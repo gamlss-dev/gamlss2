@@ -1,2 +1,2 @@
 # gamlss.experimental
-Development of new infrastructures for gamlss.
+gamlss.experimental: Development of new infrastructures for GAMLSS.

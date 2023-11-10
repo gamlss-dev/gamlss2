@@ -152,7 +152,8 @@ gamlss2.control <- function(c.crit = 0.001, n.cyc = 20,
 ## Testing.
 if(FALSE) {
   library("Formula")
-  source("gamlss.R")
+  library("gamlss.dist")
+  source("gamlss2.R")
   source("fake_formula.R")
 
   d <- bamlss::GAMart()

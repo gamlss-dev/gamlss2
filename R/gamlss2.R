@@ -162,8 +162,10 @@ if(FALSE) {
 
   b1 <- gamlss2(f, data = d)
   b2 <- gamlss2(num ~ x1 + x2, sigma.formula = ~ x3, data = d)
+  b3 <- gamlss2(num ~ x1 + x2 + s(x3) + te(sqrt(lon),lat), data = d)
 
   print(head(b1$model))
   print(head(b2$model))
+  print(head(b3$model))
 }
 

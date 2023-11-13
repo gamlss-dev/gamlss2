@@ -26,19 +26,21 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       fl[[i]] <- fake_formula(formula(formula, rhs = i, lhs = 0), specials = specials,
         nospecials = nospecials, onlyspecials = onlyspecials)
     }
-    if(!is.character(fl[[1L]])) {
-      formula <- . ~ .
-      fl <- do.call("as.Formula", fl)
-      fl <- formula(fl, lhs = 0, drop = FALSE)
-      formula <- as.Formula(fl)
-      formula[[3L]] <- fl
-      attr(formula, "lhs") <- attr(as.Formula(lhs), "lhs")
-    } else {
-      formula <- fl
+    if(length(fl)) {
+      if(!is.character(fl[[1L]])) {
+        formula <- . ~ .
+        fl <- do.call("as.Formula", fl)
+        fl <- formula(fl, lhs = 0, drop = FALSE)
+        formula <- as.Formula(fl)
+        formula[[3L]] <- fl
+        attr(formula, "lhs") <- attr(as.Formula(lhs), "lhs")
+      } else {
+        formula <- fl
+      }
     }
   } else {
     stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
-      "tx", "tx2", "tx3", "tx4", "la", "n", "lin")
+      "tx", "tx2", "tx3", "tx4", "la", "n", "lin", "pb", "pbc")
     stn <- unique(c(stn, specials))
 
     mt <- terms(formula, specials = stn)
@@ -71,8 +73,11 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       }
     }
 
-    if(onlyspecials)
+    if(onlyspecials) {
+      if(!is.character(os))
+        os <- character(0)
       formula <- os
+    }
   }
 
   return(formula)

@@ -26,7 +26,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   cl <- match.call()
   if(missing(data)) data <- environment(formula)
   mf <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset", "na.action", "weights", "offset"), names(mf), 0L)
+  m <- match(c("formula", "data", "subset", "na.action", "weights"), names(mf), 0L)
   mf <- mf[c(1L, m)]
   mf$drop.unused.levels <- TRUE
 
@@ -40,9 +40,6 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
   if(length(formula)[2L] < 2L) {
     formula <- as.Formula(formula(formula), ~ 1)
-    simple_formula <- TRUE
-  } else {
-    simple_formula <- FALSE
   }
 
   mf$formula <- fake_formula(formula)
@@ -64,14 +61,122 @@ gamlss2.formula <- function(formula, data, family = NO,
   if(any(!is.finite(X)))
     stop("detected 'Inf' values in data!")
 
-  ## Model fitting here!
+  ## Process weights and offsets.
+  weights <- model.weights(mf)
+  if(!is.null(weights)) {
+    if(length(weights) == 1) 
+      weights <- rep.int(weights, nrow(mf))
+    weights <- as.vector(weights)
+    names(weights) <- rownames(mf)
+  }
+
+  expand_offset <- function(offset) {
+    off <- NULL
+    if(!is.null(offset)) {
+      if(length(offset) == 1) 
+        offset <- rep.int(offset, n)
+      off <- as.vector(offset)
+    }
+    return(off)
+  }
+
+  ## Process variables and special term information.
+  Xterms <- offsets <- list()
+  for(i in 1:(length(ff)[2])) {
+    Xterms[[i]] <- attr(terms(formula(ff, rhs = i, lhs = 0)), "term.labels")
+    if(attr(terms(formula(ff, rhs = i, lhs = 0)), "intercept") > 0)
+      Xterms[[i]] <- c("(Intercept)", Xterms[[i]])
+    offi <- expand_offset(model.offset(model.part(ff, 
+      data = mf, rhs = i, terms = TRUE)))
+    offsets[[i]] <- if(length(offi)) offi else numeric(0)
+  }
+  Sterms <- fake_formula(formula, onlyspecials = TRUE)
+
+  if(!missing(offset)) {
+    anyoff <- any(sapply(offsets, function(x) length(x) > 0))
+    if(anyoff)
+      stop("multiple offsets supplied, either use argument offset or specify offsets in the formula!")
+    cn <- NULL
+    if(!is.list(offset) | !is.data.frame(offset)) {
+      if(!is.matrix(offset)) {
+        offset <- data.frame(offset)
+      } else {
+        offset <- as.data.frame(offset)
+      }
+    }
+    offset <- as.data.frame(offset)
+    if(nrow(offset) < 2)
+      offset <- offset[rep(1L, nrow(mf)), , drop = FALSE]
+    rownames(offset) <- rownames(mf)
+  }
+
+  ## Process special terms.
+  Specials <- special_terms(Sterms, mf)
+
+  ## Evaluate and complete family.
+  ## Note, families structure is a bit different
+  ## in order to support more than 4 parameter models.
+  family <- complete_family(family)
+
+  ## Set names.
+  names(Xterms) <- names(Sterms) <- family$names
+  Xterms0 <- Xterms
+  if(length(offsets)) {
+    names(offsets) <- family$names
+    offsets <- do.call("cbind", offsets)
+  }
+  if(!missing(offset)) {
+    if(!all(colnames(offset) %in% family$names))
+      colnames(offset) <- family$names[1:ncol(offset)]
+    offsets <- offset
+  }
+
+  ## Process factors and other linear model terms.
+  xlev <- .getXlevels(mt, mf)
+  for(i in names(Xterms)) {
+    ## Factors.
+    for(j in names(xlev)) {
+      if(j %in% Xterms[[i]]) {
+        xl <- paste0(j, xlev[[j]])
+        xl <- xl[xl %in% colnames(X)]
+        Xterms[[i]][Xterms[[i]] == j] <- NA
+        Xterms[[i]] <- Xterms[[i]][!is.na(Xterms[[i]])]
+        Xterms[[i]] <- c(Xterms[[i]], xl)
+      }
+    }
+    ## Others.
+    for(j in Xterms[[i]]) {
+      if(!(j %in% colnames(X))) {
+        if(any(ij <- grepl(j, colnames(X), fixed = TRUE))) {
+          Xterms[[i]][Xterms[[i]] == j] <- NA
+          Xterms[[i]] <- Xterms[[i]][!is.na(Xterms[[i]])]
+          Xterms[[i]] <- c(Xterms[[i]], colnames(X)[ij])
+        }
+      }
+    }
+  }
+
+  ## Optionally, use optimizer function provided from family
+  optimizer <- if(is.null(family$optimizer)) {
+    control$optimizer
+  } else {
+    family$optimizer
+  }
+
+  ## Estimation.
+  rval <- optimizer(X, Y, Specials, family,
+    offsets, weights, Xterms, Sterms, control)
 
   ## Further model information.
   rval$formula <- formula
   rval$family <- family
   rval$terms <- mt
-  rval$xlevels <- .getXlevels(mt, mf)
+  rval$xlevels <- xlev
+  rval$xterms <- Xterms0
+  rval$sterms <- Sterms
+  rval$specials <- Specials
 
+  ## Return model.frame, X and y.
   if(!control$light) {
     if(model) {
       rval$model <- mf
@@ -84,7 +189,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     }
   }
 
-  class(rval) <- "gamlss2"
+  class(rval) <- c(class(rval), "gamlss2")
 
   return(rval)
 }
@@ -104,58 +209,17 @@ gamlss2.default <- function(x, y, specials, family = NO,
 }
 
 ## Control parameters.
-gamlss2.control <- function(c.crit = 0.001, n.cyc = 20,
-  mu.step = 1, sigma.step = 1, nu.step = 1, 
-  tau.step = 1, gd.tol = Inf, iter = 0,
-  trace = TRUE, autostep = TRUE, 
-  save = TRUE, light = FALSE, ...)
+gamlss2.control <- function(optimizer = RS, step = 1,
+  trace = TRUE, flush = TRUE, light = FALSE, ...)
 {
   ctr <- as.list(environment())
   ctr <- c(ctr, list(...))
-
-  if(c.crit <= 0) {
-    warning("the value of c.crit supplied is zero or negative the default value of 0.001 was used instead")
-    c.crit <- 0.001
-  }
-   if(n.cyc < 1) {
-    warning("the value of no cycles supplied is zero or negative the default value of 20 was used instead")
-    n.cyc <- 20
-  }
-   if(iter < 0) {
-    warning("the value of no iterations  supplied is  negative the default value of 0 was used instead")
-    iter <- 0
-  }
-   if(mu.step > 1 | mu.step < 0) {
-    warning("the value of mu.step supplied is less than zero or more than one the default value of 1 was used instead")
-    mu.step <- 1
-  }
-   if(sigma.step > 1 | sigma.step < 0) {
-    warning("the value of sigma.step supplied is less than zero or more than one the default value of 1 was used instead")
-    sigma.step <- 1
-  }
-   if(nu.step > 1 | nu.step < 0) {
-    warning("the value of nu.step supplied is less than zero or more than one the default value of 1 was used instead")
-    nu.step <- 1
-  }
-   if(tau.step > 1 | tau.step < 0) {
-    warning("the value of tau.step supplied is less than zero or more than one the default value of 1 was used instead")
-    tau.step <- 1
-  }
-   if(gd.tol < 0) {
-    warning("the value of gd.tol supplied is less than zero the default value of Inf was used instead")
-    gd.tol <- Inf
-  }
 
   return(ctr)
 }
 
 ## Testing.
 if(FALSE) {
-  library("Formula")
-  library("gamlss.dist")
-  source("gamlss2.R")
-  source("fake_formula.R")
-
   d <- bamlss::GAMart()
 
   f <- list(num ~ x1 + x2, ~ x3)  
@@ -167,5 +231,12 @@ if(FALSE) {
   print(head(b1$model))
   print(head(b2$model))
   print(head(b3$model))
+
+  f <- list(
+    num ~ fac + x1 + pb(x2) + s(x3) + te(sqrt(lon),lat),
+        ~ s(x1) + x2 + pb(sqrt(x3))
+  )
+
+  b <- gamlss2(f, data = d)
 }
 

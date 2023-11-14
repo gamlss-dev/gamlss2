@@ -63,9 +63,9 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     for(j in np) {
       ## Outer loop working response and weights.
       peta <- family$map2par(eta)
-      score <- family$score[[j]](y, peta, id = j)
-      hess <- family$hess[[j]](y, peta, id = j)
-      
+      score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
+      hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+
       z <- eta[[j]] + 1 / hess * score
 
       ## Overwrite eta once.
@@ -92,23 +92,61 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           eta[[j]] <- eta[[j]] - fit[[j]]$linear$fitted.values
           e <- z - eta[[j]]
 
+          ## Weights.
+          wj <- if(is.null(weights)) hess else hess * weights
+
           ## Estimate weighted linear model.
-          m <- if(is.null(weights)) {
-            lm.wfit(x[, xterms[[j]], drop = FALSE], e, hess, method = "qr")
-          } else {
-            lm.wfit(x[, xterms[[j]], drop = FALSE], e, hess * weights, method = "qr")
-          }
+          m <- lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, method = "qr")
 
+          ## If linear model does not improve the fit, use ML.
+          etai <- eta
+          etai[[j]] <- etai[[j]] + m$fitted.values
+          ll1 <- family$loglik(y, family$map2par(etai))
+          if(ll1 < ll0) {
+            ll <- function(par) {
+              eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
+              -family$loglik(y, family$map2par(eta))
+            }
+            start <- if(iter[1L] > 0 | iter[2L] > 0) coef(m) else rep(0, length(coef(m)))
+            opt <- nlminb(start, objective = ll)
+            m$coefficients <- opt$par
+            m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
+          }
+          
           ## Step length control.
-          if(control$step != 1) {
-            if((iter[1L] > 1L) | (iter[2L] > 1L))
-              m$fitted.values <- control$step * m$fitted.values + (1 - control$step) * fit[[j]]$linear$fitted.values
+          if(control$step < 1) {
+            if(iter[1L] > 0 | iter[2L] > 0) {
+              m$fitted.values <- control$step * m$fitted.values +
+                (1 - control$step) * fit[[j]]$linear$fitted.values
+            }
           }
 
-          ## Update predictor.
-          eta[[j]] <- eta[[j]] + m$fitted.values
-          fit[[j]]$linear$fitted.values <- m$fitted.values
-          fit[[j]]$linear$coefficients <- m$coefficients
+          etai <- eta
+          etai[[j]] <- etai[[j]] + m$fitted.values
+          ll1 <- family$loglik(y, family$map2par(etai))
+
+          if(ll1 > ll0) {
+            ## Update predictor.
+            fit[[j]]$linear$fitted.values <- m$fitted.values
+            fit[[j]]$linear$coefficients <- m$coefficients
+          }
+          eta[[j]] <- eta[[j]] + fit[[j]]$linear$fitted.values
+        }
+
+        ## Fit specials part.
+        if(length(sterms[[j]]) & FALSE) {
+          for(k in sterms[[j]]) {
+            ## Additive model term fit.
+            fs <- if(is.null(weights)) {
+              special.wfit(specials[[k]], e, hess, family, control)
+            } else {
+              special.wfit(specials[[k]], e, hess * weights, family, control)
+            }
+
+            ## Update predictor.
+            eta[[j]] <- eta[[j]] + fs$fitted.values
+            fit[[j]][[k]]$fitted.values <- fs$fitted.values
+          }
         }
 
         ## New log-likelihood.
@@ -124,8 +162,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
         ## Update working response.
         if(eps[2L] > stop.eps[2L]) {
           peta <- family$map2par(eta)
-          score <- family$score[[j]](y, peta, id = j)
-          hess <- family$hess[[j]](y, peta, id = j)
+          score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
+          hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
           z <- eta[[j]] + 1 / hess * score
         }
 
@@ -148,6 +186,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     ## Stopping criterion.
     eps[1L] <- abs((llo1 - llo0) / llo0)
 
+    ## Warning if deviance is increasing.
+    if(llo1 < llo0) {
+      warning("Deviance is increasing, maybe set argument step!")
+    }
+
     ## Update outer iterator.
     iter[1L] <- iter[1L] + 1L
 
@@ -157,8 +200,9 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
         if(control$flush)
           cat("\r")
       }
-      cat("GAMLSS-RS iteration ", iter[1L], ": Global Deviance = ",
-        format(round(-2 * llo1, 4)), if(control$flush) NULL else "\n", sep = "")
+      cat("GAMLSS-RS iteration ", fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
+        ": Global Deviance = ", paste0(round(-2 * llo1, digits = 4), "   "),
+        if(control$flush) NULL else "\n", sep = "")
     }
   }
 
@@ -179,7 +223,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   rval <- list("fitted.values" = as.data.frame(eta),
     "coefficients" = coef_lin, "specials" = fit_specials,
     "elapsed" = elapsed, "iterations" = iter[1L],
-    "logLik" = llo1)
+    "logLik" = llo1, "control" = control)
 
   rval
 }
@@ -200,5 +244,34 @@ initialize_eta <- function(y, family, nobs)
     }
   }
   return(eta)
+}
+
+## Function to check values of score and hess vectors
+deriv_checks <- function(x, is.weight = FALSE)
+{
+  x[is.na(x)] <- 1.490116e-08
+  x[x > 1e+10] <- 1e+10
+  if(is.weight) {
+    x[x == 0] <- 1.490116e-08
+    x[x < 0] <- -1 * x[x < 0]
+    x[x < 1e-10] <- 1e-10
+  } else {
+    x[x < -1e+10] <- -1e+10
+  }
+  return(x)
+}
+
+## Formatting for printing.
+fmt <- Vectorize(function(x, width = 8, digits = 2) {
+  txt <- formatC(round(x, digits), format = "f", digits = digits, width = width)
+  if(nchar(txt) > width) {
+    txt <- strsplit(txt, "")[[1]]
+    txt <- paste(txt[1:width], collapse = "", sep = "")
+  }
+  txt
+})
+
+fmt2 <- function(x, ...) {
+  gsub(" ", "", fmt(x, ...))
 }
 

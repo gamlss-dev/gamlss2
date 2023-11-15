@@ -12,10 +12,74 @@ special_terms <- function(x, data, ...)
       if(any(grepl(".smooth.spec", class(sterms[[j]])))) {
         stopifnot(requireNamespace("mgcv"))
         knots <- list(...)$knots
-        sterms[[j]] <- mgcv::smoothCon(sterms[[j]], data = data, knots = knots)[[1L]]
+        sterms[[j]] <- mgcv::smoothCon(sterms[[j]], data = data, knots = knots,
+          absorb.cons = TRUE, scale.penalty = TRUE)[[1L]]
       }
     }
   }
 
   return(sterms)
 }
+
+## Special term fit function, works with gamlss model terms, too.
+special.wfit <- function(x, z, w, y, eta, j, family, control)
+{
+  if(inherits(x, "smooth")) {
+    call <- attr(x, "call")
+    call[[2]] <- quote(x)
+    fe <- eval(call)
+    fit <- list(
+      "fitted.values" = drop(fe$fitted.values),
+      "coefficients" = fe$coefSmo,
+      "lambdas" = fe$lambda,
+      "edf" = fe$nl.df,
+      "model" = fe$model
+    )
+  } else {
+    ff <- if(is.null(x$special.wfit)) {
+      smooth.construct.wfit
+    } else {
+      x$special.wfit
+    }
+    fit <- ff(x, z, w, y, eta, j, family, control)
+  }
+  return(fit)
+}
+
+## Fitting function for mgcv smooth terms.
+smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
+{
+  ## Number of observations.
+  n <- nrow(x$X)
+
+  ## Set up smoothing parameters.
+  lambdas <- x$lambdas
+  if(is.null(lambdas))
+    lambdas <- 10
+  lambdas <- rep(lambdas, x$dim)
+
+  ## Pre compute cross product
+  XWX <- crossprod(x$X * w, x$X)
+  
+  ## Function to search for smoothing parameters using GCV.
+  fl <- function(l, rf = FALSE) {
+    S <- diag(1e-05, ncol(x$X))
+    for(j in 1:length(x$S))
+     S <- S + l[j] * x$S[[j]]
+    P <- solve(XWX + S)
+    b <- drop(P %*% crossprod(x$X * w, z))
+    fit <- drop(x$X %*% b)
+    edf <- sum(diag(XWX %*% P))
+    if(rf) {
+      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf, "lambdas" = l))
+    } else {
+      rss <- sum((z - fit)^2)
+      return(rss * n / (n - edf)^2)
+    }
+  }
+
+  opt <- nlminb(lambdas, objective = fl)
+
+  return(fl(opt$par, rf = TRUE))
+}
+

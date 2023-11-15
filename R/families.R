@@ -395,7 +395,7 @@ tF <- function(x, ...)
   }
 
   rval$map2par <- function(eta) {
-    for(j in rval$names) {
+    for(j in names(eta)) {
       eta[[j]] <- linkinv[[j]](eta[[j]])
       eta[[j]][is.na(eta[[j]])] <- 0
       if(any(jj <- eta[[j]] == Inf))
@@ -440,7 +440,7 @@ complete_family <- function(family)
 
   if(is.null(family$map2par)) {
     family$map2par <- function(eta) {
-      for(j in family$names) {
+      for(j in names(eta)) {
         eta[[j]] <- linkinv[[j]](eta[[j]])
         eta[[j]][is.na(eta[[j]])] <- 0
         if(any(jj <- eta[[j]] == Inf))

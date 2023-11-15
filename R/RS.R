@@ -27,15 +27,16 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     maxit <- c(maxit, 1L)
 
   ## Initialize fitted values for each model term.
-  fit <- list()
+  fit <- sfit <- list()
   for(j in np) {
     fit[[j]] <- list()
     if(length(xterms[[j]]))
-      fit[[j]]$linear <- list("fitted.values" = rep(0.0, n))
+      fit[[j]] <- list("fitted.values" = rep(0.0, n))
     if(length(sterms)) {
       if(length(sterms[[j]])) {
+        sfit[[j]] <- list()
         for(i in sterms[[j]])
-          fit[[j]][[i]] <- list("fitted.values" = rep(0.0, n))
+          sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n))
       }
     }
   }
@@ -89,7 +90,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
         ## Fit linear part.
         if(length(xterms[[j]])) {
           ## Compute partial residuals.
-          eta[[j]] <- eta[[j]] - fit[[j]]$linear$fitted.values
+          eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
           e <- z - eta[[j]]
 
           ## Weights.
@@ -117,7 +118,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           if(control$step < 1) {
             if(iter[1L] > 0 | iter[2L] > 0) {
               m$fitted.values <- control$step * m$fitted.values +
-                (1 - control$step) * fit[[j]]$linear$fitted.values
+                (1 - control$step) * fit[[j]]$fitted.values
             }
           }
 
@@ -127,25 +128,46 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
           if(ll1 > ll0) {
             ## Update predictor.
-            fit[[j]]$linear$fitted.values <- m$fitted.values
-            fit[[j]]$linear$coefficients <- m$coefficients
+            fit[[j]]$fitted.values <- m$fitted.values
+            fit[[j]]$coefficients <- m$coefficients
           }
-          eta[[j]] <- eta[[j]] + fit[[j]]$linear$fitted.values
+          eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
         }
 
         ## Fit specials part.
-        if(length(sterms[[j]]) & FALSE) {
+        if(length(sterms[[j]])) {
           for(k in sterms[[j]]) {
+            ## Compute partial residuals.
+            eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
+            e <- z - eta[[j]]
+
             ## Additive model term fit.
             fs <- if(is.null(weights)) {
-              special.wfit(specials[[k]], e, hess, family, control)
+              special.wfit(specials[[k]], e, hess, y, eta, j, family, control)
             } else {
-              special.wfit(specials[[k]], e, hess * weights, family, control)
+              special.wfit(specials[[k]], e, hess * weights, y, eta, j, family, control)
             }
 
-            ## Update predictor.
-            eta[[j]] <- eta[[j]] + fs$fitted.values
-            fit[[j]][[k]]$fitted.values <- fs$fitted.values
+            ## Step length control.
+            if(control$step < 1) {
+              if(iter[1L] > 0 | iter[2L] > 0) {
+                fs$fitted.values <- control$step * fs$fitted.values +
+                  (1 - control$step) * sfit[[j]][[k]]$fitted.values
+              }
+            }
+
+            etai <- eta
+            etai[[j]] <- etai[[j]] + fs$fitted.values
+            ll1 <- family$loglik(y, family$map2par(etai))
+
+            if(ll1 > ll0) {
+              ## Update predictor.
+              sfit[[j]][[k]]$fitted.values <- fs$fitted.values
+              sfit[[j]][[k]]$coefficients <- fs$coefficients
+              sfit[[j]][[k]]$edf <- fs$edf
+              sfit[[j]][[k]]$lambdas <- fs$lambdas
+            }
+            eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }
         }
 
@@ -187,8 +209,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     eps[1L] <- abs((llo1 - llo0) / llo0)
 
     ## Warning if deviance is increasing.
-    if(llo1 < llo0) {
-      warning("Deviance is increasing, maybe set argument step!")
+    if((llo1 < llo0) & (iter[1L] > 0)) {
+      warning("Deviance is increasing, maybe set argument step in gamlss2.control()!")
     }
 
     ## Update outer iterator.
@@ -212,18 +234,23 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   ## Runtime.
   elapsed <- (proc.time() - tstart)["elapsed"]
 
-  ## Extract linear/specials parts.
-  coef_lin <- fit_specials <- list()
+  ## Extract coefficients parts.
+  coef_lin <- list()
   for(j in np) {
     if(length(xterms[[j]])) {
-      coef_lin[[j]] <- fit[[j]]$linear$coefficients
+      coef_lin[[j]] <- fit[[j]]$coefficients
     }
   }
 
-  rval <- list("fitted.values" = as.data.frame(eta),
-    "coefficients" = coef_lin, "specials" = fit_specials,
+  rval <- list(
+    "fitted.values" = as.data.frame(eta),
+    "fitted.specials" = sfit,
+    "coefficients" = coef_lin,
     "elapsed" = elapsed, "iterations" = iter[1L],
-    "logLik" = llo1, "control" = control)
+    "logLik" = llo1, "control" = control
+  )
+
+  class(rval) <- "gamlss2"
 
   rval
 }

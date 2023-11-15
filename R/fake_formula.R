@@ -40,7 +40,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     }
   } else {
     stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
-      "tx", "tx2", "tx3", "tx4", "la", "n", "lin", "pb", "pbc")
+      "tx", "tx2", "tx3", "tx4", "la", "n", "lin", "pb", "pbc", "nn")
     stn <- unique(c(stn, specials))
 
     mt <- terms(formula, specials = stn)
@@ -59,8 +59,15 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
           av <- all.vars(e[[i]])
           av <- av[av != "|"]
           if(length(av)) {
-            if(av %in% v)
-              ff <- c(ff, e[[i]])
+            if(all(av %in% v)) {
+              if(as.character(e[[i]])[1L] == "~") {
+                vf <- attr(terms(eval(e[[i]])), "variables")
+                for(k in 2:length(vf))
+                  ff <- c(ff, vf[[k]])
+              } else {
+                ff <- c(ff, e[[i]])
+              }
+            }
           }
         }
         os <- c(os, j)

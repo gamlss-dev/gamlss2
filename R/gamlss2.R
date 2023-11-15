@@ -296,9 +296,11 @@ predict.gamlss2 <- function(object,
     parameter <- family$names[parameter]
   parameter <- family$names[pmatch(parameter, family$names)]
 
+  tt <- type == "terms"
+
   p <- list()
   for(j in parameter) {
-    p[[j]] <- rep(0, length.out = nrow(mf))
+    p[[j]] <- if(tt) NULL else rep(0, length.out = nrow(mf))
     tj <- if(is.null(terms)) {
       c(object$xterms[[j]], object$sterms[[j]])
     } else {
@@ -311,7 +313,12 @@ predict.gamlss2 <- function(object,
           xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
         }
         if(length(xn)) {
-          p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% coef(object)[[j]][xn])
+          if(tt) {
+            ft <- t(t(X[, xn, drop = FALSE]) * coef(object)[[j]][xn])
+            p[[j]] <- cbind(p[[j]], ft)
+          } else {
+            p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% coef(object)[[j]][xn])
+          }
         }
       }
       if(length(object$sterms[[j]])) {
@@ -324,10 +331,18 @@ predict.gamlss2 <- function(object,
             if(inherits(object$specials[[i]], "mgcv.smooth")) {
               Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
               co <- object$fitted.specials[[j]][[i]]$coefficients
-              p[[j]] <- p[[j]] + drop(Xs %*% co)
+              fit <- drop(Xs %*% co)
             } else {
               cs <- object$fitted.specials[[j]][[i]]$coefficients
-              p[[j]] <- p[[j]] + cs$fun(mf[[cs$name]])
+              fit <- cs$fun(mf[[cs$name]])
+            }
+            if(tt) {
+              fit <- matrix(fit, ncol = 1L)
+              colnames(fit) <- i
+              rownames(fit) <- rownames(mf)
+              p[[j]] <- cbind(p[[j]], fit)
+            } else {
+              p[[j]] <- p[[j]] + fit
             }
           }
         }
@@ -335,7 +350,7 @@ predict.gamlss2 <- function(object,
     }
   }
 
-  if(type %in% c("parameter", "response")) {
+  if(type %in% c("parameter", "response") & !tt) {
     p <- family$map2par(p)
   }
 
@@ -353,7 +368,8 @@ predict.gamlss2 <- function(object,
     if(length(p) < 2) {
       p <- p[[1L]]
     } else {
-      p <- as.data.frame(p)
+      if(!tt)
+        p <- as.data.frame(p)
     }
   }
 
@@ -365,13 +381,13 @@ if(FALSE) {
   d <- bamlss::GAMart(n = 10000, sd = -1)
 
   f <- list(
-    y ~ s(x1) + pb(x2) + s(x3) + te(lon,lat,k=10),
+    y ~ x1 + x2 + s(x3) + te(lon,lat,k=10),
       ~ s(x1) + pb(x2)
   )
 
   b <- gamlss2(f, data = d, maxit = c(100, 100))
 
-  fx2 <- predict(b, newdata = d[1:100, ], parameter = "sigma", term = "x2")
-  plot(fx2 ~ d$x2[1:100])
+  fx <- predict(b, newdata = d[1:100, ], parameter = "mu", term = "x3")
+  plot(fx ~ d$x3[1:100])
 }
 

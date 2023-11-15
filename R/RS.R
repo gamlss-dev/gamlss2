@@ -130,6 +130,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             ## Update predictor.
             fit[[j]]$fitted.values <- m$fitted.values
             fit[[j]]$coefficients <- m$coefficients
+            fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values
           }
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
         }
@@ -164,6 +165,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
               ## Update predictor.
               sfit[[j]][[k]]$fitted.values <- fs$fitted.values
               sfit[[j]][[k]]$coefficients <- fs$coefficients
+              sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values
               sfit[[j]][[k]]$edf <- fs$edf
               sfit[[j]][[k]]$lambdas <- fs$lambdas
             }
@@ -228,11 +230,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
   }
 
-  if(control$flush)
-    cat("\n")
-
   ## Runtime.
   elapsed <- (proc.time() - tstart)["elapsed"]
+
+  if(control$trace & control$flush)
+    cat("\n")
 
   ## Extract coefficients parts.
   coef_lin <- list()
@@ -245,6 +247,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   rval <- list(
     "fitted.values" = as.data.frame(eta),
     "fitted.specials" = sfit,
+    "fitted.linear" = fit,
     "coefficients" = coef_lin,
     "elapsed" = elapsed, "iterations" = iter[1L],
     "logLik" = llo1, "control" = control

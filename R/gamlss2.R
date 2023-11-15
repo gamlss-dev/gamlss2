@@ -381,7 +381,7 @@ if(FALSE) {
   d <- bamlss::GAMart(n = 10000, sd = -1)
 
   f <- list(
-    y ~ x1 + x2 + s(x3) + te(lon,lat,k=10),
+    y ~ x1 + x2 + pb(x3) + te(lon,lat,k=10),
       ~ s(x1) + pb(x2)
   )
 

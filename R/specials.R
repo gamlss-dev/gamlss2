@@ -58,8 +58,10 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
     lambdas <- 10
   lambdas <- rep(lambdas, x$dim)
 
-  ## Pre compute cross product
-  XWX <- crossprod(x$X * w, x$X)
+  ## Pre compute matrices.
+  XW <- x$X * w
+  XWX <- crossprod(XW, x$X)
+  XWz <- crossprod(XW, z)
   
   ## Function to search for smoothing parameters using GCV.
   fl <- function(l, rf = FALSE) {
@@ -67,7 +69,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
     for(j in 1:length(x$S))
      S <- S + l[j] * x$S[[j]]
     P <- solve(XWX + S)
-    b <- drop(P %*% crossprod(x$X * w, z))
+    b <- drop(P %*% XWz)
     fit <- drop(x$X %*% b)
     edf <- sum(diag(XWX %*% P))
     if(rf) {

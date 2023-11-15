@@ -365,8 +365,8 @@ if(FALSE) {
   d <- bamlss::GAMart(n = 10000, sd = -1)
 
   f <- list(
-    y ~ s(x1) + s(x2) + s(x3) + te(lon,lat),
-      ~ s(x1) + s(x2)
+    y ~ s(x1) + pb(x2) + s(x3) + te(lon,lat,k=10),
+      ~ s(x1) + pb(x2)
   )
 
   b <- gamlss2(f, data = d, maxit = c(100, 100))

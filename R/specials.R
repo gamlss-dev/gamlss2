@@ -62,10 +62,10 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
   XW <- x$X * w
   XWX <- crossprod(XW, x$X)
   XWz <- crossprod(XW, z)
+  S <- diag(1e-05, ncol(x$X))
   
   ## Function to search for smoothing parameters using GCV.
   fl <- function(l, rf = FALSE) {
-    S <- diag(1e-05, ncol(x$X))
     for(j in 1:length(x$S))
      S <- S + l[j] * x$S[[j]]
     P <- solve(XWX + S)

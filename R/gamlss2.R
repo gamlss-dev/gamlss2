@@ -387,6 +387,8 @@ if(FALSE) {
 
   b <- gamlss2(f, data = d, maxit = c(100, 100))
 
+  a <- gamlss2(effort~Type+random(Subject), data=ergoStool )
+
   fx <- predict(b, newdata = d[1:100, ], parameter = "mu", term = "x3")
   plot(fx ~ d$x3[1:100])
 }

@@ -40,7 +40,9 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     }
   } else {
     stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
-      "tx", "tx2", "tx3", "tx4", "la", "n", "lin", "pb", "pbc", "nn")
+      "tx", "tx2", "tx3", "tx4", "la", "n", "lin",
+      "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
+      "random", "ra", "lo")
     stn <- unique(c(stn, specials))
 
     mt <- terms(formula, specials = stn)

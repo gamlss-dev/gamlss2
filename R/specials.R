@@ -22,14 +22,16 @@ special_terms <- function(x, data, ...)
 }
 
 ## Special term fit function, works with gamlss model terms, too.
-special.wfit <- function(x, z, w, y, eta, j, family, control)
+special.wfit <- function(x, z, w, y, eta, j, family, control, ...)
 {
   if(inherits(x, "smooth")) {
     call <- attr(x, "call")
     call[[2]] <- quote(x)
     fe <- eval(call)
+    if(!is.null(fe$y))
+      fe$fitted.values <- fe$y
     fit <- list(
-      "fitted.values" = drop(fe$fitted.values),
+      "fitted.values" = as.numeric(fe$fitted.values),
       "coefficients" = fe$coefSmo,
       "lambdas" = fe$lambda,
       "edf" = fe$nl.df,

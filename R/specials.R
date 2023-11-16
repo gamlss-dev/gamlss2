@@ -1,5 +1,5 @@
 ## Function simply evaluates the
-## sepcial terms in the model formula
+## special terms in the model formula
 ## and assigns appropriate model fitting
 ## functions for the backfitting steps.
 special_terms <- function(x, data, ...)

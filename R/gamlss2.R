@@ -313,6 +313,15 @@ predict.gamlss2 <- function(object,
           xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
         }
         if(length(xn)) {
+          for(i in seq_along(xn)) {
+            if(!is.null(object$xlevels)) {
+              if(xn[i] %in% names(object$xlevels)) {
+                xnl <- paste0(xn[i], object$xlevels[[xn[i]]])
+                xnl <- xnl[xnl %in% colnames(X)]
+                xn <- c(xn[-i], xnl)
+              }
+            }
+          }
           if(tt) {
             ft <- t(t(X[, xn, drop = FALSE]) * coef(object)[[j]][xn])
             p[[j]] <- cbind(p[[j]], ft)
@@ -334,7 +343,13 @@ predict.gamlss2 <- function(object,
               fit <- drop(Xs %*% co)
             } else {
               cs <- object$fitted.specials[[j]][[i]]$coefficients
-              fit <- cs$fun(mf[[cs$name]])
+              if(inherits(cs, "random")) {
+                vn <- as.character(as.call(as.call(parse(text = i))[[1L]])[[2L]])
+                xv <- mf[[vn]]
+                fit <- cs$coef[as.character(xv)]
+              } else {
+                fit <- cs$fun(mf[[cs$name]])
+              }
             }
             if(tt) {
               fit <- matrix(fit, ncol = 1L)
@@ -388,6 +403,8 @@ if(FALSE) {
   b <- gamlss2(f, data = d, maxit = c(100, 100))
 
   a <- gamlss2(effort~Type+random(Subject), data=ergoStool )
+
+
 
   fx <- predict(b, newdata = d[1:100, ], parameter = "mu", term = "x3")
   plot(fx ~ d$x3[1:100])

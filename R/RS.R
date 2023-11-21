@@ -13,6 +13,10 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   ## Initialize predictors.
   eta <- initialize_eta(y, family, n)
 
+  ## Check weights.
+  if(!is.null(weights))
+    weights <- as.numeric(weights)
+
   ## Set control parameters.
   ## Stopping criterion.
   eps <- control$eps

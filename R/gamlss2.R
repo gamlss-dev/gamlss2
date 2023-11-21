@@ -3,6 +3,7 @@ gamlss2 <- function(x, ...)
 {
   UseMethod("gamlss2")
 }
+
 ################################################################################
 ################################################################################
 ################################################################################
@@ -201,9 +202,13 @@ gamlss2.formula <- function(formula, data, family = NO,
 ################################################################################
 ################################################################################
 ## List method.
-gamlss2.list <- function(formula, ...)
+gamlss2.list <- function(x, ...)
 {
-  gamlss2.formula(formula, ...)
+  cl <- match.call()
+  cl$formula <- do.call("as.Formula", x)
+  cl$x <- FALSE
+  cl[[1L]] <- as.name("gamlss2.formula")
+  eval.parent(cl)
 }
 
 ## Control parameters.
@@ -223,6 +228,8 @@ gamlss2.control <- function(optimizer = RS, step = 1,
 model.frame.gamlss2 <- function(formula, ...)
 {
   dots <- list(...)
+  if(is.null(dots$keepresponse))
+    dots$keepresponse <- FALSE
   nargs <- dots[match(c("data", "na.action", "subset"), names(dots), 0)]
   if(length(nargs) || is.null(formula$model)) {
     fcall <- formula$call
@@ -232,7 +239,8 @@ model.frame.gamlss2 <- function(formula, ...)
     fcall[[1L]] <- quote(model.frame)
     fcall$xlev <- formula$xlevels
     fcall$formula <- terms(formula)
-    fcall$formula <- update(fcall$formula, NULL ~ .)
+    if(!dots$keepresponse)
+     fcall$formula <- update(fcall$formula, NULL ~ .)
     fcall[names(nargs)] <- nargs
     env <- if(is.null(environment(formula$terms))) {
       parent.frame()
@@ -408,6 +416,99 @@ predict.gamlss2 <- function(object,
 
   return(p)
 }
+
+## Residuals.
+residuals.gamlss2 <- function(object, type = c("quantile", "response", "parameter"), newdata = NULL, ...)
+{
+  family <- family(object)
+
+  if(!is.null(family$residuals)) {
+    res <- family$residuals(object, type = type, ...)
+    if(length(class(res)) < 2) {
+      if(inherits(res, "numeric"))
+        class(res) <- c("gamlss2.residuals", class(res))
+    }
+  } else {
+    type <- match.arg(type)
+
+    object$model <- NULL
+
+    object$y <- model.response(model.frame(object, keepresponse = TRUE, data = newdata))
+
+    if(is.null(object$y))
+      stop("response variable is missing, cannot compute residuals!")
+
+    nobs <- nrow(object$y)
+    y <- if(is.data.frame(object$y)) {
+      if(ncol(object$y) < 2) {
+        object$y[[1]]
+      } else object$y
+    } else {
+      object$y
+    }
+
+    par <- predict(object, drop = FALSE, newdata = newdata, ...)
+    for(j in family$names)
+      par[[j]] <- make.link2(family$links[j])$linkinv(par[[j]])
+
+    if(type == "quantile") {
+      if(is.null(family$p)) {
+        type <- "response"
+        warning(paste("no $p() function in family '", family$family,
+          "', cannot compute quantile residuals, computing response resdiuals instead!", sep = ""))
+      } else {
+        discrete <- FALSE
+        if(!is.null(family$type)) {
+          if(tolower(family$type) == "discrete")
+            discrete <- TRUE
+        }
+        if(family$family == "binomial")
+          discrete <- TRUE
+        if(discrete) {
+          ymin <- min(y, na.rm = TRUE)
+          a <- family$p(ifelse(y == ymin, y, y - 1), par)
+          a <- ifelse(y == ymin, 0, a)
+          b <- family$p(y, par)
+          u <- runif(length(y), a, b)
+          u <- ifelse(u > 0.999999, u - 1e-16, u)
+          u <- ifelse(u < 1e-06, u + 1e-16, u)
+          res <- qnorm(u)
+        } else {
+          prob <- family$p(y, par)
+          thres <- 0.999999999999999
+          prob[prob > thres] <- thres
+          prob[prob < (1 - thres)] <- 1 - thres
+          res <- qnorm(prob)
+          if(any(isnf <- !is.finite(res))) {
+            warning("non finite quantiles from probabilities, set to NA!")
+            res[isnf] <- NA
+          }
+        }
+        attr(res, "type") <- "Quantile"
+      }
+    }
+
+    if(type == "response") {
+      mu <- if(is.null(family$mu)) {
+        function(par, ...) { par[[1]] }
+      } else family$mu
+      res <- y - mu(par)
+      attr(res, "type") <- "Response"
+    }
+
+    if(type == "parameter") {
+      N
+    }
+   
+    class(res) <- c("gamlss2.residuals", class(res))
+  }
+
+  if(any(j <- !is.finite(res)))
+    res[j] <- NA
+
+  return(res)
+}
+
 ################################################################################
 ################################################################################
 ################################################################################

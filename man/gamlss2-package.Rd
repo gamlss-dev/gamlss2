@@ -14,7 +14,7 @@
 \details{
   The primary purpose of this package is to facilitate the creation of advanced infrastructures
   designed to enhance the GAMLSS modeling framework. Notably, the \pkg{gamlss2} package represents a
-  significant overhaul of its predecessor, gamlss, with a key emphasis on improving estimation
+  significant overhaul of its predecessor, \pkg{gamlss}, with a key emphasis on improving estimation
   speed and incorporating more adaptable infrastructures. These enhancements enable the seamless
   integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
   regression trees, and forests, fostering a more versatile and powerful modeling environment.

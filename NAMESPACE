@@ -1,10 +1,11 @@
 import("Formula")
 import("gamlss.dist")
+import("mgcv")
 
 importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "make.link", "model.frame", "model.matrix", "model.offset",
   "model.response", "model.weights", "nlminb", "pnorm",
-  "qnorm", "rnorm", "runif", "sd", "update")
+  "qnorm", "rnorm", "runif", "sd", "update", "predict")
 
 export("fake_formula")
 

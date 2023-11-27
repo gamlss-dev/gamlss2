@@ -76,7 +76,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     off <- NULL
     if(!is.null(offset)) {
       if(length(offset) == 1) 
-        offset <- rep.int(offset, n)
+        offset <- rep.int(offset, nrow(X))
       off <- as.vector(offset)
     }
     return(off)
@@ -497,7 +497,7 @@ residuals.gamlss2 <- function(object, type = c("quantile", "response", "paramete
     }
 
     if(type == "parameter") {
-      N
+      stop("Not implemented yet!")
     }
    
     class(res) <- c("gamlss2.residuals", class(res))

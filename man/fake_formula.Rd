@@ -38,6 +38,10 @@ fake_formula(formula, specials = NULL,
   Nikolaus Umlauf \email{Nikolaus.Umlauf@uibk.ac.at}
 }
 
+\seealso{
+  \code{\link{gamlss2}}
+}
+
 \examples{
 ## Required package.
 library("Formula")

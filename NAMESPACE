@@ -1,5 +1,6 @@
 import("Formula")
 import("gamlss.dist")
+import("gamlss.data")
 import("mgcv")
 
 importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
@@ -7,5 +8,16 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "model.response", "model.weights", "nlminb", "pnorm",
   "qnorm", "rnorm", "runif", "sd", "update", "predict")
 
-export("fake_formula")
+importFrom("utils", "flush.console")
+
+export(
+  "fake_formula",
+  "gamlss2",
+  "gamlss2.formula",
+  "gamlss2.list",
+  "gamlss2.control"
+)
+
+S3method(gamlss2, formula)
+S3method(gamlss2, list)
 

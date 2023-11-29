@@ -1,7 +1,4 @@
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+## Rigby and Stasinopoulos algorithm.
 RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control)
 {
   ## Number of observations.
@@ -38,8 +35,16 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   fit <- sfit <- list()
   for(j in np) {
     fit[[j]] <- list()
-    if(length(xterms[[j]]))
-      fit[[j]] <- list("fitted.values" = rep(0.0, n))
+    if(length(xterms[[j]])) {
+      if("(Intercept)" %in% xterms[[j]]) {
+        fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
+        names(fit[[j]]$coefficients) <- xterms[[j]]
+        fit[[j]]$coefficients["(Intercept)"] <- mean(eta[[j]])
+        fit[[j]] <- list("fitted.values" = drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"]))
+      } else {
+        fit[[j]] <- list("fitted.values" = eta[[j]])
+      }
+    }
     if(length(sterms)) {
       if(length(sterms[[j]])) {
         sfit[[j]] <- list()
@@ -77,15 +82,6 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
       z <- eta[[j]] + 1 / hess * score
 
-      ## Overwrite eta once.
-      if(iter[1L] < 1) {
-        eta[[j]] <- rep(0.0, n)
-        if(nrow(offsets) > 0) {
-          if(!is.null(offsets[[j]]))
-             eta[[j]] <- eta[[j]] + offsets[[j]]
-        }
-      }
-
       ## Start inner loop.
       while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
         ## Current log-likelihood.
@@ -111,13 +107,13 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           etai <- eta
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$loglik(y, family$map2par(etai))
+
           if(ll1 < ll0) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$loglik(y, family$map2par(eta))
             }
-            start <- if(iter[1L] > 0 | iter[2L] > 0) coef(m) else rep(0, length(coef(m)))
-            opt <- nlminb(start, objective = ll)
+            opt <- nlminb(coef(m), objective = ll)
             m$coefficients <- opt$par
             m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
           }
@@ -229,8 +225,9 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     ## Print current state.
     if(control$trace) {
       if(iter[1L] > 1) {
-        if(control$flush)
-          cat("\r")
+        if(control$flush) {
+          flush.console()
+        }
       }
       cat("GAMLSS-RS iteration ", fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
         ": Global Deviance = ", paste0(round(-2 * llo1, digits = 4), "   "),
@@ -265,10 +262,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
   rval
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Function to initialize predictors.
 initialize_eta <- function(y, family, nobs)
 {
@@ -301,10 +295,7 @@ deriv_checks <- function(x, is.weight = FALSE)
   }
   return(x)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Formatting for printing.
 fmt <- Vectorize(function(x, width = 8, digits = 2) {
   txt <- formatC(round(x, digits), format = "f", digits = digits, width = width)
@@ -318,7 +309,4 @@ fmt <- Vectorize(function(x, width = 8, digits = 2) {
 fmt2 <- function(x, ...) {
   gsub(" ", "", fmt(x, ...))
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+

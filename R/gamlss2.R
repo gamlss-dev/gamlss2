@@ -4,14 +4,9 @@ gamlss2 <- function(x, ...)
   UseMethod("gamlss2")
 }
 
-################################################################################
-################################################################################
-################################################################################
-################################################################################
 ## Formula method.
 gamlss2.formula <- function(formula, data, family = NO,
   subset, na.action, weights, offset,
-  model = TRUE, x = TRUE, y = TRUE,
   control = gamlss2.control(...), ...)
 {
   ## Process specific formulas.
@@ -25,6 +20,11 @@ gamlss2.formula <- function(formula, data, family = NO,
     formula <- formula[c("mu", "sigma", "nu", "tau")]
     names(formula) <- NULL
   }
+
+  ## Evaluate and complete family.
+  ## Note, families structure is a bit different
+  ## in order to support more than 4 parameter models.
+  family <- complete_family(family)
 
   ## Call.
   cl <- match.call()
@@ -46,6 +46,12 @@ gamlss2.formula <- function(formula, data, family = NO,
     formula <- as.Formula(formula(formula), ~ 1)
   }
 
+  ## Expand formula.
+  if((length(attr(formula, "rhs")) < length(family$names)) & control$expand) {
+    k <- length(family$names) - length(attr(formula, "rhs"))
+    attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(1, k)))
+  }
+
   mf$formula <- fake_formula(formula)
 
   ## Evaluate model.frame.
@@ -57,6 +63,8 @@ gamlss2.formula <- function(formula, data, family = NO,
   mt <- terms(ff, data = data)
   Y <- model.response(mf)
   X <- model.matrix(mt, mf)
+  if(!("(Intercept)" %in% colnames(X)))
+    X <- cbind("(Intercept)" = 1.0, X)
 
   if(any(is.na(X)))
     stop("detected 'NA' values in data!")
@@ -115,16 +123,12 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Process special terms.
   Specials <- special_terms(Sterms, mf)
 
-  ## Evaluate and complete family.
-  ## Note, families structure is a bit different
-  ## in order to support more than 4 parameter models.
-  family <- complete_family(family)
-
   ## Set names.
-  names(Xterms) <- names(Sterms) <- family$names
+  names(Xterms) <- family$names[1:length(Xterms)]
+  names(Sterms) <- family$names[1:length(Sterms)]
   Xterms0 <- Xterms
   if(length(offsets)) {
-    names(offsets) <- family$names
+    names(offsets) <- family$names[1:length(offsets)]
     offsets <- do.call("cbind", offsets)
   }
   if(!missing(offset)) {
@@ -182,25 +186,23 @@ gamlss2.formula <- function(formula, data, family = NO,
 
   ## Return model.frame, X and y.
   if(!control$light) {
-    if(model) {
+    if(control$model) {
       rval$model <- mf
     }
-    if(y) {
+    if(control$y) {
       rval$y = Y
     }
-    if(x) {
+    if(control$x) {
       rval$x <- X
     }
+    rval$results <- results(rval)
   }
 
   class(rval) <- unique(c(class(rval), "gamlss2"))
 
   return(rval)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## List method.
 gamlss2.list <- function(x, ...)
 {
@@ -213,17 +215,15 @@ gamlss2.list <- function(x, ...)
 
 ## Control parameters.
 gamlss2.control <- function(optimizer = RS, step = 1,
-  trace = TRUE, flush = TRUE, light = FALSE, ...)
+  trace = TRUE, flush = TRUE, light = FALSE, expand = TRUE,
+  model = TRUE, x = TRUE, y = TRUE, ...)
 {
   ctr <- as.list(environment())
   ctr <- c(ctr, list(...))
 
   return(ctr)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## A model.frame method.
 model.frame.gamlss2 <- function(formula, ...)
 {
@@ -252,34 +252,31 @@ model.frame.gamlss2 <- function(formula, ...)
     return(formula$model)
   }
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## The model.matrix.
 model.matrix.gamlss2 <- function(object, data = NULL, ...)
 {
   if(!is.null(data))
     object$x <- NULL
   if(n_match <- match("x", names(object), 0L)) {
-    object[[n_match]]
+    return(object[[n_match]])
   } else {
     object$terms <- terms(fake_formula(object$formula, nospecials = TRUE))
     data <- model.frame(object, xlev = object$xlevels, data = data, ...)
     if(exists(".GenericCallEnv", inherits = FALSE)) {
-      NextMethod("model.matrix", data = data, contrasts.arg = object$contrasts)
+      X <- NextMethod("model.matrix", data = data, contrasts.arg = object$contrasts)
     } else {
       dots <- list(...)
       dots$data <- dots$contrasts.arg <- NULL
-      do.call("model.matrix", c(list(object = object, 
+      X <- do.call("model.matrix", c(list(object = object, 
         data = data, contrasts.arg = object$contrasts), dots))
     }
+    if(!("(Intercept)" %in% colnames(X)))
+      X <- cbind("(Intercept)" = 1.0, X)
+    return(X)
   }
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Family extractor.
 family.gamlss2 <- function(object, ...) object$family
 
@@ -291,10 +288,7 @@ grep2 <- function (pattern, x, ...)
     i <- c(i, grep(p, x, ...))
   unique(i)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Predict method.
 predict.gamlss2 <- function(object, 
   parameter = NULL, newdata = NULL, type = c("link", "parameter", "response", "terms"), 
@@ -507,28 +501,5 @@ residuals.gamlss2 <- function(object, type = c("quantile", "response", "paramete
     res[j] <- NA
 
   return(res)
-}
-
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-## Testing.
-if(FALSE) {
-  d <- bamlss::GAMart(n = 10000, sd = -1)
-
-  f <- list(
-    y ~ x1 + x2 + pb(x3) + te(lon,lat,k=10),
-      ~ s(x1) + pb(x2)
-  )
-
-  b <- gamlss2(f, data = d, maxit = c(100, 100))
-
-  a <- gamlss2(effort~Type+random(Subject), data=ergoStool )
-
-
-
-  fx <- predict(b, newdata = d[1:100, ], parameter = "mu", term = "x3")
-  plot(fx ~ d$x3[1:100])
 }
 

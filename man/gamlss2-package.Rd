@@ -1,5 +1,5 @@
-\name{gamlss2}
-\alias{gamlss2}
+\name{gamlss2-package}
+\alias{gamlss2-package}
 
 \docType{package}
 
@@ -37,6 +37,6 @@
 \keyword{package}
 
 \seealso{
-  \code{\link{fake_formula}}
+  \code{\link{gamlss2}}, \code{\link{fake_formula}}
 }
 

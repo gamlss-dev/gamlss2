@@ -226,7 +226,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     if(control$trace) {
       if(iter[1L] > 1) {
         if(control$flush) {
-          flush.console()
+          cat('\r')
         }
       }
       cat("GAMLSS-RS iteration ", fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),

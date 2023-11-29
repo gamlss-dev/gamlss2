@@ -95,8 +95,6 @@ gamlss2(x, \dots)
   (see also \url{https://www.gamlss.com/}).
 }
 
-\author{Mikis Stasinopoulos, Bob Rigby, Nikolaus Umlauf}
-
 \seealso{
   \code{\link{RS}}, \code{\link{gamlss2.control}}, \code{\link{gamlss2.family}}
 }

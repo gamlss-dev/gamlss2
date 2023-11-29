@@ -34,10 +34,6 @@ fake_formula(formula, specials = NULL,
   If \code{onlyspecials = TRUE} a vector or list of special model term names is returned.
 }
 
-\author{
-  Nikolaus Umlauf \email{Nikolaus.Umlauf@uibk.ac.at}
-}
-
 \seealso{
   \code{\link{gamlss2}}
 }

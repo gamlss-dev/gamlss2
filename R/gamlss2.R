@@ -123,6 +123,22 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Process special terms.
   Specials <- special_terms(Sterms, mf)
 
+  ## Process by variables using mgcv::smoothCon().
+  olab <- sapply(Specials, function(x) if(is.list(x)) x$orig.label else "")
+  nt <- names(olab)
+  ulab <- unique(olab)
+  ulab <- ulab[ulab != ""]
+  for(j in seq_along(Sterms)) {
+    if(length(Sterms[[j]])) {
+      for(i in ulab) {
+        ii <- which(Sterms[[j]] == i)
+        Sterms[[j]] <- as.list(Sterms[[j]])
+        Sterms[[j]][[ii]] <- as.character(nt[olab == i])
+        Sterms[[j]] <- unlist(Sterms[[j]])
+      }
+    }
+  }
+
   ## Set names.
   names(Xterms) <- family$names[1:length(Xterms)]
   names(Sterms) <- family$names[1:length(Sterms)]

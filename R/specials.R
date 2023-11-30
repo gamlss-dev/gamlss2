@@ -8,12 +8,19 @@ special_terms <- function(x, data, ...)
 
   if(length(x)) {
     for(j in unlist(x)) {
-      sterms[[j]] <- eval(parse(text = j), envir = data)
-      if(any(grepl(".smooth.spec", class(sterms[[j]])))) {
+      sj <- eval(parse(text = j), envir = data)
+      if(any(grepl(".smooth.spec", class(sj)))) {
         stopifnot(requireNamespace("mgcv"))
         knots <- list(...)$knots
-        sterms[[j]] <- mgcv::smoothCon(sterms[[j]], data = data, knots = knots,
-          absorb.cons = TRUE, scale.penalty = TRUE)[[1L]]
+        sj <- mgcv::smoothCon(sj, data = data, knots = knots,
+          absorb.cons = TRUE, scale.penalty = TRUE)
+        for(i in 1:length(sj))
+          sj[[i]]$orig.label <- j
+        sjn <- sapply(sj, function(x) x$label)
+        names(sj) <- sjn
+        sterms <- c(sterms, sj)
+      } else {
+        sterms[[j]] <- sj
       }
     }
   }
@@ -35,6 +42,7 @@ special.wfit <- function(x, z, w, y, eta, j, family, control, ...)
       "coefficients" = fe$coefSmo,
       "lambdas" = fe$lambda,
       "edf" = fe$nl.df,
+      "df" = length(z) - fe$nl.df,
       "model" = fe$model
     )
   } else {
@@ -75,7 +83,8 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
     fit <- drop(x$X %*% b)
     edf <- sum(diag(XWX %*% P))
     if(rf) {
-      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf, "lambdas" = l))
+      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
+        "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
     } else {
       rss <- sum((z - fit)^2)
       return(rss * n / (n - edf)^2)

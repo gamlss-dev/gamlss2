@@ -172,6 +172,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
               sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values
               sfit[[j]][[k]]$edf <- fs$edf
               sfit[[j]][[k]]$lambdas <- fs$lambdas
+              sfit[[j]][[k]]$vcov <- fs$vcov
+              sfit[[j]][[k]]$df <- fs$df
             }
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }

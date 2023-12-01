@@ -117,7 +117,7 @@ for(q in c(0.05, 0.5, 0.95))
   pq <- cbind(pq, family(b)$q(q, par))
 
 ## Plot.
-plot(y ~ x, data = abdom, pch = 16,
+plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)

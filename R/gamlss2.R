@@ -132,9 +132,11 @@ gamlss2.formula <- function(formula, data, family = NO,
     if(length(Sterms[[j]])) {
       for(i in ulab) {
         ii <- which(Sterms[[j]] == i)
-        Sterms[[j]] <- as.list(Sterms[[j]])
-        Sterms[[j]][[ii]] <- as.character(nt[olab == i])
-        Sterms[[j]] <- unlist(Sterms[[j]])
+        if(length(ii)) {
+          Sterms[[j]] <- as.list(Sterms[[j]])
+          Sterms[[j]][[ii]] <- as.character(nt[olab == i])
+          Sterms[[j]] <- unlist(Sterms[[j]])
+        }
       }
     }
   }

@@ -20,4 +20,8 @@ export(
 
 S3method(gamlss2, formula)
 S3method(gamlss2, list)
+S3method(plot, gamlss2)
+S3method(predict, gamlss2)
+S3method(residuals, gamlss2)
+S3method(family, gamlss2)
 

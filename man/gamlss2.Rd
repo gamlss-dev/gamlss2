@@ -103,12 +103,24 @@ gamlss2(x, \dots)
 data("abdom", package = "gamlss.data")
 
 ## Specify the model Formula.
-f <- y ~ s(x) | s(x)
+f <- y ~ s(x) | s(x) | s(x) | s(x)
 
 ## Estimate model.
 b <- gamlss2(f, data = abdom, family = BCT)
 
-## TODOs: plots etc.
+## Predict parameters.
+par <- predict(b, type = "parameter")
+
+## Predict quantiles.
+pq <- NULL
+for(q in c(0.05, 0.5, 0.95))
+  pq <- cbind(pq, family(b)$q(q, par))
+
+## Plot.
+plot(y ~ x, data = abdom, pch = 16,
+  col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
+matplot(abdom$x, pq, type = "l", lwd = 2,
+  lty = 1, col = 4, add = TRUE)
 }
 
 \keyword{models}

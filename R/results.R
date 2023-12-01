@@ -15,11 +15,12 @@ results.gamlss2 <- function(x)
     x$model <- model.frame(x)
 
   if(length(x$sterms)) {
-    res$specials <- list()
+    res$effects <- list()
     k <- 1L
     for(j in np) {
       if(length(x$sterms[[j]])) {
         for(i in x$sterms[[j]]) {
+          ## For mgcv smooths.
           if("mgcv.smooth" %in% class(x$specials[[i]])) {
             dim <- x$specials[[i]]$dim
             by <- x$specials[[i]]$by
@@ -28,7 +29,8 @@ results.gamlss2 <- function(x)
                 xr <- range(x$model[[x$specials[[i]]$term]])
                 nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
               } else {
-                nd <- data.frame(unique(x$model[[x$specials[[i]]$term]]))
+                xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
+                nd <- data.frame(xf)
               }
               names(nd) <- x$specials[[i]]$term
               if(by != "NA") {
@@ -42,11 +44,10 @@ results.gamlss2 <- function(x)
               }
               X <- PredictMat(x$specials[[i]], nd, n = nrow(nd))
               se <- rowSums((X %*% x$fitted.specials[[j]][[i]]$vcov) * X)
-              se <- sqrt(se)
-              cv <- qt(1 - 0.01/2, x$fitted.specials[[j]][[i]]$df)
+              se <- 2 * sqrt(se)
               nd$fit <- drop(X %*% coef(x$fitted.specials[[j]][[i]]))
-              nd$lower <- nd$fit - cv * se
-              nd$upper <- nd$fit + cv * se
+              nd$lower <- nd$fit - se
+              nd$upper <- nd$fit + se
               if(by == "NA") {
                 lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
                 lab <- paste0(lab[-length(lab)], collapse = "")
@@ -58,9 +59,13 @@ results.gamlss2 <- function(x)
                   paste0(",", round(x$fitted.specials[[j]][[i]]$edf, 2L), "):"), lab,
                   fixed = TRUE)
               }
-              res$specials[[lab]] <- nd
+              attr(nd, "label") <- lab
+              res$effects[[lab]] <- nd
+            } else {
+              
             }
           }
+          ## gamlss smooth terms.
           if("smooth" %in% class(x$specials[[i]])) {
             ## FIXME: vcov?
           }

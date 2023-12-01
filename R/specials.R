@@ -78,16 +78,23 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
   fl <- function(l, rf = FALSE) {
     for(j in 1:length(x$S))
       S <- S + l[j] * x$S[[j]]
-    P <- solve(XWX + S)
+
+    P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
+    if(inherits(P, "try-error"))
+      P <- solve(XWX + S)
+
     b <- drop(P %*% XWz)
+
     fit <- drop(x$X %*% b)
     edf <- sum(diag(XWX %*% P))
+
     if(rf) {
       return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
         "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
     } else {
-      rss <- sum((z - fit)^2)
+      rss <- sum(w * (z - fit)^2)
       return(rss * n / (n - edf)^2)
+      #return(rss + 2 * edf)
     }
   }
 

@@ -1,32 +1,56 @@
 ## A plotting method.
-plot.gamlss2 <- function(x, scale = FALSE, spar = TRUE, ...)
+plot.gamlss2 <- function(x, parameter = NULL,
+  which = "effects", terms = NULL,
+  scale = TRUE, spar = TRUE, ...)
 {
   if(spar) {
     owd <- par(no.readonly = TRUE)
     on.exit(par(owd))
   }
 
-  if(is.null(x$results))
-    x$results <- results(x)
+  ## Which parameters to plot?
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter))
+    parameter <- list(...)$model
+    if(is.null(parameter))
+      parameter <- x$family$names
+  }
+  if(!is.character(parameter))
+    parameter <- x$family$names[parameter]
+  parameter <- x$family$names[pmatch(parameter, x$family$names)]
 
-  if(length(x$results$effects)) {
-    if(spar)
-      par(mfrow = n2mfrow(length(x$results$effects)))
+  ## Effect plots.
+  if("effects" %in% which) {
+    if(is.null(x$results))
+      x$results <- results(x)
 
-    ylim <- list(...)$ylim
+    en <- grep2(parameter, names(x$results$effects), fixed = TRUE, value = TRUE)
+    if(!is.null(terms))
+      en <- grep2(terms, en, fixed = TRUE, value = TRUE)
 
-    if(scale > 0) {
-      ylim <- NULL
-      for(j in names(x$results$effects))
-        ylim <- c(ylim, range(x$results$effects[[j]][, c("lower", "upper")]))
-      ylim <- range(ylim)
-    }
+    if(length(x$results$effects)) {
+      if(spar)
+        par(mfrow = n2mfrow(length(en)))
 
-    for(j in names(x$results$effects)) {
-      if(!is.factor(x$results$effects[[j]][[1L]])) {
-        plot_smooth_effect(x$results$effects[[j]], ylim = ylim, ...)
-      } else {
-        plot_factor_effect(x$results$effects[[j]], ylim = ylim, ...)
+      ylim <- list(...)$ylim
+
+      if(scale > 0) {
+        ylim <- list()
+        for(i in parameter) {
+          for(j in grep(i, en, fixed = TRUE, value = TRUE))
+            ylim[[i]] <- c(ylim[[i]], range(x$results$effects[[j]][, c("lower", "upper")]))
+          ylim[[i]] <- range(ylim[[i]])
+        }
+      }
+
+      for(j in en) {
+        p <- strsplit(j, ".", fixed = TRUE)[[1L]][1L]
+        if(!is.factor(x$results$effects[[j]][[1L]])) {
+          plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+        } else {
+          plot_factor_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+        }
       }
     }
   }

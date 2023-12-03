@@ -88,7 +88,14 @@ predict.gamlss2 <- function(object,
                 xv <- mf[[vn]]
                 fit <- cs$coef[as.character(xv)]
               } else {
-                fit <- cs$fun(mf[[cs$name]])
+                fit <- try(cs$fun(mf[[cs$name]]), silent = TRUE)
+                if(inherits(fit, "try-error")) {
+                  fit <- try(predict(cs, newdata = mf), silent = TRUE)
+                  if(inherits(fit, "try-error")) {
+                    warning(paste0("cannot predict model term '", i, "'!"))
+                    fit <- rep(0.0, nrow(mf))
+                  }
+                }
               }
             }
             if(tt) {

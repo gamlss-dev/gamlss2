@@ -55,6 +55,18 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
   }
 
+  ## Use Cole and Green algorithm?
+  CGk <- Inf
+  if(!is.null(control$CG)) {
+    if(!is.logical(control$CG))
+      CGk <- as.integer(control$CG)
+  }
+  CG <- isTRUE(control$CG)
+  if(CG)
+    CGk <- 0L
+  if(length(family$hess) < 2L)
+    CGk <- Inf
+
   ## Track runtime.
   tstart <- proc.time()
 
@@ -75,6 +87,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
       llo0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
     }
 
+    ## Old predictors.
+    if(iter[1L] >= CGk) {
+      eta_old <- eta
+    }
+
     for(j in np) {
       ## Outer loop working response and weights.
       peta <- family$map2par(eta)
@@ -92,11 +109,29 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           ll0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
         }
 
+        ## Cole and Green adjustment.
+        if(iter[1L] >= CGk) {
+          h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
+          if(length(h)) {
+            ej <- sapply(strsplit(h, ".", fixed = TRUE), function(x) x[2L])
+            adj <- 0.0
+            for(l in seq_along(h)) {
+              hess_l <- deriv_checks(family$hess[[h[l]]](y, peta, id = j), is.weight = TRUE)
+              adj <- adj + hess_l * (eta[[j]] - eta_old[[j]])
+            }
+            adj <- adj * hess
+          }
+        }
+
         ## Fit linear part.
         if(length(xterms[[j]])) {
           ## Compute partial residuals.
           eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-          e <- z - eta[[j]]
+          if(iter[1L] >= CGk) {
+            e <- (z + adj) - eta[[j]]
+          } else {
+            e <- z - eta[[j]]
+          }
 
           ## Weights.
           wj <- if(is.null(weights)) hess else hess * weights
@@ -145,7 +180,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           for(k in sterms[[j]]) {
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
-            e <- z - eta[[j]]
+            if(iter[1L] >= CGk) {
+              e <- (z + adj) - eta[[j]]
+            } else {
+              e <- z - eta[[j]]
+            }
 
             ## Additive model term fit.
             fs <- if(is.null(weights)) {
@@ -232,7 +271,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           cat('\r')
         }
       }
-      cat("GAMLSS-RS iteration ", fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
+      cat(paste0("GAMLSS-", if(iter[1L] >= CGk) "CG" else "RS", " iteration "),
+        fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
         ": Global Deviance = ", paste0(round(-2 * llo1, digits = 4), "   "),
         if(control$flush) NULL else "\n", sep = "")
     }
@@ -264,6 +304,13 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   class(rval) <- "gamlss2"
 
   rval
+}
+
+## Cole and Green flavor.
+CG <- function(x, y, specials, family, offsets, weights, xterms, sterms, control)
+{
+  control$CG <- TRUE
+  RS(x, y, specials, family, offsets, weights, xterms, sterms, control)
 }
 
 ## Function to initialize predictors.

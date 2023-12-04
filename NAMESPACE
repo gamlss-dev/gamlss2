@@ -6,9 +6,15 @@ import("mgcv")
 importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "make.link", "model.frame", "model.matrix", "model.offset",
   "model.response", "model.weights", "nlminb", "pnorm",
-  "qnorm", "rnorm", "runif", "sd", "update", "predict")
+  "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
+  "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals")
 
 importFrom("utils", "flush.console")
+
+importFrom("grDevices", "gray.colors", "n2mfrow", "rgb")
+
+importFrom("graphics", "abline", "axis", "box", "grid", "hist",
+  "lines", "par", "polygon", "rect")
 
 export(
   "fake_formula",
@@ -24,4 +30,5 @@ S3method(plot, gamlss2)
 S3method(predict, gamlss2)
 S3method(residuals, gamlss2)
 S3method(family, gamlss2)
+S3method(logLik, gamlss2)
 

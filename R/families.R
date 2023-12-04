@@ -342,6 +342,72 @@ tF <- function(x, ...)
     }
   }
 
+  ## For CG algorithm.
+  if(all(c("mu", "sigma") %in% nx)) {
+    mu.sigma.hs <- make_call(x$d2ldmdd)
+    hess$mu.sigma <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.mu <- mu.link$linkfun(par$mu)
+      eta.sigma <- sigma.link$linkfun(par$sigma)
+      hess <- -1 * eval(mu.sigma.hs)
+      hess * mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma)
+    }
+    hess$sigma.mu <- hess$mu.sigma
+  }
+  if("nu" %in% nx) {
+    mu.nu.hs <- make_call(x$d2ldmdv)
+    hess$mu.nu <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.mu <- mu.link$linkfun(par$mu)
+      eta.nu <- nu.link$linkfun(par$nu)
+      hess <- -1 * eval(mu.nu.hs)
+      hess * mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu)
+    }
+    hess$nu.mu <- hess$mu.nu
+
+    sigma.nu.hs <- make_call(x$d2ldddv)
+    hess$sigma.nu <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.sigma <- sigma.link$linkfun(par$sigma)
+      eta.nu <- nu.link$linkfun(par$nu)
+      hess <- -1 * eval(sigma.nu.hs)
+      hess * sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu)
+    }
+    hess$nu.sigma <- hess$sigma.nu
+  }
+
+  if("tau" %in% nx) {
+    mu.tau.hs <- make_call(x$d2ldmdt)
+    hess$mu.tau <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.mu <- mu.link$linkfun(par$mu)
+      eta.tau <- tau.link$linkfun(par$tau)
+      hess <- -1 * eval(mu.tau.hs)
+      hess * mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau)
+    }
+    hess$tau.mu <- hess$mu.tau
+
+    sigma.tau.hs <- make_call(x$d2ldddt)
+    hess$sigma.tau <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.sigma <- sigma.link$linkfun(par$sigma)
+      eta.tau <- tau.link$linkfun(par$tau)
+      hess <- -1 * eval(sigma.tau.hs)
+      hess * sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau)
+    }
+    hess$tau.sigma <- hess$sigma.tau
+
+    nu.tau.hs <- make_call(x$d2ldvdt)
+    hess$nu.tau <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.nu <- nu.link$linkfun(par$nu)
+      eta.tau <- tau.link$linkfun(par$tau)
+      hess <- -1 * eval(nu.tau.hs)
+      hess * nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau)
+    }
+    hess$tau.nu <- hess$nu.tau
+  }
+
   dfun <- get(paste("d", x$family[1], sep = ""))
   pfun <- try(get(paste("p", x$family[1], sep = "")), silent = TRUE)
   qfun <- try(get(paste("q", x$family[1], sep = "")), silent = TRUE)

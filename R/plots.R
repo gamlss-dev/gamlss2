@@ -283,7 +283,7 @@ plot_sr <- function(f, x, ...) {
     main <- "Against Fitted Values"
   xlab <- list(...)$xlab
   if(is.null(xlab))
-    xlab <- "Fitted Values"
+    xlab <- "Fitted Values (Median)"
   ylab <- list(...)$ylab
   if(is.null(ylab))
     ylab <- "Quantile Residuals"

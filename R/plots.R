@@ -8,7 +8,17 @@ plot.gamlss2 <- function(x, parameter = NULL,
     on.exit(par(owd))
   }
 
-  ## Which parameters to plot?
+  ## What should be plotted?
+  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid")
+  if(!is.character(which)) {
+    if(any(which > 5L))
+      which <- which[which <= 5L]
+    which <- which.match[which]
+  } else which <- which.match[grep(tolower(which), which.match, fixed = TRUE)]
+  if(length(which) > length(which.match) || !any(which %in% which.match))
+    stop("argument which is specified wrong!")
+
+  ## If effects, which parameters to plot?
   if(is.null(parameter)) {
     parameter <- list(...)$what
     if(is.null(parameter))
@@ -38,9 +48,16 @@ plot.gamlss2 <- function(x, parameter = NULL,
       if(scale > 0) {
         ylim <- list()
         for(i in parameter) {
-          for(j in grep(i, en, fixed = TRUE, value = TRUE))
-            ylim[[i]] <- c(ylim[[i]], range(x$results$effects[[j]][, c("lower", "upper")]))
-          ylim[[i]] <- range(ylim[[i]])
+          gok <- grep(i, en, fixed = TRUE, value = TRUE)
+          for(j in gok) {
+            if("lower" %in% colnames(x$results$effects[[j]])) {
+              ylim[[i]] <- c(ylim[[i]], range(x$results$effects[[j]][, c("lower", "upper")]))
+            } else {
+              ylim[[i]] <- c(ylim[[i]], range(x$results$effects[[j]][, "fit"]))
+            }
+          }
+          if(length(gok))
+            ylim[[i]] <- range(ylim[[i]])
         }
       }
 
@@ -52,6 +69,37 @@ plot.gamlss2 <- function(x, parameter = NULL,
           plot_factor_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
         }
       }
+    }
+
+    ## No further plotting.
+    return(invisible(NULL))
+  }
+
+  ## Residual plot.
+  if(any(grepl("resid", which))) {
+    ## Number of plots.
+    if(spar)
+      par(mfrow = n2mfrow(length(which)))
+
+    ## Compute residuals.
+    resids <- residuals(x, type = "quantile", ...)
+
+    if("hist-resid" %in% which) {
+      plot_hist(resids, ...)
+    }
+
+    if("qq-resid" %in% which) {
+      plot_qq(resids, ...)
+    }
+
+    if("wp-resid" %in% which) {
+      plot_wp(resids, ...)
+    }
+
+    if("scatter-resid" %in% which) {
+      p <- predict(x, type = "parameter", ...)
+      p <- family(x)$q(0.5, p)
+      plot_sr(p, resids, ...)
     }
   }
 }
@@ -68,6 +116,8 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
       col <- col(ncol)
   }
   ncol <- length(col)
+  if(!("lower" %in% names(x)))
+    x$lower <- x$upper <- x$fit
   polyl <- apply(x[, c("lower", "fit", "upper")], 1,
     function(x)  {
       seq(x[1], x[2], length = ncol)
@@ -145,5 +195,105 @@ plot_factor_effect <- function(x, col = NULL, ncol = 20L, width = 0.6,
     lines(c(pos[j]-width, pos[j]+width), rep(px["fit", j], 2L), lwd = 1)
   box()
   axis(2)
+}
+
+## Histogram and density plot.
+plot_hist <- function(x, ...)
+{
+  h <- hist(x, breaks = "Scott", plot = FALSE)
+  d <- density(x)
+  ylim <- list(...)$ylim
+  if(is.null(ylim))
+    ylim <- range(c(h$density, d$y))
+  main <- list(...)$main
+  if(is.null(main))
+    main <- "Histogram and Density"
+  xlab <- list(...)$xlab
+  if(is.null(xlab))
+    xlab <- "Quantile Residuals"
+  hist(x, breaks = "Scott", freq = FALSE, ylim = ylim,
+    xlab = xlab, main = main, ...)
+  lines(d, lwd = 2, col = 4)
+}
+
+## Q-Q plot.
+plot_qq <- function(x, ...)
+{
+  z <- qnorm(ppoints(length(x)))
+  qqnorm(x, col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 19, ...)
+  lines(z, z, lwd = 2, col = 4)
+}
+
+## Wormplot.
+plot_wp <- function(x, ...)
+{
+  d <- qqnorm(x, plot = FALSE)
+  probs <- c(0.25, 0.75)
+  y3 <- quantile(x, probs, type = 7, na.rm = TRUE)
+  x3 <- qnorm(probs)
+  slope <- diff(y3)/diff(x3)
+  int <- y3[1L] - slope * x3[1L]
+  d$y <- d$y - (int + slope * d$x)
+
+  xlim <- list(...)$xlim
+  if(is.null(xlim)) {
+    xlim <- range(d$x)
+    xlim <- xlim + c(-0.1, 0.1) * diff(xlim)
+  }
+
+  ylim <- list(...)$ylim
+  if(is.null(ylim)) {
+    ylim <- range(d$y)
+    ylim <- ylim + c(-0.3, 0.3) * diff(ylim)
+  }
+
+  main <- list(...)$main
+  if(is.null(main))
+    main <- "Worm Plot"
+  xlab <- list(...)$xlab
+  if(is.null(xlab))
+    xlab <- "Theoretical Quantiles"
+  ylab <- list(...)$ylab
+  if(is.null(ylab))
+    ylab <- "Deviation"
+
+  plot(d$x, d$y, xlim = xlim, ylim = ylim,
+    xlab = xlab, ylab = ylab, main = main,
+    col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 19, ...)
+  grid(lty = "solid")
+
+  dz <- 0.25
+  z <- seq(xlim[1L], xlim[2L], dz)
+  p <- pnorm(z)
+  se <- (1/dnorm(z)) * (sqrt(p * (1 - p)/length(d$y)))
+  low <- qnorm((1 - 0.95)/2) * se
+  high <- -low
+  lines(z, low, lty = 2)
+  lines(z, high, lty = 2)
+
+  fit <- lm(d$y ~ d$x + I(d$x^2) + I(d$x^3))
+  i <- order(d$x)
+  lines(d$x[i], fitted(fit)[i], col = 4, lwd = 2)
+}
+
+## Fitted vs. residuals.
+plot_sr <- function(f, x, ...) {
+  main <- list(...)$main
+  if(is.null(main))
+    main <- "Against Fitted Values"
+  xlab <- list(...)$xlab
+  if(is.null(xlab))
+    xlab <- "Fitted Values"
+  ylab <- list(...)$ylab
+  if(is.null(ylab))
+    ylab <- "Quantile Residuals"
+
+  plot(f, x, xlab = xlab, ylab = ylab, main = main,
+    col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 19, ...)
+  abline(h = 0, col = "lightgray")
+
+  m <- lm(x ~ f + I(f^2) + I(f^3))
+  i <- order(f)
+  lines(f[i], fitted(m)[i], col = 4, lwd = 2)
 }
 

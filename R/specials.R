@@ -92,9 +92,18 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
       return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
         "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
     } else {
+      if(is.null(control$criterion))
+        control$criterion <- "gcv"
+
       rss <- sum(w * (z - fit)^2)
-      return(rss * n / (n - edf)^2)
-      #return(rss + 2 * edf)
+
+      rval <- switch(tolower(control$criterion),
+        "gcv" = rss * n / (n - edf)^2,
+        "aic" = rss + 2 * edf,
+        "bic" = rss + log(n) * edf
+      )
+
+      return(rval)
     }
   }
 

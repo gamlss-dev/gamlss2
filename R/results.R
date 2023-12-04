@@ -62,12 +62,23 @@ results.gamlss2 <- function(x)
               attr(nd, "label") <- lab
               res$effects[[lab]] <- nd
             } else {
-              
+
             }
           }
           ## gamlss smooth terms.
           if("smooth" %in% class(x$specials[[i]])) {
             ## FIXME: vcov?
+
+            if(inherits(x$fitted.specials[[j]][[i]]$coefficients, "pb")) {
+              xn <- attr(x$specials[[i]], "Name")
+              xr <- range(x$model[[xn]])
+              nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+              names(nd) <- xn
+              nd$fit <- x$fitted.specials[[j]][[i]]$coefficients$fun(nd[[xn]])
+              lab <- paste0(j, ".", i)
+              attr(nd, "label") <- lab
+              res$effects[[lab]] <- nd
+            }
           }
         }
       }

@@ -66,6 +66,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     CGk <- 0L
   if(length(family$hess) < 2L)
     CGk <- Inf
+  if(!any(grepl(".", names(family$hess), fixed = TRUE)))
+    CGk <- Inf
 
   ## Track runtime.
   tstart <- proc.time()

@@ -86,6 +86,12 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       if(!is.character(os))
         os <- character(0)
       formula <- os
+    } else {
+      tf <- terms(formula, specials = stn)
+      sj <- unlist(attr(tf, "specials"))
+      if(!is.null(sj)) {
+        formula <- fake_formula(formula)
+      }
     }
   }
 

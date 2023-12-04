@@ -130,7 +130,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           ## Compute partial residuals.
           eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
           if(iter[1L] >= CGk) {
-            e <- (z + adj) - eta[[j]]
+            e <- (z - adj) - eta[[j]]
           } else {
             e <- z - eta[[j]]
           }
@@ -183,7 +183,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
             if(iter[1L] >= CGk) {
-              e <- (z + adj) - eta[[j]]
+              e <- (z - adj) - eta[[j]]
             } else {
               e <- z - eta[[j]]
             }

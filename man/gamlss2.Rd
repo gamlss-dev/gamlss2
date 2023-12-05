@@ -108,6 +108,12 @@ f <- y ~ s(x) | s(x) | s(x) | s(x)
 ## Estimate model.
 b <- gamlss2(f, data = abdom, family = BCT)
 
+## Plot estimated effects.
+plot(b, which = "effects")
+
+## Plot diagnostics.
+plot(b, which = "resid")
+
 ## Predict parameters.
 par <- predict(b, type = "parameter")
 

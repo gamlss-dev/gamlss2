@@ -73,15 +73,15 @@ Normal <- function(...) {
     "links" = c("mu" = "identity", "sigma" = "log"),
     "score" = list(
       "mu" = function(y, par, ...) {
-        drop((y - par$mu) / (par$sigma^2))
+        (y - par$mu) / (par$sigma^2)
       },
       "sigma" = function(y, par, ...) {
-        drop(-1 + (y - par$mu)^2 / (par$sigma^2))
-       }
+        -1 + (y - par$mu)^2 / (par$sigma^2)
+      }
     ),
     "hess" = list(
       "mu" = function(y, par, ...) {
-        drop(1 / (par$sigma^2))
+        1 / (par$sigma^2)
       },
       "sigma" = function(y, par, ...) {
         rep(2, length(y))

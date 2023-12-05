@@ -82,18 +82,22 @@ predict.gamlss2 <- function(object,
               co <- object$fitted.specials[[j]][[i]]$coefficients
               fit <- drop(Xs %*% co)
             } else {
-              cs <- object$fitted.specials[[j]][[i]]$coefficients
-              if(inherits(cs, "random")) {
-                vn <- as.character(as.call(as.call(parse(text = i))[[1L]])[[2L]])
-                xv <- mf[[vn]]
-                fit <- cs$coef[as.character(xv)]
+              if(inherits(object$specials[[i]], "special")) {
+                fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf)
               } else {
-                fit <- try(cs$fun(mf[[cs$name]]), silent = TRUE)
-                if(inherits(fit, "try-error")) {
-                  fit <- try(predict(cs, newdata = mf), silent = TRUE)
+                cs <- object$fitted.specials[[j]][[i]]$coefficients
+                if(inherits(cs, "random")) {
+                  vn <- as.character(as.call(as.call(parse(text = i))[[1L]])[[2L]])
+                  xv <- mf[[vn]]
+                  fit <- cs$coef[as.character(xv)]
+                } else {
+                  fit <- try(cs$fun(mf[[cs$name]]), silent = TRUE)
                   if(inherits(fit, "try-error")) {
-                    warning(paste0("cannot predict model term '", i, "'!"))
-                    fit <- rep(0.0, nrow(mf))
+                    fit <- try(predict(cs, newdata = mf), silent = TRUE)
+                    if(inherits(fit, "try-error")) {
+                      warning(paste0("cannot predict model term '", i, "'!"))
+                      fit <- rep(0.0, nrow(mf))
+                    }
                   }
                 }
               }

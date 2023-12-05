@@ -118,7 +118,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             ej <- sapply(strsplit(h, ".", fixed = TRUE), function(x) x[2L])
             adj <- 0.0
             for(l in seq_along(h)) {
-              hess_l <- deriv_checks(family$hess[[h[l]]](y, peta, id = j), is.weight = TRUE)
+              hess_l <- family$hess[[h[l]]](y, peta, id = j)  ## FIXME: deriv_checks()?
               adj <- adj + hess_l * (eta[[j]] - eta_old[[j]])
             }
             adj <- adj * hess
@@ -209,13 +209,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
             if(ll1 > ll0) {
               ## Update predictor.
-              sfit[[j]][[k]]$fitted.values <- fs$fitted.values
-              sfit[[j]][[k]]$coefficients <- fs$coefficients
+              sfit[[j]][[k]] <- fs
               sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values
-              sfit[[j]][[k]]$edf <- fs$edf
-              sfit[[j]][[k]]$lambdas <- fs$lambdas
-              sfit[[j]][[k]]$vcov <- fs$vcov
-              sfit[[j]][[k]]$df <- fs$df
             }
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }

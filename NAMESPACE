@@ -21,7 +21,9 @@ export(
   "gamlss2",
   "gamlss2.formula",
   "gamlss2.list",
-  "gamlss2.control"
+  "gamlss2.control",
+  "special_fit",
+  "special_predict"
 )
 
 S3method(gamlss2, formula)
@@ -31,4 +33,7 @@ S3method(predict, gamlss2)
 S3method(residuals, gamlss2)
 S3method(family, gamlss2)
 S3method(logLik, gamlss2)
+S3method(special_fit, cf)
+S3method(special_predict, cf.fitted)
+S3method(special_predict, default)
 

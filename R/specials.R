@@ -46,12 +46,16 @@ special.wfit <- function(x, z, w, y, eta, j, family, control, ...)
       "model" = fe$model
     )
   } else {
-    ff <- if(is.null(x$special.wfit)) {
-      smooth.construct.wfit
+    if(inherits(x, "special")) {
+      fit <- special_fit(x, z, w, y, eta, j, family, control, ...)
     } else {
-      x$special.wfit
+      ff <- if(is.null(x$special.wfit)) {
+        smooth.construct.wfit
+      } else {
+        x$special.wfit
+      }
+      fit <- ff(x, z, w, y, eta, j, family, control)
     }
-    fit <- ff(x, z, w, y, eta, j, family, control)
   }
   return(fit)
 }
@@ -110,5 +114,26 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
   opt <- nlminb(lambdas, objective = fl)
 
   return(fl(opt$par, rf = TRUE))
+}
+
+## A method for fitting special terms.
+special_fit <- function(x, ...)
+{
+  UseMethod("special_fit")
+}
+
+## A method for predicting special terms.
+special_predict <- function(x, ...)
+{
+  UseMethod("special_predict")
+}
+
+## Default method.
+special_predict.default <- function(x, data, ...)
+{
+  if(is.null(x$model))
+    return(predict(x, newdata = data))
+  else
+    return(predict(x$model, newdata = data))
 }
 

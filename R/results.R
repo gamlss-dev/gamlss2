@@ -80,6 +80,36 @@ results.gamlss2 <- function(x)
               res$effects[[lab]] <- nd
             }
           }
+
+          ## special terms.
+          if("special" %in% class(x$specials[[i]])) {
+            nd <- list()
+            for(tj in x$specials[[i]]$term) {
+              if(!is.factor(x$model[[tj]])) {
+                xr <- range(x$model[[tj]])
+                nd[[tj]] <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+              } else {
+                xf <- sort(unique(x$model[[tj]]))
+                nd[[tj]] <- rep(xf[1L], length.out = 300L)
+              }
+            }
+            nd <- as.data.frame(nd)
+            names(nd) <- x$specials[[i]]$term
+            p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
+            if(is.null(dim(p))) {
+              nd$fit <- as.numeric(p)
+            } else {
+              if(is.matrix(p))
+                p <- as.data.frame(p)
+              nd <- cbind(nd, p)
+            }
+            lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
+            lab <- paste0(lab[-length(lab)], collapse = "")
+            lab <- paste0(lab, ",", round(x$fitted.specials[[j]][[i]]$edf, 2L), ")")
+            lab <- paste0(j, ".", lab)
+            attr(nd, "label") <- lab
+            res$effects[[lab]] <- nd
+          }
         }
       }
     }

@@ -85,6 +85,9 @@ Normal <- function(...) {
       },
       "sigma" = function(y, par, ...) {
         rep(2, length(y))
+      },
+      "mu.sigma" = function(y, par, ...) {
+        rep(0, length(y))
       }
     ),
     "loglik" = function(y, par, ...) {

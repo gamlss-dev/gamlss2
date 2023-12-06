@@ -24,12 +24,18 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   stop.eps <- eps
   eps <- eps + 1
 
+  ## The step length control.
+  if(is.null(control$step))
+    control$step <- 1
+  if((control$step > 1) | (control$step < 0))
+    control$step <- 1
+
   ## Maximum number of backfitting iterations.
   maxit <- control$maxit
   if(is.null(maxit))
-    maxit <- 400L
+    maxit <- 100L
   if(length(maxit) < 2L)
-    maxit <- c(maxit, 1L)
+    maxit <- c(maxit, 10L)
 
   ## Initialize fitted values for each model term.
   fit <- sfit <- list()
@@ -172,7 +178,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             ## Update predictor.
             fit[[j]]$fitted.values <- m$fitted.values
             fit[[j]]$coefficients <- m$coefficients
-            fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values
+            ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
         }
@@ -210,7 +216,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             if(ll1 > ll0) {
               ## Update predictor.
               sfit[[j]][[k]] <- fs
-              sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values
+              ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
             }
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }

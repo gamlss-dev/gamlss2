@@ -8,14 +8,13 @@
 }
 
 \usage{
-gamlss2.control(optimizer = RS, step = 1, trace = TRUE,
+gamlss2.control(optimizer = RS, trace = TRUE,
   flush = TRUE, light = FALSE, expand = TRUE,
   model = TRUE, x = TRUE, y = TRUE, \dots)
 }
 
 \arguments{
   \item{optimizer}{Function, the optimizer function that should be used for fitting.}
-  \item{step}{Numeric, a step length control parameter.}
   \item{trace}{Logical, should information be printed while the algorithm is running?}
   \item{flush}{Logical, use \code{\link[utils]{flush.console}} for displaying the
     current output in the console.}
@@ -28,7 +27,8 @@ gamlss2.control(optimizer = RS, step = 1, trace = TRUE,
   \item{x}{Logical, indicating whether the model matrix should be included
     as component of the returned object.}
   \item{y}{Logical, should the response be included as component of the returned object.}
-  \item{\dots}{Further control parameters to be part of the return value.}
+  \item{\dots}{Further control parameters to be part of the return value, e.g.,
+    used within optimizer function \code{\link{RS}}.}
 }
 
 \details{
@@ -51,7 +51,8 @@ data("abdom", package = "gamlss.data")
 ## Specify the model Formula.
 f <- y ~ s(x) | s(x)
 
-## Estimate model with different step length control.
+## Estimate model with different step length
+## control in the RS algorithm.
 b1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
 b2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
 }

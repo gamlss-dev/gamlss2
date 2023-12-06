@@ -22,6 +22,8 @@ export(
   "gamlss2.formula",
   "gamlss2.list",
   "gamlss2.control",
+  "RS",
+  "CG",
   "special_fit",
   "special_predict"
 )

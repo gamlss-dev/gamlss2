@@ -232,7 +232,7 @@ gamlss2.list <- function(x, ...)
 }
 
 ## Control parameters.
-gamlss2.control <- function(optimizer = RS, step = 1,
+gamlss2.control <- function(optimizer = RS,
   trace = TRUE, flush = TRUE, light = FALSE, expand = TRUE,
   model = TRUE, x = TRUE, y = TRUE, ...)
 {

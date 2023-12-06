@@ -1,7 +1,3 @@
-################################################################################
-################################################################################
-################################################################################
-################################################################################
 ## Second make.link function.
 make.link2 <- function(link)
 {
@@ -118,10 +114,8 @@ make.link2 <- function(link)
   rval$name <- link
   rval
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
+## Parsing links helper function.
 parse_links <- function(links, default.links, ...)
 {
   dots <- list(...)
@@ -140,10 +134,7 @@ parse_links <- function(links, default.links, ...)
   names(links) <- nl
   links
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Function takes a gamlss family and sets it up
 ## a bit different in order to support more than
 ## 4 parameter models.
@@ -351,6 +342,72 @@ tF <- function(x, ...)
     }
   }
 
+  ## For CG algorithm.
+  if(all(c("mu", "sigma") %in% nx)) {
+    mu.sigma.hs <- make_call(x$d2ldmdd)
+    hess$mu.sigma <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.mu <- mu.link$linkfun(par$mu)
+      eta.sigma <- sigma.link$linkfun(par$sigma)
+      hess <- -1 * eval(mu.sigma.hs)
+      hess * mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma)
+    }
+    hess$sigma.mu <- hess$mu.sigma
+  }
+  if("nu" %in% nx) {
+    mu.nu.hs <- make_call(x$d2ldmdv)
+    hess$mu.nu <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.mu <- mu.link$linkfun(par$mu)
+      eta.nu <- nu.link$linkfun(par$nu)
+      hess <- -1 * eval(mu.nu.hs)
+      hess * mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu)
+    }
+    hess$nu.mu <- hess$mu.nu
+
+    sigma.nu.hs <- make_call(x$d2ldddv)
+    hess$sigma.nu <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.sigma <- sigma.link$linkfun(par$sigma)
+      eta.nu <- nu.link$linkfun(par$nu)
+      hess <- -1 * eval(sigma.nu.hs)
+      hess * sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu)
+    }
+    hess$nu.sigma <- hess$sigma.nu
+  }
+
+  if("tau" %in% nx) {
+    mu.tau.hs <- make_call(x$d2ldmdt)
+    hess$mu.tau <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.mu <- mu.link$linkfun(par$mu)
+      eta.tau <- tau.link$linkfun(par$tau)
+      hess <- -1 * eval(mu.tau.hs)
+      hess * mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau)
+    }
+    hess$tau.mu <- hess$mu.tau
+
+    sigma.tau.hs <- make_call(x$d2ldddt)
+    hess$sigma.tau <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.sigma <- sigma.link$linkfun(par$sigma)
+      eta.tau <- tau.link$linkfun(par$tau)
+      hess <- -1 * eval(sigma.tau.hs)
+      hess * sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau)
+    }
+    hess$tau.sigma <- hess$sigma.tau
+
+    nu.tau.hs <- make_call(x$d2ldvdt)
+    hess$nu.tau <- function(y, par, ...) {
+      par <- check_range(par)
+      eta.nu <- nu.link$linkfun(par$nu)
+      eta.tau <- tau.link$linkfun(par$tau)
+      hess <- -1 * eval(nu.tau.hs)
+      hess * nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau)
+    }
+    hess$tau.nu <- hess$nu.tau
+  }
+
   dfun <- get(paste("d", x$family[1], sep = ""))
   pfun <- try(get(paste("p", x$family[1], sep = "")), silent = TRUE)
   qfun <- try(get(paste("q", x$family[1], sep = "")), silent = TRUE)
@@ -449,10 +506,7 @@ tF <- function(x, ...)
   class(rval) <- "gamlss2.family"
   rval
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Complete a family object, e.g.,
 ## if derivatives are not supplied they
 ## will be approximated numerically.
@@ -572,10 +626,7 @@ complete_family <- function(family)
 
   return(family)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## A simple print method.
 print.gamlss2.family <- function(x, full = TRUE, ...)
 {
@@ -604,10 +655,7 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
     }
   }
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Some example families.
 Gaussian <- function(...)
 {
@@ -662,10 +710,7 @@ Gaussian <- function(...)
   class(rval) <- "gamlss2.family"
   rval
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 Weibull <- function(...)
 {
   rval <- list(
@@ -749,10 +794,7 @@ Weibull <- function(...)
 
   rval
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## From VGAM.
 is.Numeric <- function (x, length.arg = Inf, integer.valued = FALSE, positive = FALSE) {
   if (all(is.numeric(x)) && all(is.finite(x)) && (if (is.finite(length.arg)) length(x) == 
@@ -869,7 +911,4 @@ YJ <- function(...) {
   class(fam) <- "gamlss2.family"
   return(fam)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+

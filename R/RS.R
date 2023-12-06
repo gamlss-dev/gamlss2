@@ -1,7 +1,4 @@
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+## Rigby and Stasinopoulos algorithm.
 RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control)
 {
   ## Number of observations.
@@ -10,29 +7,52 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   np <- family$names
   ## Initialize predictors.
   eta <- initialize_eta(y, family, n)
+<<<<<<< HEAD
+=======
+
+  ## Check weights.
+  if(!is.null(weights))
+    weights <- as.numeric(weights)
+
+>>>>>>> eb7f83aee69762bd899391614df23e47c59252d4
   ## Set control parameters.
   ## Stopping criterion.
   eps <- control$eps
   if(is.null(eps))
-    eps <- sqrt(.Machine$double.eps)
+    eps <- 1e-05
   if(length(eps) < 2)
     eps <- c(eps, eps)
   stop.eps <- eps
   eps <- eps + 1
 
+  ## The step length control.
+  if(is.null(control$step))
+    control$step <- 1
+  if((control$step > 1) | (control$step < 0))
+    control$step <- 1
+
   ## Maximum number of backfitting iterations.
   maxit <- control$maxit
   if(is.null(maxit))
-    maxit <- 400L
+    maxit <- 100L
   if(length(maxit) < 2L)
-    maxit <- c(maxit, 1L)
+    maxit <- c(maxit, 10L)
 
   ## Initialize fitted values for each model term.
   fit <- sfit <- list()
   for(j in np) {
     fit[[j]] <- list()
-    if(length(xterms[[j]]))
-      fit[[j]] <- list("fitted.values" = rep(0.0, n))
+    if(length(xterms[[j]])) {
+      if("(Intercept)" %in% xterms[[j]]) {
+        fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
+        names(fit[[j]]$coefficients) <- xterms[[j]]
+        fit[[j]]$coefficients["(Intercept)"] <- mean(eta[[j]])
+        fit[[j]] <- list("fitted.values" = drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"]))
+        eta[[j]] <- fit[[j]]$fitted.values
+      } else {
+        fit[[j]] <- list("fitted.values" = eta[[j]])
+      }
+    }
     if(length(sterms)) {
       if(length(sterms[[j]])) {
         sfit[[j]] <- list()
@@ -41,6 +61,20 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
       }
     }
   }
+
+  ## Use Cole and Green algorithm?
+  CGk <- Inf
+  if(!is.null(control$CG)) {
+    if(!is.logical(control$CG))
+      CGk <- as.integer(control$CG)
+  }
+  CG <- isTRUE(control$CG)
+  if(CG)
+    CGk <- 0L
+  if(length(family$hess) < 2L)
+    CGk <- Inf
+  if(!any(grepl(".", names(family$hess), fixed = TRUE)))
+    CGk <- Inf
 
   ## Track runtime.
   tstart <- proc.time()
@@ -61,6 +95,15 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     } else {
       llo0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
     }
+<<<<<<< HEAD
+=======
+
+    ## Old predictors.
+    if(iter[1L] >= CGk) {
+      eta_old <- eta
+    }
+
+>>>>>>> eb7f83aee69762bd899391614df23e47c59252d4
     for(j in np) {
       ## Outer loop working response and weights.
       peta <- family$map2par(eta)
@@ -68,15 +111,6 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
       hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
 
       z <- eta[[j]] + 1 / hess * score
-
-      ## Overwrite eta once.
-      if(iter[1L] < 1) {
-        eta[[j]] <- rep(0.0, n)
-        if(nrow(offsets) > 0) {
-          if(!is.null(offsets[[j]]))
-             eta[[j]] <- eta[[j]] + offsets[[j]]
-        }
-      }
 
       ## Start inner loop.
       while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
@@ -87,11 +121,29 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           ll0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
         }
 
+        ## Cole and Green adjustment.
+        if(iter[1L] >= CGk) {
+          h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
+          if(length(h)) {
+            ej <- sapply(strsplit(h, ".", fixed = TRUE), function(x) x[2L])
+            adj <- 0.0
+            for(l in seq_along(h)) {
+              hess_l <- family$hess[[h[l]]](y, peta, id = j)  ## FIXME: deriv_checks()?
+              adj <- adj + hess_l * (eta[[j]] - eta_old[[j]])
+            }
+            adj <- adj * hess
+          }
+        }
+
         ## Fit linear part.
         if(length(xterms[[j]])) {
           ## Compute partial residuals.
           eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-          e <- z - eta[[j]]
+          if(iter[1L] >= CGk) {
+            e <- (z - adj) - eta[[j]]
+          } else {
+            e <- z - eta[[j]]
+          }
 
           ## Weights.
           wj <- if(is.null(weights)) hess else hess * weights
@@ -103,13 +155,13 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           etai <- eta
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$loglik(y, family$map2par(etai))
+
           if(ll1 < ll0) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$loglik(y, family$map2par(eta))
             }
-            start <- if(iter[1L] > 0 | iter[2L] > 0) coef(m) else rep(0, length(coef(m)))
-            opt <- nlminb(start, objective = ll)
+            opt <- nlminb(coef(m), objective = ll)
             m$coefficients <- opt$par
             m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
           }
@@ -130,7 +182,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             ## Update predictor.
             fit[[j]]$fitted.values <- m$fitted.values
             fit[[j]]$coefficients <- m$coefficients
-            fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values
+            ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
         }
@@ -140,7 +192,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           for(k in sterms[[j]]) {
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
-            e <- z - eta[[j]]
+            if(iter[1L] >= CGk) {
+              e <- (z - adj) - eta[[j]]
+            } else {
+              e <- z - eta[[j]]
+            }
 
             ## Additive model term fit.
             fs <- if(is.null(weights)) {
@@ -163,11 +219,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
             if(ll1 > ll0) {
               ## Update predictor.
-              sfit[[j]][[k]]$fitted.values <- fs$fitted.values
-              sfit[[j]][[k]]$coefficients <- fs$coefficients
-              sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values
-              sfit[[j]][[k]]$edf <- fs$edf
-              sfit[[j]][[k]]$lambdas <- fs$lambdas
+              sfit[[j]][[k]] <- fs
+              ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
             }
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }
@@ -221,10 +274,12 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     ## Print current state.
     if(control$trace) {
       if(iter[1L] > 1) {
-        if(control$flush)
-          cat("\r")
+        if(control$flush) {
+          cat('\r')
+        }
       }
-      cat("GAMLSS-RS iteration ", fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
+      cat(paste0("GAMLSS-", if(iter[1L] >= CGk) "CG" else "RS", " iteration "),
+        fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
         ": Global Deviance = ", paste0(round(-2 * llo1, digits = 4), "   "),
         if(control$flush) NULL else "\n", sep = "")
     }
@@ -257,10 +312,14 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
   rval
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
+## Cole and Green flavor.
+CG <- function(x, y, specials, family, offsets, weights, xterms, sterms, control)
+{
+  control$CG <- TRUE
+  RS(x, y, specials, family, offsets, weights, xterms, sterms, control)
+}
+
 ## Function to initialize predictors.
 initialize_eta <- function(y, family, nobs)
 {
@@ -293,10 +352,7 @@ deriv_checks <- function(x, is.weight = FALSE)
   }
   return(x)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Formatting for printing.
 fmt <- Vectorize(function(x, width = 8, digits = 2) {
   txt <- formatC(round(x, digits), format = "f", digits = digits, width = width)
@@ -310,7 +366,4 @@ fmt <- Vectorize(function(x, width = 8, digits = 2) {
 fmt2 <- function(x, ...) {
   gsub(" ", "", fmt(x, ...))
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+

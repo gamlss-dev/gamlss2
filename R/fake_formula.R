@@ -42,7 +42,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
       "tx", "tx2", "tx3", "tx4", "la", "n", "lin",
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
-      "random", "ra", "lo")
+      "random", "ra", "lo", "tr", "tree", "cf")
     stn <- unique(c(stn, specials))
 
     mt <- terms(formula, specials = stn)
@@ -86,6 +86,17 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       if(!is.character(os))
         os <- character(0)
       formula <- os
+    } else {
+      tf <- terms(formula, specials = stn)
+      sj <- unlist(attr(tf, "specials"))
+      if(!is.null(sj)) {
+        formula <- fake_formula(formula)
+      }
+      tf <- terms(formula, specials = stn)
+      if(length(j <- grep("list(", attr(tf, "term.labels"), fixed = TRUE, value = TRUE))) {
+        fc <- paste("formula <- update(formula, . ~ . -", j, ")")
+        eval(parse(text = fc))
+      }
     }
   }
 

@@ -3,14 +3,10 @@ gamlss2 <- function(x, ...)
 {
   UseMethod("gamlss2")
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Formula method.
 gamlss2.formula <- function(formula, data, family = NO,
   subset, na.action, weights, offset,
-  model = TRUE, x = TRUE, y = TRUE,
   control = gamlss2.control(...), ...)
 {
   ## Process specific formulas.
@@ -24,6 +20,11 @@ gamlss2.formula <- function(formula, data, family = NO,
     formula <- formula[c("mu", "sigma", "nu", "tau")]
     names(formula) <- NULL
   }
+
+  ## Evaluate and complete family.
+  ## Note, families structure is a bit different
+  ## in order to support more than 4 parameter models.
+  family <- complete_family(family)
 
   ## Call.
   cl <- match.call()
@@ -45,6 +46,12 @@ gamlss2.formula <- function(formula, data, family = NO,
     formula <- as.Formula(formula(formula), ~ 1)
   }
 
+  ## Expand formula.
+  if((length(attr(formula, "rhs")) < length(family$names)) & control$expand) {
+    k <- length(family$names) - length(attr(formula, "rhs"))
+    attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(1, k)))
+  }
+
   mf$formula <- fake_formula(formula)
 
   ## Evaluate model.frame.
@@ -56,6 +63,8 @@ gamlss2.formula <- function(formula, data, family = NO,
   mt <- terms(ff, data = data)
   Y <- model.response(mf)
   X <- model.matrix(mt, mf)
+  if(!("(Intercept)" %in% colnames(X)))
+    X <- cbind("(Intercept)" = 1.0, X)
 
   if(any(is.na(X)))
     stop("detected 'NA' values in data!")
@@ -75,7 +84,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     off <- NULL
     if(!is.null(offset)) {
       if(length(offset) == 1) 
-        offset <- rep.int(offset, n)
+        offset <- rep.int(offset, nrow(X))
       off <- as.vector(offset)
     }
     return(off)
@@ -114,16 +123,30 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Process special terms.
   Specials <- special_terms(Sterms, mf)
 
-  ## Evaluate and complete family.
-  ## Note, families structure is a bit different
-  ## in order to support more than 4 parameter models.
-  family <- complete_family(family)
+  ## Process by variables using mgcv::smoothCon().
+  olab <- sapply(Specials, function(x) if(is.list(x)) x$orig.label else "")
+  nt <- names(olab)
+  ulab <- unique(olab)
+  ulab <- ulab[ulab != ""]
+  for(j in seq_along(Sterms)) {
+    if(length(Sterms[[j]])) {
+      for(i in ulab) {
+        ii <- which(Sterms[[j]] == i)
+        if(length(ii)) {
+          Sterms[[j]] <- as.list(Sterms[[j]])
+          Sterms[[j]][[ii]] <- as.character(nt[olab == i])
+          Sterms[[j]] <- unlist(Sterms[[j]])
+        }
+      }
+    }
+  }
 
   ## Set names.
-  names(Xterms) <- names(Sterms) <- family$names
+  names(Xterms) <- family$names[1:length(Xterms)]
+  names(Sterms) <- family$names[1:length(Sterms)]
   Xterms0 <- Xterms
   if(length(offsets)) {
-    names(offsets) <- family$names
+    names(offsets) <- family$names[1:length(offsets)]
     offsets <- do.call("cbind", offsets)
   }
   if(!missing(offset)) {
@@ -175,54 +198,58 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$terms <- terms(rval$fake_formula)
   rval$family <- family
   rval$xlevels <- xlev
+  rval$contrasts <- attr(X, "contrasts")
+  rval$na.action <- attr(mf, "na.action")
   rval$xterms <- Xterms0
   rval$sterms <- Sterms
   rval$specials <- Specials
 
   ## Return model.frame, X and y.
   if(!control$light) {
-    if(model) {
+    if(control$model) {
       rval$model <- mf
     }
-    if(y) {
+    if(control$y) {
       rval$y = Y
     }
-    if(x) {
+    if(control$x) {
       rval$x <- X
     }
+    rval$results <- results(rval)
   }
 
   class(rval) <- unique(c(class(rval), "gamlss2"))
 
   return(rval)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## List method.
-gamlss2.list <- function(formula, ...)
+gamlss2.list <- function(x, ...)
 {
-  gamlss2.formula(formula, ...)
+  cl <- match.call()
+  cl$formula <- do.call("as.Formula", x)
+  cl$x <- FALSE
+  cl[[1L]] <- as.name("gamlss2.formula")
+  eval.parent(cl)
 }
 
 ## Control parameters.
-gamlss2.control <- function(optimizer = RS, step = 1,
-  trace = TRUE, flush = TRUE, light = FALSE, ...)
+gamlss2.control <- function(optimizer = RS,
+  trace = TRUE, flush = TRUE, light = FALSE, expand = TRUE,
+  model = TRUE, x = TRUE, y = TRUE, ...)
 {
   ctr <- as.list(environment())
   ctr <- c(ctr, list(...))
 
   return(ctr)
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## A model.frame method.
 model.frame.gamlss2 <- function(formula, ...)
 {
   dots <- list(...)
+  if(is.null(dots$keepresponse))
+    dots$keepresponse <- FALSE
   nargs <- dots[match(c("data", "na.action", "subset"), names(dots), 0)]
   if(length(nargs) || is.null(formula$model)) {
     fcall <- formula$call
@@ -232,7 +259,8 @@ model.frame.gamlss2 <- function(formula, ...)
     fcall[[1L]] <- quote(model.frame)
     fcall$xlev <- formula$xlevels
     fcall$formula <- terms(formula)
-    fcall$formula <- update(fcall$formula, NULL ~ .)
+    if(!dots$keepresponse)
+     fcall$formula <- update(fcall$formula, NULL ~ .)
     fcall[names(nargs)] <- nargs
     env <- if(is.null(environment(formula$terms))) {
       parent.frame()
@@ -244,190 +272,31 @@ model.frame.gamlss2 <- function(formula, ...)
     return(formula$model)
   }
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## The model.matrix.
 model.matrix.gamlss2 <- function(object, data = NULL, ...)
 {
   if(!is.null(data))
     object$x <- NULL
   if(n_match <- match("x", names(object), 0L)) {
-    object[[n_match]]
+    return(object[[n_match]])
   } else {
     object$terms <- terms(fake_formula(object$formula, nospecials = TRUE))
     data <- model.frame(object, xlev = object$xlevels, data = data, ...)
     if(exists(".GenericCallEnv", inherits = FALSE)) {
-      NextMethod("model.matrix", data = data, contrasts.arg = object$contrasts)
+      X <- NextMethod("model.matrix", data = data, contrasts.arg = object$contrasts)
     } else {
       dots <- list(...)
       dots$data <- dots$contrasts.arg <- NULL
-      do.call("model.matrix", c(list(object = object, 
+      X <- do.call("model.matrix", c(list(object = object, 
         data = data, contrasts.arg = object$contrasts), dots))
     }
+    if(!("(Intercept)" %in% colnames(X)))
+      X <- cbind("(Intercept)" = 1.0, X)
+    return(X)
   }
 }
-################################################################################
-################################################################################
-################################################################################
-################################################################################
+
 ## Family extractor.
 family.gamlss2 <- function(object, ...) object$family
-
-## Multiple grep.
-grep2 <- function (pattern, x, ...) 
-{
-  i <- NULL
-  for(p in pattern)
-    i <- c(i, grep(p, x, ...))
-  unique(i)
-}
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-## Predict method.
-predict.gamlss2 <- function(object, 
-  parameter = NULL, newdata = NULL, type = c("link", "parameter", "response", "terms"), 
-  terms = NULL, se.fit = FALSE, ...)
-{
-  type <- match.arg(type)
-
-  if(!is.null(newdata)) {
-    mf <- model.frame(object, data = newdata)
-  } else {
-    mf <- model.frame(object)
-  }
-  X <- model.matrix(fake_formula(object$formula, nospecials = TRUE), data = mf)
-
-  family <- object$family
-
-  if(is.null(parameter)) {
-    parameter <- list(...)$what
-    if(is.null(parameter))
-    parameter <- list(...)$model
-    if(is.null(parameter))
-      parameter <- family$names
-  }
-  if(!is.character(parameter))
-    parameter <- family$names[parameter]
-  parameter <- family$names[pmatch(parameter, family$names)]
-
-  tt <- type == "terms"
-
-  p <- list()
-  for(j in parameter) {
-    p[[j]] <- if(tt) NULL else rep(0, length.out = nrow(mf))
-    tj <- if(is.null(terms)) {
-      c(object$xterms[[j]], object$sterms[[j]])
-    } else {
-      grep2(terms, c(object$xterms[[j]], object$sterms[[j]]), fixed = TRUE, value = TRUE)
-    }
-    if(length(tj)) {
-      if(length(object$xterms[[j]])) {
-        xn <- NULL
-        for(i in tj) {
-          xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
-        }
-        if(length(xn)) {
-          for(i in seq_along(xn)) {
-            if(!is.null(object$xlevels)) {
-              if(xn[i] %in% names(object$xlevels)) {
-                xnl <- paste0(xn[i], object$xlevels[[xn[i]]])
-                xnl <- xnl[xnl %in% colnames(X)]
-                xn <- c(xn[-i], xnl)
-              }
-            }
-          }
-          if(tt) {
-            ft <- t(t(X[, xn, drop = FALSE]) * coef(object)[[j]][xn])
-            p[[j]] <- cbind(p[[j]], ft)
-          } else {
-            p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% coef(object)[[j]][xn])
-          }
-        }
-      }
-      if(length(object$sterms[[j]])) {
-        xn <- NULL
-        for(i in tj) {
-          xn <- c(xn, grep(i, object$sterms[[j]], fixed = TRUE, value = TRUE))      
-        }
-        if(length(xn)) {
-          for(i in xn) {
-            if(inherits(object$specials[[i]], "mgcv.smooth")) {
-              Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
-              co <- object$fitted.specials[[j]][[i]]$coefficients
-              fit <- drop(Xs %*% co)
-            } else {
-              cs <- object$fitted.specials[[j]][[i]]$coefficients
-              if(inherits(cs, "random")) {
-                vn <- as.character(as.call(as.call(parse(text = i))[[1L]])[[2L]])
-                xv <- mf[[vn]]
-                fit <- cs$coef[as.character(xv)]
-              } else {
-                fit <- cs$fun(mf[[cs$name]])
-              }
-            }
-            if(tt) {
-              fit <- matrix(fit, ncol = 1L)
-              colnames(fit) <- i
-              rownames(fit) <- rownames(mf)
-              p[[j]] <- cbind(p[[j]], fit)
-            } else {
-              p[[j]] <- p[[j]] + fit
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if(type %in% c("parameter", "response") & !tt) {
-    p <- family$map2par(p)
-  }
-
-  if(type == "response") {
-    fm <- family$mean
-    if(is.null(fm)) {
-      if(!is.null(family$q)) {
-        fm <- function(par) family$q(0.5, par)
-      }
-    }
-    p <- if(is.null(fm)) p[[1L]] else fm(p)
-  }
-
-  if(is.list(p)) {
-    if(length(p) < 2) {
-      p <- p[[1L]]
-    } else {
-      if(!tt)
-        p <- as.data.frame(p)
-    }
-  }
-
-  return(p)
-}
-################################################################################
-################################################################################
-################################################################################
-################################################################################
-## Testing.
-if(FALSE) {
-  d <- bamlss::GAMart(n = 10000, sd = -1)
-
-  f <- list(
-    y ~ x1 + x2 + pb(x3) + te(lon,lat,k=10),
-      ~ s(x1) + pb(x2)
-  )
-
-  b <- gamlss2(f, data = d, maxit = c(100, 100))
-
-  a <- gamlss2(effort~Type+random(Subject), data=ergoStool )
-
-
-
-  fx <- predict(b, newdata = d[1:100, ], parameter = "mu", term = "x3")
-  plot(fx ~ d$x3[1:100])
-}
 

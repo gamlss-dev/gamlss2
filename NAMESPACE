@@ -1,11 +1,41 @@
 import("Formula")
 import("gamlss.dist")
+import("gamlss.data")
+import("mgcv")
 
-importFrom("stats", "terms")
+importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
+  "make.link", "model.frame", "model.matrix", "model.offset",
+  "model.response", "model.weights", "nlminb", "pnorm",
+  "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
+  "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals")
 
-export("fake_formula")
+importFrom("utils", "flush.console")
 
-importFrom("stats", ".getXlevels", "coef", "dnorm", "lm.wfit",
-             "make.link", "model.frame", "model.matrix", "model.offset",
-             "model.response", "model.weights", "nlminb", "pnorm",
-             "qnorm", "rnorm", "runif", "sd", "update")
+importFrom("grDevices", "gray.colors", "n2mfrow", "rgb")
+
+importFrom("graphics", "abline", "axis", "box", "grid", "hist",
+  "lines", "par", "polygon", "rect")
+
+export(
+  "fake_formula",
+  "gamlss2",
+  "gamlss2.formula",
+  "gamlss2.list",
+  "gamlss2.control",
+  "RS",
+  "CG",
+  "special_fit",
+  "special_predict"
+)
+
+S3method(gamlss2, formula)
+S3method(gamlss2, list)
+S3method(plot, gamlss2)
+S3method(predict, gamlss2)
+S3method(residuals, gamlss2)
+S3method(family, gamlss2)
+S3method(logLik, gamlss2)
+S3method(special_fit, cf)
+S3method(special_predict, cf.fitted)
+S3method(special_predict, default)
+

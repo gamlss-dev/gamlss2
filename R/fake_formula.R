@@ -92,6 +92,11 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       if(!is.null(sj)) {
         formula <- fake_formula(formula)
       }
+      tf <- terms(formula, specials = stn)
+      if(length(j <- grep("list(", attr(tf, "term.labels"), fixed = TRUE, value = TRUE))) {
+        fc <- paste("formula <- update(formula, . ~ . -", j, ")")
+        eval(parse(text = fc))
+      }
     }
   }
 

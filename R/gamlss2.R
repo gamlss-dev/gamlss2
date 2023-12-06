@@ -198,6 +198,8 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$terms <- terms(rval$fake_formula)
   rval$family <- family
   rval$xlevels <- xlev
+  rval$contrasts <- attr(X, "contrasts")
+  rval$na.action <- attr(mf, "na.action")
   rval$xterms <- Xterms0
   rval$sterms <- Sterms
   rval$specials <- Specials

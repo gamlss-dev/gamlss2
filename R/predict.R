@@ -51,14 +51,23 @@ predict.gamlss2 <- function(object,
           xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
         }
         if(length(xn)) {
+          xn2 <- list()
           for(i in seq_along(xn)) {
             if(!is.null(object$xlevels)) {
-              if(xn[i] %in% names(object$xlevels)) {
-                xnl <- paste0(xn[i], object$xlevels[[xn[i]]])
-                xnl <- xnl[xnl %in% colnames(X)]
-                xn <- c(xn[-i], xnl)
+              if(!is.null(object$xlevels[[xn[i]]])) {
+                xn2[[xn[i]]] <- paste0(xn[i], object$xlevels[[xn[i]]])
               }
             }
+          }
+          if(length(xn2)) {
+            xnn <- xn
+            xn <- as.list(xn)
+            names(xn) <- xnn
+            for(i in names(xn2))
+              xn[[i]] <- xn2[[i]]
+            xn <- unlist(xn)
+            names(xn) <- NULL
+            xn <- xn[xn %in% colnames(X)]
           }
           if(tt) {
             ft <- t(t(X[, xn, drop = FALSE]) * coef(object)[[j]][xn])

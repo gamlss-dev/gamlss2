@@ -37,7 +37,7 @@ special_predict(x, \dots)
     \item \code{eta}: The current named list of predictors.
     \item \code{j}: Character, the parameter name for which the model term needs to be updated.
     \item \code{family}: The family object of the model, see \code{\link{gamlss2.family}}.
-    \item \code{control}: A named list of control arguments, see \code{\link{gamlss2.control}}.
+    \item \code{control}: A named list of control arguments, see \code{\link{gamlss2_control}}.
   }
   Note that for setting up a special model term only the first three arguments a mandatory,
   all other arguments are optional. The function must at least return a named list containing

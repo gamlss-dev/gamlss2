@@ -1,5 +1,5 @@
-\name{gamlss2.control} 
-\alias{gamlss2.control}
+\name{gamlss2_control} 
+\alias{gamlss2_control}
 
 \title{Control Parameters for GAMLSS}
 
@@ -8,7 +8,7 @@
 }
 
 \usage{
-gamlss2.control(optimizer = RS, trace = TRUE,
+gamlss2_control(optimizer = RS, trace = TRUE,
   flush = TRUE, light = FALSE, expand = TRUE,
   model = TRUE, x = TRUE, y = TRUE, \dots)
 }
@@ -32,7 +32,7 @@ gamlss2.control(optimizer = RS, trace = TRUE,
 }
 
 \details{
-  The control parameters in \code{gamlss2.control} can also be extended, e.g., if another
+  The control parameters in \code{gamlss2_control} can also be extended, e.g., if another
   optimization function is used, newly specified control parameters are automatically
   passed on to this function.
 } 

@@ -58,9 +58,9 @@ CG(x, y, specials, family, offsets,
   }
 
   To facilitate the development of new algorithms for \pkg{gamlss2}, users can exchange
-  them using the \code{optimizer} argument in \code{\link{gamlss2.control}}. Users
+  them using the \code{optimizer} argument in \code{\link{gamlss2_control}}. Users
   developing new model fitting functions are advised to use these functions as templates
-  and pass them to \code{\link{gamlss2.control}}. Alternatively, users can replace the
+  and pass them to \code{\link{gamlss2_control}}. Alternatively, users can replace the
   optimizer function by adding a named list element, \code{"optimizer"}, to the family object.
   For instructions on setting up new families in \pkg{gamlss2}, see \code{\link{gamlss2.family}}.
 } 
@@ -79,7 +79,7 @@ CG(x, y, specials, family, offsets,
   \item{elapsed}{The elapsed runtime of the algorithm.}
   \item{iterations}{How many iterations the algorithm performed.}
   \item{logLik}{The final value of the log-likelihood of the model.}
-  \item{control}{All control arguments used as supplied from function \code{\link{gamlss2.control}}.}
+  \item{control}{All control arguments used as supplied from function \code{\link{gamlss2_control}}.}
 }
 
 \references{
@@ -90,7 +90,7 @@ CG(x, y, specials, family, offsets,
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link{gamlss2.control}}, \code{\link{gamlss2.family}}
+  \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
 \examples{## Load the abdominal circumference data

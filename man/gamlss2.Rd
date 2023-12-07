@@ -19,7 +19,7 @@ gamlss2(x, \dots)
 
 \method{gamlss2}{formula}(formula, data, family = NO,
   subset, na.action, weights, offset,
-  control = gamlss2.control(\dots), \dots)
+  control = gamlss2_control(\dots), \dots)
 
 \method{gamlss2}{list}(x, \dots)
 }
@@ -44,8 +44,8 @@ gamlss2(x, \dots)
     of the distribution. In the case of multiple offsets, a data frame or list must be supplied.
     Each offset is assigned in the same order as the parameters of the distribution
     specified in the family object.}
-  \item{control}{A list of control arguments, see \code{\link{gamlss2.control}}.}
-  \item{\dots}{Arguments passed to \code{\link{gamlss2.control}}.}
+  \item{control}{A list of control arguments, see \code{\link{gamlss2_control}}.}
+  \item{\dots}{Arguments passed to \code{\link{gamlss2_control}}.}
 }
 
 \details{
@@ -56,7 +56,7 @@ gamlss2(x, \dots)
       \pkg{gamlss.dist} package or using \code{\link{gamlss2.family}} objects.
     \item Estimation is carried out through a Newton-Raphson/Fisher scoring algorithm,
       see function \code{\link{RS}}. The estimation algorithms can also be exchanged using 
-      \code{\link{gamlss2.control}}. Additionally, if an \code{optimizer} is specified by the
+      \code{\link{gamlss2_control}}. Additionally, if an \code{optimizer} is specified by the
       family object, this optimizer function will be employed for estimation.
     \item The return value is determined by the object returned from the optimizer function,
       typically an object of class \code{"gamlss2"}. Default methods and extractor functions
@@ -69,7 +69,7 @@ gamlss2(x, \dots)
 \value{
   The return value is determined by the object returned from the optimizer function.
   By default, the optimization is performed using the \code{\link{RS}} optimizer function
-  (see \code{\link{gamlss2.control}}), yielding an object of class \code{"gamlss2"}.
+  (see \code{\link{gamlss2_control}}), yielding an object of class \code{"gamlss2"}.
   Default methods and extractor functions are available for this class.
 }
 
@@ -96,7 +96,7 @@ gamlss2(x, \dots)
 }
 
 \seealso{
-  \code{\link{RS}}, \code{\link{gamlss2.control}}, \code{\link{gamlss2.family}}
+  \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
 \examples{## Load the abdominal circumference data

@@ -261,7 +261,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
     ## Warning if deviance is increasing.
     if((llo1 < llo0) & (iter[1L] > 0)) {
-      warning("Deviance is increasing, maybe set argument step in gamlss2.control()!")
+      warning("Deviance is increasing, maybe set argument step in gamlss2_control()!")
     }
 
     ## Update outer iterator.

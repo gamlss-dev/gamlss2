@@ -21,7 +21,7 @@ export(
   "gamlss2",
   "gamlss2.formula",
   "gamlss2.list",
-  "gamlss2.control",
+  "gamlss2_control",
   "RS",
   "CG",
   "special_fit",

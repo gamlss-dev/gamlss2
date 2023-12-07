@@ -7,7 +7,7 @@ gamlss2 <- function(x, ...)
 ## Formula method.
 gamlss2.formula <- function(formula, data, family = NO,
   subset, na.action, weights, offset,
-  control = gamlss2.control(...), ...)
+  control = gamlss2_control(...), ...)
 {
   ## Process specific formulas.
   if(!is.null(control$sigma.formula) | !is.null(control$nu.formula) | !is.null(control$tau.formula)) {
@@ -234,7 +234,7 @@ gamlss2.list <- function(x, ...)
 }
 
 ## Control parameters.
-gamlss2.control <- function(optimizer = RS,
+gamlss2_control <- function(optimizer = RS,
   trace = TRUE, flush = TRUE, light = FALSE, expand = TRUE,
   model = TRUE, x = TRUE, y = TRUE, ...)
 {

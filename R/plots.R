@@ -220,7 +220,13 @@ plot_hist <- function(x, ...)
 plot_qq <- function(x, ...)
 {
   z <- qnorm(ppoints(length(x)))
-  qqnorm(x, col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 19, ...)
+  pch <- list(...)$pch
+  if(is.null(pch))
+    pch <- 19
+  col <- list(...)$col
+  if(is.null(col))
+    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
+  qqnorm(x, col = col, pch = pch)
   lines(z, z, lwd = 2, col = 4)
 }
 
@@ -256,10 +262,16 @@ plot_wp <- function(x, ...)
   ylab <- list(...)$ylab
   if(is.null(ylab))
     ylab <- "Deviation"
+  pch <- list(...)$pch
+  if(is.null(pch))
+    pch <- 19
+  col <- list(...)$col
+  if(is.null(col))
+    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
 
   plot(d$x, d$y, xlim = xlim, ylim = ylim,
     xlab = xlab, ylab = ylab, main = main,
-    col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 19, ...)
+    col = col, pch = pch)
   grid(lty = "solid")
 
   dz <- 0.25
@@ -287,9 +299,15 @@ plot_sr <- function(f, x, ...) {
   ylab <- list(...)$ylab
   if(is.null(ylab))
     ylab <- "Quantile Residuals"
+  pch <- list(...)$pch
+  if(is.null(pch))
+    pch <- 19
+  col <- list(...)$col
+  if(is.null(col))
+    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
 
   plot(f, x, xlab = xlab, ylab = ylab, main = main,
-    col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 19, ...)
+    col = col, pch = pch)
   abline(h = 0, col = "lightgray")
 
   m <- lm(x ~ f + I(f^2) + I(f^3))

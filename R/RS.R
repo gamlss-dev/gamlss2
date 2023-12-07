@@ -3,17 +3,18 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 {
   ## Number of observations.
   n <- if(is.null(dim(y))) length(y) else nrow(y)
-
   ## Parameter names. FIXME: TRUE/FALSE?
   np <- family$names
-
   ## Initialize predictors.
   eta <- initialize_eta(y, family, n)
+<<<<<<< HEAD
+=======
 
   ## Check weights.
   if(!is.null(weights))
     weights <- as.numeric(weights)
 
+>>>>>>> eb7f83aee69762bd899391614df23e47c59252d4
   ## Set control parameters.
   ## Stopping criterion.
   eps <- control$eps
@@ -94,12 +95,15 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     } else {
       llo0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
     }
+<<<<<<< HEAD
+=======
 
     ## Old predictors.
     if(iter[1L] >= CGk) {
       eta_old <- eta
     }
 
+>>>>>>> eb7f83aee69762bd899391614df23e47c59252d4
     for(j in np) {
       ## Outer loop working response and weights.
       peta <- family$map2par(eta)

@@ -72,15 +72,17 @@ NN <- function(formula, ...)
   ## List of control arguments.
   ctr <- list(...)
   if(is.null(ctr$size))
-    ctr$size <- 50
+    ctr$size <- 20
   if(is.null(ctr$maxit))
     ctr$maxit <- 100
   if(is.null(ctr$decay))
-    ctr$decay <- 0.1
+    ctr$decay <- 0.01
   if(is.null(ctr$trace))
     ctr$trace <- FALSE
   if(is.null(ctr$MaxNWts))
     ctr$MaxNWts <- 1000
+  if(is.null(ctr$scale))
+    ctr$scale <- TRUE
 
   ## Put all information together.
   st$control <- ctr
@@ -88,6 +90,21 @@ NN <- function(formula, ...)
   st$term <- all.vars(formula)
   st$label <- paste0("NN(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
   st$data <- model.frame(formula)
+
+  ## Scale per default!
+  if(ctr$scale) {
+    sx <- list()
+    for(j in colnames(data)) {
+      if(!is.factor(data[[j]])) {
+        sx[[j]] <- list(
+          "mean" = mean(data[[j]]),
+          "sd" = sd(data[[j]])
+        )
+        data[[j]] <- (data[[j]] - sx[[j]]$mean) / sx[[j]]$sd
+      }
+    }
+    st$scalex <- sx
+  }
 
   ## Assign the "special" class and the new class "NN".
   class(st) <- c("special", "NN")
@@ -122,6 +139,9 @@ special_fit.NN <- function(x, z, w, control, ...)
   ## Degrees of freedom.
   rval$edf <- x$control$size
 
+  ## Possible scaling.
+  rval$scalex <- x$scalex
+
   ## Assign class for predict method.
   class(rval) <- "NN.fitted"
 
@@ -131,6 +151,11 @@ special_fit.NN <- function(x, z, w, control, ...)
 ## Finally, the predict method.
 special_predict.NN.fitted <- function(x, data, se.fit = FALSE, ...)
 {
+  if(!is.null(x$scalex)) {
+    for(j in names(x$scalex)) {
+      data[[j]] <- (data[[j]] - scalex[[j]]$mean) / scalex[[j]]$sd
+    }
+  }
   p <- predict(x$model, newdata = data, type = "raw")
   p <- p - x$shift
   if(se.fit)
@@ -141,14 +166,12 @@ special_predict.NN.fitted <- function(x, data, se.fit = FALSE, ...)
 ## Example with data.
 data("abdom", package = "gamlss.data")
 
-## Note, data should be scaled!
-abdom$xs <- as.numeric(scale(abdom$x))
-
 ## Specify the model Formula.
-f <- y ~ NN(~xs) | NN(~xs) | NN(~xs) | NN(~xs)
+f <- y ~ NN(~x) | NN(~x) | NN(~x) | NN(~x)
 
 ## Estimate model.
-## Set the seed for reproducabilty.
+## Set the seed for reproducibility.
+## Note, data should be scaled!
 set.seed(123)
 b <- gamlss2(f, data = abdom, family = BCT)
 
@@ -171,6 +194,49 @@ plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
+
+## Another example using the Munich rent data.
+data("rent", package = "gamlss.data")
+
+## Model formula.
+f <- R ~ NN(~Fl+A,size=20) | NN(~Fl+A,size=20)
+
+## Estimate model.
+set.seed(456)
+b <- gamlss2(f, data = rent, family = GA)
+
+## Diagnostics.
+plot(b, which = "resid")
+
+## Predict using new data.
+n <- 50
+nd <- with(rent, expand.grid(
+  "Fl" = seq(min(Fl), max(Fl), length = n),
+  "A" = seq(min(A), max(A), length = n)
+))
+
+## Predict parameters of the GA distribution.
+par <- predict(b, newdata = nd, type = "parameter")
+
+## Compute median rent R estimate.
+nd$fit <- family(b)$q(0.5, par)
+
+## Visualize.
+library("lattice")
+
+p1 <- wireframe(fit ~ Fl + A, data = nd,
+  screen = list(z = 50, x = -70, y = -10),
+  aspect = c(1, 0.9), drape = TRUE,
+  main = "NN(~Fl+A)",
+  xlab = "Floor", ylab = "YoC",
+  zlab = "Rent")
+
+p2 <- levelplot(fit ~ Fl + A, data = nd,
+  contour = TRUE,
+  main = "NN(~Fl+A)", xlab = "Floor", ylab = "YoC")
+
+print(p1, split = c(1, 1, 2, 1), more = TRUE)
+print(p2, split = c(2, 1, 2, 1), more = FALSE)
 }
 
 \keyword{models}

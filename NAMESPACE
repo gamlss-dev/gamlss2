@@ -39,3 +39,5 @@ S3method(special_fit, cf)
 S3method(special_predict, cf.fitted)
 S3method(special_predict, default)
 
+useDynLib(gamlss2, .registration = TRUE)
+

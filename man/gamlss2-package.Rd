@@ -4,7 +4,7 @@
 \docType{package}
 
 \title{
-  packageTitle{gamlss2}
+  GAMLSS Modeling with Advanced Flexible Infrastructures
 }
 
 \description{

@@ -72,7 +72,7 @@ NN <- function(formula, ...)
   ## List of control arguments.
   ctr <- list(...)
   if(is.null(ctr$size))
-    ctr$size <- 20
+    ctr$size <- 50
   if(is.null(ctr$maxit))
     ctr$maxit <- 100
   if(is.null(ctr$decay))
@@ -199,7 +199,7 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 data("rent", package = "gamlss.data")
 
 ## Model formula.
-f <- R ~ NN(~Fl+A,size=20) | NN(~Fl+A,size=20)
+f <- R ~ NN(~Fl+A,size=100) | NN(~Fl+A,size=100)
 
 ## Estimate model.
 set.seed(456)

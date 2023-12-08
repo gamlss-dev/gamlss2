@@ -437,7 +437,10 @@ tF <- function(x, ...)
     "hess" = hess,
     "d" = function(y, par, log = FALSE, ...) {
        par <- check_range(par)
-       eval(dc)
+       d <- eval(dc)
+       if(log)
+         d[!is.finite(d)] <- -100
+       return(d)
     },
     "p" = if(!inherits(pfun, "try-error")) function(q, par, log = FALSE, ...) {
       par <- check_range(par)
@@ -500,7 +503,9 @@ tF <- function(x, ...)
   rval$loglik <- function(y, par) {
     par <- check_range(par)
     log <- TRUE
-    sum(eval(dc), na.rm = TRUE)
+    d <- eval(dc)
+    d[!is.finite(d)] <- -100
+    sum(d, na.rm = TRUE)
   }
 
   class(rval) <- "gamlss2.family"

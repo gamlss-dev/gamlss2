@@ -1,7 +1,7 @@
 \name{gamlss2_control} 
 \alias{gamlss2_control}
 
-\title{Control Parameters for GAMLSS}
+\title{Control Parameters}
 
 \description{
   Various parameters that control fitting of GAMLSS using \code{\link{gamlss2}}.

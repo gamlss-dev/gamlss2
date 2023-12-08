@@ -244,7 +244,7 @@ gamlss2_control <- function(optimizer = RS,
   if(is.null(ctr$binning))
     ctr$binning <- FALSE
   if(is.null(ctr$digits))
-    ctr$digits <- 2L
+    ctr$digits <- Inf
 
   return(ctr)
 }

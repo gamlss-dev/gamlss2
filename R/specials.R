@@ -2,14 +2,9 @@
 ## special terms in the model formula
 ## and assigns appropriate model fitting
 ## functions for the backfitting steps.
-special_terms <- function(x, data, binning = TRUE, digits = 2, ...)
+special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
 {
   sterms <- list()
-
-  if(is.null(binning))
-    binning <- FALSE
-  if(is.null(digits))
-    digits <- 2
 
   if(length(x)) {
     for(j in unlist(x)) {
@@ -20,9 +15,12 @@ special_terms <- function(x, data, binning = TRUE, digits = 2, ...)
 
       if(binj) {
         dj <- data[, vj, drop = FALSE]
-        for(v in vj) {
-          if(is.numeric(dj[[v]]))
-            dj[[v]] <- round(dj[[v]], digits = digits)
+        if(is.finite(digits)) {
+          for(v in vj) {
+            if(is.numeric(dj[[v]])) {
+              dj[[v]] <- round(dj[[v]], digits = digits)
+            }
+          }
         }
         dj <- apply(dj, 1, paste, sep = "\r", collapse = ";")
 
@@ -210,19 +208,25 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
       if(is.null(control$criterion))
         control$criterion <- "gcv"
 
-      rss <- sum(w * (z - fit)^2)
+      if(!is.null(control$opt_ll)) {
+        eta[[j]] <- eta[[j]] + fit
+        ll <- family$loglik(y, family$map2par(eta))
+        rval <- -2 * ll + 2 * edf
+      } else {
+        rss <- sum(w * (z - fit)^2)
 
-      rval <- switch(tolower(control$criterion),
-        "gcv" = rss * n / (n - edf)^2,
-        "aic" = rss + 2 * edf,
-        "bic" = rss + log(n) * edf
-      )
+        rval <- switch(tolower(control$criterion),
+          "gcv" = rss * n / (n - edf)^2,
+          "aic" = rss + 2 * edf,
+          "bic" = rss + log(n) * edf
+        )
+      }
 
       return(rval)
     }
   }
 
-  opt <- nlminb(lambdas, objective = fl)
+  opt <- nlminb(lambdas, objective = fl, lower = 1e-10, upper = Inf)
 
   return(fl(opt$par, rf = TRUE))
 }

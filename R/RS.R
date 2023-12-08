@@ -178,6 +178,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             ## Update predictor.
             fit[[j]]$fitted.values <- m$fitted.values
             fit[[j]]$coefficients <- m$coefficients
+            ll0 <- ll1
             ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
@@ -216,8 +217,10 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             if(ll1 > ll0) {
               ## Update predictor.
               sfit[[j]][[k]] <- fs
+              ll0 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
             }
+
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }
         }
@@ -327,7 +330,11 @@ initialize_eta <- function(y, family, nobs)
   for(j in family$names) {
     if(!is.null(family$initialize[[j]])) {
       linkfun <- make.link2(family$links[j])$linkfun
-      eta[[j]] <- linkfun(family$initialize[[j]](y))
+      eta[[j]] <- try(linkfun(family$initialize[[j]](y)), silent = TRUE)
+      if(inherits(eta[[j]], "try-error")) {
+        if(is.null(dim(y)))
+          eta[[j]] <- linkfun(family$initialize[[j]](matrix(y, ncol = 1)))
+      }
       eta[[j]] <- rep(eta[[j]], length.out = nobs)
     }
   }

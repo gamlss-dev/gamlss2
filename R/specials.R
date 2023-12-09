@@ -115,7 +115,7 @@ special.wfit <- function(x, z, w, y, eta, j, family, control, ...)
     )
   } else {
     if(inherits(x, "special")) {
-      fit <- special_fit(x = x, z = z, w = w, y = y, eta = eta, j = j, family = family, control = control)
+      fit <- special_fit(x = x, z = z, w = w, y = y, eta = eta, j = j, family = family, control = control, ...)
     } else {
       ff <- if(is.null(x$special.wfit)) {
         smooth.construct.wfit

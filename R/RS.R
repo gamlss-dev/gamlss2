@@ -197,9 +197,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
             ## Additive model term fit.
             fs <- if(is.null(weights)) {
-              special.wfit(specials[[k]], e, hess, y, eta, j, family, control)
+              special.wfit(specials[[k]], e, hess, y, eta, j, family, control,
+                transfer = sfit[[j]][[k]]$transfer)
             } else {
-              special.wfit(specials[[k]], e, hess * weights, y, eta, j, family, control)
+              special.wfit(specials[[k]], e, hess * weights, y, eta, j, family, control,
+                transfer = sfit[[j]][[k]]$transfer)
             }
 
             ## Step length control.

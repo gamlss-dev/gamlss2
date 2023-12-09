@@ -62,7 +62,7 @@ special_predict(x, \dots)
 \examples{## Example special term for neural networks.
 ## The constructor function is used in the formula
 ## when calling gamlss2().
-NN <- function(formula, ...)
+n <- function(formula, ...)
 {
   stopifnot(requireNamespace("nnet"))
 
@@ -72,15 +72,15 @@ NN <- function(formula, ...)
   ## List of control arguments.
   ctr <- list(...)
   if(is.null(ctr$size))
-    ctr$size <- 50
+    ctr$size <- 100
   if(is.null(ctr$maxit))
-    ctr$maxit <- 100
+    ctr$maxit <- 1000
   if(is.null(ctr$decay))
-    ctr$decay <- 0.01
+    ctr$decay <- 0.1
   if(is.null(ctr$trace))
     ctr$trace <- FALSE
   if(is.null(ctr$MaxNWts))
-    ctr$MaxNWts <- 1000
+    ctr$MaxNWts <- 10000
   if(is.null(ctr$scale))
     ctr$scale <- TRUE
 
@@ -88,7 +88,7 @@ NN <- function(formula, ...)
   st$control <- ctr
   st$formula <- formula
   st$term <- all.vars(formula)
-  st$label <- paste0("NN(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$label <- paste0("n(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
   st$data <- model.frame(formula)
 
   ## Scale per default!
@@ -96,24 +96,21 @@ NN <- function(formula, ...)
     sx <- list()
     for(j in colnames(data)) {
       if(!is.factor(data[[j]])) {
-        sx[[j]] <- list(
-          "mean" = mean(data[[j]]),
-          "sd" = sd(data[[j]])
-        )
-        data[[j]] <- (data[[j]] - sx[[j]]$mean) / sx[[j]]$sd
+        sx[[j]] <- range(data[[j]])
+        data[[j]] <- (data[[j]] - sx[[j]][1]) / diff(sx[[j]])
       }
     }
     st$scalex <- sx
   }
 
-  ## Assign the "special" class and the new class "NN".
-  class(st) <- c("special", "NN")
+  ## Assign the "special" class and the new class "n".
+  class(st) <- c("special", "n")
 
   return(st)
 }
 
-## Set up the special "NN" model term fitting function
-special_fit.NN <- function(x, z, w, control, ...)
+## Set up the special "n" model term fitting function
+special_fit.n <- function(x, z, w, control, ...)
 {
   ## Model formula needs to be updated.
   f <- update(x$formula, response_z ~ .)
@@ -122,15 +119,24 @@ special_fit.NN <- function(x, z, w, control, ...)
   x$data$response_z <- z
   x$data$weights_w <- w
 
+  ## Possible weights from last iteration.
+  Wts <- list(...)$transfer$Wts
+
   ## Estimate model.
-  rval <- list(
-    "model" = nnet::nnet(formula = f, data = x$data, weights = weights_w,
-      size = x$control$size, maxit = x$control$maxit, decay = x$control$decay,
-      trace = x$control$trace, MaxNWts = x$control$MaxNWts, linout = TRUE)
-  )
+  nnc <- parse(text = paste0('nnet::nnet(formula = f, data = x$data, weights = weights_w,',
+      'size = x$control$size, maxit = x$control$maxit, decay = x$control$decay,',
+      'trace = x$control$trace, MaxNWts = x$control$MaxNWts, linout = TRUE',
+      if(!is.null(Wts)) ', Wts = Wts)' else ')'))
+
+  rval <- list("model" = eval(nnc))
 
   ## Get the fitted.values.
   rval$fitted.values <- predict(rval$model)
+
+  ## Transferring the weights for the next backfitting iteration.
+  ## Note, "transfer" can be used to transfer anything from one
+  ## iteration to the next.
+  rval$transfer <- list("Wts" = rval$model$wts)
 
   ## Center fitted values.
   rval$shift <- mean(rval$fitted.values)
@@ -143,17 +149,17 @@ special_fit.NN <- function(x, z, w, control, ...)
   rval$scalex <- x$scalex
 
   ## Assign class for predict method.
-  class(rval) <- "NN.fitted"
+  class(rval) <- "n.fitted"
 
   return(rval)
 }
 
 ## Finally, the predict method.
-special_predict.NN.fitted <- function(x, data, se.fit = FALSE, ...)
+special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 {
   if(!is.null(x$scalex)) {
     for(j in names(x$scalex)) {
-      data[[j]] <- (data[[j]] - scalex[[j]]$mean) / scalex[[j]]$sd
+      data[[j]] <- (data[[j]] - sx[[j]][1]) / diff(sx[[j]])
     }
   }
   p <- predict(x$model, newdata = data, type = "raw")
@@ -163,11 +169,11 @@ special_predict.NN.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## Example with data.
+\dontrun{## Example with data.
 data("abdom", package = "gamlss.data")
 
 ## Specify the model Formula.
-f <- y ~ NN(~x) | NN(~x) | NN(~x) | NN(~x)
+f <- y ~ n(~x) | n(~x) | n(~x) | n(~x)
 
 ## Estimate model.
 ## Set the seed for reproducibility.
@@ -199,7 +205,7 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 data("rent", package = "gamlss.data")
 
 ## Model formula.
-f <- R ~ NN(~Fl+A,size=100) | NN(~Fl+A,size=100)
+f <- R ~ n(~Fl+A,size=10,decay=0.7) | n(~Fl+A,size=10,decay=0.7)
 
 ## Estimate model.
 set.seed(456)
@@ -227,17 +233,17 @@ library("lattice")
 p1 <- wireframe(fit ~ Fl + A, data = nd,
   screen = list(z = 50, x = -70, y = -10),
   aspect = c(1, 0.9), drape = TRUE,
-  main = "NN(~Fl+A)",
+  main = "n(~Fl+A)",
   xlab = "Floor", ylab = "YoC",
   zlab = "Rent")
 
 p2 <- levelplot(fit ~ Fl + A, data = nd,
   contour = TRUE,
-  main = "NN(~Fl+A)", xlab = "Floor", ylab = "YoC")
+  main = "n(~Fl+A)", xlab = "Floor", ylab = "YoC")
 
 print(p1, split = c(1, 1, 2, 1), more = TRUE)
 print(p2, split = c(2, 1, 2, 1), more = FALSE)
-}
+}}
 
 \keyword{models}
 \keyword{regression}

@@ -154,6 +154,55 @@ plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
+
+## Another example using only the density
+## function, all derivatives are approximated
+## in this case. For residual diagnostics,
+## the $p() and $q() function is needed, too.
+Gamma <- function(...) {
+  fam <- list(
+    "family" = "Gamma",
+    "names" = c("mu", "sigma"),
+    "links" = c("mu" = "log", "sigma" = "log"),
+    "d" = function(y, par, log = FALSE, ...) {
+      shape <- par$sigma
+      scale <- par$mu/par$sigma
+      dgamma(y, shape = shape, scale = scale, log = log)
+    },
+    "p" = function(y, par, lower.tail = TRUE, log.p = FALSE) {
+      shape <- par$sigma
+      scale <- par$mu/par$sigma
+      pgamma(y, shape = shape, scale = scale,
+        lower.tail = lower.tail, log.p = log.p)
+    },
+    "q" = function(p, par, lower.tail = TRUE, log.p = FALSE) {
+      shape <- par$sigma
+      scale <- par$mu/par$sigma
+       qgamma(p, shape = shape, scale = scale,
+         lower.tail = lower.tail, log.p = log.p)
+    }
+  )
+
+  class(fam) <- "gamlss2.family"
+
+  return(fam)
+}
+
+## Example using the Munich rent data.
+data("rent", package = "gamlss.data")
+
+## Model formula.
+f <- R ~ s(Fl) + s(A) | s(Fl) + s(A)
+
+## Estimate model.
+set.seed(456)
+b <- gamlss2(f, data = rent, family = Gamma)
+
+## Plot estimated effects.
+plot(b, which = "effects")
+
+## Diagnostics, needs the $p() and $q() function!
+plot(b, which = "resid")
 }
 
 \keyword{regression}

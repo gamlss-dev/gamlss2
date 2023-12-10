@@ -523,6 +523,10 @@ complete_family <- function(family)
   if(inherits(family, "gamlss.family"))
     return(tF(family))
 
+  if(is.null(family$family)) {
+    family$family <- "No family name supplied!"
+  }
+
   if(is.null(names(family$links)))
     names(family$links) <- family$names
 
@@ -626,6 +630,28 @@ complete_family <- function(family)
         )
       }
       family$hess[[i]] <- eval(parse(text = paste(fun, collapse = "")))
+    }
+  }
+  for(i in seq_along(family$names)) {
+    for(j in seq_along(family$names)) {
+      if(i < j) {
+        hij <- paste0(family$names[i], ".", family$names[j])
+        if(is.null(family$hess[[hij]])) {
+          ni <- family$names[i]
+          nj <- family$names[j]
+          fun <- c(
+            "function(y, par, ...) {",
+            paste("  eta <- linkfun[['", ni, "']](par[['", ni, "']]);", sep = ""),
+            paste("  par[['", ni, "']] <- linkinv[['", ni, "']](eta + err01);", sep = ""),
+            paste("  d1 <- family$score[['", nj, "']](y, par, ...);", sep = ""),
+            paste("  par[['", ni, "']] <- linkinv[['", ni, "']](eta - err01);", sep = ""),
+            paste("  d2 <- family$score[['", nj, "']](y, par, ...);", sep = ""),
+            "  return(-1 * (d1 - d2) / err02)",
+            "}"
+          )
+          family$hess[[hij]] <- eval(parse(text = paste(fun, collapse = "")))
+        }
+      }
     }
   }
 

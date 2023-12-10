@@ -18,7 +18,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   ## Stopping criterion.
   eps <- control$eps
   if(is.null(eps))
-    eps <- 1e-05
+    eps <- sqrt(.Machine$double.eps)
   if(length(eps) < 2)
     eps <- c(eps, eps)
   stop.eps <- eps
@@ -116,6 +116,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
         } else {
           ll0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
         }
+        ll02 <- ll0
 
         ## Cole and Green adjustment.
         if(iter[1L] >= CGk) {
@@ -152,7 +153,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$loglik(y, family$map2par(etai))
 
-          if(ll1 < ll0) {
+          if(ll1 < ll02) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$loglik(y, family$map2par(eta))
@@ -174,11 +175,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$loglik(y, family$map2par(etai))
 
-          if(ll1 > ll0) {
+          if(ll1 > ll02) {
             ## Update predictor.
             fit[[j]]$fitted.values <- m$fitted.values
             fit[[j]]$coefficients <- m$coefficients
-            ll0 <- ll1
+            ll02 <- ll1
             ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
@@ -216,10 +217,10 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             etai[[j]] <- etai[[j]] + fs$fitted.values
             ll1 <- family$loglik(y, family$map2par(etai))
 
-            if(ll1 > ll0) {
+            if(ll1 > ll02) {
               ## Update predictor.
               sfit[[j]][[k]] <- fs
-              ll0 <- ll1
+              ll02 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
             }
 

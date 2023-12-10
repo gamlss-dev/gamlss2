@@ -161,7 +161,6 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 ## the $p() and $q() function is needed, too.
 Gamma <- function(...) {
   fam <- list(
-    "family" = "Gamma",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "log", "sigma" = "log"),
     "d" = function(y, par, log = FALSE, ...) {

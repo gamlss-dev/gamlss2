@@ -650,6 +650,8 @@ complete_family <- function(family)
             "}"
           )
           family$hess[[hij]] <- eval(parse(text = paste(fun, collapse = "")))
+          hji <- paste0(family$names[j], ".", family$names[i])
+          family$hess[[hji]] <- family$hess[[hij]]
         }
       }
     }

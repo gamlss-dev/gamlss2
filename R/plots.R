@@ -181,6 +181,12 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
       ylim <- c(-max(abs(ylim)), max(abs(ylim)))
   }
 
+  image <- list(...)$image
+  if(!is.null(image)) {
+    if(image)
+      persp <- FALSE
+  }
+
   if(persp) {
     pal <- make_pal(col, ncol = ncol, data = m,
       range = ylim, symmetric = symmetric)

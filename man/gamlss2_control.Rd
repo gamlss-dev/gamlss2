@@ -45,7 +45,7 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   \code{\link{RS}}, \code{\link{gamlss2}}
 }
 
-\examples{## Load the abdominal circumference data
+\examples{\dontrun{## Load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
 ## Specify the model Formula.
@@ -55,7 +55,7 @@ f <- y ~ s(x) | s(x)
 ## control in the RS algorithm.
 b1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
 b2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
-}
+}}
 
 \keyword{models}
 \keyword{regression}

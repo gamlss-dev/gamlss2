@@ -93,7 +93,7 @@ CG(x, y, specials, family, offsets,
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{## Load the abdominal circumference data
+\examples{\dontrun{## Load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
 ## Specify the model Formula.
@@ -107,7 +107,7 @@ b <- gamlss2(f, data = abdom, family = BCT, optimizer = CG)
 
 ## First 2 RS iterations and afterwards switch to CG.
 b <- gamlss2(f, data = abdom, family = BCT, CG = 2)
-}
+}}
 
 \keyword{models}
 \keyword{regression}

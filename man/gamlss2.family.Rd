@@ -65,7 +65,7 @@
   \code{\link{gamlss2}}
 }
 
-\examples{## New family object for the normal distribution.
+\examples{\dontrun{## New family object for the normal distribution.
 Normal <- function(...) {
   fam <- list(
     "family" = "Normal",
@@ -202,7 +202,7 @@ plot(b, which = "effects")
 
 ## Diagnostics, needs the $p() and $q() function!
 plot(b, which = "resid")
-}
+}}
 
 \keyword{regression}
 \keyword{models}

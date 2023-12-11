@@ -211,6 +211,9 @@ f <- R ~ n(~Fl+A,size=10,decay=0.7) | n(~Fl+A,size=10,decay=0.7)
 set.seed(456)
 b <- gamlss2(f, data = rent, family = GA)
 
+## Plot estimated effects.
+plot(b, which = "effects", persp = FALSE)
+
 ## Diagnostics.
 plot(b, which = "resid")
 

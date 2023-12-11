@@ -64,7 +64,13 @@ plot.gamlss2 <- function(x, parameter = NULL,
       for(j in en) {
         p <- strsplit(j, ".", fixed = TRUE)[[1L]][1L]
         if(!is.factor(x$results$effects[[j]][[1L]])) {
-          plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+          xn <- colnames(x$results$effects[[j]])
+          xn <- xn[!(xn %in% c("lower", "upper", "fit"))]
+          if(length(xn) < 2) {
+            plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+          } else {
+            plot_smooth_effect_2d(x$results$effects[[j]], ylim = ylim[[p]], ...)
+          }
         } else {
           plot_factor_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
         }
@@ -148,6 +154,63 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
       col = colr[i], border = NA)
   }
   lines(x[, "fit"] ~ x[, 1L], lwd = 1)
+}
+
+## Plot bivariate smooth effects.
+plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
+  xlab = NULL, ylab = NULL, zlab = NULL, main = NULL,
+  xlim = NULL, ylim = NULL,
+  persp = TRUE, contour = TRUE, symmetric = TRUE,
+  theta = 40, phi = 40, expand = 0.9, ticktype = "simple", ...)
+{
+  n <- sqrt(nrow(x))
+  x1 <- seq(min(x[, 1L]), max(x[, 1L]), length = n)
+  x2 <- seq(min(x[, 2L]), max(x[, 2L]), length = n)
+  m <- matrix(x$fit, n, n)
+
+  if(is.null(col))
+    col <- colorspace::diverge_hcl
+
+  if(is.null(xlab))
+    xlab <- names(x)[1L]
+  if(is.null(ylab))
+    ylab <- names(x)[2L]
+  if(is.null(ylim)) {
+    ylim <- range(x[, "fit"])
+    if(symmetric)
+      ylim <- c(-max(abs(ylim)), max(abs(ylim)))
+  }
+
+  if(persp) {
+    pal <- make_pal(col, ncol = ncol, data = m,
+      range = ylim, symmetric = symmetric)
+    col <- pal$map(m)
+  } else {
+    col <- make_pal(col, ncol = ncol, data = x[, "fit"],
+      range = ylim, symmetric = symmetric)$colors
+  }
+
+  if(persp) {
+    if(is.null(zlab))
+      zlab <- attr(x, "label")
+    pmat <- persp(x1, x2, m, xlab = xlab, ylab = ylab, col = col,
+      theta = theta, phi = phi, zlab = zlab, expand = expand,
+      ticktype = ticktype, zlim = ylim, border = NA)
+    cl <- contourLines(x1, x2, m)
+    for(i in 1:length(cl)) {
+      lines(trans3d(cl[[i]]$x, cl[[i]]$y, cl[[i]]$level, pmat), col = "black")
+      tco <- trans3d(mean(cl[[i]]$x), mean(cl[[i]]$y), cl[[i]]$level, pmat)
+      text(tco[1L], tco[2L], cl[[i]]$level, col = "black",
+        pos = 3, cex = 0.6, offset = 0.5)
+    }
+  } else {
+    if(is.null(main)) {
+      main <- attr(x, "label")
+    }
+    image(x1, x2, m, main = main,
+      xlab = xlab, ylab = ylab, zlim = ylim, col = col)
+    contour(x1, x2, m, add = TRUE)
+  }
 }
 
 ## Factor effects.
@@ -313,5 +376,51 @@ plot_sr <- function(f, x, ...) {
   m <- lm(x ~ f + I(f^2) + I(f^3))
   i <- order(f)
   lines(f[i], fitted(m)[i], col = 4, lwd = 2)
+}
+
+## Create color palette.
+make_pal <- function(col, ncol = NULL, data = NULL, range = NULL, 
+  breaks = NULL, swap = FALSE, symmetric = TRUE) 
+{
+  if(is.null(symmetric))
+    symmetric <- TRUE
+  if(is.null(col))
+    col <- colorspace::diverge_hcl
+  if(is.null(ncol) && is.null(breaks))
+    ncol <- 99L
+  if(is.null(ncol) && !is.null(breaks))
+    ncol <- length(breaks) - 1L
+  if(is.function(col))
+    col <- col(ncol)    
+  else 
+    ncol <- length(col)
+  if(swap) 
+    col <- rev(col)
+  if(all(is.null(data), is.null(range), is.null(breaks))) 
+    stop("at least one needs to be specified")
+  if(is.null(breaks)) {
+    if(is.null(range)) {
+      range <- range(data, na.rm = TRUE)
+      if(symmetric) { 
+        mar <- max(abs(range))
+        range <- c(0 - mar, mar)
+      }
+    }
+    if(diff(range) == 0)
+      breaks <- seq(min(range) - 1, min(range) + 1, length.out = ncol + 1L)
+    else
+      breaks <- seq(range[1L], range[2L], length.out = ncol + 1L)
+  } else stopifnot(length(breaks) == ncol + 1L)
+  if(is.matrix(data)) {
+    obs2col <- function(x) {
+      hgt <- (x[-1L, -1L] + x[-1L, -(ncol(x) - 1L)] + 
+        x[-(nrow(x) -1L), -1L] + x[-(nrow(x) -1L), -(ncol(x) - 1L)])/4
+      c(col[1L], col, col[ncol])[cut(hgt, c(-Inf, breaks, Inf), include.lowest = TRUE)]
+    }
+  } else {
+    obs2col <- function(x) c(col[1L], col, col[ncol])[cut(x, c(-Inf, breaks, Inf))]
+  }
+
+  return(list(colors = col, breaks = breaks, map = obs2col))
 }
 

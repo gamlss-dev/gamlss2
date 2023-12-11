@@ -191,10 +191,10 @@ Gamma <- function(...) {
 data("rent", package = "gamlss.data")
 
 ## Model formula.
-f <- R ~ s(Fl) + s(A) | s(Fl) + s(A)
+f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") |
+  ti(Fl) + ti(A) + ti(Fl, A, bs = "ps")
 
 ## Estimate model.
-set.seed(456)
 b <- gamlss2(f, data = rent, family = Gamma)
 
 ## Plot estimated effects.

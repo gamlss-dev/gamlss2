@@ -24,13 +24,25 @@ results.gamlss2 <- function(x)
           if("mgcv.smooth" %in% class(x$specials[[i]])) {
             dim <- x$specials[[i]]$dim
             by <- x$specials[[i]]$by
-            if(dim < 2) {
-              if(!is.factor(x$model[[x$specials[[i]]$term]])) {
-                xr <- range(x$model[[x$specials[[i]]$term]])
-                nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+            if(dim < 3) {
+              if(dim > 1) {
+                xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
+                if(all(xc == "numeric")) {
+                  nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
+                    max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
+                    seq(min(x$model[[x$specials[[i]]$term[2L]]]),
+                    max(x$model[[x$specials[[i]]$term[2L]]]), length = 50))
+                } else {
+                  next
+                }
               } else {
-                xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
-                nd <- data.frame(xf)
+                if(!is.factor(x$model[[x$specials[[i]]$term]])) {
+                  xr <- range(x$model[[x$specials[[i]]$term]])
+                  nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+                } else {
+                  xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
+                  nd <- data.frame(xf)
+                }
               }
               names(nd) <- x$specials[[i]]$term
               if(by != "NA") {
@@ -61,8 +73,6 @@ results.gamlss2 <- function(x)
               }
               attr(nd, "label") <- lab
               res$effects[[lab]] <- nd
-            } else {
-
             }
           }
           ## gamlss smooth terms.
@@ -83,16 +93,33 @@ results.gamlss2 <- function(x)
 
           ## special terms.
           if("special" %in% class(x$specials[[i]])) {
+            dim <- length(x$specials[[i]]$term)
+
+            if(dim > 2)
+              next
+
             nd <- list()
-            for(tj in x$specials[[i]]$term) {
-              if(!is.factor(x$model[[tj]])) {
-                xr <- range(x$model[[tj]])
-                nd[[tj]] <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+
+            if(dim > 1) {
+              xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
+              if(all(xc == "numeric")) {
+                nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
+                  max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
+                  seq(min(x$model[[x$specials[[i]]$term[2L]]]),
+                  max(x$model[[x$specials[[i]]$term[2L]]]), length = 50))
               } else {
-                xf <- sort(unique(x$model[[tj]]))
-                nd[[tj]] <- rep(xf[1L], length.out = 300L)
+                next
+              }
+            } else {
+              if(!is.factor(x$model[[x$specials[[i]]$term]])) {
+                xr <- range(x$model[[x$specials[[i]]$term]])
+                nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+              } else {
+                xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
+                nd <- data.frame(xf)
               }
             }
+
             nd <- as.data.frame(nd)
             names(nd) <- x$specials[[i]]$term
             p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)

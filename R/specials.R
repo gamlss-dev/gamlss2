@@ -206,7 +206,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
         "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
     } else {
       if(is.null(control$criterion))
-        control$criterion <- "gcv"
+        control$criterion <- "aicc"
 
       if(!is.null(control$opt_ll)) {
         eta[[j]] <- eta[[j]] + fit
@@ -218,6 +218,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
         rval <- switch(tolower(control$criterion),
           "gcv" = rss * n / (n - edf)^2,
           "aic" = rss + 2 * edf,
+          "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
           "bic" = rss + log(n) * edf
         )
       }

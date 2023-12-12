@@ -7,9 +7,10 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "make.link", "model.frame", "model.matrix", "model.offset",
   "model.response", "model.weights", "nlminb", "pnorm",
   "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
-  "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals")
+  "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
+  "as.formula", "optimHess", "printCoefmat", "pt", "vcov")
 
-importFrom("utils", "flush.console")
+importFrom("utils", "flush.console", "tail")
 
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d")
 
@@ -38,6 +39,9 @@ S3method(logLik, gamlss2)
 S3method(special_fit, cf)
 S3method(special_predict, cf.fitted)
 S3method(special_predict, default)
+S3method(summary, gamlss2)
+S3method(print, gamlss2)
+S3method(print, summary.gamlss2)
 
 useDynLib(gamlss2, .registration = TRUE)
 

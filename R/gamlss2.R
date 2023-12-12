@@ -144,7 +144,6 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Set names.
   names(Xterms) <- family$names[1:length(Xterms)]
   names(Sterms) <- family$names[1:length(Sterms)]
-  Xterms0 <- Xterms
   if(length(offsets)) {
     names(offsets) <- family$names[1:length(offsets)]
     offsets <- do.call("cbind", offsets)
@@ -195,14 +194,15 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$call <- call
   rval$formula <- formula
   rval$fake_formula <- fake_formula(formula)
-  rval$terms <- terms(rval$fake_formula)
+  rval$terms <- terms(merge_formula(formula(rval$fake_formula, collapse = TRUE), as.formula(mt)))
   rval$family <- family
   rval$xlevels <- xlev
   rval$contrasts <- attr(X, "contrasts")
   rval$na.action <- attr(mf, "na.action")
-  rval$xterms <- Xterms0
+  rval$xterms <- Xterms
   rval$sterms <- Sterms
   rval$specials <- Specials
+  rval$df <- get_df(rval)
 
   ## Return model.frame, X and y.
   if(!control$light) {
@@ -286,16 +286,14 @@ model.matrix.gamlss2 <- function(object, data = NULL, ...)
   if(n_match <- match("x", names(object), 0L)) {
     return(object[[n_match]])
   } else {
-    object$terms <- terms(fake_formula(object$formula, nospecials = TRUE))
-    data <- model.frame(object, xlev = object$xlevels, data = data, ...)
-    if(exists(".GenericCallEnv", inherits = FALSE)) {
-      X <- NextMethod("model.matrix", data = data, contrasts.arg = object$contrasts)
-    } else {
-      dots <- list(...)
-      dots$data <- dots$contrasts.arg <- NULL
-      X <- do.call("model.matrix", c(list(object = object, 
-        data = data, contrasts.arg = object$contrasts), dots))
+    if(is.null(data)) {
+      data <- model.frame(object, xlev = object$xlevels, ...)
     }
+    dots <- list(...)
+    dots$data <- dots$contrasts.arg <- NULL
+    mt <- terms(update(terms(object), NULL ~ .))
+    X <- do.call(stats::model.matrix.default, c(list(object = list("terms" = mt), 
+      data = data, contrasts.arg = object$contrasts), dots))
     if(!("(Intercept)" %in% colnames(X)))
       X <- cbind("(Intercept)" = 1.0, X)
     return(X)
@@ -304,4 +302,55 @@ model.matrix.gamlss2 <- function(object, data = NULL, ...)
 
 ## Family extractor.
 family.gamlss2 <- function(object, ...) object$family
+
+## A simple printing method.
+print.gamlss2 <- function(x, ...)
+{
+  x$call[[1]] <- as.name("gamlss2")
+  cat("Call:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n", sep = "")
+  cat("---\n")
+  print(x$family, full = FALSE)
+  cat("*--------\n")
+  info1 <- c(
+    paste("n =", x$nobs),
+    paste("df = ", round(x$df, digits = 2)),
+    paste("res.df = ", round(x$nobs - x$df, digits = 2))
+  )
+  info2 <- c(
+    paste("logLik =", round(x$logLik, digits = 4)),
+    paste("Deviance =", round(-2 * x$logLik, digits = 4)),
+    paste("AIC =", round(-2 * x$logLik + 2*x$df, digits = 4))
+  )
+  cat(info1)
+  cat("\n")
+  cat(info2)
+  cat("\n")
+}
+
+## Merging formulas.
+is_formula <- function(x) inherits(x, "formula")
+
+merge_formula <- function(x, y, ...)
+{
+  if(!is_formula(x) || length(x) != 3)
+    stop("First argument is invalid")
+  if(!is_formula(y)) stop("Second argument is invalid")
+  if(length(list(...))) warning("extraneous arguments discarded")
+  is.gEnv <- function(e) identical(e, .GlobalEnv)
+
+  str <- paste(c(deparse(x[[2]]), "~",
+    deparse(x[[3]]), "+",
+    deparse(y[[length(y)]])), collapse = "")
+  f <- as.formula(str)
+  ex <- environment(x)
+  ey <- environment(y)
+  if(!is.gEnv(ex)) {
+      environment(f) <- ex
+      if(!is.gEnv(ey) && !identical(ex,ey)) {
+          warning("`x' and `y' have different environments; x's is used")
+      }
+  } else if(!is.gEnv(ey))
+      environment(f) <- ey
+  f
+}
 

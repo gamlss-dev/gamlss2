@@ -307,7 +307,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     "fitted.linear" = fit,
     "coefficients" = coef_lin,
     "elapsed" = elapsed, "iterations" = iter[1L],
-    "logLik" = llo1, "control" = control
+    "logLik" = llo1, "control" = control,
+    "nobs" = length(eta[[1L]])
   )
 
   class(rval) <- "gamlss2"

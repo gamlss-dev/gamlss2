@@ -11,11 +11,15 @@ predict.gamlss2 <- function(object,
   if(!is.null(newdata)) {
     mf <- model.frame(object, data = newdata)
   } else {
-    mf <- model.frame(object)
+    mf <- if(is.null(object$model)) {
+      model.frame(object)
+    } else {
+      object$model
+    }
   }
 
   ## Linear effects design matrix.
-  X <- model.matrix(fake_formula(object$formula, nospecials = TRUE), data = mf)
+  X <- model.matrix(object, data = mf)
 
   family <- object$family
 
@@ -70,10 +74,10 @@ predict.gamlss2 <- function(object,
             xn <- xn[xn %in% colnames(X)]
           }
           if(tt) {
-            ft <- t(t(X[, xn, drop = FALSE]) * coef(object)[[j]][xn])
+            ft <- t(t(X[, xn, drop = FALSE]) * object$coefficients[[j]][xn])
             p[[j]] <- cbind(p[[j]], ft)
           } else {
-            p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% coef(object)[[j]][xn])
+            p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% object$coefficients[[j]][xn])
           }
         }
       }

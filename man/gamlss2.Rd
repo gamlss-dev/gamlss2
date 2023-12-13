@@ -75,7 +75,7 @@ gamlss2(x, \dots)
 
 \references{
   Rigby, R.A. and Stasinopoulos, D.M. (2005). Generalized Additive Models for Location,
-  Scale and Ahape (with Discussion). \emph{Journal of the Royal Statistical Society},
+  Scale and Shape (with Discussion). \emph{Journal of the Royal Statistical Society},
   Series C (Applied Statistics), \bold{54}: 507--554.
   \doi{10.1111/j.1467-9876.2005.00510.x}
 

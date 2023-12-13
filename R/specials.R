@@ -61,6 +61,10 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         if(binj) {
           sj$binning <- bn
         }
+        if(inherits(sj, "matrix")) {
+          sj <- list("X" = sj, "S" = list(diag(1, ncol(sj))),
+            "label" = j, "term" = all.vars(parse(text = j)), "dim" = 1L)
+        }
         sterms[[j]] <- sj
       }
     }

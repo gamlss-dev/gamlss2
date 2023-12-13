@@ -141,6 +141,31 @@ results.gamlss2 <- function(x)
       }
     }
   }
+  if(length(x$xterms) & FALSE) {
+    tl <- attr(attr(x$xterms, "terms"), "term.labels")
+    if(length(res$effects) < 1L)
+      res$effects <- list()
+    if(is.null(x$x))
+      x$x <- model.matrix(x)
+    for(i in names(x$xterms)) {
+      for(j in tl) {
+        ii <- grep(j, x$xterms[[i]], fixed = TRUE, value = TRUE)
+        if(length(ii)) {
+          nd <- list()
+          v <- all.vars(parse(text = j))
+          nd[[v]] <- seq(min(x$model[[v]]), max(x$model[[v]]), length = 300L)
+          X <- eval(parse(text = j), envir = nd)
+          if(!is.matrix(X))
+            X <- matrix(X, ncol = 1L)
+          nd$fit <- drop(X %*% x$fitted.linear[[i]]$coefficients[ii])
+          nd <- as.data.frame(nd)
+          lab <- paste0(i, ".", j)
+          attr(nd, "label") <- lab
+          res$effects[[lab]] <- nd
+        }
+      }
+    }
+  }
 
   return(res)
 }

@@ -37,10 +37,10 @@ vcov.gamlss2 <- function(object, full = FALSE, ...)
   } else {
     object$y
   }
-  x <- if(is.null(object$x)) {
+  x <- if(is.null(object[["x"]])) {
     model.matrix(object)
   } else {
-    object$x
+    object[["x"]]
   }
 
   n <- if(is.null(dim(y))) length(y) else nrow(y)

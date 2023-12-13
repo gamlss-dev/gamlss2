@@ -199,6 +199,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$xlevels <- xlev
   rval$contrasts <- attr(X, "contrasts")
   rval$na.action <- attr(mf, "na.action")
+  attr(Xterms, "terms") <- mt
   rval$xterms <- Xterms
   rval$sterms <- Sterms
   rval$specials <- Specials

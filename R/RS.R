@@ -86,6 +86,13 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     control$flush <- interactive()
   }
 
+  if(control$trace) {
+    if(!is.null(control$light)) {
+      if(control$light)
+        cat("Start estimation ...\n")
+    }
+  }
+
   ## Start outer loop.
   while((eps[1L] > stop.eps[1L]) & iter[1L] < maxit[1L]) {
     ## Old log-likelihood.

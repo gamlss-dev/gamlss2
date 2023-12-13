@@ -6,6 +6,7 @@ bibentry("Article",
   volume = "54",
   pages = "507--554",
   year = "2005",
+  doi = "10.1111/j.1467-9876.2005.00510.x",
   author = c(person("R.A. Rigby"), person("D.M. Stasinopoulos")),
   textVersion = "Rigby R.A. and Stasinopoulos D.M. (2005). Generalized Additive Models for Location, Scale and Shape, (with Discussion), Journal of the Royal Statistical Society, Series C (Applied Statistics), 54, pp 507-554.")
 

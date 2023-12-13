@@ -108,6 +108,9 @@ f <- y ~ s(x) | s(x) | s(x) | s(x)
 ## Estimate model.
 b <- gamlss2(f, data = abdom, family = BCT)
 
+## Model summary.
+summary(b)
+
 ## Plot estimated effects.
 plot(b, which = "effects")
 

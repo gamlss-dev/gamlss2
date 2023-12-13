@@ -1,5 +1,5 @@
 ## Extract coefficients.
-coef.gamlss2 <- function(object, full = FALSE, drop = TRUE)
+coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
 {
   co <- object$coefficients
 
@@ -197,5 +197,22 @@ print.summary.gamlss2 <- function(x,
   cat("\n")
   cat(info2)
   cat("\n")
+}
+
+## Confint method.
+confint.gamlss2 <- function(object, parm, level = 0.95, ...)
+{
+  co <- coef(object, full = FALSE, drop = TRUE)
+  v <- vcov(object, full = FALSE)
+  a <- (1 - level)/2
+  a <- c(a, 1 - a)
+  se <- sqrt(abs(diag(v)))
+  ci <- co + se %o% qnorm(a)
+  colnames(ci) <- paste0(round(a * 100, 3), "%")
+  rownames(ci) <- gsub(".p.", ".", rownames(ci), fixed = TRUE)
+  if(!missing(parm)) {
+    ci <- ci[unique(grep2(parm, rownames(ci), value = TRUE, fixed = TRUE)), ]
+  }
+  return(ci)
 }
 

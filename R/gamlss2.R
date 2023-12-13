@@ -217,6 +217,8 @@ gamlss2.formula <- function(formula, data, family = NO,
       rval$x <- X
     }
     rval$results <- results(rval)
+  } else {
+    rval$fitted.values <- NULL
   }
 
   class(rval) <- unique(c(class(rval), "gamlss2"))

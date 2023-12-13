@@ -48,36 +48,79 @@ devtools::install_github("gamlss-dev/gamlss2")
 
 ## Introduction
 
-...
+This section gives a first quick overview of the functionality of the package and
+demonstrates that the usual "look & feel" when using well-established model fitting 
+functions like `glm()` is an elementary part of _bamlss_, i.e., first steps and
+basic handling of the package should be relatively simple. We illustrate the first steps
+with _bamlss_ using a data set taken from the _Regression Book_ [@Fahrmeir+Kneib+Lang+Marx:2013]
+which is about prices of used VW Golf cars. The data is loaded with
+```{r}
+data("Golf", package = "bamlss")
+head(Golf)
+```
+In this example the aim is to model the `price` in 1000 Euro. Using _gamlss2_ a first
+linear model could be set up by first specifying a model formula
+```{r}
+f <- price ~ age + kilometer + tia + abs + sunroof
+```
+afterwards the model is estimated by
+```{r, message=FALSE, results="hide"}
+library("gamlss2")
+b1 <- gamlss2(f, family = NO, data = Golf)
+```
+The summary statistics can be shown with
+```{r, message=FALSE, results="hide"}
+summary(b1)
+```
+For comparison, we estimate the same model using the _gamlss_ package.
+```{r, message=FALSE, results="hide"}
+library("gamlss")
+b2 <- gamlss(f, family = NO, data = Golf)
+summary(b2)
+```
+Note that the estimated coefficients for both implementations, as well as standard errors
+and p-values are exactly the same. Similar for confidence intervals, we get
+```{r, message=FALSE, results="hide"}
+confint(b1)
+confint(b2)
+```
 
 ## Big Data
 
-```{r}
+```{r, eval = FALSE}
+library("gamlss2")
+library("gamlss.cens")
+
 if(!file.exists("homstart.rds")) {
   bamlss::homstart_data()
+  homstart <- na.omit(homstart)
+  vn <- c("raw", "cat", "year", "month", "day", "weekend", "elevation", "lon", "lat")      
+  homstart <- homstart[, vn]
   saveRDS(homstart, file = "homstart.rds")
 } else {
   homstart <- readRDS("homstart.rds")
 }
 
 homstart$raw[homstart$raw < 0] <- 0
-d <- subset(homstart, year >= 1979)
-
-d$cens <- d$raw > 0
-
-library("gamlss.cens")
+homstart$cens <- homstart$raw > 0
 
 gen.cens(TF, type = "left")
 
 f <- list(
   Surv(sqrt(raw), cens, type = "left") ~ s(elevation,k=4) + ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)),
+    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)) + weekend,
   ~ s(elevation,k=4) + ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)),
+    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)) + weekend,
   ~ s(elevation,k=4) + ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
+    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)) + weekend
 )
 
-b <- gamlss2(f, data = d, family = TFlc, binning = TRUE, flush = FALSE)
+if(!file.exists("homstart_model.rds")) {
+  b <- gamlss2(f, data = homstart, family = TFlc,
+    binning = TRUE, light = TRUE, flush = FALSE)
+  saveRDS(b, file = "homstart_model.rds")
+} else {
+  b <- readRDS("homstart_model.rds")
+}
 ```
 

@@ -220,7 +220,7 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
 }
 
 ## Factor effects.
-plot_factor_effect <- function(x, col = NULL, ncol = 20L, width = 0.6,
+plot_factor_effect <- function(x, col = NULL, ncol = 1L, width = 0.6,
   xlab = NULL, ylab = NULL, main = NULL,
   xlim = NULL, ylim = NULL, ...)
 {
@@ -249,15 +249,17 @@ plot_factor_effect <- function(x, col = NULL, ncol = 20L, width = 0.6,
   width <- width/2
   coll <- rev(col)
   colu <- col
-  for(j in 1:ncol(px)) {
-    xr <- range(px[, j])
-    xrl <- seq(xr[1], px["fit", j], length = ncol)
-    xru <- rev(seq(px["fit", j], xr[2], length = ncol))
-    for(i in 1:ncol) {
-      rect(pos[j]-width, xrl[i], pos[j]+width, px["fit", j],
-        col = coll[i], border = NA)
-      rect(pos[j]-width, px["fit", j], pos[j]+width, xru[i],
-        col = coll[i], border = NA)
+  if(ncol > 1) {
+    for(j in 1:ncol(px)) {
+      xr <- range(px[, j])
+      xrl <- seq(xr[1], px["fit", j], length = ncol)
+      xru <- rev(seq(px["fit", j], xr[2], length = ncol))
+      for(i in 1:ncol) {
+        rect(pos[j]-width, xrl[i], pos[j]+width, px["fit", j],
+          col = coll[i], border = NA)
+        rect(pos[j]-width, px["fit", j], pos[j]+width, xru[i],
+          col = coll[i], border = NA)
+      }
     }
   }
   for(j in 1:ncol(px))

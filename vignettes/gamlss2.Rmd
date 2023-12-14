@@ -104,16 +104,14 @@ if(!file.exists("homstart.rds")) {
 homstart$raw[homstart$raw < 0] <- 0
 homstart$cens <- homstart$raw > 0
 
-gen.cens(TF, type = "left")
+gen.cens(NO, type = "left")
 
-f <- list(
-  Surv(sqrt(raw), cens, type = "left") ~ s(elevation,k=4) + ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)) + weekend,
-  ~ s(elevation,k=4) + ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)) + weekend,
-  ~ s(elevation,k=4) + ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-    ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30)) + weekend
-)
+f <- ~ weekend + s(year) + s(elevation,k=4) +
+  ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
+  ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
+
+f <- rep(list(f), 3)
+f[[1]] <- update(f[[1]], Surv(sqrt(raw), cens, type = "left") ~ .)
 
 if(!file.exists("homstart_model.rds")) {
   b <- gamlss2(f, data = homstart, family = TFlc,

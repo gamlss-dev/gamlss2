@@ -56,7 +56,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
       if(length(sterms[[j]])) {
         sfit[[j]] <- list()
         for(i in sterms[[j]])
-          sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n))
+          sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n), "edf" = 0.0, "selected" = FALSE)
       }
     }
   }
@@ -227,6 +227,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
             if(ll1 > ll02) {
               ## Update predictor.
               sfit[[j]][[k]] <- fs
+              sfit[[j]][[k]]$selected <- TRUE
               ll02 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
             }
@@ -306,6 +307,31 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     if(length(xterms[[j]])) {
       coef_lin[[j]] <- fit[[j]]$coefficients
     }
+  }
+
+  ## Check if terms are never updated
+  ## and remove fiited values if light = TRUE.
+  if(length(sfit)) {
+    dropj <- NULL
+    for(j in names(sfit)) {
+      if(length(sfit[[j]])) {
+        drop <- NULL
+        for(i in names(sfit[[j]])) {
+          if(control$light) {
+            sfit[[j]][[i]]$fitted.values <- NULL
+          }
+          if(!sfit[[j]][[i]]$selected)
+            drop <- c(drop, i)
+        }
+        if(length(drop)) {
+          sfit[[j]][drop] <- NULL
+        }
+        if(length(sfit[[j]]) < 1L)
+          dropj <- c(dropj, j)
+      }
+    }
+    if(length(dropj))
+      sfit[dropj] <- NULL
   }
 
   rval <- list(

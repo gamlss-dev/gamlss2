@@ -91,9 +91,11 @@ predict.gamlss2 <- function(object,
         if(length(xn)) {
           for(i in xn) {
             if(inherits(object$specials[[i]], "mgcv.smooth")) {
-              Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
-              co <- object$fitted.specials[[j]][[i]]$coefficients
-              fit <- drop(Xs %*% co)
+              if(object$fitted.specials[[j]][[i]]$selected) {
+                Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
+                co <- object$fitted.specials[[j]][[i]]$coefficients
+                fit <- drop(Xs %*% co)
+              }
             } else {
               if(inherits(object$specials[[i]], "special")) {
                 fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf)

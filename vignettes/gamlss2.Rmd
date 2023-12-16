@@ -91,34 +91,29 @@ confint(b2)
 library("gamlss2")
 library("gamlss.cens")
 
-if(!file.exists("homstart.rds")) {
-  bamlss::homstart_data()
-  homstart <- na.omit(homstart)
-  vn <- c("raw", "cat", "year", "month", "day", "weekend", "elevation", "lon", "lat")      
-  homstart <- homstart[, vn]
-  saveRDS(homstart, file = "homstart.rds")
-} else {
-  homstart <- readRDS("homstart.rds")
-}
+d <- readRDS("WeatherGermany.rds")
 
-homstart$raw[homstart$raw < 0] <- 0
-homstart$cens <- homstart$raw > 0
+d$Pre[d$Pre < 0] <- 0
+d$cens <- d$Pre > 0
 
 gen.cens(NO, type = "left")
+gen.cens(TF, type = "left")
 
-f <- ~ weekend + s(year) + s(elevation,k=4) +
-  ti(day,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-  ti(day,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
+f <- ~ s(year) + s(alt,k=4) +
+  ti(yday,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
+  ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
 
 f <- rep(list(f), 3)
-f[[1]] <- update(f[[1]], Surv(sqrt(raw), cens, type = "left") ~ .)
+f[[1]] <- update(f[[1]], Surv(sqrt(Pre), cens, type = "left") ~ .)
+f <- do.call("as.Formula", f)
 
-if(!file.exists("homstart_model.rds")) {
-  b <- gamlss2(f, data = homstart, family = TFlc,
-    binning = TRUE, light = TRUE, flush = FALSE)
-  saveRDS(b, file = "homstart_model.rds")
+if(!file.exists("PreModel.rds")) {
+  b <- gamlss2(f, data = d, family = NOlc,
+    binning = TRUE, light = TRUE, flush = FALSE,
+    criterion = "bic")
+  saveRDS(b1, file = "PreModel.rds")
 } else {
-  b <- readRDS("homstart_model.rds")
+  b <- readRDS("PreModel.rds")
 }
 ```
 

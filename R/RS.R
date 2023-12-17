@@ -384,7 +384,7 @@ deriv_checks <- function(x, is.weight = FALSE)
   x[is.na(x)] <- 1.490116e-08
   x[x > 1e+10] <- 1e+10
   if(is.weight) {
-    x[x == 0] <- 1.490116e-08
+    x[(x == 0) | !is.finite(x)] <- 1.490116e-08
     x[x < 0] <- -1 * x[x < 0]
     x[x < 1e-10] <- 1e-10
   } else {

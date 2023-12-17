@@ -103,15 +103,14 @@ f <- ~ s(year) + s(alt,k=4) +
   ti(yday,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
   ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
 
-f <- rep(list(f), 3)
+f <- rep(list(f), 2)
 f[[1]] <- update(f[[1]], Surv(sqrt(Pre), cens, type = "left") ~ .)
-f <- do.call("as.Formula", f)
 
 if(!file.exists("PreModel.rds")) {
   b <- gamlss2(f, data = d, family = NOlc,
     binning = TRUE, light = TRUE, flush = FALSE,
     criterion = "bic")
-  saveRDS(b1, file = "PreModel.rds")
+  saveRDS(b, file = "PreModel.rds")
 } else {
   b <- readRDS("PreModel.rds")
 }

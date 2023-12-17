@@ -214,7 +214,8 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
       main <- attr(x, "label")
     }
     image(x1, x2, m, main = main,
-      xlab = xlab, ylab = ylab, zlim = ylim, col = col)
+      xlab = xlab, ylab = ylab, zlim = ylim, col = col,
+      xlim = range(x1), ylim = range(x2))
     contour(x1, x2, m, add = TRUE)
   }
 }

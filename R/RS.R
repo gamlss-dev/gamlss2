@@ -46,7 +46,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
         fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
         names(fit[[j]]$coefficients) <- xterms[[j]]
         fit[[j]]$coefficients["(Intercept)"] <- mean(eta[[j]])
-        fit[[j]] <- list("fitted.values" = drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"]))
+        fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
         eta[[j]] <- fit[[j]]$fitted.values
       } else {
         fit[[j]] <- list("fitted.values" = eta[[j]])

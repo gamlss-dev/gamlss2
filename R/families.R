@@ -629,6 +629,13 @@ complete_family <- function(family)
           "}"
         )
       }
+
+#      fun <- c(
+#        "function(y, par, ...) {",
+#        paste0("sc <- family$score[['", i, "']](y, par, ...); return(sc^2)"),
+#        "}"
+#      )
+
       family$hess[[i]] <- eval(parse(text = paste(fun, collapse = "")))
     }
   }
@@ -639,6 +646,7 @@ complete_family <- function(family)
         if(is.null(family$hess[[hij]])) {
           ni <- family$names[i]
           nj <- family$names[j]
+
           fun <- c(
             "function(y, par, ...) {",
             paste("  eta <- linkfun[['", ni, "']](par[['", ni, "']]);", sep = ""),
@@ -649,6 +657,13 @@ complete_family <- function(family)
             "  return(-1 * (d1 - d2) / err02)",
             "}"
           )
+
+#          fun <- c(
+#            "function(y, par, ...) {",
+#            paste0("family$score[['", ni, "']](y, par, ...)*family$score[['", nj, "']](y, par, ...)"),
+#            "}"
+#          )
+
           family$hess[[hij]] <- eval(parse(text = paste(fun, collapse = "")))
           hji <- paste0(family$names[j], ".", family$names[i])
           family$hess[[hji]] <- family$hess[[hij]]

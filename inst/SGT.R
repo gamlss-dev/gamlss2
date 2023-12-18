@@ -42,7 +42,7 @@ f <- y ~ s(x) | s(x) | s(x) | s(x) | s(x)
 
 ## Estimate model.
 b <- gamlss2(f, data = abdom, family = SGT,
-  maxit = c(100, 100), eps = 1e-05)
+  maxit = c(100, 100), eps = 1e-08)
 
 ## Plot estimated effects.
 plot(b, which = "effects")

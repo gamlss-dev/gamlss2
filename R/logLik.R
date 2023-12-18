@@ -33,3 +33,8 @@ get_df <- function(object)
   return(df)
 }
 
+deviance.gamlss2 <- function(object, ...)
+{
+  -2 * as.numeric(logLik(object))
+}
+

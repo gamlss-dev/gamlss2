@@ -40,8 +40,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
       en <- grep2(terms, en, fixed = TRUE, value = TRUE)
 
     if(length(x$results$effects)) {
-      if(spar)
-        par(mfrow = n2mfrow(length(en)))
+      if(spar) {
+        nplts <- length(en)
+        par(mfrow = if(nplts <= 4) c(1, nplts) else n2mfrow(nplts))
+      }
 
       ylim <- list(...)$ylim
 

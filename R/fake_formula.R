@@ -42,7 +42,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
       "tx", "tx2", "tx3", "tx4", "la", "n", "lin",
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
-      "random", "ra", "lo", "tr", "tree", "cf", "NN")
+      "random", "ra", "lo", "tr", "tree", "cf", "NN", "pb2")
     stn <- unique(c(stn, specials))
 
     mt <- terms(formula, specials = stn)

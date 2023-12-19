@@ -57,3 +57,11 @@ special_predict.cf.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
+## pb2() using smooth.construct.
+pb2 <- function(x, df = NULL, lambda = NULL, ...)
+{
+  if(is.null(df))
+    df <- 10
+  s(x, bs = "ps", k = df, sp = lambda)
+}
+

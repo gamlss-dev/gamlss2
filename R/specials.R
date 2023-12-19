@@ -33,6 +33,16 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         dj <- data[bn$nodups, vj, drop = FALSE]
       }
 
+      ## Change constructor if possible.
+      sjp <- eval(parse(text = paste0("quote(", j, ")")))
+      sjpc <- as.character(sjp[1L])
+      changed <- FALSE
+      if(sjpc == "pb" & FALSE) {
+        sjp[[1L]] <- as.name("pb2")
+        j <- deparse(sjp)
+        changed <- TRUE
+      }
+
       sj <- eval(parse(text = j), envir = if(binj) dj else data)
 
       ## For class "smooth", binning is not possible.
@@ -55,6 +65,11 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
           }
         }
         sjn <- sapply(sj, function(x) x$label)
+        if(changed) {
+          sjn <- j
+          sj[[1L]]$label <- sjn
+          sj[[1L]]$orig.label <- sjn
+        }
         names(sj) <- sjn
         sterms <- c(sterms, sj)
       } else {
@@ -154,10 +169,6 @@ calc_XWX <- function(x, w, index = NULL)
   rval
 }
 
-## d <- bamlss::GAMart(n = 1000)
-## f <- num~s(x1)+s(x2)+s(x3)+s(id,bs="re")
-## b <- gamlss2(f, data = d, binning = TRUE, digits = 3)
-
 ## Fitting function for mgcv smooth terms.
 smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
 {
@@ -186,38 +197,41 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
     XWz <- crossprod(XW, z)
   }
   S <- diag(1e-05, ncol(x$X))
+
+  if(is.null(control$criterion))
+    control$criterion <- "aicc"
   
-  ## Function to search for smoothing parameters using GCV.
-  fl <- function(l, rf = FALSE) {
-    for(j in 1:length(x$S))
-      S <- S + l[j] * x$S[[j]]
+  if(control$criterion == "ml" & x$dim < 2L & !control$binning) {
+    stop("local ML method not implemented yet")
+  } else {
+    ## Function to search for smoothing parameters using GCV etc.
+    fl <- function(l, rf = FALSE) {
+      for(j in 1:length(x$S))
+        S <- S + l[j] * x$S[[j]]
 
-    P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
-    if(inherits(P, "try-error"))
-      P <- solve(XWX + S)
+      P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
+      if(inherits(P, "try-error"))
+        P <- solve(XWX + S)
 
-    b <- drop(P %*% XWz)
+      b <- drop(P %*% XWz)
 
-    fit <- drop(x$X %*% b)
+      fit <- drop(x$X %*% b)
 
-    if(control$binning)
-      fit <- fit[x$binning$match.index]
+      if(control$binning)
+        fit <- fit[x$binning$match.index]
 
-    edf <- sum(diag(XWX %*% P))
+      edf <- sum(diag(XWX %*% P))
 
-    if(rf) {
-      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-        "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
-    } else {
-      if(is.null(control$criterion))
-        control$criterion <- "aicc"
-
-      if(!is.null(control$opt_ll)) {
-        eta[[j]] <- eta[[j]] + fit
-        ll <- family$loglik(y, family$map2par(eta))
-        rval <- -2 * ll + 2 * edf
+      if(rf) {
+        return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
+          "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
       } else {
-        rss <- sum(w * (z - fit)^2)
+        if(isTRUE(control$logLik)) {
+          eta[[j]] <- eta[[j]] + fit
+          rss <- family$loglik(y, family$map2par(eta))
+        } else {
+          rss <- sum(w * (z - fit)^2)
+        }
 
         rval <- switch(tolower(control$criterion),
           "gcv" = rss * n / (n - edf)^2,
@@ -225,13 +239,18 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
           "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
           "bic" = rss + log(n) * edf
         )
-      }
 
-      return(rval)
+        return(rval)
+      }
+    }
+
+    if(is.null(x$sp)) {
+      opt <- nlminb(lambdas, objective = fl, lower = 1e-10, upper = Inf,
+        control = list("rel.tol" = 1e-5, "iter.max" = 100))
+    } else {
+      opt <- list(par = x$sp)
     }
   }
-
-  opt <- nlminb(lambdas, objective = fl, lower = 1e-10, upper = Inf)
 
   return(fl(opt$par, rf = TRUE))
 }

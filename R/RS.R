@@ -18,7 +18,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   ## Stopping criterion.
   eps <- control$eps
   if(is.null(eps))
-    eps <- 1e-10 ## sqrt(.Machine$double.eps)
+    eps <- sqrt(.Machine$double.eps)
   if(length(eps) < 2)
     eps <- c(eps, eps)
   stop.eps <- eps

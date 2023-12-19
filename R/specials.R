@@ -246,7 +246,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
 
     if(is.null(x$sp)) {
       opt <- nlminb(lambdas, objective = fl, lower = 1e-10, upper = Inf,
-        control = list("rel.tol" = 1e-5, "iter.max" = 100))
+        control = list("rel.tol" = 1e-6, "iter.max" = 100))
     } else {
       opt <- list(par = x$sp)
     }

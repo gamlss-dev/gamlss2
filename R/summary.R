@@ -155,6 +155,7 @@ summary.gamlss2 <- function(object, ...)
       colnames(sg$specials[[i]]) <- "edf"
     }
   }
+  sg$elapsed <- object$elapsed
   class(sg) <- "summary.gamlss2"
   return(sg)
 }
@@ -189,13 +190,22 @@ print.summary.gamlss2 <- function(x,
     paste("res.df = ", round(x$nobs - x$df, digits = 2))
   )
   info2 <- c(
-    paste("logLik =", round(x$logLik, digits = 4)),
+    ## paste("logLik =", round(x$logLik, digits = 4)),
     paste("Deviance =", round(-2 * x$logLik, digits = 4)),
     paste("AIC =", round(-2 * x$logLik + 2*x$df, digits = 4))
+  )
+  rt <- x$elapsed
+  rt <- if(rt > 60) {
+    paste(formatC(format(round(rt / 60, 2), nsmall = 2), width = 5), "min", sep = "")
+  } else paste(formatC(format(round(rt, 2), nsmall = 2), width = 5), "sec", sep = "")
+  info3 <- c(
+    paste("elapsed =", rt)
   )
   cat(info1)
   cat("\n")
   cat(info2)
+  cat("\n")
+  cat(info3)
   cat("\n")
 }
 

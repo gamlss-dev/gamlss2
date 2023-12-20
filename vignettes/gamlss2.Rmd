@@ -26,7 +26,7 @@ library("gamlss2")
 The primary purpose of this package is to facilitate the creation of advanced infrastructures
 designed to enhance the GAMLSS modeling framework. Notably, the _gamlss2_ package represents a
 significant overhaul of its predecessor, _gamlss_, with a key emphasis on improving estimation
-speed and incorporating more adaptable infrastructures. These enhancements enable the seamless
+speed and incorporating more flexible infrastructures. These enhancements enable the seamless
 integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
 regression trees, and forests, fostering a more versatile and powerful modeling environment.
 
@@ -50,9 +50,9 @@ devtools::install_github("gamlss-dev/gamlss2")
 
 This section gives a first quick overview of the functionality of the package and
 demonstrates that the usual "look & feel" when using well-established model fitting 
-functions like `glm()` is an elementary part of _bamlss_, i.e., first steps and
+functions like `glm()` is an elementary part of _gamlss2_, i.e., first steps and
 basic handling of the package should be relatively simple. We illustrate the first steps
-with _bamlss_ using a data set taken from the _Regression Book_ [@Fahrmeir+Kneib+Lang+Marx:2013]
+with _gamlss2_ using a data set taken from the _Regression Book_ [@Fahrmeir+Kneib+Lang+Marx:2013]
 which is about prices of used VW Golf cars. The data is loaded with
 ```{r}
 data("Golf", package = "bamlss")
@@ -64,35 +64,83 @@ linear model could be set up by first specifying a model formula
 f <- price ~ age + kilometer + tia + abs + sunroof
 ```
 afterwards the model is estimated by
-```{r, message=FALSE, results="hide"}
+```{r}
 library("gamlss2")
 b1 <- gamlss2(f, family = NO, data = Golf)
 ```
 The summary statistics can be shown with
-```{r, message=FALSE, results="hide"}
+```{r}
 summary(b1)
 ```
 For comparison, we estimate the same model using the _gamlss_ package.
-```{r, message=FALSE, results="hide"}
+```{r}
 library("gamlss")
 b2 <- gamlss(f, family = NO, data = Golf)
 summary(b2)
 ```
 Note that the estimated coefficients for both implementations, as well as standard errors
 and p-values are exactly the same. Similar for confidence intervals, we get
-```{r, message=FALSE, results="hide"}
+```{r}
 confint(b1)
 confint(b2)
 ```
 
 ## Big Data
 
-```{r, eval = FALSE}
-library("gamlss2")
+To optimize computational efficiency when working with large datasets, we leverage the
+observation that the number of distinct observations for a given covariate is typically
+significantly smaller than the total number of observations in the complete dataset. As a strategy,
+we calculate design matrices only using these unique observations and implement the
+exceptionally efficient algorithms presented in
+@Lang+Umlauf+Wechselberger+Harttgen+Kneib:2012. This option can be used by setting
+the argument `binning = TRUE`. In many instances, it is feasible to decrease the number of
+distinct observations through rounding, such as rounding to two digits. In the context of
+large datasets, the approximation error associated with this rounding is typically negligible.
+
+Below, we present an example utilizing precipitation data obtained from German meteorological
+stations, provided by the Deutscher Wetterdienst (DWD, [https://www.dwd.de/](https://www.dwd.de/)).
+In this illustration, we employ a censored normal distribution to model precipitation amounts,
+which can be constructed using the _gamlss.cens_ package.
+```{r}
 library("gamlss.cens")
-
+gen.cens(NO, type = "left")
+```
+The compiled data set is available at
+[WeatherGermany.rds](https://fileshare.uibk.ac.at/f/795c0a9739de4e06b3a5/?dl=1)
+and contains the following covariates
+```{r}
 d <- readRDS("WeatherGermany.rds")
+print(dim(d))
+print(head(d))
+```
+The model can be estimated with
+```{r, eval = FALSE}
+## Create indicator for Surv() response.
+d$cens <- d$Pre > 0
 
+## Model formula.
+f <- ~ s(year) + s(alt,k=4) +
+  ti(yday,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
+  ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
+
+f <- rep(list(f), 2)
+f[[1]] <- update(f[[1]], Surv(sqrt(Pre), cens, type = "left") ~ .)
+
+## Estimate model.
+b <- gamlss2(f, data = d, family = NOlc,
+  binning = TRUE, light = TRUE, flush = FALSE,
+  criterion = "bic")
+```
+The summary statistics
+```{r, echo=FALSE}
+b <- readRDS("PreModel.rds")
+d$cens <- d$Pre > 0
+```
+```{r}
+summary(b)
+```
+
+```{r, eval = FALSE, echo=FALSE}
 d$Pre[d$Pre < 0] <- 0
 d$cens <- d$Pre > 0
 
@@ -115,4 +163,5 @@ if(!file.exists("PreModel.rds")) {
   b <- readRDS("PreModel.rds")
 }
 ```
+
 

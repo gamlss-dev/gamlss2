@@ -9,6 +9,14 @@ gamlss2.formula <- function(formula, data, family = NO,
   subset, na.action, weights, offset,
   control = gamlss2_control(...), ...)
 {
+  ## Save environments.
+  menv <- if(missing(data)) {
+    environment(formula)
+  } else {
+    environment(data)
+  }
+  fenv <- environment(formula)
+
   ## Process specific formulas.
   if(!is.null(control$sigma.formula) | !is.null(control$nu.formula) | !is.null(control$tau.formula)) {
     if(!inherits(formula, "list")) {
@@ -19,6 +27,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     formula[["tau"]] <- if(is.null(control$tau.formula)) ~1 else control$tau.formula
     formula <- formula[c("mu", "sigma", "nu", "tau")]
     names(formula) <- NULL
+    environment(formula) <- fenv
   }
 
   ## Evaluate and complete family.
@@ -195,6 +204,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$formula <- formula
   rval$fake_formula <- fake_formula(formula)
   rval$terms <- terms(merge_formula(formula(rval$fake_formula, collapse = TRUE), as.formula(mt)))
+  environment(rval$terms) <- menv
   rval$family <- family
   rval$xlevels <- xlev
   rval$contrasts <- attr(X, "contrasts")

@@ -15,8 +15,6 @@ residuals.gamlss2 <- function(object,
   } else {
     type <- match.arg(type)
 
-    object$model <- NULL
-
     ## Get the response.
     object$y <- if(is.null(newdata)) {
       model.response(model.frame(object, keepresponse = TRUE))

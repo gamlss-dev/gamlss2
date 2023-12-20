@@ -288,10 +288,11 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
           cat('\r')
         }
       }
-      cat(paste0("GAMLSS-", if(iter[1L] >= CGk) "CG" else "RS", " iteration "),
+      itxt <- paste0(paste0("GAMLSS-", if(iter[1L] >= CGk) "CG" else "RS", " iteration"),
         fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
-        ": Global Deviance = ", paste0(round(-2 * llo1, digits = 4), "   "),
-        if(control$flush) NULL else "\n", sep = "")
+        ": Global Deviance = ", round(-2 * llo1, digits = 4),
+        " eps = ", fmt(eps[1L], width = 8, digits = 8), "    ")
+      cat(itxt, if(control$flush) NULL else "\n")
     }
   }
 

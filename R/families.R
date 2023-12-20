@@ -200,7 +200,8 @@ tF <- function(x, ...)
       score <- eval(mu.cs)
       hess <- -1 * eval(mu.hs)
       eta <- mu.link$linkfun(par$mu)
-      res <- drop(score * mu.link$mu.eta2(eta) + hess * mu.link$mu.eta(eta)^2)
+      ## res <- drop(score * mu.link$mu.eta2(eta) + hess * mu.link$mu.eta(eta)^2)
+      res <- drop(hess * mu.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -243,7 +244,8 @@ tF <- function(x, ...)
       score <- eval(sigma.cs)
       hess <- -1 * eval(sigma.hs)
       eta <- sigma.link$linkfun(par$sigma)
-      res <- drop(score * sigma.link$mu.eta2(eta) + hess * sigma.link$mu.eta(eta)^2)
+      ## res <- drop(score * sigma.link$mu.eta2(eta) + hess * sigma.link$mu.eta(eta)^2)
+      res <- drop(hess * sigma.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -282,7 +284,8 @@ tF <- function(x, ...)
       score <- eval(nu.cs)
       hess <- -1 * eval(nu.hs)
       eta <- nu.link$linkfun(par$nu)
-      res <- drop(score * nu.link$mu.eta2(eta) + hess * nu.link$mu.eta(eta)^2)
+      ## res <- drop(score * nu.link$mu.eta2(eta) + hess * nu.link$mu.eta(eta)^2)
+      res <- drop(hess * nu.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -321,7 +324,8 @@ tF <- function(x, ...)
       score <- eval(tau.cs)
       hess <- -1 * eval(tau.hs)
       eta <- tau.link$linkfun(par$tau)
-      res <- drop(score * tau.link$mu.eta2(eta) + hess * tau.link$mu.eta(eta)^2)
+      ## res <- drop(score * tau.link$mu.eta2(eta) + hess * tau.link$mu.eta(eta)^2)
+      res <- drop(hess * tau.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]

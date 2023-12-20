@@ -85,6 +85,46 @@ confint(b1)
 confint(b2)
 ```
 
+## Munich Rent GAMLSS
+
+To illustrate the functionality of the _gamlss2_ package, we use the _rent99_ dataset,
+which is included in the _gamlss.data_ package.
+```{r}
+data("rent99", package = "gamlss.data")
+```
+We estimate models using the _GA_ distribution.
+```{r}
+## Model formula.
+f <- rent ~ s(area) + s(yearc) + location + bath + kitchen |
+   s(area) + s(yearc) + location + bath + kitchen
+
+## Estimation.
+start <- proc.time()
+b1 <- gamlss2(f, data = rent99, family = GA)
+proc.time() - start
+
+## Estimation with gamlss.
+start <- proc.time()
+b2 <- gamlss(rent ~ pb(area) + pb(yearc) + location + bath + kitchen,
+  sigma.formula =~ pb(area) + pb(yearc) + location + bath + kitchen,
+  data = rent99, family = GA)
+proc.time() - start
+
+## Compare using the AIC.
+AIC(b1, b2)
+```
+Note that _gamlss2_ is considerably faster in this example. Estimated effects
+can be visualized with
+```{r, out.width="100%", fig.width=12, fig.height=4}
+plot(b1)
+```
+```{r, out.width="100%", fig.width=12, fig.height=8}
+term.plot(b2, what = "mu", pages = 1, ask = FALSE)
+```
+```{r, out.width="100%", fig.width=12, fig.height=8}
+term.plot(b2, what = "sigma", pages = 1, ask = FALSE)
+```
+
 ## Big Data
 
 To optimize computational efficiency when working with large datasets, we leverage the
@@ -131,7 +171,13 @@ b <- gamlss2(f, data = d, family = NOlc,
   binning = TRUE, light = TRUE, flush = FALSE,
   criterion = "bic")
 ```
-The summary statistics
+Please be aware that setting the argument `light = TRUE` results in the exclusion of all
+design matrices, the model frame, and fitted values from the returned object.
+This is done to minimize the object's size. The model smoothing parameters are estimated
+using the local BIC in this example. Note that the model is quite complex, as it includes
+a three dimensional seasonal varying spatial effect.
+
+The summary statistics gives
 ```{r, echo=FALSE}
 b <- readRDS("PreModel.rds")
 d$cens <- d$Pre > 0
@@ -164,4 +210,4 @@ if(!file.exists("PreModel.rds")) {
 }
 ```
 
-
+## References

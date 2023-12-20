@@ -247,7 +247,7 @@ plot_factor_effect <- function(x, col = NULL, ncol = 1L, width = 0.6,
     ylab <- attr(x, "label")
   plot(pos, xlim = xlim, ylim = ylim,
     xlab = xlab, ylab = ylab,
-    axes = FALSE)
+    axes = FALSE, type = "n")
   axis(1, at = pos, labels = colnames(px))
   width <- width/2
   coll <- rev(col)

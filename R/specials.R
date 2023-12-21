@@ -223,6 +223,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
   }
 
   if(control$criterion == "ml" & x$dim < 2L & !control$binning & localML) {
+    ## Local ML method, only for pb2() yet!
     order <- x$m[1L]
     if(is.null(order))
       order <- 1

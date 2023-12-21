@@ -246,12 +246,12 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
       sig2 <- sum(w * (z - fit)^2) / (N - edf)
       tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / (edf - order)
 
-      if (tau2 < 1e-07) tau2 <- 1e-07
+      if(tau2 < 1e-07) tau2 <- 1e-07
       lambdas.old <- lambdas
       lambdas <- sig2/tau2
-      if (lambdas < 1e-07) lambdas <- 1e-07
-      if (lambdas > 1e+07) lambdas <- 1e+07
-      if (abs(lambdas - lambdas.old) < 1e-07 || lambdas > 1e+10) break
+      if(lambdas < 1e-07) lambdas <- 1e-07
+      if(lambdas > 1e+07) lambdas <- 1e+07
+      if(abs(lambdas - lambdas.old) < 1e-07 || lambdas > 1e+10) break
     }
 
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,

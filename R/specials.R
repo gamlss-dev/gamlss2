@@ -55,8 +55,13 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
       if(any(grepl(".smooth.spec", class(sj)))) {
         stopifnot(requireNamespace("mgcv"))
         knots <- list(...)$knots
+
+        absorb.cons <- if(is.null(sj$xt$absorb.cons)) TRUE else isTRUE(sj$xt$absorb.cons)
+        scale.penalty <- if(is.null(sj$xt$scale.penalty)) TRUE else isTRUE(sj$xt$scale.penalty)
+
         sj <- mgcv::smoothCon(sj, data = if(binj) dj else data, knots = knots,
-          absorb.cons = TRUE, scale.penalty = TRUE)
+          absorb.cons = absorb.cons, scale.penalty = scale.penalty)
+
         for(i in 1:length(sj)) {
           sj[[i]]$orig.label <- j
           if(binj) {
@@ -141,7 +146,7 @@ special.wfit <- function(x, z, w, y, eta, j, family, control, ...)
       } else {
         x$special.wfit
       }
-      fit <- ff(x, z, w, y, eta, j, family, control)
+      fit <- ff(x, z, w, y, eta, j, family, control, ...)
     }
   }
 
@@ -170,7 +175,7 @@ calc_XWX <- function(x, w, index = NULL)
 }
 
 ## Fitting function for mgcv smooth terms.
-smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
+smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
 {
   ## Number of observations.
   n <- length(z)
@@ -180,12 +185,6 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
     rz <- numeric(length(x$binning$nodups))
     calc_Xe(x$binning$sorted.index, w, z, rw, rz, x$binning$order)
   }
-
-  ## Set up smoothing parameters.
-  lambdas <- x$lambdas
-  if(is.null(lambdas))
-    lambdas <- 10
-  lambdas <- rep(lambdas, x$dim)
 
   ## Pre compute matrices.
   if(control$binning) {
@@ -198,11 +197,65 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
   }
   S <- diag(1e-05, ncol(x$X))
 
+  if(!is.null(x$control)) {
+    control[names(x$control)] <- x$control
+    if(!is.null(control$method))
+      control$criterion <- tolower(control$method)
+  }
   if(is.null(control$criterion))
     control$criterion <- "aicc"
-  
-  if(control$criterion == "ml" & x$dim < 2L & !control$binning) {
-    stop("local ML method not implemented yet")
+
+  ## Set up smoothing parameters.
+  lambdas <- transfer$lambdas
+  if(is.null(lambdas)) {
+    lambdas <- if(is.null(control$start)) 10 else control$start
+  }
+  lambdas <- rep(lambdas, x$dim)
+
+  ## Penalty for AIC.
+  K <- if(is.null(control$K)) 2 else control$K
+
+  ## Local ML check.
+  localML <- isTRUE(x$localML)
+  if(!localML) {
+    if(control$criterion == "ml")
+      control$criterion <- "aicc"
+  }
+
+  if(control$criterion == "ml" & x$dim < 2L & !control$binning & localML) {
+    order <- x$m[1L]
+    if(is.null(order))
+      order <- 1
+
+    N <- sum(w != 0)
+
+    for(it in 1:50) {
+      P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
+      if(inherits(P, "try-error"))
+        P <- solve(XWX + lambdas * x$S[[1L]])
+
+      b <- drop(P %*% XWz)
+      fit <- drop(x$X %*% b)
+
+      if(control$binning)
+        fit <- fit[x$binning$match.index]
+
+      edf <- sum(diag(XWX %*% P))
+
+      sig2 <- sum(w * (z - fit)^2) / (N - edf)
+      tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / (edf - order)
+
+      if (tau2 < 1e-07) tau2 <- 1e-07
+      lambdas.old <- lambdas
+      lambdas <- sig2/tau2
+      if (lambdas < 1e-07) lambdas <- 1e-07
+      if (lambdas > 1e+07) lambdas <- 1e+07
+      if (abs(lambdas - lambdas.old) < 1e-07 || lambdas > 1e+10) break
+    }
+
+    return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
+      "lambdas" = lambdas, "vcov" = P, "df" = n - edf,
+      "transfer" = list("lambdas" = lambdas)))
   } else {
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
@@ -224,7 +277,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
 
       if(rf) {
         return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-          "lambdas" = l, "vcov" = P, "df" = nrow(x$X) - edf))
+          "lambdas" = l, "vcov" = P, "df" = n - edf, "transfer" = list("lambdas" = l)))
       } else {
         if(isTRUE(control$logLik)) {
           eta[[j]] <- eta[[j]] + fit
@@ -236,6 +289,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control)
         rval <- switch(tolower(control$criterion),
           "gcv" = rss * n / (n - edf)^2,
           "aic" = rss + 2 * edf,
+          "gaic" = rss + K * edf,
           "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
           "bic" = rss + log(n) * edf
         )

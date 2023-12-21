@@ -143,7 +143,8 @@ gamlss2.formula <- function(formula, data, family = NO,
         ii <- which(Sterms[[j]] == i)
         if(length(ii)) {
           Sterms[[j]] <- as.list(Sterms[[j]])
-          Sterms[[j]][[ii]] <- as.character(nt[olab == i])
+          uti <- unique(as.character(nt[olab == i]))
+          Sterms[[j]][[ii]] <- uti
           Sterms[[j]] <- unlist(Sterms[[j]])
         }
       }

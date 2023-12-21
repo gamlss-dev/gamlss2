@@ -175,7 +175,7 @@ calc_XWX <- function(x, w, index = NULL)
 }
 
 ## Fitting function for mgcv smooth terms.
-smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
+smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
   ## Number of observations.
   n <- length(z)
@@ -206,11 +206,15 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
     control$criterion <- "aicc"
 
   ## Set up smoothing parameters.
-  lambdas <- transfer$lambdas
+  if(iter[1L] > -1) {
+    lambdas <- transfer$lambdas
+  } else {
+    lambdas <- 10
+  }
   if(is.null(lambdas)) {
     lambdas <- if(is.null(control$start)) 10 else control$start
   }
-  lambdas <- rep(lambdas, x$dim)
+  lambdas <- rep(lambdas, length.out = x$dim)
 
   ## Penalty for AIC.
   K <- if(is.null(control$K)) 2 else control$K
@@ -299,16 +303,15 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
     }
 
     if(is.null(x$sp)) {
-      opt <- nlminb(lambdas, objective = fl, lower = 1e-07, upper = 1e+07,
-        control = list("rel.tol" = 1e-6, "iter.max" = 100))
+      opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
     } else {
       opt <- list(par = x$sp)
     }
   }
 
   rval <- fl(opt$par, rf = TRUE)
-print(length(rval$lambdas))
-##  rval$transfer <- list("lambdas" = rval$lambdas)
+
+  rval$transfer <- list("lambdas" = rval$lambdas)
 
   return(rval)
 }

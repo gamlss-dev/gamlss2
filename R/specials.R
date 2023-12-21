@@ -255,8 +255,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
     }
 
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-      "lambdas" = lambdas, "vcov" = P, "df" = n - edf,
-      "transfer" = list("lambdas" = lambdas)))
+      "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
   } else {
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
@@ -278,7 +277,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
 
       if(rf) {
         return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-          "lambdas" = l, "vcov" = P, "df" = n - edf, "transfer" = list("lambdas" = l)))
+          "lambdas" = l, "vcov" = P, "df" = n - edf))
       } else {
         if(isTRUE(control$logLik)) {
           eta[[j]] <- eta[[j]] + fit
@@ -300,14 +299,18 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer)
     }
 
     if(is.null(x$sp)) {
-      opt <- nlminb(lambdas, objective = fl, lower = 1e-10, upper = Inf,
+      opt <- nlminb(lambdas, objective = fl, lower = 1e-07, upper = 1e+07,
         control = list("rel.tol" = 1e-6, "iter.max" = 100))
     } else {
       opt <- list(par = x$sp)
     }
   }
 
-  return(fl(opt$par, rf = TRUE))
+  rval <- fl(opt$par, rf = TRUE)
+print(length(rval$lambdas))
+##  rval$transfer <- list("lambdas" = rval$lambdas)
+
+  return(rval)
 }
 
 ## A method for fitting special terms.

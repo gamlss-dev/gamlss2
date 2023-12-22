@@ -142,7 +142,7 @@ summary.gamlss2 <- function(object, ...)
     ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
     rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
   }
-  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.expl", "iterations", "elapsed")]
+  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "iterations", "elapsed")]
   sg$call[[1L]] <- as.name("gamlss2")
   sg$coefficients <- ctl
   if(!is.null(object$fitted.specials)) {
@@ -192,7 +192,7 @@ print.summary.gamlss2 <- function(x,
   info2 <- c(
     ## paste("logLik =", round(x$logLik, digits = 4)),
     paste("Deviance =", round(-2 * x$logLik, digits = 4)),
-    paste0("Null Dev. Red. = ", round(x$dev.expl * 100, digits = 2), "%")
+    paste0("Null Dev. Red. = ", round(x$dev.reduction * 100, digits = 2), "%")
   )
 
   rt <- x$elapsed

@@ -377,7 +377,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     "nobs" = length(eta[[1L]]),
     "deviance" = -2 * llo1,
     "null.deviance" = dev0,
-    "dev.expl" = (dev0 - (-2 * llo1)) / dev0
+    "dev.reduction" = abs((dev0 - (-2 * llo1)) / dev0)
   )
 
   class(rval) <- "gamlss2"

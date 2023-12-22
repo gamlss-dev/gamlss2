@@ -59,8 +59,11 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         absorb.cons <- if(is.null(sj$xt$absorb.cons)) TRUE else isTRUE(sj$xt$absorb.cons)
         scale.penalty <- if(is.null(sj$xt$scale.penalty)) TRUE else isTRUE(sj$xt$scale.penalty)
 
+        select <- isTRUE(list(...)$select)
+
         sj <- mgcv::smoothCon(sj, data = if(binj) dj else data, knots = knots,
-          absorb.cons = absorb.cons, scale.penalty = scale.penalty)
+          absorb.cons = absorb.cons, scale.penalty = scale.penalty,
+          null.space.penalty = select)
 
         for(i in 1:length(sj)) {
           sj[[i]]$orig.label <- j
@@ -214,7 +217,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(is.null(lambdas)) {
     lambdas <- if(is.null(control$start)) 10 else control$start
   }
-  lambdas <- rep(lambdas, length.out = x$dim)
+  lambdas <- rep(lambdas, length.out = length(x$S))
 
   ## Penalty for AIC.
   K <- if(is.null(control$K)) 2 else control$K
@@ -226,7 +229,7 @@ smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       control$criterion <- "aicc"
   }
 
-  if(control$criterion == "ml" & x$dim < 2L & !control$binning & localML) {
+  if(control$criterion == "ml" & length(x$S) < 2L & !control$binning & localML) {
     ## Local ML method, only for pb2() yet!
     order <- x$m[1L]
     if(is.null(order))

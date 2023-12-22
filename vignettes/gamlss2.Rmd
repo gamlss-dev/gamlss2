@@ -80,7 +80,7 @@ b2 <- gamlss(f, family = NO, data = Golf)
 summary(b2)
 ```
 Note that the estimated coefficients for both implementations, as well as standard errors
-and p-values are exactly the same. Similar for confidence intervals, we get
+and p-values are almost the same. Similar for confidence intervals, we get
 ```{r}
 confint(b1)
 confint(b2)
@@ -186,8 +186,8 @@ d$cens <- d$Pre > 0
 summary(b)
 ```
 Visualize estimated effects
-```{r, out.width="100%", fig.width=12, fig.height=8}
-plot(b)
+```{r, out.width="100%", fig.width=12, fig.height=12}
+plot(b, image = TRUE)
 ```
 
 ```{r, eval = FALSE, echo=FALSE}
@@ -195,19 +195,17 @@ d$Pre[d$Pre < 0] <- 0
 d$cens <- d$Pre > 0
 
 gen.cens(NO, type = "left")
-gen.cens(TF, type = "left")
 
 f <- ~ s(year) + s(alt,k=4) +
-  ti(yday,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-  ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
+  ti(yday,bs="cc") + ti(lon,lat,bs="tp",d=2,k=30) +
+  ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(10,30))
 
 f <- rep(list(f), 2)
 f[[1]] <- update(f[[1]], Surv(sqrt(Pre), cens, type = "left") ~ .)
 
 if(!file.exists("PreModel.rds")) {
   b <- gamlss2(f, data = d, family = NOlc,
-    binning = TRUE, light = TRUE, flush = FALSE,
-    criterion = "bic")
+    binning = TRUE, light = TRUE, flush = FALSE)
   saveRDS(b, file = "PreModel.rds")
 } else {
   b <- readRDS("PreModel.rds")

@@ -126,7 +126,8 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
 
   ## Process special terms.
-  Specials <- special_terms(Sterms, mf, binning = control$binning, digits = control$digits)
+  Specials <- special_terms(Sterms, mf, binning = control$binning,
+    digits = control$digits, select = control$select)
 
   ## Process by variables using mgcv::smoothCon().
   olab <- sapply(Specials, function(x) if(is.list(x)) x$orig.label else "")
@@ -255,6 +256,8 @@ gamlss2_control <- function(optimizer = RS,
     ctr$binning <- FALSE
   if(is.null(ctr$digits))
     ctr$digits <- Inf
+  if(is.null(ctr$initialize))
+    ctr$initialize <- TRUE
 
   return(ctr)
 }

@@ -169,3 +169,21 @@ grep2 <- function (pattern, x, ...)
   unique(i)
 }
 
+## Extract fitted values.
+fitted.gamlss2 <- function(object, newdata = NULL,
+  type = c("link", "parameter"), ...)
+{
+  type <- match.arg(type)
+
+  if(is.null(newdata) & !is.null(object$fitted.values)) {
+    fit <- object$fitted.values
+  } else {
+    fit <- predict(object, newdata = newdata)
+  }
+
+  if(type == "parameter")
+    fit <- family(object)$map2par(fit)
+
+  return(fit)
+}
+

@@ -142,7 +142,7 @@ summary.gamlss2 <- function(object, ...)
     ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
     rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
   }
-  sg <- object[c("call", "family", "df", "nobs", "logLik", "iterations", "elapsed")]
+  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.expl", "iterations", "elapsed")]
   sg$call[[1L]] <- as.name("gamlss2")
   sg$coefficients <- ctl
   if(!is.null(object$fitted.specials)) {
@@ -192,13 +192,15 @@ print.summary.gamlss2 <- function(x,
   info2 <- c(
     ## paste("logLik =", round(x$logLik, digits = 4)),
     paste("Deviance =", round(-2 * x$logLik, digits = 4)),
-    paste("AIC =", round(-2 * x$logLik + 2*x$df, digits = 4))
+    paste0("explained = ", round(x$dev.expl * 100, digits = 2), "%")
   )
+
   rt <- x$elapsed
   rt <- if(rt > 60) {
     paste(formatC(format(round(rt / 60, 2), nsmall = 2), width = 5), "min", sep = "")
   } else paste(formatC(format(round(rt, 2), nsmall = 2), width = 5), "sec", sep = "")
   info3 <- c(
+    paste("AIC =", round(-2 * x$logLik + 2*x$df, digits = 4)),
     paste("elapsed =", rt)
   )
   cat(info1)
@@ -224,5 +226,33 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
     ci <- ci[unique(grep2(parm, rownames(ci), value = TRUE, fixed = TRUE)), ]
   }
   return(ci)
+}
+
+## R2.
+R2 <- function(object, newdata = NULL, ...)
+{
+  if(!is.null(family(object)$type)) {
+    if(family(object)$type != "continuous")
+      stop("R-squared only for continuous responses!")
+  }
+
+  par <- fitted(object, newdata = newdata, type = "parameter")
+ 
+  y <- if (!is.null(newdata)) {
+    model.response(model.frame(object, data = newdata, keepresponse = TRUE))
+  } else {
+    model.response(model.frame(object, keepresponse = TRUE))
+  }
+
+  if(is.null(family(b)$mean)) {
+    fit <- family(object)$q(0.5, par)
+  } else {
+    fit <- family(object)$mean(par)
+  }
+
+  nobs <- length(fit)
+  rsq <- 1 - var(y - fit) * (nobs - 1)/(var(y - mean(y)) * (nobs - object$df))
+
+  return(rsq)
 }
 

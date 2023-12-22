@@ -61,6 +61,38 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
   }
 
+  ## Null deviance.
+  dev0 <- -2 * family$loglik(y, family$map2par(eta))
+
+  ## Estimate intercept only model first.
+  if(isTRUE(control$initialize)) {
+    beta <- ieta <- list()
+    for(j in np) {
+      beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
+      ieta[[j]] <- rep(beta[[j]], n)
+    }
+    beta <- unlist(beta)
+
+    fn_ll <- function(par) {
+      for(j in np)
+        ieta[[j]] <- rep(par[j], n)
+      ll <- family$loglik(y, family$map2par(ieta))
+      return(-ll)
+    }
+
+    opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
+
+    if(!inherits(opt, "try-error")) {
+      beta <- opt$par
+      dev0 <- 2 * opt$objective
+      for(j in np) {
+        fit[[j]]$coefficients["(Intercept)"] <- beta[j]
+        fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
+        eta[[j]] <- fit[[j]]$fitted.values
+      }
+    }
+  }
+
   ## Use Cole and Green algorithm?
   CGk <- Inf
   if(!is.null(control$CG)) {
@@ -342,7 +374,10 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     "coefficients" = coef_lin,
     "elapsed" = elapsed, "iterations" = iter[1L],
     "logLik" = llo1, "control" = control,
-    "nobs" = length(eta[[1L]])
+    "nobs" = length(eta[[1L]]),
+    "deviance" = -2 * llo1,
+    "null.deviance" = dev0,
+    "dev.expl" = (dev0 - (-2 * llo1)) / dev0
   )
 
   class(rval) <- "gamlss2"

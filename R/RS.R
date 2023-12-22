@@ -18,7 +18,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   ## Stopping criterion.
   eps <- control$eps
   if(is.null(eps))
-    eps <- sqrt(.Machine$double.eps)
+    eps <- 0.00001 ## sqrt(.Machine$double.eps)
   if(length(eps) < 2)
     eps <- c(eps, eps)
   stop.eps <- eps
@@ -33,9 +33,9 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   ## Maximum number of backfitting iterations.
   maxit <- control$maxit
   if(is.null(maxit))
-    maxit <- 100L
+    maxit <- 20L
   if(length(maxit) < 2L)
-    maxit <- c(maxit, 20L)
+    maxit <- c(maxit, 10L)
 
   ## Initialize fitted values for each model term.
   fit <- sfit <- list()

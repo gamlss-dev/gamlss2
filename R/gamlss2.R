@@ -10,11 +10,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   control = gamlss2_control(...), ...)
 {
   ## Save environments.
-  menv <- if(missing(data)) {
-    environment(formula)
-  } else {
-    environment(data)
-  }
+  menv <- parent.frame()
   fenv <- environment(formula)
 
   ## Process specific formulas.

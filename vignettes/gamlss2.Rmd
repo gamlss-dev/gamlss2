@@ -19,6 +19,7 @@ vignette: >
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
+library("survival")
 ```
 
 ## Overview 
@@ -160,16 +161,15 @@ d$cens <- d$Pre > 0
 
 ## Model formula.
 f <- ~ s(year) + s(alt,k=4) +
-  ti(yday,bs="cc",k=10) + ti(lon,lat,bs="tp",d=2,k=30) +
-  ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(8,30))
+  ti(yday,bs="cc") + ti(lon,lat,bs="tp",d=2,k=30) +
+  ti(yday,lon,lat,bs=c("cc","tp"),d=c(1,2),k=c(10,30))
 
 f <- rep(list(f), 2)
 f[[1]] <- update(f[[1]], Surv(sqrt(Pre), cens, type = "left") ~ .)
 
 ## Estimate model.
 b <- gamlss2(f, data = d, family = NOlc,
-  binning = TRUE, light = TRUE, flush = FALSE,
-  criterion = "bic")
+  binning = TRUE, light = TRUE, flush = FALSE)
 ```
 Please be aware that setting the argument `light = TRUE` results in the exclusion of all
 design matrices, the model frame, and fitted values from the returned object.
@@ -184,6 +184,10 @@ d$cens <- d$Pre > 0
 ```
 ```{r}
 summary(b)
+```
+Visualize estimated effects
+```{r, out.width="100%", fig.width=12, fig.height=8}
+plot(b)
 ```
 
 ```{r, eval = FALSE, echo=FALSE}

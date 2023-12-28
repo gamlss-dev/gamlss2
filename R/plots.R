@@ -274,6 +274,7 @@ plot_factor_effect <- function(x, col = NULL, ncol = 1L, width = 0.6,
 ## Histogram and density plot.
 plot_hist <- function(x, ...)
 {
+  x <- na.omit(x)
   h <- hist(x, breaks = "Scott", plot = FALSE)
   d <- density(x)
   ylim <- list(...)$ylim
@@ -307,6 +308,7 @@ plot_qq <- function(x, ...)
 ## Wormplot.
 plot_wp <- function(x, ...)
 {
+  x <- na.omit(x)
   d <- qqnorm(x, plot = FALSE)
   probs <- c(0.25, 0.75)
   y3 <- quantile(x, probs, type = 7, na.rm = TRUE)
@@ -364,6 +366,11 @@ plot_wp <- function(x, ...)
 
 ## Fitted vs. residuals.
 plot_sr <- function(f, x, ...) {
+  if(any(is.na(x))) {
+    i <- which(is.na(x))
+    x <- x[-i]
+    f <- f[-i]
+  }
   main <- list(...)$main
   if(is.null(main))
     main <- "Against Fitted Values"

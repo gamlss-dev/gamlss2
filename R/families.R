@@ -512,6 +512,20 @@ tF <- function(x, ...)
     sum(d, na.rm = TRUE)
   }
 
+  if(!is.null(x$rqres)) {
+    rqres <- utils::getFromNamespace("rqres", "gamlss")
+    rqres_fun <- x$rqres
+    nenv <- new.env()
+    assign("rqres", utils::getFromNamespace("rqres", "gamlss"), envir = nenv)
+
+    rval$rqres <- function(y, par, ...) {
+      assign("y", y, envir = nenv)
+      for(i in nx)
+        assign(i, par[[i]], envir = nenv)
+      eval(x$rqres, envir = nenv)
+    }
+  }
+
   class(rval) <- "gamlss2.family"
   rval
 }

@@ -173,8 +173,7 @@ b <- gamlss2(f, data = d, family = NOlc,
 ```
 Please be aware that setting the argument `light = TRUE` results in the exclusion of all
 design matrices, the model frame, and fitted values from the returned object.
-This is done to minimize the object's size. The model smoothing parameters are estimated
-using the local BIC in this example. Note that the model is quite complex, as it includes
+This is done to minimize the object's size. Note that the model is quite complex, as it includes
 a three dimensional seasonal varying spatial effect.
 
 The summary statistics gives
@@ -210,6 +209,22 @@ if(!file.exists("PreModel.rds")) {
 } else {
   b <- readRDS("PreModel.rds")
 }
+```
+
+For spatial prediction of probabilities over Germany we can download the
+[_ETOPO Global Relief Model_](https://www.ncei.noaa.gov/products/etopo-global-relief-model)
+
+```{r, eval = FALSE, echo=FALSE}
+library("sf")
+
+## Download altitude data.
+if(!file.exists("etopo.tif")) {
+  download.file("https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/30s/30s_bed_elev_gtif/ETOPO_2022_v1_30s_N90W180_bed.tif", "etopo.tif")
+} else {
+  etopo <- readRDS("etopo.rds")
+}
+
+
 ```
 
 ## References

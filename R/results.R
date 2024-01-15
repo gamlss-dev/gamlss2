@@ -18,7 +18,7 @@ results.gamlss2 <- function(x)
     res$effects <- list()
     k <- 1L
     for(j in np) {
-      if(length(x$sterms[[j]])) {
+      if(length(x$sterms[[j]]) & (j %in% names(x$fitted.specials))) {
         for(i in x$sterms[[j]]) {
           ## For mgcv smooths.
           if("mgcv.smooth" %in% class(x$specials[[i]])) {

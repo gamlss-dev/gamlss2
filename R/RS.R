@@ -343,7 +343,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   }
 
   ## Check if terms are never updated
-  ## and remove fiited values if light = TRUE.
+  ## and remove fitted values if light = TRUE.
   if(length(sfit)) {
     dropj <- NULL
     for(j in names(sfit)) {

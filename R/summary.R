@@ -24,9 +24,29 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
         cos[[i]]$s <- NULL
     }
   }
-  co <- if(drop) unlist(cos) else cos
 
-  return(co)
+  model <- list(...)$model
+  if(is.null(model)) {
+    what <- list(...)$what
+    if(!is.null(what))
+      model <- what
+  }
+  if(!is.null(model)) {
+    model <- grep2(model, object$family$names, value = TRUE, fixed = TRUE)
+    cos <- cos[model]    
+  }
+
+  if(drop) {
+    nc <- names(cos)
+    cos <- unlist(cos)
+    if(length(nc) < 2L) {
+      names(cos) <- gsub(paste0(nc, "."), "", names(cos), fixed = TRUE)
+      for(j in c("p.", "s."))
+        names(cos) <- gsub(j, "", names(cos), fixed = TRUE)
+    }
+  }
+
+  return(cos)
 }
 
 ## Variance-covariance matrix.

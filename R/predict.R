@@ -1,6 +1,6 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
-  parameter = NULL, newdata = NULL, type = c("link", "parameter", "response", "terms"), 
+  model = NULL, newdata = NULL, type = c("link", "parameter", "response", "terms"), 
   terms = NULL, se.fit = FALSE, ...)
 {
   ## FIXME: se.fit, terms ...
@@ -23,23 +23,21 @@ predict.gamlss2 <- function(object,
 
   family <- object$family
 
-  ## Which parameter to predict?
-  if(is.null(parameter)) {
-    parameter <- list(...)$what
-    if(is.null(parameter))
-    parameter <- list(...)$model
-    if(is.null(parameter))
-      parameter <- family$names
+  ## Which parameter model to predict?
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- family$names
   }
-  if(!is.character(parameter))
-    parameter <- family$names[parameter]
-  parameter <- family$names[pmatch(parameter, family$names)]
+  if(!is.character(model))
+    model <- family$names[model]
+  model <- family$names[pmatch(model, family$names)]
 
   tt <- type == "terms"
 
   ## Predict all specified parameters.
   p <- list()
-  for(j in parameter) {
+  for(j in model) {
     p[[j]] <- if(tt) NULL else rep(0, length.out = nrow(mf))
     tj <- if(is.null(terms)) {
       c(object$xterms[[j]], object$sterms[[j]])
@@ -173,7 +171,7 @@ grep2 <- function (pattern, x, ...)
 
 ## Extract fitted values.
 fitted.gamlss2 <- function(object, newdata = NULL,
-  type = c("link", "parameter"), ...)
+  type = c("link", "parameter"), model = NULL, ...)
 {
   type <- match.arg(type)
 
@@ -186,6 +184,15 @@ fitted.gamlss2 <- function(object, newdata = NULL,
   if(type == "parameter")
     fit <- family(object)$map2par(fit)
 
-  return(fit)
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- object$family$names
+  }
+  if(!is.character(model))
+    model <- object$family$names[model]
+  model <- object$family$names[pmatch(model, object$family$names)]
+
+  return(fit[, model])
 }
 

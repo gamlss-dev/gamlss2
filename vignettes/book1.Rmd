@@ -18,6 +18,7 @@ vignette: >
 ---
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss")
 library("gamlss2")
 library("survival")
 ```
@@ -26,11 +27,27 @@ library("survival")
 
 ```{r}
 ## Load the Munich rent data.
-data("rent", package = "gamlss")
+data("rent", package = "gamlss.data")
 
 ## Estimate models.
+r0 <- gamlss(R ~ Fl + A + H + loc, family = NO, data = rent, trace = FALSE)
 r1 <- gamlss2(R ~ Fl + A + H + loc, family = NO, data = rent, trace = FALSE)
-l1 <- lm(R ~ Fl + A + H + loc,data=rent)
+l1 <- lm(R ~ Fl + A + H + loc, data = rent)
+
+## Compare
+coef(r0)
+coef(r1)
 coef(r1, model = "mu")
+coef(r1, what = "mu")
 coef(l1)
+
+head(fitted(r0))
+head(fitted(r1))
+head(fitted(r1, type = "parameter"))
+fitted(r1, model = "sigma")[1]
+fitted(r1, what = "sigma")[1]
+fitted(r1, what = "sigma", type = "parameter")[1]
+
+summary(r0)
+summary(r1)
 ```

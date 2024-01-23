@@ -8,7 +8,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   np <- family$names
 
   ## Initialize predictors.
-  eta <- initialize_eta(y, family, n)
+  eta <- initialize_eta(y, family, n, TRUE)
 
   ## Check weights.
   if(!is.null(weights))
@@ -65,7 +65,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   dev0 <- -2 * family$loglik(y, family$map2par(eta))
 
   ## Estimate intercept only model first.
-  if(isTRUE(control$initialize)) {
+  if(isTRUE(control$nullmodel)) {
     beta <- ieta <- list()
     for(j in np) {
       beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
@@ -75,10 +75,14 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 
     lli <- family$loglik(y, family$map2par(ieta))
 
+    ridge <- control$ridge
+    if(is.null(ridge))
+      ridge <- 1e-05
+
     fn_ll <- function(par) {
       for(j in np)
         ieta[[j]] <- rep(par[j], n)
-      ll <- family$loglik(y, family$map2par(ieta))
+      ll <- family$loglik(y, family$map2par(ieta)) - ridge * sum(par^2)
       return(-ll)
     }
 
@@ -88,10 +92,12 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
       if(-opt$objective > lli) {
         beta <- opt$par
         dev0 <- 2 * opt$objective
-        for(j in np) {
-          fit[[j]]$coefficients["(Intercept)"] <- beta[j]
-          fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
-          eta[[j]] <- fit[[j]]$fitted.values
+        if(isTRUE(control$initialize)) {
+          for(j in np) {
+            fit[[j]]$coefficients["(Intercept)"] <- beta[j]
+            fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
+            eta[[j]] <- fit[[j]]$fitted.values
+          }
         }
       }
     }
@@ -381,7 +387,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     "nobs" = length(eta[[1L]]),
     "deviance" = -2 * llo1,
     "null.deviance" = dev0,
-    "dev.reduction" = abs((dev0 - (-2 * llo1)) / dev0)
+    "dev.reduction" = abs((dev0 - (-2 * llo1)) / dev0),
+    "nullmodel" = control$nullmodel
   )
 
   class(rval) <- "gamlss2"
@@ -397,12 +404,12 @@ CG <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 }
 
 ## Function to initialize predictors.
-initialize_eta <- function(y, family, nobs)
+initialize_eta <- function(y, family, nobs, initialize)
 {
   eta <- list()
   for(j in family$names)
     eta[[j]] <- rep(0.0, nobs)
-  if(is.null(family$initialize))
+  if(is.null(family$initialize) | !initialize)
     return(eta)
   for(j in family$names) {
     if(!is.null(family$initialize[[j]])) {

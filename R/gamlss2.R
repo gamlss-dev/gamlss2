@@ -258,6 +258,8 @@ gamlss2_control <- function(optimizer = RS,
     ctr$digits <- Inf
   if(is.null(ctr$initialize))
     ctr$initialize <- FALSE
+  if(is.null(ctr$nullmodel))
+    ctr$nullmodel <- TRUE
 
   return(ctr)
 }

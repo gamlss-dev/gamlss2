@@ -3,8 +3,10 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
 {
   co <- object$coefficients
 
+  family <- family(object)
+
   cos <- list()
-  for(i in family(object)$names) {
+  for(i in family$names) {
     if(!is.null(co[[i]])) {
       cos[[i]] <- list("p" = co[[i]])
     }
@@ -32,7 +34,9 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
       model <- what
   }
   if(!is.null(model)) {
-    model <- grep2(model, object$family$names, value = TRUE, fixed = TRUE)
+    if(!is.character(model))
+      model <- family$names[model]
+    model <- family$names[pmatch(model, family$names)]
     cos <- cos[model]    
   }
 
@@ -110,7 +114,12 @@ vcov.gamlss2 <- function(object, full = FALSE, ...)
 
   par <- coef(object, full = full, drop = TRUE)
 
-  v <- solve(as.matrix(optimHess(par, fn = loglik, control = list(fnscale = -1))))
+  H <- as.matrix(optimHess(par, fn = loglik, control = list(fnscale = -1)))
+  v <- try(solve(H), silent = TRUE)
+  if(inherits(v, "try-error")) {
+    H <- H + diag(1e-05, ncol(H))
+    v <- solve(H)
+  }
 
   return(v)
 }

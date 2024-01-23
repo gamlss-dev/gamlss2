@@ -73,6 +73,8 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
     beta <- unlist(beta)
 
+    lli <- family$loglik(y, family$map2par(ieta))
+
     fn_ll <- function(par) {
       for(j in np)
         ieta[[j]] <- rep(par[j], n)
@@ -83,12 +85,14 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
 
     if(!inherits(opt, "try-error")) {
-      beta <- opt$par
-      dev0 <- 2 * opt$objective
-      for(j in np) {
-        fit[[j]]$coefficients["(Intercept)"] <- beta[j]
-        fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
-        eta[[j]] <- fit[[j]]$fitted.values
+      if(-opt$objective > lli) {
+        beta <- opt$par
+        dev0 <- 2 * opt$objective
+        for(j in np) {
+          fit[[j]]$coefficients["(Intercept)"] <- beta[j]
+          fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
+          eta[[j]] <- fit[[j]]$fitted.values
+        }
       }
     }
   }
@@ -342,7 +346,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
   }
 
-  ## Check if terms are never updated
+  ## Check if special terms are never updated
   ## and remove fitted values if light = TRUE.
   if(length(sfit)) {
     dropj <- NULL

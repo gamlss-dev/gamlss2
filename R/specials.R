@@ -334,9 +334,13 @@ special_predict <- function(x, ...)
 ## Default method.
 special_predict.default <- function(x, data, ...)
 {
-  if(is.null(x$model))
-    return(predict(x, newdata = data))
-  else
-    return(predict(x$model, newdata = data))
+  if(is.null(x)) {
+    return(rep(0, nrow(data)))
+  } else {
+    if(is.null(x$model))
+      return(predict(x, newdata = data))
+    else
+      return(predict(x$model, newdata = data))
+  }
 }
 

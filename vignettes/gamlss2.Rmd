@@ -227,4 +227,127 @@ if(!file.exists("etopo.tif")) {
 
 ```
 
+## Exchanging the Optimizer
+
+The default optimizer function in _gamlss2_ is `RS()`. The function has arguments
+```{r, eval = FALSE}
+RS(x, y, specials, family, offsets, weights, xterms, sterms, control)
+```
+where `x` is the linear effects design matrix, `y` is the response (a vector or matrix), `specials`
+is a named list of special model terms, e.g., as created by smooth constructor `s()`. Now `xterms`
+and `sterms` are named lists, each list element represents one parameter of the distribution as
+specified in the `family`. One list elements holds the variable names of linear effects or the term
+labels of specials (smooth) model terms. This way, no duplicated design matrices need to be setup.
+
+The return value of `RS()` is of class `"gamlss2"` for which summary, extractor and plotting functions
+are provided.
+
+Note that function `RS()`may be exchanged, either using `gamlss2_control()` or if an `$optimizer`
+function is specified within the family. This way, one could also integrate full Bayesian MCMC
+methods, or boosting algorithms etc. Only the methods for the return value need to be written new
+for such functions.
+
+## New Special Terms
+
+In similar fashion new "special" model terms can be included for `RS()`and `GC()`. All is needed
+is to write methods for
+```{r, eval = FALSE}
+special_fit(x, ...)
+special_predict(x, ...)
+```
+where `x` is a model term object as supplied in the formula in the `gamlss2()` call.
+
+Example using existing `smooth.construct()` infrastructures, new `pb2()` model term
+```{r, eval = FALSE}
+pb2 <- function(x, df = NULL, lambda = NULL, max.df = NULL, control = pb2.control(...), ...)
+{
+  m <- c(control$degree, control$order)
+  k <- control$inter + m[1L] + 1L
+  sx <- s(x, bs = "ps", m = m, k = k, sp = lambda)
+  sx$control <- control
+  sx$label <- gsub("s(", "pb2(", sx$label, fixed = TRUE)
+  sx$orig.label <- sx$label
+  sx$localML <- TRUE
+  return(sx)
+}
+```
+
+Or, completely new model term, e.g., conditional inference forest constructor.
+```{r, eval = FALSE}
+## Special conditional inference forest constructor.
+cf <- function(formula, ...)
+{
+  stopifnot(requireNamespace("partykit"))
+  st <- list()
+  ctr <- list(...)
+  ntree <- ctr$ntree
+  if(is.null(ntree))
+    ntree <- 100L
+  ctr$ntree <- NULL
+  st$control <- do.call(partykit::ctree_control, ctr)
+  st$formula <- formula
+  st$term <- all.vars(formula)
+  st$label <- paste0("cf(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$data <- model.frame(formula)
+  st$ntree <- ntree
+  class(st) <- c("special", "cf")
+  return(st)
+}
+
+## The fitting function for the backfitting algorithm.
+special_fit.cf <- function(x, z, w, y, eta, j, family, control, ...)
+{
+  f <- update(x$formula, response_z ~ .)
+  x$data$response_z <- z
+  rval <- list(
+    "model" = partykit::cforest(formula = f, data = x$data, weights = w,
+      control = x$control, ntree = x$ntree)
+  )
+  rval$fitted.values <- predict(rval$model)
+  rval$shift <- mean(rval$fitted.values)
+  rval$fitted.values <- rval$fitted.values - rval$shift
+  rval$edf <- x$ntree
+  class(rval) <- "cf.fitted"
+  return(rval)
+}
+
+## Predict method.
+special_predict.cf.fitted <- function(x, data, se.fit = FALSE, ...)
+{
+  if(se.fit) {
+    ct <- lapply(seq_along(x$model$nodes), function(i) partykit::as.constparty(
+      partykit::party(x$model$nodes[[i]], data = x$model$data, terms = x$model$terms,
+      fitted = data.frame(
+        `(response)` = x$model$fitted[["(response)"]],
+        `(weights)` = x$model$weights[[i]],
+        check.names = FALSE))
+    ))
+    p <- sapply(ct, predict, newdata = data)
+    p <- apply(p, 1, quantile, prob = c(0.05, 0.5, 0.95))
+    p <- t(p)
+    colnames(p) <- c("lower", "fit", "upper")
+  } else {
+    p <- predict(x$model, newdata = data, type = "response")
+  }
+  p <- p - x$shift
+  return(p)
+}
+```
+Similar, a neural network model term, see `?special_terms`.
+
+## Notes
+
+* Package _gamlss_ "special" model terms in _gamlss2_? Support is already there
+  but limited, e.g., using `pb()` confidence intervals cannot be computed.
+* Write wrappers like `pb2()`, use `smooth.construct()`?
+* Goal is to write more optimizer/sampler functions.
+* Project idea, "non-cyclic" algorithm for fast stepwise selection of linear or smooth terms?
+* `predict()` with confidence/prediction intervals? `se.fit = TRUE` does not work using new data?
+* How should we compute confidence/prediction intervals?
+* Considering _gamlss_, extend the examples similar to _gamlss2_.
+* Check the manual pages carefully, e.g., do we need references on every manual page?
+* Include the `NO()` distribution in _gamlss_ (or hidden default `.NO()`) so we can write examples for each
+  family in _gamlss.dist_?
+
 ## References
+

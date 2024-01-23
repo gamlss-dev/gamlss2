@@ -96,7 +96,7 @@ vcov.gamlss2 <- function(object, full = FALSE, ...)
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
       }
-      if(full) {
+      if(full | TRUE) { ## FIXME: always add?
         if(!is.null(par[[i]]$s)) {
           for(j in names(par[[i]]$s)) {
             fit <- drop(object$specials[[j]]$X %*% par[[i]]$s[[j]])

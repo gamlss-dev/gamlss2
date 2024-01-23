@@ -1,0 +1,36 @@
+---
+title: "Reproducing Book 1"
+author: "Nikolaus Umlauf"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+bibliography: gamlss2.bib
+nocite: |
+  @gamlss2:Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{First Steps}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, first steps}
+  %\VignettePackage{gamlss2}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss2")
+library("survival")
+```
+
+## Chapter 1: Why GAMLSS
+
+```{r}
+## Load the Munich rent data.
+data("rent", package = "gamlss")
+
+## Estimate models.
+r1 <- gamlss2(R ~ Fl + A + H + loc, family = NO, data = rent, trace = FALSE)
+l1 <- lm(R ~ Fl + A + H + loc,data=rent)
+coef(r1, model = "mu")
+coef(l1)
+```

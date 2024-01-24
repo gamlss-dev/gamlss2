@@ -302,18 +302,115 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
   return(rsq)
 }
 
-Rsq <- function(object, ...)
+## New r-squared function.
+Rsq <- function(object, ..., type = c("Cox Snell", "Cragg Uhler", "both", "simple"), newdata = NULL)
 {
-  UseMethod("Rsq")
+  objs <- list(object, ...)
+  rsq <- NULL
+  drop <- NULL
+  for(j in 1:length(objs)) {
+    if(inherits(objs[[j]], c("gamlss", "gamlss2"))) {
+      if(inherits(objs[[j]], "gamlss")) {
+        type2 <- unique(gsub("simple", "Cox Snell", type))
+        rsq <- c(rsq, Rsq_gamlss(objs[[j]], type = type2))
+      } else {
+        rsq <- c(rsq, Rsq_gamlss2(objs[[j]], type = type, newdata = newdata))
+      }
+    } else {
+       drop <- c(drop, j)
+    }
+  }
+  if(length(drop)) {
+    rsq <- rsq[-drop]
+  }
+  if(length(rsq)) {
+    if(length(rsq) > 1L) {
+      Call <- match.call()
+      names(rsq) <- as.character(Call[-1L])
+    }
+  }
+  if(is.vector(rsq))
+    rsq <- sort(rsq)
+  return(rsq)
 }
 
-Rsq.gamlss <- function(object, ...)
+Rsq_gamlss <- function(object, ...)
 {
   utils::getFromNamespace("Rsq", "gamlss")(object, ...)
 }
 
-Rsq.gamlss2 <- function(object, ...)
+Rsq_gamlss2 <- function(object, ...)
 {
   .R2(object, ...)
+}
+
+## New GAIC function.
+GAIC <- function(object, ..., k = 2, corrected = FALSE)
+{
+  objs <- list(object, ...)
+
+  gaic <- edf <- NULL
+  drop <- NULL
+
+  for(j in 1:length(objs)) {
+    if(inherits(objs[[j]], c("gamlss", "gamlss2"))) {
+      if(inherits(objs[[j]], "gamlss")) {
+        df <- objs[[j]]$df.fit
+        N <- objs[[j]]$N
+        deviance <- objs[[j]]$G.deviance
+      } else {
+        df <- objs[[j]]$df
+        N <- objs[[j]]$nobs
+        deviance <- objs[[j]]$deviance
+      }
+
+      Cor <- if((k == 2) && corrected) {
+        (2 * df * (df + 1))/(N - df - 1)
+      } else {
+        0
+      }
+
+      gaic <- c(gaic, deviance + df * k + Cor)
+      edf <- c(edf, df)
+    } else {
+      drop <- c(drop, j)
+      gaic <- c(gaic, NA)
+      edf <- c(edf, NA)
+    }
+  }
+
+  if(length(drop)) {
+    gaic <- gaic[-drop]
+    edf <- edf[-drop]
+  }
+
+  if(length(gaic) > 1L) {
+    Call <- match.call()
+    rn <- as.character(Call[-1L])
+    if("..1" %in% rn) {
+      rn <- as.character(sys.call(-1))[-1L]
+    }
+    if(length(drop))
+      rn <- rn[-drop]
+    i <- order(gaic, decreasing = TRUE)
+    gaic <- data.frame("AIC" = gaic[i], "df" = edf[i])
+    rn <- rn[i]
+    if(any(j <- duplicated(rn)))
+      rn[j] <- paste0(rn[j], ".", 1:sum(j))
+    rownames(gaic) <- rn[i]
+  }
+
+  return(gaic)
+}
+
+## Generic AIC/BIC method.
+AIC.gamlss2 <- function(object, ..., k = 2, corrected = FALSE)
+{
+  GAIC(object, ..., k = k, corrected = corrected)
+}
+
+BIC.gamlss2 <- function(object, ...)
+{
+  GAIC(object, ..., k = log(object$nobs), corrected = FALSE)
 }
 

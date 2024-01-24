@@ -25,6 +25,8 @@ library("survival")
 
 ## Chapter 1: Why GAMLSS
 
+### Gaussian Model
+
 ```{r}
 ## Load the Munich rent data.
 data("rent", package = "gamlss.data")
@@ -54,6 +56,9 @@ summary(r1)
 Rsq(r0)
 Rsq(r1)
 
+## New Rsq() function accepts multiple objects.
+Rsq(r0, r1)
+
 ## Plot residuals.
 plot(r0)
 plot(r1)
@@ -63,3 +68,67 @@ plot(r1, which = "qq-resid")
 plot(r1, which = "hist-resid")
 plot(r1, which = "scatter-resid")
 ```
+
+### Gamma Model
+
+```{r}
+r3 <-  gamlss(R ~ Fl + A + H + loc, family = GA, data = rent)
+r4 <-  gamlss2(R ~ Fl + A + H + loc, family = GA, data = rent)
+coef(r3)
+coef(r4)
+coef(r4, model = "mu")
+coef(r4, model = "sigma")
+coef(r4, what = "sigma")
+deviance(r3)
+deviance(r4)
+
+## GLM
+l2 <- glm(R ~ Fl + A + H + loc, family = Gamma(link = "log"), data = rent)
+coef(l2)
+summary(l2)$dispersion
+deviance(l2)
+
+## Compare log-likelihoods.
+logLik(r3)
+logLik(r4)
+logLik(l2)
+
+summary(r3)
+summary(r4)
+```
+
+### Inverse Gamma Models
+
+```{r}
+r5 <-  gamlss(R ~ Fl + A + H + loc, family = IG, data = rent)
+r6 <-  gamlss2(R ~ Fl + A + H + loc, family = IG, data = rent)
+
+## New GAIC function.
+GAIC(r5)
+GAIC(r6)
+GAIC(r5, r6)
+GAIC(r5, r6, k = 0)
+
+## New methods.
+AIC(r6)
+BIC(r6)
+AIC(r6, r4)
+BIC(r6, r4)
+```
+
+### Using Splines
+
+```{r}
+r7 <-  gamlss(R ~ pb(Fl) + pb(A) + H + loc, family = GA, data = rent)
+r8 <-  gamlss2(R ~ s(Fl) + s(A) + H + loc, family = GA, data = rent)
+r9 <-  gamlss2(R ~ Fl + A + s(Fl) + s(A) + H + loc, family = GA, data = rent)
+
+## Compare.
+GAIC(r7, r8, r9)
+
+## Plot effects.
+term.plot(r7, pages = 1, ask = FALSE)
+plot(r8, pages = 1)
+plot(r9, pages = 1)
+```
+

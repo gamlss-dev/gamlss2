@@ -258,30 +258,62 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
 }
 
 ## R2.
-R2 <- function(object, newdata = NULL, ...)
+.R2 <- function(object, type = c("Cox Snell", "Cragg Uhler", "both", "simple"), newdata = NULL, ...)
 {
-  if(!is.null(family(object)$type)) {
-    if(family(object)$type != "continuous")
-      stop("R-squared only for continuous responses!")
-  }
+  type <- match.arg(type)
 
-  par <- fitted(object, newdata = newdata, type = "parameter")
- 
   y <- if (!is.null(newdata)) {
     model.response(model.frame(object, data = newdata, keepresponse = TRUE))
   } else {
     model.response(model.frame(object, keepresponse = TRUE))
   }
 
-  if(is.null(family(b)$mean)) {
-    fit <- family(object)$q(0.5, par)
+  ## FIXME: bd?
+
+  if(type == "simple") {
+    if(!is.null(family(object)$type)) {
+      if(family(object)$type != "continuous")
+        stop("R-squared only for continuous responses!")
+    }
+
+    par <- fitted(object, newdata = newdata, type = "parameter")
+
+    if(is.null(family(object)$mean)) {
+      fit <- family(object)$q(0.5, par)
+    } else {
+      fit <- family(object)$mean(par)
+    }
+
+    nobs <- length(fit)
+    rsq <- 1 - var(y - fit) * (nobs - 1)/(var(y - mean(y)) * (nobs - object$df))
   } else {
-    fit <- family(object)$mean(par)
+    ll0 <- object$null.deviance / -2
+    ll1 <- object$deviance / -2
+    rsq1 <- 1 - exp((2/object$nobs) * (ll0 - ll1))
+    rsq2 <- rsq1 / (1 - exp((2/object$nobs) * ll0))
+    if(type == "Cox Snell")
+      rsq <- rsq1
+    if(type == "Cragg Uhler")
+      rsq <- rsq2
+    if(type == "both")
+      rsq <- list("CoxSnell" = rsq1, "CraggUhler" = rsq2)
   }
 
-  nobs <- length(fit)
-  rsq <- 1 - var(y - fit) * (nobs - 1)/(var(y - mean(y)) * (nobs - object$df))
-
   return(rsq)
+}
+
+Rsq <- function(object, ...)
+{
+  UseMethod("Rsq")
+}
+
+Rsq.gamlss <- function(object, ...)
+{
+  utils::getFromNamespace("Rsq", "gamlss")(object, ...)
+}
+
+Rsq.gamlss2 <- function(object, ...)
+{
+  .R2(object, ...)
 }
 

@@ -30,6 +30,12 @@ plot.gamlss2 <- function(x, parameter = NULL,
     parameter <- x$family$names[parameter]
   parameter <- x$family$names[pmatch(parameter, x$family$names)]
 
+  ## Check for any effect plots.
+  if(length(which) < 2L) {
+    if(which == "effects" & length(x$results$effects) < 1L)
+      which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
+  }
+
   ## Effect plots.
   if("effects" %in% which) {
     if(is.null(x$results))
@@ -289,6 +295,7 @@ plot_hist <- function(x, ...)
   hist(x, breaks = "Scott", freq = FALSE, ylim = ylim,
     xlab = xlab, main = main, ...)
   lines(d, lwd = 2, col = 4)
+  rug(x, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 }
 
 ## Q-Q plot.

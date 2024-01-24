@@ -26,7 +26,8 @@ export(
   "RS",
   "CG",
   "special_fit",
-  "special_predict"
+  "special_predict",
+  "Rsq"
 )
 
 S3method(gamlss2, formula)
@@ -47,6 +48,8 @@ S3method(coef, gamlss2)
 S3method(summary, gamlss2)
 S3method(print, gamlss2)
 S3method(print, summary.gamlss2)
+S3method(Rsq, gamlss2)
+S3method(Rsq, gamlss)
 
 useDynLib(gamlss2, .registration = TRUE)
 

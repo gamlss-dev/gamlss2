@@ -50,4 +50,16 @@ fitted(r1, what = "sigma", type = "parameter")[1]
 
 summary(r0)
 summary(r1)
+
+Rsq(r0)
+Rsq(r1)
+
+## Plot residuals.
+plot(r0)
+plot(r1)
+plot(r1, which = "resid")
+plot(r1, which = "wp-resid")
+plot(r1, which = "qq-resid")
+plot(r1, which = "hist-resid")
+plot(r1, which = "scatter-resid")
 ```

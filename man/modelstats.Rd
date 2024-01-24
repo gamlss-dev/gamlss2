@@ -67,9 +67,7 @@ AIC(b1, b2)
 BIC(b1, b2)
 
 ## Plot estimated effects.
-## ncol is needed to draw confidence
-## intervals for the factor effects, too.
-plot(b2, pages = 1, ncol = 30)
+plot(b2, pages = 1)
 }
 
 \keyword{regression}

@@ -323,14 +323,16 @@ Rsq <- function(object, ..., type = c("Cox Snell", "Cragg Uhler", "both", "simpl
   if(length(drop)) {
     rsq <- rsq[-drop]
   }
-  if(length(rsq)) {
+  if(length(rsq) & !is.list(rsq)) {
     if(length(rsq) > 1L) {
       Call <- match.call()
       names(rsq) <- as.character(Call[-1L])
     }
   }
-  if(is.vector(rsq))
-    rsq <- sort(rsq)
+  if(!is.list(rsq)) {
+    if(is.vector(rsq))
+      rsq <- sort(rsq)
+  }
   return(rsq)
 }
 

@@ -134,3 +134,62 @@ plot(r9, pages = 1)
 plot(r10, pages = 1)
 ```
 
+### Mu and Sigma Models
+
+```{r}
+m1 <-  gamlss(R ~ pb(Fl) + pb(A) + H + loc,
+  sigma.fo = ~ pb(Fl) + pb(A) + H + loc, 
+  family = GA, data = rent)
+
+m2 <-  gamlss(R ~ pb(Fl) + pb(A) + H + loc,
+  sigma.fo = ~ pb(Fl) + pb(A) + H + loc, 
+  family = IG, data = rent)
+
+## Use of sigma.formula.
+b1 <-  gamlss2(R ~ s(Fl) + s(A) + H + loc,
+  sigma.formula = ~ s(Fl) + s(A) + H + loc, 
+  family = GA, data = rent)
+
+## New using Formula().
+f <- R  ~ s(Fl) + s(A) + H + loc | s(Fl) + s(A) + H + loc
+
+b2 <-  gamlss2(f, family = IG, data = rent)
+
+## Compare.
+GAIC(m1, m2, b1, b2)
+
+## Plot.
+term.plot(m1, pages = 1, what = "sigma", ask = FALSE)
+plot(b1, pages = 1)
+
+## More complex models.
+m3 <-  gamlss(R ~ pb(Fl) + pb(A) + H + loc,
+  sigma.fo = ~ pb(Fl) + pb(A) + H + loc,
+  nu.fo = ~ 1, family = BCCGo, data = rent)
+
+m4 <-  gamlss(R ~ pb(Fl) + pb(A) + H + loc,
+  sigma.fo = ~ pb(Fl) + pb(A) + H + loc,
+  nu.fo = ~ pb(Fl) + pb(A) + H + loc,
+  family = BCCGo, data = rent)
+
+f <- R  ~ s(Fl) + s(A) + H + loc | s(Fl) + s(A) + H + loc
+
+b3 <- gamlss2(f, data = rent, family = BCCGo)
+
+f <- R  ~ s(Fl) + s(A) + H + loc |
+  s(Fl) + s(A) + H + loc |
+  s(Fl) + s(A) + H + loc
+
+b4 <- gamlss2(f, data = rent, family = BCCGo)
+
+GAIC(m1, m2, m3, m4, b1, b2, b3, b4)
+
+## Plot estimated effects.
+plot(b4, model = "mu")
+plot(b4, model = "sigma")
+plot(b4, model = "nu")
+
+## Plot quantile residuals.
+plot(b4, which = "resid")
+```
+

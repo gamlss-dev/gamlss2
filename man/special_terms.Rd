@@ -113,7 +113,7 @@ n <- function(formula, ...)
 special_fit.n <- function(x, z, w, control, ...)
 {
   ## Model formula needs to be updated.
-  f <- update(x$formula, response_z ~ .)
+  .fnns <- update(x$formula, response_z ~ .)
 
   ## Assign current working response.
   x$data$response_z <- z
@@ -123,7 +123,7 @@ special_fit.n <- function(x, z, w, control, ...)
   Wts <- list(...)$transfer$Wts
 
   ## Estimate model.
-  nnc <- parse(text = paste0('nnet::nnet(formula = f, data = x$data, weights = weights_w,',
+  nnc <- parse(text = paste0('nnet::nnet(formula = .fnns, data = x$data, weights = weights_w,',
       'size = x$control$size, maxit = x$control$maxit, decay = x$control$decay,',
       'trace = x$control$trace, MaxNWts = x$control$MaxNWts, linout = TRUE',
       if(!is.null(Wts)) ', Wts = Wts)' else ')'))

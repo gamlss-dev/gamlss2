@@ -57,6 +57,23 @@ gamlss2.formula <- function(formula, data, family = NO,
     attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(1, k)))
   }
 
+  ## Check for "." in formula.
+  for(i in 1:length(formula)[2L]) {
+    rhs <- formula(formula, rhs = i)
+    if(as.character(rhs[3]) == ".") {
+      if(!inherits(data, "environment")) {
+        yn <- NULL
+        for(j in 1:length(formula)[1L])
+          yn <- c(yn, as.character(formula(formula, lhs = j))[2L])
+        vn <- names(data)
+        vn <- vn[!(vn %in% yn)]
+        attr(formula, "rhs")[[i]] <- as.call(str2lang(paste(vn, collapse = "+")))
+      } else {
+        stop('using "." in formula but no data argument supplied!')
+      }
+    }
+  }
+
   mf$formula <- fake_formula(formula)
 
   ## Evaluate model.frame.

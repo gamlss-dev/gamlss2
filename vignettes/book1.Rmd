@@ -122,13 +122,15 @@ BIC(r6, r4)
 r7 <-  gamlss(R ~ pb(Fl) + pb(A) + H + loc, family = GA, data = rent)
 r8 <-  gamlss2(R ~ s(Fl) + s(A) + H + loc, family = GA, data = rent)
 r9 <-  gamlss2(R ~ Fl + A + s(Fl) + s(A) + H + loc, family = GA, data = rent)
+r10 <-  gamlss2(R ~ pb2(Fl) + pb2(A) + H + loc, family = GA, data = rent)
 
 ## Compare.
-GAIC(r7, r8, r9)
+GAIC(r7, r8, r9, r10)
 
 ## Plot effects.
 term.plot(r7, pages = 1, ask = FALSE)
 plot(r8, pages = 1)
 plot(r9, pages = 1)
+plot(r10, pages = 1)
 ```
 

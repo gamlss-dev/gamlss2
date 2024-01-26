@@ -121,7 +121,7 @@ vcov.gamlss2 <- function(object, full = FALSE, ...)
     v <- solve(H)
   }
 
-  return(v)
+  return(-v)
 }
 
 ## Little helper function.

@@ -193,3 +193,31 @@ plot(b4, model = "nu")
 plot(b4, which = "resid")
 ```
 
+## Chapter 2: Introduction to gamlss Packages
+
+```{r}
+data("film90", package = "gamlss.data")
+
+## Plot the data
+plot(lborev1 ~ lboopen, data = film90,
+  col = as.integer(film90$dist),
+  xlab = "log opening revenue",
+  ylab = "log extra revenue")
+
+## Formula.
+f <- lborev1 ~ lboopen + I(lboopen^2) + I(lboopen^3)
+
+## Models.
+m0 <- gamlss(f, data = film90, family = NO)
+b0 <- gamlss2(f, data = film90, family = NO)
+l0 <- lm(f, data = film90)
+
+## Plot fitted values.
+plot(lborev1 ~ lboopen, col = "lightgray", data = film90)
+i <- order(film90$lboopen)
+fm0 <- fitted(m0)
+fb0 <- fitted(b0, model = "mu")
+lines(fm0[i] ~ film90$lboopen[i], col = 2, lwd = 4)
+lines(fb0[i] ~ film90$lboopen[i], col = 4, lwd = 2)
+```
+

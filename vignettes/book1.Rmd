@@ -193,7 +193,7 @@ plot(b4, model = "nu")
 plot(b4, which = "resid")
 ```
 
-## Chapter 2: Introduction to gamlss Packages
+## Chapter 2: gamlss Packages
 
 ```{r}
 data("film90", package = "gamlss.data")
@@ -219,7 +219,11 @@ fm0 <- fitted(m0)
 fb0 <- fitted(b0, model = "mu")
 lines(fm0[i] ~ film90$lboopen[i], col = 2, lwd = 4)
 lines(fb0[i] ~ film90$lboopen[i], col = 4, lwd = 2)
+```
 
+### Using vcov()
+
+```{r}
 ## Variance-covariance matrix.
 print(vcov(m0), digits = 3)
 print(vcov(b0), digits = 3)
@@ -241,7 +245,11 @@ corrplot(vcov(m0, type = "cor"), col = col(2),
 
 corrplot(vcov(b0, type = "cor"), col = col(2),
   outline = TRUE, tl.col = "black", addCoef.col = "white")
+```
 
+### Splines
+
+```{r}
 ## Using splines.
 m2 <- gamlss(lborev1 ~ pb(lboopen), data = film90, family = NO)
 summary(m2)
@@ -253,11 +261,34 @@ summary(b2)
 GAIC(m2, b2)
 
 ## Plot.
+par(mfrow = c(1, 1))
 plot(lborev1 ~ lboopen, col = "lightgray", data = film90)
 i <- order(film90$lboopen)
 fm2 <- fitted(m2)
 fb2 <- fitted(b2, model = "mu")
 lines(fm2[i] ~ film90$lboopen[i], col = 2, lwd = 4)
 lines(fb2[i] ~ film90$lboopen[i], col = 4, lwd = 2)
+```
+
+### Neural Networks
+
+```{r}
+library("gamlss.add")
+
+set.seed(123)
+m1 <- gamlss(lborev1 ~ nn(~lboopen, size = 20, decay = 0.1),
+  data = film90, family = NO)
+
+set.seed(123)
+b1 <- gamlss2(lborev1 ~ n(~lboopen, size = 20, decay = 0.1),
+  data = film90, family = NO)
+
+## Plot fitted values.
+plot(lborev1 ~ lboopen, col = "lightgray", data = film90)
+i <- order(film90$lboopen)
+fm1 <- fitted(m1)
+fb1 <- fitted(b1, model = "mu")
+lines(fm1[i] ~ film90$lboopen[i], col = 2, lwd = 4)
+lines(fb1[i] ~ film90$lboopen[i], col = 4, lwd = 2)
 ```
 

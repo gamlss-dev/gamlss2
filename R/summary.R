@@ -54,8 +54,10 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
 }
 
 ## Variance-covariance matrix.
-vcov.gamlss2 <- function(object, full = FALSE, ...)
+vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = FALSE, ...)
 {
+  type <- match.arg(type)
+
   y <- if(is.null(object$y)) {
     model.response(model.frame(object, keepresponse = TRUE))
   } else {
@@ -114,14 +116,26 @@ vcov.gamlss2 <- function(object, full = FALSE, ...)
 
   par <- coef(object, full = full, drop = TRUE)
 
+  if(type == "coef")
+    return(par)
+
   H <- as.matrix(optimHess(par, fn = loglik, control = list(fnscale = -1)))
   v <- try(solve(H), silent = TRUE)
   if(inherits(v, "try-error")) {
     H <- H + diag(1e-05, ncol(H))
     v <- solve(H)
   }
+  v <- -v
 
-  return(-v)
+  if(type == "cor") {
+    dv <- sqrt(diag(v))
+    v <- v / (dv %*% t(dv))
+  }
+
+  if(type == "se")
+    v <- sqrt(diag(v))
+
+  return(v)
 }
 
 ## Little helper function.

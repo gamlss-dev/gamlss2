@@ -219,5 +219,45 @@ fm0 <- fitted(m0)
 fb0 <- fitted(b0, model = "mu")
 lines(fm0[i] ~ film90$lboopen[i], col = 2, lwd = 4)
 lines(fb0[i] ~ film90$lboopen[i], col = 4, lwd = 2)
+
+## Variance-covariance matrix.
+print(vcov(m0), digits = 3)
+print(vcov(b0), digits = 3)
+print(vcov(l0), digits = 3)
+
+## Using poly()
+m1 <- gamlss(lborev1 ~ poly(lboopen, 3), data = film90, family = NO)
+b1 <- gamlss2(lborev1 ~ poly(lboopen, 3), data = film90, family = NO)
+
+## Plot correlation matrices.
+library("corrplot")
+
+col <- colorRampPalette(c("black", "grey"))
+
+par(mfrow = c(1, 2))
+
+corrplot(vcov(m0, type = "cor"), col = col(2),
+  outline = TRUE, tl.col = "black", addCoef.col = "white")
+
+corrplot(vcov(b0, type = "cor"), col = col(2),
+  outline = TRUE, tl.col = "black", addCoef.col = "white")
+
+## Using splines.
+m2 <- gamlss(lborev1 ~ pb(lboopen), data = film90, family = NO)
+summary(m2)
+
+b2 <- gamlss2(lborev1 ~ s(lboopen, k = 20), data = film90, family = NO)
+summary(b2)
+
+## Compare.
+GAIC(m2, b2)
+
+## Plot.
+plot(lborev1 ~ lboopen, col = "lightgray", data = film90)
+i <- order(film90$lboopen)
+fm2 <- fitted(m2)
+fb2 <- fitted(b2, model = "mu")
+lines(fm2[i] ~ film90$lboopen[i], col = 2, lwd = 4)
+lines(fb2[i] ~ film90$lboopen[i], col = 4, lwd = 2)
 ```
 

@@ -507,9 +507,13 @@ tF <- function(x, ...)
   rval$loglik <- function(y, par) {
     par <- check_range(par)
     log <- TRUE
-    d <- eval(dc)
+    d <- try(eval(dc), silent = TRUE)
+    if(inherits(d, "try-error")) {
+      warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
+      return(-Inf)
+    }
     d[!is.finite(d)] <- -100
-    sum(d, na.rm = TRUE)
+    return(sum(d, na.rm = TRUE))
   }
 
   if(!is.null(x$rqres)) {
@@ -585,7 +589,11 @@ complete_family <- function(family)
   if(is.null(family$loglik)) {
     if(!is.null(family$d)) {
       family$loglik <- function(y, par, ...) {
-        logdens <- family$d(y, par, log = TRUE)
+        logdens <- try(family$d(y, par, log = TRUE), silent = TRUE)
+        if(inherits(logdens, "try-error")) {
+          warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
+          return(-Inf)
+        }
         if(any(i <- !is.finite(logdens))) {
           logdens[i] <- -100
         }

@@ -24,7 +24,7 @@ results.gamlss2 <- function(x)
           if("mgcv.smooth" %in% class(x$specials[[i]])) {
             dim <- x$specials[[i]]$dim
             by <- x$specials[[i]]$by
-            if(dim < 3) {
+            if(dim < 3 & !is.null(x$fitted.specials[[j]][[i]])) {
               if(dim > 1) {
                 xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
                 if(all(xc == "numeric")) {

@@ -11,6 +11,12 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
       vj <- all.vars(parse(text = j))
       vj <- vj[vj %in% names(data)]
 
+      if(length(vj) < 1L) {
+        vjf <- as.formula(paste0("~", j))
+        vjf <- fake_formula(vjf)
+        vj <- attr(terms(vjf), "term.labels")
+      }
+
       binj <- binning
 
       if(binj) {

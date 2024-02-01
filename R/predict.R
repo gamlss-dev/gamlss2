@@ -88,6 +88,7 @@ predict.gamlss2 <- function(object,
         xn <- unique(xn)
         if(length(xn)) {
           for(i in xn) {
+            fit <- rep(0.0, nrow(mf))
             if(inherits(object$specials[[i]], "mgcv.smooth")) {
               if(!is.null(object$fitted.specials[[j]][[i]]$selected)) {
                 Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))

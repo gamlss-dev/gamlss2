@@ -16,7 +16,7 @@ importFrom("utils", "flush.console", "tail", "getFromNamespace")
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d")
 
 importFrom("graphics", "abline", "axis", "box", "grid", "hist",
-  "lines", "par", "polygon", "rect", "image", "text", "rug")
+  "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot")
 
 export(
   "fake_formula",
@@ -35,6 +35,7 @@ export(
 S3method(gamlss2, formula)
 S3method(gamlss2, list)
 S3method(plot, gamlss2)
+S3method(plot, gamlss2.list)
 S3method(predict, gamlss2)
 S3method(fitted, gamlss2)
 S3method(residuals, gamlss2)
@@ -52,6 +53,7 @@ S3method(print, gamlss2)
 S3method(print, summary.gamlss2)
 S3method(AIC, gamlss2)
 S3method(BIC, gamlss2)
+S3method(c, gamlss2)
 
 useDynLib(gamlss2, .registration = TRUE)
 

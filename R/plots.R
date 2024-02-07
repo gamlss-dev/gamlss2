@@ -30,6 +30,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
     parameter <- x$family$names[parameter]
   parameter <- x$family$names[pmatch(parameter, x$family$names)]
 
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L)
+    stop("argument parameter is specified wrong!")
+
   ## Check for any effect plots.
   if(length(which) < 2L) {
     if(which == "effects" & length(x$results$effects) < 1L)
@@ -451,4 +455,114 @@ make_pal <- function(col, ncol = NULL, data = NULL, range = NULL,
 
   return(list(colors = col, breaks = breaks, map = obs2col))
 }
+
+## Plot a list of objects.
+plot.gamlss2.list <- function(x, parameter = NULL, which = "effects", terms = NULL, spar = TRUE, legend = TRUE, ...)
+{
+  ## What should be plotted?
+  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid")
+  if(!is.character(which)) {
+    if(any(which > 5L))
+      which <- which[which <= 5L]
+    which <- which.match[which]
+  } else which <- which.match[grep(tolower(which), which.match, fixed = TRUE)]
+  if(length(which) > length(which.match) || !any(which %in% which.match))
+    stop("argument which is specified wrong!")
+
+  if("effects" %in% which) {
+    ok <- sapply(x, function(z) { !is.null(z$results$effects) })
+    x <- x[ok]
+    if(length(x)) {
+      effects <- unique(unlist(sapply(x, function(z) { names(z$results$effects) })))
+      e2 <- strsplit(effects, ",", fixed = TRUE)
+      e2 <- sapply(e2, function(x) { paste0(x[-grep(")", x, fixed = TRUE)], collapse = ",") })
+      e2 <- unique(e2)
+      eff <- list()
+      for(j in e2) {
+        jn <- paste0(j, ")")
+        for(i in seq_along(x)) {
+          jj <- grep(j, names(x[[i]]$results$effects), fixed = TRUE)
+          if(length(jj)) {
+            xn <- colnames(x[[i]]$results$effects[[jj]])
+            xn <- xn[!(xn %in% c("fit", "lower", "upper"))]
+            if(length(xn) < 2L) {
+              if(length(eff[[jn]]) < 1L) {
+                eff[[jn]] <- x[[i]]$results$effects[[jj]][, c(xn, "fit")]
+                colnames(eff[[jn]]) <- c(xn, names(x)[i])
+              } else {
+                fj <- data.frame(x[[i]]$results$effects[[jj]][, "fit"])
+                colnames(fj) <- names(x)[i]
+                eff[[jn]] <- cbind(eff[[jn]], "fit" = fj)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if(is.null(parameter)) {
+      parameter <- list(...)$what
+      if(is.null(parameter))
+      parameter <- list(...)$model
+      if(is.null(parameter))
+        parameter <- x$family$names
+    }
+
+    if(!is.null(parameter)) {
+      if(is.character(parameter)) {
+        ok <- grep2(parameter, names(eff), fixed = TRUE, value = TRUE)
+      } else {
+        ok <- parameter
+      }
+      eff <- eff[ok]   
+    }
+    if(length(eff) > 0L) {
+      if(!is.null(terms)) {
+        if(is.character(terms)) {
+          ok <- grep2(terms, names(eff), fixed = TRUE, value = TRUE)
+        } else {
+          ok <- terms
+        }
+        eff <- eff[ok]
+      }
+    }
+    if(length(eff) > 0L) {
+      if(spar) {
+        owd <- par(no.readonly = TRUE)
+        on.exit(par(owd))
+        par(mfrow = n2mfrow(length(eff)))
+      }
+      if(legend) {
+        pos <- list(...)$pos
+        if(is.null(pos))
+          pos <- "topright"
+        pos <- rep(pos, length.out = length(eff))
+      }
+      col <- list(...)$col
+      if(is.null(col))
+        col <- 1L
+      lwd <- list(...)$lwd
+      if(is.null(lwd))
+        lwd <- 2L
+      for(j in seq_along(eff)) {
+        nm <- ncol(eff[[j]]) - 1L
+        o <- order(eff[[j]][, 1L])
+        eff[[j]] <- eff[[j]][o, ]
+        lty <- list(...)$lty
+        if(is.null(lty))
+          lty <- 1:nm
+        matplot(eff[[j]][, 1L], eff[[j]][, -1L],
+          type = "l", col = col, lwd = lwd, lty = lty,
+          xlab = colnames(eff[[j]])[1L], ylab = names(eff)[j])
+        if(legend) {
+          legend(pos[j], colnames(eff[[j]])[-1L],
+            lwd = lwd, lty = lty, bty = "n", col = col)
+        }
+      }
+    }
+  }
+
+  return(invisible(NULL))
+}
+
 

@@ -292,3 +292,29 @@ lines(fm1[i] ~ film90$lboopen[i], col = 2, lwd = 4)
 lines(fb1[i] ~ film90$lboopen[i], col = 4, lwd = 2)
 ```
 
+### BCCG & BCPE
+
+```{r}
+m2 <- gamlss(lborev1 ~ pb(lboopen), sigma.formula = ~pb(lboopen),
+  nu.formula = ~pb(lboopen), data = film90, family = BCCG)
+
+m3 <- gamlss(lborev1 ~ pb(lboopen), sigma.formula = ~pb(lboopen),
+  nu.formula = ~pb(lboopen), tau.formula = ~pb(lboopen),
+  data = film90, start.from = m2, family = BCPE)
+
+f <- lborev1 ~ pb2(lboopen)|pb2(lboopen)|pb2(lboopen)|pb2(lboopen)
+
+b2 <- gamlss2(f, data = film90, family = BCCG)
+
+b3 <- gamlss2(f, data = film90, family = BCPE)
+
+## Compare.
+GAIC(m2, m3, b2, b3)
+
+## Fitted values.
+fittedPlot(m2, m3, x = film90$lboopen, line.type = TRUE)
+
+## Similar with gamlss2.
+plot(c(b2, b3))
+```
+

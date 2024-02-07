@@ -386,3 +386,16 @@ merge_formula <- function(x, y, ...)
   f
 }
 
+## Combine method.
+c.gamlss2 <- function(...)
+{
+  objects <- list(...)
+  x <- NULL
+  for(i in 1L:length(objects))
+    x <- c(x, objects[i])
+  Call <- match.call()
+  names(x) <- as.character(Call[-1L])
+  class(x) <- c("gamlss2.list")
+  return(x)
+}
+

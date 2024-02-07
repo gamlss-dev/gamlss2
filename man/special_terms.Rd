@@ -159,7 +159,7 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 {
   if(!is.null(x$scalex)) {
     for(j in names(x$scalex)) {
-      data[[j]] <- (data[[j]] - sx[[j]][1]) / diff(sx[[j]])
+      data[[j]] <- (data[[j]] - x$scalex[[j]][1]) / diff(x$scalex[[j]])
     }
   }
   p <- predict(x$model, newdata = data, type = "raw")

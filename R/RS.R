@@ -37,6 +37,20 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   if(length(maxit) < 2L)
     maxit <- c(maxit, 10L)
 
+  ## Fix some parameters?
+  if(is.null(control$fixed)) {
+    control$fixed <- rep(FALSE, length = length(np))
+    names(control$fixed) <- np
+  } else {
+    if(is.null(names(control$fixed)))
+      names(control$fixed) <- np[1:length(control$fixed)]
+  }
+  control$fixed <- as.list(control$fixed)
+  for(j in np) {
+    if(is.null(control$fixed[[j]]))
+      control$fixed[[j]] <- FALSE
+  }
+
   ## Initialize fitted values for each model term.
   fit <- sfit <- list()
   for(j in np) {
@@ -45,7 +59,19 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
       if("(Intercept)" %in% xterms[[j]]) {
         fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
         names(fit[[j]]$coefficients) <- xterms[[j]]
-        fit[[j]]$coefficients["(Intercept)"] <- mean(eta[[j]])
+        etastart <- mean(eta[[j]])
+        if(!is.null(control$start)) {
+          if(is.list(control$start)) {
+            if(!is.null(control$start[[j]])) {
+              etastart <- control$start[[j]][1L]
+            }
+          } else {
+            if(!is.na(control$start[j])) {
+              etastart <- control$start[j][1L]
+            }
+          }
+        }
+        fit[[j]]$coefficients["(Intercept)"] <- etastart
         fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
         eta[[j]] <- fit[[j]]$fitted.values
       } else {
@@ -150,6 +176,10 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
 
     for(j in np) {
+      ## Check if paramater is fixed.
+      if(control$fixed[[j]])
+        next
+
       ## Outer loop working response and weights.
       peta <- family$map2par(eta)
       score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)

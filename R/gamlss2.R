@@ -264,7 +264,7 @@ gamlss2.list <- function(x, ...)
 ## Control parameters.
 gamlss2_control <- function(optimizer = RS,
   trace = TRUE, flush = TRUE, light = FALSE, expand = TRUE,
-  model = TRUE, x = TRUE, y = TRUE, ...)
+  model = TRUE, x = TRUE, y = TRUE, start = NULL, ...)
 {
   ctr <- as.list(environment())
   ctr <- c(ctr, list(...))

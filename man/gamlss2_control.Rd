@@ -10,7 +10,7 @@
 \usage{
 gamlss2_control(optimizer = RS, trace = TRUE,
   flush = TRUE, light = FALSE, expand = TRUE,
-  model = TRUE, x = TRUE, y = TRUE, \dots)
+  model = TRUE, x = TRUE, y = TRUE, start = NULL, \dots)
 }
 
 \arguments{
@@ -27,6 +27,7 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   \item{x}{Logical, indicating whether the model matrix should be included
     as component of the returned object.}
   \item{y}{Logical, should the response be included as component of the returned object.}
+  \item{start}{Starting values for estimation algorithms.}
   \item{\dots}{Further control parameters to be part of the return value, e.g.,
     used within optimizer function \code{\link{RS}}.}
 }
@@ -55,6 +56,18 @@ f <- y ~ s(x) | s(x)
 ## control in the RS algorithm.
 b1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
 b2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
+
+## Use starting values.
+b3 <- gamlss2(f, data = abdom, family = BCT,
+  start = c(mu = 200, sigma = -2, nu = 1, tau = 0.1))
+
+## Fix some parameters.
+b4 <- gamlss2(f, data = abdom, family = BCT,
+  start = c(mu = 200, sigma = -2, nu = 1, tau = 0.1),
+  fixed = c(nu = TRUE, tau = TRUE))
+
+## Estimated coefficients
+coef(b4)
 }}
 
 \keyword{models}

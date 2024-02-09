@@ -13,11 +13,11 @@
 \usage{
 ## Rigby and Stasinopoulos algorithm.
 RS(x, y, specials, family, offsets,
-  weights, xterms, sterms, control)
+  weights, start, xterms, sterms, control)
 
 ## Cole and Green algorithm.
 CG(x, y, specials, family, offsets,
-  weights, xterms, sterms, control)
+  weights, start, xterms, sterms, control)
 }
 
 \arguments{
@@ -28,6 +28,13 @@ CG(x, y, specials, family, offsets,
   \item{family}{A family object, see \code{\link{gamlss2.family}}.}
   \item{offsets}{If supplied, a list or data frame of possible model offset.}
   \item{weights}{If supplied, a numeric vector of weights.}
+  \item{start}{Starting values, either for the parameters of the response distribution or,
+    if specified as a named list in which each element of length one is named with
+    \code{"(Intercept)"}, the respective intercepts are initialized. If starting values are
+    specified as a named list, data frame or matrix, where each element/column is a
+    vector with the same length as the number of observations in the data,
+    the respective predictors are initialized with these. See the examples for
+    \code{\link{gamlss2}}.}
   \item{xterms}{A named list specifying the linear model terms. Each named list
     element represents one parameter as specified in the family object.}
   \item{sterms}{A named list specifying the special model terms. Each named list

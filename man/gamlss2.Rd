@@ -18,7 +18,7 @@
 gamlss2(x, \dots)
 
 \method{gamlss2}{formula}(formula, data, family = NO,
-  subset, na.action, weights, offset,
+  subset, na.action, weights, offset, start = NULL,
   control = gamlss2_control(\dots), \dots)
 
 \method{gamlss2}{list}(x, \dots)
@@ -44,6 +44,7 @@ gamlss2(x, \dots)
     of the distribution. In the case of multiple offsets, a data frame or list must be supplied.
     Each offset is assigned in the same order as the parameters of the distribution
     specified in the family object.}
+  \item{start}{Starting values for estimation algorithms.}
   \item{control}{A list of control arguments, see \code{\link{gamlss2_control}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2_control}}.}
 }
@@ -130,6 +131,22 @@ plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
+
+## Use of starting values.
+m <- gamlss2(f, data = abdom, family = BCT,
+  start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10))
+
+## Fix some parameters.
+m <- gamlss2(f, data = abdom, family = BCT,
+  start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10),
+  fixed = c(nu = TRUE, tau = TRUE))
+
+## Estimated coefficients
+coef(m)
+
+## Starting values using full predictors.
+m <- gamlss2(f, data = abdom, family = BCT,
+  start = fitted(m))
 }
 
 \keyword{models}

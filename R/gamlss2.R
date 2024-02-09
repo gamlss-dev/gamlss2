@@ -6,7 +6,7 @@ gamlss2 <- function(x, ...)
 
 ## Formula method.
 gamlss2.formula <- function(formula, data, family = NO,
-  subset, na.action, weights, offset,
+  subset, na.action, weights, offset, start = NULL,
   control = gamlss2_control(...), ...)
 {
   ## Save environments.
@@ -211,8 +211,9 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
 
   ## Estimation.
-  rval <- optimizer(X, Y, Specials, family,
-    offsets, weights, Xterms, Sterms, control)
+  rval <- optimizer(x = X, y = Y, specials = Specials, family = family,
+    offsets = offsets, weights = weights, start = start, xterms = Xterms, sterms = Sterms,
+    control = control)
 
   ## Further model information.
   rval$call <- call
@@ -264,7 +265,7 @@ gamlss2.list <- function(x, ...)
 ## Control parameters.
 gamlss2_control <- function(optimizer = RS,
   trace = TRUE, flush = TRUE, light = FALSE, expand = TRUE,
-  model = TRUE, x = TRUE, y = TRUE, start = NULL, ...)
+  model = TRUE, x = TRUE, y = TRUE, fixed = FALSE, ...)
 {
   ctr <- as.list(environment())
   ctr <- c(ctr, list(...))

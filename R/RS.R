@@ -1,5 +1,5 @@
 ## Rigby and Stasinopoulos algorithm.
-RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control)
+RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 {
   ## Number of observations.
   n <- if(is.null(dim(y))) length(y) else nrow(y)
@@ -8,7 +8,41 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   np <- family$names
 
   ## Initialize predictors.
-  eta <- initialize_eta(y, family, n, TRUE)
+  etastart <- initialize_eta(y, family, n, TRUE)
+
+  ## Starting values.
+  if(!missing(start)) {
+    if(!is.null(start)) {
+      if(inherits(start, "list")) {
+        if(length(start[[1L]]) > 1L)
+          start <- as.data.frame(start)
+      }
+      if(inherits(start, c("data.frame", "matrix"))) {
+        start <- as.data.frame(start)
+        if(nrow(start) != n)
+          stop("starting values have wrong number of observations!")
+        for(j in np) {
+          if(!is.null(start[[j]])) {
+            etastart[[j]] <- start[[j]]
+          }
+        }
+      }
+      if(inherits(start, c("list", "numeric"))) {
+        start <- as.list(start)
+        if(is.null(names(start)))
+          names(start) <- rep(np, length.out = length(start))
+        for(j in np) {
+          if(!is.null(start[[j]])) {
+            if(is.na(start[[j]]["(Intercept)"])) {
+              etastart[[j]] <- rep(make.link2(family$links[j])$linkfun(start[[j]]), n)
+            } else {
+              etastart[[j]] <- rep(start[[j]], n)
+            }
+          }
+        }
+      }
+    }
+  }
 
   ## Check weights.
   if(!is.null(weights))
@@ -52,26 +86,15 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   }
 
   ## Initialize fitted values for each model term.
-  fit <- sfit <- list()
+  fit <- sfit <- eta <- list()
   for(j in np) {
     fit[[j]] <- list()
+    eta[[j]] <- rep(0.0, n)
     if(length(xterms[[j]])) {
       if("(Intercept)" %in% xterms[[j]]) {
         fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
         names(fit[[j]]$coefficients) <- xterms[[j]]
-        etastart <- mean(eta[[j]])
-        if(!is.null(control$start)) {
-          if(is.list(control$start)) {
-            if(!is.null(control$start[[j]])) {
-              etastart <- control$start[[j]][1L]
-            }
-          } else {
-            if(!is.na(control$start[j])) {
-              etastart <- control$start[j][1L]
-            }
-          }
-        }
-        fit[[j]]$coefficients["(Intercept)"] <- etastart
+        fit[[j]]$coefficients["(Intercept)"] <- mean(etastart[[j]])
         fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
         eta[[j]] <- fit[[j]]$fitted.values
       } else {
@@ -91,7 +114,7 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
   dev0 <- -2 * family$loglik(y, family$map2par(eta))
 
   ## Estimate intercept only model first.
-  if(isTRUE(control$nullmodel)) {
+  if(isTRUE(control$nullmodel) & length(xterms)) {
     beta <- ieta <- list()
     for(j in np) {
       beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
@@ -99,30 +122,32 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
     }
     beta <- unlist(beta)
 
-    lli <- family$loglik(y, family$map2par(ieta))
+    if(!any(is.na(beta))) {
+      lli <- family$loglik(y, family$map2par(ieta))
 
-    ridge <- control$ridge
-    if(is.null(ridge))
-      ridge <- 1e-05
+      ridge <- control$ridge
+      if(is.null(ridge))
+        ridge <- 1e-05
 
-    fn_ll <- function(par) {
-      for(j in np)
-        ieta[[j]] <- rep(par[j], n)
-      ll <- family$loglik(y, family$map2par(ieta)) - ridge * sum(par^2)
-      return(-ll)
-    }
+      fn_ll <- function(par) {
+        for(j in np)
+          ieta[[j]] <- rep(par[j], n)
+        ll <- family$loglik(y, family$map2par(ieta)) - ridge * sum(par^2)
+        return(-ll)
+      }
 
-    opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
+      opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
 
-    if(!inherits(opt, "try-error")) {
-      if(-opt$objective > lli) {
-        beta <- opt$par
-        dev0 <- 2 * opt$objective
-        if(isTRUE(control$initialize)) {
-          for(j in np) {
-            fit[[j]]$coefficients["(Intercept)"] <- beta[j]
-            fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
-            eta[[j]] <- fit[[j]]$fitted.values
+      if(!inherits(opt, "try-error")) {
+        if(-opt$objective > lli) {
+          beta <- opt$par
+          dev0 <- 2 * opt$objective
+          if(isTRUE(control$initialize)) {
+            for(j in np) {
+              fit[[j]]$coefficients["(Intercept)"] <- beta[j]
+              fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
+              eta[[j]] <- fit[[j]]$fitted.values
+            }
           }
         }
       }
@@ -181,11 +206,19 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
         next
 
       ## Outer loop working response and weights.
-      peta <- family$map2par(eta)
+      peta <- if(iter[1L] > 0L) {
+        family$map2par(eta)
+      } else {
+        family$map2par(etastart)
+      }
       score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
       hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
 
-      z <- eta[[j]] + 1 / hess * score
+      z <- if(iter[1L] > 0L) {
+        eta[[j]] + 1 / hess * score
+      } else {
+        etastart[[j]] + 1 / hess * score
+      }
 
       ## Start inner loop.
       while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
@@ -427,10 +460,10 @@ RS <- function(x, y, specials, family, offsets, weights, xterms, sterms, control
 }
 
 ## Cole and Green flavor.
-CG <- function(x, y, specials, family, offsets, weights, xterms, sterms, control)
+CG <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 {
   control$CG <- TRUE
-  RS(x, y, specials, family, offsets, weights, xterms, sterms, control)
+  RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 }
 
 ## Function to initialize predictors.

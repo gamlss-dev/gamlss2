@@ -24,10 +24,10 @@ specify any type of model using these new infrastructures, making the package hi
 flexible and accommodating to a wide range of modeling requirements.
 
 * The main model function is `gamlss2()`.
-* The default optimizer functions is `RS()`. Optimizer functions can be exachanged.
+* The default optimizer functions is `RS()`. Optimizer functions can be exchanged.
 * Most important methods: `summary()`, `plot()`, `predict()`.
 * Easy development of new family objects, see `?family.gamlss2`.
-* User-specific "special" terms, see `?special_terms`.
+* User-specific "special" terms are possible, see `?special_terms`.
 
 For examples, please visit the manual pages.
 

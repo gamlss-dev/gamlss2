@@ -14,8 +14,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(!missing(start)) {
     if(!is.null(start)) {
       if(inherits(start, "list")) {
-        if(length(start[[1L]]) > 1L)
-          start <- as.data.frame(start)
+        if("fake_formula" %in% names(start)) {
+          start <- fitted(start)
+        } else {
+          if(length(start[[1L]]) > 1L)
+            start <- as.data.frame(start)
+        }
       }
       if(inherits(start, c("data.frame", "matrix"))) {
         start <- as.data.frame(start)

@@ -141,12 +141,16 @@ m <- gamlss2(f, data = abdom, family = BCT,
   start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10),
   fixed = c(nu = TRUE, tau = TRUE))
 
-## Estimated coefficients
+## Estimated coefficients (intercepts).
 coef(m)
 
 ## Starting values using full predictors.
 m <- gamlss2(f, data = abdom, family = BCT,
   start = fitted(m))
+
+## Same with.
+m <- gamlss2(f, data = abdom, family = BCT,
+  start = m)
 }
 
 \keyword{models}

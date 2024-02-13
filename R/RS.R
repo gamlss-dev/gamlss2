@@ -274,7 +274,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$loglik(y, family$map2par(eta))
             }
-            opt <- nlminb(coef(m), objective = ll)
+            opt <- optim(coef(m), fn = ll)
             m$coefficients <- opt$par
             m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
           }

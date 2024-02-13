@@ -316,5 +316,13 @@ fittedPlot(m2, m3, x = film90$lboopen, line.type = TRUE)
 
 ## Similar with gamlss2.
 plot(c(b2, b3))
+
+## Quantiles.
+centiles(m3,  xvar = film90$lboopen,
+  cent = c(3, 10, 25, 50, 75, 90, 97),
+  ylab = "lborev1", xlab = "lboopen")
+
+## Using gamlss2.
+quantile(b3, plot = TRUE, variable = TRUE)
 ```
 

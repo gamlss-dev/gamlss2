@@ -328,6 +328,8 @@ quantile(b3, plot = TRUE, variable = TRUE)
 
 ## Chapter 3: Algorithms
 
+### Species Example using PIG
+
 ```{r}
 data("species", package = "gamlss.data")
 
@@ -347,5 +349,29 @@ f <- fish ~ s(sqrt(lake)) | s(sqrt(lake))
 b2 <- gamlss2(f, data = species, family = PIG)
 
 GAIC(m1, m2, m3, b1, b2)
+```
+
+### Oil Price Example
+
+```{r}
+data("oil", package = "gamlss.data")
+
+m1 <- gamlss(OILPRICE ~ pb(respLAG) + pb(HO1_log),
+  sigma.formula =~ pb(respLAG) + pb(HO1_log),
+  nu.formula =~ pb(respLAG) + pb(HO1_log),
+  tau.formula =~ pb(respLAG) + pb(HO1_log),
+  family = SHASHo, data = oil, method = mixed(10, 10),
+  gd.tol = Inf)
+
+f <- OILPRICE ~ s(respLAG,k=20) + s(HO1_log,k=20) |
+  s(respLAG,k=20) + s(HO1_log,k=20) |
+  s(respLAG,k=20) + s(HO1_log,k=20) |
+  s(respLAG,k=20) + s(HO1_log,k=20)
+
+## Increase number of iterations, start CG algorithm at iteration 10
+## of the outer backfitting loop.
+b1 <- gamlss2(f, data = oil, family = SHASHo, maxit = c(100, 10), CG = 10)
+
+GAIC(m1, b1)
 ```
 

@@ -326,3 +326,26 @@ centiles(m3,  xvar = film90$lboopen,
 quantile(b3, plot = TRUE, variable = TRUE)
 ```
 
+## Chapter 3: Algorithms
+
+```{r}
+data("species", package = "gamlss.data")
+
+m1 <- gamlss(fish ~ log(lake), sigma.fo =~ log(lake),
+  family = PIG, data = species)
+
+m2 <- gamlss(fish ~ log(lake), sigma.fo =~ log(lake),
+  family = PIG, data = species, method = CG(), n.cyc = 100)
+
+m3 <- gamlss(fish ~ log(lake), sigma.fo =~ log(lake),
+  family = PIG, data = species, method = mixed(1, 100))
+
+f <- fish ~ log(lake) | log(lake)
+b1 <- gamlss2(f, data = species, family = PIG)
+
+f <- fish ~ s(sqrt(lake)) | s(sqrt(lake))
+b2 <- gamlss2(f, data = species, family = PIG)
+
+GAIC(m1, m2, m3, b1, b2)
+```
+

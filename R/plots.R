@@ -116,8 +116,11 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if("scatter-resid" %in% which) {
       p <- predict(x, type = "parameter", ...)
-      p <- family(x)$q(0.5, p)
-      plot_sr(p, resids, ...)
+      m <- family(x)$q(0.5, p)
+      n <- if(is.null(dim(p))) length(p) else nrow(p)
+      if(length(m) != n)
+        m <- family(x)$mean(p)
+      plot_sr(m, resids, ...)
     }
   }
 }
@@ -400,7 +403,6 @@ plot_sr <- function(f, x, ...) {
   col <- list(...)$col
   if(is.null(col))
     col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
-
   plot(f, x, xlab = xlab, ylab = ylab, main = main,
     col = col, pch = pch)
   abline(h = 0, col = "lightgray")

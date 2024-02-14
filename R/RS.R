@@ -140,12 +140,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         return(-ll)
       }
 
-      opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
+      opt <- try(optim(beta, fn = fn_ll, method = "BFGS"), silent = TRUE)
 
       if(!inherits(opt, "try-error")) {
-        if(-opt$objective > lli) {
+        if(-opt$value > lli) {
           beta <- opt$par
-          dev0 <- 2 * opt$objective
+          dev0 <- 2 * opt$value
           if(isTRUE(control$initialize)) {
             for(j in np) {
               fit[[j]]$coefficients["(Intercept)"] <- beta[j]
@@ -272,11 +272,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           if(ll1 < ll02) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
-              -family$loglik(y, family$map2par(eta))
+              -family$loglik(y, family$map2par(eta)) + ridge * sum(par^2)
             }
-            opt <- optim(coef(m), fn = ll)
-            m$coefficients <- opt$par
-            m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
+            opt <- try(optim(coef(m), fn = ll, method = "BFGS"), silent = TRUE)
+            if(!inherits(opt, "try-error")) {
+              m$coefficients <- opt$par
+              m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
+            }
           }
           
           ## Step length control.

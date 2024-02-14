@@ -11,40 +11,45 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   etastart <- initialize_eta(y, family, n, TRUE)
 
   ## Starting values.
+  cstart <- NULL
   if(!missing(start)) {
-    if(!is.null(start)) {
-      if(inherits(start, "list")) {
-        if("fake_formula" %in% names(start)) {
-          start <- fitted(start)
-        } else {
-          if(length(start[[1L]]) > 1L)
-            start <- as.data.frame(start)
-        }
-      }
-      if(inherits(start, c("data.frame", "matrix"))) {
-        start <- as.data.frame(start)
-        if(nrow(start) != n)
-          stop("starting values have wrong number of observations!")
-        for(j in np) {
-          if(!is.null(start[[j]])) {
-            etastart[[j]] <- start[[j]]
+    if(!inherits(start, "coef.gamlss2")) {
+      if(!is.null(start)) {
+        if(inherits(start, "list")) {
+          if("fake_formula" %in% names(start)) {
+            start <- fitted(start)
+          } else {
+            if(length(start[[1L]]) > 1L)
+              start <- as.data.frame(start)
           }
         }
-      }
-      if(inherits(start, c("list", "numeric"))) {
-        start <- as.list(start)
-        if(is.null(names(start)))
-          names(start) <- rep(np, length.out = length(start))
-        for(j in np) {
-          if(!is.null(start[[j]])) {
-            if(is.na(start[[j]]["(Intercept)"])) {
-              etastart[[j]] <- rep(make.link2(family$links[j])$linkfun(start[[j]]), n)
-            } else {
-              etastart[[j]] <- rep(start[[j]], n)
+        if(inherits(start, c("data.frame", "matrix"))) {
+          start <- as.data.frame(start)
+          if(nrow(start) != n)
+            stop("starting values have wrong number of observations!")
+          for(j in np) {
+            if(!is.null(start[[j]])) {
+              etastart[[j]] <- start[[j]]
+            }
+          }
+        }
+        if(inherits(start, c("list", "numeric"))) {
+          start <- as.list(start)
+          if(is.null(names(start)))
+            names(start) <- rep(np, length.out = length(start))
+          for(j in np) {
+            if(!is.null(start[[j]])) {
+              if(is.na(start[[j]]["(Intercept)"])) {
+                etastart[[j]] <- rep(make.link2(family$links[j])$linkfun(start[[j]]), n)
+              } else {
+                etastart[[j]] <- rep(start[[j]], n)
+              }
             }
           }
         }
       }
+    } else {
+      cstart <- unlist(start)
     }
   }
 
@@ -90,16 +95,26 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Initialize fitted values for each model term.
-  fit <- sfit <- eta <- list()
+  fit <- sfit <- eta <- nes <- list()
   for(j in np) {
     fit[[j]] <- list()
     eta[[j]] <- rep(0.0, n)
+    nes[[j]] <- FALSE
     if(length(xterms[[j]])) {
       if("(Intercept)" %in% xterms[[j]]) {
         fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
         names(fit[[j]]$coefficients) <- xterms[[j]]
         fit[[j]]$coefficients["(Intercept)"] <- mean(etastart[[j]])
         fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
+        if(!is.null(cstart)) {
+          sj <- grep(paste0(j, ".p."), names(cstart), fixed = TRUE, value = TRUE)
+          sj <- sj[sj %in% paste0(j, ".p.", xterms[[j]])]
+          if(length(sj)) {
+            fit[[j]]$coefficients[gsub(paste0(j, ".p."), "", sj)] <- as.numeric(cstart[sj])
+            fit[[j]]$fitted.values <- drop(x %*% fit[[j]]$coefficients)
+            nes[[j]] <- TRUE
+          }
+        }
         eta[[j]] <- fit[[j]]$fitted.values
       } else {
         fit[[j]] <- list("fitted.values" = eta[[j]])
@@ -108,10 +123,27 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     if(length(sterms)) {
       if(length(sterms[[j]])) {
         sfit[[j]] <- list()
-        for(i in sterms[[j]])
+        for(i in sterms[[j]]) {
           sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n), "edf" = 0.0, "selected" = FALSE)
+          if(!is.null(cstart)) {
+            sj <- grep(paste0(j, ".s.", i), names(cstart), fixed = TRUE, value = TRUE)
+            if(length(sj)) {
+              if(!is.null(specials[[i]]$X)) {
+                sfit[[j]][[i]]$fitted.values <- drop(specials[[i]]$X %*% cstart[sj])
+                if(control$binning) {
+                  sfit[[j]][[i]]$fitted.values <- sfit[[j]][[i]]$fitted.values[specials[[i]]$binning$match.index]
+                }
+                sfit[[j]][[i]]$selected <- TRUE
+                eta[[j]] <- eta[[j]] + sfit[[j]][[i]]$fitted.values
+                nes[[j]] <- TRUE
+              }
+            }
+          }
+        }
       }
     }
+    if(nes[[j]])
+      etastart[[j]] <- eta[[j]]
   }
 
   ## Null deviance.
@@ -341,6 +373,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               sfit[[j]][[k]]$selected <- TRUE
               ll02 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
+            } else {
+              if(isTRUE(sfit[[j]][[k]]$selected)) {
+                sfit[[j]][[k]] <- fs
+                sfit[[j]][[k]]$selected <- TRUE
+                ll02 <- ll1
+              }
             }
 
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values

@@ -50,7 +50,14 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
     }
   }
 
+  class(cos) <- "coef.gamlss2"
+
   return(cos)
+}
+
+print.coef.gamlss2 <- function(x, ...)
+{
+  print(unclass(x), ...)
 }
 
 ## Variance-covariance matrix.

@@ -140,12 +140,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         return(-ll)
       }
 
-      opt <- try(optim(beta, fn = fn_ll, method = "BFGS"), silent = TRUE)
+      opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
 
       if(!inherits(opt, "try-error")) {
-        if(-opt$value > lli) {
+        if(-opt$objective > lli) {
           beta <- opt$par
-          dev0 <- 2 * opt$value
+          dev0 <- 2 * opt$objective
           if(isTRUE(control$initialize)) {
             for(j in np) {
               fit[[j]]$coefficients["(Intercept)"] <- beta[j]

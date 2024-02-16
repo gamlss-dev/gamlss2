@@ -178,7 +178,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         if(-opt$objective > lli) {
           beta <- opt$par
           dev0 <- 2 * opt$objective
-          if(isTRUE(control$initialize)) {
+          if(isTRUE(control$initialize) & missing(start)) {
             for(j in np) {
               fit[[j]]$coefficients["(Intercept)"] <- beta[j]
               fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
@@ -301,7 +301,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$loglik(y, family$map2par(etai))
 
-          if(ll1 < ll02) {
+          if(ll1 < ll02 & FALSE) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$loglik(y, family$map2par(eta)) + ridge * sum(par^2)
@@ -422,7 +422,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     ## Stopping criterion.
     eps[1L] <- abs((llo1 - llo0) / llo0)
 
-    ## Warning if deviance is increasing.
+    ## Warning if deviance is increasing?
     if((llo1 < llo0) & (iter[1L] > 0)) {
       warning("Deviance is increasing, maybe set argument step in gamlss2_control()!")
     }

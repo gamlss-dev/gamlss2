@@ -218,11 +218,13 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
       theta = theta, phi = phi, zlab = zlab, expand = expand,
       ticktype = ticktype, zlim = ylim, border = NA)
     cl <- contourLines(x1, x2, m)
-    for(i in 1:length(cl)) {
-      lines(trans3d(cl[[i]]$x, cl[[i]]$y, cl[[i]]$level, pmat), col = "black")
-      tco <- trans3d(mean(cl[[i]]$x), mean(cl[[i]]$y), cl[[i]]$level, pmat)
-      text(tco[1L], tco[2L], cl[[i]]$level, col = "black",
-        pos = 3, cex = 0.6, offset = 0.5)
+    if(length(cl)) {
+      for(i in 1:length(cl)) {
+        lines(trans3d(cl[[i]]$x, cl[[i]]$y, cl[[i]]$level, pmat), col = "black")
+        tco <- trans3d(mean(cl[[i]]$x), mean(cl[[i]]$y), cl[[i]]$level, pmat)
+        text(tco[1L], tco[2L], cl[[i]]$level, col = "black",
+          pos = 3, cex = 0.6, offset = 0.5)
+      }
     }
   } else {
     if(is.null(main)) {

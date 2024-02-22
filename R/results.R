@@ -92,7 +92,7 @@ results.gamlss2 <- function(x)
           }
 
           ## special terms.
-          if("special" %in% class(x$specials[[i]])) {
+          if(("special" %in% class(x$specials[[i]])) & (i %in% names(x$fitted.specials[[j]]))) {
             dim <- length(x$specials[[i]]$term)
 
             if(dim > 2)

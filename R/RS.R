@@ -78,7 +78,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(is.null(maxit))
     maxit <- 20L
   if(length(maxit) < 2L)
-    maxit <- c(maxit, 10L)
+    maxit <- c(maxit, 20L)
 
   ## Fix some parameters?
   if(is.null(control$fixed)) {

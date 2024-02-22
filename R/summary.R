@@ -83,24 +83,10 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
   family <- object$family
   nx <- family$names
-  eta <- list()
-  for(i in nx) {
-    eta[[i]] <- rep(0, n)
-    if(!full) {
-      if(!is.null(lpar[[i]]$s)) {
-        for(j in names(lpar[[i]]$s)) {
-          fit <- drop(object$specials[[j]]$X %*% lpar[[i]]$s[[j]])
-          if(!is.null(object$specials[[j]]$binning)) {
-            fit <- fit[object$specials[[j]]$binning$match.index]
-          }
-          eta[[i]] <- eta[[i]] + fit
-        }
-      }
-    }
-  }
 
   loglik <- function(par) {
     par <- par2list(par)
+    eta <- list()
     for(i in nx) {
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
@@ -130,7 +116,11 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   v <- try(solve(H), silent = TRUE)
   if(inherits(v, "try-error")) {
     H <- H + diag(1e-05, ncol(H))
-    v <- solve(H)
+    v <- try(solve(H), silent = TRUE)
+    if(inherits(v, "try-error")) {
+      H <- H + diag(1e-03, ncol(H))
+      v <- solve(H)
+    }
   }
   v <- -v
 

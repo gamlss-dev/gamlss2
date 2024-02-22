@@ -1,3 +1,48 @@
+## Special conditional inference ctree constructor.
+tree <- function(formula, ...)
+{
+  stopifnot(requireNamespace("rpart"))
+  st <- list()
+  ctr <- list(...)
+  st$control <- do.call(rpart::rpart.control, ctr)
+  st$formula <- formula
+  st$term <- all.vars(formula)
+  st$label <- paste0("tree(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$data <- model.frame(formula)
+  class(st) <- c("special", "tree")
+  return(st)
+}
+
+## ctree fitting function for the backfitting algorithm.
+special_fit.tree <- function(x, z, w, y, eta, j, family, control, ...)
+{
+  f <- update(x$formula, response_z ~ .)
+  x$data$response_z <- z
+  x$data$w_z <- w
+  rval <- list(
+    "model" = rpart::rpart(formula = f, data = x$data, weights = w_z,
+      control = x$control)
+  )
+  rval$fitted.values <- predict(rval$model)
+  rval$shift <- mean(rval$fitted.values)
+  rval$fitted.values <- rval$fitted.values - rval$shift
+  frame <- rval$model$frame
+  leaves <- frame$var == "<leaf>"
+  size <- sum(leaves)
+  edf <- 2 * size - 1
+  rval$edf <- edf
+  class(rval) <- "tree.fitted"
+  return(rval)
+}
+
+## A ct predict method.
+special_predict.tree.fitted <- function(x, data, ...)
+{
+  p <- predict(x$model, newdata = data, type = "vector")
+  p <- p - x$shift
+  return(p)
+}
+
 ## Special conditional inference forest constructor.
 cf <- function(formula, ...)
 {

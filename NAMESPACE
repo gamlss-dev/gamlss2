@@ -9,7 +9,7 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
   "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
-  "formula", "logLik", "na.omit", "var")
+  "formula", "logLik", "na.omit", "var", "optim")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace")
 

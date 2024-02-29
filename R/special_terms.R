@@ -18,9 +18,9 @@ special_fit.tree <- function(x, z, w, y, eta, j, family, control, ...)
 {
   f <- update(x$formula, response_z ~ .)
   x$data$response_z <- z
-  x$data$w_z <- w
+  x$data$w <- w
   rval <- list(
-    "model" = rpart::rpart(formula = f, data = x$data, weights = w_z,
+    "model" = rpart::rpart(formula = f, data = x$data, weights = w,
       control = x$control)
   )
   rval$fitted.values <- predict(rval$model)

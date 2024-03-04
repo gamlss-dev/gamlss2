@@ -371,7 +371,7 @@ f <- OILPRICE ~ s(respLAG,k=20) + s(HO1_log,k=20) |
 ## Increase number of iterations, start CG algorithm at iteration 10
 ## of the outer backfitting loop.
 b1 <- gamlss2(f, data = oil, family = SHASHo, maxit = c(400, 1), CG = 10)
-
+  
 GAIC(m1, b1)
 ```
 

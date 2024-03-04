@@ -304,9 +304,9 @@ m3 <- gamlss(lborev1 ~ pb(lboopen), sigma.formula = ~pb(lboopen),
 
 f <- lborev1 ~ pb2(lboopen)|pb2(lboopen)|pb2(lboopen)|pb2(lboopen)
 
-b2 <- gamlss2(f, data = film90, family = BCCG)
+b2 <- gamlss2(f, data = film90, family = BCCG, maxit = c(100, 1))
 
-b3 <- gamlss2(f, data = film90, family = BCPE)
+b3 <- gamlss2(f, data = film90, family = BCPE, maxit = c(100, 1))
 
 ## Compare.
 GAIC(m2, m3, b2, b3)
@@ -370,7 +370,7 @@ f <- OILPRICE ~ s(respLAG,k=20) + s(HO1_log,k=20) |
 
 ## Increase number of iterations, start CG algorithm at iteration 10
 ## of the outer backfitting loop.
-b1 <- gamlss2(f, data = oil, family = SHASHo, maxit = c(100, 10), CG = 10)
+b1 <- gamlss2(f, data = oil, family = SHASHo, maxit = c(400, 1), CG = 10)
 
 GAIC(m1, b1)
 ```

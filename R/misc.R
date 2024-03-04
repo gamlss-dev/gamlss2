@@ -55,7 +55,7 @@ available_families <- function(type = c("continuous", "discrete"), families = NU
   return(d)
 }
 
-findDist <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
+findFamily <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
   if(is.null(families)) {
     families <- if(is.numeric(y)) {
       available_families(type = "continuous")
@@ -90,5 +90,65 @@ findDist <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
   }
 
   return(sort(ic, decreasing = TRUE))
+}
+
+fitFamily <- function(y, family = NO, plot = TRUE, ...)
+{
+  if(is.character(family))
+    family <- available_families(families = familiy[1L])[[1L]]
+
+  y <- na.omit(y)
+
+  b <- gamlss2(y ~ 1, family = family, ...)
+
+  if(plot) {
+    par <- predict(b, type = "parameter")
+
+    dy <- b$family$d(y, par)
+
+    h <- hist(y, breaks = "Scott", plot = FALSE)
+
+    ylim <- list(...)$ylim
+    if(is.null(ylim))
+      ylim <- range(c(h$density, dy))
+
+    main <- list(...)$main
+    if(is.null(main)) {
+      k <- list(...)$k
+      if(is.null(k))
+        k <- 2
+      main <- paste("Histogram and estimated",  b$family$family,
+        "density\nGAIC =", round(GAIC(b, k = k), 4))
+    }
+    xlab <- list(...)$xlab
+    if(is.null(xlab))
+      xlab <- "Response"
+
+    hist(y, breaks = "Scott", freq = FALSE, ylim = ylim,
+      xlab = xlab, main = main)
+    i <- order(y)
+    lines(dy[i] ~ y[i], col = 4, lwd = 2)
+
+    legend <- list(...)$legend
+    if(is.null(legend))
+      legend <- TRUE
+
+    if(legend) {
+      par <- par[1L, ]
+
+      pos <- list(...)$pos
+      if(is.null(pos))
+        pos <- "topright"
+
+      legend(pos,
+        paste0(names(par), " = ", round(par, 4)),
+        title = "Parameters:", title.font = 2,
+        lwd = 1, col = NA, bty = "n")
+    }
+
+    return(invisible(b))
+  } else {
+    return(b)
+  }  
 }
 

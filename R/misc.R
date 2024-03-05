@@ -13,7 +13,7 @@ varimp <- function(object, newdata = NULL, scale = TRUE, nrep = 20, ...)
       newdata[[vn[j]]] <- sample(xj)
       vi[i] <- logLik(object, newdata = newdata) - ll0
     }
-    ll[vn[j]] <- median(vi)
+    ll[vn[j]] <- mean(vi, na.rm = TRUE)
     newdata[[vn[j]]] <- xj
   }
   ll <- ll / ll0

@@ -95,45 +95,84 @@ findFamily <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
 fitFamily <- function(y, family = NO, plot = TRUE, ...)
 {
   if(is.character(family))
-    family <- available_families(families = familiy[1L])[[1L]]
+    family <- available_families(families = family[1L])[[1L]]
 
   y <- na.omit(y)
 
   b <- gamlss2(y ~ 1, family = family, ...)
 
   if(plot) {
-    par <- predict(b, type = "parameter")
-
-    dy <- b$family$d(y, par)
-
-    h <- hist(y, breaks = "Scott", plot = FALSE)
-
-    ylim <- list(...)$ylim
-    if(is.null(ylim))
-      ylim <- range(c(h$density, dy))
+    par <- predict(b, type = "parameter", drop = FALSE)
 
     main <- list(...)$main
-    if(is.null(main)) {
-      k <- list(...)$k
-      if(is.null(k))
-        k <- 2
-      main <- paste("Histogram and estimated",  b$family$family,
-        "density\nGAIC =", round(GAIC(b, k = k), 4))
-    }
     xlab <- list(...)$xlab
     if(is.null(xlab))
       xlab <- "Response"
+    ylim <- list(...)$ylim
 
-    hist(y, breaks = "Scott", freq = FALSE, ylim = ylim,
-      xlab = xlab, main = main)
-    i <- order(y)
-    lines(dy[i] ~ y[i], col = 4, lwd = 2)
+    if(b$family$type == "continuous") {
+      if(is.null(main)) {
+        k <- list(...)$k
+        if(is.null(k))
+          k <- 2
+        main <- paste("Histogram and estimated",  b$family$family,
+          "density\nGAIC =", round(GAIC(b, k = k), 4))
+      }
+
+      dy <- b$family$d(y, par)
+
+      h <- hist(y, breaks = "Scott", plot = FALSE)
+
+      if(is.null(ylim))
+        ylim <- range(c(h$density, dy))
+
+      hist(y, breaks = "Scott", freq = FALSE, ylim = ylim,
+        xlab = xlab, main = main)
+      i <- order(y)
+      lines(dy[i] ~ y[i], col = 4, lwd = 2)
+    }
+
+    if(b$family$type == "discrete") {
+      if(is.null(main)) {
+        k <- list(...)$k
+        if(is.null(k))
+          k <- 2
+        main <- paste("Proportions and estimated",  b$family$family,
+          "probabilties\nGAIC =", round(GAIC(b, k = k), 4))
+      }
+
+      dy <- b$family$d(y, par)
+
+      Y <- unique(cbind(y, dy))
+      Y <- Y[order(Y[, 1]), ]
+
+      tab <- prop.table(table(y))
+
+      if(is.null(ylim))
+        ylim <- range(c(0, tab, dy * 1.1))
+
+      ylab <- list(...)$ylab
+      if(is.null(ylab))
+        ylab <- "Probability"
+
+      bp <- barplot(tab, ylim = ylim,
+        xlab = xlab, main = main, ylab = ylab)
+
+      bp <- as.numeric(bp)
+      #xr <- min(diff(bp))
+      #bp <- bp - 0.5 * xr
+
+      lines(Y[, 2] ~ bp, col = 4, lwd = 2, type = "h")
+      points(bp, Y[, 2], col = 4, pch = 16)
+      points(bp, Y[, 2], col = rgb(0.1, 0.1, 0.1, alpha = 0.6))
+    }
 
     legend <- list(...)$legend
     if(is.null(legend))
       legend <- TRUE
 
     if(legend) {
+      np <- names(par)
       par <- par[1L, ]
 
       pos <- list(...)$pos
@@ -141,7 +180,7 @@ fitFamily <- function(y, family = NO, plot = TRUE, ...)
         pos <- "topright"
 
       legend(pos,
-        paste0(names(par), " = ", round(par, 4)),
+        paste0(np, " = ", round(par, 4)),
         title = "Parameters:", title.font = 2,
         lwd = 1, col = NA, bty = "n")
     }

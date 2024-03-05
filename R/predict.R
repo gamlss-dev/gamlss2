@@ -1,7 +1,7 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
   model = NULL, newdata = NULL, type = c("link", "parameter", "response", "terms"), 
-  terms = NULL, se.fit = FALSE, ...)
+  terms = NULL, se.fit = FALSE, drop = TRUE, ...)
 {
   ## FIXME: se.fit, terms ...
 
@@ -150,7 +150,7 @@ predict.gamlss2 <- function(object,
 
   ## Drop dimension if only one parameter is predicted.
   if(is.list(p)) {
-    if(length(p) < 2) {
+    if((length(p) < 2 & drop)) {
       p <- p[[1L]]
     } else {
       if(!tt)

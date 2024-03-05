@@ -9,15 +9,16 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
   "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
-  "formula", "logLik", "na.omit", "var", "optim")
+  "formula", "logLik", "na.omit", "var", "optim", "median")
 
-importFrom("utils", "flush.console", "tail", "getFromNamespace")
+importFrom("utils", "flush.console", "tail", "getFromNamespace", "capture.output")
 
-importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d")
+importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d",
+  "dev.off", "png")
 
-importFrom("graphics", "abline", "axis", "box", "grid", "hist",
+importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
-  "points")
+  "points", "legend")
 
 export(
   "fake_formula",
@@ -30,7 +31,10 @@ export(
   "special_fit",
   "special_predict",
   "Rsq",
-  "GAIC"
+  "GAIC",
+  "available_families",
+  "findFamily",
+  "fitFamily"
 )
 
 S3method(gamlss2, formula)

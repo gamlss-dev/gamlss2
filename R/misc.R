@@ -1,4 +1,4 @@
-varimp <- function(object, newdata = NULL, nrep = 20, ...)
+varimp <- function(object, newdata = NULL, scale = TRUE, nrep = 20, ...)
 {
   vn <- unique(all.vars(formula(object$fake_formula, lhs = 0)))
   if(is.null(newdata))
@@ -17,6 +17,9 @@ varimp <- function(object, newdata = NULL, nrep = 20, ...)
     newdata[[vn[j]]] <- xj
   }
   ll <- ll / ll0
+  if(scale) {
+    ll <- (ll - min(ll)) / diff(range(ll))
+  }
   return(sort(ll))
 }
 

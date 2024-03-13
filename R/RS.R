@@ -301,7 +301,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$loglik(y, family$map2par(etai))
 
-          if(ll1 < ll02 & FALSE) {
+          if(ll1 < ll02) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$loglik(y, family$map2par(eta)) + ridge * sum(par^2)
@@ -373,13 +373,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               sfit[[j]][[k]]$selected <- TRUE
               ll02 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
-            } else {
-              if(isTRUE(sfit[[j]][[k]]$selected)) {
-                sfit[[j]][[k]] <- fs
-                sfit[[j]][[k]]$selected <- TRUE
-                ll02 <- ll1
-              }
-            }
+            } #else {
+              #if(isTRUE(sfit[[j]][[k]]$selected)) {
+                #sfit[[j]][[k]] <- fs
+                #sfit[[j]][[k]]$selected <- TRUE
+                #ll02 <- ll1
+              #}
+            #}
 
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
           }

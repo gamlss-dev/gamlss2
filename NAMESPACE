@@ -62,5 +62,7 @@ S3method(BIC, gamlss2)
 S3method(c, gamlss2)
 S3method(quantile, gamlss2)
 
+S3method(distributions3::prodist, gamlss2)
+
 useDynLib(gamlss2, .registration = TRUE)
 

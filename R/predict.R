@@ -1,6 +1,6 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
-  model = NULL, newdata = NULL, type = c("link", "parameter", "response", "terms"), 
+  model = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
   terms = NULL, se.fit = FALSE, drop = TRUE, ...)
 {
   ## FIXME: se.fit, terms ...

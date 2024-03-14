@@ -11,7 +11,7 @@ predicted (out-of-sample) parameters, terms, etc.
 
 \usage{
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
-  type = c("link", "parameter", "response", "terms"), terms = NULL,
+  type = c("parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, ...)
 }
 \arguments{
@@ -75,9 +75,9 @@ predict(m, newdata = nd)
 predict(m, newdata = nd, type = "response")
 
 ## model parameter(s)
-predict(m, newdata = nd, type = "parameter")
-predict(m, newdata = nd, type = "parameter", model = "sigma")
-predict(m, newdata = nd, type = "parameter", model = "sigma", drop = FALSE)
+predict(m, newdata = nd)
+predict(m, newdata = nd, model = "sigma")
+predict(m, newdata = nd, model = "sigma", drop = FALSE)
 
 ## individual terms in additive predictor(s)
 predict(m, newdata = nd, type = "terms", model = "sigma")

@@ -15,3 +15,15 @@ prodist.gamlss2 <- function(object, ...) {
   ## return distributions3 object
   return(d)
 }
+
+## newresponse() method for topmodels.
+newresponse.gamlss2 <- function(object, newdata, ...)
+{
+  y <- if(missing(newdata) || is.null(newdata)) {
+    model.response(model.frame(object, keepresponse = TRUE))
+  } else {
+    model.response(model.frame(object, keepresponse = TRUE, data = newdata))
+  }
+  return(y)
+}
+

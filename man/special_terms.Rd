@@ -188,7 +188,7 @@ plot(b, which = "effects")
 plot(b, which = "resid")
 
 ## Predict parameters.
-par <- predict(b, type = "parameter")
+par <- predict(b)
 
 ## Predict quantiles.
 pq <- NULL
@@ -225,7 +225,7 @@ nd <- with(rent, expand.grid(
 ))
 
 ## Predict parameters of the GA distribution.
-par <- predict(b, newdata = nd, type = "parameter")
+par <- predict(b, newdata = nd)
 
 ## Compute median rent R estimate.
 nd$fit <- family(b)$q(0.5, par)

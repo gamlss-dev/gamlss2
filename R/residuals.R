@@ -35,9 +35,7 @@ residuals.gamlss2 <- function(object,
     }
 
     ## Predict parameters.
-    par <- predict(object, drop = FALSE, newdata = newdata, ...)
-    for(j in family$names)
-      par[[j]] <- make.link2(family$links[j])$linkinv(par[[j]])
+    par <- predict(object, drop = FALSE, newdata = newdata, type = "parameter", ...)
 
     ## Randomized quantile residuals.
     if(type == "quantile") {

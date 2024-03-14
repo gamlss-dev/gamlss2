@@ -142,7 +142,7 @@ plot(b, which = "effects")
 plot(b, which = "resid")
 
 ## Predict parameters.
-par <- predict(b, type = "parameter")
+par <- predict(b)
 
 ## Predict quantiles.
 pq <- NULL

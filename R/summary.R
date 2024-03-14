@@ -43,7 +43,7 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
   if(drop) {
     nc <- names(cos)
     cos <- unlist(cos)
-    if(length(nc) < 2L) {
+    if((length(nc) < 2L) & !isFALSE(list(...)$dropall)) {
       names(cos) <- gsub(paste0(nc, "."), "", names(cos), fixed = TRUE)
       for(j in c("p.", "s."))
         names(cos) <- gsub(j, "", names(cos), fixed = TRUE)
@@ -78,7 +78,7 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
   n <- if(is.null(dim(y))) length(y) else nrow(y)
 
-  par <- coef(object, full = TRUE, drop = TRUE)
+  par <- coef(object, full = TRUE, drop = TRUE, dropall = FALSE)
   lpar <- par2list(par)
 
   family <- object$family
@@ -107,20 +107,24 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
     return(ll)
   }
 
-  par <- coef(object, full = full, drop = TRUE)
+  par <- coef(object, full = full, drop = TRUE, dropall = FALSE)
 
   if(type == "coef")
     return(par)
 
   H <- as.matrix(optimHess(par, fn = loglik, control = list(fnscale = -1)))
-  v <- try(solve(H), silent = TRUE)
-  if(inherits(v, "try-error")) {
-    H <- H + diag(1e-05, ncol(H))
+  if(ncol(H) > 1L) {
     v <- try(solve(H), silent = TRUE)
     if(inherits(v, "try-error")) {
-      H <- H + diag(1e-03, ncol(H))
-      v <- solve(H)
+      H <- H + diag(1e-05, ncol(H))
+      v <- try(solve(H), silent = TRUE)
+      if(inherits(v, "try-error")) {
+        H <- H + diag(1e-03, ncol(H))
+        v <- solve(H)
+      }
     }
+  } else {
+    v <- 1 / H
   }
   v <- -v
 
@@ -168,7 +172,7 @@ summary.gamlss2 <- function(object, ...)
 {
   df.res <- object$nobs - object$df
   v <- vcov(object, full = FALSE)
-  par <- coef(object, full = FALSE)
+  par <- coef(object, full = FALSE, dropall = FALSE)
   se <- sqrt(abs(diag(v)))
   tvalue <- par / se
   pvalue <- 2 * pt(-abs(tvalue), df.res)

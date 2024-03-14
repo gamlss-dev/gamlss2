@@ -179,7 +179,7 @@ fitted.gamlss2 <- function(object, newdata = NULL,
   if(is.null(newdata) & !is.null(object$fitted.values)) {
     fit <- object$fitted.values
   } else {
-    fit <- predict(object, newdata = newdata)
+    fit <- predict(object, newdata = newdata, type = "link")
   }
 
   if(type == "parameter")

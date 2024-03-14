@@ -11,7 +11,7 @@ Authors@R: c(person("Mikis", "Stasinopoulos", role = c("aut", "cph"),
 Description: The primary purpose of this package is to facilitate the creation of
   advanced infrastructures designed to enhance the GAMLSS modeling framework.
 Depends: R (>= 4.1.0), gamlss.dist, gamlss.data, Formula, mgcv
-Suggests: gamlss, colorspace, knitr, scoringRules, partykit, nnet, lattice, rpart
+Suggests: gamlss, colorspace, knitr, scoringRules, partykit, nnet, lattice, rpart, distributions3
 License: GPL-2 | GPL-3
 LazyLoad: yes
 RoxygenNote: 7.1.1

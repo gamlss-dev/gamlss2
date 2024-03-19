@@ -107,12 +107,59 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
     return(ll)
   }
 
+  gradient <- function(par) {
+    npar <- names(par)
+    par <- par2list(par)
+    eta <- list()
+    for(i in nx) {
+      if(!is.null(par[[i]]$p)) {
+        eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
+      }
+      if(full | TRUE) { ## FIXME: always add?
+        if(!is.null(par[[i]]$s)) {
+          for(j in names(par[[i]]$s)) {
+            fit <- drop(object$specials[[j]]$X %*% par[[i]]$s[[j]])
+            if(!is.null(object$specials[[j]]$binning)) {
+              fit <- fit[object$specials[[j]]$binning$match.index]
+            }
+            eta[[i]] <- eta[[i]] + fit
+          }
+        }
+      }
+    }
+    par2 <- family$map2par(eta)
+    g <- NULL
+    for(i in nx) {
+      score <- family$score[[i]](y, par2)
+      if(!is.null(par[[i]]$p)) {
+        g <- c(g, colSums(x[, names(par[[i]]$p), drop = FALSE] * score))
+      }
+      if(full | TRUE) { ## FIXME: always add?
+        if(!is.null(par[[i]]$s)) {
+          for(j in names(par[[i]]$s)) {
+            if(!is.null(object$specials[[j]]$binning)) {
+              fit <- fit[object$specials[[j]]$binning$match.index]
+              g <- c(g, colSums(object$specials[[j]]$X[object$specials[[j]]$binning$match.index, ] * score))
+            } else {
+              g <- c(g, colSums(object$specials[[j]]$X * score))
+            }
+          }
+        }
+      }
+    }
+    names(g) <- npar
+    return(g)
+  }
+
   par <- coef(object, full = full, drop = TRUE, dropall = FALSE)
 
   if(type == "coef")
     return(par)
 
-  H <- as.matrix(optimHess(par, fn = loglik, control = list(fnscale = -1)))
+  control <- list(...)
+  control$fnscale <- -1
+
+  H <- as.matrix(optimHess(par, fn = loglik, gr = gradient, control = control))
   if(ncol(H) > 1L) {
     v <- try(solve(H), silent = TRUE)
     if(inherits(v, "try-error")) {

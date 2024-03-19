@@ -173,7 +173,14 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   } else {
     v <- 1 / H
   }
+
   v <- -v
+
+  ev <- eigen(v)
+  lambda <- ev$values
+  if(any(eigen(v)$values < 0)) {
+    v <- as.matrix(Matrix::nearPD(v)$mat)
+  }
 
   if(type == "cor") {
     dv <- sqrt(diag(v))

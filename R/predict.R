@@ -4,6 +4,13 @@ predict.gamlss2 <- function(object,
   terms = NULL, se.fit = FALSE, drop = TRUE, ...)
 {
   ## FIXME: se.fit, terms ...
+  samples <- NULL
+  if(se.fit) {
+    R <- list(...)$R
+    if(is.null(R))
+      R <- 100L
+    samples <- sampling(object, R = R)
+  }
 
   type <- match.arg(type)
 
@@ -38,7 +45,15 @@ predict.gamlss2 <- function(object,
   ## Predict all specified parameters.
   p <- list()
   for(j in model) {
-    p[[j]] <- if(tt) NULL else rep(0, length.out = nrow(mf))
+    p[[j]] <- if(tt) {
+      NULL
+    } else {
+      if(is.null(samples)) {
+        rep(0.0, length.out = nrow(mf))
+      } else {
+        matrix(0.0, nrow = nrow(mf), ncol = nrow(samples))
+      }
+    }
     tj <- if(is.null(terms)) {
       c(object$xterms[[j]], object$sterms[[j]])
     } else {
@@ -75,7 +90,15 @@ predict.gamlss2 <- function(object,
             ft <- t(t(X[, xn, drop = FALSE]) * object$coefficients[[j]][xn])
             p[[j]] <- cbind(p[[j]], ft)
           } else {
-            p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% object$coefficients[[j]][xn])
+            if(is.null(samples)) {
+              p[[j]] <- p[[j]] + drop(X[, xn, drop = FALSE] %*% object$coefficients[[j]][xn])
+            } else {
+              ij <- paste0(j, ".p.", xn)
+              ps <- apply(samples, 1, function(beta) {
+                X[, xn, drop = FALSE] %*% beta[ij]
+              })
+              p[[j]] <- p[[j]] + ps
+            }
           }
         }
       }
@@ -88,12 +111,23 @@ predict.gamlss2 <- function(object,
         xn <- unique(xn)
         if(length(xn)) {
           for(i in xn) {
-            fit <- rep(0.0, nrow(mf))
+            fit <- if(is.null(samples)) {
+              rep(0.0, nrow(mf))
+            } else {
+              matrix(0.0, nrow = nrow(mf), ncol = nrow(samples))
+            }
             if(inherits(object$specials[[i]], "mgcv.smooth")) {
               if(!is.null(object$fitted.specials[[j]][[i]]$selected)) {
                 Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
-                co <- object$fitted.specials[[j]][[i]]$coefficients
-                fit <- drop(Xs %*% co)
+                if(is.null(samples)) {
+                  co <- object$fitted.specials[[j]][[i]]$coefficients
+                  fit <- drop(Xs %*% co)
+                } else {
+                  ij <- paste0(j, ".s.", i)
+                  fit <- apply(samples, 1, function(beta) {
+                    X[, xn, drop = FALSE] %*% beta[ij]
+                  })
+                }
               }
             } else {
               if(inherits(object$specials[[i]], "special")) {
@@ -146,6 +180,24 @@ predict.gamlss2 <- function(object,
       }
     }
     p <- if(is.null(fm)) p[[1L]] else fm(p)
+  }
+
+  if(!is.null(samples) & !tt) {
+    FUN <- list(...)$FUN
+    if(is.null(FUN))
+      FUN <- mean
+    if(se.fit) {
+      FUN <- function(x) {
+        c("fit" = mean(x, na.rm = TRUE), "se" = sd(x, na.rm = TRUE))
+      }
+    }
+    for(j in names(p)) {
+      p[[j]] <- apply(p[[j]], 1, FUN)
+      if(!is.null(dim(p[[j]]))) {
+        if(nrow(p[[j]]) != nrow(mf))
+          p[[j]] <- t(p[[j]])
+      }
+    }
   }
 
   ## Drop dimension if only one parameter is predicted.

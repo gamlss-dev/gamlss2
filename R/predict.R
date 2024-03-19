@@ -9,7 +9,7 @@ predict.gamlss2 <- function(object,
     R <- list(...)$R
     if(is.null(R))
       R <- 100L
-    samples <- sampling(object, R = R)
+    samples <- sampling(object, R = R, full = TRUE)
   }
 
   type <- match.arg(type)
@@ -123,9 +123,9 @@ predict.gamlss2 <- function(object,
                   co <- object$fitted.specials[[j]][[i]]$coefficients
                   fit <- drop(Xs %*% co)
                 } else {
-                  ij <- paste0(j, ".s.", i)
+                  ij <- paste0(paste0(j, ".s.", i), ".", 1:ncol(Xs))
                   fit <- apply(samples, 1, function(beta) {
-                    X[, xn, drop = FALSE] %*% beta[ij]
+                    Xs %*% beta[ij]
                   })
                 }
               }

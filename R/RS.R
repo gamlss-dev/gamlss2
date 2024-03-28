@@ -333,6 +333,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
+
+          if(iter[1L] < 1L)
+            etastart[[j]] <- eta[[j]]
         }
 
         ## Fit specials part.
@@ -382,6 +385,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             #}
 
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
+
+            if(iter[1L] < 1L)
+              etastart[[j]] <- eta[[j]]
           }
         }
 

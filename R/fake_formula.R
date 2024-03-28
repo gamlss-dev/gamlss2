@@ -62,7 +62,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
           av <- av[av != "|"]
           if(length(av)) {
             if(all(av %in% v)) {
-              ef <- try(eval(e[[i]]))
+              ef <- try(eval(e[[i]]), silent = TRUE)
               if(!inherits(ef, "try-error")) {
                 if(inherits(ef, "formula")) {
                   vf <- attr(terms(eval(ef)), "variables")

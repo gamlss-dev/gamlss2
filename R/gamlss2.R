@@ -249,6 +249,14 @@ gamlss2.formula <- function(formula, data, family = NO,
       for(j in names(rval$fitted.linear))
         rval$fitted.linear[[j]]$fitted.values <- NULL
     }
+    if(!is.null(rval$specials)) {
+      for(j in names(rval$specials)) {
+        if(!is.null(rval$specials[[j]][["X"]])) {
+          rval$specials[[j]][["X"]] <- NULL
+          rval$specials[[j]][["Xu"]] <- NULL
+        }
+      }
+    }
   }
 
   class(rval) <- unique(c(class(rval), "gamlss2"))

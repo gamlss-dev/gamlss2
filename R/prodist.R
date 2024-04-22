@@ -15,4 +15,3 @@ prodist.gamlss2 <- function(object, ...) {
   ## return distributions3 object
   return(d)
 }
-

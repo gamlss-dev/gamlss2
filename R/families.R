@@ -539,11 +539,17 @@ tF <- function(x, ...)
 ## will be approximated numerically.
 complete_family <- function(family)
 {
-  if(is.function(family))
+  if(is.character(family)) {
+    family <- get(family)
+  }
+    
+  if(is.function(family)) {
     family <- family()
+  }
 
-  if(inherits(family, "gamlss.family"))
+  if(inherits(family, "gamlss.family")) {
     return(tF(family))
+  }
 
   if(is.null(family$family)) {
     family$family <- "No family name supplied!"

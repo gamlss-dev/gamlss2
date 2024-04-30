@@ -7,7 +7,7 @@ results <- function(x, ...)
 }
 
 ## Extract linear and special term information.
-results.gamlss2 <- function(x)
+results.gamlss2 <- function(x, ...)
 {
   res <- list()
   np <- x$family$names

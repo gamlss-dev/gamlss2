@@ -151,7 +151,7 @@ special.wfit <- function(x, z, w, y, eta, j, family, control, ...)
       fit <- special_fit(x = x, z = z, w = w, y = y, eta = eta, j = j, family = family, control = control, ...)
     } else {
       ff <- if(is.null(x$special.wfit)) {
-        smooth.construct.wfit
+        smooth.construct_wfit
       } else {
         x$special.wfit
       }
@@ -184,7 +184,7 @@ calc_XWX <- function(x, w, index = NULL)
 }
 
 ## Fitting function for mgcv smooth terms.
-smooth.construct.wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
+smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
   ## Number of observations.
   n <- length(z)

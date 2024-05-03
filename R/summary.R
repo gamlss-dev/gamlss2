@@ -457,7 +457,7 @@ GAIC <- function(object, ..., k = 2, corrected = FALSE)
     }
     if(length(drop))
       rn <- rn[-drop]
-    i <- order(gaic, decreasing = TRUE)
+    i <- order(gaic, decreasing = FALSE)
     gaic <- data.frame("AIC" = gaic[i], "df" = edf[i])
     rn <- rn[i]
     if(any(j <- duplicated(rn)))

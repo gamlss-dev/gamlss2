@@ -448,7 +448,6 @@ GAIC <- function(object, ..., k = 2, corrected = FALSE)
   objs <- list(object, ...)
   gaic <- edf <- NULL
   drop <- NULL
-browser()
   for(j in 1:length(objs)) {
     if(inherits(objs[[j]], c("gamlss", "gamlss2"))) {
       if(inherits(objs[[j]], "gamlss")) {
@@ -465,7 +464,6 @@ browser()
       } else {
         0
       }
-
       gaic <- c(gaic, deviance + df * k + Cor)
       edf <- c(edf, df)
     } else {
@@ -479,7 +477,6 @@ browser()
     gaic <- gaic[-drop]
     edf <- edf[-drop]
   }
-
   if(length(gaic) > 1L) {
     Call <- match.call()
     rn <- as.character(Call[-1L])
@@ -493,7 +490,7 @@ browser()
     rn <- rn[i]
     if(any(j <- duplicated(rn)))
       rn[j] <- paste0(rn[j], ".", 1:sum(j))
-    rownames(gaic) <- rn[i]
+    rownames(gaic) <- rn # not rn[i] because already corrected
   }
   return(gaic)
 }

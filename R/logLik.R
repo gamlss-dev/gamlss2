@@ -35,6 +35,20 @@ get_df <- function(object)
 
 deviance.gamlss2 <- function(object, ...)
 {
-  -2 * as.numeric(logLik(object))
+  -2 * as.numeric(logLik(object, ...))
+}
+
+response.name <- function(formula) {
+  if(is.list(formula)) {
+    if(!is.null(formula$formula)) {
+      formula <- formula$formula
+    } else {
+      formula <- do.call("as.Formula", formula)
+    }
+  }
+  formula <- as.Formula(formula)
+  formula <- formula(formula, rhs = 0, collapse = TRUE)
+  rn <- all.vars(formula)
+  return(rn)
 }
 

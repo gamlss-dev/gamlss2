@@ -34,7 +34,8 @@ export(
   "GAIC",
   "available_families",
   "findFamily",
-  "fitFamily"
+  "fitFamily",
+  "response.name"
 )
 
 S3method(gamlss2, formula)

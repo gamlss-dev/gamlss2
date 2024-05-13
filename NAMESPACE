@@ -30,6 +30,7 @@ export(
   "CG",
   "special_fit",
   "special_predict",
+  "specials",
   "Rsq",
   "GAIC",
   "available_families",

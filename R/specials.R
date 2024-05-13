@@ -350,3 +350,61 @@ special_predict.default <- function(x, data, ...)
   }
 }
 
+## Specials extractor function after fitting the model.
+specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
+{
+  if(is.null(object$fitted.specials)) {
+    return(NULL)
+  }
+
+  ## Which parameter model to predict?
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- list(...)$parameter
+    if(is.null(model))
+      model <- object$family$names
+  }
+  if(!is.character(model))
+    model <- object$family$names[model]
+  model <- object$family$names[pmatch(model, object$family$names)]
+
+  rval <- NULL
+
+  for(i in model) {
+    if(!is.null(object$fitted.specials[[i]])) {
+      it <- if(is.null(terms)) {
+        names(object$fitted.specials[[i]])
+      } else {
+        grep2(terms, names(object$fitted.specials[[i]]), ignore.case = TRUE, value = TRUE, fixed = TRUE)
+      }
+
+      tmp <- object$fitted.specials[[i]][it]
+      names(tmp) <- paste0(i, ".", it)
+
+      if(!is.null(elements)) {
+        for(j in seq_along(tmp)) {
+          cj <- class(tmp[[j]])
+          if(!is.null(elements)) {
+            if((length(elements) == 1L) && (elements == "names")) {
+              tmp[[j]] <- names(tmp[[j]])
+            } else {
+              wj <- grep2(elements, names(tmp[[j]]), ignore.case = FALSE, value = TRUE, fixed = TRUE)
+              if(length(wj)) {
+                tmp[[j]] <- if(length(wj) > 1L) tmp[[j]][wj] else tmp[[j]][[wj]]
+              }
+            }
+          }
+        }
+      }
+
+      rval <- c(rval, tmp)
+    }
+  }
+
+  if(length(rval) < 2L)
+    rval <- rval[[1L]]
+
+  return(rval)
+}
+

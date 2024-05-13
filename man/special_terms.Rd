@@ -2,6 +2,7 @@
 \alias{special_terms}
 \alias{special_fit}
 \alias{special_predict}
+\alias{specials}
 
 \title{Special Model Terms for GAMLSS}
 
@@ -18,10 +19,18 @@ special_fit(x, \dots)
 
 ## Generic predict method.
 special_predict(x, \dots)
+
+## Extractor function for fitted special terms.
+specials(object, model = NULL, terms = NULL, elements = NULL, ...)
 }
 
 \arguments{
   \item{x}{A model term object as supplied in the formula in the \code{\link{gamlss2}} call.}
+  \item{object}{A fitted \code{\link{gamlss2}} object.}
+  \item{model}{Character or integer, specifies the model for which fitted special terms should be extracted.}
+  \item{terms}{Character or integer, specifies the special model terms that should be extracted.}
+  \item{elements}{Character, specifies which elements of a fitted special term should be
+    extracted. If \code{elements = "names"}, the corresponding element names are extracted.}
   \item{\dots}{Arguments needed for the \code{special_fit()} function to facilitate the
     fitting of the model term, see the details. Similarly, for the \code{special_predict()} function,
     the \code{\dots} argument encompasses the objects for computing predictions for the model term.}
@@ -107,10 +116,10 @@ n <- function(formula, ...)
   ## Scale per default!
   if(ctr$scale) {
     sx <- list()
-    for(j in colnames(data)) {
-      if(!is.factor(data[[j]])) {
-        sx[[j]] <- range(data[[j]])
-        data[[j]] <- (data[[j]] - sx[[j]][1]) / diff(sx[[j]])
+    for(j in colnames(st$data)) {
+      if(!is.factor(st$data[[j]])) {
+        sx[[j]] <- range(st$data[[j]])
+        st$data[[j]] <- (st$data[[j]] - sx[[j]][1]) / diff(sx[[j]])
       }
     }
     st$scalex <- sx
@@ -259,6 +268,16 @@ p2 <- levelplot(fit ~ Fl + A, data = nd,
 
 print(p1, split = c(1, 1, 2, 1), more = TRUE)
 print(p2, split = c(2, 1, 2, 1), more = FALSE)
+
+## Extract fitted special terms.
+## Fitted NN for parameter mu.
+specials(b, model = "mu", elements = "model")
+
+## Same for sigma.
+specials(b, model = "sigma", elements = "model")
+
+## Return element names of fitted special term list.
+specials(b, model = "sigma", elements = "names")
 }}
 
 \keyword{models}

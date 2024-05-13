@@ -50,7 +50,7 @@
 
   Stasinopoulos, D. M., and Rigby, R. A. (2007). Generalized Additive Models for
   Location Scale and Shape (GAMLSS) in R. \emph{Journal of Statistical Software},
-  \bold{23}(7), 1--46. \doi{doi.org/10.18637/jss.v023.i07}
+  \bold{23}(7), 1--46. \doi{10.18637/jss.v023.i07}
 
   Stasinopoulos D. M., Rigby R.A., Heller G., Voudouris V., and De Bastiani, F. (2017).
   \emph{Flexible Regression and Smoothing: Using GAMLSS in R},

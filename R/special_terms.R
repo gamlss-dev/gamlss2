@@ -177,10 +177,10 @@ n <- function(formula, ...)
   ## Scale per default!
   if(ctr$scale) {
     sx <- list()
-    for(j in colnames(data)) {
-      if(!is.factor(data[[j]])) {
-        sx[[j]] <- range(data[[j]])
-        data[[j]] <- (data[[j]] - sx[[j]][1]) / diff(sx[[j]])
+    for(j in colnames(st$data)) {
+      if(!is.factor(st$data[[j]])) {
+        sx[[j]] <- range(st$data[[j]])
+        st$data[[j]] <- (st$data[[j]] - sx[[j]][1]) / diff(sx[[j]])
       }
     }
     st$scalex <- sx

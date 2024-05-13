@@ -28,6 +28,19 @@ special_predict(x, \dots)
 }
 
 \details{
+  To implement a new special term, the first step is to write a formula constructor function for
+  the new model term. For example, consider the implementation below, which demonstrates how to
+  create a neural network model term. Additionally, the name of the new model term constructor
+  must be passed to the \code{specials} argument of the function \code{\link{fake_formula}}.
+  Please note that in the provided example, no new special name is passed because \code{"n"}
+  is already registered in \code{\link{fake_formula}}.
+
+  Afterwards, a fitting and a predict method for the new special model term needs to be implemented.
+  Please also refer to the example below, implementing these functions for a neural network
+  model term.
+
+  The following describes the detailed arguments and return values.
+
   A method for \code{special_fit()} has the following arguments:
   \itemize{
     \item \code{x}: The special model term object, containing all the data for fitting.

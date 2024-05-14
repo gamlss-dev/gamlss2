@@ -113,6 +113,9 @@ fitFamily <- function(y, family = NO, plot = TRUE, ...)
       xlab <- "Response"
     ylim <- list(...)$ylim
 
+    if(is.null(b$family$type))
+      b$family$type <- "continuous"
+
     if(b$family$type == "continuous") {
       if(is.null(main)) {
         k <- list(...)$k

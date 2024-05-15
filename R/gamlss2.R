@@ -268,7 +268,16 @@ gamlss2.formula <- function(formula, data, family = NO,
 gamlss2.list <- function(x, ...)
 {
   cl <- match.call()
-  cl$formula <- do.call("as.Formula", x)
+  fl <- list()
+  for(j in seq_along(x)) {
+    fl[[j]] <- as.character(x[[j]])
+    if(length(fl[[j]]) > 2L) { 
+      fl[[j]] <- as.formula(paste(fl[[j]][2L], "~", fl[[j]][3L]))
+    } else {
+      fl[[j]] <- as.formula(paste("~", fl[[j]][2L]))
+    }
+  }
+  cl$formula <- do.call("as.Formula", fl)
   cl$x <- FALSE
   cl[[1L]] <- as.name("gamlss2.formula")
   eval.parent(cl)

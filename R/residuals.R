@@ -3,6 +3,8 @@ residuals.gamlss2 <- function(object,
   type = c("quantile", "response", "parameter"), newdata = NULL, ...)
 {
   family <- family(object)
+  if(is.null(family$type))
+    family$type <- "continuous"
 
   ## If there is a residuals function in the family
   ## object, use this function.

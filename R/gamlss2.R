@@ -314,7 +314,10 @@ model.frame.gamlss2 <- function(formula, ...)
     fcall <- formula$call
     m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"), names(fcall), 0L)
     fcall <- fcall[c(1L, m)]
-    fcall$drop.unused.levels <- TRUE
+    drop.unused.levels <- list(...)$drop.unused.levels
+    if(is.null(drop.unused.levels))
+      drop.unused.levels <- FALSE
+    fcall$drop.unused.levels <- drop.unused.levels
     fcall[[1L]] <- quote(model.frame)
     fcall$xlev <- formula$xlevels
     fcall$formula <- terms(formula)

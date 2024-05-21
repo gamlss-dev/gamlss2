@@ -16,7 +16,7 @@ predict.gamlss2 <- function(object,
 
   ## Extract the model frame.
   if(!is.null(newdata)) {
-    mf <- model.frame(object, data = newdata)
+    mf <- model.frame(object, data = newdata, ...)
   } else {
     mf <- if(is.null(object$model)) {
       model.frame(object)

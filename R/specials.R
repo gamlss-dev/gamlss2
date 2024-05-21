@@ -398,8 +398,12 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
               }
             }
           }
-          if(is.null(tmp[[j]]$response.name))
-            tmp[[j]]$response.name <- rn
+        }
+      }
+
+      for(j in seq_along(tmp)) {
+        if(is.null(tmp[[j]]$response.name)) {
+          tmp[[j]]$response.name <- rn
         }
       }
 

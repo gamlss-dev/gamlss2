@@ -357,6 +357,9 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
     return(NULL)
   }
 
+  ## Extract response name, sometimes needed.
+  rn <- response.name(object)
+
   ## Which parameter model to predict?
   if(is.null(model)) {
     model <- list(...)$what
@@ -395,6 +398,8 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
               }
             }
           }
+          if(is.null(tmp[[j]]$response.name))
+            tmp[[j]]$response.name <- rn
         }
       }
 

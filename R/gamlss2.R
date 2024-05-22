@@ -210,10 +210,19 @@ gamlss2.formula <- function(formula, data, family = NO,
     family$optimizer
   }
 
+  ## Check for binomial families.
+  if(family$family %in% .bi.list) {
+    fenv <- environment(family[["d"]])
+    ybd <- get_y_bd(Y)
+    Y <- ybd$y
+    fenv$bd <- ybd$bd
+    environment(optimizer) <- fenv
+  }
+
   ## Estimation.
   rval <- optimizer(x = X, y = Y, specials = Specials, family = family,
     offsets = offsets, weights = weights, start = start, xterms = Xterms, sterms = Sterms,
-    control = control)
+    control = control)  
 
   ## Further model information.
   rval$call <- call

@@ -36,6 +36,14 @@ residuals.gamlss2 <- function(object,
       object$y
     }
 
+    ## Check for binomial families.
+    if(family$family %in% .bi.list) {
+      fenv <- environment(family[["d"]])
+      ybd <- get_y_bd(y)
+      y <- ybd$y
+      fenv$bd <- ybd$bd
+    }
+
     ## Predict parameters.
     par <- predict(object, drop = FALSE, newdata = newdata, type = "parameter", ...)
 

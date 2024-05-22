@@ -146,8 +146,6 @@ tF <- function(x, ...)
     stop('only "gamlss.family" objects can be transformed!')
 
   args <- list(...)
-  bd <- if(is.null(args$bd)) 1 else args$bd
-  args$bd <- NULL
   pr <- args$range
   check_range <- function(par) {
     for(j in names(par)) {
@@ -175,7 +173,7 @@ tF <- function(x, ...)
         call <- paste(call, paste(np, '=', 'par$', np, sep = '', collapse = ','), sep = "")
       }
       if("bd" %in% nf) {
-        call <- paste(call, ",bd=", bd, sep = "")
+        call <- paste(call, ",bd", sep = "")
       }
     }
     call <- parse(text = paste(call, ")", sep = ""))
@@ -214,8 +212,6 @@ tF <- function(x, ...)
           if(!is.null(dim(y)))
             y <- y[, ncol(y)]
         }
-        if(!is.null(bd))
-          bd <- rep(bd, length.out = if(!is.null(dim(y))) nrow(y) else length(y))
         res <- eval(x$mu.initial)
         if(!is.null(dim(res))) {
           if(length(dim(res)) > 1)
@@ -254,8 +250,6 @@ tF <- function(x, ...)
     }
     if(!is.null(x$sigma.initial)) {
       initialize$sigma <- function(y, ...) {
-        if(!is.null(bd))
-          bd <- rep(bd, length.out = if(!is.null(dim(y))) nrow(y) else length(y))
         res <- eval(x$sigma.initial)
         if(!is.null(dim(res))) {
           if(length(dim(res)) > 1)
@@ -294,8 +288,6 @@ tF <- function(x, ...)
     }
     if(!is.null(x$nu.initial)) {
       initialize$nu <- function(y, ...) {
-        if(!is.null(bd))
-          bd <- rep(bd, length.out = if(!is.null(dim(y))) nrow(y) else length(y))
         res <- eval(x$nu.initial)
         if(!is.null(dim(res))) {
           if(length(dim(res)) > 1)
@@ -334,8 +326,6 @@ tF <- function(x, ...)
     }
     if(!is.null(x$tau.initial)) {
       initialize$tau <- function(y, ...) {
-        if(!is.null(bd))
-          bd <- rep(bd, length.out = if(!is.null(dim(y))) nrow(y) else length(y))
         res <- eval(x$tau.initial)
         if(!is.null(dim(res))) {
           if(length(dim(res)) > 1)
@@ -422,16 +412,16 @@ tF <- function(x, ...)
 
   dc <- parse(text = paste('dfun(y,', paste(paste(nx, 'par$', sep = "="),
     nx, sep = '', collapse = ','), ',log=log,...',
-    if(bdc) paste0(",bd=", bd) else NULL, ")", sep = ""))
+    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
   pc <- parse(text = paste('pfun(q,', paste(paste(nx, 'par$', sep = "="),
     nx, sep = '', collapse = ','), ',log=log,...',
-    if(bdc) paste0(",bd=", bd) else NULL, ")", sep = ""))
+    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
   qc <- parse(text = paste('qfun(p,', paste(paste(nx, 'par$', sep = "="),
     nx, sep = '', collapse = ','), ',log=log,...',
-    if(bdc) paste0(",bd=", bd) else NULL, ")", sep = ""))
+    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
   rc <- parse(text = paste('rfun(n,', paste(paste(nx, 'par$', sep = "="),
     nx, sep = '', collapse = ','), ',...',
-    if(bdc) paste0(",bd=", bd) else NULL, ")", sep = ""))
+    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
 
   rval <- list(
     "family" = x$family[1],
@@ -518,7 +508,6 @@ tF <- function(x, ...)
 
   if(!is.null(x$rqres)) {
     rqres <- utils::getFromNamespace("rqres", "gamlss")
-    rqres_fun <- x$rqres
     nenv <- new.env()
     assign("rqres", utils::getFromNamespace("rqres", "gamlss"), envir = nenv)
 
@@ -990,5 +979,31 @@ YJ <- function(...) {
   )
   class(fam) <- "gamlss2.family"
   return(fam)
+}
+
+## For binomial families.
+.bi.list <- c("BI", "Binomial", "BB", "Beta Binomial", "ZIBI", "ZIBB", 
+  "ZABI", "ZABB", "DBI", "BItr", "BBtr",  "ZIBItr", "ZIBBtr", 
+  "ZABItr", "ZABBtr", "DBItr")
+
+get_y_bd <- function(Y) {
+  if(NCOL(Y) == 1) {
+    y <- if(is.factor(Y))  Y != levels(Y)[1] else Y
+    bd <- rep(1, N)
+    if(any(y < 0 | y > 1))
+      stop("y values must be 0 <= y <= 1")
+  } else if(NCOL(Y) == 2) {
+            if (any(abs(Y - round(Y)) > 0.001)) {
+            warning("non-integer counts in a binomial GAMLSS!")
+                                                }
+            bd <- Y[,1] + Y[,2]
+            y <-  Y[,1]
+             if (any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
+   } else {
+     stop(paste("For the binomial family, Y must be", 
+          "a vector of 0 and 1's or a 2 column", "matrix where col 1 is no. successes", 
+          "and col 2 is no. failures"))
+   }
+   return(data.frame(y = y, bd = bd))
 }
 

@@ -94,7 +94,7 @@ n <- function(formula, ...)
   ## List of control arguments.
   ctr <- list(...)
   if(is.null(ctr$size))
-    ctr$size <- 100
+    ctr$size <- 50
   if(is.null(ctr$maxit))
     ctr$maxit <- 1000
   if(is.null(ctr$decay))

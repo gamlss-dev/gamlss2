@@ -226,7 +226,7 @@ special_fit.n <- function(x, z, w, control, ...)
   rval$fitted.values <- rval$fitted.values - rval$shift
 
   ## Degrees of freedom.
-  rval$edf <- x$control$size
+  rval$edf <- length(coef(rval$model))
 
   ## Possible scaling.
   rval$scalex <- x$scalex

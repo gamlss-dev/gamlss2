@@ -5,11 +5,20 @@ predict.gamlss2 <- function(object,
 {
   ## FIXME: se.fit, terms ...
   samples <- NULL
-  if(se.fit) {
+  if(se.fit || !is.null(list(...)$FUN)) {
     R <- list(...)$R
     if(is.null(R))
       R <- 100L
     samples <- sampling(object, R = R, full = TRUE)
+  }
+
+  FUN <- list(...)$FUN
+  if(is.null(FUN))
+    FUN <- mean
+  if(se.fit) {
+    FUN <- function(x) {
+       c("fit" = mean(x, na.rm = TRUE), "se" = sd(x, na.rm = TRUE))
+    }
   }
 
   type <- match.arg(type)
@@ -94,7 +103,27 @@ predict.gamlss2 <- function(object,
             xn <- xn[xn %in% colnames(X)]
           }
           if(tt) {
-            ft <- t(t(X[, xn, drop = FALSE]) * object$coefficients[[j]][xn])
+            if(is.null(samples)) {
+              ft <- t(t(X[, xn, drop = FALSE]) * object$coefficients[[j]][xn])
+            } else {
+              ij <- paste0(j, ".p.", xn)
+              ps <- list()
+              for(l in seq_along(ij)) {
+                ps[[l]] <- apply(samples, 1, function(beta) {
+                  X[, xn[l], drop = TRUE] * beta[ij[l]]
+                })
+                ps[[l]] <- apply(ps[[l]], 1, FUN)
+                if(!is.null(dim(ps[[l]]))) {
+                  if(nrow(ps[[l]]) != nrow(mf))
+                    ps[[l]] <- t(ps[[l]])
+                } else {
+                  ps[[l]] <- matrix(ps[[l]], ncol = 1L)
+                }
+                rownames(ps[[l]]) <- rownames(mf)
+                colnames(ps[[l]]) <- paste0(xn[l], if(ncol(ps[[l]]) > 1) "." else "", colnames(ps[[l]]))
+              }
+              ft <- do.call("cbind", ps)
+            }
             p[[j]] <- cbind(p[[j]], ft)
           } else {
             if(is.null(samples)) {
@@ -160,8 +189,20 @@ predict.gamlss2 <- function(object,
               }
             }
             if(tt) {
-              fit <- matrix(fit, ncol = 1L)
-              colnames(fit) <- i
+              if(is.null(samples)) {
+                fit <- matrix(fit, ncol = 1L)
+                colnames(fit) <- i
+              } else {
+                fit <- apply(fit, 1, FUN)
+                if(!is.null(dim(fit))) {
+                  if(nrow(fit) != nrow(mf)) {
+                    fit <- t(fit)
+                  }
+                } else {
+                  fit <- matrix(fit, ncol = 1)
+                }
+                colnames(fit) <- paste0(i, if(ncol(fit) > 1L) "." else "", colnames(fit))
+              }
               rownames(fit) <- rownames(mf)
               p[[j]] <- cbind(p[[j]], fit)
             } else {
@@ -190,14 +231,6 @@ predict.gamlss2 <- function(object,
   }
 
   if(!is.null(samples) & !tt) {
-    FUN <- list(...)$FUN
-    if(is.null(FUN))
-      FUN <- mean
-    if(se.fit) {
-      FUN <- function(x) {
-        c("fit" = mean(x, na.rm = TRUE), "se" = sd(x, na.rm = TRUE))
-      }
-    }
     for(j in names(p)) {
       p[[j]] <- apply(p[[j]], 1, FUN)
       if(!is.null(dim(p[[j]]))) {

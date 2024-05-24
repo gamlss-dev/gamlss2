@@ -8,7 +8,15 @@ predict.gamlss2 <- function(object,
   if(se.fit || !is.null(list(...)$FUN)) {
     R <- list(...)$R
     if(is.null(R))
-      R <- 100L
+      R <- 200L
+    seed <- list(...)$seed
+    if(is.null(seed))
+      seed <- 123
+    if(is.logical(seed)) {
+      seed <- if(!seed) NULL else seed <- 123
+    }
+    if(!is.null(seed))
+      set.seed(seed)
     samples <- sampling(object, R = R, full = TRUE)
   }
 
@@ -112,6 +120,8 @@ predict.gamlss2 <- function(object,
                 ps[[l]] <- apply(samples, 1, function(beta) {
                   X[, xn[l], drop = TRUE] * beta[ij[l]]
                 })
+                if(nrow(ps[[l]]) != nrow(mf))
+                  ps[[l]] <- t(ps[[l]])
                 ps[[l]] <- apply(ps[[l]], 1, FUN)
                 if(!is.null(dim(ps[[l]]))) {
                   if(nrow(ps[[l]]) != nrow(mf))

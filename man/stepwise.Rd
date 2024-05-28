@@ -49,7 +49,7 @@ stepwise(x, y, specials, family, offsets,
     \item First, in a forward selection step, the linear terms with the highest improvement
       on the GAIC are selected.
     \item Second, in a forward selection step, the nonlinear model terms or
-      special model terms (see \code{\link{special_terms)}}) with the highest improvement
+      special model terms (see \code{\link{specials}}) with the highest improvement
       on the GAIC are selected.
     \item Third, in a backward step, linear or nonlinear (special) terms are deselected,
       if the GAIC can be further improved.
@@ -66,7 +66,7 @@ stepwise(x, y, specials, family, offsets,
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
+  \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
 \examples{\dontrun{## Load the Munich rent data

@@ -414,14 +414,3 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   return(m)
 }
 
-if(FALSE) {
-  data("rent", package = "gamlss.data")
-
-  rent$Fl <- scale(rent$Fl)
-  rent$A <- scale(rent$A)
-
-  f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
-    Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
-
-  b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
-}

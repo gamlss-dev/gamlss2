@@ -989,21 +989,21 @@ YJ <- function(...) {
 get_y_bd <- function(Y) {
   if(NCOL(Y) == 1) {
     y <- if(is.factor(Y))  Y != levels(Y)[1] else Y
-    bd <- rep(1, N)
+    bd <- rep(1, nrow(Y))
     if(any(y < 0 | y > 1))
       stop("y values must be 0 <= y <= 1")
   } else if(NCOL(Y) == 2) {
-            if (any(abs(Y - round(Y)) > 0.001)) {
-            warning("non-integer counts in a binomial GAMLSS!")
-                                                }
-            bd <- Y[,1] + Y[,2]
-            y <-  Y[,1]
-             if (any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
-   } else {
-     stop(paste("For the binomial family, Y must be", 
-          "a vector of 0 and 1's or a 2 column", "matrix where col 1 is no. successes", 
-          "and col 2 is no. failures"))
-   }
-   return(data.frame(y = y, bd = bd))
+    if(any(abs(Y - round(Y)) > 0.001)) {
+      warning("non-integer counts in a binomial GAMLSS!")
+    }
+    bd <- Y[,1] + Y[,2]
+    y <-  Y[,1]
+    if (any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
+  } else {
+    stop(paste("For the binomial family, Y must be", 
+      "a vector of 0 and 1's or a 2 column", "matrix where col 1 is no. successes", 
+      "and col 2 is no. failures"))
+  }
+  return(data.frame(y = y, bd = bd))
 }
 

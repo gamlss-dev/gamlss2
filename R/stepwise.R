@@ -21,8 +21,11 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
     }
   }
 
-  ## Set optimizer.
-  
+  trace <- control$trace
+  if(length(trace) < 2L) {
+    trace <- c(FALSE, trace)
+  }
+  control$trace <- trace[1L]
 
   ## Penalty for AIC.
   K <- if(is.null(control$K)) log(nrow(x)) else control$K
@@ -114,7 +117,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         start <- m$fitted.values
 
-        cat("  <+> parameter", i, "term", j, "\n")
+        if(trace[2L])
+          cat("  <+> parameter", i, "term", j, "\n")
       }
     } else {
       do <- FALSE
@@ -193,7 +197,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           start <- m$fitted.values
 
-          cat("  <+> parameter", i, "term", j, "\n")
+          if(trace[2L])
+            cat("  <+> parameter", i, "term", j, "\n")
         }
       } else {
         do <- FALSE
@@ -308,7 +313,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
       start <- m$fitted.values
 
-      cat("  <-> parameter", i, "term", j, "\n")
+      if(trace[2L])
+        cat("  <-> parameter", i, "term", j, "\n")
     }
 
     ## Forward step.
@@ -397,7 +403,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
       start <- m$fitted.values
 
-      cat("  <+> parameter", i, "term", j, "\n")
+      if(trace[2L])
+        cat("  <+> parameter", i, "term", j, "\n")
     }
 
     do <- anysel

@@ -9,7 +9,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
   }
 
   ## What should be plotted?
-  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid")
+  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection")
   if(!is.character(which)) {
     if(any(which > 5L))
       which <- which[which <= 5L]
@@ -122,6 +122,15 @@ plot.gamlss2 <- function(x, parameter = NULL,
         m <- family(x)$mean(p)
       plot_sr(m, resids, ...)
     }
+  }
+
+  ## Stepwise model selection.
+  if(("selection" %in% which) & !is.null(x$selection)) {
+    plot(x$selection$AIC, type = "b", xlab = "Stepwise Iteration",
+      ylab = paste("-2 * logLik +", x$selection$K, "* df"),
+      col = gray(0.6), pch = 16)
+    points(x$selection$AIC, type = "b")
+    points(x$selection$AIC)
   }
 }
 

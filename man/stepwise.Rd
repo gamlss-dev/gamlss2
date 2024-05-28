@@ -92,6 +92,9 @@ plot(b)
 
 ## Diagnostic plots.
 plot(b, which = "resid")
+
+## Plot GAIC.
+plot(b, which = "selection")
 }}
 
 \keyword{models}

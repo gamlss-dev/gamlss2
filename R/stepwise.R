@@ -413,7 +413,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   m <- RS(x, y, specials, family, offsets,
     weights, start = start, xterms_sel2, sterms = sterms_sel2, control)
 
-  m$selection <- list("AIC" = ici, "logLik" = ll, "df" = df)
+  m$selection <- list("AIC" = ici, "logLik" = ll, "df" = df, "K" = K)
   m$xterms <- xterms_sel2
   m$sterms <- sterms_sel2
   m$specials <- specials[unique(unlist(sterms_sel2))]

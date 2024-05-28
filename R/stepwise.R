@@ -118,7 +118,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
         start <- m$fitted.values
 
         if(trace[2L])
-          cat("  <+> parameter", i, "term", j, "\n")
+          cat(".. .. <+> parameter", i, "term", j, "\n")
       }
     } else {
       do <- FALSE
@@ -198,7 +198,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
           start <- m$fitted.values
 
           if(trace[2L])
-            cat("  <+> parameter", i, "term", j, "\n")
+            cat(".. .. <+> parameter", i, "term", j, "\n")
         }
       } else {
         do <- FALSE
@@ -404,7 +404,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
       start <- m$fitted.values
 
       if(trace[2L])
-        cat("  <+> parameter", i, "term", j, "\n")
+        cat(".. .. <+> parameter", i, "term", j, "\n")
     }
 
     do <- anysel

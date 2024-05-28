@@ -21,6 +21,9 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
     }
   }
 
+  ## Set optimizer.
+  
+
   ## Penalty for AIC.
   K <- if(is.null(control$K)) log(nrow(x)) else control$K
 

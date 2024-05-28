@@ -36,7 +36,8 @@ export(
   "available_families",
   "findFamily",
   "fitFamily",
-  "response.name"
+  "response.name",
+  "stepwise"
 )
 
 S3method(gamlss2, formula)

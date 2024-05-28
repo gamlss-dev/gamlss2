@@ -26,7 +26,12 @@ results.gamlss2 <- function(x, ...)
             by <- x$specials[[i]]$by
             if(dim < 3 & !is.null(x$fitted.specials[[j]][[i]])) {
               if(dim > 1) {
-                xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
+                xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], function(x) {
+                  if(inherits(x, "matrix"))
+                    return("numeric")
+                  else
+                    return(class(x))
+                }))
                 if(all(xc == "numeric")) {
                   nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
                     max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),

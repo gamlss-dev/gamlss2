@@ -95,7 +95,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       if(!is.character(os))
         os <- character(0)
       os <- gsub(" ", "", os)
-      formula <- os
+      formula <- unique(os)
     } else {
       tf <- terms(formula, specials = stn)
       sj <- unlist(attr(tf, "specials"))

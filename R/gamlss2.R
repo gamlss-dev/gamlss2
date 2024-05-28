@@ -202,6 +202,7 @@ gamlss2.formula <- function(formula, data, family = NO,
       }
     }
   }
+  attr(Xterms, "xlevels") <- xlev
 
   ## Optionally, use optimizer function provided from family
   optimizer <- if(is.null(family$optimizer)) {
@@ -222,7 +223,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Estimation.
   rval <- optimizer(x = X, y = Y, specials = Specials, family = family,
     offsets = offsets, weights = weights, start = start, xterms = Xterms, sterms = Sterms,
-    control = control)  
+    control = control)
 
   ## Further model information.
   rval$call <- call
@@ -235,9 +236,13 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$contrasts <- attr(X, "contrasts")
   rval$na.action <- attr(mf, "na.action")
   attr(Xterms, "terms") <- mt
-  rval$xterms <- Xterms
-  rval$sterms <- Sterms
-  rval$specials <- Specials
+  if(is.null(rval$selection)) {
+    rval$xterms <- Xterms
+    rval$sterms <- Sterms
+    rval$specials <- Specials
+  } else {
+    attr(rval$xterms, "terms") <- mt
+  }
   rval$df <- get_df(rval)
 
   ## Return model.frame, X and y.

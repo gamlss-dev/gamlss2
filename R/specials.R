@@ -5,9 +5,8 @@
 special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
 {
   sterms <- list()
-
   if(length(x)) {
-    for(j in unlist(x)) {
+    for(j in unique(unlist(x))) {
       vj <- all.vars(parse(text = j))
       vj <- vj[vj %in% names(data)]
 

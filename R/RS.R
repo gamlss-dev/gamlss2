@@ -111,7 +111,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           sj <- sj[sj %in% paste0(j, ".p.", xterms[[j]])]
           if(length(sj)) {
             fit[[j]]$coefficients[gsub(paste0(j, ".p."), "", sj)] <- as.numeric(cstart[sj])
-            fit[[j]]$fitted.values <- drop(x %*% fit[[j]]$coefficients)
+            fit[[j]]$fitted.values <- drop(x[, names(fit[[j]]$coefficients), drop = FALSE] %*% fit[[j]]$coefficients)
             nes[[j]] <- TRUE
           }
         }

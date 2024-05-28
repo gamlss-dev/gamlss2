@@ -110,6 +110,7 @@ predict.gamlss2 <- function(object,
             names(xn) <- NULL
             xn <- xn[xn %in% colnames(X)]
           }
+          xn <- unique(xn)
           if(tt) {
             if(is.null(samples)) {
               ft <- t(t(X[, xn, drop = FALSE]) * object$coefficients[[j]][xn])

@@ -126,11 +126,54 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
   ## Stepwise model selection.
   if(("selection" %in% which) & !is.null(x$selection)) {
-    plot(x$selection$AIC, type = "b", xlab = "Stepwise Iteration",
-      ylab = paste("-2 * logLik +", x$selection$K, "* df"),
-      col = gray(0.6), pch = 16)
-    points(x$selection$AIC, type = "b")
-    points(x$selection$AIC)
+    ylim <- list(...)$ylim
+    labels <- list(...)$labels
+    if(is.null(labels))
+      labels <- TRUE
+    if(is.null(ylim) & !is.null(labels)) {
+      ylim <- c(min(x$selection$AIC),
+        diff(range(x$selection$AIC)) * 0.1 + max(x$selection$AIC))
+    }
+    xlim <- list(...)$xlim
+    if(is.null(xlim) & !is.null(labels)) {
+      xlim <- c(-0.5, length(x$selection$AIC) - 0.5)
+    }
+    pch <- list(...)$pch
+    if(is.null(pch))
+      pch <- 16
+    type <- list(...)$type
+    if(is.null(type))
+      type <- "b"
+    col <- list(...)$col
+    if(is.null(col))
+      col <- 4
+    xlab <- list(...)$xlab
+    if(is.null(xlab))
+      xlab <- "Stepwise Iteration"
+    ylab <- list(...)$ylab
+    if(is.null(ylab))
+      ylab <- paste("-2 * logLik +", x$selection$K, "* df")
+    main <- list(...)$main
+    if(is.null(main))
+      main <- "GAIC Path"
+
+    n <- length(x$selection$AIC) - 1L
+
+    plot(0:n, x$selection$AIC, type = type, xlab = xlab,
+      ylab = ylab, main = main, col = col, pch = pch,
+      ylim = ylim, xlim = xlim)
+
+    if(type == "b") {
+      points(0:n, x$selection$AIC, type = type)
+      points(0:n, x$selection$AIC)
+    }
+
+    if(is.logical(labels)) {
+      if(labels) {
+        text(0:n, x$selection$AIC,
+          names(x$selection$AIC), pos = 3)
+      }
+    }
   }
 }
 

@@ -40,8 +40,8 @@ stepwise(x, y, specials, family, offsets,
 
 \details{
   Note that the GAIC penalty is controlled by the \code{"K"} argument, which can be easily
-  specified in the \code{\link{gamlss2}} call (using \code{\link{gamlss2_control}}).
-  See the examples.
+  specified in the \code{\link{gamlss2}} call (using \code{\link{gamlss2_control}}). The default
+  is the BIC penalty. See also the examples.
 
   The stepwise algorithm uses the following strategy:
   \itemize{

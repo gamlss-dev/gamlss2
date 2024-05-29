@@ -42,6 +42,9 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
     xsel[[i]][names(xsel[[i]]) == "(Intercept)"] <- TRUE
   }
 
+  if(trace[2L])
+    cat("Forward selection:\n")
+
   ## (1) Forward linear only.
   ici <- Inf
   ll <- -Inf
@@ -117,8 +120,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         start <- m$fitted.values
 
-        if(trace[2L])
-          cat("  <+> parameter", i, "term", j, "\n")
+        if(trace[2L]) {
+          cat("  GAIC = ", fmt(m$deviance + K * get_df2(m), width = 10, digits = 4),
+            " <+> parameter ", i, ", term ", j,  "\n", sep = "")
+        }
       }
     } else {
       do <- FALSE
@@ -175,11 +180,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
         names(ici)[lici] <- names(ll)[lici] <- names(df)[lici] <- paste0(i, ".", j)
 
         if(length(ici) > 1L) {
-          tstat <- 2 * (ll[length(ll)] - ll[length(ll) - 1L])
-          dfij <- df[length(df)] - df[length(df) - 1L]
-          pval <- pchisq(tstat, df = dfij, lower.tail = FALSE)
-
-          if((ici[length(ici)] >= ici[length(ici) - 1L]) | (pval >= 0.05)) {
+          if((ici[length(ici)] >= ici[length(ici) - 1L])) {
             ll <- ll[-length(ll)]
             ici <- ici[-length(ici)]
             df <- df[-length(df)]
@@ -197,8 +198,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           start <- m$fitted.values
 
-          if(trace[2L])
-            cat("  <+> parameter", i, "term", j, "\n")
+          if(trace[2L]) {
+            cat("  GAIC = ", fmt(m$deviance + K * get_df2(m), width = 10, digits = 4),
+              " <+> parameter ", i, ", term ", j,  "\n", sep = "")
+          }
         }
       } else {
         do <- FALSE
@@ -212,6 +215,9 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
     weights, start = start, xterms_sel2, sterms = sterms_sel2, control)
 
   ## (3) Mixed.
+  if(trace[2L])
+    cat("Backward and forward selection:\n")
+
   selected <- NULL
   for(i in names(xterms_sel2))
     selected <- c(selected, paste0(i, ".p.", xterms_sel2[[i]]))
@@ -313,8 +319,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
       start <- m$fitted.values
 
-      if(trace[2L])
-        cat("  <-> parameter", i, "term", j, "\n")
+      if(trace[2L]) {
+        cat("  GAIC = ", fmt(m$deviance + K * get_df2(m), width = 10, digits = 4),
+          " <-> parameter ", i, ", term", j,  "\n", sep = "")
+      }
     }
 
     ## Forward step.
@@ -377,7 +385,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
         i <- j[1L]
         j <- j[2L]
 
-        xterms_sel2[[i]] <- xterms_sel2[[i]][-grep(j, xterms_sel2[[i]], fixed = TRUE)]
+        xterms_sel2[[i]] <- c(xterms_sel2[[i]], j)
       }
 
       if(grepl(".s.", sel, fixed = TRUE)) {
@@ -386,7 +394,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
         i <- j[1L]
         j <- j[2L]
 
-        sterms_sel2[[i]] <- sterms_sel2[[i]][-grep(j, sterms_sel2[[i]], fixed = TRUE)]
+        sterms_sel2[[i]] <- c(sterms_sel2[[i]], j)
       }
 
       ici <- c(ici, ic[[i]][[j]]$AIC)
@@ -403,8 +411,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
       start <- m$fitted.values
 
-      if(trace[2L])
-        cat("  <+> parameter", i, "term", j, "\n")
+      if(trace[2L]) {
+        cat("  GAIC = ", fmt(m$deviance + K * get_df2(m), width = 10, digits = 4),
+          " <+> parameter ", i, ", term", j,  "\n", sep = "")
+      }
     }
 
     do <- anysel

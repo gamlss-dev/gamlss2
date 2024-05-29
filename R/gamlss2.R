@@ -84,6 +84,11 @@ gamlss2.formula <- function(formula, data, family = NO,
   ff <- fake_formula(formula, nospecials = TRUE)
   mt <- terms(ff, data = data)
   Y <- model.response(mf)
+  if(is.null(Y)) {
+    rn <- response.name(formula)
+    rn <- rn[rn != "."]
+    Y <- mf[, rn]
+  }
   X <- model.matrix(mt, mf)
   if(!("(Intercept)" %in% colnames(X)))
     X <- cbind("(Intercept)" = 1.0, X)

@@ -12,7 +12,7 @@ get_df2 <- function(object) {
 }
 
 stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
-{ 
+{
   nx <- family$names
 
   for(i in nx) {

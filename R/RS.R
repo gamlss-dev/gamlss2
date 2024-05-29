@@ -12,7 +12,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   ## Starting values.
   cstart <- NULL
-  if(!missing(start)) {
+  if(missing(start))
+    start <- NULL
+  if(!is.null(start)) {
     if(!inherits(start, "coef.gamlss2")) {
       if(!is.null(start)) {
         if(inherits(start, "list")) {

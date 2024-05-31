@@ -193,13 +193,13 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
     sterms[[i]] <- character(0)
 
   ## Max. iterations.
-  n.iter <- control$n.iter
-  if(is.null(n.iter))
-    n.iter <- Inf
+  ncycles <- control$ncycles
+  if(is.null(ncycles))
+    ncycles <- Inf
   gaic0 <- gaic
   improved <- TRUE
   k <- 0L
-  while(improved & (k < n.iter)) {
+  while(improved & (k < ncycles)) {
     if(length(notselected) & ("forward" %in% strategy)) {
       if(trace[2L])
         cat("Forward Selection\n")

@@ -63,6 +63,10 @@ stepwise(x, y, specials, family, offsets,
   \code{strategy} in the \code{\link{gamlss2_control}} function. Please see 
   the examples. Possible values are
   \code{strategy = c("forward.linear", "forward", "backward", "replace")}.
+
+  The maximum number of cycles of the last three items can be controlled
+  by specifying, e.g., for one cycle \code{n.iter = 1}, in function
+  \code{\link{gamlss2_control}}.
 } 
 
 \value{

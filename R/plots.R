@@ -131,12 +131,12 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(is.null(labels))
       labels <- TRUE
     if(is.null(ylim) & !is.null(labels)) {
-      ylim <- c(min(x$selection$AIC),
-        diff(range(x$selection$AIC)) * 0.1 + max(x$selection$AIC))
+      ylim <- c(min(x$selection$GAIC),
+        diff(range(x$selection$GAIC)) * 0.1 + max(x$selection$GAIC))
     }
     xlim <- list(...)$xlim
     if(is.null(xlim) & !is.null(labels)) {
-      xlim <- c(-0.5, length(x$selection$AIC) - 0.5)
+      xlim <- c(-0.5, length(x$selection$GAIC) - 0.5)
     }
     pch <- list(...)$pch
     if(is.null(pch))
@@ -157,21 +157,21 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(is.null(main))
       main <- "GAIC Path"
 
-    n <- length(x$selection$AIC) - 1L
+    n <- length(x$selection$GAIC) - 1L
 
-    plot(0:n, x$selection$AIC, type = type, xlab = xlab,
+    plot(0:n, x$selection$GAIC, type = type, xlab = xlab,
       ylab = ylab, main = main, col = col, pch = pch,
       ylim = ylim, xlim = xlim)
 
     if(type == "b") {
-      points(0:n, x$selection$AIC, type = type)
-      points(0:n, x$selection$AIC)
+      points(0:n, x$selection$GAIC, type = type)
+      points(0:n, x$selection$GAIC)
     }
 
     if(is.logical(labels)) {
       if(labels) {
-        text(0:n, x$selection$AIC,
-          names(x$selection$AIC), pos = 3)
+        text(0:n, x$selection$GAIC,
+          names(x$selection$GAIC), pos = 3)
       }
     }
   }

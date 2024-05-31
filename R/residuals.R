@@ -24,6 +24,15 @@ residuals.gamlss2 <- function(object,
       model.response(model.frame(object, keepresponse = TRUE, data = newdata))
     }
 
+    if(is.null(object$y)) {
+      rn <- response.name(object)
+      object$y <- if(is.null(newdata)) {
+        model.frame(object, keepresponse = TRUE)[, rn]
+      } else {
+        model.frame(object, keepresponse = TRUE, data = newdata)[, rn]
+      }
+    }
+
     if(is.null(object$y))
       stop("response variable is missing, cannot compute residuals!")
 

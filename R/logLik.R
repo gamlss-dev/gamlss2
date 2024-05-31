@@ -49,6 +49,7 @@ response.name <- function(formula) {
   formula <- as.Formula(formula)
   formula <- formula(formula, rhs = 0, collapse = TRUE)
   rn <- all.vars(formula)
+  rn <- rn[rn != "."]
   return(rn)
 }
 

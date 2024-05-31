@@ -48,16 +48,21 @@ stepwise(x, y, specials, family, offsets,
     \item Each predictor must include an intercept.
     \item First, in a forward selection step, the linear terms with the highest improvement
       on the GAIC are selected.
-    \item Second, in a forward selection step, the nonlinear model terms or
+    \item Second, in a forward selection step, all linear or
       special model terms (see \code{\link{specials}}) with the highest improvement
       on the GAIC are selected.
-    \item Third, in a backward step, linear or nonlinear (special) terms are deselected,
-      if the GAIC can be further improved.
-    \item Fourth, in a forward step, linear or nonlinear (special) terms are selected,
+    \item Third, each model term is tested to see if an exchange with
+      a model term not yet selected will improve the GAIC.
+    \item Fourth, in a backward step, linear or nonlinear (special) terms are deselected,
       if the GAIC can be further improved.
   }
 
-  The last two items are iterated until no further improvement is achieved.
+  The last three items are iterated until no further improvement is achieved.
+
+  The different strategies can be selected using an argument named
+  \code{strategy} in the \code{\link{gamlss2_control}} function. Please see 
+  the examples. Possible values are
+  \code{strategy = c("forward.linear", "forward", "backward", "replace")}.
 } 
 
 \value{
@@ -95,6 +100,11 @@ plot(b, which = "resid")
 
 ## Plot GAIC.
 plot(b, which = "selection")
+
+## Use only forward linear and replace strategy.
+b <- gamlss2(f, data = rent, family = NO,
+  optimizer = stepwise, K = 2,
+  strategy = c("forward.linear", "replace"))
 }}
 
 \keyword{models}

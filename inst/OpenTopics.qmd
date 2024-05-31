@@ -1,0 +1,7 @@
+## Open Topics
+
+1. Should `GAIC()` and `Rsq()` be generic functions? At the moment the functions are overwitten from _gamlss_ when loading _gamlss2_.
+
+2. Should the `pb()` model term also be overwitten?
+
+3. Which model terms do we need `re()`, `lasso()`, etc.?

@@ -453,14 +453,14 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
   ## Final model.
   m <- RS(x, y, specials, family, offsets,
-    weights, start = start, xterms, sterms = sterms, control)
+    weights, start = NULL, xterms, sterms = sterms, control)
 
   ## Small extractor function.
   ge <- function(j) { sapply(stats_save, function(z) z[[j]]) }
 
   m$selection <- list("GAIC" = ge("GAIC"), "logLik" = ge("logLik"),
     "df" = ge("df"), "K" = K)
-  names(m$selection$GAIC) <- ge("term")
+  names(m$selection$GAIC) <- gsub(".s.", ".", gsub(".p.", ".", ge("term"), fixed = TRUE), fixed = TRUE)
   m$xterms <- xterms
   m$sterms <- sterms
   m$specials <- specials[unique(unlist(sterms))]

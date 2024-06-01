@@ -5,3 +5,6 @@
 2. Should the `pb()` model term also be overwitten?
 
 3. Which model terms do we need `re()`, `lasso()`, etc.?
+
+4. Which strategies should we use in stepwise()? At the moment the
+   function uses "forward.linear", "forward", "backward" and "replace".

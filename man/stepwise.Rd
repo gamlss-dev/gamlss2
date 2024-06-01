@@ -109,6 +109,20 @@ plot(b, which = "selection")
 b <- gamlss2(f, data = rent, family = NO,
   optimizer = stepwise, K = 2,
   strategy = c("forward.linear", "replace"))
+
+## More complex model.
+f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+
+## Model using the BCT family.
+b <- gamlss2(f, data = rent, family = BCT,
+  optimizer = stepwise, K = 2,
+  strategy = c("forward.linear", "forward", "backward"))
+
+## Plot GAIC.
+plot(b, which = "selection")
 }}
 
 \keyword{models}

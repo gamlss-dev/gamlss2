@@ -105,10 +105,10 @@ plot(b, which = "resid")
 ## Plot GAIC.
 plot(b, which = "selection")
 
-## Use only forward linear and replace strategy.
+## Use forward linear, replace and backward strategy.
 b <- gamlss2(f, data = rent, family = NO,
   optimizer = stepwise, K = 2,
-  strategy = c("forward.linear", "replace"))
+  strategy = c("forward.linear", "replace", "backward"))
 
 ## More complex model.
 f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |

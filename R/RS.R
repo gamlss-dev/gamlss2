@@ -378,13 +378,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               sfit[[j]][[k]]$selected <- TRUE
               ll02 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
-            } #else {
-              #if(isTRUE(sfit[[j]][[k]]$selected)) {
-                #sfit[[j]][[k]] <- fs
-                #sfit[[j]][[k]]$selected <- TRUE
-                #ll02 <- ll1
-              #}
-            #}
+            } ##else {
+              ##if(isTRUE(sfit[[j]][[k]]$selected)) {
+              ##  sfit[[j]][[k]] <- fs
+              ##  ll02 <- ll1
+              ##}
+            ##}
 
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
 
@@ -478,7 +477,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           if(control$light) {
             sfit[[j]][[i]]$fitted.values <- NULL
           }
-          if(!sfit[[j]][[i]]$selected)
+          if(!isTRUE(sfit[[j]][[i]]$selected))
             drop <- c(drop, i)
         }
         if(length(drop)) {

@@ -96,9 +96,6 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   m <- RS(x, y, specials = NULL, family, offsets,
     weights, start = start, xterms_itcpt, sterms = NULL, control)
 
-  ## Update starting values.
-  start <- fit <- m$fitted.values
-
   ## Nullmodel GAIC, logLik, df.
   stats_save <- list()
   stats_save[[1L]] <- modelstats(m)
@@ -165,9 +162,6 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
         ## Save stats.
         stats_save[[iter]] <- stats[[j]]
         stats_save[[iter]]$term <- j
-
-        ## Set starting values.
-        start <- fit
 
         ## Print info.
         if(trace[2L]) {
@@ -260,9 +254,6 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
           stats_save[[iter]] <- stats[[j]]
           stats_save[[iter]]$term <- j
 
-          ## Set starting values.
-          start <- fit
-
           ## Print info.
           if(trace[2L]) {
             j <- splitname(j)
@@ -351,9 +342,6 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
           stats_save[[iter]] <- stats[[j]]
           stats_save[[iter]]$term <- stats[[j]]$new
 
-          ## Set starting values.
-          start <- fit
-
           ## Print info.
           if(trace[2L]) {
             r <- splitname(stats[[j]]$old)
@@ -429,9 +417,6 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
           stats_save[[iter]] <- stats[[j]]
           stats_save[[iter]]$term <- j
 
-          ## Set starting values.
-          start <- fit
-
           ## Print info.
           if(trace[2L]) {
             j <- splitname(j)
@@ -453,7 +438,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
   ## Final model.
   m <- RS(x, y, specials, family, offsets,
-    weights, start = NULL, xterms, sterms = sterms, control)
+    weights, start = start, xterms, sterms = sterms, control)
 
   ## Small extractor function.
   ge <- function(j) { sapply(stats_save, function(z) z[[j]]) }

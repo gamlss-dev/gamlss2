@@ -4,6 +4,8 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
   co <- object$coefficients
 
   family <- family(object)
+  if(is.null(family))
+    family <- list("names" = names(co))
 
   cos <- list()
   for(i in family$names) {

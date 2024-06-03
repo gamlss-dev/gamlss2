@@ -26,7 +26,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   strategy <- control$strategy
   choices <- c("forward.linear", "forward", "backward", "replace")
   if(is.null(strategy)) {
-    strategy <- choices
+    strategy <- c("forward.linear", "forward", "backward")
   } else {
     strategy <- match.arg(strategy, choices, several.ok = TRUE)
   }

@@ -114,10 +114,11 @@ b <- gamlss2(f, data = rent, family = NO,
   optimizer = stepwise, K = 2,
   strategy = c("forward.linear", "replace", "backward"))
 
-## More complex model.
+## More complex model. Note, the third parameter
+## nu does not include any model terms.
 f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
-  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  1 |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## Model using the BCT family.

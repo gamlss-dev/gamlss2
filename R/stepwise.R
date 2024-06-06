@@ -483,6 +483,9 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   do <- TRUE
   iter <- 1L
   while(do) {
+    if(trace[2L] && (iter > 1L))
+      cat("Continue\n")
+
     if("forward" %in% strategy) {
       if(trace[2L] && (iter < 2L))
         cat("Forward Selection\n")
@@ -638,12 +641,31 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   ge <- function(j) { sapply(stats_save, function(z) z[[j]]) }
 
   model$selection <- list("GAIC" = ge("GAIC"), "logLik" = ge("logLik"),
-    "df" = ge("df"), "K" = K)
+    "df" = ge("df"), "K" = K, "formula" = xs2formula(xterms, sterms))
   names(model$selection$GAIC) <- gsub(".s.", ".", gsub(".p.", ".", ge("term"), fixed = TRUE), fixed = TRUE)
   model$xterms <- xterms
   model$sterms <- sterms
   model$specials <- specials[unique(unlist(sterms))]
 
+  if(trace[2L]) {
+    cat("Final Model\n")
+    for(j in names(model$selection$formula)) {
+      cat(paste0("$", j, "\n.. "))
+      print(model$selection$formula[[j]])
+    }
+  }
+
   return(model)
+}
+
+xs2formula <- function(x, s)
+{
+  f <- list()
+  for(j in unique(names(x),names(s))) {
+    f[[j]] <- paste(c(x[[j]], s[[j]]), collapse = "+")
+    f[[j]] <- gsub("(Intercept)", "1", f[[j]], fixed = TRUE)
+    f[[j]] <- as.formula(paste("~", f[[j]]), env = .GlobalEnv)
+  }
+  return(f)
 }
 

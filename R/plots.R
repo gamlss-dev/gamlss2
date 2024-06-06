@@ -170,8 +170,9 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if(is.logical(labels)) {
       if(labels) {
-        text(0:n, x$selection$GAIC,
-          names(x$selection$GAIC), pos = 3)
+        nl <- names(x$selection$GAIC)
+        nl[1] <- "nullmodel"
+        text(0:n, x$selection$GAIC, nl, pos = 3)
       }
     }
   }

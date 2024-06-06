@@ -44,30 +44,34 @@ stepwise(x, y, specials, family, offsets,
   is the BIC penalty. See also the examples.
 
   The stepwise algorithm uses the following strategy:
-  \itemize{
+  \enumerate{
     \item Each predictor must include an intercept.
-    \item First, in a forward selection step, the linear terms with the highest improvement
+    \item In a forward selection step, model terms with the highest improvement
       on the GAIC are selected.
-    \item Second, in a forward selection step, all linear or
-      special model terms (see \code{\link{specials}}) with the highest improvement
-      on the GAIC are selected.
-    \item Third, each model term is tested to see if an exchange with
+    \item In a replacement step, each model term is tested to see if an exchange with
       a model term not yet selected will improve the GAIC.
-    \item Fourth, in a backward step, linear or nonlinear (special) terms are deselected,
+    \item In a backward step, model terms are deselected,
       if the GAIC can be further improved.
   }
 
-  The last three items are iterated until no further improvement is achieved.
+  Items 2-4 are iterated until no further improvement is achieved.
 
   The different strategies can be selected using an argument named
   \code{strategy} in the \code{\link{gamlss2_control}} function. Please see 
   the examples. Possible values are
-  \code{strategy = c("forward.linear", "forward", "backward", "replace")}.
+  \code{strategy = c("forward", "replace", "backward")}.
 
-  The maximum number of cycles of the last three items can be controlled
-  by specifying, e.g., for one cycle \code{ncycles = 1}, in function
-  \code{\link{gamlss2_control}}.
-} 
+  In addition, each of the steps 2-4 can be applied to linear model terms only,
+  prior to performing the steps for all model terms. This can be done by additionally
+  setting \code{strategy = c("forward.linear", "replace.linear", "backward.linear")}.
+
+  Note that each of the steps 2-4 can be performed while maintaining the order of the 
+  parameters of the response distribution, i.e., if the \code{keeporder = TRUE}
+  argument is set (in function \code{\link{gamlss2_control}}),
+  then the parameters will be updated in the order specified in the
+  \code{\link{gamlss2.family}}. Using backward elimination, the model terms are
+  deselected in reverse order.
+}
 
 \value{
   The function returns the final model as named list of class \code{"gamlss2"}. See
@@ -119,7 +123,8 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
 ## Model using the BCT family.
 b <- gamlss2(f, data = rent, family = BCT,
   optimizer = stepwise, K = 2,
-  strategy = c("forward.linear", "forward", "backward"))
+  strategy = c("forward.linear", "forward", "backward"),
+  keeporder = TRUE)
 
 ## Plot GAIC.
 plot(b, which = "selection")

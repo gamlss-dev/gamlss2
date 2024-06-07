@@ -1,5 +1,6 @@
 \name{stepwise} 
 \alias{stepwise}
+\alias{stepGAMLSS}
 
 \title{Stepwise Model Term Selection Using GAIC}
 
@@ -11,11 +12,23 @@
 }
 
 \usage{
+## Wrapper function for stepwise GAMLSS estimation.
+stepGAMLSS(formula, ..., K = 2,
+  strategy = c("both.linear", "both"), keeporder = FALSE)
+
+## Stepwise optimizer function.
 stepwise(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 }
 
 \arguments{
+  \item{formula}{A model formula for \code{\link{gamlss2}}.}
+  \item{\dots}{Arguments passed to \code{\link{gamlss2}}.}
+  \item{K}{Numeric, the penalty for the \code{\link{GAIC}}.}
+  \item{strategy}{Character, the strategy that should be applied for the stepwise algorithm.
+    Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
+    \code{"backward.linear"}, \code{"replace"}, \code{"replace.linear"},
+    \code{"both"}, \code{"both.linear"}. See the details.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and
@@ -39,9 +52,8 @@ stepwise(x, y, specials, family, offsets,
 }
 
 \details{
-  Note that the GAIC penalty is controlled by the \code{"K"} argument, which can be easily
-  specified in the \code{\link{gamlss2}} call (using \code{\link{gamlss2_control}}). The default
-  is the BIC penalty. See also the examples.
+  The wrapper functions simply calls \code{\link{gamlss2}} using the \code{stepwise()} optimizer
+  function.
 
   The stepwise algorithm uses the following strategy:
   \enumerate{
@@ -57,10 +69,8 @@ stepwise(x, y, specials, family, offsets,
 
   Items 2-5 are iterated until no further improvement is achieved.
 
-  The different strategies can be selected using an argument named
-  \code{strategy} in the \code{\link{gamlss2_control}} function. Please see 
-  the examples. Possible values are
-  \code{strategy = c("both", "forward", "backward", "replace")}.
+  The different strategies can be selected using argument \code{strategy}. Please see 
+  the examples. Possible values are \code{strategy = c("both", "forward", "backward", "replace")}.
 
   In addition, each of the steps 2-4 can be applied to linear model terms only,
   prior to performing the steps for all model terms. This can be done by additionally
@@ -70,15 +80,15 @@ stepwise(x, y, specials, family, offsets,
 
   Note that each of the steps 2-4 can be performed while maintaining the order of the 
   parameters of the response distribution, i.e., if the \code{keeporder = TRUE}
-  argument is set (in function \code{\link{gamlss2_control}}),
-  then the parameters will be updated in the order specified in the
+  argument is set, then the parameters will be updated in the order specified in the
   \code{\link{gamlss2.family}}. Using backward elimination, the model terms are
   deselected in reverse order.
 }
 
 \value{
-  The function returns the final model as named list of class \code{"gamlss2"}. See
-  the return value of function \code{\link{RS}}.
+  The optimizer function \code{stepwise()} returns the final model as named list
+  of class \code{"gamlss2"}. See the return value of function \code{\link{RS}}.
+  The wrapper function \code{stepGAMLSS()} also returns the final model.
 }
 
 \seealso{
@@ -98,7 +108,10 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## Estimate a Gamma model using the stepwise algorithm.
-b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+b <- stepGAMLSS(f, data = rent, family = GA, K = 2)
+
+## Same with.
+## b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
 
 ## Final model summary.
 summary(b)
@@ -113,8 +126,7 @@ plot(b, which = "resid")
 plot(b, which = "selection")
 
 ## Use forward linear, replace and backward strategy.
-b <- gamlss2(f, data = rent, family = GA,
-  optimizer = stepwise, K = 2,
+b <- stepGAMLSS(f, data = rent, family = GA, K = 2,
   strategy = c("forward.linear", "replace", "backward"))
 
 ## More complex model. Note, the third parameter
@@ -125,9 +137,8 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## Model using the BCT family.
-b <- gamlss2(f, data = rent, family = BCT,
-  optimizer = stepwise, K = 2,
-  strategy = c("forward.linear", "both"),
+b <- stepGAMLSS(f, data = rent, family = BCT,
+  K = 2, strategy = c("forward.linear", "both"),
   keeporder = TRUE)
 
 ## Plot GAIC.

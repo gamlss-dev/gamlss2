@@ -380,7 +380,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   control$trace <- trace[1L]
 
   ## Penalty for AIC.
-  K <- if(is.null(control$K)) log(nrow(x)) else control$K
+  K <- if(is.null(control$K)) 2 else control$K
 
   ## Estimate nullmodel first.
   xterms_itcpt <- list()
@@ -429,8 +429,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            selected <- c(selected[!grepl(paste0(i, ".p."), selected, fixed = TRUE)], si$selected)
+            notselected <- c(notselected[!grepl(paste0(i, ".p."), notselected, fixed = TRUE)], si$notselected)
             xterms <- si$xterms
             stats_save <- si$stats_save
             model <- si$model
@@ -443,8 +443,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           stats_save <- si$stats_save
           model <- si$model
@@ -467,8 +467,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            selected <- c(selected[!grepl(paste0(i, ".p."), selected, fixed = TRUE)], si$selected)
+            notselected <- c(notselected[!grepl(paste0(i, ".p."), notselected, fixed = TRUE)], si$notselected)
             xterms <- si$xterms
             stats_save <- si$stats_save
             model <- si$model
@@ -481,8 +481,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           stats_save <- si$stats_save
           model <- si$model
@@ -505,8 +505,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            selected <- c(selected[!grepl(paste0(i, ".p."), selected, fixed = TRUE)], si$selected)
+            notselected <- c(notselected[!grepl(paste0(i, ".p."), notselected, fixed = TRUE)], si$notselected)
             xterms <- si$xterms
             stats_save <- si$stats_save
             model <- si$model
@@ -519,8 +519,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           stats_save <- si$stats_save
           model <- si$model
@@ -543,8 +543,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            selected <- c(selected[!grepl(paste0(i, ".p."), selected, fixed = TRUE)], si$selected)
+            notselected <- c(notselected[!grepl(paste0(i, ".p."), notselected, fixed = TRUE)], si$notselected)
             xterms <- si$xterms
             stats_save <- si$stats_save
             model <- si$model
@@ -557,8 +557,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           stats_save <- si$stats_save
           model <- si$model
@@ -613,6 +613,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
+            jd <- !grepl(paste0(i, ".p."), selected, fixed = TRUE) & !grepl(paste0(i, ".s."), selected, fixed = TRUE)
+            selected <- c(selected[jd], si$selected)
+            jd <- !grepl(paste0(i, ".p."), notselected, fixed = TRUE) & !grepl(paste0(i, ".s."), notselected, fixed = TRUE)
+            notselected <- c(notselected[jd], si$notselected)
             selected <- unique(c(selected, si$selected))
             notselected <- unique(c(notselected, si$notselected))
             xterms <- si$xterms
@@ -628,8 +632,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           sterms <- si$sterms
           stats_save <- si$stats_save
@@ -661,8 +665,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            jd <- !grepl(paste0(i, ".p."), selected, fixed = TRUE) & !grepl(paste0(i, ".s."), selected, fixed = TRUE)
+            selected <- c(selected[jd], si$selected)
+            jd <- !grepl(paste0(i, ".p."), notselected, fixed = TRUE) & !grepl(paste0(i, ".s."), notselected, fixed = TRUE)
+            notselected <- c(notselected[jd], si$notselected)
             xterms <- si$xterms
             sterms <- si$sterms
             stats_save <- si$stats_save
@@ -676,8 +682,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           sterms <- si$sterms
           stats_save <- si$stats_save
@@ -709,8 +715,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            jd <- !grepl(paste0(i, ".p."), selected, fixed = TRUE) & !grepl(paste0(i, ".s."), selected, fixed = TRUE)
+            selected <- c(selected[jd], si$selected)
+            jd <- !grepl(paste0(i, ".p."), notselected, fixed = TRUE) & !grepl(paste0(i, ".s."), notselected, fixed = TRUE)
+            notselected <- c(notselected[jd], si$notselected)
             xterms <- si$xterms
             sterms <- si$sterms
             stats_save <- si$stats_save
@@ -724,8 +732,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           sterms <- si$sterms
           stats_save <- si$stats_save
@@ -757,8 +765,10 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
           ## Update.
           if(length(si$model)) {
-            selected <- unique(c(selected, si$selected))
-            notselected <- unique(c(notselected, si$notselected))
+            jd <- !grepl(paste0(i, ".p."), selected, fixed = TRUE) & !grepl(paste0(i, ".s."), selected, fixed = TRUE)
+            selected <- c(selected[jd], si$selected)
+            jd <- !grepl(paste0(i, ".p."), notselected, fixed = TRUE) & !grepl(paste0(i, ".s."), notselected, fixed = TRUE)
+            notselected <- c(notselected[jd], si$notselected)
             xterms <- si$xterms
             sterms <- si$sterms
             stats_save <- si$stats_save
@@ -772,8 +782,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
         ## Update.
         if(length(si$model)) {
-          selected <- unique(c(selected, si$selected))
-          notselected <- unique(c(notselected, si$notselected))
+          selected <- si$selected
+          notselected <- si$notselected
           xterms <- si$xterms
           sterms <- si$sterms
           stats_save <- si$stats_save
@@ -821,8 +831,8 @@ xs2formula <- function(x, s)
   return(f)
 }
 
-stepOptim <- function(formula, ..., K = 2,
-  strategy = c("forward.linear", "forward", "backward"), keeporder = FALSE)
+stepGAMLSS <- function(formula, ..., K = 2,
+  strategy = c("both.linear", "both"), keeporder = FALSE)
 {
   gamlss2(formula, ..., optimizer = stepwise, K = K, strategy = strategy, keeporder = keeporder)
 }

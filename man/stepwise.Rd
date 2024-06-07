@@ -29,6 +29,10 @@ stepwise(x, y, specials, family, offsets,
     Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
     \code{"backward.linear"}, \code{"replace"}, \code{"replace.linear"},
     \code{"both"}, \code{"both.linear"}. See the details.}
+  \code{keeporder}{Logical, For the different strategies of the stepwise algorithm,
+    should the updates be performed sequentially according to the order of the parameters of
+    the response distribution as specified in the family (see \code{\link{gamlss2.family}}),
+    or should the selection search be performed across all parameters?}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and

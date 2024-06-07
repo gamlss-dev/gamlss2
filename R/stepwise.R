@@ -47,7 +47,7 @@ modelstats <- function(model, K) {
 }
 
 forward_backward_step <- function(selected, notselected, xterms, sterms, strategy, stats_save,
-  x, y, specials, family, offsets, weights, start, control, trace, K)
+  x, y, specials, family, offsets, weights, start, control, trace, K, maxit = Inf)
 {
   ## Which model terms?
   modelterms <- switch(strategy,
@@ -64,7 +64,8 @@ forward_backward_step <- function(selected, notselected, xterms, sterms, strateg
   ## Start select loop.
   do <- TRUE
   model <- NULL
-  while(do) {
+  k <- 0L
+  while(do && (k < maxit)) {
     if(length(modelterms) > 1L) {
       stats <- list()
       for(j in modelterms) {
@@ -158,6 +159,8 @@ forward_backward_step <- function(selected, notselected, xterms, sterms, strateg
     } else {
       do <- FALSE
     }
+
+    k <- k + 1L
   }
 
   rval <- list("selected" = selected, "notselected" = notselected,
@@ -166,7 +169,6 @@ forward_backward_step <- function(selected, notselected, xterms, sterms, strateg
 
   return(rval)
 }
-
 
 replace_step <- function(selected, notselected, xterms, sterms, stats_save,
   x, y, specials, family, offsets, weights, start, control, trace, K)
@@ -280,6 +282,72 @@ replace_step <- function(selected, notselected, xterms, sterms, stats_save,
   return(rval)
 }
 
+both_step <- function(selected, notselected, xterms, sterms, stats_save,
+  x, y, specials, family, offsets, weights, start, control, trace, K)
+{
+  trace2 <- trace
+  trace2[2L] <- FALSE
+
+  gaic <- stats_save[[length(stats_save)]]$GAIC
+  model <- NULL
+
+  do <- TRUE
+  while(do) {
+    fs <- forward_backward_step(selected, notselected, xterms, sterms,
+      strategy = "forward", stats_save, x, y, specials, family, offsets, weights, start,
+      control, trace2, K, maxit = 1L)
+
+    bs <- forward_backward_step(selected, notselected, xterms, sterms,
+      strategy = "backward", stats_save, x, y, specials, family, offsets, weights, start,
+      control, trace2, K, maxit = 1L)
+
+    i1 <- length(fs$stats_save)
+    i2 <- length(bs$stats_save)
+
+    if((fs$stats_save[[i1]]$GAIC < gaic) || (bs$stats_save[[i2]]$GAIC < gaic)) {
+      if((fs$stats_save[[i1]]$GAIC < bs$stats_save[[i2]]$GAIC) && (fs$stats_save[[i1]]$GAIC < gaic)) {
+        ## Print info.
+        if(trace[2L]) {
+          j <- splitname(fs$stats_save[[i1]]$term)
+          cat("  GAIC = ", fmt(fs$stats_save[[i1]]$GAIC, width = 10, digits = 4),
+            " <+> parameter ", j[1L], ", term ", j[2L],  "\n", sep = "")
+        }
+        selected <- fs$selected
+        notselected <- fs$notselected
+        xterms <- fs$xterms
+        sterms <- fs$sterms
+        stats_save <- fs$stats_save
+        model <- fs$model
+        gaic <- fs$stats_save[[i1]]$GAIC
+      }
+
+      if((bs$stats_save[[i2]]$GAIC < fs$stats_save[[i1]]$GAIC) && (bs$stats_save[[i2]]$GAIC < gaic)) {
+        ## Print info.
+        if(trace[2L]) {
+          j <- splitname(bs$stats_save[[i2]]$term)
+          cat("  GAIC = ", fmt(bs$stats_save[[i2]]$GAIC, width = 10, digits = 4),
+            " <-> parameter ", j[1L], ", term ", j[2L],  "\n", sep = "")
+        }
+        selected <- bs$selected
+        notselected <- bs$notselected
+        xterms <- bs$xterms
+        sterms <- bs$sterms
+        stats_save <- bs$stats_save
+        model <- bs$model
+        gaic <- bs$stats_save[[i2]]$GAIC
+      }
+    } else {
+      do <- FALSE
+    }
+  }
+
+  rval <- list("selected" = selected, "notselected" = notselected,
+    "stats_save" = stats_save, "xterms" = xterms, "sterms" = sterms,
+    "model" = model)
+
+  return(rval)
+}
+
 stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 {
   nx <- family$names
@@ -293,18 +361,16 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 
   ## Which strategies to use?
   strategy <- control$strategy
-  choices <- c("forward.linear", "forward", "backward", "backward.linear", "replace", "replace.linear")
+  choices <- c("forward.linear", "forward", "backward", "backward.linear",
+     "replace", "replace.linear", "both", "both.linear")
   if(is.null(strategy)) {
-    strategy <- c("forward.linear", "forward", "backward")
+    strategy <- c("both.linear", "both")
   } else {
     strategy <- match.arg(strategy, choices, several.ok = TRUE)
   }
 
   ## Should the order of the parameters be retained?
   keeporder <- isTRUE(control$keeporder)
-
-  ## Should all parameters be updated with the same model term?
-  updateall <- isTRUE(control$updateall)
 
   ## Inner and outer trace.
   trace <- control$trace
@@ -373,6 +439,44 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
       } else {
         ## Run forward selection.
         si <- forward_backward_step(selected, notselected, xterms, sterms = NULL, strategy = "forward",
+          stats_save, x, y, specials = NULL, family, offsets, weights, start, control, trace, K)
+
+        ## Update.
+        if(length(si$model)) {
+          selected <- unique(c(selected, si$selected))
+          notselected <- unique(c(notselected, si$notselected))
+          xterms <- si$xterms
+          stats_save <- si$stats_save
+          model <- si$model
+        }
+      }
+    }
+
+    if("both.linear" %in% strategy) {
+      if(trace[2L] && (iter < 2L))
+        cat("Bidirectional Linear Selection\n")
+      if(keeporder) {
+        for(i in nx) {
+          ## Get only linear terms
+          isel <- grep(paste0(i, ".p."), selected, fixed = TRUE, value = TRUE)
+          inot <- grep(paste0(i, ".p."), notselected, fixed = TRUE, value = TRUE)
+
+          ## Run bidirectional selection.
+          si <- both_step(isel, inot, xterms, sterms = NULL,
+            stats_save, x, y, specials = NULL, family, offsets, weights, start, control, trace, K)
+
+          ## Update.
+          if(length(si$model)) {
+            selected <- unique(c(selected, si$selected))
+            notselected <- unique(c(notselected, si$notselected))
+            xterms <- si$xterms
+            stats_save <- si$stats_save
+            model <- si$model
+          }
+        }
+      } else {
+        ## Bidirectional selection.
+        si <- both_step(selected, notselected, xterms, sterms = NULL,
           stats_save, x, y, specials = NULL, family, offsets, weights, start, control, trace, K)
 
         ## Update.
@@ -534,6 +638,54 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
       }
     }
 
+    if("both" %in% strategy) {
+      if(trace[2L] && (iter < 2L))
+        cat("Bidirectional Selection\n")
+      if(keeporder) {
+        for(i in nx) {
+          ## Get selected terms.
+          isel <- c(
+            grep(paste0(i, ".p."), selected, fixed = TRUE, value = TRUE),
+            grep(paste0(i, ".s."), selected, fixed = TRUE, value = TRUE)
+          )
+
+          ## Get not selected terms.
+          inot <- c(
+            grep(paste0(i, ".p."), notselected, fixed = TRUE, value = TRUE),
+            grep(paste0(i, ".s."), notselected, fixed = TRUE, value = TRUE)
+          )
+
+          ## Run bidirectional selection.
+          si <- both_step(isel, inot, xterms, sterms,
+            stats_save, x, y, specials, family, offsets, weights, start, control, trace, K)
+
+          ## Update.
+          if(length(si$model)) {
+            selected <- unique(c(selected, si$selected))
+            notselected <- unique(c(notselected, si$notselected))
+            xterms <- si$xterms
+            sterms <- si$sterms
+            stats_save <- si$stats_save
+            model <- si$model
+          }
+        }
+      } else {
+        ## Bidirectional selection.
+        si <- both_step(selected, notselected, xterms, sterms,
+          stats_save, x, y, specials, family, offsets, weights, start, control, trace, K)
+
+        ## Update.
+        if(length(si$model)) {
+          selected <- unique(c(selected, si$selected))
+          notselected <- unique(c(notselected, si$notselected))
+          xterms <- si$xterms
+          sterms <- si$sterms
+          stats_save <- si$stats_save
+          model <- si$model
+        }
+      }
+    }
+
     if("replace" %in% strategy) {
       if(trace[2L] && (iter < 2L))
         cat("Replace Selection\n")
@@ -661,11 +813,17 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 xs2formula <- function(x, s)
 {
   f <- list()
-  for(j in unique(names(x),names(s))) {
-    f[[j]] <- paste(c(x[[j]], s[[j]]), collapse = "+")
+  for(j in unique(names(x), names(s))) {
+    f[[j]] <- paste(c(unique(x[[j]]), unique(s[[j]])), collapse = "+")
     f[[j]] <- gsub("(Intercept)", "1", f[[j]], fixed = TRUE)
     f[[j]] <- as.formula(paste("~", f[[j]]), env = .GlobalEnv)
   }
   return(f)
+}
+
+stepOptim <- function(formula, ..., K = 2,
+  strategy = c("forward.linear", "forward", "backward"), keeporder = FALSE)
+{
+  gamlss2(formula, ..., optimizer = stepwise, K = K, strategy = strategy, keeporder = keeporder)
 }
 

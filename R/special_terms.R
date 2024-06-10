@@ -103,7 +103,7 @@ special_predict.cf.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 ## ps2() & pb2() wrapper function using s().
-ps2 <- pb2 <- function(x, k = 20, ...)
+ps <- pb <- function(x, k = 20, ...)
 {
   sx <- s(x, bs = "ps", k = k, ...)
   sx$term <- deparse(substitute(x))

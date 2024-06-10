@@ -1,5 +1,5 @@
-\name{ps2}
-\alias{ps2}
+\name{pb}
+\alias{pb}
 
 \title{
   P-Splines for GAMLSS.
@@ -7,17 +7,18 @@
 
 \description{
   Estimation of P-splines using an efficient local maximum likelihood approach to automatically
-  select the smoothing parameter.
+  select the smoothing parameter. According to the inventors of P-splines,
+  \code{pb} stands for "penalized beta" splines or "Paul and Brian".
 }
 
 \usage{
-ps2(x, k = 20, ...)
+pb(x, k = 20, ...)
 }
 
 \arguments{
   \item{x}{The variable that should be used for estimation.}
   \item{k}{The dimension of the B-spline basis to represent the smooth term.}
-  \item{\dots}{Furter arguments passed to function \code{\link[mgcv]{s}}.}
+  \item{\dots}{Further arguments passed to function \code{\link[mgcv]{s}}.}
 }
 
 \value{
@@ -26,16 +27,20 @@ ps2(x, k = 20, ...)
 }
 
 \details{
-  Function \code{ps2()} is a small wrapper function that calls \code{\link[mgcv]{s}}
+  Function \code{pb()} is an \bold{internal} wrapper function that calls \code{\link[mgcv]{s}}
   to set up a smooth specification object that can be used for model fitting with
-  \code{\link{gamlss2}}. Using \code{ps2()}, an efficient local maximum likelihood
+  \code{\link{gamlss2}}. Using \code{pb()}, an efficient local maximum likelihood
   approach is used to estimate the smoothing parameter. See the reference for details.
 }
 
 \references{
+  Eilers P.H.C. and Marx B.D. (1996). Flexible Smoothing with B-Splines and Penalties
+  \emph{Statistical Science}, \bold{11}-2, 89--121.
+  \doi{10.1214/ss/1038425655}
+
   Rigby R.A. and Stasinopoulos D.M. (2014).
-  \emph{Automatic Smoothing Parameter Selection in GAMLSS with an Application to Centile Estimation},
-  Statistical Methods in Medical Research, \bold{23}-4,  318--332.
+  Automatic Smoothing Parameter Selection in GAMLSS with an Application to Centile Estimation,
+  \emph{Statistical Methods in Medical Research}, \bold{23}-4,  318--332.
   \doi{10.1177/0962280212473302}
 }
 
@@ -47,7 +52,7 @@ ps2(x, k = 20, ...)
 data("dbhh", package = "gamlss.data")
 
 ## Specify the model Formula.
-f <- head ~ ps2(age) | ps2(age) | ps2(age) | ps2(age)
+f <- head ~ pb(age) | pb(age) | pb(age) | pb(age)
 
 ## Estimate model.
 b <- gamlss2(f, data = dbhh, family = BCT)

@@ -34,12 +34,12 @@ pb(x, k = 20, ...)
 }
 
 \references{
-  Eilers P.H.C. and Marx B.D. (1996). Flexible Smoothing with B-Splines and Penalties
+  Eilers P.H.C. and Marx B.D. (1996). Flexible Smoothing with B-Splines and Penalties.
   \emph{Statistical Science}, \bold{11}-2, 89--121.
   \doi{10.1214/ss/1038425655}
 
   Rigby R.A. and Stasinopoulos D.M. (2014).
-  Automatic Smoothing Parameter Selection in GAMLSS with an Application to Centile Estimation,
+  Automatic Smoothing Parameter Selection in GAMLSS with an Application to Centile Estimation.
   \emph{Statistical Methods in Medical Research}, \bold{23}-4,  318--332.
   \doi{10.1177/0962280212473302}
 }

@@ -102,45 +102,15 @@ special_predict.cf.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## pb2() using smooth.construct.
-pb2 <- function(x, df = NULL, lambda = NULL, max.df = NULL, control = pb2.control(...), ...)
+## ps2() & pb2() wrapper function using s().
+ps2 <- pb2 <- function(x, k = 20, ...)
 {
-  m <- c(control$degree, control$order)
-  k <- control$inter + m[1L] + 1L
-  sx <- s(x, bs = "ps", m = m, k = k, sp = lambda)
+  sx <- s(x, bs = "ps", k = k, ...)
   sx$term <- deparse(substitute(x))
-  sx$control <- control
   sx$label <- paste0("pb2(", sx$term, ")")
+  sx$control <- list("criterion" = "ml")
   sx$localML <- TRUE
   return(sx)
-}
-
-pb2.control <- function(inter = 20, degree = 3, order = 2,
-  start = 10, method = c("ML", "GAIC", "GCV"), k = 2, ...) 
-{
-  if(inter <= 0) {
-    warning("the value of inter supplied is less than 0, the value of 10 was used instead")
-    inter <- 10
-  }
-
-  if(degree <= 0) {
-    warning("the value of degree supplied is less than zero or negative the default value of 3 was used instead")
-    degree <- 3
-  }
-
-  if(order < 0) {
-    warning("the value of order supplied is zero or negative the default value of 2 was used instead")
-    order <- 2
-  }
-
-  if(k <= 0) {
-    warning("the value of GAIC/GCV penalty supplied is less than zero the default value of 2 was used instead")
-    k <- 2
-  }
-
-  method <- match.arg(method)
-
-  return(list(inter = inter, degree = degree, order = order, start = start, method = method, k = k))
 }
 
 ## The constructor function is used in the formula

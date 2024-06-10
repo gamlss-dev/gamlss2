@@ -43,7 +43,7 @@ ps2(x, k = 20, ...)
   \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.ps.smooth.spec}}
 }
 
-\examples{## Load the abdominal circumference data
+\examples{## Load head circumference data.
 data("dbhh", package = "gamlss.data")
 
 ## Specify the model Formula.

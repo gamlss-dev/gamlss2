@@ -100,7 +100,7 @@ gamlss2(x, \dots)
   \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{## Load the abdominal circumference data
+\examples{## Load the abdominal circumference data.
 data("abdom", package = "gamlss.data")
 
 ## Specify the model Formula.

@@ -989,7 +989,7 @@ YJ <- function(...) {
 get_y_bd <- function(Y) {
   if(NCOL(Y) == 1) {
     y <- if(is.factor(Y))  Y != levels(Y)[1] else Y
-    bd <- rep(1, nrow(Y))
+    bd <- if(is.null(dim(Y))) rep(1, length(Y)) else rep(1, nrow(Y))
     if(any(y < 0 | y > 1))
       stop("y values must be 0 <= y <= 1")
   } else if(NCOL(Y) == 2) {

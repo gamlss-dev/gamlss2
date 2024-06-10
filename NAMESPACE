@@ -38,7 +38,8 @@ export(
   "fitFamily",
   "response.name",
   "stepwise",
-  "stepGAMLSS"
+  "stepGAMLSS",
+  "ps2"
 )
 
 S3method(gamlss2, formula)

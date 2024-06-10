@@ -20,6 +20,8 @@ importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
   "points", "legend")
 
+importFrom("parallel", "mclapply")
+
 export(
   "fake_formula",
   "gamlss2",

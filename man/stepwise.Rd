@@ -14,7 +14,8 @@
 \usage{
 ## Wrapper function for stepwise GAMLSS estimation.
 stepGAMLSS(formula, ..., K = 2,
-  strategy = c("both.linear", "both"), keeporder = FALSE)
+  strategy = c("both.linear", "both"), keeporder = FALSE,
+  cores = 1L)
 
 ## Stepwise optimizer function.
 stepwise(x, y, specials, family, offsets,
@@ -25,12 +26,16 @@ stepwise(x, y, specials, family, offsets,
   \item{formula}{A model formula for \code{\link{gamlss2}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2}}.}
   \item{K}{Numeric, the penalty for the \code{\link{GAIC}}.}
-  \item{strategy}{Character, the strategy that should be applied for the stepwise algorithm. Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
+  \item{strategy}{Character, the strategy that should be applied for the stepwise algorithm.
+    Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
     \code{"backward.linear"}, \code{"replace"}, \code{"replace.linear"},
     \code{"both"}, \code{"both.linear"}. See the details.}
-    \item{keeporder}{Logical, For the different strategies of the stepwise algorithm,
-    should the updates be performed sequentially according to the order of the parameters of the response distribution as specified in the family (see \code{\link{gamlss2.family}}),
+  \item{keeporder}{Logical, For the different strategies of the stepwise algorithm,
+    should the updates be performed sequentially according to the order of the parameters
+    of the response distribution as specified in the family (see \code{\link{gamlss2.family}}),
     or should the selection search be performed across all parameters?}
+  \item{cores}{Integer, if \code{cores > 1L}, function \code{\link[parallel]{mclapply}}
+    function is used to speed up computations using multiple cores within the selection steps.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and
@@ -57,7 +62,7 @@ stepwise(x, y, specials, family, offsets,
   The wrapper functions simply calls \code{\link{gamlss2}} using the \code{stepwise()} optimizer
   function.
 
-  The stepwise algorithm uses the following strategy:
+  The stepwise algorithm can apply the following strategies:
   \enumerate{
     \item Each predictor must include an intercept.
     \item In a forward selection step, model terms with the highest improvement
@@ -67,16 +72,18 @@ stepwise(x, y, specials, family, offsets,
     \item In a backward step, model terms are deselected,
       if the GAIC can be further improved.
     \item In a bidirectional step, model terms can be either added or removed.
+    \item In addition, the forward, backward and replace selection step can be combined.
   }
 
-  Items 2-5 are iterated until no further improvement is achieved.
+  The selected strategies are iterated until no further improvement is achieved.
 
   The different strategies can be selected using argument \code{strategy}. Please see 
-  the examples. Possible values are \code{strategy = c("both", "forward", "backward", "replace")}.
+  the examples. Possible values are \code{strategy = c("both", "forward", "backward", "replace", "all")}.
+  Here, \code{strategy = "all"} combines the forward, backward and replace selection step.
 
   In addition, each of the steps 2-4 can be applied to linear model terms only,
   prior to performing the steps for all model terms. This can be done by additionally
-  setting \code{strategy = c("both.linear", "forward.linear", "backward.linear", "replace.linear")}.
+  setting \code{strategy = c("both.linear", "forward.linear", "backward.linear", "replace.linear", "all.linear")}.
 
   The default is \code{strategy = c("both.linear", "both")} and \code{keeporder = FALSE}.
 

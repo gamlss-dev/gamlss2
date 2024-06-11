@@ -1,8 +1,13 @@
 ## Helper functions.
 get_df2 <- function(object) {
   df <- 0
-  if(length(object$fitted.linear))
-    df <- df + sum(sapply(object$fitted.linear, function(x) length(x$coefficients)))
+  if(length(object$fitted.linear)) {
+    if(is.null(attr(object$fitted.linear, "edf"))) {
+      df <- df + sum(sapply(object$fitted.linear, function(x) length(x$coefficients)))
+    } else {
+      df <- df + sum(attr(object$fitted.linear, "edf"))
+    }
+  }
   if(length(object$fitted.specials)) {
     for(j in seq_along(object$fitted.specials)) {
       dfj <- sapply(object$fitted.specials[[j]], function(x) x$edf)

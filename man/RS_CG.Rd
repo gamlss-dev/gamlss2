@@ -62,6 +62,11 @@ CG(x, y, specials, family, offsets,
     \item \code{trace}: Logical, should information be printed while the algorithm is running?
     \item \code{flush}: Logical, use \code{\link[utils]{flush.console}} for displaying the
       current output in the console.
+    \item \code{ridge}: Logical, should automatic ridge penalization be applied
+      only to linear effects, without penalizing the intercept? For each parameter of
+      the distribution the optimum ridge penalty is estimated using an information criterion.
+      Possible options are \code{criterion = c("gcv", "aic", "gaic", "aicc", "bic")}. The
+      default is \code{criterion = "aicc"}.
   }
 
   To facilitate the development of new algorithms for \pkg{gamlss2}, users can exchange

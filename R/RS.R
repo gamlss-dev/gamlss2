@@ -96,6 +96,19 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       control$fixed[[j]] <- FALSE
   }
 
+  ## Ridge penalty?
+  ridge <- isTRUE(control$ridge)
+  penalty <- control$penalty
+  if(is.null(penalty))
+    penalty <- 1
+  penalty <- rep(penalty, length.out = length(np))
+  names(penalty) <- np
+
+  ## Second fixed ridge penalty.
+  lambda <- control$lambda
+  if(is.null(lambda))
+    lambda <- 1e-05
+  
   ## Initialize fitted values for each model term.
   fit <- sfit <- eta <- nes <- list()
   for(j in np) {
@@ -163,14 +176,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     if(!any(is.na(beta))) {
       lli <- family$loglik(y, family$map2par(ieta))
 
-      ridge <- control$ridge
-      if(is.null(ridge))
-        ridge <- 1e-05
-
       fn_ll <- function(par) {
         for(j in np)
           ieta[[j]] <- rep(par[j], n)
-        ll <- family$loglik(y, family$map2par(ieta)) - ridge * sum(par^2)
+        ll <- family$loglik(y, family$map2par(ieta)) - lambda * sum(par^2)
         return(-ll)
       }
 
@@ -296,7 +305,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           wj <- if(is.null(weights)) hess else hess * weights
 
           ## Estimate weighted linear model.
-          m <- lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, method = "qr")
+          if(ridge) {
+            m <- ridge.lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, penalty = penalty[j], control)
+            penalty[j] <- m$penalty
+          } else {
+            m <- lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, method = "qr")
+          }
 
           ## If linear model does not improve the fit, use ML.
           etai <- eta
@@ -306,7 +320,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           if(ll1 < ll02) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
-              -family$loglik(y, family$map2par(eta)) + ridge * sum(par^2)
+              -family$loglik(y, family$map2par(eta)) + lambda * sum(par^2)
             }
             opt <- try(optim(coef(m), fn = ll, method = "BFGS"), silent = TRUE)
             if(!inherits(opt, "try-error")) {
@@ -331,6 +345,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ## Update predictor.
             fit[[j]]$fitted.values <- m$fitted.values
             fit[[j]]$coefficients <- m$coefficients
+            if(!is.null(m$edf))
+              fit[[j]]$edf <- m$edf
             ll02 <- ll1
             ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
@@ -491,6 +507,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       sfit[dropj] <- NULL
   }
 
+  if(ridge) {
+    attr(fit, "edf") <- unlist(sapply(fit, function(x) x$edf))
+  }
+
   rval <- list(
     "fitted.values" = as.data.frame(eta),
     "fitted.specials" = sfit,
@@ -566,5 +586,71 @@ fmt <- Vectorize(function(x, width = 8, digits = 2) {
 
 fmt2 <- function(x, ...) {
   gsub(" ", "", fmt(x, ...))
+}
+
+## Ridge regression linear model.
+ridge.lm.wfit <- function(x, y, w, penalty, control)
+{
+  if(is.null(control$criterion))
+    control$criterion <- "aicc"
+
+  XW <- x * w
+  XWX <- crossprod(XW, x)
+  XWy <- crossprod(XW, y)
+
+  nc <- ncol(x)
+  i <- which(colnames(x) == "(Intercept)")
+  I <- rep(1, nc)
+  if(length(i))
+    I[i] <- 0.0
+
+  only_itcpt <- all(colnames(x) == "(Intercept)")
+
+  n <- length(w)
+
+  ## Function to find optimum ridge penalty.
+  fp <- function(pen, rf = FALSE) {
+    S <- diag(I * pen)
+    if(!length(S))
+      S <- 0.0
+
+    P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
+    if(inherits(P, "try-error"))
+      P <- solve(XWX + S)
+
+    b <- drop(P %*% XWy)
+
+    fit <- drop(x %*% b)
+
+    edf <- sum(diag(XWX %*% P))
+
+    if(rf) {
+      names(b) <- colnames(x)
+      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
+        "penalty" = pen, "vcov" = P, "df" = n - edf))
+    } else {
+      rss <- sum(w * (y - fit)^2)
+
+      rval <- switch(tolower(control$criterion),
+        "gcv" = rss * n / (n - edf)^2,
+        "aic" = rss + 2 * edf,
+        "gaic" = rss + K * edf,
+        "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+        "bic" = rss + log(n) * edf
+      )
+
+      return(rval)
+    }
+  }
+
+  if(!only_itcpt) {
+    opt <- nlminb(penalty, objective = fp, lower = penalty / 10, upper = penalty * 10)
+  } else {
+    opt <- list(par = 0.0)
+  }
+
+  rval <- fp(opt$par, rf = TRUE)
+
+  return(rval)
 }
 

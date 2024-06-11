@@ -136,7 +136,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
     }
     xlim <- list(...)$xlim
     if(is.null(xlim) & !is.null(labels)) {
-      xlim <- c(-0.5, length(x$selection$GAIC) - 0.5)
+      xlim <- c(-0.05 * length(x$selection$GAIC), length(x$selection$GAIC) - 0.5)
     }
     pch <- list(...)$pch
     if(is.null(pch))
@@ -152,7 +152,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
       xlab <- "Stepwise Iteration"
     ylab <- list(...)$ylab
     if(is.null(ylab))
-      ylab <- paste("-2 * logLik +", x$selection$K, "* df")
+      ylab <- paste("-2 * logLik +", round(x$selection$K, 4), "* df")
     main <- list(...)$main
     if(is.null(main))
       main <- "GAIC Path"

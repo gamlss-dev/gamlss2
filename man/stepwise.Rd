@@ -1,6 +1,7 @@
 \name{stepwise} 
 \alias{stepwise}
 \alias{stepGAMLSS}
+\alias{newformula}
 
 \title{Stepwise Model Term Selection Using GAIC}
 
@@ -16,6 +17,9 @@
 stepGAMLSS(formula, ..., K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
+
+## After stepwise search, extract the new formula.
+newformula(object)
 
 ## Stepwise optimizer function.
 stepwise(x, y, specials, family, offsets,
@@ -36,6 +40,7 @@ stepwise(x, y, specials, family, offsets,
     or should the selection search be performed across all parameters?}
   \item{cores}{Integer, if \code{cores > 1L}, function \code{\link[parallel]{mclapply}}
     function is used to speed up computations using multiple cores within the selection steps.}
+  \item{object}{An object fitted using \code{stepGAMLSS}.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and
@@ -121,6 +126,9 @@ b <- stepGAMLSS(f, data = rent, family = GA, K = 2)
 
 ## Same with.
 ## b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+
+## Show the new formula of selected model terms.
+newformula(b)
 
 ## Final model summary.
 summary(b)

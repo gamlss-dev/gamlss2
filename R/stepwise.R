@@ -1049,3 +1049,7 @@ stepGAMLSS <- function(formula, ..., K = 2,
     keeporder = keeporder, cores = cores)
 }
 
+newformula <- function(object) {
+  return(object$selection$formula)
+}
+

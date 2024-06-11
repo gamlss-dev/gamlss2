@@ -594,6 +594,10 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
   if(is.null(control$criterion))
     control$criterion <- "aicc"
 
+  K <- control$K
+  if(is.null(K))
+    K <- 2.0
+
   XW <- x * w
   XWX <- crossprod(XW, x)
   XWy <- crossprod(XW, y)

@@ -130,14 +130,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
     labels <- list(...)$labels
     if(is.null(labels))
       labels <- TRUE
-    if(is.null(ylim) & !is.null(labels)) {
-      ylim <- c(min(x$selection$GAIC),
-        diff(range(x$selection$GAIC)) * 0.1 + max(x$selection$GAIC))
-    }
     xlim <- list(...)$xlim
-    if(is.null(xlim) & !is.null(labels)) {
-      xlim <- c(-0.05 * length(x$selection$GAIC), length(x$selection$GAIC) - 0.5)
-    }
     pch <- list(...)$pch
     if(is.null(pch))
       pch <- 16
@@ -171,8 +164,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(is.logical(labels)) {
       if(labels) {
         nl <- names(x$selection$GAIC)
-        nl[1] <- "nullmodel"
-        text(0:n, x$selection$GAIC, nl, pos = 3)
+        nl[1L] <- "nullmodel"
+        pos <- rep(3L, length(nl))
+        pos[1L] <- 4L
+        text(0:n, x$selection$GAIC, nl, pos = pos)
       }
     }
   }

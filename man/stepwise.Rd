@@ -40,7 +40,7 @@ stepwise(x, y, specials, family, offsets,
     or should the selection search be performed across all parameters?}
   \item{cores}{Integer, if \code{cores > 1L}, function \code{\link[parallel]{mclapply}}
     function is used to speed up computations using multiple cores within the selection steps.}
-  \item{object}{An object fitted using \code{stepGAMLSS}.}
+  \item{object}{An object fitted using \code{stepGAMLSS()}.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and

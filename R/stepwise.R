@@ -1050,6 +1050,9 @@ stepGAMLSS <- function(formula, ..., K = 2,
 }
 
 newformula <- function(object) {
-  return(object$selection$formula)
+  f <- object$selection$formula
+  rn <- response.name(object)
+  f[[1L]] <- eval(parse(text = paste("update(f[[1L]], ", rn, " ~ .)")))
+  return(f)
 }
 

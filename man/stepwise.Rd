@@ -64,8 +64,8 @@ stepwise(x, y, specials, family, offsets,
 }
 
 \details{
-  The wrapper functions simply calls \code{\link{gamlss2}} using the \code{stepwise()} optimizer
-  function.
+  The wrapper function \code{stepGAMLSS()} calls \code{\link{gamlss2}}
+  using the \code{stepwise()} optimizer function.
 
   The stepwise algorithm can apply the following strategies:
   \enumerate{

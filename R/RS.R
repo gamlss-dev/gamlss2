@@ -215,9 +215,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(!any(grepl(".", names(family$hess), fixed = TRUE)))
     CGk <- Inf
 
-  ## Track runtime.
-  tstart <- proc.time()
-
   ## Track iterations
   iter <- c(0, 0)
 
@@ -468,9 +465,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     }
   }
 
-  ## Runtime.
-  elapsed <- (proc.time() - tstart)["elapsed"]
-
   if(control$trace & control$flush)
     cat("\n")
 
@@ -516,7 +510,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     "fitted.specials" = sfit,
     "fitted.linear" = fit,
     "coefficients" = coef_lin,
-    "elapsed" = elapsed, "iterations" = iter[1L],
+    "iterations" = iter[1L],
     "logLik" = llo1, "control" = control,
     "nobs" = length(eta[[1L]]),
     "deviance" = -2 * llo1,

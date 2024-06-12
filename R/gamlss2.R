@@ -224,10 +224,16 @@ gamlss2.formula <- function(formula, data, family = NO,
     environment(optimizer) <- fenv
   }
 
+  ## Track runtime.
+  tstart <- proc.time()
+
   ## Estimation.
   rval <- optimizer(x = X, y = Y, specials = Specials, family = family,
     offsets = offsets, weights = weights, start = start, xterms = Xterms, sterms = Sterms,
     control = control)
+
+  ## Runtime.
+  elapsed <- (proc.time() - tstart)["elapsed"]
 
   ## Further model information.
   rval$call <- call
@@ -248,6 +254,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     attr(rval$xterms, "terms") <- mt
   }
   rval$df <- get_df(rval)
+  rval$elapsed <- elapsed
 
   ## Return model.frame, X and y.
   if(!control$light) {

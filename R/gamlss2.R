@@ -233,7 +233,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     control = control)
 
   ## Runtime.
-  elapsed <- (proc.time() - tstart)["elapsed"]
+  elapsed <- as.numeric((proc.time() - tstart)["elapsed"])
 
   ## Further model information.
   rval$call <- call

@@ -1,10 +1,272 @@
-## Open Topics
+---
+title: "Open Topics"
+format: revealjs
+---
 
-1. Should `GAIC()` and `Rsq()` be generic functions? At the moment the functions are overwitten from _gamlss_ when loading _gamlss2_.
+```{r, echo=FALSE, message=FALSE}
+library("MASS")
 
-2. Should the `pb()` model term also be overwitten?
+options(prompt = "R> ", continue = "+  ", width = 80,
+  digits = 3, show.signif.stars = TRUE, useFancyQuotes = FALSE)
 
-3. Which model terms do we need `re()`, `lasso()`, etc.?
+data("rent", package = "gamlss.data")
 
-4. Which strategies should we use in stepwise()? At the moment the
-   function uses "forward.linear", "forward", "backward" and "replace".
+set.seed(123)
+```
+
+## GAIC() & Rsq()
+
+* Should `GAIC()` and `Rsq()` be generic functions? At the moment the functions are
+  overwitten from **gamlss** when loading **gamlss2**.
+
+```{r, echo=TRUE, message=FALSE}
+library("gamlss")
+```
+
+
+## GAIC() & Rsq() 
+
+* Should `GAIC()` and `Rsq()` be generic functions? At the moment the functions are
+  overwitten from **gamlss** when loading **gamlss2**.
+
+```{r, echo=TRUE, message=TRUE}
+library("gamlss2")
+```
+
+
+## GAIC() & Rsq() 
+
+```{r, echo=TRUE, message=TRUE}
+b1 <- gamlss(R ~ pb(Fl) + pb(A), data = rent)
+b2 <- gamlss2(R ~ pb(Fl) + pb(A), data = rent)
+b3 <- gamlss2(R ~ Fl + A + pb(Fl) + pb(A), data = rent)
+GAIC(b1, b2, b3)
+```
+
+
+##  pb()
+
+* `pb()` model terms in **gamlss2** use not the same code as original `pb()`.
+
+* However, the same method for estimating the shrinkage parameter is used.
+
+* Pure linear effects are not automatically included!
+
+```{r, echo=TRUE, message=TRUE, eval=FALSE}
+pb <- function(x, k = 20, ...) {
+  sx <- s(x, bs = "ps", k = k, ...)
+  sx$term <- deparse(substitute(x))
+  sx$label <- paste0("pb2(", sx$term, ")")
+  sx$control <- list("criterion" = "ml")
+  sx$localML <- TRUE
+  return(sx)
+}
+```
+
+
+## Model Terms
+
+* Which model terms do we need `re()`, `lasso()`, etc.?
+
+* Should extra special model terms be part of another package?
+
+* Similar to **gamlss.add**?
+
+
+## Ridge Penalty
+
+* I added a ridge penalty option for linear effects.
+
+```{r, echo=TRUE, message=FALSE}
+collin_data = function(n = 1000, p = 5) {
+  Sigma <- matrix(0.9, nrow = p, ncol = p)
+  diag(Sigma) <- 1
+  X <- cbind(1, mvrnorm(n, mu = rep(0, p), Sigma = Sigma))
+  beta_mu <- c(2, 3, 1.5, 0, 0, 2)
+  beta_sigma <- c(-1, 2, 0, 1, 2.5, 0.5)
+  y <- X %*% beta_mu + rnorm(n, sd = exp(X %*% beta_sigma))
+  d <- as.data.frame(X[, -1])
+  names(d) <- paste0("x", 1:p)
+  d$y <- y
+  return(d)
+}
+
+d <- collin_data()
+```
+
+## Ridge Penalty
+
+* Model without ridge penalty.
+```{r, echo=TRUE, message=FALSE}
+b <- gamlss2(y ~ . | ., data = d, family = NO,
+  ridge = FALSE)
+coef(b, model = "mu")
+coef(b, model = "sigma")
+```
+
+## Ridge Penalty
+
+* Ridge penalty using AICc per default.
+```{r, echo=TRUE, message=FALSE}
+b <- gamlss2(y ~ . | ., data = d, family = NO,
+  ridge = TRUE, criterion = "BIC")
+coef(b, model = "mu")
+coef(b, model = "sigma")
+```
+
+## Stepwise Algorithm
+
+* We now have a stepwise implementation.
+
+* Optimizer function is `stepwise()`.
+
+* Wrapper function is `stepGAMLSS()`.
+
+```{r, echo=TRUE, message=FALSE, eval=FALSE}
+stepGAMLSS <- function(formula, ..., K = 2,
+  strategy = c("both.linear", "both"), keeporder = FALSE,
+  cores = 1L)
+{
+  gamlss2(formula, ..., optimizer = stepwise, K = K, strategy = strategy,
+    keeporder = keeporder, cores = cores)
+}
+```
+
+
+## Stepwise Algorithm
+
+* Should `stepwise()` and `stepGAMLSS()` be described in the same help site?
+
+* I need a good example for the stepwise algorithm, any ideas? At
+  the moment I use the `rent` data from **gamlss.data**.
+
+
+## Stepwise Algorithm
+
+* **Forward** selection step, model terms with the highest improvement
+  on the GAIC are selected.
+
+* **Backward** step, model terms are deselected,
+  if the GAIC can be further improved.
+
+* **Replacement** step, each model term is tested to see if an exchange with
+  a model term not yet selected will improve the GAIC.
+
+* **Both**, bidirectional step, model terms are either added or removed.
+
+* **All** step, forward, backward and replace combined.
+
+## Stepwise Algorithm
+
+Strategies for all model terms.
+
+* `strategy = c("both", "forward", "backward", "replace", "all")`.
+
+Optional, only for linear model terms.
+
+* `strategy = c("both.linear", "forward.linear", "backward.linear", "replace.linear", "all.linear")`.
+
+
+## Stepwise Algorithm
+
+Example using the Munich rent data.
+```{r, echo=TRUE, message=FALSE}
+data("rent", package = "gamlss.data")
+
+## Scale data.
+rent$Fl <- scale(rent$Fl)
+rent$A <- scale(rent$A)
+
+## The formula defines the searching scope.
+f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+```
+
+
+## Stepwise Algorithm
+
+Estimate a Gamma model using the stepwise algorithm.
+```{r, echo=TRUE, message=FALSE, eval=FALSE}
+b <- stepGAMLSS(f, data = rent, family = GA,
+  K = 2, keeporder = FALSE)
+```
+```{r, echo=FALSE, message=FALSE, eval=TRUE}
+if(!file.exists("stepmodel.rds")) {
+  b <- stepGAMLSS(f, data = rent, family = GA, K = 2)
+  saveRDS(b, file = "stepmodel.rds")
+} else {
+  b <- readRDS("stepmodel.rds")
+}
+```
+
+* Argument `K` controls the GAIC penalty.
+
+* `keeporder`, should the updates be performed sequentially according
+   to the order of the parameters?
+
+* Internally the `RS()` optimizer function is used.
+
+* Optimizer functions could in principle be exhanged?!
+
+
+## Stepwise Algorithm
+
+Summary of final model.
+```{r, echo=TRUE, message=FALSE}
+summary(b)
+```
+
+
+## Stepwise Algorithm
+
+Same with.
+```{r, echo=TRUE, eval=FALSE, message=FALSE}
+b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+```
+
+Show the new formula of selected model terms.
+```{r, echo=TRUE, message=FALSE}
+newformula(b)
+```
+
+
+## Stepwise Algorithm
+
+Plot evolution of AIC.
+```{r, echo=TRUE, message=FALSE, fig.align='center'}
+plot(b, which = "selection")
+```
+
+
+## Effect Plots
+
+* Bivariate effect plots, any ideas?
+
+```{r, echo=TRUE, message=FALSE, fig.align='center'}
+par(mfrow = c(1, 2), mar = rep(0, 4))
+plot(b, spar = FALSE)
+```
+
+
+## Effect Plots
+
+* Bivariate effect plots, any ideas?
+
+```{r, echo=TRUE, message=FALSE, fig.align='center'}
+par(mfrow = c(1, 2))
+plot(b, spar = FALSE, image = TRUE)
+```
+
+
+## More Topics
+
+* Should new algorithms/optimizer functions be part of new packages?
+
+* Should we open a new package for data?
+
+* Or, should we add a data folder in the package? Or both?
+
+* Maybe, you have new interesting data?
+
+* Create a new website usng **altdoc**?
+

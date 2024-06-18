@@ -34,3 +34,11 @@ For examples, please visit the manual pages.
 ```{r installation-github, eval=FALSE}
 help(package = "gamlss2")
 ```
+
+The binary package can be installed with
+
+```{r installation-r-universe, eval=FALSE}
+install.packages('gamlss2', repos = c('https://gamlss-dev.r-universe.dev',
+  'https://cloud.r-project.org'))
+```
+

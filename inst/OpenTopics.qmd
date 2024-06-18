@@ -1,6 +1,8 @@
 ---
 title: "Open Topics"
-format: revealjs
+format:
+  revealjs:
+    self-contained: true
 ---
 
 ```{r, echo=FALSE, message=FALSE}
@@ -269,4 +271,15 @@ plot(b, spar = FALSE, image = TRUE)
 * Maybe, you have new interesting data?
 
 * Create a new website using **[altdoc](https://altdoc.etiennebacher.com/)**?
+
+
+## Vignettes
+
+* Getting started with **gamlss2**.
+
+* Transitioning from **gamlss** to **gamlss2**.
+
+* **gamlss2** object & methods.
+
+* Compare **gamlss** and **gamlss2** object.
 

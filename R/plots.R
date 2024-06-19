@@ -46,8 +46,15 @@ plot.gamlss2 <- function(x, parameter = NULL,
       x$results <- results(x)
 
     en <- grep2(parameter, names(x$results$effects), fixed = TRUE, value = TRUE)
-    if(!is.null(terms))
-      en <- grep2(terms, en, fixed = TRUE, value = TRUE)
+    if(!is.null(terms)) {
+      if(is.character(terms)) {
+        en <- grep2(terms, en, fixed = TRUE, value = TRUE)
+      } else {
+        if(max(terms) > length(en))
+          stop("argument terms is specified wrong!")
+        en <- en[terms]
+      }
+    }
 
     if(length(x$results$effects)) {
       if(spar) {

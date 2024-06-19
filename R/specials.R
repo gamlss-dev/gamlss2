@@ -401,8 +401,10 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
       }
 
       for(j in seq_along(tmp)) {
-        if(is.null(tmp[[j]]$response.name)) {
-          tmp[[j]]$response.name <- rn
+        if(is.list(tmp[[j]])) {
+          if(is.null(tmp[[j]]$response.name)) {
+            tmp[[j]]$response.name <- rn
+          }
         }
       }
 

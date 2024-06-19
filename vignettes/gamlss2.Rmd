@@ -19,7 +19,6 @@ vignette: >
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
-library("survival")
 ```
 
 ## Overview 

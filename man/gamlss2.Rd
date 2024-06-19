@@ -82,8 +82,7 @@ gamlss2(x, \dots)
 
   Rigby, R. A., Stasinopoulos, D. M., Heller, G. Z., and De Bastiani, F. (2019).
 	\emph{Distributions for Modeling Location, Scale, and Shape: Using GAMLSS in R},
-  Chapman and Hall/CRC. An older version can be found in \url{https://www.gamlss.com/}.
-  \doi{10.1201/9780429298547}
+  Chapman and Hall/CRC. \doi{10.1201/9780429298547}
 
   Stasinopoulos, D. M., and Rigby, R. A. (2007). Generalized Additive Models for
   Location Scale and Shape (GAMLSS) in R. \emph{Journal of Statistical Software},
@@ -92,8 +91,6 @@ gamlss2(x, \dots)
   Stasinopoulos D. M., Rigby R.A., Heller G., Voudouris V., and De Bastiani, F. (2017).
   \emph{Flexible Regression and Smoothing: Using GAMLSS in R},
   Chapman and Hall/CRC. \doi{10.1201/b21973}
-
-  (see also \url{https://www.gamlss.com/}).
 }
 
 \seealso{

@@ -125,8 +125,13 @@ plot.gamlss2 <- function(x, parameter = NULL,
       p <- predict(x, type = "parameter", ...)
       m <- family(x)$q(0.5, p)
       n <- if(is.null(dim(p))) length(p) else nrow(p)
-      if(length(m) != n)
-        m <- family(x)$mean(p)
+      if(length(m) != n) {
+        if(is.null(family(x)$mean)) {
+          m <- p[[1L]]
+        } else {
+          m <- family(x)$mean(p)
+        }
+      }
       plot_sr(m, resids, ...)
     }
   }

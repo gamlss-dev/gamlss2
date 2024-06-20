@@ -33,8 +33,11 @@ predict.gamlss2 <- function(object,
 
   ## Extract the model frame.
   if(!is.null(newdata)) {
-    mf <- model.frame(object, data = newdata,
-      keepresponse = object$family$family %in% .bi.list, ...)
+    mf <- try(model.frame(object, data = newdata,
+      keepresponse = object$family$family %in% .bi.list, ...), silent = TRUE)
+    if(inherits(mf, "try-error")) {
+      mf <- model.frame(object, data = newdata, ...)
+    }
   } else {
     mf <- if(is.null(object$model)) {
       model.frame(object)

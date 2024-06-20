@@ -122,7 +122,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
     }
 
     if("scatter-resid" %in% which) {
-      p <- predict(x, type = "parameter", ...)
+      p <- predict(x, type = "parameter", drop = FALSE, ...)
       m <- family(x)$q(0.5, p)
       n <- if(is.null(dim(p))) length(p) else nrow(p)
       if(length(m) != n) {

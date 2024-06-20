@@ -997,6 +997,8 @@ YJ <- function(...) {
   "ZABItr", "ZABBtr", "DBItr")
 
 get_y_bd <- function(Y) {
+  if(is.null(Y))
+    return(list(y = 1, bd = 1))
   if(NCOL(Y) == 1) {
     y <- if(is.factor(Y))  Y != levels(Y)[1] else Y
     bd <- if(is.null(dim(Y))) rep(1, length(Y)) else rep(1, nrow(Y))

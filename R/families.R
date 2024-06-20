@@ -438,15 +438,25 @@ tF <- function(x, ...)
     },
     "p" = if(!inherits(pfun, "try-error")) function(q, par, log = FALSE, ...) {
       par <- check_range(par)
-      eval(pc)
+      p <- eval(pc)
+      if(length(p) < length(par[[1L]])) {
+        q <- rep(q, length.out = length(par[[1L]]))
+        p <- eval(pc)
+      }
+      return(p)
     } else NULL,
     "q" = if(!inherits(qfun, "try-error")) function(p, par, log = FALSE, ...) {
       par <- check_range(par)
-      eval(qc)
+      q <- eval(qc)
+      if(length(q) < length(par[[1L]])) {
+        p <- rep(p, length.out = length(par[[1L]]))
+        q <- eval(qc)
+      }
+      return(q)
     } else NULL,
     "r" = if(!inherits(rfun, "try-error")) function(n, par, ...) {
       par <- check_range(par)
-      eval(rc)
+      return(eval(rc))
     } else NULL
   )
   names(rval$links) <- nx

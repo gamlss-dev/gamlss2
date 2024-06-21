@@ -7,7 +7,7 @@ sampling <- function(object, R = 100, ...)
     V <- as.matrix(Matrix::nearPD(V)$mat)
   }
   Cv <- chol(V)
-  cb <- coef(object, ...)
+  cb <- coef(object, dropall = FALSE, ...)
   sc <- rnorm(R * length(cb))
   sc <- t(cb + t(Cv) %*% matrix(sc, nrow = length(cb), ncol = R))
   d <- drop(cb - apply(sc, 2, mean))

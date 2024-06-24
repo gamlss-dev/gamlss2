@@ -47,7 +47,7 @@ barplot(table(MCS$counts))
 f <- counts ~ s(yday, bs = "cc") |
   s(yday, bs = "cc")
 
-## Estimate count model.
+\dontrun{## Estimate count model.
 b <- gamlss2(f, data = MCS, family = NBI)
 
 ## Plot estimated effects.
@@ -69,7 +69,7 @@ plot(counts ~ yday, data = MCS,
   pch = 19, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(nd$yday, p, type = "l", lty = c(2, 1, 2),
   lwd = 2, col = 4, add = TRUE)
-}
+}}
 
 \keyword{datasets}
 

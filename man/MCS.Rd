@@ -15,9 +15,9 @@ The \code{MCS} data contains the following variables:
 \describe{
   \item{date:}{Date, the date of the recording.}
   \item{counts:}{Integer, the number of motorcycles on that day.}
-  \item{tempmin:}{Numeric, minimum temperature \eqn{^{\circ}C}.}
-  \item{tempmax:}{Numeric, maximum temperature \eqn{^{\circ}C}.}
-  \item{temp:}{Numeric, mean temperature \eqn{^{\circ}C}.}
+  \item{tempmin:}{Numeric, minimum temperature in \eqn{^{\circ}C}.}
+  \item{tempmax:}{Numeric, maximum temperature in \eqn{^{\circ}C}.}
+  \item{temp:}{Numeric, mean temperature in \eqn{^{\circ}C}.}
   \item{humidity:}{Numeric, mean relative humidity in percent.}
   \item{tempdew:}{Numeric, average dewpoint temperature in \eqn{^{\circ}C}.}
   \item{cloudiness:}{Numeric, average cloud cover in percent.}

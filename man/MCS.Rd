@@ -28,6 +28,16 @@ The \code{MCS} data contains the following variables:
 }
 }
 
+\references{
+  \describe{
+    \item{Data Source:}{Deutscher Wetterdienst (DWD), Climate Data Center (CDC).
+      \url{https://opendata.dwd.de/climate_environment/CDC/}}
+    \item{Licence:}{CC BY 4.0}
+    \item{Station:}{Wernigerode (5490; Sachsen-Anhalt)}
+    \item{Position:}{10.7686/51.8454/233 (lon, lat, alt, EPSG 4326)}
+  }
+}
+
 \examples{
 data("MCS")
 

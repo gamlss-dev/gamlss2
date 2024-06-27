@@ -8,6 +8,13 @@ The development version of _gamlss2_ can be installed via
 devtools::install_github("gamlss-dev/gamlss2")
 ```
 
+The binary package can also be installed with
+
+```{r installation-r-universe, eval=FALSE}
+install.packages('gamlss2', repos = c('https://gamlss-dev.r-universe.dev',
+  'https://cloud.r-project.org'))
+```
+
 ## Overview 
 
 The primary purpose of this package is to facilitate the creation of advanced infrastructures
@@ -33,12 +40,5 @@ For examples, please visit the manual pages.
 
 ```{r installation-github, eval=FALSE}
 help(package = "gamlss2")
-```
-
-The binary package can be installed with
-
-```{r installation-r-universe, eval=FALSE}
-install.packages('gamlss2', repos = c('https://gamlss-dev.r-universe.dev',
-  'https://cloud.r-project.org'))
 ```
 

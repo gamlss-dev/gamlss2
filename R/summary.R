@@ -154,6 +154,9 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
   par <- coef(object, full = full, drop = TRUE, dropall = FALSE)
 
+  ## Set NA coefficients to zero.
+  par[is.na(par)] <- 0.0
+
   if(type == "coef")
     return(par)
 

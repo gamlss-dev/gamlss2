@@ -586,7 +586,7 @@ fmt2 <- function(x, ...) {
 ridge.lm.wfit <- function(x, y, w, penalty, control)
 {
   if(is.null(control$criterion))
-    control$criterion <- "aicc"
+    control$criterion <- "gaic"
 
   K <- control$K
   if(is.null(K))

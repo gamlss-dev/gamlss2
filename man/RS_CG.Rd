@@ -65,8 +65,9 @@ CG(x, y, specials, family, offsets,
     \item \code{ridge}: Logical, should automatic ridge penalization be applied
       only to linear effects, without penalizing the intercept? For each parameter of
       the distribution the optimum ridge penalty is estimated using an information criterion.
-      Possible options are \code{criterion = c("gcv", "aic", "gaic", "aicc", "bic")}. The
-      default is \code{criterion = "aicc"}.
+      Possible options are \code{criterion = c("aic", "aicc", "bic", "gaic", "gcv")}. The
+      default is \code{criterion = "gaic"} and argument \code{K = 2}, which can
+      be set in \code{\link{gamlss2_control}}.
   }
 
   To facilitate the development of new algorithms for \pkg{gamlss2}, users can exchange

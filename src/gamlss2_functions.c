@@ -32,6 +32,9 @@ void calc_Xe(SEXP ind, SEXP weights, SEXP e, SEXP xweights, SEXP xrres, SEXP ord
   int n = length(ind);
   int k = 0;
 
+  PROTECT(xrres);
+  PROTECT(xrres);
+
   double *weightsptr = REAL(weights);
   double *eptr = REAL(e);
   double *xweightsptr = REAL(xweights);
@@ -54,6 +57,8 @@ void calc_Xe(SEXP ind, SEXP weights, SEXP e, SEXP xweights, SEXP xrres, SEXP ord
     xweightsptr[j] += weightsptr[k];
     xrresptr[j] += weightsptr[k] * eptr[k];
   }
+
+  UNPROTECT(2);
 }
 
 /* Fast block diagonal crossproduct with weights. */

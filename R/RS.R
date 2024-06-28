@@ -473,6 +473,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   for(j in np) {
     if(length(xterms[[j]])) {
       coef_lin[[j]] <- fit[[j]]$coefficients
+      coef_lin[[j]][is.na(coef_lin[[j]])] <- 0.0
     }
   }
 

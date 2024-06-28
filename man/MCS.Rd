@@ -29,12 +29,21 @@ The \code{MCS} data contains the following variables:
 }
 
 \references{
+  Weather Data:
   \describe{
-    \item{Data Source:}{Deutscher Wetterdienst (DWD), Climate Data Center (CDC).
-      \url{https://opendata.dwd.de/climate_environment/CDC/}}
+    \item{Data Source:}{Deutscher Wetterdienst (DWD), Climate Data Center (CDC).}
     \item{Licence:}{CC BY 4.0}
+    \item{URL:}{\url{https://opendata.dwd.de/climate_environment/CDC/}}
     \item{Station:}{Wernigerode (5490; Sachsen-Anhalt)}
     \item{Position:}{10.7686/51.8454/233 (lon, lat, alt, EPSG 4326)}
+  }
+
+  Motorcycle Data:
+  \describe{
+    \item{Data Source:}{Bundesanstalt für Strassenwesen (BASt)}
+    \item{Licence:}{CC BY 4.0}
+    \item{URL:}{\url{https://www.bast.de},
+      \url{https://www.bast.de/DE/Verkehrstechnik/Fachthemen/v2-verkehrszaehlung/Verkehrszaehlung.html}}
   }
 }
 

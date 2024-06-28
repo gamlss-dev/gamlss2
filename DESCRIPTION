@@ -2,14 +2,16 @@ Package: gamlss2
 Type: Package
 Title: GAMLSS Modeling with Advanced Flexible Infrastructures
 Version: 1.0
-Date: 2024-06-10
+Date: 2024-06-28
 Authors@R: c(person("Mikis", "Stasinopoulos", role = c("aut", "cph"), 
                email = "d.stasinopoulos@gre.ac.uk", comment = c(ORCID = "0000-0003-2407-5704")),
              person("Robert", "Rigby", role = "aut", email = "r.rigby@gre.ac.uk", comment = c(ORCID = "0000-0003-3853-1707")),
              person(given = "Nikolaus", family = "Umlauf", role = c("aut", "cre"),
                email = "Nikolaus.Umlauf@uibk.ac.at", comment = c(ORCID = "0000-0003-2160-9803")),
              person(given = "Achim", family = "Zeileis", role = "ctb", email = "Achim.Zeileis@R-project.org",
-               comment = c(ORCID = "0000-0003-0918-3766")))
+               comment = c(ORCID = "0000-0003-0918-3766")),
+             person(given = "Reto", family = "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at",
+               comment = c(ORCID = "0000-0002-3798-5507")))
 Description: The primary purpose of this package is to facilitate the creation of
   advanced infrastructures designed to enhance the GAMLSS modeling framework.
 Depends: R (>= 4.1.0), gamlss.dist, gamlss.data, Formula, mgcv

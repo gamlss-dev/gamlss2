@@ -38,7 +38,7 @@ The \code{MCS} data contains the following variables:
     \item{Position:}{10.7686/51.8454/233 (lon, lat, alt, EPSG 4326)}
   }
 
-  Motorcycle Data:
+  Traffic Data:
   \describe{
     \item{Data Source:}{Bundesanstalt für Strassenwesen (BASt)}
     \item{Licence:}{CC BY 4.0}

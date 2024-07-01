@@ -1,6 +1,6 @@
-\name{findFamily}
-\alias{findFamily}
-\alias{fitFamily}
+\name{find_family}
+\alias{find_family}
+\alias{fit_family}
 \alias{available_families}
 
 \title{
@@ -16,11 +16,11 @@
 ## List of available families from gamlss.dist package.
 available_families(type = c("continuous", "discrete"), families = NULL)
 
-## Find suitable reponse distribution.
-findFamily(y, families = NULL, k = 2, verbose = TRUE, ...)
+## Find suitable response distribution.
+find_family(y, families = NULL, k = 2, verbose = TRUE, ...)
 
 ## Fit distribution parameters.
-fitFamily(y, family = NO, plot = TRUE, ...)
+fit_family(y, family = NO, plot = TRUE, ...)
 }
 
 \arguments{
@@ -34,26 +34,26 @@ fitFamily(y, family = NO, plot = TRUE, ...)
     see also \code{\link{gamlss2.family}}.}
   \item{plot}{Logical, should a plot of the fitted density be provided?}
   \item{\dots}{Further arguments to be passed to \code{\link{gamlss2}} when using
-    \code{findFamily()}, or arguments \code{legend = TRUE/FALSE}, \code{pos = "topright"} (see also
+    \code{find_family()}, or arguments \code{legend = TRUE/FALSE}, \code{pos = "topright"} (see also
     function \code{\link[graphics]{legend}}),
     \code{main}, \code{xlab} and \code{ylab} when argument \code{plot = TRUE} using
-    function \code{fitFamily()}.}
+    function \code{fit_family()}.}
 }
 
 \details{
-  The function \code{findFamily()} employs \code{\link{gamlss2}} to estimate intercept-only
+  The function \code{find_family()} employs \code{\link{gamlss2}} to estimate intercept-only
   models for each specified family object in the \code{families} argument. Note that model
   estimation occurs within a \code{\link[base]{try}} block with warnings suppressed.
   Additionally, the function calculates the \code{\link{GAIC}} for each family whenever
   feasible and returns the sorted values in descending order.
 
-  Function \code{fitFamily()} fits a single intercept-only model using the
+  Function \code{fit_family()} fits a single intercept-only model using the
   specified family and creates a plot of the fitted density.
 }
 
 \value{
-  Function \code{findFamily()} returns a vector of \code{\link{GAIC}} values for the
-  different fitted families. Function \code{fitFamily()} returns the fitted intercept-only
+  Function \code{find_family()} returns a vector of \code{\link{GAIC}} values for the
+  different fitted families. Function \code{fit_family()} returns the fitted intercept-only
   model.
 }
 
@@ -72,22 +72,22 @@ fitFamily(y, family = NO, plot = TRUE, ...)
 data("rent", package = "gamlss.data")
 
 ## Find a suitable response to the response.
-ic <- findFamily(rent$R)
+ic <- find_family(rent$R)
 print(ic)
 
 ## Fit parameters using the BCCG family.
-fitFamily(rent$R, family = BCCG)
+fit_family(rent$R, family = BCCG)
 
 ## Using count data.
 data("polio", package = "gamlss.data")
 
 ## Search best count model.
-ic <- findFamily(polio, k = 0,
+ic <- find_family(polio, k = 0,
   families = available_families(type = "discrete"))
 print(ic)
 
 ## Fit parameters using the ZASICHEL family.
-fitFamily(polio, family = ZASICHEL)
+fit_family(polio, family = ZASICHEL)
 }
 }
 

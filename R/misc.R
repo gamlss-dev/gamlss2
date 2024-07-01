@@ -58,7 +58,7 @@ available_families <- function(type = c("continuous", "discrete"), families = NU
   return(d)
 }
 
-findFamily <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
+find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
   if(is.null(families)) {
     families <- if(is.numeric(y)) {
       available_families(type = "continuous")
@@ -95,7 +95,7 @@ findFamily <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
   return(sort(ic, decreasing = TRUE))
 }
 
-fitFamily <- function(y, family = NO, plot = TRUE, ...)
+fit_family <- function(y, family = NO, plot = TRUE, ...)
 {
   if(is.character(family))
     family <- available_families(families = family[1L])[[1L]]

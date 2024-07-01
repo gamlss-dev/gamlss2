@@ -1,7 +1,7 @@
 \name{stepwise} 
 \alias{stepwise}
-\alias{stepGAMLSS}
-\alias{newformula}
+\alias{step_gamlss2}
+\alias{new_formula}
 
 \title{Stepwise Model Term Selection Using GAIC}
 
@@ -14,12 +14,12 @@
 
 \usage{
 ## Wrapper function for stepwise GAMLSS estimation.
-stepGAMLSS(formula, ..., K = 2,
+step_gamlss2(formula, ..., K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
 
 ## After stepwise search, extract the new formula.
-newformula(object)
+new_formula(object)
 
 ## Stepwise optimizer function.
 stepwise(x, y, specials, family, offsets,
@@ -40,7 +40,7 @@ stepwise(x, y, specials, family, offsets,
     or should the selection search be performed across all parameters?}
   \item{cores}{Integer, if \code{cores > 1L}, function \code{\link[parallel]{mclapply}}
     function is used to speed up computations using multiple cores within the selection steps.}
-  \item{object}{An object fitted using \code{stepGAMLSS()}.}
+  \item{object}{An object fitted using \code{step_gamlss2()}.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and
@@ -64,7 +64,7 @@ stepwise(x, y, specials, family, offsets,
 }
 
 \details{
-  The wrapper function \code{stepGAMLSS()} calls \code{\link{gamlss2}}
+  The wrapper function \code{step_gamlss2()} calls \code{\link{gamlss2}}
   using the \code{stepwise()} optimizer function.
 
   The stepwise algorithm can apply the following strategies:
@@ -102,7 +102,7 @@ stepwise(x, y, specials, family, offsets,
 \value{
   The optimizer function \code{stepwise()} returns the final model as named list
   of class \code{"gamlss2"}. See the return value of function \code{\link{RS}}.
-  The wrapper function \code{stepGAMLSS()} also returns the final model.
+  The wrapper function \code{step_gamlss2()} also returns the final model.
 }
 
 \seealso{
@@ -128,7 +128,7 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## Estimate a Gamma model using the stepwise algorithm.
-b <- stepGAMLSS(f, data = rent, family = GA, K = 2)
+b <- step_gamlss2(f, data = rent, family = GA, K = 2)
 
 ## Same with.
 ## b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
@@ -149,7 +149,7 @@ plot(b, which = "resid")
 plot(b, which = "selection")
 
 ## Use forward linear, replace and backward strategy.
-b <- stepGAMLSS(f, data = rent, family = GA, K = 2,
+b <- step_gamlss2(f, data = rent, family = GA, K = 2,
   strategy = c("forward.linear", "replace", "backward"))
 
 ## More complex model. Note, the third parameter
@@ -160,7 +160,7 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## Model using the BCT family.
-b <- stepGAMLSS(f, data = rent, family = BCT,
+b <- step_gamlss2(f, data = rent, family = BCT,
   K = 2, strategy = c("forward.linear", "both"),
   keeporder = TRUE)
 

@@ -35,12 +35,13 @@ export(
   "Rsq",
   "GAIC",
   "available_families",
-  "findFamily",
-  "fitFamily",
+  "find_family",
+  "fit_family",
   "response.name",
   "stepwise",
-  "stepGAMLSS",
-  "newformula"
+  "step_gamlss2",
+  "new_formula",
+  "softplus"
 )
 
 S3method(gamlss2, formula)

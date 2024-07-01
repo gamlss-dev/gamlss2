@@ -1046,7 +1046,7 @@ xs2formula <- function(x, s)
   return(f)
 }
 
-stepGAMLSS <- function(formula, ..., K = 2,
+step_gamlss2 <- function(formula, ..., K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
 {
@@ -1054,7 +1054,7 @@ stepGAMLSS <- function(formula, ..., K = 2,
     keeporder = keeporder, cores = cores)
 }
 
-newformula <- function(object) {
+new_formula <- function(object) {
   f <- object$selection$formula
   rn <- response.name(object)
   f[[1L]] <- eval(parse(text = paste("update(f[[1L]], ", rn, " ~ .)")))

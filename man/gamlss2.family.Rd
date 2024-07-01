@@ -2,9 +2,7 @@
 \alias{gamlss2.family}
 \alias{family.gamlss2}
 
-\title{
-  Family Objects in \pkg{gamlss2}
-}
+\title{Family Objects in \pkg{gamlss2}}
 
 \description{
   Family objects within the package \pkg{gamlss2} are used to specify the

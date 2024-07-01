@@ -1,9 +1,7 @@
 \name{pb}
 \alias{pb}
 
-\title{
-  P-Splines for GAMLSS.
-}
+\title{P-Splines for GAMLSS}
 
 \description{
   Estimation of P-splines using an efficient local maximum likelihood approach to automatically

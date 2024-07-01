@@ -1,9 +1,7 @@
 \name{quantile.gamlss2}
 \alias{quantile.gamlss2}
 
-\title{
-  Quantiles for GAMLSS
-}
+\title{Quantiles for GAMLSS}
 
 \description{
   The function computes estimated quantiles and optionally produces a plot.

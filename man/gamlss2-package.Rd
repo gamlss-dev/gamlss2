@@ -3,9 +3,7 @@
 
 \docType{package}
 
-\title{
-  GAMLSS Modeling with Advanced Flexible Infrastructures
-}
+\title{GAMLSS Modeling with Advanced Flexible Infrastructures}
 
 \description{
   \packageDescription{gamlss2}

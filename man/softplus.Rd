@@ -26,7 +26,10 @@ softplus(a = 1)
 }
 
 \examples{
-softplus(a = 1)
+## softplus function for different values of a.
+plot(softplus(a = 1)$linkinv, -4, 4, ylab = "softplus(x)")
+plot(softplus(a = 10)$linkinv, -4, 4, col = 4, add = TRUE)
+legend("topleft", c("a = 1", "a = 10"), lwd = 1, col = c(1, 4))
 }
 
 \keyword{regression}

@@ -19,7 +19,7 @@ softplus(a = 1)
 \details{
 The softplus link function with parameter \eqn{a} is given by:
 
-\deqn{\frac{\log(1 + \exp(a \cdot x))}{a}}{log(1 + exp(a * x))/a}
+\deqn{\displaystyle \frac{\log(1 + \exp(a \cdot x))}{a}}{log(1 + exp(a * x))/a}
   
 This is an approximation of the linear spline \eqn{\max\{0, x\}}
 where the discrepancy between the two functions decreases with

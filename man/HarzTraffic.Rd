@@ -54,13 +54,13 @@ The \code{MCS} data contains the following variables:
 }
 
 \examples{
-data("MCS")
+data("HarzTraffic")
 
 ## Plot bike counts over the season.
-plot(counts ~ yday, data = MCS)
+plot(counts ~ yday, data = HarzTraffic)
 
 ## Visualize count distribution.
-barplot(table(MCS$counts))
+barplot(table(HarzTraffic$counts))
 
 ## Estimation of a negative binomial seasonal model
 ## for motorcycle counts using cyclic splines.
@@ -69,7 +69,7 @@ f <- counts ~ s(yday, bs = "cc") |
   s(yday, bs = "cc")
 
 \dontrun{## Estimate count model.
-b <- gamlss2(f, data = MCS, family = NBI)
+b <- gamlss2(f, data = HarzTraffic, family = NBI)
 
 ## Plot estimated effects.
 plot(b)
@@ -86,7 +86,7 @@ par <- predict(b, newdata = nd)
 p <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
 
 ## Plot.
-plot(counts ~ yday, data = MCS,
+plot(counts ~ yday, data = HarzTraffic,
   pch = 19, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(nd$yday, p, type = "l", lty = c(2, 1, 2),
   lwd = 2, col = 4, add = TRUE)

@@ -1,6 +1,5 @@
 ---
-title: "GAMLSS Modeling with Advanced Flexible Infrastructures"
-author: "Mikis Stasinopoulos, Robert Rigby, Nikolaus Umlauf"
+title: "gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression"
 output:
   html_document:
     toc: true
@@ -42,14 +41,8 @@ The development version of _gamlss2_ is hosted on github at
 <https://github.com/gamlss-dev/gamlss2>.
 It can be installed via
 
-```{r installation-github, eval=FALSE}
-devtools::install_github("gamlss-dev/gamlss2")
-```
-
-The binary package can be installed with
-
-```{r installation-r-universe, eval=FALSE}
-install.packages('gamlss2', repos = c('https://gamlss-dev.r-universe.dev',
-  'https://cloud.r-project.org'))
+```{r installation, eval=FALSE}
+install.packages("gamlss2",
+  repos = c("https://gamlss-dev.R-universe.dev", "https://cloud.r-project.org"))
 ```
 

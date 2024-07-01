@@ -1,12 +1,10 @@
 \name{fake_formula}
 \alias{fake_formula}
 
-\title{
-  Create a "Fake Formula".
-}
+\title{Extended Processing of "Fake" Formulas}
 
 \description{
-  Create a "fake formula" from a \code{\link[stats]{formula}}, a \code{\link[Formula]{Formula}},
+  Create a "fake" formula from a \code{\link[stats]{formula}}, a \code{\link[Formula]{Formula}},
   or a \code{\link[base]{list}} of \code{\link[stats]{formula}}s. The function extracts
   all necessary variables (transformation of variables), to build a \code{\link[stats]{model.frame}}.
   The function also extracts all special model terms within the formulas, the information can
@@ -39,29 +37,26 @@ fake_formula(formula, specials = NULL,
 }
 
 \examples{
-## Required package.
-library("Formula")
-
-## Simple formula
+## basic formula
 f <- y ~ x1 + x2 + log(x3)
 ff <- fake_formula(f)
 print(ff)
 
-## Including special model terms.
+## including special model terms
 f <- y ~ x1 + s(x2) + x3 + te(log(x3), x4)
 ff <- fake_formula(f)
 print(ff)
 
-## Multiple formulas.
+## multiple parts on the right-hand side
 f <- y ~ x1 + s(x2) + x3 + te(log(x3), x4) | x2 + sqrt(x5)
 ff <- fake_formula(f)
 print(ff)
 
-## Can be collapsed.
+## collapse all formula parts
 print(formula(ff, collapse = TRUE))
 print(formula(ff, collapse = TRUE, update = TRUE))
 
-## A list of formulas.
+## list of formulas
 f <- list(
   y ~ x1 + s(x2) + x3 + te(log(x3), x4),
     ~ x2 + sqrt(x5),
@@ -70,28 +65,29 @@ f <- list(
 ff <- fake_formula(f)
 print(ff)
 
-## Extract single parts of rhs.
+## extract separate parts on the right-hand side
 formula(ff, rhs = 1)
 formula(ff, rhs = 2)
 formula(ff, rhs = 3)
 
-## Multiple responses.
-f <- y1|y2|y3 ~ x1 + s(x2) + x3 + te(log(x3), x4) | x2 + ti(x5)
+## formula with multiple responses and multiple parts
+f <- y1 | y2 | y3 ~ x1 + s(x2) + x3 + te(log(x3), x4) | x2 + ti(x5)
 ff <- fake_formula(f)
 print(ff)
 
+## list of formulas with multiple responses
 f <- list(
   y1 ~ x1 + s(x2) + x3 + te(log(x3), x4),
-  y2  ~ x2 + sqrt(x5),
-  y3  ~ z2 + x1 + exp(x3) + s(x10)
+  y2 ~ x2 + sqrt(x5),
+  y3 ~ z2 + x1 + exp(x3) + s(x10)
 )
 ff <- fake_formula(f)
 
-## Extract only no special variables.
+## extract only without special terms
 ff <- fake_formula(f, nospecials = TRUE)
 print(ff)
 
-## Extract only special terms.
+## extract only special terms
 ff <- fake_formula(f, onlyspecials = TRUE)
 print(ff)
 }

@@ -1,12 +1,12 @@
-\name{MCS}
-\alias{MCS}
+\name{HarzTraffic}
+\alias{HarzTraffic}
 
 \encoding{UTF-8}
 
-\title{Motorcycle Counts at Sonnenberg}
+\title{Traffic Counts at Sonnenberg in the Harz Region}
 
 \description{
-  This dataset contains daily motorcycle counts at Sonnenberg, located in the Harz region
+  This dataset contains daily tarrfic counts close to the Sonnenberg, located in the Harz region
   of Germany. It covers a period of nearly three years, from 2021-01-01 to 2023-11-30.
 }
 
@@ -16,7 +16,11 @@
 The \code{MCS} data contains the following variables:
 \describe{
   \item{date:}{Date, the date of the recording.}
-  \item{counts:}{Integer, the number of motorcycles on that day.}
+  \item{yday:}{Integer, the day of the year.}
+  \item{bikes:}{Integer, the number of motorcycles on that day.}
+  \item{cars:}{Integer, the number of cars on that day.}
+  \item{trucks:}{Integer, the number of trucks on that day.}
+  \item{others:}{Integer, the number of other vehicles on that day.}
   \item{tempmin:}{Numeric, minimum temperature in \eqn{^{\circ}C}.}
   \item{tempmax:}{Numeric, maximum temperature in \eqn{^{\circ}C}.}
   \item{temp:}{Numeric, mean temperature in \eqn{^{\circ}C}.}
@@ -52,11 +56,7 @@ The \code{MCS} data contains the following variables:
 \examples{
 data("MCS")
 
-## Visualize seasonal trends.
-## First, extract the day of the year.
-MCS$yday <- as.integer(format(MCS$date, "\%j")) - 1L
-
-## Plot the counts over the motorcycle season.
+## Plot bike counts over the season.
 plot(counts ~ yday, data = MCS)
 
 ## Visualize count distribution.

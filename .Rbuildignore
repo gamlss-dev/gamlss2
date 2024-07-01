@@ -4,3 +4,6 @@ inst/SGT.R
 inst/OpenTopics.qmd
 token
 .github
+^_quarto$
+^altdoc$
+^docs$

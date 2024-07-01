@@ -1,0 +1,41 @@
+project:
+  type: website
+  output-dir: ../docs/
+
+website:
+  title: "gamlss2"
+  navbar:
+    logo: "gamlss2.png"
+    logo-alt: "gamlss2 logo"
+    search: true
+    right:
+      - icon: github
+        href: $ALTDOC_PACKAGE_URL_GITHUB
+        aria-label: $ALTDOC_PACKAGE_NAME GitHub
+  sidebar:
+    style: docked
+    collapse-level: 1
+    contents:
+      - section: $ALTDOC_VIGNETTE_BLOCK
+      - section: $ALTDOC_MAN_BLOCK
+      - text: News
+        file: $ALTDOC_NEWS
+      - text: Citation
+        file: $ALTDOC_CITATION
+
+format:
+  html:
+    toc: true
+    theme:
+      - cosmo
+      - custom.scss
+    number-sections: false
+    fontsize: '110%'
+    fontcolor: "#333333"
+    linkcolor: "#5F52A5"
+    code-copy: true
+    code-overflow: scroll
+    title-block-style: none
+    grid: 
+      sidebar-width: 340px
+      margin-width: 340px

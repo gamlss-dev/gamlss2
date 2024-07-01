@@ -1,0 +1,14 @@
+# temporary R files
+.RData
+.Rhistory
+.Rapp.history
+.Rproj.user/
+
+# vignette output
+vignettes/*.html
+vignettes/*.pdf
+
+# altdoc infrastructure
+altdoc/freeze.rds
+_quarto/
+docs/

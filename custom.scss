@@ -14,3 +14,16 @@ $sidebar-fg: #333333;
 $sidebar-hl: #5F52A5;
 $toc-color: #5F52A5;
 $toc-hl: #5F52A5;
+
+/*-- scss:rules --*/
+.navbar-brand-container {
+    a {
+        &.navbar-brand-logo {
+            margin: 0;
+            padding: 0;
+            img {
+                max-height: 2em;
+            }
+        }
+    }
+}

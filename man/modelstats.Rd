@@ -49,8 +49,8 @@ Rsq(object, ...,
 }
 
 \references{
-  Nagelkerke, N.J.D, (1991). A Note on a General Definition of the Coefficient of Determination.
-    Biometrika, \bold{78}(3), 691--692. \doi{10.1093/biomet/78.3.691}
+  Nagelkerke NJD (1991). \dQuote{A Note on a General Definition of the Coefficient of Determination.}
+    \emph{Biometrika}, \bold{78}(3), 691--692. \doi{10.1093/biomet/78.3.691}
 }
 
 \seealso{\code{\link{gamlss2}}}

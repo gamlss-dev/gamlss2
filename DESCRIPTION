@@ -1,8 +1,7 @@
 Package: gamlss2
-Type: Package
-Title: GAMLSS Modeling with Advanced Flexible Infrastructures
-Version: 1.0
-Date: 2024-06-28
+Title: GAMLSS Infrastructure for Flexible Distributional Regression
+Version: 0.1-0
+Date: 2024-07-01
 Authors@R: c(person("Mikis", "Stasinopoulos", role = c("aut", "cph"), 
                email = "d.stasinopoulos@gre.ac.uk", comment = c(ORCID = "0000-0003-2407-5704")),
              person("Robert", "Rigby", role = "aut", email = "r.rigby@gre.ac.uk", comment = c(ORCID = "0000-0003-3853-1707")),
@@ -12,12 +11,15 @@ Authors@R: c(person("Mikis", "Stasinopoulos", role = c("aut", "cph"),
                comment = c(ORCID = "0000-0003-0918-3766")),
              person(given = "Reto", family = "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at",
                comment = c(ORCID = "0000-0002-3798-5507")))
-Description: The primary purpose of this package is to facilitate the creation of
-  advanced infrastructures designed to enhance the GAMLSS modeling framework.
-Depends: R (>= 4.1.0), gamlss.dist, gamlss.data, Formula, mgcv
-Suggests: gamlss, colorspace, knitr, scoringRules, partykit, Matrix, nnet, lattice, rpart, distributions3, parallel
+Description: Next generation infrastructure for generalized additive models for location, scale, and shape (GAMLSS)
+  and distributional regression more generally. The package provides a fresh reimplementaton of the classic
+  'gamlss' package while being more modular and facilitating the creation of advanced terms and models.
 License: GPL-2 | GPL-3
+URL: https://gamlss-dev.github.io/gamlss2/
+BugReports: https://github.com/gamlss-dev/gamlss2/issues
+Depends: R (>= 4.1.0), gamlss.dist, gamlss.data, mgcv
+Imports: parallel, Formula
+Suggests: gamlss, colorspace, knitr, scoringRules, partykit, Matrix, nnet, lattice, rpart, distributions3
 LazyLoad: yes
-RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 

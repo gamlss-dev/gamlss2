@@ -1,6 +1,8 @@
 \name{MCS}
 \alias{MCS}
 
+\encoding{UTF-8}
+
 \title{Motorcycle Counts at Sonnenberg}
 
 \description{

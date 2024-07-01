@@ -10,10 +10,10 @@
   of Germany. It covers a period of nearly three years, from 2021-01-01 to 2023-11-30.
 }
 
-\usage{data("MCS")}
+\usage{data("HarzTraffic")}
 
 \format{
-The \code{MCS} data contains the following variables:
+The \code{HarzTraffic} data contains the following variables:
 \describe{
   \item{date:}{Date, the date of the recording.}
   \item{yday:}{Integer, the day of the year.}

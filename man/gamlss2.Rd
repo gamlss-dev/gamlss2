@@ -97,7 +97,13 @@ gamlss2(x, \dots)
   \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{## Load the abdominal circumference data.
+\examples{
+\dontshow{ if(!requireNamespace("gamlss.data")) {
+  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
+    stop("not all packages required for the example are installed")
+  } else q() }}
+
+## Load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
 ## Specify the model Formula.

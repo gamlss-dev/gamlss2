@@ -62,7 +62,13 @@ fitFamily(y, family = NO, plot = TRUE, ...)
 }
 
 \examples{
-\dontrun{## Load data.
+\dontrun{
+\dontshow{ if(!requireNamespace("gamlss.data")) {
+  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
+    stop("not all packages required for the example are installed")
+  } else q() }}
+
+## Load data.
 data("rent", package = "gamlss.data")
 
 ## Find a suitable response to the response.

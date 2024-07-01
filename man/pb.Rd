@@ -48,7 +48,13 @@ pb(x, k = 20, ...)
   \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.ps.smooth.spec}}
 }
 
-\examples{## Load head circumference data.
+\examples{
+\dontshow{ if(!requireNamespace("gamlss.data")) {
+  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
+    stop("not all packages required for the example are installed")
+  } else q() }}
+
+## Load head circumference data.
 data("dbhh", package = "gamlss.data")
 
 ## Specify the model Formula.

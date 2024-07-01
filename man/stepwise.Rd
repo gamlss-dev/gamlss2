@@ -109,7 +109,13 @@ stepwise(x, y, specials, family, offsets,
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
-\examples{\dontrun{## Load the Munich rent data
+\examples{
+\dontshow{ if(!requireNamespace("gamlss.data")) {
+  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
+    stop("not all packages required for the example are installed")
+  } else q() }}
+
+\dontrun{## Load the Munich rent data
 data("rent", package = "gamlss.data")
 
 ## Because of possible linear interactions,

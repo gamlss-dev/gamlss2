@@ -1,6 +1,5 @@
 import("Formula")
 import("gamlss.dist")
-import("gamlss.data")
 import("mgcv")
 
 importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",

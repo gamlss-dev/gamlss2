@@ -55,7 +55,13 @@ Rsq(object, ...,
 
 \seealso{\code{\link{gamlss2}}}
 
-\examples{## Load the aids data set
+\examples{
+\dontshow{ if(!requireNamespace("gamlss.data")) {
+  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
+    stop("not all packages required for the example are installed")
+  } else q() }}
+
+## Load the aids data set
 data("aids", package = "gamlss.data")
 
 ## Estimate negative binomial count models.

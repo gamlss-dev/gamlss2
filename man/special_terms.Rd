@@ -81,7 +81,13 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
   \code{\link{gamlss2}}, \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{## Example special term for neural networks.
+\examples{
+\dontshow{ if(!requireNamespace("gamlss.data")) {
+  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
+    stop("not all packages required for the example are installed")
+  } else q() }}
+
+## Example special term for neural networks.
 ## The constructor function is used in the formula
 ## when calling gamlss2().
 n <- function(formula, ...)

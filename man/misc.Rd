@@ -1,12 +1,11 @@
 \name{response.name}
 \alias{response.name}
 
-\title{
-  Auxiliary Functions.
-}
+\title{Auxiliary Functions for Formulas and Model Objects}
 
 \description{
-  Various auxiliary functions to facilitate the work of fitted models.
+  Various auxiliary functions to facilitate the work with formulas and fitted
+  model objects.
 }
 
 \usage{
@@ -27,26 +26,21 @@ response.name(formula)
 }
 
 \examples{
-## Required package.
-library("Formula")
-
-## Simple formula
+## basic formula
 f <- y ~ x1 + x2 + log(x3)
-rn <- response.name(f)
-print(rn)
+response.name(f)
 
-## Multiple responses.
-f <- y1|y2|y3 ~ x1 + s(x2) + x3 + te(log(x3), x4) | x2 + ti(x5)
-rn <- response.name(f)
-print(rn)
+## formula with multiple responses
+f <- y1 | y2 | y3 ~ x1 + s(x2) + x3 + te(log(x3), x4) | x2 + ti(x5)
+response.name(f)
 
+## list of formulas
 f <- list(
   y1 ~ x1 + s(x2) + x3 + te(log(x3), x4),
   y2  ~ x2 + sqrt(x5),
   y3  ~ z2 + x1 + exp(x3) + s(x10)
 )
-rn <- response.name(f)
-print(rn)
+response.name(f)
 }
 
 \keyword{utilities}

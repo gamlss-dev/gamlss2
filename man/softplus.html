@@ -387,7 +387,7 @@ Extra parameter of the generalized softplus function
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The softplus link function with parameter <span class="math inline">\(a\)</span> is given by:</p>
 <p style="text-align: center;">
-</p><p><span class="math inline">\(\frac{\log(1 + \exp(a \cdot x))}{a}\)</span></p>
+</p><p><span class="math inline">\(\displaystyle \frac{\log(1 + \exp(a \cdot x))}{a}\)</span></p>
 <p>This is an approximation of the linear spline <span class="math inline">\(\max\{0, x\}\)</span> where the discrepancy between the two functions decreases with increasing <span class="math inline">\(a\)</span>.</p>
 <p>Wiemann et al.&nbsp;(2023) propose to employ the softplus function as the inverse link function where positivity of a parameter needs to be assured, e.g., in count data regressions. This is in particular of interest as an alternative to the exponential inverse link function because the exponential implies multiplicative effects of the regressors while the softplus function does not.</p>
 </section>

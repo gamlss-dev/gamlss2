@@ -39,10 +39,10 @@ flexible and accommodating to a wide range of modeling requirements.
 
 The development version of _gamlss2_ is hosted on github at
 <https://github.com/gamlss-dev/gamlss2>.
-It can be installed via
+It can be installed from R-universe via
 
 ```{r installation, eval=FALSE}
 install.packages("gamlss2",
-  repos = c("https://gamlss-dev.R-universe.dev", "https://cloud.r-project.org"))
+  repos = c("https://gamlss-dev.R-universe.dev", "https://cloud.R-project.org"))
 ```
 

@@ -6,7 +6,7 @@
 \title{Traffic Counts at Sonnenberg in the Harz Region}
 
 \description{
-  This dataset contains daily tarrfic counts close to the Sonnenberg, located in the Harz region
+  This dataset contains daily traffic counts close to the Sonnenberg, located in the Harz region
   of Germany. It covers a period of nearly three years, from 2021-01-01 to 2023-11-30.
 }
 
@@ -57,15 +57,15 @@ The \code{HarzTraffic} data contains the following variables:
 data("HarzTraffic")
 
 ## Plot bike counts over the season.
-plot(counts ~ yday, data = HarzTraffic)
+plot(bikes ~ yday, data = HarzTraffic)
 
 ## Visualize count distribution.
-barplot(table(HarzTraffic$counts))
+barplot(table(HarzTraffic$bikes))
 
 ## Estimation of a negative binomial seasonal model
 ## for motorcycle counts using cyclic splines.
 ## Model formula:
-f <- counts ~ s(yday, bs = "cc") |
+f <- bikes ~ s(yday, bs = "cc") |
   s(yday, bs = "cc")
 
 \dontrun{## Estimate count model.
@@ -86,7 +86,7 @@ par <- predict(b, newdata = nd)
 p <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
 
 ## Plot.
-plot(counts ~ yday, data = HarzTraffic,
+plot(bikes ~ yday, data = HarzTraffic,
   pch = 19, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(nd$yday, p, type = "l", lty = c(2, 1, 2),
   lwd = 2, col = 4, add = TRUE)

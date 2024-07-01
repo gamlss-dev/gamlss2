@@ -32,12 +32,16 @@ Rsq(object, ...,
 }
 
 \details{
-  The \code{Rsq()} function uses the definition for R-squared: 
-  \deqn{R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^(2/n)}{R-squared =1-(L(0)/L(fitted))^(2/n)}
+  The \code{Rsq()} function uses the definition for R-squared:
+
+  \deqn{R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}}{R-squared =1-(L(0)/L(fitted))^(2/n)}
+
   where \eqn{L(0)} is the null model (only a constant is  fitted to all parameters) and 
   \eqn{L(\hat{\theta})}{L(fitted)} is the current fitted model. This definition sometimes is
   referred to as the Cox & Snell R-squared. The Nagelkerke /Cragg & Uhler's definition divides
-  the above with \deqn{1- L(0)^(2/n)}{1-L(0)^(2/n)}
+  the above with
+
+  \deqn{1 - L(0)^{2/n}}{1-L(0)^(2/n)}
 }
 
 \value{

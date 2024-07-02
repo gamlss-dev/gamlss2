@@ -1,9 +1,7 @@
 \name{pb}
 \alias{pb}
 
-\title{
-  P-Splines for GAMLSS.
-}
+\title{P-Splines for GAMLSS}
 
 \description{
   Estimation of P-splines using an efficient local maximum likelihood approach to automatically
@@ -34,13 +32,13 @@ pb(x, k = 20, ...)
 }
 
 \references{
-  Eilers P.H.C. and Marx B.D. (1996). Flexible Smoothing with B-Splines and Penalties.
-  \emph{Statistical Science}, \bold{11}-2, 89--121.
+  Eilers PHC, Marx BD (1996). \dQuote{Flexible Smoothing with B-Splines and Penalties.}
+  \emph{Statistical Science}, \bold{11}(2), 89--121.
   \doi{10.1214/ss/1038425655}
 
-  Rigby R.A. and Stasinopoulos D.M. (2014).
-  Automatic Smoothing Parameter Selection in GAMLSS with an Application to Centile Estimation.
-  \emph{Statistical Methods in Medical Research}, \bold{23}-4,  318--332.
+  Rigby RA, Stasinopoulos DM (2014).
+  \dQuote{Automatic Smoothing Parameter Selection in GAMLSS with an Application to Centile Estimation.}
+  \emph{Statistical Methods in Medical Research}, \bold{23}(4),  318--332.
   \doi{10.1177/0962280212473302}
 }
 

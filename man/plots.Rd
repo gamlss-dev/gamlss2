@@ -2,9 +2,7 @@
 \alias{plot.gamlss2}
 \alias{plot.gamlss2.list}
 
-\title{
-  Plotting GAMLSS
-}
+\title{Plotting GAMLSS}
 
 \description{
   Plotting methods for objects of class \code{"gamlss2"} and \code{"gamlss2.list"}, which can be

@@ -3,9 +3,7 @@
 \alias{fit_family}
 \alias{available_families}
 
-\title{
-  Find and Fit GAMLSS Families
-}
+\title{Find and Fit GAMLSS Families}
 
 \description{
   These functions provide useful infrastructures for finding suitable GAMLSS

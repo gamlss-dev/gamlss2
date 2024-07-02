@@ -37,7 +37,7 @@ export(
   "available_families",
   "find_family",
   "fit_family",
-  "response.name",
+  "response_name",
   "stepwise",
   "step_gamlss2",
   "new_formula",

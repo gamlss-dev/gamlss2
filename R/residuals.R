@@ -25,7 +25,7 @@ residuals.gamlss2 <- function(object,
     }
 
     if(is.null(object$y)) {
-      rn <- response.name(object)
+      rn <- response_name(object)
       object$y <- if(is.null(newdata)) {
         model.frame(object, keepresponse = TRUE)[, rn]
       } else {

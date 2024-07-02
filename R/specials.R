@@ -357,7 +357,7 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
   }
 
   ## Extract response name, sometimes needed.
-  rn <- response.name(object)
+  rn <- response_name(object)
 
   ## Which parameter model to predict?
   if(is.null(model)) {
@@ -402,8 +402,8 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
 
       for(j in seq_along(tmp)) {
         if(is.list(tmp[[j]])) {
-          if(is.null(tmp[[j]]$response.name)) {
-            tmp[[j]]$response.name <- rn
+          if(is.null(tmp[[j]]$response_name)) {
+            tmp[[j]]$response_name <- rn
           }
         }
       }

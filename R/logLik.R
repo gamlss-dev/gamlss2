@@ -43,7 +43,7 @@ deviance.gamlss2 <- function(object, ...)
   -2 * as.numeric(logLik(object, ...))
 }
 
-response.name <- function(formula) {
+response_name <- function(formula) {
   if(is.list(formula)) {
     if(!is.null(formula$formula)) {
       formula <- formula$formula

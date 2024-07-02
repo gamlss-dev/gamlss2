@@ -87,7 +87,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   mt <- terms(ff0, data = data)
   Y <- model.response(mf)
   if(is.null(Y)) {
-    rn <- response.name(formula)
+    rn <- response_name(formula)
     Y <- mf[, rn]
   }
   X <- model.matrix(mt, mf)

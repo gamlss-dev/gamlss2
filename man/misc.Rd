@@ -1,5 +1,5 @@
-\name{response.name}
-\alias{response.name}
+\name{response_name}
+\alias{response_name}
 
 \title{Auxiliary Functions for Formulas and Model Objects}
 
@@ -9,7 +9,7 @@
 }
 
 \usage{
-response.name(formula)
+response_name(formula)
 }
 
 \arguments{
@@ -18,7 +18,7 @@ response.name(formula)
 }
 
 \value{
-  Function \code{response.name} extracts the response name as a character vector.
+  Function \code{response_name} extracts the response name as a character vector.
 }
 
 \seealso{
@@ -28,11 +28,11 @@ response.name(formula)
 \examples{
 ## basic formula
 f <- y ~ x1 + x2 + log(x3)
-response.name(f)
+response_name(f)
 
 ## formula with multiple responses
 f <- y1 | y2 | y3 ~ x1 + s(x2) + x3 + te(log(x3), x4) | x2 + ti(x5)
-response.name(f)
+response_name(f)
 
 ## list of formulas
 f <- list(
@@ -40,7 +40,7 @@ f <- list(
   y2  ~ x2 + sqrt(x5),
   y3  ~ z2 + x1 + exp(x3) + s(x10)
 )
-response.name(f)
+response_name(f)
 }
 
 \keyword{utilities}

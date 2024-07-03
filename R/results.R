@@ -32,7 +32,7 @@ results.gamlss2 <- function(x, ...)
                   else
                     return(class(x))
                 }))
-                if(all(xc == "numeric")) {
+                if(all(xc %in% c("numeric", "integer"))) {
                   nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
                     max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
                     seq(min(x$model[[x$specials[[i]]$term[2L]]]),

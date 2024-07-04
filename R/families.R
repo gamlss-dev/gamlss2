@@ -1079,7 +1079,7 @@ ologit4 <- function(...) {
   return(fam)
 }
 
-#if(FALSE) {
+##if(FALSE) {
 #library("bamlss")
 #library("gamlss2")
 
@@ -1096,4 +1096,4 @@ ologit4 <- function(...) {
 
 #m <- bamlss(yi ~ s(x), family = ologit4)
 #plot(m)
-#}
+##}

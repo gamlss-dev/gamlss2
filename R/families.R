@@ -1043,3 +1043,57 @@ softplus <- function(a = 1) {
   return(link)
 }
 
+ologit4 <- function(...) {
+  fam <- list(
+    "family" = "Ordered Logit",
+    "names" = c("mu", "r1", "r2", "r3"),
+    "links" = c(mu = "identity", r1 = "identity", r2 = "identity", r3 = "identity"),
+    "d" = function(y, par, log = FALSE, ...) {
+      e1 <- exp(par$mu - par$r1) / (1 + exp(par$mu - par$r1))
+      e2 <- exp(par$mu - par$r2) / (1 + exp(par$mu - par$r2))
+      e3 <- exp(par$mu - par$r3) / (1 + exp(par$mu - par$r3))
+
+      p1 <- 1 - e1
+      p2 <- e1 - e2
+      p3 <- e2 - e3
+      p4 <- e3
+
+      d <- rep(NA, length(y))
+
+      d[y == 1L] <- p1[y == 1L]
+      d[y == 2L] <- p2[y == 2L]
+      d[y == 3L] <- p3[y == 3L]
+      d[y == 4L] <- p4[y == 4L]
+
+      d[d < 1e-08 | is.na(d)] <- 1e-08
+
+      if(log) {
+        d <- log(d)
+        d[is.na(d)] <- -1e+10
+      }
+
+      return(d)
+    }
+  )
+  class(fam) <- c("gamlss2.family", "family.bamlss")
+  return(fam)
+}
+
+#if(FALSE) {
+#library("bamlss")
+#library("gamlss2")
+
+#set.seed(123)
+
+#n <- 2000
+#x <- runif(n, -3, 3)
+#y <- sin(x) + rnorm(n, sd = 0.3)
+#yf <- cut(y, breaks = seq(min(y), max(y), length = 5), include.lowest = TRUE)
+#yi <- as.integer(yf)
+
+#b <- gamlss2(yi ~ s(x), family = ologit4, step = 0.1, maxit = c(400, 400))
+#plot(b)
+
+#m <- bamlss(yi ~ s(x), family = ologit4)
+#plot(m)
+#}

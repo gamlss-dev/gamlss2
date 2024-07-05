@@ -55,12 +55,7 @@ Rsq(object, ...,
 
 \seealso{\code{\link{gamlss2}}}
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 ## Load the aids data set
 data("aids", package = "gamlss.data")
 
@@ -77,7 +72,7 @@ AIC(b1, b2)
 BIC(b1, b2)
 
 ## Plot estimated effects.
-plot(b2, pages = 1)
+plot(b2)
 }
 
 \keyword{regression}

@@ -56,14 +56,14 @@ Rsq(object, ...,
 \seealso{\code{\link{gamlss2}}}
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## Load the aids data set
+## load the aids data set
 data("aids", package = "gamlss.data")
 
-## Estimate negative binomial count models.
+## estimate negative binomial count models
 b1 <- gamlss2(y ~ x + qrt, data = aids, family = NBI)
 b2 <- gamlss2(y ~ s(x) + s(qrt, bs = "re"), data = aids, family = NBI)
 
-## Compare models.
+## compare models
 Rsq(b1)
 Rsq(b1, type = "both")
 Rsq(b1, b2)
@@ -71,7 +71,7 @@ GAIC(b1, b2)
 AIC(b1, b2)
 BIC(b1, b2)
 
-## Plot estimated effects.
+## plot estimated effects
 plot(b2)
 }
 

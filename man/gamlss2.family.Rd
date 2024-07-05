@@ -63,13 +63,8 @@
   \code{\link{gamlss2}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-\dontrun{## New family object for the normal distribution.
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## new family object for the normal distribution
 Normal <- function(...) {
   fam <- list(
     "family" = "Normal",
@@ -130,38 +125,36 @@ Normal <- function(...) {
   return(fam)
 }
 
-## Load the abdominal circumference data
+## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## Specify the model Formula.
+## specify the model Formula
 f <- y ~ s(x) | s(x)
 
-## Estimate model.
+## estimate model
 b <- gamlss2(f, data = abdom, family = Normal)
 
-## Plot estimated effects.
+## plot estimated effects
 plot(b, which = "effects")
 
-## Plot diagnostics.
+## plot diagnostics
 plot(b, which = "resid")
 
-## Predict parameters.
+## predict parameters
 par <- predict(b)
 
-## Predict quantiles.
-pq <- NULL
-for(q in c(0.05, 0.5, 0.95))
-  pq <- cbind(pq, family(b)$q(q, par))
+## predict quantiles
+pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
 
-## Plot.
+## visualize
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
 
-## Another example using only the density
+## another example using only the density
 ## function, all derivatives are approximated
-## in this case. For residual diagnostics,
+## in this case; for residual diagnostics,
 ## the $p() and $q() function is needed, too.
 Gamma <- function(...) {
   fam <- list(
@@ -191,20 +184,20 @@ Gamma <- function(...) {
   return(fam)
 }
 
-## Example using the Munich rent data.
+## example using the Munich rent data
 data("rent", package = "gamlss.data")
 
-## Model formula.
+## model formula
 f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") |
   ti(Fl) + ti(A) + ti(Fl, A, bs = "ps")
 
-## Estimate model.
+## estimate model
 b <- gamlss2(f, data = rent, family = Gamma)
 
-## Plot estimated effects.
+## visualize estimated effects
 plot(b, which = "effects")
 
-## Diagnostics, needs the $p() and $q() function!
+## diagnostics, needs the $p() and $q() function!
 plot(b, which = "resid")
 }}
 

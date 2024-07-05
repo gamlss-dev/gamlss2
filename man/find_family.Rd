@@ -59,30 +59,26 @@ fit_family(y, family = NO, plot = TRUE, ...)
   \code{\link{gamlss2}}.
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-\dontrun{## Load data.
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## load data
 data("rent", package = "gamlss.data")
 
-## Find a suitable response to the response.
+## find a suitable response to the response
 ic <- find_family(rent$R)
 print(ic)
 
-## Fit parameters using the BCCG family.
+## fit parameters using the BCCG family
 fit_family(rent$R, family = BCCG)
 
-## Using count data.
+## count data
 data("polio", package = "gamlss.data")
 
-## Search best count model.
+## search best count model
 ic <- find_family(polio, k = 0,
   families = available_families(type = "discrete"))
 print(ic)
 
-## Fit parameters using the ZASICHEL family.
+## fit parameters using the ZASICHEL family
 fit_family(polio, family = ZASICHEL)
 }
 }

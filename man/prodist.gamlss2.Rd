@@ -50,12 +50,7 @@ Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
 \code{\link[gamlss.dist]{GAMLSS}}, \code{\link{predict.gamlss2}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("distributions3")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }
-}
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 ## packages, code, and data
 library("distributions3")
 data("cars", package = "datasets")

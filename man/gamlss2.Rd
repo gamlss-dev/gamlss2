@@ -97,61 +97,54 @@ gamlss2(x, \dots)
   \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-## Load the abdominal circumference data
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## Specify the model Formula.
+## specify the model Formula
 f <- y ~ s(x) | s(x) | s(x) | s(x)
 
-## Estimate model.
+## estimate model
 b <- gamlss2(f, data = abdom, family = BCT)
 
-## Model summary.
+## model summary
 summary(b)
 
-## Plot estimated effects.
+## plot estimated effects
 plot(b, which = "effects")
 
-## Plot diagnostics.
+## plot diagnostics
 plot(b, which = "resid")
 
-## Predict parameters.
+## predict parameters
 par <- predict(b)
 
-## Predict quantiles.
-pq <- NULL
-for(q in c(0.05, 0.5, 0.95))
-  pq <- cbind(pq, family(b)$q(q, par))
+## predict quantiles
+pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
 
-## Plot.
+## visualize
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
 
-## Use of starting values.
+## use of starting values
 m <- gamlss2(f, data = abdom, family = BCT,
   start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10))
 
-## Fix some parameters.
+## fix some parameters
 m <- gamlss2(f, data = abdom, family = BCT,
   start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10),
   fixed = c(nu = TRUE, tau = TRUE))
 
-## Estimated coefficients (intercepts).
+## estimated coefficients (intercepts)
 coef(m)
 
-## Starting values using full predictors.
+## starting values using full predictors
 m <- gamlss2(f, data = abdom, family = BCT,
   start = fitted(m))
 
-## Same with.
+## same with
 m <- gamlss2(f, data = abdom, family = BCT,
   start = m)
 }

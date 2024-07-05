@@ -48,13 +48,7 @@ Wiemann PFV, Kneib T, Hambuckers J (2023). \dQuote{Using the Softplus Function t
   \code{\link[stats]{make.link}}, \code{\link{gamlss2}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("distributions3")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }
-}
-
+\examples{\dontshow{ if(!requireNamespace("distributions3")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 ## visualization of softmax function from Wiemann et al. (2003, Figure 1)
 x <- -200:200/50
 plot(x, softplus(1)$linkinv(x), ylab = expression(softplus[a](x)),

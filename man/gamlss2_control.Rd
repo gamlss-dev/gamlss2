@@ -48,20 +48,15 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   \code{\link{RS}}, \code{\link{gamlss2}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-\dontrun{## Load the abdominal circumference data
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## Specify the model Formula.
+## specify the model Formula
 f <- y ~ s(x) | s(x)
 
-## Estimate model with different step length
-## control in the RS algorithm.
+## estimate model with different step length
+## control in the RS algorithm
 b1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
 b2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
 }}

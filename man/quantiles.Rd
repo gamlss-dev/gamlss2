@@ -42,33 +42,29 @@
   \code{\link{gamlss2}}.
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-\dontrun{## Load data.
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## load data
 data("film90", package = "gamlss.data")
 
-## Model formula.
+## model formula
 f <-  ~ s(lboopen)
 f <- rep(list(f), 4)
 f[[1]] <- update(f[[1]], lborev1 ~ .)
 
-## Estimate model.
+## estimate model
 b <- gamlss2(f, data = film90, family = BCPE)
 
-## Compute quantiles using "newdata".
+## compute quantiles using "newdata"
 nd <- film90[1:10, ]
 print(quantile(b, newdata = nd))
 
-## Plot sorted quantiles.
+## plot sorted quantiles
 quantile(b, plot = TRUE)
 
-## Quantile plot using covariate data.
+## quantile plot using covariate data
 quantile(b, plot = TRUE, variable = TRUE)
 
-## Plot without raw data.
+## plot without raw data
 quantile(b, plot = TRUE, variable = TRUE, data = FALSE)
 }
 }

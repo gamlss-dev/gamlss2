@@ -106,25 +106,20 @@ CG(x, y, specials, family, offsets,
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-\dontrun{## Load the abdominal circumference data
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## Specify the model Formula.
+## specify the model Formula
 f <- y ~ s(x) | s(x) | s(x) | s(x)
 
-## Estimate model using RS (default).
+## estimate model using RS (default)
 b <- gamlss2(f, data = abdom, family = BCT, optimizer = RS)
 
-## Now with CG.
+## now with CG
 b <- gamlss2(f, data = abdom, family = BCT, optimizer = CG)
 
-## First 2 RS iterations and afterwards switch to CG.
+## first 2 RS iterations and afterwards switch to CG
 b <- gamlss2(f, data = abdom, family = BCT, CG = 2)
 }}
 

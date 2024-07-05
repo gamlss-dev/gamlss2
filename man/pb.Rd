@@ -46,36 +46,29 @@ pb(x, k = 20, ...)
   \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.ps.smooth.spec}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-## Load head circumference data.
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+## load head circumference data
 data("dbhh", package = "gamlss.data")
 
-## Specify the model Formula.
+## specify the model Formula
 f <- head ~ pb(age) | pb(age) | pb(age) | pb(age)
 
-## Estimate model.
+## estimate model
 b <- gamlss2(f, data = dbhh, family = BCT)
 
-## Plot estimated effects.
+## visualize estimated effects
 plot(b, which = "effects")
 
-## Plot diagnostics.
+## plot diagnostics
 plot(b, which = "resid")
 
-## Predict parameters.
+## predict parameters
 par <- predict(b)
 
-## Predict quantiles.
-pq <- NULL
-for(q in seq(0.05, 0.95, by = 0.1))
-  pq <- cbind(pq, family(b)$q(q, par))
+## predict quantiles
+pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
 
-## Plot.
+## plot
 plot(head ~ age, data = dbhh, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(dbhh$age, pq, type = "l",

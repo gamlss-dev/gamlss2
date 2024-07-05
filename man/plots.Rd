@@ -47,26 +47,22 @@
   \code{\link{gamlss2}}.
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-\dontrun{## Load data.
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## load data
 data("film90", package = "gamlss.data")
 
-## Model formula.
+## model formula
 f <-  ~ s(lboopen) + s(lnosc)
 f <- rep(list(f), 4)
 f[[1]] <- update(f[[1]], lborev1 ~ .)
 
-## Estimate model.
+## estimate model
 b1 <- gamlss2(f, data = film90, family = BCCG)
 
-## Plot effects (default).
+## plot effects (default)
 plot(b1)
 
-## Plot specific effect.
+## plot specific effect
 plot(b1, parameter = "sigma")
 plot(b1, model = "sigma")
 plot(b1, model = "nu", term = 1)
@@ -74,19 +70,19 @@ plot(b1, model = "nu", term = 2)
 plot(b1, model = "nu", term = "lnosc")
 plot(b1, term = "lnosc")
 
-## Plot all residual diagnostics.
+## plot all residual diagnostics
 plot(b1, which = "resid")
 
-## Single diagnostic plots.
+## single diagnostic plots
 plot(b1, which = "hist-resid")
 plot(b1, which = "qq-resid")
 plot(b1, which = "wp-resid")
 plot(b1, which = "scatter-resid")
 
-## Estimate another model.
+## estimate another model
 b2 <- gamlss2(f, data = film90, family = BCPE)
 
-## Compare estimated effects.
+## compare estimated effects
 plot(c(b1, b2))
 plot(c(b1, b2), term = "lboopen",
   col = c(1, 4), lwd = 3, lty = 1,

@@ -81,23 +81,18 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
   \code{\link{gamlss2}}, \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-## Example special term for neural networks.
-## The constructor function is used in the formula
-## when calling gamlss2().
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+## example special term for neural networks,
+## the constructor function is used in the formula
+## when calling gamlss2()
 n <- function(formula, ...)
 {
   stopifnot(requireNamespace("nnet"))
 
-  ## List for setting up the special model term.
+  ## list for setting up the special model term
   st <- list()
 
-  ## List of control arguments.
+  ## list of control arguments
   ctr <- list(...)
   if(is.null(ctr$size))
     ctr$size <- 50
@@ -112,14 +107,14 @@ n <- function(formula, ...)
   if(is.null(ctr$scale))
     ctr$scale <- TRUE
 
-  ## Put all information together.
+  ## put all information together
   st$control <- ctr
   st$formula <- formula
   st$term <- all.vars(formula)
   st$label <- paste0("n(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
   st$data <- model.frame(formula)
 
-  ## Scale per default!
+  ## scale per default!
   if(ctr$scale) {
     sx <- list()
     for(j in colnames(st$data)) {
@@ -131,26 +126,26 @@ n <- function(formula, ...)
     st$scalex <- sx
   }
 
-  ## Assign the "special" class and the new class "n".
+  ## assign the "special" class and the new class "n"
   class(st) <- c("special", "n")
 
   return(st)
 }
 
-## Set up the special "n" model term fitting function
+## set up the special "n" model term fitting function
 special_fit.n <- function(x, z, w, control, ...)
 {
-  ## Model formula needs to be updated.
+  ## model formula needs to be updated
   .fnns <- update(x$formula, response_z ~ .)
 
-  ## Assign current working response.
+  ## assign current working response
   x$data$response_z <- z
   x$data$weights_w <- w
 
-  ## Possible weights from last iteration.
+  ## possible weights from last iteration
   Wts <- list(...)$transfer$Wts
 
-  ## Estimate model.
+  ## estimate model
   nnc <- parse(text = paste0('nnet::nnet(formula = .fnns, data = x$data, weights = weights_w,',
       'size = x$control$size, maxit = x$control$maxit, decay = x$control$decay,',
       'trace = x$control$trace, MaxNWts = x$control$MaxNWts, linout = TRUE',
@@ -158,31 +153,31 @@ special_fit.n <- function(x, z, w, control, ...)
 
   rval <- list("model" = eval(nnc))
 
-  ## Get the fitted.values.
+  ## get the fitted.values
   rval$fitted.values <- predict(rval$model)
 
-  ## Transferring the weights for the next backfitting iteration.
-  ## Note, "transfer" can be used to transfer anything from one
-  ## iteration to the next.
+  ## transferring the weights for the next backfitting iteration
+  ## note, "transfer" can be used to transfer anything from one
+  ## iteration to the next
   rval$transfer <- list("Wts" = rval$model$wts)
 
-  ## Center fitted values.
+  ## center fitted values
   rval$shift <- mean(rval$fitted.values)
   rval$fitted.values <- rval$fitted.values - rval$shift
 
-  ## Degrees of freedom.
+  ## degrees of freedom
   rval$edf <- length(coef(rval$model))
 
-  ## Possible scaling.
+  ## possible scaling
   rval$scalex <- x$scalex
 
-  ## Assign class for predict method.
+  ## assign class for predict method
   class(rval) <- "n.fitted"
 
   return(rval)
 }
 
-## Finally, the predict method.
+## finally, the predict method
 special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 {
   if(!is.null(x$scalex)) {
@@ -197,68 +192,66 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-\dontrun{## Example with data.
+\dontrun{## example with data
 data("abdom", package = "gamlss.data")
 
-## Specify the model Formula.
+## specify the model Formula
 f <- y ~ n(~x) | n(~x) | n(~x) | n(~x)
 
-## Estimate model.
-## Set the seed for reproducibility.
-## Note, data should be scaled!
+## estimate model,
+## set the seed for reproducibility
+## note, data should be scaled!
 set.seed(123)
 b <- gamlss2(f, data = abdom, family = BCT)
 
-## Plot estimated effects.
+## visualize estimated effects
 plot(b, which = "effects")
 
-## Plot diagnostics.
+## plot diagnostics
 plot(b, which = "resid")
 
-## Predict parameters.
+## predict parameters
 par <- predict(b)
 
-## Predict quantiles.
-pq <- NULL
-for(q in c(0.05, 0.5, 0.95))
-  pq <- cbind(pq, family(b)$q(q, par))
+## predict quantiles
+pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
 
-## Plot.
+## plot
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
 
-## Another example using the Munich rent data.
+## another example using the Munich rent data
 data("rent", package = "gamlss.data")
 
-## Model formula.
+## model Formula
 f <- R ~ n(~Fl+A,size=10,decay=0.7) | n(~Fl+A,size=10,decay=0.7)
 
-## Estimate model.
+## estimate model
 set.seed(456)
 b <- gamlss2(f, data = rent, family = GA)
 
-## Plot estimated effects.
+## plot estimated effects
 plot(b, which = "effects", persp = FALSE)
 
-## Diagnostics.
+## diagnostics
 plot(b, which = "resid")
 
-## Predict using new data.
+## predict using new data
 n <- 50
 nd <- with(rent, expand.grid(
   "Fl" = seq(min(Fl), max(Fl), length = n),
   "A" = seq(min(A), max(A), length = n)
 ))
 
-## Predict parameters of the GA distribution.
+## predict parameters of the GA distribution
 par <- predict(b, newdata = nd)
 
-## Compute median rent R estimate.
+## compute median rent R estimate
 nd$fit <- family(b)$q(0.5, par)
 
-## Visualize.
+## visualize
 library("lattice")
 
 p1 <- wireframe(fit ~ Fl + A, data = nd,
@@ -275,14 +268,14 @@ p2 <- levelplot(fit ~ Fl + A, data = nd,
 print(p1, split = c(1, 1, 2, 1), more = TRUE)
 print(p2, split = c(2, 1, 2, 1), more = FALSE)
 
-## Extract fitted special terms.
-## Fitted NN for parameter mu.
+## extract fitted special terms,
+## fitted NN for parameter mu
 specials(b, model = "mu", elements = "model")
 
-## Same for sigma.
+## same for sigma
 specials(b, model = "sigma", elements = "model")
 
-## Return element names of fitted special term list.
+## return element names of fitted special term list
 specials(b, model = "sigma", elements = "names")
 }}
 

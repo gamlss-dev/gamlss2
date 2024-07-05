@@ -109,62 +109,58 @@ stepwise(x, y, specials, family, offsets,
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
-\examples{
-\dontshow{ if(!requireNamespace("gamlss.data")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-
-\dontrun{## Load the Munich rent data
+\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\dontrun{## load the Munich rent data
 data("rent", package = "gamlss.data")
 
-## Because of possible linear interactions,
-## scale the covariates first.
+## because of possible linear interactions,
+## scale the covariates first
 rent$Fl <- scale(rent$Fl)
 rent$A <- scale(rent$A)
 
-## The formula defines the searching scope.
+## the Formula defines the searching scope
 f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
-## Estimate a Gamma model using the stepwise algorithm.
+## estimate a Gamma model using the stepwise algorithm
 b <- step_gamlss2(f, data = rent, family = GA, K = 2)
 
-## Same with.
+## same with
 ## b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
 
-## Show the new formula of selected model terms.
-newformula(b)
+## show the new formula of selected model terms
+new_formula(b)
 
-## Final model summary.
+## final model summary
 summary(b)
 
-## Effect plots.
+## effect plots
 plot(b)
 
-## Diagnostic plots.
+## diagnostic plots
 plot(b, which = "resid")
 
-## Plot GAIC.
+## plot GAIC
 plot(b, which = "selection")
 
-## Use forward linear, replace and backward strategy.
+## use forward linear, replace and backward strategy
 b <- step_gamlss2(f, data = rent, family = GA, K = 2,
   strategy = c("forward.linear", "replace", "backward"))
 
-## More complex model. Note, the third parameter
-## nu does not include any model terms.
+## more complex model
+## note, the third parameter
+## nu does not include any model terms
 f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
   1 |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
-## Model using the BCT family.
+## model using the BCT family
 b <- step_gamlss2(f, data = rent, family = BCT,
   K = 2, strategy = c("forward.linear", "both"),
   keeporder = TRUE)
 
-## Plot GAIC.
+## plot GAIC
 plot(b, which = "selection")
 }}
 

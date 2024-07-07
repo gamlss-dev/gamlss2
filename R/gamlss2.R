@@ -218,8 +218,12 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
 
   ## Response sanity check.
-  if(!is.null(family$valid.response))
-    family$valid.response(Y)
+  if(!is.null(family$valid.response)) {
+    if(!family$valid.response(Y)) {
+      stop(paste0("please check the response, family '",
+        family$family, "' validy check not passed!"))
+    }
+  }
 
   ## Check for binomial families.
   if(family$family %in% .bi.list) {

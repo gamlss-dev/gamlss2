@@ -217,6 +217,10 @@ gamlss2.formula <- function(formula, data, family = NO,
     family$optimizer
   }
 
+  ## Response sanity check.
+  if(!is.null(family$valid.response))
+    family$valid.response(Y)
+
   ## Check for binomial families.
   if(family$family %in% .bi.list) {
     fenv <- environment(family[["d"]])

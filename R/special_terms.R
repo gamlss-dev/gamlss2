@@ -222,3 +222,64 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
+## Linear model terms wrapper.
+lin <- function(x, ..., ridge = FALSE)
+{
+  x <- lab <- deparse(substitute(x), backtick = TRUE, width.cutoff = 500)
+  f <- try(as.formula(x), silent = TRUE)
+  is_f <- TRUE
+  if(inherits(f, "try-error")) {
+    v <- as.list(substitute(list(...)))[-1]
+    if(length(v)) {
+      lab <- paste0(x, ",", as.character(unlist(v)))
+      v <- c(x, as.character(unlist(v)))
+    } else {
+      v <- x
+    }
+    f <- as.formula(paste("~", paste(v, collapse = "+")))
+    is_f <- FALSE
+  }
+  if(ridge) {
+    lab <- paste0(lab,",ridge=", ridge)
+  }
+  v <- all.vars(f)
+  sx <- list("formula" = f, "term" = v,
+    "label" = paste0("lin(", lab, ")"),
+    "by" = "NA", "dim" = length(v))
+  if(!ridge) {
+    sx$sp <- 1e-10
+  }
+  class(sx) <- "lin.smooth.spec"
+  return(sx)
+}
+
+smooth.construct.lin.smooth.spec <- function(object, data, knots)
+{
+  object$X <- model.matrix(object$formula, data = if (is.list(data)) 
+    data[all.vars(reformulate(names(data))) %in% all.vars(object$formula)]
+    else data)
+  if(any(grepl("(Intercept)", colnames(object$X), fixed = TRUE))) {
+    object$X <- object$X[, -1L, drop = FALSE]
+  }
+  object$bs.dim <- ncol(object$X)
+  object$S <- list(diag(object$bs.dim))
+  object$rank <- object$bs.dim
+  object$null.space.dim <- 0
+  object$C <- matrix(0, 0, ncol(object$X))
+  object$side.constrain <- FALSE
+  class(object) <- "lin.effect"
+  return(object)
+}
+
+Predict.matrix.lin.effect <- function(object, data) 
+{
+  if(is.list(data)) 
+    data <- data[all.vars(reformulate(names(data))) %in% all.vars(object$formula)]
+  X <- model.matrix(object$formula, model.frame(object$formula, data, na.action = na.pass))
+  if(any(grepl("(Intercept)", colnames(X), fixed = TRUE))) {
+    X <- X[, -1L, drop = FALSE]
+  }
+  X[!is.finite(X)] <- 0
+  return(X)
+}
+

@@ -76,7 +76,13 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
                 for(k in 2:length(vf))
                   ff <- c(ff, vf[[k]])
               } else {
-                ff <- c(ff, e[[i]])
+                if(as.character(e[1L]) == "lin") {
+                  lv <- all.vars(e[[i]])
+                  for(l in lv)
+                    ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))
+                } else {
+                  ff <- c(ff, e[[i]])
+                }
               }
             }
           }

@@ -242,6 +242,7 @@ lin <- function(x, ..., ridge = FALSE)
   if(ridge) {
     lab <- paste0(lab,",ridge=", ridge)
   }
+  lab <- gsub(" ", "", lab)
   v <- all.vars(f)
   sx <- list("formula" = f, "term" = v,
     "label" = paste0("lin(", lab, ")"),

@@ -66,8 +66,15 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
               if(!inherits(ef, "try-error")) {
                 if(inherits(ef, "formula")) {
                   vf <- attr(terms(eval(ef)), "variables")
-                  for(k in 2:length(vf))
-                    ff <- c(ff, vf[[k]])
+                  for(k in 2:length(vf)) {
+                    if(as.character(e[1L]) == "lin") {
+                      lv <- all.vars(vf[[k]])
+                      for(l in lv)
+                        ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))
+                    } else {
+                      ff <- c(ff, vf[[k]])
+                    }
+                  }
                   next
                 }
               }

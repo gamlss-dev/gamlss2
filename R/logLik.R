@@ -1,4 +1,4 @@
-logLik.gamlss2 <- function(object, newdata = NULL, ...)
+.logLik.gamlss2 <- function(object, newdata = NULL)
 {
   if(is.null(newdata)) {
     ll <- object$logLik
@@ -16,6 +16,34 @@ logLik.gamlss2 <- function(object, newdata = NULL, ...)
   attr(ll, "nobs") <- nobs
   attr(ll, "df") <- object$df
   class(ll) <- "logLik"
+  return(ll)
+}
+
+logLik.gamlss2 <- function(object, ..., newdata = NULL)
+{
+  objs <- list(object, ...)
+
+  ll <- list()
+  for(j in 1:length(objs)) {
+    ll[[j]] <- .logLik.gamlss2(objs[[j]], newdata = newdata)
+  }
+
+  if(length(ll) > 1L) {
+    Call <- match.call()
+    rn <- as.character(Call[-1L])
+    if("..1" %in% rn) {
+      rn <- as.character(sys.call(-1))[-1L]
+    }
+    i <- order(unlist(ll), decreasing = TRUE)
+    ll <- ll[i]
+    rn <- rn[i]
+    if(any(j <- duplicated(rn)))
+      rn[j] <- paste0(rn[j], ".", 1:sum(j))
+    names(ll) <- rn
+  } else {
+    ll <- ll[[1L]]
+  }
+
   return(ll)
 }
 
@@ -38,9 +66,30 @@ get_df <- function(object)
   return(df)
 }
 
-deviance.gamlss2 <- function(object, ...)
+deviance.gamlss2 <- function(object, ..., newdata = NULL)
 {
-  -2 * as.numeric(logLik(object, ...))
+  objs <- list(object, ...)
+
+  devs <- NULL
+  for(j in 1:length(objs)) {
+    devs <- c(devs, -2 * as.numeric(logLik(objs[[j]], newdata = newdata)))
+  }
+
+  if(length(devs) > 1L) {
+    Call <- match.call()
+    rn <- as.character(Call[-1L])
+    if("..1" %in% rn) {
+      rn <- as.character(sys.call(-1))[-1L]
+    }
+    i <- order(devs, decreasing = FALSE)
+    devs <- devs[i]
+    rn <- rn[i]
+    if(any(j <- duplicated(rn)))
+      rn[j] <- paste0(rn[j], ".", 1:sum(j))
+    names(devs) <- rn
+  }
+
+  return(devs)
 }
 
 response_name <- function(formula) {

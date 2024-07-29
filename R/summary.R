@@ -461,7 +461,7 @@ GAIC <- function(object, ..., k = 2, corrected = FALSE)
     rn <- rn[i]
     if(any(j <- duplicated(rn)))
       rn[j] <- paste0(rn[j], ".", 1:sum(j))
-    rownames(gaic) <- rn # not rn[i] because already corrected
+    rownames(gaic) <- rn
   }
   return(gaic)
 }

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression – gamlss2</title>
+<title>gamlss2: Infrastructure for Flexible Distributional Regression – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -140,7 +140,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">gamlss2: Infrastructure for Flexible Distributional Regression</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -164,7 +164,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/gamlss2.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression</span></a>
+ <span class="menu-text">gamlss2: Infrastructure for Flexible Distributional Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/install.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installation</span></a>
   </div>
 </li>
       </ul>
@@ -310,8 +316,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#first-steps" id="toc-first-steps" class="nav-link active" data-scroll-target="#first-steps">First Steps</a></li>
   </ul>
 </nav>
     </div>
@@ -319,23 +324,74 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header">
-<h1 class="title display-7">gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression</h1>
+<h1 class="title display-7">gamlss2: Infrastructure for Flexible Distributional Regression</h1>
 
 </header>
 
 
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>The primary purpose of this package is to facilitate the creation of advanced infrastructures designed to enhance the GAMLSS modeling framework. Notably, the <em>gamlss2</em> package represents a significant overhaul of its predecessor, <em>gamlss</em>, with a key emphasis on improving estimation speed and incorporating more flexible infrastructures. These enhancements enable the seamless integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation, regression trees, and forests, fostering a more versatile and powerful modeling environment.</p>
-<p>Moreover, the package expands its compatibility by supporting all model terms from the base R <em>mgcv</em> package. Additionally, the <em>gamlss2</em> package introduces the capability to accommodate more than four parameter families. Essentially, this means that users can now specify any type of model using these new infrastructures, making the package highly flexible and accommodating to a wide range of modeling requirements.</p>
-</section>
-<section id="installation" class="level2">
-<h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<p>The development version of <em>gamlss2</em> is hosted on github at <a href="https://github.com/gamlss-dev/gamlss2" class="uri">https://github.com/gamlss-dev/gamlss2</a>. It can be installed from R-universe via</p>
+<section id="first-steps" class="level2">
+<h2 class="anchored" data-anchor-id="first-steps">First Steps</h2>
+<p>The package is designed to follow the workflow of well-established model fitting functions like <code>lm()</code> or <code>glm()</code>, i.e., the step of estimating full distributional regression models is actually not very difficult.</p>
+<p>To illustrate the workflow using <em>gamlss2</em>, we analyze the <code>HarzTraffic</code> data, where we model the number of motorcycles (response <code>bikes</code>) at Sonnenberg in the Harz region of Germany. The data can be loaded with</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"gamlss2"</span>,</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">"https://gamlss-dev.R-universe.dev"</span>, <span class="st">"https://cloud.R-project.org"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        date yday bikes cars trucks others tempmin tempmax  temp humidity
+1 2021-01-01    0     2 3135     25      1     0.2     2.6  1.32       85
+2 2021-01-02    1     7 6593     32     10     1.6     4.0  2.63       72
+3 2021-01-03    2     0 3367     30      2    -0.4     1.2  0.19       94
+4 2021-01-04    3     0 2186     75      0    -0.6    -0.1 -0.37       97
+5 2021-01-05    4     3 2071     68      0    -0.6     0.5 -0.21       98
+6 2021-01-06    5     1 2022     97      0    -0.2     0.5  0.17       93
+  tempdew cloudiness rain sunshine wind windmax
+1   -0.93         99  1.2       50 1.38     3.7
+2   -1.99        100  0.0       13 1.35     2.4
+3   -0.65         98 13.5        0 1.74     2.8
+4   -0.78         99  3.8        0 1.39     2.1
+5   -0.46         98  5.3        0 1.42     2.1
+6   -0.84         97  4.5        0 3.02     4.6</code></pre>
 </div>
+</div>
+<p>The data consists of seasonal time information (variable <code>day</code>) along with a number of environmental variables (e.g.&nbsp;mean daily <code>temp</code>). As a first model, we estimate a linear regression model with normal errors (which is the default)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 14325.7146 eps = 0.046095     
+GAMLSS-RS iteration  2: Global Deviance = 14325.7146 eps = 0.000000     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+gamlss2(formula = bikes ~ temp + rain + sunshine + wind, data = HarzTraffic)
+---
+Family: NO 
+Link function: mu = identity, sigma = log
+*--------
+Parameter: mu 
+---
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -15.33601   19.67683  -0.779   0.4359    
+temp         17.68501    1.01429  17.436  &lt; 2e-16 ***
+rain         -3.76399    1.74873  -2.152   0.0316 *  
+sunshine      0.36452    0.02995  12.172  &lt; 2e-16 ***
+wind        -25.26905    4.38768  -5.759 1.11e-08 ***
+*--------
+Parameter: sigma 
+---
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  5.35765    0.02175   246.3   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+*--------
+n = 1057 df =  6 res.df =  1051
+Deviance = 14325.7146 Null Dev. Red. = 4.61%
+AIC = 14337.7146 elapsed =  0.02sec</code></pre>
+</div>
+</div>
+<p>Note that the summary output is very similar to <code>lm()</code> and <code>glm()</code> with the main difference being that summary outputs are provided for all parameters of the distribution. In this case, the model is estimated using the <code>NO</code> family of the <em>gamlss.dist</em> package, a two-parameter distribution with parameters <code>mu</code> and <code>sigma</code>.</p>
 
 
 </section>

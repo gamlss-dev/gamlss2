@@ -1,5 +1,5 @@
 ---
-title: "gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression"
+title: "gamlss2: Infrastructure for Flexible Distributional Regression"
 output:
   html_document:
     toc: true
@@ -20,29 +20,28 @@ vignette: >
 library("gamlss2")
 ```
 
-## Overview 
+## First Steps
 
-The primary purpose of this package is to facilitate the creation of advanced infrastructures
-designed to enhance the GAMLSS modeling framework. Notably, the _gamlss2_ package represents a
-significant overhaul of its predecessor, _gamlss_, with a key emphasis on improving estimation
-speed and incorporating more flexible infrastructures. These enhancements enable the seamless
-integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
-regression trees, and forests, fostering a more versatile and powerful modeling environment.
+The package is designed to follow the workflow of well-established model fitting functions
+like `lm()` or `glm()`, i.e., the step of estimating full distributional regression models
+is actually not very difficult.
 
-Moreover, the package expands its compatibility by supporting all model terms from the base
-R _mgcv_ package. Additionally, the _gamlss2_ package introduces the capability to
-accommodate more than four parameter families. Essentially, this means that users can now
-specify any type of model using these new infrastructures, making the package highly
-flexible and accommodating to a wide range of modeling requirements.
-
-## Installation
-
-The development version of _gamlss2_ is hosted on github at
-<https://github.com/gamlss-dev/gamlss2>.
-It can be installed from R-universe via
-
-```{r installation, eval=FALSE}
-install.packages("gamlss2",
-  repos = c("https://gamlss-dev.R-universe.dev", "https://cloud.R-project.org"))
+To illustrate the workflow using _gamlss2_, we analyze the `HarzTraffic` data, where we model
+the number of motorcycles (response `bikes`) at Sonnenberg in the Harz region of Germany.
+The data can be loaded with
+```{r harzdata}
+data("HarzTraffic")
+head(HarzTraffic)
 ```
+The data consists of seasonal time information (variable `day`) along with a number of
+environmental variables (e.g. mean daily `temp`). As a first model, we estimate a linear regression
+model with normal errors (which is the default)
+```{r model1}
+b <- gamlss2(bikes ~ temp + rain + sunshine + wind, data = HarzTraffic)
+summary(b)
+```
+Note that the summary output is very similar to `lm()` and `glm()` with the main difference
+being that summary outputs are provided for all parameters of the distribution. In this case,
+the model is estimated using the `NO` family of the _gamlss.dist_ package, a two-parameter
+distribution with parameters `mu` and `sigma`.
 

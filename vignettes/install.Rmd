@@ -1,0 +1,23 @@
+---
+title: "Installation"
+output: rmarkdown::html_vignette
+bibliography: gamlss2.bib
+nocite: |
+  @gamlss2:Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{First Steps}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, first steps}
+  %\VignettePackage{gamlss2}
+---
+
+The development version of _gamlss2_ is hosted on github at
+<https://github.com/gamlss-dev/gamlss2>.
+It can be installed from R-universe via
+
+```{r installation, eval=FALSE}
+install.packages("gamlss2",
+  repos = c("https://gamlss-dev.R-universe.dev", "https://cloud.R-project.org"))
+```
+

@@ -45,6 +45,8 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       "random", "ra", "lo", "tr", "tree", "cf", "NN", "pb2", "ct", "st", "ps2")
     stn <- unique(c(stn, specials))
 
+    formula <- ff_replace(formula)
+
     mt <- terms(formula, specials = stn)
 
     os <- NULL
@@ -123,6 +125,21 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     }
   }
 
+  return(formula)
+}
+
+## Replace * and : with +.
+ff_replace <- function(formula)
+{
+  n <- length(formula)
+  f <- formula[[n]]
+  f <- deparse(f)
+  if(any(grepl(":", f, fixed = TRUE))) {
+    f <- gsub(":", "+", f, fixed = TRUE)
+    f <- as.call(parse(text = f))
+    formula[[n]] <- f[[1L]]
+    formula <- update(formula, . ~ .)
+  }
   return(formula)
 }
 

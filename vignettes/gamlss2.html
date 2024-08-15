@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.55">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>gamlss2: Infrastructure for Flexible Distributional Regression – gamlss2</title>
+<title>First Steps – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -140,7 +140,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">gamlss2: Infrastructure for Flexible Distributional Regression</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/gamlss2.html">First Steps</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -164,13 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/gamlss2.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">gamlss2: Infrastructure for Flexible Distributional Regression</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../vignettes/install.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Installation</span></a>
+ <span class="menu-text">First Steps</span></a>
   </div>
 </li>
       </ul>
@@ -311,26 +305,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#first-steps" id="toc-first-steps" class="nav-link active" data-scroll-target="#first-steps">First Steps</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header">
-<h1 class="title display-7">gamlss2: Infrastructure for Flexible Distributional Regression</h1>
+<h1 class="title display-7">First Steps</h1>
 
 </header>
 
 
-<section id="first-steps" class="level2">
-<h2 class="anchored" data-anchor-id="first-steps">First Steps</h2>
 <p>The package is designed to follow the workflow of well-established model fitting functions like <code>lm()</code> or <code>glm()</code>, i.e., the step of estimating full distributional regression models is actually not very difficult.</p>
 <p>To illustrate the workflow using <em>gamlss2</em>, we analyze the <code>HarzTraffic</code> data, where we model the number of motorcycles (response <code>bikes</code>) at Sonnenberg in the Harz region of Germany. The data can be loaded with</p>
 <div class="cell">
@@ -394,7 +380,6 @@ AIC = 14337.7146 elapsed =  0.02sec</code></pre>
 <p>Note that the summary output is very similar to <code>lm()</code> and <code>glm()</code> with the main difference being that summary outputs are provided for all parameters of the distribution. In this case, the model is estimated using the <code>NO</code> family of the <em>gamlss.dist</em> package, a two-parameter distribution with parameters <code>mu</code> and <code>sigma</code>.</p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

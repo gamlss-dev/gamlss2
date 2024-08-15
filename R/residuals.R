@@ -116,6 +116,10 @@ residuals.gamlss2 <- function(object,
         }
       }
 
+      if(length(ix <- which(!is.finite(res))) > 0L) {
+        res[ix] <- qnorm(family$p(y[ix], par[ix, , drop = FALSE], log = TRUE), log.p = TRUE)
+      }
+
       if(any(isnf <- !is.finite(res))) {
         warning("non finite quantiles from probabilities, set to NA!")
         res[isnf] <- NA

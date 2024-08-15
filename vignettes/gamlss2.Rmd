@@ -1,5 +1,5 @@
 ---
-title: "gamlss2: Infrastructure for Flexible Distributional Regression"
+title: "First Steps"
 output:
   html_document:
     toc: true
@@ -19,8 +19,6 @@ vignette: >
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
 ```
-
-## First Steps
 
 The package is designed to follow the workflow of well-established model fitting functions
 like `lm()` or `glm()`, i.e., the step of estimating full distributional regression models

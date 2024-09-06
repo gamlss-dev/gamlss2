@@ -7,7 +7,7 @@ output:
     theme: flatly
 bibliography: gamlss2.bib
 nocite: |
-  @gamlss2:Rigby+Stasinopoulos:2005
+  @Rigby+Stasinopoulos:2005
 vignette: >
   %\VignetteIndexEntry{First Steps}
   %\VignetteEngine{knitr::rmarkdown}
@@ -31,9 +31,9 @@ The data can be loaded with
 data("HarzTraffic")
 head(HarzTraffic)
 ```
-The data consists of seasonal time information (variable `day`) along with a number of
-environmental variables (e.g. mean daily `temp`). As a first model, we estimate a linear regression
-model with normal errors (which is the default)
+The data consists of seasonal time information (variable `yday`) along with a number of
+environmental variables (e.g. mean daily `temp`erature). As a first model,
+we estimate a linear regression model with normal errors (which is the default)
 ```{r model1}
 b <- gamlss2(bikes ~ temp + rain + sunshine + wind, data = HarzTraffic)
 summary(b)
@@ -42,4 +42,21 @@ Note that the summary output is very similar to `lm()` and `glm()` with the main
 being that summary outputs are provided for all parameters of the distribution. In this case,
 the model is estimated using the `NO` family of the _gamlss.dist_ package, a two-parameter
 distribution with parameters `mu` and `sigma`.
+
+### Residual Diagnostics
+
+Since we estimated a simple linear model with Gaussian errors up to now, we are assuming that
+the distribution of the response variable, the number of motorcycles (`bikes`), follows a
+normal distribution with constant variance. However, this assumption may not always hold true,
+especially when the response variable is count data, which often exhibits overdispersion
+or non-constant variance.
+
+To assess whether the normal distribution with constant variance is appropriate, we can
+start by examining diagnostic plots.
+```{r resids}
+plot(b)
+```
+
+These plots help us visually inspect the residuals for any deviations from the assumptions
+of normality and constant variance.
 

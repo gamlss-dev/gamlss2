@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.56">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -54,7 +54,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -305,8 +325,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#residual-diagnostics" id="toc-residual-diagnostics" class="nav-link active" data-scroll-target="#residual-diagnostics">Residual Diagnostics</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -339,7 +365,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 6   -0.84         97  4.5        0 3.02     4.6</code></pre>
 </div>
 </div>
-<p>The data consists of seasonal time information (variable <code>day</code>) along with a number of environmental variables (e.g.&nbsp;mean daily <code>temp</code>). As a first model, we estimate a linear regression model with normal errors (which is the default)</p>
+<p>The data consists of seasonal time information (variable <code>yday</code>) along with a number of environmental variables (e.g.&nbsp;mean daily <code>temp</code>erature). As a first model, we estimate a linear regression model with normal errors (which is the default)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -374,14 +400,35 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 1057 df =  6 res.df =  1051
 Deviance = 14325.7146 Null Dev. Red. = 4.61%
-AIC = 14337.7146 elapsed =  0.02sec</code></pre>
+AIC = 14337.7146 elapsed =  0.03sec</code></pre>
 </div>
 </div>
 <p>Note that the summary output is very similar to <code>lm()</code> and <code>glm()</code> with the main difference being that summary outputs are provided for all parameters of the distribution. In this case, the model is estimated using the <code>NO</code> family of the <em>gamlss.dist</em> package, a two-parameter distribution with parameters <code>mu</code> and <code>sigma</code>.</p>
+<section id="residual-diagnostics" class="level3">
+<h3 class="anchored" data-anchor-id="residual-diagnostics">Residual Diagnostics</h3>
+<p>Since we estimated a simple linear model with Gaussian errors up to now, we are assuming that the distribution of the response variable, the number of motorcycles (<code>bikes</code>), follows a normal distribution with constant variance. However, this assumption may not always hold true, especially when the response variable is count data, which often exhibits overdispersion or non-constant variance.</p>
+<p>To assess whether the normal distribution with constant variance is appropriate, we can start by examining diagnostic plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/resids-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These plots help us visually inspect the residuals for any deviations from the assumptions of normality and constant variance.</p>
 
 
 
-</main> <!-- /main -->
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
+Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society Series C (Applied Statistics)</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

@@ -284,3 +284,92 @@ Predict.matrix.lin.effect <- function(object, data)
   return(X)
 }
 
+## Random effects.
+re <- function(fixed = ~ 1, random = NULL, ...)
+{
+  stopifnot(requireNamespace("nlme"))
+
+  call <- match.call(expand.dots = FALSE)
+
+  ## List for setting up the special model term.
+  st <- list()
+
+  ## List of control arguments.
+  ctr <- list(...)
+  if(is.null(ctr$method))
+    ctr$method <- "ML"
+
+  ## Put all information together.
+  st$control <- ctr
+  st$fixed <- fixed
+  st$random <- random
+  st$term <- c(all.vars(fixed), all.vars(random))
+  st$label <- gsub(" ", "", deparse(call))
+  st$method <- ctr$method
+  ctr$method <- NULL
+  st$correlation <- ctr$correlation
+  ctr$correlation <- NULL
+
+  ## Assign data.
+  rm_v <- function(formula) {
+    env <- environment(formula)
+    formula <- formula(as.Formula(formula), drop = TRUE, collapse = TRUE)
+    environment(formula) <- env
+    return(formula)
+  }
+
+  df <- model.frame(rm_v(fixed))
+  dr <- model.frame(rm_v(random))
+
+  if(nrow(df) < 1 && nrow(dr) > 0)
+    st$data <- dr
+  if(nrow(df) > 0 && nrow(dr) < 1)
+    st$data <- df
+  if(nrow(df) > 0 && nrow(dr) > 0)
+    st$data <- cbind(df, dr)
+
+  ## Assign the "special" class and the new class "n".
+  class(st) <- c("special", "re")
+
+  return(st)
+}
+
+## Set up the special "re" model term fitting function
+special_fit.re <- function(x, z, w, control, ...)
+{
+  ## Model formula needs to be updated.
+  .fnns <- update(x$fixed, response_z ~ .)
+
+  ## Assign current working response.
+  x$data$response_z <- z
+  x$data$weights_w <- w
+
+  ## Estimate model.
+  rem <- parse(text = paste0(
+    'nlme::lme(fixed = .fnns, data = x$data, random = x$random, weights = varFixed(~weights_w),',
+    'method="', x$method, '",control=x$control,correlation=', x$correlation, ',keep.data=FALSE)'))
+
+  rval <- list("model" = eval(rem))
+
+  ## Get the fitted.values.
+  rval$fitted.values <- fitted(rval$model)
+
+  ## Degrees of freedom.
+  N <- sum(w != 0)
+  rval$edf <- sum(w * (z - rval$fitted.values)^2)/(rval$model$sigma^2)
+
+  ## Assign class for predict method.
+  class(rval) <- "re.fitted"
+
+  return(rval)
+}
+
+## The re() predict method.
+special_predict.re.fitted <- function(x, data, se.fit = FALSE, ...)
+{
+  p <- predict(x$model, newdata = data, level = 0)
+  if(se.fit)
+    p <- data.frame("fit" = p)
+  return(p)
+}
+

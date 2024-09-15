@@ -25,6 +25,8 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     for(i in 1:n[2L]) {
       fl[[i]] <- fake_formula(formula(formula, rhs = i, lhs = 0), specials = specials,
         nospecials = nospecials, onlyspecials = onlyspecials)
+      if(!is.character(fl[[i]]))
+        fl[[i]] <- formula(as.Formula(fl[[i]]), drop = TRUE, collapse = TRUE)
     }
     if(length(fl)) {
       if(!is.character(fl[[1L]])) {
@@ -44,7 +46,6 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
       "random", "ra", "lo", "tr", "tree", "cf", "NN", "pb2", "ct", "st", "ps2")
     stn <- unique(c(stn, specials))
-
     formula <- ff_replace(formula)
 
     mt <- terms(formula, specials = stn)
@@ -85,7 +86,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
                 for(k in 2:length(vf))
                   ff <- c(ff, vf[[k]])
               } else {
-                if(as.character(e[1L]) == "lin") {
+                if(as.character(e[1L]) %in% c("lin")) {
                   lv <- all.vars(e[[i]])
                   for(l in lv)
                     ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))
@@ -97,10 +98,10 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
           }
         }
         os <- c(os, j)
-        eval(parse(text = paste0("formula <- update(formula, . ~ . -", j,")")))
+        eval(parse(text = paste0("formula <- update(formula, NULL ~ . -", j,")")))
         if(!nospecials) {
           for(i in ff) {
-            eval(parse(text = paste0("formula <- update(formula, . ~ . +", deparse(i),")")))
+            eval(parse(text = paste0("formula <- update(formula, NULL ~ . +", deparse(i),")")))
           }
         }
       }
@@ -132,7 +133,11 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
 ff_replace <- function(formula)
 {
   n <- length(formula)
-  f <- formula[[n]]
+  if(length(n) > 1) {
+    f <- formula[[max(n)]]
+  } else {
+    f <- formula[[n]]
+  }
   f <- deparse(f)
   if(any(grepl(":", f, fixed = TRUE))) {
     f <- gsub(":", "+", f, fixed = TRUE)

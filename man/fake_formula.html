@@ -402,7 +402,7 @@ Logical, should only the special model terms be returned?
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x3 + x2 + log(x3) + x4</code></pre>
+<pre><code>~x1 + x3 + x2 + log(x3) + x4</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## multiple parts on the right-hand side</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4) <span class="sc">|</span> x2 <span class="sc">+</span> <span class="fu">sqrt</span>(x5)</span>

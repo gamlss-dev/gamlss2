@@ -18,7 +18,7 @@ re(fixed =~ 1, random =~ NULL, ...)
 
 \arguments{
   \item{\dots}{For function \code{\link[mgcv]{s}}, the variables that should
-    be used for setting up the ranom effect. See \code{\link[mgcv]{smooth.construct.re.smooth.spec}}
+    be used for setting up the random effect. See \code{\link[mgcv]{smooth.construct.re.smooth.spec}}
     for details and the examples below. For the \code{re()} function, the dots argument is used
     to specify additional control arguments for the \code{\link{nlme}{lme}} function,
     such as the \code{method} and \code{correlation} arguments.}
@@ -44,10 +44,13 @@ re(fixed =~ 1, random =~ NULL, ...)
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.re.smooth.spec}, \code{\link[mgcv]{s}}, \code{\link[nlme]{lme}
-}
+  \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.re.smooth.spec}}, \code{\link[mgcv]{s}}, \code{\link[nlme]{lme}}
+ }
 
-\examples{\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\examples{
+
+\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+
 ## orthdontic measurement data
 data("Orthodont", package = "nlme")
 
@@ -107,7 +110,8 @@ g <- gamlss2(f, data = Ovary)
 ## compare fitted values
 par(mfrow = n2mfrow(nlevels(Ovary$Mare)), mar = c(4, 4, 1, 1))
 
-for(j in levels(Ovary$Mare)) {
+for(j in levels(Ovary$Mare)) 
+  {
   ds <- subset(Ovary, Mare == j)
 
   plot(follicles ~ Time, data = ds)
@@ -120,7 +124,8 @@ for(j in levels(Ovary$Mare)) {
 
   f <- fitted(m)[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 2, lwd = 2)
-}
+ }
+ 
 }
 
 \keyword{utilities}

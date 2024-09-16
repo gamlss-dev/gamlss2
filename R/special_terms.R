@@ -300,11 +300,12 @@ re <- function(fixed = ~ 1, random = NULL, ...)
     ctr$method <- "ML"
 
   ## Put all information together.
-  st$control <- ctr
+  st$control <- ctr$control
   st$fixed <- fixed
   st$random <- random
   st$term <- c(all.vars(fixed), all.vars(random))
   st$label <- gsub(" ", "", deparse(call))
+  st$label <- gsub("re(", "re2(", st$label, fixed = TRUE)
   st$method <- ctr$method
   ctr$method <- NULL
   st$correlation <- ctr$correlation
@@ -319,7 +320,10 @@ re <- function(fixed = ~ 1, random = NULL, ...)
   }
 
   df <- model.frame(rm_v(fixed))
-  dr <- model.frame(rm_v(random))
+  if(inherits(random, "formula"))
+    dr <- model.frame(rm_v(random))
+  else
+    dr <- data.frame()
 
   if(nrow(df) < 1 && nrow(dr) > 0)
     st$data <- dr
@@ -347,7 +351,7 @@ special_fit.re <- function(x, z, w, control, ...)
   ## Estimate model.
   rem <- parse(text = paste0(
     'nlme::lme(fixed = .fnns, data = x$data, random = x$random, weights = varFixed(~weights_w),',
-    'method="', x$method, '",control=x$control,correlation=', x$correlation, ',keep.data=FALSE)'))
+    'method="', x$method, '",control=x$control,correlation=x$correlation,keep.data=FALSE)'))
 
   rval <- list("model" = eval(rem))
 

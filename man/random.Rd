@@ -1,32 +1,27 @@
 \name{re}
 \alias{re}
 
+
 \title{Random Effects}
 
 \description{
-  Random effects estimation using package \pkg{mgcv} model term constructors or
-  package \pkg{nlme} infrastructures.
+There are two ways of fitting a random effect within \code{gamlss2}. The first, using  \code{s()}, is for a simple random effect, that is, when only one factor is entered the model as a smoother. This method uses the function \code{s()} of the package \pkg{mgcv} with argument \code{bs = "re"}. For example, if \code{area} is factor with several levels, \code{s(area, bs = "re")} will sringh the levels of \code{area} towards their mean level. The second, more general way, allows to fit more complicated random effect models using the function \code{re()}. The function \code{re()} is an interface connecting \code{gamlss2} with the specialised package for random effects \pkg{nlme}.
+
+Here we document only the \code{re()} function only but we also give examples using \code{s(..., bs = "re")}. 
 }
 
 \usage{
-## Simple iid random effects with mgcv s().
-s(..., bs = "re")
-
-## Random effects constructor using lme().
-re(fixed =~ 1, random =~ NULL, ...)
+re(fixed =~ 1, random = NULL, ...)
 }
 
 \arguments{
-  \item{\dots}{For function \code{\link[mgcv]{s}}, the variables that should
-    be used for setting up the random effect. See \code{\link[mgcv]{smooth.construct.re.smooth.spec}}
-    for details and the examples below. For the \code{re()} function, the dots argument is used
+ 
+  \item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model. In most cases, this can also be included in the \code{\link{gamlss2}} parameter formula.}
+  \item{random}{A formula specifying the random effect part of the model,
+    as in the \code{\link{nlme}{lme()}} function.}
+ \item{\dots}{ For the \code{re()} function, the dots argument is used
     to specify additional control arguments for the \code{\link{nlme}{lme}} function,
     such as the \code{method} and \code{correlation} arguments.}
-  \item{bs}{Character, the smoothing basis to use. For random effects it must be set to \code{bs = "re"}, see \code{\link[mgcv]{s}} for more details.}
-  \item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model.
-    In most cases, this can also be included in the \code{\link{gamlss2}} parameter formula.}
-  \item{random}{A formula specifying the random effect part of the model,
-    as in the \code{\link{nlme}{lme}} function.}
 }
 
 \value{

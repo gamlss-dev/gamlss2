@@ -339,37 +339,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="random-effects">Random Effects</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Random effects estimation using package <span class="pkg">mgcv</span> model term constructors or package <span class="pkg">nlme</span> infrastructures.</p>
+<p>There are two ways of fitting a random effect within <code>gamlss2</code>. The first, using <code>s()</code>, is for a simple random effect, that is, when only one factor is entered the model as a smoother. This method uses the function <code>s()</code> of the package <span class="pkg">mgcv</span> with argument <code>bs = “re”</code>. For example, if <code>area</code> is factor with several levels, <code>s(area, bs = “re”)</code> will sringh the levels of <code>area</code> towards their mean level. The second, more general way, allows to fit more complicated random effect models using the function <code>re()</code>. The function <code>re()</code> is an interface connecting <code>gamlss2</code> with the specialised package for random effects <span class="pkg">nlme</span>.</p>
+<p>Here we document only the <code>re()</code> function only but we also give examples using <code>s(…, bs = “re”)</code>.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## Simple iid random effects with mgcv s().
-s(..., bs = "re")
-
-## Random effects constructor using lme().
-re(fixed =~ 1, random =~ NULL, ...)
+<pre><code class="language-R">re(fixed =~ 1, random = NULL, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
 <h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
 <table>
 <tbody><tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="...">…</code>
-</td>
-<td>
-For function <code>s</code>, the variables that should be used for setting up the random effect. See <code>smooth.construct.re.smooth.spec</code> for details and the examples below. For the <code>re()</code> function, the dots argument is used to specify additional control arguments for the <code>nlme{lme}</code> function, such as the <code>method</code> and <code>correlation</code> arguments.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="bs">bs</code>
-</td>
-<td>
-Character, the smoothing basis to use. For random effects it must be set to <code>bs = “re”</code>, see <code>s</code> for more details.
-</td>
-</tr>
-<tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
 <code id="fixed">fixed</code>
 </td>
@@ -382,7 +363,15 @@ A formula that specifies the fixed effects of the <code>nlme{lme}</code> model. 
 <code id="random">random</code>
 </td>
 <td>
-A formula specifying the random effect part of the model, as in the <code>nlme{lme}</code> function.
+A formula specifying the random effect part of the model, as in the <code>nlme{lme()}</code> function.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="...">…</code>
+</td>
+<td>
+For the <code>re()</code> function, the dots argument is used to specify additional control arguments for the <code>nlme{lme}</code> function, such as the <code>method</code> and <code>correlation</code> arguments.
 </td>
 </tr>
 </tbody></table>

@@ -25,9 +25,9 @@ log1(...)
 \details{
 The Kumaraswamy distribution is a continuous distribution defined on the interval (0, 1). The probability density function is
 
-\deqn{\displaystyle aby^{a - 1}(1 - y^a)^{b - 1}}
+\deqn{\displaystyle f(y; a, b) = aby^{a - 1}(1 - y^a)^{b - 1}}
 
-\eqn{y} is the response, \eqn{a} and \eqn{b} are non-negative parameters.
+\eqn{y \in (0, 1)} is the response, \eqn{a} and \eqn{b} are non-negative parameters.
 
 The \code{log1} link function is given by:
 

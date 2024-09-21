@@ -39,7 +39,8 @@ This is the default, since the mode of the distribution is only defined for \eqn
 \value{
   The family returns an object of class \code{"gamlss2.family"}.
 
-  The link function an link specification object of class \code{"link-glm"}.
+  Function \code{log1()} returns a link specification
+  object of class \code{"link-glm"}.
 }
 
 \references{

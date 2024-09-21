@@ -105,8 +105,7 @@ g <- gamlss2(f, data = Ovary)
 ## compare fitted values
 par(mfrow = n2mfrow(nlevels(Ovary$Mare)), mar = c(4, 4, 1, 1))
 
-for(j in levels(Ovary$Mare)) 
-  {
+for(j in levels(Ovary$Mare)) {
   ds <- subset(Ovary, Mare == j)
 
   plot(follicles ~ Time, data = ds)
@@ -120,7 +119,6 @@ for(j in levels(Ovary$Mare))
   f <- fitted(m)[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 2, lwd = 2)
  }
- 
 }
 
 \keyword{utilities}

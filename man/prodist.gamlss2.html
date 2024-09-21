@@ -409,12 +409,10 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6976 eps = 0.000000     </code></p
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">prodist</span>(m, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                                                   1 
-"GAMLSS NO distribution (mu = 23.04, sigma = 10.06)" 
-                                                   2 
-"GAMLSS NO distribution (mu = 59.04, sigma = 18.51)" 
-                                                   3 
-"GAMLSS NO distribution (mu = 96.35, sigma = 33.95)" </code></pre>
+<pre><code>                                     1                                      2 
+"GAMLSS NO(mu = 23.04, sigma = 10.06)" "GAMLSS NO(mu = 59.04, sigma = 18.51)" 
+                                     3 
+"GAMLSS NO(mu = 96.35, sigma = 33.95)" </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## obtain quantiles (works the same for any distribution object 'd' !)</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -461,10 +459,10 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6976 eps = 0.000000     </code></p
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate random numbers</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1       r_2      r_3      r_4      r_5
-1 22.86599  18.85065 14.59564 29.63346 27.07558
-2 47.54988  89.13364 67.52875 66.72233 71.08592
-3 40.67966 124.19922 74.78712 70.22604 95.13761</code></pre>
+<pre><code>        r_1       r_2       r_3      r_4      r_5
+1  15.51682  18.28521  16.77376 29.91433 29.73379
+2  37.68816  55.31626  61.50554 61.99842 56.06180
+3 136.77810 118.55731 156.54109 95.46841 95.38618</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## density and distribution</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -491,8 +489,8 @@ GAMLSS-RS iteration  2: Global Deviance = 355.3922 eps = 0.000000     </code></p
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">prodist</span>(m2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">difference =</span> <span class="dv">0</span>))</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(d2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                                    1 
-"GAMLSS PO distribution (mu = 1.237)" </code></pre>
+<pre><code>                      1 
+"GAMLSS PO(mu = 1.237)" </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d2, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">

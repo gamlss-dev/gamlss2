@@ -1,0 +1,85 @@
+\name{Kumaraswamy}
+\alias{Kumaraswamy}
+\alias{log1}
+
+\title{Kumaraswamy Distribution}
+
+\description{
+  This function implements the two-parameter Kumaraswamy family for responses in (0, 1).
+}
+
+\usage{
+## The Kumaraswamy family.
+Kumaraswamy(a.link = log1, b.link = log1, ...)
+
+## The exp(x) + 1 link specification.
+log1(...)
+}
+
+\arguments{
+  \item{a.link}{Character or function, the link function to be used for parameter \code{a}.}
+  \item{b.link}{Character or function, the link function to be used for parameter \code{b}.}
+  \item{\dots}{Not used.}
+}
+
+\details{
+The Kumaraswamy distribution is a continuous distribution defined on the interval (0, 1). The probability density function is
+
+\deqn{\displaystyle aby^{a - 1}(1 - y^a)^{b - 1}}
+
+and \eqn{a} and \eqn{b} are non-negative parameters.
+
+The \code{log1} link function is given by:
+
+\deqn{\displaystyle \exp(x) + 1}
+
+This is the default, since the mode of the distribution is only defined for \eqn{a \geq 1}, \eqn{b \geq 1}.
+}
+
+\value{
+  The family returns an object of class \code{"gamlss2.family"}.
+
+  The link function an link specification object of class \code{"link-glm"}.
+}
+
+\references{
+Kumaraswamy P (1980). \dQuote{A Generalized Probability Density Function for Double-Bounded Random Processes.}
+  \emph{Journal of Hydrology}, 46(1), 79--88.
+  \doi{https://doi.org/10.1016/0022-1694(80)90036-0}
+}
+
+\seealso{
+  \code{\link{gamlss2.family}}, \code{\link{gamlss2}}
+}
+
+\examples{## create family object with
+## different link specifications
+fam <- Kumaraswamy(a.link = log1, b.link = "log")
+
+## simulate data
+set.seed(123)
+n <- 1000
+d <- data.frame("x" = runif(n, -pi, pi))
+
+## true parameters
+par <- data.frame(
+  "a" = exp(1.2 + sin(d$x)) + 1,
+  "b" = 1
+)
+
+## sample response
+d$y <- fam$r(1, par)
+
+## estimate model using the Kumaraswamy family
+b <- gamlss2(y ~ s(x), data = d, family = fam)
+
+## plot estimated effect
+plot(b)
+
+## plot residual diagnostics
+plot(b, which = "resid")
+}
+
+\keyword{regression}
+\keyword{models}
+\keyword{distribution}

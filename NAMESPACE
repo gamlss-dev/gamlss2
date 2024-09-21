@@ -42,7 +42,9 @@ export(
   "stepwise",
   "step_gamlss2",
   "new_formula",
-  "softplus"
+  "softplus",
+  "log1",
+  "Kumaraswamy"
 )
 
 S3method(gamlss2, formula)

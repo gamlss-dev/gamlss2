@@ -27,7 +27,7 @@ The Kumaraswamy distribution is a continuous distribution defined on the interva
 
 \deqn{\displaystyle aby^{a - 1}(1 - y^a)^{b - 1}}
 
-and \eqn{a} and \eqn{b} are non-negative parameters.
+\eqn{y} is the response, \eqn{a} and \eqn{b} are non-negative parameters.
 
 The \code{log1} link function is given by:
 

@@ -171,9 +171,44 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       etastart[[j]] <- eta[[j]]
   }
 
-  ## For printing.
-  if(control$flush) {
-    control$flush <- interactive()
+  ## Null deviance.
+  dev0 <- -2 * family$loglik(y, family$map2par(eta))
+
+  ## Estimate intercept only model first.
+  if(isTRUE(control$nullmodel) & length(xterms)) {
+    beta <- ieta <- list()
+    for(j in np) {
+      beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
+      ieta[[j]] <- rep(beta[[j]], n)
+    }
+    beta <- unlist(beta)
+
+    if(!any(is.na(beta))) {
+      lli <- family$loglik(y, family$map2par(ieta))
+
+      fn_ll <- function(par) {
+        for(j in np)
+          ieta[[j]] <- rep(par[j], n)
+        ll <- family$loglik(y, family$map2par(ieta)) - 1e-05 * sum(par^2)
+        return(-ll)
+      }
+
+      opt <- try(nlminb(beta, objective = fn_ll), silent = TRUE)
+
+      if(!inherits(opt, "try-error")) {
+        if(-opt$objective > lli) {
+          beta <- opt$par
+          dev0 <- 2 * opt$objective
+          if(isTRUE(control$initialize) & (missing(start) | is.null(start))) {
+            for(j in np) {
+              fit[[j]]$coefficients["(Intercept)"] <- beta[j]
+              fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
+              eta[[j]] <- fit[[j]]$fitted.values
+            }
+          }
+        }
+      }
+    }
   }
 
   ## Start MCMC.
@@ -183,6 +218,21 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         cat("Start sampling ...\n")
     }
   }
+
+  ## Priors.
+  priors <- control$priors
+
+  if(is.null(priors)) {
+    priors$p <- function(parameters) {
+      sum(dnorm(parameters, sd = 1000, log = TRUE))
+    }
+  }
+
+  ## Start time etc.
+  ptm <- proc.time()
+  step <- 20
+  nstep <- step
+  step <- floor(n.iter / step)
   
   for(iter in 1:n.iter) {
     for(j in np) {
@@ -190,21 +240,181 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       if(control$fixed[[j]])
         stop("fixed parameters not supported yet!")
 
-      ## Outer loop working response and weights.
-      peta <- if(iter > 1L) {
-        family$map2par(eta)
-      } else {
-        family$map2par(etastart)
-      }
-      score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-      hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+      ## Sampling linear part.
+      if(length(xterms[[j]])) {
+        ## Get parameters.
+        peta <- family$map2par(eta)
 
-      z <- if(iter[1L] > 0L) {
-        eta[[j]] + 1 / hess * score
-      } else {
-        etastart[[j]] + 1 / hess * score
+        ## Derivatives.
+        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
+        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+
+        ## Working response.
+        z <- eta[[j]] + 1 / hess * score
+
+        ## Compute partial residuals.
+        eta2 <- eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
+        e <- z - eta[[j]]
+
+        ## Weights.
+        wj <- if(is.null(weights)) hess else hess * weights
+
+        ## Compute old log-likelihood.
+        pibeta <- family$loglik(y, peta)
+
+        ## Old parameters.
+        b0 <- fit[[j]]$coefficients
+
+        ## Log-prior.
+        p1 <- priors$p(b0)
+
+        ## Compute mean and precision.
+        XWX <- crossprod(x[, xterms[[j]], drop = FALSE] * wj, x[, xterms[[j]], drop = FALSE])
+        P <- chol2inv(chol(XWX))
+        M <- P %*% crossprod(x[, xterms[[j]], drop = FALSE] * wj, e)
+
+        ## Sample new parameters.
+        b1 <- drop(rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
+
+        ## Log-priors.
+        p2 <- priors$p(b1)
+        qbetaprop <- dmvnorm(b1, mean = M, sigma = P, log = TRUE)
+
+        ## New fitted values.        
+        fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% b1)
+
+        ## Set up new predictor.
+        eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
+
+        ## New parameters.
+        peta <- family$map2par(eta)
+
+        ## Compute new log likelihood.
+        pibetaprop <- family$loglik(y, peta)
+
+        ## Compute new score and hess.
+        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
+        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+        ## Weights.
+        wj <- if(is.null(weights)) hess else hess * weights
+
+        ## New working observations.
+        z <- eta[[j]] + 1 / hess * score
+
+        ## New residuals.
+        e <- z - eta2
+
+        ## Compute mean and precision.
+        XWX <- crossprod(x[, xterms[[j]], drop = FALSE] * wj, x[, xterms[[j]], drop = FALSE])
+        P <- chol2inv(chol(XWX))
+        M <- P %*% crossprod(x[, xterms[[j]], drop = FALSE] * wj, e)
+
+        ## Log-priors.
+        qbeta <- dmvnorm(b0, mean = M, sigma = P, log = TRUE)
+
+        ## Acceptance probablity.
+        alpha <- (pibetaprop + qbeta + p2) - (pibeta + qbetaprop + p1)
+
+        ## Accept or reject?
+        if(runif(1L) <= exp(alpha)) {
+          fit[[j]]$coefficients <- b1
+        } else {
+          fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% b0)
+          eta[[j]] <- eta2 + fit[[j]]$fitted.values
+        }
+
+        ## Save.
+        if(iter %in% iterthin) {
+          js <- which(iterthin == iter)
+          samples[[j]]$p[js, ] <- fit[[j]]$coefficients
+        }
+
+cat("\n-----------\n")
+cat("par", j, "\n")
+cat("pibetaprop", pibetaprop, "\n")
+cat("qbeta", qbeta, "\n")
+cat("p2", p2, "\n")
+cat("pibeta", pibeta, "\n")
+cat("qbetaprop", qbetaprop, "\n")
+cat("p1", p1, "\n")
+cat("alpha", exp(alpha), "\n")
+
       }
     }
+
+    if(control$trace) {
+      barfun(ptm, n.iter, iter, step, nstep)
+    }
   }
+
+  if(control$trace && interactive())
+    cat("\n")
+
+  ## Get mean coefficients.
+  coef_lin <- eta <- list()
+  for(j in np) {
+    eta[[j]] <- rep(0, n)
+    if(!is.null(samples[[j]]$p)) {
+      coef_lin[[j]] <- apply(samples[[j]]$p, 2, mean, na.rm = TRUE)
+      fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% coef_lin[[j]])
+      eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
+    }
+  }
+
+  ll <- family$loglik(y, family$map2par(eta))
+
+  rval <- list(
+    "fitted.values" = as.data.frame(eta),
+    "fitted.specials" = sfit,
+    "fitted.linear" = fit,
+    "coefficients" = coef_lin,
+    "iterations" = iter,
+    "logLik" = ll, "control" = control,
+    "nobs" = length(eta[[1L]]),
+    "deviance" = -2 * ll,
+    "null.deviance" = dev0,
+    "dev.reduction" = abs((dev0 - (-2 * ll)) / dev0),
+    "nullmodel" = control$nullmodel,
+    "samples" = samples
+  )
+
+  class(rval) <- "gamlss2"
+
+  return(rval)
 }
 
+## Print info during sampling.
+barfun <- function(ptm, n.iter, i, step, nstep, start = TRUE)
+{
+  ia <- interactive()
+  if(i == 10 & start) {
+    cat(if(ia) "\r" else "\n")
+    elapsed <- c(proc.time() - ptm)[3]
+    rt <- elapsed / i * (n.iter - i)
+    rt <- if(rt > 60) {
+      paste(formatC(format(round(rt / 60, 2), nsmall = 2), width = 5), "min", sep = "")
+    } else paste(formatC(format(round(rt, 2), nsmall = 2), width = 5), "sec", sep = "")
+    cat("|", rep(" ", nstep), "|   0% ", rt, sep = "")
+    if(.Platform$OS.type != "unix" & ia) flush.console()
+  }
+  istep <- i %% step
+  if(is.na(istep))
+    istep <- 0
+  if(istep == 0) {
+    cat(if(ia) "\r" else "\n")
+    p <- i / n.iter
+    p <- paste("|", paste(rep("*", round(nstep * p)), collapse = ""),
+      paste(rep(" ", round(nstep * (1 - p))), collapse = ""), "| ",
+      formatC(round(p, 2) * 100, width = 3), "%", sep = "")
+    elapsed <- c(proc.time() - ptm)[3]
+    rt <- elapsed / i * (n.iter - i)
+    rt <- if(rt > 60) {
+      paste(formatC(format(round(rt / 60, 2), nsmall = 2), width = 5), "min", sep = "")
+    } else paste(formatC(format(round(rt, 2), nsmall = 2), width = 5), "sec", sep = "")
+    elapsed <- if(elapsed > 60) {
+      paste(formatC(format(round(elapsed / 60, 2), nsmall = 2), width = 5), "min", sep = "")
+    } else paste(formatC(format(round(elapsed, 2), nsmall = 2), width = 5), "sec", sep = "")
+    cat(p, rt, elapsed, sep = " ")
+    if(.Platform$OS.type != "unix" & ia) flush.console()
+  }
+}

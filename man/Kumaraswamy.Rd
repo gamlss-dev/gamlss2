@@ -12,13 +12,14 @@
 ## The Kumaraswamy family.
 Kumaraswamy(a.link = log1, b.link = log1, ...)
 
-## The exp(x) + 1 link specification.
-log1(...)
+## The exp(x) + shift link specification.
+log1(shift = 1)
 }
 
 \arguments{
   \item{a.link}{Character or function, the link function to be used for parameter \code{a}.}
   \item{b.link}{Character or function, the link function to be used for parameter \code{b}.}
+  \item{shift}{Numeric, the shift parameter to be used for the link.}
   \item{\dots}{Not used.}
 }
 

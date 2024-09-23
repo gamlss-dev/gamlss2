@@ -1099,9 +1099,9 @@ ologit4 <- function(...) {
 ##}
 
 ## Shifted log-link.
-log1 <- function(...) {
-  linkfun <- function(mu) log(mu - 1)
-  linkinv <- function(eta) exp(eta) + 1
+log1 <- function(shift = 1) {
+  linkfun <- function(mu) log(mu - shift)
+  linkinv <- function(eta) exp(eta) + shift
   mu.eta <- function(eta) exp(eta)
   valideta <- function(eta) TRUE
   
@@ -1111,7 +1111,7 @@ log1 <- function(...) {
       linkinv = linkinv,
       mu.eta = mu.eta,
       valideta = valideta,
-      name = "exp(x) + 1"
+      name = paste0("exp(x) +", shift)
     ),
     class = "link-glm"
   )

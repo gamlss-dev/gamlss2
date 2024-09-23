@@ -6,18 +6,22 @@ predict.gamlss2 <- function(object,
   ## FIXME: se.fit, terms ...
   samples <- NULL
   if(se.fit || !is.null(list(...)$FUN)) {
-    R <- list(...)$R
-    if(is.null(R))
-      R <- 200L
-    seed <- list(...)$seed
-    if(is.null(seed))
-      seed <- 123
-    if(is.logical(seed)) {
-      seed <- if(!seed) NULL else seed <- 123
+    if(is.null(object$samples)) {
+      R <- list(...)$R
+      if(is.null(R))
+        R <- 200L
+      seed <- list(...)$seed
+      if(is.null(seed))
+        seed <- 123
+      if(is.logical(seed)) {
+        seed <- if(!seed) NULL else seed <- 123
+      }
+      if(!is.null(seed))
+        set.seed(seed)
+      samples <- sampling(object, R = R, full = TRUE)
+    } else {
+      samples <- object$samples
     }
-    if(!is.null(seed))
-      set.seed(seed)
-    samples <- sampling(object, R = R, full = TRUE)
   }
 
   FUN <- list(...)$FUN

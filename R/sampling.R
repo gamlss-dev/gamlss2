@@ -245,20 +245,6 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Get parameters.
         peta <- family$map2par(eta)
 
-        ## Derivatives.
-        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
-
-        ## Working response.
-        z <- eta[[j]] + 1 / hess * score
-
-        ## Compute partial residuals.
-        eta2 <- eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-        e <- z - eta[[j]]
-
-        ## Weights.
-        wj <- if(is.null(weights)) hess else hess * weights
-
         ## Compute old log-likelihood.
         pibeta <- family$loglik(y, peta)
 
@@ -268,10 +254,25 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Log-prior.
         p1 <- priors$p(b0)
 
+        ## Derivatives.
+        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
+        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+
+        ## Working response.
+        z <- eta[[j]] + 1 / hess * score
+
+        ## Compute residuals.
+        eta2 <- eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
+        e <- z - eta2
+
+        ## Weights.
+        wj <- if(is.null(weights)) hess else hess * weights
+
         ## Compute mean and precision.
         XWX <- crossprod(x[, xterms[[j]], drop = FALSE] * wj, x[, xterms[[j]], drop = FALSE])
+        XWX <- XWX + diag(1e-08, ncol(XWX))
         P <- chol2inv(chol(XWX))
-        M <- P %*% crossprod(x[, xterms[[j]], drop = FALSE] * wj, e)
+        M <- drop(P %*% crossprod(x[, xterms[[j]], drop = FALSE], wj * e))
 
         ## Sample new parameters.
         b1 <- drop(rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
@@ -281,10 +282,10 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         qbetaprop <- dmvnorm(b1, mean = M, sigma = P, log = TRUE)
 
         ## New fitted values.        
-        fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% b1)
+        fj <- drop(x[, xterms[[j]], drop = FALSE] %*% b1)
 
         ## Set up new predictor.
-        eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
+        eta[[j]] <- eta[[j]] + fj
 
         ## New parameters.
         peta <- family$map2par(eta)
@@ -295,6 +296,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Compute new score and hess.
         score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
         hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+
         ## Weights.
         wj <- if(is.null(weights)) hess else hess * weights
 
@@ -306,8 +308,9 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## Compute mean and precision.
         XWX <- crossprod(x[, xterms[[j]], drop = FALSE] * wj, x[, xterms[[j]], drop = FALSE])
+        XWX <- XWX + diag(1e-08, ncol(XWX))
         P <- chol2inv(chol(XWX))
-        M <- P %*% crossprod(x[, xterms[[j]], drop = FALSE] * wj, e)
+        M <- drop(P %*% crossprod(x[, xterms[[j]], drop = FALSE], wj * e))
 
         ## Log-priors.
         qbeta <- dmvnorm(b0, mean = M, sigma = P, log = TRUE)
@@ -318,9 +321,9 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Accept or reject?
         if(runif(1L) <= exp(alpha)) {
           fit[[j]]$coefficients <- b1
+          fit[[j]]$fitted.values <- fj
         } else {
-          fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% b0)
-          eta[[j]] <- eta2 + fit[[j]]$fitted.values
+          eta[[j]] <- eta[[j]] - fj + fit[[j]]$fitted.values
         }
 
         ## Save.
@@ -329,15 +332,15 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           samples[[j]]$p[js, ] <- fit[[j]]$coefficients
         }
 
-cat("\n-----------\n")
-cat("par", j, "\n")
-cat("pibetaprop", pibetaprop, "\n")
-cat("qbeta", qbeta, "\n")
-cat("p2", p2, "\n")
-cat("pibeta", pibeta, "\n")
-cat("qbetaprop", qbetaprop, "\n")
-cat("p1", p1, "\n")
-cat("alpha", exp(alpha), "\n")
+#cat("\n-----------\n")
+#cat("par", j, "\n")
+#cat("pibetaprop", pibetaprop, "\n")
+#cat("qbeta", qbeta, "\n")
+#cat("p2", p2, "\n")
+#cat("pibeta", pibeta, "\n")
+#cat("qbetaprop", qbetaprop, "\n")
+#cat("p1", p1, "\n")
+#cat("alpha", exp(alpha), "\n")
 
       }
     }
@@ -356,10 +359,15 @@ cat("alpha", exp(alpha), "\n")
     eta[[j]] <- rep(0, n)
     if(!is.null(samples[[j]]$p)) {
       coef_lin[[j]] <- apply(samples[[j]]$p, 2, mean, na.rm = TRUE)
+      colnames(samples[[j]]$p) <- paste0(j, ".p.", colnames(samples[[j]]$p))
       fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% coef_lin[[j]])
       eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
     }
+
+    samples[[j]] <- do.call("cbind", samples[[j]])
   }
+
+  samples <- do.call("cbind", samples)
 
   ll <- family$loglik(y, family$map2par(eta))
 
@@ -418,3 +426,30 @@ barfun <- function(ptm, n.iter, i, step, nstep, start = TRUE)
     if(.Platform$OS.type != "unix" & ia) flush.console()
   }
 }
+
+if(FALSE) {
+  set.seed(123)
+
+  n <- 1000
+
+  d <- data.frame("x" = seq(-pi, pi, length = n))
+  d$y <- 1.2 + sin(d$x) + rnorm(n, sd = exp(-1 + cos(d$x)))
+
+  m <- gamlss2(y ~ poly(x,3) | poly(x,3), data = d, optimizer = RS)
+
+  cm <- coef(m)
+
+  b <- gamlss2(y ~ poly(x,3) | poly(x,3), data = d, optimizer = BS, start = cm)
+
+  p <- predict(b, FUN = sd)
+
+  fit <- NULL
+  for(j in c(0.025, 0.5, 0.975))
+    fit <- cbind(fit, family(b)$q(j, p))
+
+  par(mfrow = c(1, 2))
+  plot(d)
+  matplot(d$x, fit, type = "l", lty = 1, col = 4, lwd = 2, add = TRUE)
+  matplot(b$samples, type = "l", lty = 1)
+}
+

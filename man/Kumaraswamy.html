@@ -382,8 +382,8 @@ window.Quarto = {
 <pre><code class="language-R">## The Kumaraswamy family.
 Kumaraswamy(a.link = log1, b.link = log1, ...)
 
-## The exp(x) + 1 link specification.
-log1(...)
+## The exp(x) + shift link specification.
+log1(shift = 1)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -403,6 +403,14 @@ Character or function, the link function to be used for parameter <code>a</code>
 </td>
 <td>
 Character or function, the link function to be used for parameter <code>b</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="shift">shift</code>
+</td>
+<td>
+Numeric, the shift parameter to be used for the link.
 </td>
 </tr>
 <tr>

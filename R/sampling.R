@@ -386,7 +386,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     "samples" = samples
   )
 
-  class(rval) <- "gamlss2"
+  class(rval) <- c("gamlss2.mcmc", "gamlss2")
 
   return(rval)
 }
@@ -435,13 +435,13 @@ if(FALSE) {
   d <- data.frame("x" = seq(-pi, pi, length = n))
   d$y <- 1.2 + sin(d$x) + rnorm(n, sd = exp(-1 + cos(d$x)))
 
-  m <- gamlss2(y ~ poly(x,3) | poly(x,3), data = d, optimizer = RS)
+  m <- gamlss2(y ~ poly(x,10) | poly(x,10), data = d, optimizer = RS)
 
   cm <- coef(m)
 
-  b <- gamlss2(y ~ poly(x,3) | poly(x,3), data = d, optimizer = BS, start = cm)
+  b <- gamlss2(y ~ poly(x,10) | poly(x,10), data = d, optimizer = BS, start = cm)
 
-  p <- predict(b, FUN = sd)
+  p <- predict(b, FUN = median)
 
   fit <- NULL
   for(j in c(0.025, 0.5, 0.975))

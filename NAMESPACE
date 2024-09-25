@@ -9,7 +9,7 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "median", "pchisq",
-  "na.pass", "reformulate")
+  "na.pass", "reformulate", "cov", "rexp", "rgamma")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace", "capture.output")
 
@@ -21,6 +21,8 @@ importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "points", "legend")
 
 importFrom("parallel", "mclapply")
+
+importFrom("mvtnorm", "dmvnorm", "rmvnorm")
 
 export(
   "fake_formula",

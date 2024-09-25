@@ -293,11 +293,11 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         M <- drop(P %*% crossprod(x[, xterms[[j]], drop = FALSE], wj * e))
 
         ## Sample new parameters.
-        b1 <- drop(rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
+        b1 <- drop(mvtnorm::rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
 
         ## Log-priors.
         p2 <- priors$p(b1)
-        qbetaprop <- dmvnorm(b1, mean = M, sigma = P, log = TRUE)
+        qbetaprop <- mvtnorm::dmvnorm(b1, mean = M, sigma = P, log = TRUE)
 
         ## New fitted values.        
         fj <- drop(x[, xterms[[j]], drop = FALSE] %*% b1)
@@ -331,7 +331,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         M <- drop(P %*% crossprod(x[, xterms[[j]], drop = FALSE], wj * e))
 
         ## Log-priors.
-        qbeta <- dmvnorm(b0, mean = M, sigma = P, log = TRUE)
+        qbeta <- mvtnorm::dmvnorm(b0, mean = M, sigma = P, log = TRUE)
 
         ## Acceptance probablity.
         alpha <- (pibetaprop + qbeta + p2) - (pibeta + qbetaprop + p1)
@@ -610,11 +610,11 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   edf <- sum((x$X %*% P) * x$X)
 
   ## Sample new parameters.
-  b1 <- drop(rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
+  b1 <- drop(mvtnorm::rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
 
   ## Log-priors.
   p2 <- x$prior(c(b1, tau))
-  qbetaprop <- dmvnorm(b1, mean = M, sigma = P, log = TRUE)
+  qbetaprop <- mvtnorm::dmvnorm(b1, mean = M, sigma = P, log = TRUE)
 
   ## New fitted values.        
   fj <- drop(x$X %*% b1)
@@ -651,7 +651,7 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   M <- drop(P %*% crossprod(x$X, wj * e))
 
   ## Log-priors.
-  qbeta <- dmvnorm(b0, mean = M, sigma = P, log = TRUE)
+  qbeta <- mvtnorm::dmvnorm(b0, mean = M, sigma = P, log = TRUE)
 
   ## Acceptance probablity.
   alpha <- (pibetaprop + qbeta + p2) - (pibeta + qbetaprop + p1)

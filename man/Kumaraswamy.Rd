@@ -30,7 +30,7 @@ The Kumaraswamy distribution is a continuous distribution defined on the interva
 
 \eqn{y \in (0, 1)} is the response, \eqn{a} and \eqn{b} are non-negative parameters.
 
-The \code{log1} link function is given by:
+The \code{shiftlog} link function is given by:
 
 \deqn{\displaystyle \exp(x) + 1}
 
@@ -40,7 +40,7 @@ This is the default, since the mode of the distribution is only defined for \eqn
 \value{
   The family returns an object of class \code{"gamlss2.family"}.
 
-  Function \code{log1()} returns a link specification
+  Function \code{shiftlog()} returns a link specification
   object of class \code{"link-glm"}.
 }
 

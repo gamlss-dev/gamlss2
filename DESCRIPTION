@@ -18,8 +18,8 @@ License: GPL-2 | GPL-3
 URL: https://gamlss-dev.github.io/gamlss2/
 BugReports: https://github.com/gamlss-dev/gamlss2/issues
 Depends: R (>= 4.1.0), gamlss.dist, mgcv
-Imports: parallel, Formula
-Suggests: gamlss, gamlss.data, colorspace, knitr, mvtnorm, scoringRules, partykit, Matrix, nnet, lattice, rpart, distributions3, nlme
+Imports: parallel, Formula, mvtnorm
+Suggests: gamlss, gamlss.data, colorspace, knitr, scoringRules, partykit, Matrix, nnet, lattice, rpart, distributions3, nlme
 LazyLoad: yes
 VignetteBuilder: knitr
 

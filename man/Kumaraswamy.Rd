@@ -56,7 +56,7 @@ Kumaraswamy P (1980). \dQuote{A Generalized Probability Density Function for Dou
 
 \examples{## create family object with
 ## different link specifications
-fam <- Kumaraswamy(a.link = log1, b.link = "log")
+fam <- Kumaraswamy(a.link = shiftlog, b.link = "log")
 
 ## simulate data
 set.seed(123)

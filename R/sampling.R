@@ -149,13 +149,16 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         for(i in sterms[[j]]) {
           if(!inherits(specials[[i]], "mgcv.smooth"))
             stop("only mgcv smooth terms are allowed!")
-          sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n), "edf" = 0.0, "selected" = FALSE)
+          sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n), "edf" = 0.0,
+            "coefficients" = rep(0.0, ncol(specials[[i]]$X), "tau" = rep(0.001, length(specials[[i]]$S))))
           samples[[j]]$s[[i]] <- matrix(NA, nrow = nsave,
-            ncol = ncol(specials[[i]]$X) + length(specials[[i]]$S) + 1L)
+            ncol = ncol(specials[[i]]$X) + length(specials[[i]]$S) + 2L)
           if(!is.null(cstart)) {
             sj <- grep(paste0(j, ".s.", i), names(cstart), fixed = TRUE, value = TRUE)
-            if(length(sj)) {
-              sfit[[j]][[i]]$fitted.values <- drop(specials[[i]]$X %*% cstart[sj])
+            sjb <- sj[!grepl(".lambda", sj, fixed = TRUE)]
+            if(length(sjb)) {
+              sfit[[j]][[i]]$fitted.values <- drop(specials[[i]]$X %*% cstart[sjb])
+              sfit[[j]][[i]]$coefficients <- cstart[sjb]
               if(control$binning) {
                 sfit[[j]][[i]]$fitted.values <- sfit[[j]][[i]]$fitted.values[specials[[i]]$binning$match.index]
               }
@@ -163,7 +166,22 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               eta[[j]] <- eta[[j]] + sfit[[j]][[i]]$fitted.values
               nes[[j]] <- TRUE
             }
+            sjl <- sj[grepl(".lambda", sj, fixed = TRUE)]
+            if(length(sjb)) {
+              sfit[[j]][[i]]$tau <- 1 / cstart[sjl]
+              names(sfit[[j]][[i]]$tau) <- gsub("lambda", "tau", names(sfit[[j]][[i]]$tau))
+            } else {
+              sjt <- sj[grepl(".tau", sj, fixed = TRUE)]
+              if(length(sjb)) {
+                sfit[[j]][[i]]$tau <- cstart[sjt]
+                names(sfit[[j]][[i]]$tau) <- gsub("lambda", "tau", names(sfit[[j]][[i]]$tau))
+              }
+            }
           }
+
+          ## Assign a prior.
+          if(is.null(specials[[i]]$prior))
+            specials[[i]]$prior <- prior(specials[[i]])
         }
       }
     }
@@ -343,6 +361,37 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 #cat("alpha", exp(alpha), "\n")
 
       }
+
+      ## Sample specials part.
+      if(length(sterms[[j]])) {
+        for(k in sterms[[j]]) {
+          prop <- propose(x = specials[[k]], y = y, family = family,
+            eta = eta, fitted = sfit[[j]][[k]], parameter = j,
+            weights = weights, control = control)
+
+          ## Set new state.
+          if(runif(1L) <= prop$alpha) {
+            eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values + prop$fitted.values
+            sfit[[j]][[k]]$fitted.values <- prop$fitted.values
+            sfit[[j]][[k]]$coefficients <- prop$coefficients
+            sfit[[j]][[k]]$tau <- prop$tau
+            sfit[[j]][[k]]$edf <- prop$edf
+            sfit[[j]][[k]]$alpha <- prop$alpha
+            samples[[j]]$s[[k]][]
+          }
+
+          ## Save.
+          if(iter %in% iterthin) {
+            js <- which(iterthin == iter)
+            samples[[j]]$s[[k]][js, ] <- c(
+              sfit[[j]][[k]]$coefficients,
+              sfit[[j]][[k]]$tau, 
+              sfit[[j]][[k]]$edf,
+              if(is.null(sfit[[j]][[k]]$alpha)) 0 else sfit[[j]][[k]]$alpha
+            )
+          }
+        }
+      }
     }
 
     if(control$trace) {
@@ -357,6 +406,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   coef_lin <- eta <- list()
   for(j in np) {
     eta[[j]] <- rep(0, n)
+
     if(!is.null(samples[[j]]$p)) {
       coef_lin[[j]] <- apply(samples[[j]]$p, 2, mean, na.rm = TRUE)
       colnames(samples[[j]]$p) <- paste0(j, ".p.", colnames(samples[[j]]$p))
@@ -364,7 +414,34 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
     }
 
-    samples[[j]] <- do.call("cbind", samples[[j]])
+    if(!is.null(samples[[j]]$s)) {
+      for(k in names(samples[[j]]$s)) {
+        nc <- ncol(specials[[k]]$X)
+
+        colnames(samples[[j]]$s[[k]]) <- c(
+          paste0(j, ".s.", k, ".", 1:nc),
+          paste0(j, ".s.", k, ".lambda", 1:length(specials[[k]]$S)),
+          paste0(j, ".s.", k, ".edf"),
+          paste0(j, ".s.", k, ".alpha")
+        )
+
+        cm <- apply(samples[[j]]$s[[k]][, 1:nc, drop = FALSE], 2, mean)
+        sfit[[j]][[k]]$fitted.values <- drop(specials[[k]]$X %*% cm)
+        lj <- grep(".lambda", colnames(samples[[j]]$s[[k]]))
+        sfit[[j]][[k]]$lambda <- apply(samples[[j]]$s[[k]][, lj, drop = FALSE], 2, mean)
+        lj <- grep(".edf", colnames(samples[[j]]$s[[k]]))
+        sfit[[j]][[k]]$edf <- mean(samples[[j]]$s[[k]][, lj])
+        lj <- grep(".alpha", colnames(samples[[j]]$s[[k]]))
+        sfit[[j]][[k]]$alpha <- mean(samples[[j]]$s[[k]][, lj])
+        sfit[[j]][[k]]$vcov <- cov(samples[[j]]$s[[k]][, 1:nc, drop = FALSE])
+
+        eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
+      }
+
+      samples[[j]] <- cbind(samples[[j]]$p, do.call("cbind", samples[[j]]$s))
+    } else {
+      samples[[j]] <- do.call("cbind", samples[[j]])
+    }
   }
 
   samples <- do.call("cbind", samples)
@@ -427,6 +504,262 @@ barfun <- function(ptm, n.iter, i, step, nstep, start = TRUE)
   }
 }
 
+## Generic log-prior function.
+prior <- function(x, ...) {
+  UseMethod("prior")
+}
+
+## Log-prior for mgcv smooth terms.
+prior.mgcv.smooth <- function(x, ...)
+{
+  function(parameters) {
+    i <- grep(".tau", names(parameters), fixed = TRUE)
+
+    tau <- parameters[i]
+    gamma <- parameters[-i]
+
+    a <- b <- 0.0001
+    igs <- log((b^a)) - log(gamma(a))
+    var_prior_fun <- function(tau) {
+      igs + (-a - 1) * log(tau) - b/tau
+    }
+
+    ld <- 0
+    P <- 0
+
+    for(j in seq_along(tau)) {
+      P <- P + 1/tau[j] * x$S[[j]]
+      ld <- ld + var_prior_fun(tau[j])
+    }
+
+    dP <- determinant(P, logarithm = TRUE)
+    dP <- as.numeric(dP$modulus) * as.numeric(dP$sign)
+    lp <- 0.5 * dP - 0.5 * (crossprod(gamma, P) %*% gamma) + ld
+
+    return(lp[1L])
+  }
+}
+
+## Generic propose function.
+propose <- function(x, y, family, eta, fitted, parameter, weights = NULL, control = NULL)
+{
+  UseMethod("propose")
+}
+
+## Propose for mgcv smooth terms.
+propose.mgcv.smooth <- function(x, y, family, eta, fitted,
+  parameter, weights = NULL, control = NULL)
+{
+  ## Get parameters.
+  peta <- family$map2par(eta)
+
+  ## Compute old log-likelihood.
+  pibeta <- family$loglik(y, peta)
+
+  ## Old parameters.
+  b0 <- fitted$coefficients
+  tau <- fitted$tau
+
+  ## Log-prior.
+  p1 <- x$prior(c(b0, tau))
+
+  ## New shrinkage variance(s).
+  if(!x$fixed) {
+    if(length(tau) > 1 | TRUE) {
+      theta <- c(b0, tau)
+      i <- grep(".tau", names(theta), fixed = TRUE)
+      for(j in i) {
+        theta <- uni.slice(theta, x, family, NULL,
+          NULL, parameter, j, logPost = log_posterior,
+          lower = 1e-08, log_likelihood = pibeta)
+      }
+      tau <- theta[i]
+    } else {
+      a <- x$rank / 2 + 0.001
+      b <- 0.5 * crossprod(b0, x$S[[1]]) %*% b0 + 0.001
+      nt <- names(tau)
+      tau <- 1 / rgamma(1, a, b)
+      names(tau) <- nt
+    }
+  }
+
+  ## Derivatives.
+  score <- deriv_checks(family$score[[parameter]](y, peta, id = j), is.weight = FALSE)
+  hess <- deriv_checks(family$hess[[parameter]](y, peta, id = j), is.weight = TRUE)
+
+  ## Working response.
+  z <- eta[[parameter]] + 1 / hess * score
+
+  ## Compute residuals.
+  eta2 <- eta[[parameter]] <- eta[[parameter]] - fitted$fitted.values
+  e <- z - eta2
+
+  ## Weights.
+  wj <- if(is.null(weights)) hess else hess * weights
+
+  ## Compute mean and precision.
+  XWX <- crossprod(x$X * wj, x$X)
+  for(j in 1:length(tau)) {
+    XWX <- XWX + 1/tau[j] * x$S[[j]]
+  }
+
+  P <- chol2inv(chol(XWX))
+  M <- drop(P %*% crossprod(x$X, wj * e))
+
+  ## Degrees of freedom.
+  edf <- sum((x$X %*% P) * x$X)
+
+  ## Sample new parameters.
+  b1 <- drop(rmvnorm(n = 1, mean = M, sigma = P, method = "chol"))
+
+  ## Log-priors.
+  p2 <- x$prior(c(b1, tau))
+  qbetaprop <- dmvnorm(b1, mean = M, sigma = P, log = TRUE)
+
+  ## New fitted values.        
+  fj <- drop(x$X %*% b1)
+
+  ## Set up new predictor.
+  eta[[parameter]] <- eta[[parameter]] + fj
+
+  ## New parameters.
+  peta <- family$map2par(eta)
+
+  ## Compute new log likelihood.
+  pibetaprop <- family$loglik(y, peta)
+
+  ## Compute new score and hess.
+  score <- deriv_checks(family$score[[parameter]](y, peta, id = j), is.weight = FALSE)
+  hess <- deriv_checks(family$hess[[parameter]](y, peta, id = j), is.weight = TRUE)
+
+  ## Weights.
+  wj <- if(is.null(weights)) hess else hess * weights
+
+  ## New working observations.
+  z <- eta[[parameter]] + 1 / hess * score
+
+  ## New residuals.
+  e <- z - eta2
+
+  ## Compute mean and precision.
+  XWX <- crossprod(x$X * wj, x$X)
+  for(j in 1:length(tau)) {
+    XWX <- XWX + 1/tau[j] * x$S[[j]]
+  }
+
+  P <- chol2inv(chol(XWX))
+  M <- drop(P %*% crossprod(x$X, wj * e))
+
+  ## Log-priors.
+  qbeta <- dmvnorm(b0, mean = M, sigma = P, log = TRUE)
+
+  ## Acceptance probablity.
+  alpha <- (pibetaprop + qbeta + p2) - (pibeta + qbetaprop + p1)
+
+  ## Assign names.
+  names(b1) <- names(b0)
+
+  ## Return state.
+  fitted$fitted.values <- fj
+  fitted$coefficients <- b1
+  fitted$tau <- tau
+  fitted$edf <- edf
+  fitted$alpha <- exp(alpha)
+
+  return(fitted)
+}
+
+## Function to compute proportional log-posterior.
+log_posterior <- function(coefficients, x, family, y,
+  eta, parameter, log_likelihood = NULL)
+{
+  if(is.null(log_likelihood)) {
+    eta[[parameter]] <- eta[[parameter]] + drop(x$X %*% coefficients[1:ncol(x$X)])
+    log_likelihood <- family$loglik(y, family$map2par(eta))
+  }
+
+  log_prior <- x$prior(coefficients)
+
+  return(log_likelihood + log_prior)
+}
+
+## Univariate slice sampler.
+uni.slice <- function(g, x, family, response, eta, id, j, ...,
+  w = 1, m = 30, lower = -Inf, upper = +Inf, logPost)
+{
+  x0 <- g[j]
+  gL <- gR <- g
+
+  gx0 <- logPost(g, x, family, response, eta, id, ...)
+
+  ## Determine the slice level, in log terms.
+  logy <- gx0 - rexp(1)
+
+  ## Find the initial interval to sample from.
+  u <- runif(1, 0, w)
+  gL[j] <- g[j] - u
+  gR[j] <- g[j] + (w - u)  ## should guarantee that g[j] is in [L, R], even with roundoff
+
+  ## Expand the interval until its ends are outside the slice, or until
+  ## the limit on steps is reached.
+  if(is.infinite(m)) {
+    repeat {
+      if(gL[j] <= lower) break
+      if(logPost(gL, x, family, response, eta, id, ...) <= logy) break
+      gL[j] <- gL[j] - w
+    }
+    repeat {
+      if(gR[j] >= upper) break
+      if(logPost(gR, x, family, response, eta, id, ...) <= logy) break
+      gR[j] <- gR[j] + w
+    }
+  } else {
+    if(m > 1) {
+      J <- floor(runif(1, 0, m))
+      K <- (m - 1) - J
+      while(J > 0) {
+        if(gL[j] <= lower) break
+        if(logPost(gL, x, family, response, eta, id, ...) <= logy) break
+        gL[j] <- gL[j] - w
+        J <- J - 1
+      }
+      while(K > 0) {
+        if(gR[j] >= upper) break
+        if(logPost(gR, x, family, response, eta, id, ...) <= logy) break
+        gR[j] <- gR[j] + w
+        K <- K - 1
+      }
+    }
+  }
+
+  ## Shrink interval to lower and upper bounds.
+  if(gL[j] < lower) {
+    gL[j] <- lower
+  }
+  if(gR[j] > upper) {
+    gR[j] <- upper
+  }
+
+  ## Sample from the interval, shrinking it on each rejection.
+  repeat {
+    g[j] <- runif(1, gL[j], gR[j])
+
+    gx1 <- logPost(g, x, family, response, eta, id, ...)
+
+    if(gx1 >= logy) break
+
+    if(g[j] > x0) {
+      gR[j] <- g[j]
+    } else {
+      gL[j] <- g[j]
+    }
+  }
+
+  ## Return the point sampled
+  return(g)
+}
+
+## Testing.
 if(FALSE) {
   set.seed(123)
 
@@ -435,11 +768,11 @@ if(FALSE) {
   d <- data.frame("x" = seq(-pi, pi, length = n))
   d$y <- 1.2 + sin(d$x) + rnorm(n, sd = exp(-1 + cos(d$x)))
 
-  m <- gamlss2(y ~ poly(x,10) | poly(x,10), data = d, optimizer = RS)
+  m <- gamlss2(y ~ s(x,k=40) | s(x,k=40), data = d, optimizer = RS)
 
-  cm <- coef(m)
+  cm <- coef(m, full = TRUE, lambdas = TRUE)
 
-  b <- gamlss2(y ~ poly(x,10) | poly(x,10), data = d, optimizer = BS, start = cm)
+  b <- gamlss2(y ~ s(x,k=40) | s(x,k=40), data = d, optimizer = BS, start = cm)
 
   p <- predict(b, FUN = median)
 

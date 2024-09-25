@@ -19,10 +19,17 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
         cos[[i]] <- list("s" = list())
       for(j in names(object$fitted.specials[[i]])) {
         cij <- object$fitted.specials[[i]][[j]]$coefficients
+        lambdas <- NULL
+        if(isTRUE(list(...)$lambdas)) {
+          lambdas <- object$fitted.specials[[i]][[j]]$lambdas
+          names(lambdas) <- paste0("lambda", 1:length(lambdas))
+        }
         if(!is.null(cij)) {
           names(cij) <- as.character(1:length(cij))
           cos[[i]]$s[[j]] <- cij
         }
+        if(!is.null(lambdas))
+          cos[[i]]$s[[j]] <- c(cos[[i]]$s[[j]], lambdas)
       }
       if(length(cos[[i]]$s) < 1L)
         cos[[i]]$s <- NULL

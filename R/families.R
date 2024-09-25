@@ -1099,7 +1099,7 @@ ologit4 <- function(...) {
 ##}
 
 ## Shifted log-link.
-log1 <- function(shift = 1) {
+shiftlog <- function(shift = 1) {
   linkfun <- function(mu) log(mu - shift)
   linkinv <- function(eta) exp(eta) + shift
   mu.eta <- function(eta) exp(eta)
@@ -1118,7 +1118,7 @@ log1 <- function(shift = 1) {
 }
 
 ## Kumaraswamy distriubtion.
-Kumaraswamy <- function(a.link = log1, b.link = log1, ...) {
+Kumaraswamy <- function(a.link = shiftlog, b.link = shiftlog, ...) {
   lfa <- make.link2(a.link)
   lfb <- make.link2(b.link)
 

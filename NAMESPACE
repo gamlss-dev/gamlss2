@@ -43,7 +43,7 @@ export(
   "step_gamlss2",
   "new_formula",
   "softplus",
-  "log1",
+  "shiftlog",
   "Kumaraswamy"
 )
 

@@ -1,6 +1,6 @@
 
 
-# gamlss2: GAMLSS Infrastructure for Flexible Distributional Regression
+# gamlss2: Infrastructure for  Distributional Regression
 
 ## Installation
 

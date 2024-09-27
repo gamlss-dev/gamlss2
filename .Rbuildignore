@@ -3,6 +3,12 @@ inst/tests.qmd
 inst/SGT.R
 inst/OpenTopics.qmd
 token
+families.Rmd
+random.Rmd 
+selection.Rmd 
+spatial.Rmd
+s+pb.Rmd 
+topmodels.Rmd
 .github
 ^_quarto$
 ^altdoc$

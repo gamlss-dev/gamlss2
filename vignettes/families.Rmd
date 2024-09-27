@@ -20,6 +20,9 @@ vignette: >
 library("gamlss2")
 ```
 
+Note that all family objects of the _gamlss.dist_ package can be used for modeling. However, for
+users wanting to specify their own (new) distribution model, this document
+
 Family objects in the _gamlss2_ package play an essential role in defining the models used for
 fitting data to distributions. These objects encapsulate the necessary details about the
 distribution and the parameters, such as:

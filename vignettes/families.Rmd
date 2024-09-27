@@ -48,7 +48,7 @@ A family object in _gamlss2_ is a list that must meet the following minimum crit
 Optionally, a family object can include functions to calculate the log-likelihood,
 random number generation, cumulative distribution function (CDF), and quantile function.
 
-Here’s an example of a minimal family object for the normal distribution.
+Here's an example of a minimal family object for the normal distribution.
 
 ```{r}
 Normal <- function(...) {

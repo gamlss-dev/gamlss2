@@ -20,8 +20,6 @@ vignette: >
 library("gamlss2")
 ```
 
-### Family Objects
-
 Family objects in the _gamlss2_ package play an essential role in defining the models used for
 fitting data to distributions. These objects encapsulate the necessary details about the
 distribution and the parameters, such as:
@@ -34,7 +32,7 @@ This document provides an overview of how to construct and use family objects wi
 By the end, you should have a good understanding of how to implement a custom family for
 use in statistical models.
 
-#### Defining Family Objects
+### Defining Family Objects
 
 A family object in _gamlss2_ is a list that must meet the following minimum criteria:
 
@@ -70,7 +68,7 @@ In this example, we define a normal distribution with two parameters: `"mu"` (me
 it is the log function. The density function uses the standard `dnorm()` function from
 to calculate the normal density.
 
-#### Density Function
+### Density Function
 
 The density function must accept the following arguments:
 
@@ -82,7 +80,7 @@ d(y, par, log = FALSE, ...)
 * `par`: A named list of parameters (e.g., `"mu"`, `"sigma"` for the normal distribution).
 * `log`: A logical value indicating whether to return the log-density.
 
-#### Optional Derivatives
+### Optional Derivatives
 
 Family objects can optionally include functions to compute the first and second derivatives of
 the log-likelihood with respect to the predictors (or its expectations). These derivatives are used for
@@ -132,7 +130,7 @@ Normal <- function(...) {
 
 If no derivatives are provided, numerical approximations will be used by the package.
 
-#### Additional Functions
+### Additional Functions
 
 Family objects can also include other functions such as:
 
@@ -143,25 +141,25 @@ Family objects can also include other functions such as:
 These functions should adhere to the same structure as the density function, taking the response
 (`y`), parameters (`par`), and other relevant arguments.
 
-#### The Kumaraswamy Distribution
+### The Kumaraswamy Distribution
 
-The **Kumaraswamy distribution** is a continuous distribution defined on the interval \((0, 1)\).
+The **Kumaraswamy distribution** is a continuous distribution defined on the interval $(0, 1)$.
 It is similar to the Beta distribution but has simpler forms for its cumulative distribution and
 inverse cumulative distribution functions, making it more computationally efficient for certain applications.
 
 The probability density function (PDF) of the Kumaraswamy distribution is:
 
-\[
+$$
 f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
-\]
+$$
 
-where \(y \in (0, 1)\) is the response, and \(a\) and \(b\) are non-negative parameters that
+where $y \in (0, 1)$ is the response, and $a$ and $b$ are non-negative parameters that
 determine the shape of the distribution.
 
 In the following example, we will create a **family object** for the Kumaraswamy distribution
 using the `Kumaraswamy()` function and estimate a model using this distribution.
 
-##### Example: Modeling with the Kumaraswamy Distribution
+#### Example: Modeling with the Kumaraswamy Distribution
 
 In this example, we will:
 
@@ -208,7 +206,7 @@ The **Kumaraswamy family** object in _gamlss2_ is flexible, allowing the user to
 different link functions for its parameters, such as the default `shiftlog` link function for
 parameter `a`, which ensures non-negative values.
 
-#### Conclusion
+### Conclusion
 
 Family objects in the _gamlss2_ package play a central role in defining the distributional model
 used for regression. The **Kumaraswamy family** is an example of a distributional family that

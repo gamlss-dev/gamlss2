@@ -1,0 +1,26 @@
+---
+title: "Smooth Terms using s() and pb()"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Top Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, inference, forecasting}
+  %\VignettePackage{gamlss2}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss2")
+```
+
+### Smooth Terms using s() and pb()
+
+Examples on how to set up models using smooth terms with `s()` and `pb()`.
+

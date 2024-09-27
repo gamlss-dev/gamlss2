@@ -1,0 +1,27 @@
+---
+title: "Variable and Model Selection"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Top Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, model selection, variable selection}
+  %\VignettePackage{gamlss2}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss2")
+```
+
+### Variable and Model Selection
+
+* Find the best fitting distribution.
+* Find relevant variables.
+

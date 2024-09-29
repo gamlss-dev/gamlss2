@@ -313,6 +313,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/make.link2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">make.link2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/misc.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">misc</span></a>
   </div>
@@ -411,7 +417,7 @@ window.Quarto = {
   <li><a href="#density-function" id="toc-density-function" class="nav-link" data-scroll-target="#density-function">Density Function</a></li>
   <li><a href="#optional-derivatives" id="toc-optional-derivatives" class="nav-link" data-scroll-target="#optional-derivatives">Optional Derivatives</a></li>
   <li><a href="#additional-functions" id="toc-additional-functions" class="nav-link" data-scroll-target="#additional-functions">Additional Functions</a></li>
-  <li><a href="#the-kumaraswamy-distribution" id="toc-the-kumaraswamy-distribution" class="nav-link" data-scroll-target="#the-kumaraswamy-distribution">The Kumaraswamy Distribution</a></li>
+  <li><a href="#flexible-links" id="toc-flexible-links" class="nav-link" data-scroll-target="#flexible-links">Flexible Links</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -425,11 +431,11 @@ window.Quarto = {
 </header>
 
 
-<p>Note that all family objects of the <em>gamlss.dist</em> package can be used for modeling. However, for users wanting to specify their own (new) distribution model, this document</p>
+<p>Note that all family objects of the <em>gamlss.dist</em> package can be used for modeling. However, for users wanting to specify their own (new) distribution model, this document provides a guide on how to define custom family objects within the gamlss2 framework.</p>
 <p>Family objects in the <em>gamlss2</em> package play an essential role in defining the models used for fitting data to distributions. These objects encapsulate the necessary details about the distribution and the parameters, such as:</p>
 <ul>
 <li>The names of the parameters.</li>
-<li>The link functions that map the parameters to the linear predictor.</li>
+<li>The link functions that map the parameters to the predictor.</li>
 <li>Functions for the density, log-likelihood, and their derivatives.</li>
 </ul>
 <p>This document provides an overview of how to construct and use family objects within <em>gamlss2</em>. By the end, you should have a good understanding of how to implement a custom family for use in statistical models.</p>
@@ -479,7 +485,8 @@ window.Quarto = {
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">function</span>(y, par, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The derivate functions of first order must be provided as a named list, one list element for each parameter of the distribution, and is named <code>"score"</code>. The second order derivative list is named <code>"hess"</code>. An example of setting up first and second order derivatives for the normal is provided in the following code:</p>
+<p>The derivate functions of first order must be provided as a named list, one list element for each parameter of the distribution, and is named <code>"score"</code>. The second order derivative list is named <code>"hess"</code>. Note that these functions must return the derivative <strong>w.r.t. predictor</strong> and the <code>"hess"</code> functions must return the <strong>negative</strong> (expected) second derivatives</p>
+<p>An example of setting up first and second order derivatives for the normal is provided in the following code:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Normal <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -491,15 +498,15 @@ window.Quarto = {
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    },</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"score"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">drop</span>((y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">/</span>(par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        (y <span class="sc">-</span> par<span class="sc">$</span>mu) <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      },</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">drop</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> (y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> (y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      }</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    ),</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hess"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">drop</span>(<span class="dv">1</span><span class="sc">/</span>(par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span> <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      },</span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rep</span>(<span class="dv">2</span>, <span class="fu">length</span>(y))</span>
@@ -522,15 +529,16 @@ window.Quarto = {
 </ul>
 <p>These functions should adhere to the same structure as the density function, taking the response (<code>y</code>), parameters (<code>par</code>), and other relevant arguments.</p>
 </section>
-<section id="the-kumaraswamy-distribution" class="level3">
-<h3 class="anchored" data-anchor-id="the-kumaraswamy-distribution">The Kumaraswamy Distribution</h3>
-<p>The <strong>Kumaraswamy distribution</strong> is a continuous distribution defined on the interval <span class="math inline">\((0, 1)\)</span>. It is similar to the Beta distribution but has simpler forms for its cumulative distribution and inverse cumulative distribution functions, making it more computationally efficient for certain applications.</p>
+<section id="flexible-links" class="level3">
+<h3 class="anchored" data-anchor-id="flexible-links">Flexible Links</h3>
+<p>Note that the example above used static link functions to define the family object. However, users can easily create families with flexible link functions as well. A helpful example of how to implement such flexibility can be found in the Kumaraswamy distribution implementation, which provides a clear template for setting up families with customizable link functions.</p>
+<p>The Kumaraswamy distribution is a continuous distribution defined on the interval <span class="math inline">\((0, 1)\)</span>. It is similar to the Beta distribution but has simpler forms for its cumulative distribution and inverse cumulative distribution functions, making it more computationally efficient for certain applications.</p>
 <p>The probability density function (PDF) of the Kumaraswamy distribution is:</p>
 <p><span class="math display">\[
 f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
 \]</span></p>
-<p>where <span class="math inline">\(y \in (0, 1)\)</span> is the response, and <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are non-negative parameters that determine the shape of the distribution.</p>
-<p>In the following example, we will create a <strong>family object</strong> for the Kumaraswamy distribution using the <code>Kumaraswamy()</code> function and estimate a model using this distribution.</p>
+<p>where <span class="math inline">\(y \in (0, 1)\)</span> is the response, and <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are non-negative parameters that determine the shape of the distribution. The complete implementation, including flexible link functions is provided in the <code>Kumaraswamy()</code> family.</p>
+<p>In the following example, we will create the family object for the Kumaraswamy distribution using the <code>Kumaraswamy()</code> function and estimate a model using this distribution.</p>
 <section id="example-modeling-with-the-kumaraswamy-distribution" class="level4">
 <h4 class="anchored" data-anchor-id="example-modeling-with-the-kumaraswamy-distribution">Example: Modeling with the Kumaraswamy Distribution</h4>
 <p>In this example, we will:</p>
@@ -587,12 +595,12 @@ GAMLSS-RS iteration  4: Global Deviance = -1504.1294 eps = 0.000002     </code><
 </div>
 </div>
 <p>In this example, we simulated a dataset where the parameter <code>a</code> of the Kumaraswamy distribution varies with <code>x</code> following a sinusoidal pattern. We then used the <code>gamlss2()</code> function to fit a smooth model that estimates this relationship. The effect of <code>x</code> on <code>y</code> is plotted, followed by a diagnostic plot to assess residuals.</p>
-<p>The <strong>Kumaraswamy family</strong> object in <em>gamlss2</em> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
+<p>The <code>Kumaraswamy()</code> family in <em>gamlss2</em> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
 </section>
 </section>
 <section id="conclusion" class="level3">
 <h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
-<p>Family objects in the <em>gamlss2</em> package play a central role in defining the distributional model used for regression. The <strong>Kumaraswamy family</strong> is an example of a distributional family that can be used for modeling continuous data on the ((0, 1)) interval. With its customizable link functions and simple structure, it is a useful tool for distributional regression in various settings.</p>
+<p>Family objects in the <em>gamlss2</em> package are a fundamental component for defining flexible, distribution-based regression models, and beyond. By encapsulating the necessary elements, such as parameters, link functions, and density functions, they provide a powerful framework for customizing models to fit specific data. The flexibility to define custom families, as demonstrated with the <code>Kumaraswamy()</code> distribution, enables users to extend the package beyond its default families, making it adaptable to a wide range of modeling scenarios. Furthermore, the ability to define both static and dynamic link functions enhances the versatility of <em>gamlss2</em> for distributional regression, empowering users to tailor models to their unique data and research needs.</p>
 
 
 

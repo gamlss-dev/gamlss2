@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>rs_cg – gamlss2</title>
+<title>make.link2 – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -101,6 +101,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -140,7 +169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/RS_CG.html">RS_CG</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/make.link2.html">make.link2</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -264,7 +293,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/make.link2.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/make.link2.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">make.link2</span></a>
   </div>
 </li>
@@ -318,7 +347,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RS_CG</span></a>
   </div>
 </li>
@@ -364,14 +393,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#rigby-and-stasinopoulos-rs-cole-and-green-cg-algorithm" id="toc-rigby-and-stasinopoulos-rs-cole-and-green-cg-algorithm" class="nav-link active" data-scroll-target="#rigby-and-stasinopoulos-rs-cole-and-green-cg-algorithm">Rigby and Stasinopoulos (RS) &amp; Cole and Green (CG) Algorithm</a>
+  <li><a href="#create-a-link-for-families" id="toc-create-a-link-for-families" class="nav-link active" data-scroll-target="#create-a-link-for-families">Create a Link for Families</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
-  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -384,21 +411,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="rigby-and-stasinopoulos-rs-cole-and-green-cg-algorithm" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="rigby-and-stasinopoulos-rs-cole-and-green-cg-algorithm">Rigby and Stasinopoulos (RS) &amp; Cole and Green (CG) Algorithm</h2>
+<section id="create-a-link-for-families" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="create-a-link-for-families">Create a Link for Families</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The function <code>RS()</code> implements the algorithm of Rigby and Stasinopoulos, the function <code>CG()</code> implements the algorithm of Cole and Green for estimating a GAMLSS with <code>gamlss2</code>.</p>
+<p>This function is used with the <code>family</code> functions in <code>gamlss2()</code>. Given the name of a link, it returns a link function, an inverse link function, the derivative <span class="math inline">\(d\mu/d\eta\)</span>, and a function for domain checking. Note that <code>make.link2()</code> is slightly more flexible and also allows functions as arguments.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## Rigby and Stasinopoulos algorithm.
-RS(x, y, specials, family, offsets,
-  weights, start, xterms, sterms, control)
-
-## Cole and Green algorithm.
-CG(x, y, specials, family, offsets,
-  weights, start, xterms, sterms, control)
+<pre><code class="language-R">make.link2(link)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -406,212 +427,93 @@ CG(x, y, specials, family, offsets,
 <table>
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="x">x</code>
+<code id="link">link</code>
 </td>
 <td>
-The full model matrix to be used for fitting.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="y">y</code>
-</td>
-<td>
-The response vector or matrix.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="specials">specials</code>
-</td>
-<td>
-A named list of special model terms, e.g., including design and penalty matrices for fitting smooth terms using <code>smooth.construct</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="family">family</code>
-</td>
-<td>
-A family object, see <code>gamlss2.family</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="offsets">offsets</code>
-</td>
-<td>
-If supplied, a list or data frame of possible model offset.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="weights">weights</code>
-</td>
-<td>
-If supplied, a numeric vector of weights.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="start">start</code>
-</td>
-<td>
-Starting values, either for the parameters of the response distribution or, if specified as a named list in which each element of length one is named with <code>“(Intercept)”</code>, the respective intercepts are initialized. If starting values are specified as a named list, data frame or matrix, where each element/column is a vector with the same length as the number of observations in the data, the respective predictors are initialized with these. See the examples for <code>gamlss2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="xterms">xterms</code>
-</td>
-<td>
-A named list specifying the linear model terms. Each named list element represents one parameter as specified in the family object.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="sterms">sterms</code>
-</td>
-<td>
-A named list specifying the special model terms. Each named list element represents one parameter as specified in the family object.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="control">control</code>
-</td>
-<td>
-Further control arguments as specified within the call of <code>gamlss2</code>. See the details.
+<p>A character string, see function <code>make.link</code>, or function.</p>
 </td>
 </tr>
 </tbody></table>
-</section>
-<section id="details" class="level3">
-<h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Functions <code>RS()</code> and <code>CG()</code> are called within <code>gamlss2</code>. Both functions implement a backfitting algorithm for estimating GAMLSS. For algorithm details see Rigby and Stasinopoulos (2005).</p>
-<p>The functions use the following control arguments:</p>
-<ul>
-<li>
-<p><code>eps</code>: Numeric vector of length 2, the stopping criterion. Default is <code>eps = c(1e-05, 1e-05)</code> for the outer and the inner backfitting loop.</p>
-</li>
-<li>
-<p><code>maxit</code>: Integer vector of length 2, the maximum number of iterations of the outer and inner backfitting loop. Default is <code>maxit = c(100, 10)</code>.</p>
-</li>
-<li>
-<p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. Note that if <code>step</code> is set smaller than 1, it might be appropriate to lower the stopping criterion <code>eps</code>, too.</p>
-</li>
-<li>
-<p><code>CG</code>: Integer, the number of iterations when to start the CG correction. Default is <code>CG = Inf</code>.</p>
-</li>
-<li>
-<p><code>trace</code>: Logical, should information be printed while the algorithm is running?</p>
-</li>
-<li>
-<p><code>flush</code>: Logical, use <code>flush.console</code> for displaying the current output in the console.</p>
-</li>
-<li>
-<p><code>ridge</code>: Logical, should automatic ridge penalization be applied only to linear effects, without penalizing the intercept? For each parameter of the distribution the optimum ridge penalty is estimated using an information criterion. Possible options are <code>criterion = c(“aic”, “aicc”, “bic”, “gaic”, “gcv”)</code>. The default is <code>criterion = “gaic”</code> and argument <code>K = 2</code>, which can be set in <code>gamlss2_control</code>.</p>
-</li>
-</ul>
-<p>To facilitate the development of new algorithms for <span class="pkg">gamlss2</span>, users can exchange them using the <code>optimizer</code> argument in <code>gamlss2_control</code>. Users developing new model fitting functions are advised to use these functions as templates and pass them to <code>gamlss2_control</code>. Alternatively, users can replace the optimizer function by adding a named list element, <code>“optimizer”</code>, to the family object. For instructions on setting up new families in <span class="pkg">gamlss2</span>, see <code>gamlss2.family</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Functions <code>RS()</code> and <code>CG()</code> return a named list of class <code>“gamlss2”</code> containing the following objects:</p>
+<p>A list containing the following components:</p>
 <table>
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>fitted.values</code>
+<code>linkfun</code>
 </td>
 <td>
-A data frame of the fitted values of the modeled parameters of the selected distribution.
+Link function <code>function(mu)</code>.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>fitted.specials</code>
+<code>linkinv</code>
 </td>
 <td>
-A named list, one element for each parameter of the distribution, containing the fitted model object information of special model terms.
+Inverse link function <code>function(eta)</code>.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>fitted.linear</code>
+<code>mu.eta</code>
 </td>
 <td>
-A named list, one element for each parameter of the distribution, containing the information on fitted linear effects.
+Derivative <code>function(eta)</code>: <span class="math inline">\(d\mu/d\eta\)</span>.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>coefficients</code>
+<code>valideta</code>
 </td>
 <td>
-A named list, one element for each parameter of the distribution, containing the estimated parameters of the linear effects.
+Function <code>function(eta)</code> that returns <code>TRUE</code> if <code>eta</code> is in the domain of <code>linkinv</code>.
 </td>
 </tr>
 <tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>elapsed</code>
+<code>name</code>
 </td>
 <td>
-The elapsed runtime of the algorithm.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>iterations</code>
-</td>
-<td>
-How many iterations the algorithm performed.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>logLik</code>
-</td>
-<td>
-The final value of the log-likelihood of the model.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code>control</code>
-</td>
-<td>
-All control arguments used as supplied from function <code>gamlss2_control</code>.
+A character string representing the name of the link function.
 </td>
 </tr>
 </tbody></table>
 </section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Rigby RA, Stasinopoulos DM (2005). “Generalized Additive Models for Location, Scale and Shape (with Discussion).” <em>Journal of the Royal Statistical Society, Series C (Applied Statistics)</em>, <b>54</b>, 507–554. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">doi:10.1111/j.1467-9876.2005.00510.x</a></p>
-</section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code>, <code>gamlss2_control</code>, <code>gamlss2.family</code></p>
+<p><code>make.link</code>, <code>gamlss2</code>, <code>gamlss2.family</code>.</p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model using RS (default)</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">optimizer =</span> RS)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## now with CG</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">optimizer =</span> CG)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="do">## first 2 RS iterations and afterwards switch to CG</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">CG =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Character specification.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">str</span>(<span class="fu">make.link2</span>(<span class="st">"logit"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 6
+ $ linkfun :function (mu)  
+ $ linkinv :function (eta)  
+ $ mu.eta  :function (eta)  
+ $ valideta:function (eta)  
+ $ name    : chr "logit"
+ $ mu.eta2 :function (eta)  
+ - attr(*, "class")= chr "link-glm"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Functions.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">str</span>(<span class="fu">make.link2</span>(softplus))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 6
+ $ linkfun :function (mu)  
+ $ linkinv :function (eta)  
+ $ mu.eta  :function (eta)  
+ $ dmu.eta :function (eta)  
+ $ valideta:function (eta)  
+ $ name    : chr "softplus(1)"
+ - attr(*, "class")= chr "link-glm"</code></pre>
+</div>
 </div>
 
 

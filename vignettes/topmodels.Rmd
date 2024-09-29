@@ -20,7 +20,5 @@ vignette: >
 library("gamlss2")
 ```
 
-### Top Models
-
 Introduction on how to use the _topmodels_ package with _gamlss2_.
 

@@ -9,7 +9,7 @@ bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
-  %\VignetteIndexEntry{Top Models}
+  %\VignetteIndexEntry{Random Effects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, random effects}
@@ -19,8 +19,6 @@ vignette: >
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
 ```
-
-### Random Effects
 
 Describe how to incorporate random effects in _gamlss2_
 

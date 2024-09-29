@@ -9,7 +9,7 @@ bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
-  %\VignetteIndexEntry{Top Models}
+  %\VignetteIndexEntry{Selection}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, model selection, variable selection}
@@ -19,8 +19,6 @@ vignette: >
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
 ```
-
-### Variable and Model Selection
 
 * Find the best fitting distribution.
 * Find relevant variables.

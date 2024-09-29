@@ -9,7 +9,7 @@ bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
-  %\VignetteIndexEntry{Top Models}
+  %\VignetteIndexEntry{Spatial Effects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, spatial effects}
@@ -20,7 +20,82 @@ vignette: >
 library("gamlss2")
 ```
 
-### Spatial Effects
-
 Describe how to incorporate spatial effects in _gamlss2_
 
+```{r, eval=FALSE, echo=FALSE}
+download_data <- function(data = "WeatherGermany10.rds") {
+  file <- paste0("https://nikum.org/abm/Data/", data)
+  tdir <- tempfile()
+  dir.create(tdir)
+  download.file(file, file.path(tdir, data))
+  return(readRDS(file.path(tdir, data)))
+}
+
+WeatherGermany10 <- download_data("WeatherGermany10.rds")
+
+WeatherGermany10 <- na.omit(WeatherGermany10)
+
+owd <- getwd()
+tdir <- tempdir()
+dir.create(tdir)
+setwd(tdir)
+
+download.file("https://geodata.ucdavis.edu/gadm/gadm4.1/shp/gadm41_DEU_shp.zip",
+  file.path(tdir, "DE.zip"))
+
+unzip("DE.zip")
+
+setwd(owd)
+
+library("sf")
+
+m <- st_read(file.path(tdir, "gadm41_DEU_2.shp"))
+m <- m[c("NAME_1", "NAME_2")]
+names(m) <- c("state", "county", "geometry")
+m$id <- as.factor(1:nrow(m))
+m <- m[c("id", "county", "state", "geometry")]
+
+co <- unique(WeatherGermany10[, c("lon", "lat")])
+co_sf <- st_as_sf(co, coords = c("lat", "lon"), crs = st_crs(m))
+
+jd <- st_join(co_sf, m[, c("id", "county", "state"), drop = FALSE])
+
+co <- cbind(co, jd[, c("id", "county", "state")])
+
+d <- WeatherGermany10[, c("Date", "Wmax", "Tmax", "Tmin", "Pre", "alt", "lat", "lon")]
+
+d$ID <- d$County <- d$State <- NA
+
+for(i in 1:nrow(co)) {
+  j <- which((d$lon == co$lon[i]) & (d$lat == co$lat[i]))
+  d$ID[j] <- co$id[i]
+  d$lat[j] <- co$lat[i]
+  d$lon[j] <- co$lon[i]
+  d$County[j] <- co$county[i]
+  d$State[j] <- co$state[i]
+}
+
+d <- d[, c("ID", "State", "County", "Date", "Wmax", "Tmax", "Tmin", "Pre", "alt", "lat", "lon")]
+
+saveRDS(d, file = "~/data/WeatherGermany10.rds")
+saveRDS(m, file = "~/data/Germany.rds")
+
+d$Year <- as.POSIXlt(d$Date)$year + 1900
+
+df <- aggregate(Wmax ~ ID + Year + State + County + alt + lon + lat,
+  FUN = function(x) sum(x >= 24.5), data = d)
+
+df <- df[, c("ID", "County", "State", "Year", "Wmax", "alt", "lon", "lat")]
+
+names(m) <- c("ID", "County", "State", "geometry")
+
+storms <- df
+Germany <- st_simplify(m, dTolerance = 2000)
+
+names(storms) <- gsub("Wmax", "Counts", names(storms))
+
+storms <- storms[order(storms$ID), ]
+
+save(storms, file = "../data/storms.rda", compress = "xz")
+save(Germany, file = "../data/Germany.rda", compress = "xz")
+```

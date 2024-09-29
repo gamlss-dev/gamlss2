@@ -46,7 +46,8 @@ export(
   "new_formula",
   "softplus",
   "shiftlog",
-  "Kumaraswamy"
+  "Kumaraswamy",
+  "make.link2"
 )
 
 S3method(gamlss2, formula)

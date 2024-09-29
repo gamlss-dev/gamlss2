@@ -9,7 +9,7 @@ bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
-  %\VignetteIndexEntry{Top Models}
+  %\VignetteIndexEntry{Family Objects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, family objects}
@@ -21,14 +21,15 @@ library("gamlss2")
 ```
 
 Note that all family objects of the _gamlss.dist_ package can be used for modeling. However, for
-users wanting to specify their own (new) distribution model, this document
+users wanting to specify their own (new) distribution model, this document provides a guide
+on how to define custom family objects within the gamlss2 framework.
 
 Family objects in the _gamlss2_ package play an essential role in defining the models used for
 fitting data to distributions. These objects encapsulate the necessary details about the
 distribution and the parameters, such as:
 
 * The names of the parameters.
-* The link functions that map the parameters to the linear predictor.
+* The link functions that map the parameters to the predictor.
 * Functions for the density, log-likelihood, and their derivatives.
 
 This document provides an overview of how to construct and use family objects within _gamlss2_.
@@ -97,7 +98,10 @@ function(y, par, ...)
 
 The derivate functions of first order must be provided as a named list, one list element for
 each parameter of the distribution, and is named `"score"`. The second order derivative list
-is named `"hess"`. An example of setting up first and second order derivatives for the normal is
+is named `"hess"`. Note that these functions must return the derivative **w.r.t. predictor**
+and the `"hess"` functions must return the **negative** (expected) second derivatives
+
+An example of setting up first and second order derivatives for the normal is
 provided in the following code:
 
 ```{r}
@@ -111,15 +115,15 @@ Normal <- function(...) {
     },
     "score" = list(
       "mu" = function(y, par, ...) {
-        drop((y - par$mu)/(par$sigma^2))
+        (y - par$mu) / (par$sigma^2)
       },
       "sigma" = function(y, par, ...) {
-        drop(-1 + (y - par$mu)^2/(par$sigma^2))
+        -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
     "hess" = list(
       "mu" = function(y, par, ...) {
-        drop(1/(par$sigma^2))
+        1 / (par$sigma^2)
       },
       "sigma" = function(y, par, ...) {
         rep(2, length(y))
@@ -144,9 +148,15 @@ Family objects can also include other functions such as:
 These functions should adhere to the same structure as the density function, taking the response
 (`y`), parameters (`par`), and other relevant arguments.
 
-### The Kumaraswamy Distribution
+### Flexible Links
 
-The **Kumaraswamy distribution** is a continuous distribution defined on the interval $(0, 1)$.
+Note that the example above used static link functions to define the family object.
+However, users can easily create families with flexible link functions as well.
+A helpful example of how to implement such flexibility can be found in the Kumaraswamy
+distribution implementation, which provides a clear template for setting up families with
+customizable link functions.
+
+The Kumaraswamy distribution is a continuous distribution defined on the interval $(0, 1)$.
 It is similar to the Beta distribution but has simpler forms for its cumulative distribution and
 inverse cumulative distribution functions, making it more computationally efficient for certain applications.
 
@@ -157,9 +167,10 @@ f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
 $$
 
 where $y \in (0, 1)$ is the response, and $a$ and $b$ are non-negative parameters that
-determine the shape of the distribution.
+determine the shape of the distribution. The complete implementation, including flexible link
+functions is provided in the `Kumaraswamy()` family.
 
-In the following example, we will create a **family object** for the Kumaraswamy distribution
+In the following example, we will create the family object for the Kumaraswamy distribution
 using the `Kumaraswamy()` function and estimate a model using this distribution.
 
 #### Example: Modeling with the Kumaraswamy Distribution
@@ -205,15 +216,19 @@ distribution varies with `x` following a sinusoidal pattern. We then used the `g
 to fit a smooth model that estimates this relationship. The effect of `x` on `y` is plotted,
 followed by a diagnostic plot to assess residuals.
 
-The **Kumaraswamy family** object in _gamlss2_ is flexible, allowing the user to specify
+The `Kumaraswamy()` family in _gamlss2_ is flexible, allowing the user to specify
 different link functions for its parameters, such as the default `shiftlog` link function for
 parameter `a`, which ensures non-negative values.
 
 ### Conclusion
 
-Family objects in the _gamlss2_ package play a central role in defining the distributional model
-used for regression. The **Kumaraswamy family** is an example of a distributional family that
-can be used for modeling continuous data on the \((0, 1)\) interval. With its customizable link
-functions and simple structure, it is a useful tool for distributional regression in various
-settings.
+Family objects in the _gamlss2_ package are a fundamental component for defining flexible,
+distribution-based regression models, and beyond. By encapsulating the necessary elements,
+such as parameters, link functions, and density functions, they provide a powerful framework
+for customizing models to fit specific data. The flexibility to define custom families,
+as demonstrated with the `Kumaraswamy()` distribution, enables users to extend the package
+beyond its default families, making it adaptable to a wide range of modeling scenarios.
+Furthermore, the ability to define both static and dynamic link functions enhances the
+versatility of _gamlss2_ for distributional regression, empowering users to tailor
+models to their unique data and research needs.
 

@@ -20,6 +20,7 @@ A class \code{"sf"} data frame containing 403 counties of Germany.
   \item{state}{Character, the state in Germany where the weather station is located.}
   \item{geometry}{The polygon information.}
 }
+}
 
 \source{
   Map of Germany:
@@ -32,10 +33,13 @@ A class \code{"sf"} data frame containing 403 counties of Germany.
 }
 
 \examples{\dontshow{ if(!requireNamespace("sf")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## load the sf package for plotting
+## load sf package for plotting
 library("sf")
 
-## map of Germany
+## load the data
+data("Germany", package = "gamlss2")
+
+## plot the map
 plot(st_geometry(Germany))
 }
 

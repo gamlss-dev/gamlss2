@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>gamlss2_control – gamlss2</title>
+<title>storms – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -140,7 +140,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/gamlss2_control.html">gamlss2_control</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/storms.html">storms</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -228,7 +228,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/gamlss2_control.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/gamlss2_control.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">gamlss2_control</span></a>
   </div>
 </li>
@@ -342,7 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/storms.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/storms.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">storms</span></a>
   </div>
 </li>
@@ -370,14 +370,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#control-parameters" id="toc-control-parameters" class="nav-link active" data-scroll-target="#control-parameters">Control Parameters</a>
+  <li><a href="#severe-storms-in-germany" id="toc-severe-storms-in-germany" class="nav-link active" data-scroll-target="#severe-storms-in-germany">Severe Storms in Germany</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
-  <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
-  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
-  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#format" id="toc-format" class="nav-link" data-scroll-target="#format">Format</a></li>
+  <li><a href="#source" id="toc-source" class="nav-link" data-scroll-target="#source">Source</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
@@ -389,132 +387,160 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="control-parameters" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="control-parameters">Control Parameters</h2>
+<section id="severe-storms-in-germany" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="severe-storms-in-germany">Severe Storms in Germany</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Various parameters that control fitting of GAMLSS using <code>gamlss2</code>.</p>
+<p>According to the Beaufort scale, severe storms occur from a wind speed of 24.5-28.4 m/s. This dataset contains annual severe storm counts from weather stations in Germany from 1981 to 2021.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">gamlss2_control(optimizer = RS, trace = TRUE,
-  flush = TRUE, light = FALSE, expand = TRUE,
-  model = TRUE, x = TRUE, y = TRUE,
-  fixed = FALSE, ...)
-</code></pre>
+<pre><code class="language-R">data("storms", package = "gamlss2")</code></pre>
 </section>
-<section id="arguments" class="level3">
-<h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
-<table>
-<tbody><tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="optimizer">optimizer</code>
-</td>
-<td>
-Function, the optimizer function that should be used for fitting.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="trace">trace</code>
-</td>
-<td>
-Logical, should information be printed while the algorithm is running?
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="flush">flush</code>
-</td>
-<td>
-Logical, use <code>flush.console</code> for displaying the current output in the console.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="light">light</code>
-</td>
-<td>
-Logical, if set to <code>light = TRUE</code>, no model frame, response, model matrix and other design matrices will be part of the return value.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="expand">expand</code>
-</td>
-<td>
-Logical, if fewer formulas are supplied than there are parameters of the distribution, should formulas with intercept only formulas be added?
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="model">model</code>
-</td>
-<td>
-Logical, should the <em>model frame</em> be included as component of the returned object.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="x">x</code>
-</td>
-<td>
-Logical, indicating whether the model matrix should be included as component of the returned object.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="y">y</code>
-</td>
-<td>
-Logical, should the response be included as component of the returned object.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="fixed">fixed</code>
-</td>
-<td>
-Logical, a named vector of parameters that should be fixed during estimation. See the examples for <code>gamlss2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="...">…</code>
-</td>
-<td>
-Further control parameters to be part of the return value, e.g., used within optimizer function <code>RS</code>.
-</td>
-</tr>
-</tbody></table>
+<section id="format" class="level3">
+<h3 class="anchored" data-anchor-id="format">Format</h3>
+<p>A data frame containing 3494 observations on 8 variables.</p>
+<dl>
+<dt>
+id
+</dt>
+<dd>
+Factor, the weather station id.
+</dd>
+<dt>
+county
+</dt>
+<dd>
+Character, the county in Germany where the weather station is located.
+</dd>
+<dt>
+state
+</dt>
+<dd>
+Character, the state in Germany where the weather station is located.
+</dd>
+<dt>
+year
+</dt>
+<dd>
+Integer, the year the observation was measured.
+</dd>
+<dt>
+counts
+</dt>
+<dd>
+Integer, the number of severe storms in this year.
+</dd>
+<dt>
+alt
+</dt>
+<dd>
+Numeric, the altitude in meters above sea level of the weather station.
+</dd>
+<dt>
+lon
+</dt>
+<dd>
+Numeric, the longitude coordinate of the weather station.
+</dd>
+<dt>
+lat
+</dt>
+<dd>
+Numeric, the latitude coordinate of the weather station.
+</dd>
+</dl>
 </section>
-<section id="details" class="level3">
-<h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The control parameters in <code>gamlss2_control</code> can also be extended, e.g., if another optimization function is used, newly specified control parameters are automatically passed on to this function.</p>
-</section>
-<section id="value" class="level3">
-<h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A list with the arguments specified.</p>
-</section>
-<section id="see-also" class="level3">
-<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>RS</code>, <code>gamlss2</code></p>
+<section id="source" class="level3">
+<h3 class="anchored" data-anchor-id="source">Source</h3>
+<p>Severe Storms Data:</p>
+<dl>
+<dt>
+Data Source:
+</dt>
+<dd>
+Deutscher Wetterdienst (DWD), Climate Data Center (CDC).
+</dd>
+<dt>
+Licence:
+</dt>
+<dd>
+CC BY 4.0
+</dd>
+<dt>
+URL:
+</dt>
+<dd>
+<a href="https://opendata.dwd.de/climate_environment/CDC/">https://opendata.dwd.de/climate_environment/CDC/</a>
+</dd>
+<dt>
+Coordinate Reference System:
+</dt>
+<dd>
+EPSG 4326
+</dd>
+</dl>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## load the data</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"storms"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model with different step length</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## control in the RS algorithm</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">step =</span> <span class="dv">1</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">step =</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## yearly observations</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(counts <span class="sc">~</span> year, <span class="at">data =</span> storms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="storms_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## count distribution</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(storms<span class="sc">$</span>counts))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="storms_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## NBI model</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula including spatial effect</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> counts <span class="sc">~</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(alt) <span class="sc">+</span> <span class="fu">s</span>(lon, lat) <span class="sc">|</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(alt) <span class="sc">+</span> <span class="fu">s</span>(lon, lat)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> storms, <span class="at">family =</span> NBI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 16316.9476 eps = 0.183905     
+GAMLSS-RS iteration  2: Global Deviance = 16236.7252 eps = 0.004916     
+GAMLSS-RS iteration  3: Global Deviance = 16229.0044 eps = 0.000475     
+GAMLSS-RS iteration  4: Global Deviance = 16227.6445 eps = 0.000083     
+GAMLSS-RS iteration  5: Global Deviance = 16226.9314 eps = 0.000043     
+GAMLSS-RS iteration  6: Global Deviance = 16226.5321 eps = 0.000024     
+GAMLSS-RS iteration  7: Global Deviance = 16226.3799 eps = 0.000009     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## estimated effects</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="storms_files/figure-html/unnamed-chunk-1-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## residual diagnostics</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="storms_files/figure-html/unnamed-chunk-1-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 
 

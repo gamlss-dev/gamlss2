@@ -49,7 +49,7 @@ barplot(table(storms$counts))
 
 ## NBI model
 ## model formula including spatial effect
-f <- counts ~ s(year) + s(alt) + s(lon, lat) |
+\dontrun{f <- counts ~ s(year) + s(alt) + s(lon, lat) |
   s(year) + s(alt) + s(lon, lat)
 
 ## estimate model
@@ -60,7 +60,7 @@ plot(b)
 
 ## residual diagnostics
 plot(b, which = "resid")
-}
+}}
 
 \keyword{datasets}
 

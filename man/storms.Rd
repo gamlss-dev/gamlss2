@@ -33,7 +33,7 @@ A data frame containing 3494 observations on 8 variables.
     \item{Data Source:}{Deutscher Wetterdienst (DWD), Climate Data Center (CDC).}
     \item{Licence:}{CC BY 4.0}
     \item{URL:}{\url{https://opendata.dwd.de/climate_environment/CDC/}}
-    \item{Coordinate Reference System:}{EPSG 4326}
+    \item{Coordinate Reference System:}{Longitude/latitude and the WGS84 datum.}
   }
 }
 

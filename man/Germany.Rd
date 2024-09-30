@@ -25,7 +25,7 @@ A class \code{"sf"} data frame containing 403 counties of Germany.
 \source{
   Map of Germany:
   \describe{
-    \item{Data Source:}{GADM.}
+    \item{Data Source:}{GADM}
     \item{Licence:}{CC BY}
     \item{URL:}{\url{https://gadm.org/}}
     \item{Coordinate Reference System:}{Longitude/latitude and the WGS84 datum.}

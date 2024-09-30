@@ -35,10 +35,10 @@ make.link2(link)
 }
 
 \examples{
-## Character specification.
+## character specification
 utils::str(make.link2("logit"))
 
-## Functions.
+## functions
 utils::str(make.link2(softplus))
 }
 

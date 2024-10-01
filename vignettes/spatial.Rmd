@@ -91,7 +91,7 @@ correlation should be penalized.
 ## needs to be computed, here we use distance based
 ## neighbors
 library("spdep")
-nb <- poly2nb(Germany)
+nb <- dnearneigh(st_centroid(st_geometry(Germany)), d1 = 0, d2 = 80)
 plot(st_geometry(Germany), border = "lightgray")
 plot.nb(nb, st_geometry(Germany), add = TRUE)
 ```
@@ -161,4 +161,49 @@ plot(b)
 
 The plot shows the estimated smooth functions for altitude, year, and the spatial effect.
 These visualizations help us interpret how storm counts vary across space and time.
+
+### Prediction
+
+First we predict the spatial effects on the scale of the predictors. Therefore, we
+set up a new data frame containing only the unique loactions.
+
+```{r}
+nd <- unique(storms[, "id", drop = FALSE])
+
+## set some dummy values, not needed when predicting single model term
+nd$alt <- 1000
+nd$year <- 2020
+
+## prediction for the mu predictor
+nd$fmu <- predict(b, newdata = nd,
+  model = "mu", term = "s(id)",
+  type = "link")
+
+## same for sigma
+nd$fsigma <- predict(b, newdata = nd,
+  model = "sigma", term = "s(id)",
+  type = "link")
+
+## add fitted values to map of Germany
+m <- merge(Germany, nd, by = "id", all.x = TRUE)
+
+## plot spatial effects
+library("ggplot2")
+library("colorspace")
+ggplot(m) + geom_sf(aes(fill = fmu)) +
+scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
+
+## note that because of the discrete spatial effect,
+## there are a lot of NAs, therefore, we need to compute
+## predictions in such regions by averaging using the neighbors
+## of a region. we use the neighbour list object nb to compute
+## the predictions, this is iterated.
+while(any(is.na(m$fmu))) {
+  m$fmu <- sapply(nb, function(i) mean(m$fmu[i], na.rm = TRUE))
+}
+
+## plot final spatial effect
+ggplot(m) + geom_sf(aes(fill = fmu)) +
+scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
+```
 

@@ -24,7 +24,7 @@ nocite: |
   @Mayretal2012
   
 vignette: >
-  %\VignetteIndexEntry{Top Models}
+  %\VignetteIndexEntry{Smooth Terms}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, inference, forecasting}
@@ -34,8 +34,6 @@ vignette: >
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
 ```
-
-### Smooth Terms using s() and pb()
 
 Examples on how to set up models using smooth terms with `s()` and `pb()`.
 

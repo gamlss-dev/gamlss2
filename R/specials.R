@@ -98,6 +98,16 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
     }
   }
 
+  if(any(dups <- duplicated(names(sterms)))) {
+    dups <- names(sterms)[dups]
+    for(j in dups) {
+      dn <- grep(j, names(sterms), fixed = TRUE, value = TRUE)
+      dn <- paste0(dn, ".", 1:length(dn))
+      i <-  grep(j, names(sterms), fixed = TRUE)
+      names(sterms)[i] <- dn
+    }
+  }
+
   return(sterms)
 }
 

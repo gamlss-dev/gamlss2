@@ -8,6 +8,21 @@ output:
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
+  @eilers2021practical
+  @Stasinopoulosetal2021
+  @Stasinopoulosetal2017
+  @Rigbyetal2019
+  @Stasinopoulos2018
+  @Fahrmeir+Kneib+Lang+Marx:2013
+  @Lang+Umlauf+Wechselberger+Harttgen+Kneib:2012
+  @bamlss2018
+  @KleiberZeileis2016
+  @distregvis2019
+  @stasinopoulos2024generalized
+  @hofner2015
+  @Hofneretal2014
+  @Mayretal2012
+  
 vignette: >
   %\VignetteIndexEntry{Top Models}
   %\VignetteEngine{knitr::rmarkdown}

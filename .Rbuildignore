@@ -1,7 +1,7 @@
-R/GA.R
-inst/tests.qmd
-inst/SGT.R
-inst/OpenTopics.qmd
+^R/GA\.R$
+^inst/tests\.qmd$
+^inst/SGT\.R$
+^inst/OpenTopics\.qmd$
 token
 README.qmd
 .github
@@ -10,3 +10,10 @@ README.qmd
 ^docs$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.Rproj\.user$
+^vignettes/families\.qmd$
+^vignettes/random\.qmd$
+^vignettes/s_pb\.qmd$
+^vignettes/selection\.qmd$
+^vignettes/spatial\.qmd$
+^vignettes/topmodels\.qmd$

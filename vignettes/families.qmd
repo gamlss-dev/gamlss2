@@ -1,16 +1,16 @@
 ---
 title: "Family Objects"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
   %\VignetteIndexEntry{Family Objects}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, family objects}
   %\VignettePackage{gamlss2}
@@ -36,7 +36,7 @@ This document provides an overview of how to construct and use family objects wi
 By the end, you should have a good understanding of how to implement a custom family for
 use in statistical models.
 
-### Defining Family Objects
+## Defining Family Objects
 
 A family object in _gamlss2_ is a list that must meet the following minimum criteria:
 
@@ -72,7 +72,7 @@ In this example, we define a normal distribution with two parameters: `"mu"` (me
 it is the log function. The density function uses the standard `dnorm()` function from
 to calculate the normal density.
 
-### Density Function
+## Density Function
 
 The density function must accept the following arguments:
 
@@ -84,7 +84,7 @@ d(y, par, log = FALSE, ...)
 * `par`: A named list of parameters (e.g., `"mu"`, `"sigma"` for the normal distribution).
 * `log`: A logical value indicating whether to return the log-density.
 
-### Optional Derivatives
+## Optional Derivatives
 
 Family objects can optionally include functions to compute the first and second derivatives of
 the log-likelihood with respect to the predictors (or its expectations). These derivatives are used for
@@ -137,7 +137,7 @@ Normal <- function(...) {
 
 If no derivatives are provided, numerical approximations will be used by the package.
 
-### Additional Functions
+## Additional Functions
 
 Family objects can also include other functions such as:
 
@@ -148,7 +148,7 @@ Family objects can also include other functions such as:
 These functions should adhere to the same structure as the density function, taking the response
 (`y`), parameters (`par`), and other relevant arguments.
 
-### Flexible Links
+## Flexible Links
 
 Note that the example above used static link functions to define the family object.
 However, users can easily create families with flexible link functions as well.
@@ -173,7 +173,7 @@ functions is provided in the `Kumaraswamy()` family.
 In the following example, we will create the family object for the Kumaraswamy distribution
 using the `Kumaraswamy()` function and estimate a model using this distribution.
 
-#### Example: Modeling with the Kumaraswamy Distribution
+### Example: Modeling with the Kumaraswamy Distribution
 
 In this example, we will:
 
@@ -220,7 +220,7 @@ The `Kumaraswamy()` family in _gamlss2_ is flexible, allowing the user to specif
 different link functions for its parameters, such as the default `shiftlog` link function for
 parameter `a`, which ensures non-negative values.
 
-### Conclusion
+## Conclusion
 
 Family objects in the _gamlss2_ package are a fundamental component for defining flexible,
 distribution-based regression models, and beyond. By encapsulating the necessary elements,

@@ -1,16 +1,16 @@
 ---
 title: "Top Models"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
   %\VignetteIndexEntry{Top Models}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, inference, forecasting}
   %\VignettePackage{gamlss2}
@@ -22,3 +22,11 @@ library("gamlss2")
 
 Introduction on how to use the _topmodels_ package with _gamlss2_.
 
+```{r}
+library("gamlss2")
+m <- gamlss2(dist ~ s(speed), data = cars)
+library("topmodels")
+proscore(m)
+rootogram(m)
+wormplot(m)
+```

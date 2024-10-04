@@ -22,7 +22,7 @@ library("gamlss2")
 
 Introduction on how to use the _topmodels_ package with _gamlss2_.
 
-```{r}
+```{r, eval=FALSE}
 library("gamlss2")
 m <- gamlss2(dist ~ s(speed), data = cars)
 library("topmodels")

@@ -36,7 +36,7 @@ determined by a logistic model, where the mixing probability is a function of `x
 ```{r}
 set.seed(123)
 
-## simulate covariate x
+## simulate covariate
 n <- 1000
 x <- sort(runif(n, -pi, pi))
 

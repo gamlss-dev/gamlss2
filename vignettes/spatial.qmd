@@ -179,7 +179,7 @@ These visualizations help us interpret how storm counts vary across space and ti
 We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
 set up a new data frame containing only the unique loactions.
 
-```{r}
+```{r, eval=FALSE}
 nd <- unique(storms[, "id", drop = FALSE])
 
 ## add the year
@@ -187,9 +187,10 @@ nd$year <- 2022
 
 ## add altitude information, this is stored
 ## in a raster file in
-library
-rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
-alt <- st_read(rf)
+
+#FIXME# library
+#FIXME# rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
+#FIXME# alt <- st_read(rf)
 
 ## prediction for the mu predictor,
 ## which is the mean of the NBI distribution

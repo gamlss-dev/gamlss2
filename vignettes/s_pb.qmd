@@ -37,5 +37,8 @@ vignette: >
 library("gamlss2")
 ```
 
+
+
 Examples on how to set up models using smooth terms with `s()` and `pb()`.
+
 

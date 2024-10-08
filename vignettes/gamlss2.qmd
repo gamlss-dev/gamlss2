@@ -1,16 +1,16 @@
 ---
 title: "First Steps"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
   %\VignetteIndexEntry{First Steps}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, first steps}
   %\VignettePackage{gamlss2}
@@ -43,7 +43,7 @@ being that summary outputs are provided for all parameters of the distribution. 
 the model is estimated using the `NO` family of the _gamlss.dist_ package, a two-parameter
 distribution with parameters `mu` and `sigma`.
 
-### Residual Diagnostics
+## Residual Diagnostics
 
 Since we estimated a simple linear model with Gaussian errors up to now, we are assuming that
 the distribution of the response variable, the number of motorcycles (`bikes`), follows a

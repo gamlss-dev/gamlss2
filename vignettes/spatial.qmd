@@ -1,16 +1,16 @@
 ---
 title: "Spatial Effects"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
   %\VignetteIndexEntry{Spatial Effects}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, spatial effects}
   %\VignettePackage{gamlss2}
@@ -33,7 +33,7 @@ This vignette is divided into two parts: the first part demonstrates how to esti
 spatial effects using MRFs with the gamlss2 package, while the second part provides examples
 of modeling spatial effects with smooth functions like thin-plate splines or tensor product splines.
 
-### Example: Modeling Severe Storm Counts in Germany
+## Example: Modeling Severe Storm Counts in Germany
 
 In this example, we analyze severe storm counts recorded at various weather stations across
 Germany over multiple years. Our goal is to model these storm counts while accounting for the
@@ -59,7 +59,7 @@ for(j in levels(storms$id)) {
 The data contains storm counts per year for each station. A preliminary visualization
 of these counts allows us to inspect patterns of storm frequency over time and across stations.
 
-### Visualizing the Spatial Structure
+## Visualizing the Spatial Structure
 
 We begin by plotting the locations of weather stations on a map of Germany. The _sf_ package is
 used to manage and plot spatial data.
@@ -80,7 +80,7 @@ points(co, col = 2, pch = 4, lwd = 2)
 This map shows the geographical distribution of weather stations. The spatial structure will
 be incorporated into our model to account for the proximity of stations when estimating storm counts.
 
-### Defining the Neighborhood Structure
+## Defining the Neighborhood Structure
 
 Next, we define the neighborhood structure among the weather stations using a distance-based
 criterion. This is crucial for the Markov random field, as it specifies how spatial
@@ -102,7 +102,7 @@ The neighbor matrix is constructed using the `dneirneigh()` function from the _s
 which calculates the adjacency structure of the geographical regions. We then visualize
 the spatial network of neighbors on the map.
 
-### Constructing the Penalty Matrix
+## Constructing the Penalty Matrix
 
 The penalty matrix defines the spatial penalties imposed by the Markov random field.
 The matrix is constructed based on the neighbor relationships defined earlier.
@@ -127,7 +127,7 @@ The penalty matrix `K` is set up such that it reflects the neighborhood relation
 regions. Each element of the matrix represents how strongly each region is connected to its
 neighbors. The diagonal entries represent the total number of neighbors for each region.
 
-### Estimating the Model
+## Estimating the Model
 
 We now estimate the spatial count model using the Negative Binomial distribution (`NBI`).
 The model includes smooth functions of altitude, year, and an interaction between altitude and year,
@@ -162,7 +162,7 @@ Here, the spatial effect is modeled as an MRF smooth (`s(id, bs = "mrf")`), wher
 matrix `K` enforces spatial structure based on neighboring stations. We use the
 Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.
 
-### Visualizing the Estimated Effects
+## Visualizing the Estimated Effects
 
 Finally, we visualize the estimated effects from the fitted model.
 
@@ -174,12 +174,12 @@ plot(b)
 The plot shows the estimated smooth functions for altitude, year, and the spatial effect.
 These visualizations help us interpret how storm counts vary across space and time.
 
-### Prediction
+## Prediction
 
 We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
 set up a new data frame containing only the unique loactions.
 
-```{r}
+```{r, eval=FALSE}
 nd <- unique(storms[, "id", drop = FALSE])
 
 ## add the year
@@ -187,9 +187,10 @@ nd$year <- 2022
 
 ## add altitude information, this is stored
 ## in a raster file in
-library
-rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
-alt <- st_read(rf)
+
+#FIXME# library
+#FIXME# rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
+#FIXME# alt <- st_read(rf)
 
 ## prediction for the mu predictor,
 ## which is the mean of the NBI distribution

@@ -1,10 +1,10 @@
 ---
 title: "Smooth Terms using s() and pb()"
-output:
-  html_document:
+format: 
+  html:
+    html-math-method: mathjax
     toc: true
-    toc_float: true
-    theme: flatly
+    number-sections: true
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
@@ -27,7 +27,7 @@ nocite: |
   
 vignette: >
   %\VignetteIndexEntry{Smooth Terms}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, inference, forecasting}
   %\VignettePackage{gamlss2}

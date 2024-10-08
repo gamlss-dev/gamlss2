@@ -1,0 +1,50 @@
+---
+title: "Quantile Estimation"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Top Models}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, inference, forecasting}
+  %\VignettePackage{gamlss2}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss2")
+```
+
+Describe estimation of quantiles/centiles.
+
+```{r}
+library("gamlss2")
+
+data("film90", package = "gamlss.data")
+     
+## model formula
+f <-  ~ s(lboopen, k = 20)
+f <- rep(list(f), 4)
+f[[1]] <- update(f[[1]], lborev1 ~ .)
+     
+## estimate model
+b <- gamlss2(f, data = film90, family = BCPE)
+     
+## compute quantiles using "newdata"
+nd <- with(film90,
+  data.frame("lboopen" = seq(min(lboopen), max(lboopen), length = 300))
+)
+fit <- quantile(b, newdata = nd, probs = c(0.1, 0.5, 0.9))
+     
+## plot quantiles
+par(mar = c(4, 4, 1, 1))
+plot(lborev1 ~ lboopen, data = film90,
+  pch = 16, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
+matplot(nd$lboopen, fit, type = "l",
+  lwd = 2, lty = 1, col = 4, add = TRUE)
+```

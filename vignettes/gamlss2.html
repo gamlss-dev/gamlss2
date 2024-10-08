@@ -396,7 +396,7 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#residual-diagnostics" id="toc-residual-diagnostics" class="nav-link active" data-scroll-target="#residual-diagnostics">Residual Diagnostics</a></li>
+  <li><a href="#residual-diagnostics" id="toc-residual-diagnostics" class="nav-link active" data-scroll-target="#residual-diagnostics"><span class="header-section-number">1</span> Residual Diagnostics</a></li>
   </ul>
 </nav>
     </div>
@@ -470,8 +470,8 @@ AIC = 14337.7146 elapsed =  0.02sec</code></pre>
 </div>
 </div>
 <p>Note that the summary output is very similar to <code>lm()</code> and <code>glm()</code> with the main difference being that summary outputs are provided for all parameters of the distribution. In this case, the model is estimated using the <code>NO</code> family of the <em>gamlss.dist</em> package, a two-parameter distribution with parameters <code>mu</code> and <code>sigma</code>.</p>
-<section id="residual-diagnostics" class="level3">
-<h3 class="anchored" data-anchor-id="residual-diagnostics">Residual Diagnostics</h3>
+<section id="residual-diagnostics" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="residual-diagnostics"><span class="header-section-number">1</span> Residual Diagnostics</h2>
 <p>Since we estimated a simple linear model with Gaussian errors up to now, we are assuming that the distribution of the response variable, the number of motorcycles (<code>bikes</code>), follows a normal distribution with constant variance. However, this assumption may not always hold true, especially when the response variable is count data, which often exhibits overdispersion or non-constant variance.</p>
 <p>To assess whether the normal distribution with constant variance is appropriate, we can start by examining diagnostic plots.</p>
 <div class="cell">

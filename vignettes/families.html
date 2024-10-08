@@ -425,12 +425,15 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#defining-family-objects" id="toc-defining-family-objects" class="nav-link active" data-scroll-target="#defining-family-objects">Defining Family Objects</a></li>
-  <li><a href="#density-function" id="toc-density-function" class="nav-link" data-scroll-target="#density-function">Density Function</a></li>
-  <li><a href="#optional-derivatives" id="toc-optional-derivatives" class="nav-link" data-scroll-target="#optional-derivatives">Optional Derivatives</a></li>
-  <li><a href="#additional-functions" id="toc-additional-functions" class="nav-link" data-scroll-target="#additional-functions">Additional Functions</a></li>
-  <li><a href="#flexible-links" id="toc-flexible-links" class="nav-link" data-scroll-target="#flexible-links">Flexible Links</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#defining-family-objects" id="toc-defining-family-objects" class="nav-link active" data-scroll-target="#defining-family-objects"><span class="header-section-number">1</span> Defining Family Objects</a></li>
+  <li><a href="#density-function" id="toc-density-function" class="nav-link" data-scroll-target="#density-function"><span class="header-section-number">2</span> Density Function</a></li>
+  <li><a href="#optional-derivatives" id="toc-optional-derivatives" class="nav-link" data-scroll-target="#optional-derivatives"><span class="header-section-number">3</span> Optional Derivatives</a></li>
+  <li><a href="#additional-functions" id="toc-additional-functions" class="nav-link" data-scroll-target="#additional-functions"><span class="header-section-number">4</span> Additional Functions</a></li>
+  <li><a href="#flexible-links" id="toc-flexible-links" class="nav-link" data-scroll-target="#flexible-links"><span class="header-section-number">5</span> Flexible Links</a>
+  <ul class="collapse">
+  <li><a href="#example-modeling-with-the-kumaraswamy-distribution" id="toc-example-modeling-with-the-kumaraswamy-distribution" class="nav-link" data-scroll-target="#example-modeling-with-the-kumaraswamy-distribution"><span class="header-section-number">5.1</span> Example: Modeling with the Kumaraswamy Distribution</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">6</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -451,8 +454,8 @@ window.Quarto = {
 <li>Functions for the density, log-likelihood, and their derivatives.</li>
 </ul>
 <p>This document provides an overview of how to construct and use family objects within <em>gamlss2</em>. By the end, you should have a good understanding of how to implement a custom family for use in statistical models.</p>
-<section id="defining-family-objects" class="level3">
-<h3 class="anchored" data-anchor-id="defining-family-objects">Defining Family Objects</h3>
+<section id="defining-family-objects" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="defining-family-objects"><span class="header-section-number">1</span> Defining Family Objects</h2>
 <p>A family object in <em>gamlss2</em> is a list that must meet the following minimum criteria:</p>
 <ul>
 <li>Family Name: The object must contain the family name as a character string.</li>
@@ -478,8 +481,8 @@ window.Quarto = {
 </div>
 <p>In this example, we define a normal distribution with two parameters: <code>"mu"</code> (mean) and <code>"sigma"</code> (standard deviation). The link function for <code>"mu"</code> is the identity, and for <code>"sigma"</code>, it is the log function. The density function uses the standard <code>dnorm()</code> function from to calculate the normal density.</p>
 </section>
-<section id="density-function" class="level3">
-<h3 class="anchored" data-anchor-id="density-function">Density Function</h3>
+<section id="density-function" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="density-function"><span class="header-section-number">2</span> Density Function</h2>
 <p>The density function must accept the following arguments:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">d</span>(y, par, <span class="at">log =</span> <span class="cn">FALSE</span>, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -490,8 +493,8 @@ window.Quarto = {
 <li><code>log</code>: A logical value indicating whether to return the log-density.</li>
 </ul>
 </section>
-<section id="optional-derivatives" class="level3">
-<h3 class="anchored" data-anchor-id="optional-derivatives">Optional Derivatives</h3>
+<section id="optional-derivatives" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="optional-derivatives"><span class="header-section-number">3</span> Optional Derivatives</h2>
 <p>Family objects can optionally include functions to compute the first and second derivatives of the log-likelihood with respect to the predictors (or its expectations). These derivatives are used for optimization during model fitting.</p>
 <p>The derivative functions follow the form:</p>
 <div class="cell">
@@ -531,8 +534,8 @@ window.Quarto = {
 </div>
 <p>If no derivatives are provided, numerical approximations will be used by the package.</p>
 </section>
-<section id="additional-functions" class="level3">
-<h3 class="anchored" data-anchor-id="additional-functions">Additional Functions</h3>
+<section id="additional-functions" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="additional-functions"><span class="header-section-number">4</span> Additional Functions</h2>
 <p>Family objects can also include other functions such as:</p>
 <ul>
 <li>Cumulative distribution function (<code>p()</code>).</li>
@@ -541,8 +544,8 @@ window.Quarto = {
 </ul>
 <p>These functions should adhere to the same structure as the density function, taking the response (<code>y</code>), parameters (<code>par</code>), and other relevant arguments.</p>
 </section>
-<section id="flexible-links" class="level3">
-<h3 class="anchored" data-anchor-id="flexible-links">Flexible Links</h3>
+<section id="flexible-links" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="flexible-links"><span class="header-section-number">5</span> Flexible Links</h2>
 <p>Note that the example above used static link functions to define the family object. However, users can easily create families with flexible link functions as well. A helpful example of how to implement such flexibility can be found in the Kumaraswamy distribution implementation, which provides a clear template for setting up families with customizable link functions.</p>
 <p>The Kumaraswamy distribution is a continuous distribution defined on the interval <span class="math inline">\((0, 1)\)</span>. It is similar to the Beta distribution but has simpler forms for its cumulative distribution and inverse cumulative distribution functions, making it more computationally efficient for certain applications.</p>
 <p>The probability density function (PDF) of the Kumaraswamy distribution is:</p>
@@ -551,8 +554,8 @@ f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
 \]</span></p>
 <p>where <span class="math inline">\(y \in (0, 1)\)</span> is the response, and <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are non-negative parameters that determine the shape of the distribution. The complete implementation, including flexible link functions is provided in the <code>Kumaraswamy()</code> family.</p>
 <p>In the following example, we will create the family object for the Kumaraswamy distribution using the <code>Kumaraswamy()</code> function and estimate a model using this distribution.</p>
-<section id="example-modeling-with-the-kumaraswamy-distribution" class="level4">
-<h4 class="anchored" data-anchor-id="example-modeling-with-the-kumaraswamy-distribution">Example: Modeling with the Kumaraswamy Distribution</h4>
+<section id="example-modeling-with-the-kumaraswamy-distribution" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="example-modeling-with-the-kumaraswamy-distribution"><span class="header-section-number">5.1</span> Example: Modeling with the Kumaraswamy Distribution</h3>
 <p>In this example, we will:</p>
 <ul>
 <li>Define the Kumaraswamy family object.</li>
@@ -610,8 +613,8 @@ GAMLSS-RS iteration  4: Global Deviance = -1504.1294 eps = 0.000002     </code><
 <p>The <code>Kumaraswamy()</code> family in <em>gamlss2</em> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
 </section>
 </section>
-<section id="conclusion" class="level3">
-<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
+<section id="conclusion" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6</span> Conclusion</h2>
 <p>Family objects in the <em>gamlss2</em> package are a fundamental component for defining flexible, distribution-based regression models, and beyond. By encapsulating the necessary elements, such as parameters, link functions, and density functions, they provide a powerful framework for customizing models to fit specific data. The flexibility to define custom families, as demonstrated with the <code>Kumaraswamy()</code> distribution, enables users to extend the package beyond its default families, making it adaptable to a wide range of modeling scenarios. Furthermore, the ability to define both static and dynamic link functions enhances the versatility of <em>gamlss2</em> for distributional regression, empowering users to tailor models to their unique data and research needs.</p>
 
 

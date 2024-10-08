@@ -396,13 +396,13 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#example-modeling-severe-storm-counts-in-germany" id="toc-example-modeling-severe-storm-counts-in-germany" class="nav-link active" data-scroll-target="#example-modeling-severe-storm-counts-in-germany">Example: Modeling Severe Storm Counts in Germany</a></li>
-  <li><a href="#visualizing-the-spatial-structure" id="toc-visualizing-the-spatial-structure" class="nav-link" data-scroll-target="#visualizing-the-spatial-structure">Visualizing the Spatial Structure</a></li>
-  <li><a href="#defining-the-neighborhood-structure" id="toc-defining-the-neighborhood-structure" class="nav-link" data-scroll-target="#defining-the-neighborhood-structure">Defining the Neighborhood Structure</a></li>
-  <li><a href="#constructing-the-penalty-matrix" id="toc-constructing-the-penalty-matrix" class="nav-link" data-scroll-target="#constructing-the-penalty-matrix">Constructing the Penalty Matrix</a></li>
-  <li><a href="#estimating-the-model" id="toc-estimating-the-model" class="nav-link" data-scroll-target="#estimating-the-model">Estimating the Model</a></li>
-  <li><a href="#visualizing-the-estimated-effects" id="toc-visualizing-the-estimated-effects" class="nav-link" data-scroll-target="#visualizing-the-estimated-effects">Visualizing the Estimated Effects</a></li>
-  <li><a href="#prediction" id="toc-prediction" class="nav-link" data-scroll-target="#prediction">Prediction</a></li>
+  <li><a href="#example-modeling-severe-storm-counts-in-germany" id="toc-example-modeling-severe-storm-counts-in-germany" class="nav-link active" data-scroll-target="#example-modeling-severe-storm-counts-in-germany"><span class="header-section-number">1</span> Example: Modeling Severe Storm Counts in Germany</a></li>
+  <li><a href="#visualizing-the-spatial-structure" id="toc-visualizing-the-spatial-structure" class="nav-link" data-scroll-target="#visualizing-the-spatial-structure"><span class="header-section-number">2</span> Visualizing the Spatial Structure</a></li>
+  <li><a href="#defining-the-neighborhood-structure" id="toc-defining-the-neighborhood-structure" class="nav-link" data-scroll-target="#defining-the-neighborhood-structure"><span class="header-section-number">3</span> Defining the Neighborhood Structure</a></li>
+  <li><a href="#constructing-the-penalty-matrix" id="toc-constructing-the-penalty-matrix" class="nav-link" data-scroll-target="#constructing-the-penalty-matrix"><span class="header-section-number">4</span> Constructing the Penalty Matrix</a></li>
+  <li><a href="#estimating-the-model" id="toc-estimating-the-model" class="nav-link" data-scroll-target="#estimating-the-model"><span class="header-section-number">5</span> Estimating the Model</a></li>
+  <li><a href="#visualizing-the-estimated-effects" id="toc-visualizing-the-estimated-effects" class="nav-link" data-scroll-target="#visualizing-the-estimated-effects"><span class="header-section-number">6</span> Visualizing the Estimated Effects</a></li>
+  <li><a href="#prediction" id="toc-prediction" class="nav-link" data-scroll-target="#prediction"><span class="header-section-number">7</span> Prediction</a></li>
   </ul>
 </nav>
     </div>
@@ -417,8 +417,8 @@ div.csl-indent {
 
 <p>Spatial data analysis is important in many fields such as environmental science, epidemiology, and climatology, where observations are collected across different geographical locations. A key challenge in spatial modeling is accounting for the dependence structure among nearby regions, which often display correlated patterns in outcomes.</p>
 <p>In generalized additive models for location, scale, and shape (GAMLSS), spatial effects can be incorporated in various ways, such as through Markov random fields (MRFs). MRFs handle spatial correlation by applying penalties that reflect the neighborhood structure of the spatial data. This vignette is divided into two parts: the first part demonstrates how to estimate discrete spatial effects using MRFs with the gamlss2 package, while the second part provides examples of modeling spatial effects with smooth functions like thin-plate splines or tensor product splines.</p>
-<section id="example-modeling-severe-storm-counts-in-germany" class="level3">
-<h3 class="anchored" data-anchor-id="example-modeling-severe-storm-counts-in-germany">Example: Modeling Severe Storm Counts in Germany</h3>
+<section id="example-modeling-severe-storm-counts-in-germany" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="example-modeling-severe-storm-counts-in-germany"><span class="header-section-number">1</span> Example: Modeling Severe Storm Counts in Germany</h2>
 <p>In this example, we analyze severe storm counts recorded at various weather stations across Germany over multiple years. Our goal is to model these storm counts while accounting for the spatial dependence between stations. To achieve this, we associate each weather station with its respective county in Germany, enabling us to incorporate the geographical structure into the model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load the Germany severe storm data</span></span>
@@ -443,8 +443,8 @@ div.csl-indent {
 </div>
 <p>The data contains storm counts per year for each station. A preliminary visualization of these counts allows us to inspect patterns of storm frequency over time and across stations.</p>
 </section>
-<section id="visualizing-the-spatial-structure" class="level3">
-<h3 class="anchored" data-anchor-id="visualizing-the-spatial-structure">Visualizing the Spatial Structure</h3>
+<section id="visualizing-the-spatial-structure" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="visualizing-the-spatial-structure"><span class="header-section-number">2</span> Visualizing the Spatial Structure</h2>
 <p>We begin by plotting the locations of weather stations on a map of Germany. The <em>sf</em> package is used to manage and plot spatial data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load map of Germany</span></span>
@@ -453,9 +453,10 @@ div.csl-indent {
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Germany"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## plot station locations</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(Germany))</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>co <span class="ot">&lt;-</span> <span class="fu">unique</span>(storms[, <span class="fu">c</span>(<span class="st">"lat"</span>, <span class="st">"lon"</span>)])</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(co, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(Germany))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>co <span class="ot">&lt;-</span> <span class="fu">unique</span>(storms[, <span class="fu">c</span>(<span class="st">"lat"</span>, <span class="st">"lon"</span>)])</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(co, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -466,8 +467,8 @@ div.csl-indent {
 </div>
 <p>This map shows the geographical distribution of weather stations. The spatial structure will be incorporated into our model to account for the proximity of stations when estimating storm counts.</p>
 </section>
-<section id="defining-the-neighborhood-structure" class="level3">
-<h3 class="anchored" data-anchor-id="defining-the-neighborhood-structure">Defining the Neighborhood Structure</h3>
+<section id="defining-the-neighborhood-structure" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="defining-the-neighborhood-structure"><span class="header-section-number">3</span> Defining the Neighborhood Structure</h2>
 <p>Next, we define the neighborhood structure among the weather stations using a distance-based criterion. This is crucial for the Markov random field, as it specifies how spatial correlation should be penalized.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate spatial count model using</span></span>
@@ -484,8 +485,9 @@ package with: `install.packages('spDataLarge',
 repos='https://nowosad.github.io/drat/', type='source')`</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>nb <span class="ot">&lt;-</span> <span class="fu">dnearneigh</span>(<span class="fu">st_centroid</span>(<span class="fu">st_geometry</span>(Germany)), <span class="at">d1 =</span> <span class="dv">0</span>, <span class="at">d2 =</span> <span class="dv">80</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(Germany), <span class="at">border =</span> <span class="st">"lightgray"</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.nb</span>(nb, <span class="fu">st_geometry</span>(Germany), <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(Germany), <span class="at">border =</span> <span class="st">"lightgray"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.nb</span>(nb, <span class="fu">st_geometry</span>(Germany), <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in st_point_on_surface.sfc(coords): st_point_on_surface may not give
 correct results for longitude/latitude data</code></pre>
@@ -498,10 +500,10 @@ correct results for longitude/latitude data</code></pre>
 </div>
 </div>
 </div>
-<p>The neighbor matrix is constructed using the <code>poly2nb()</code> function from the <em>spdep</em> package, which calculates the adjacency structure of the geographical regions. We then visualize the spatial network of neighbors on the map.</p>
+<p>The neighbor matrix is constructed using the <code>dneirneigh()</code> function from the <em>spdep</em> package, which calculates the adjacency structure of the geographical regions. We then visualize the spatial network of neighbors on the map.</p>
 </section>
-<section id="constructing-the-penalty-matrix" class="level3">
-<h3 class="anchored" data-anchor-id="constructing-the-penalty-matrix">Constructing the Penalty Matrix</h3>
+<section id="constructing-the-penalty-matrix" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="constructing-the-penalty-matrix"><span class="header-section-number">4</span> Constructing the Penalty Matrix</h2>
 <p>The penalty matrix defines the spatial penalties imposed by the Markov random field. The matrix is constructed based on the neighbor relationships defined earlier.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute final neighbor penalty matrix</span></span>
@@ -520,28 +522,28 @@ correct results for longitude/latitude data</code></pre>
 </div>
 <p>The penalty matrix <code>K</code> is set up such that it reflects the neighborhood relationships between the regions. Each element of the matrix represents how strongly each region is connected to its neighbors. The diagonal entries represent the total number of neighbors for each region.</p>
 </section>
-<section id="estimating-the-model" class="level3">
-<h3 class="anchored" data-anchor-id="estimating-the-model">Estimating the Model</h3>
-<p>We now estimate the spatial count model using the Negative Binomial distribution (<code>NBI</code>). The model includes smooth functions of altitude, year, and an interaction between altitude and year. Spatial effects are incorporated using the <code>bs = "mrf"</code> option.</p>
+<section id="estimating-the-model" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="estimating-the-model"><span class="header-section-number">5</span> Estimating the Model</h2>
+<p>We now estimate the spatial count model using the Negative Binomial distribution (<code>NBI</code>). The model includes smooth functions of altitude, year, and an interaction between altitude and year, as well as a (functional) random effect over regions for the time trend. Spatial effects are incorporated using the <code>bs = "mrf"</code> option.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate count model using the NBI family,</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula is</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="er">~</span> <span class="fu">s</span>(alt) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(id, <span class="at">bs =</span> <span class="st">"mrf"</span>, <span class="at">xt =</span> <span class="fu">list</span>(<span class="st">"penalty"</span> <span class="ot">=</span> K)) <span class="sc">+</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(alt, year)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">update</span>(f, counts <span class="sc">~</span> .), f)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model using BIC for shrinkage parameter selection</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> storms, <span class="at">family =</span> NBI, <span class="at">criterion =</span> <span class="st">"BIC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="er">~</span> <span class="fu">s</span>(alt) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(id, <span class="at">bs =</span> <span class="st">"mrf"</span>, <span class="at">xt =</span> <span class="fu">list</span>(<span class="st">"penalty"</span> <span class="ot">=</span> K), <span class="at">k =</span> <span class="dv">100</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">update</span>(f, counts <span class="sc">~</span> .), f)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model using BIC for shrinkage parameter selection</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> storms, <span class="at">family =</span> NBI, <span class="at">criterion =</span> <span class="st">"BIC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Note that estimation of this model takes some time, because of the quite high number of coefficients for the (functional) random effect <code>ti(id, year, bs = c("re", "cr"), k = c(157, 5))</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model summary</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = counts ~ s(alt) + s(year) + s(id, bs = "mrf", 
-    xt = list(penalty = K)) + te(alt, year) | s(alt) + s(year) + 
-    s(id, bs = "mrf", xt = list(penalty = K)) + te(alt, year), 
-    data = storms, family = NBI, ... = pairlist(x = FALSE, criterion = "BIC"))
+    xt = list(penalty = K), k = 100) | s(alt) + s(year) + s(id, 
+    bs = "mrf", xt = list(penalty = K), k = 100), data = storms, 
+    family = NBI, ... = pairlist(x = FALSE, criterion = "BIC"))
 ---
 Family: NBI 
 Link function: mu = log, sigma = log
@@ -550,36 +552,32 @@ Parameter: mu
 ---
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  1.15816    0.01616   71.68   &lt;2e-16 ***
+(Intercept)  1.21865    0.01641   74.28   &lt;2e-16 ***
 ---
 Smooth terms:
-      s(alt)  s(year)    s(id) te(alt,year)
-edf   8.9102   6.3675 100.9338       4.5541
+    s(alt) s(year)  s(id)
+edf 8.9459  2.5012 69.509
 *--------
 Parameter: sigma 
 ---
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -0.61129    0.02754   -22.2   &lt;2e-16 ***
+(Intercept)  -0.3826     0.0260  -14.71   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-     s(alt) s(year)   s(id) te(alt,year)
-edf  5.4313  1.9047 25.9703       3.0937
+    s(alt) s(year)  s(id)
+edf 7.7394  2.0782 22.381
 *--------
-n = 3494 df =  159.17 res.df =  3334.83
-Deviance = 15698.2644 Null Dev. Red. = 18.53%
-AIC = 16016.5958 elapsed =  8.33sec</code></pre>
+n = 3494 df =  115.16 res.df =  3378.84
+Deviance = 16112.0618 Null Dev. Red. = 16.39%
+AIC = 16342.3722 elapsed =  7.55sec</code></pre>
 </div>
 </div>
-<p>Here, the spatial effect is modeled as an MRF smooth (<code>s(id, bs = "mrf")</code>), where the penalty matrix <code>K</code> enforces spatial structure based on neighboring stations. We use the Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.</p>
-</section>
-<section id="visualizing-the-estimated-effects" class="level3">
-<h3 class="anchored" data-anchor-id="visualizing-the-estimated-effects">Visualizing the Estimated Effects</h3>
-<p>Finally, we visualize the estimated effects from the fitted model.</p>
+<p>Model calibration is checked using histogram, Q-Q plot, wormplot etc.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -588,36 +586,14 @@ AIC = 16016.5958 elapsed =  8.33sec</code></pre>
 </div>
 </div>
 </div>
-<p>The plot shows the estimated smooth functions for altitude, year, and the spatial effect. These visualizations help us interpret how storm counts vary across space and time.</p>
+<p>Here, the spatial effect is modeled as an MRF smooth (<code>s(id, bs = "mrf")</code>), where the penalty matrix <code>K</code> enforces spatial structure based on neighboring stations. We use the Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.</p>
 </section>
-<section id="prediction" class="level3">
-<h3 class="anchored" data-anchor-id="prediction">Prediction</h3>
-<p>First we predict the spatial effects on the scale of the predictors. Therefore, we set up a new data frame containing only the unique loactions.</p>
+<section id="visualizing-the-estimated-effects" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="visualizing-the-estimated-effects"><span class="header-section-number">6</span> Visualizing the Estimated Effects</h2>
+<p>Finally, we visualize the estimated effects from the fitted model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">unique</span>(storms[, <span class="st">"id"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="do">## set some dummy values, not needed when predicting single model term</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>alt <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="dv">2020</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="do">## prediction for the mu predictor</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>fmu <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">newdata =</span> nd,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">term =</span> <span class="st">"s(id)"</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"link"</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="do">## same for sigma</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>fsigma <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">newdata =</span> nd,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">term =</span> <span class="st">"s(id)"</span>,</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"link"</span>)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="do">## add fitted values to map of Germany</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">merge</span>(Germany, nd, <span class="at">by =</span> <span class="st">"id"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="do">## plot spatial effects</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ggplot2"</span>)</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"colorspace"</span>)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(m) <span class="sc">+</span> <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> fmu)) <span class="sc">+</span></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -625,25 +601,76 @@ AIC = 16016.5958 elapsed =  8.33sec</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## note that because of the discrete spatial effect,</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="do">## there are a lot of NAs, therefore, we need to compute</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="do">## predictions in such regions by averaging using the neighbors</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="do">## of a region. we use the neighbour list object nb to compute</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="do">## the predictions, this is iterated.</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span>(<span class="fu">any</span>(<span class="fu">is.na</span>(m<span class="sc">$</span>fmu))) {</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  m<span class="sc">$</span>fmu <span class="ot">&lt;-</span> <span class="fu">sapply</span>(nb, <span class="cf">function</span>(i) <span class="fu">mean</span>(m<span class="sc">$</span>fmu[i], <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="do">## plot final spatial effect</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(m) <span class="sc">+</span> <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> fmu)) <span class="sc">+</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="spatial_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
 </div>
-</div>
+<p>The plot shows the estimated smooth functions for altitude, year, and the spatial effect. These visualizations help us interpret how storm counts vary across space and time.</p>
+</section>
+<section id="prediction" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="prediction"><span class="header-section-number">7</span> Prediction</h2>
+<p>We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we set up a new data frame containing only the unique loactions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">unique</span>(storms[, <span class="st">"id"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="do">## add the year</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="dv">2022</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="do">## add altitude information, this is stored</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="do">## in a raster file in</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#FIXME# library</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#FIXME# rf &lt;- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#FIXME# alt &lt;- st_read(rf)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="do">## prediction for the mu predictor,</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="do">## which is the mean of the NBI distribution</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>fmu <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">newdata =</span> nd,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">term =</span> <span class="st">"s(id)"</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"link"</span>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="do">## add fitted values to map of Germany</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">merge</span>(Germany, nd, <span class="at">by =</span> <span class="st">"id"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="do">## plot spatial effects</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ggplot2"</span>)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"colorspace"</span>)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(m) <span class="sc">+</span> <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> fmu)) <span class="sc">+</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="do">## note that because of the discrete spatial effect,</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="do">## there are a lot of NAs, therefore, we need to compute</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="do">## predictions in such regions by averaging using the neighbors</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="do">## of a region. we use the neighbour list object nb to compute</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="do">## the predictions, this is iterated.</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>fill_missing_mrf <span class="ot">&lt;-</span> <span class="cf">function</span>(m, nb, <span class="at">j =</span> <span class="st">"fmu"</span>) {</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  <span class="do">## while there are still NAs in the specified column (e.g., 'fmu')</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="fu">any</span>(<span class="fu">is.na</span>(m[[j]]))) {</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    <span class="do">## recalculate the number of non-NA neighbors for each region</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    na_counts <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">seq_along</span>(nb), <span class="cf">function</span>(i) {</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">is.na</span>(m[[j]][i])) {</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(m[[j]][nb[[i]]])) <span class="do">## count non-NA neighbors</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>        <span class="sc">-</span><span class="dv">1</span> <span class="do">## region already filled, deprioritize</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="do">## find the region with the most non-NA neighbors</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>    max_index <span class="ot">&lt;-</span> <span class="fu">which.max</span>(na_counts)</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    <span class="do">## update that region using the mean of its neighbors' values</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(nb[[max_index]]) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>      m[[j]][max_index] <span class="ot">&lt;-</span> <span class="fu">mean</span>(m[[j]][nb[[max_index]]], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  <span class="do">## return the updated predictions</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">fill_missing_mrf</span>(m, nb, <span class="at">j =</span> <span class="st">"fmu"</span>)</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="do">## plot final spatial effects</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(m) <span class="sc">+</span> <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> fmu)) <span class="sc">+</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_continuous_diverging</span>(<span class="st">"Blue-Red 3"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

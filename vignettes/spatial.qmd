@@ -71,6 +71,7 @@ library("sf")
 data("Germany", package = "gamlss2")
 
 ## plot station locations
+par(mar = c(1, 1, 1, 1))
 plot(st_geometry(Germany))
 co <- unique(storms[, c("lat", "lon")])
 points(co, col = 2, pch = 4, lwd = 2)
@@ -92,11 +93,12 @@ correlation should be penalized.
 ## neighbors
 library("spdep")
 nb <- dnearneigh(st_centroid(st_geometry(Germany)), d1 = 0, d2 = 80)
+par(mar = c(1, 1, 1, 1))
 plot(st_geometry(Germany), border = "lightgray")
 plot.nb(nb, st_geometry(Germany), add = TRUE)
 ```
 
-The neighbor matrix is constructed using the `poly2nb()` function from the _spdep_ package,
+The neighbor matrix is constructed using the `dneirneigh()` function from the _spdep_ package,
 which calculates the adjacency structure of the geographical regions. We then visualize
 the spatial network of neighbors on the map.
 
@@ -128,23 +130,32 @@ neighbors. The diagonal entries represent the total number of neighbors for each
 ## Estimating the Model
 
 We now estimate the spatial count model using the Negative Binomial distribution (`NBI`).
-The model includes smooth functions of altitude, year, and an interaction between altitude and year.
+The model includes smooth functions of altitude, year, and an interaction between altitude and year,
+as well as a (functional) random effect over regions for the time trend.
 Spatial effects are incorporated using the `bs = "mrf"` option.
 
 ```{r, results="hide"}
 ## estimate count model using the NBI family,
 ## model formula is
-f <- ~ s(alt) + s(year) + s(id, bs = "mrf", xt = list("penalty" = K)) +
-  te(alt, year)
+f <- ~ s(alt) + s(year) + s(id, bs = "mrf", xt = list("penalty" = K), k = 100)
 f <- list(update(f, counts ~ .), f)
 
 ## estimate model using BIC for shrinkage parameter selection
 b <- gamlss2(f, data = storms, family = NBI, criterion = "BIC")
 ```
 
+Note that estimation of this model takes some time, because of the quite high number of
+coefficients for the (functional) random effect `ti(id, year, bs = c("re", "cr"), k = c(157, 5))`.
+
 ```{r}
 ## model summary
 summary(b)
+```
+
+Model calibration is checked using histogram, Q-Q plot, wormplot etc.
+
+```{r}
+plot(b, which = "resid")
 ```
 
 Here, the spatial effect is modeled as an MRF smooth (`s(id, bs = "mrf")`), where the penalty
@@ -156,6 +167,7 @@ Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.
 Finally, we visualize the estimated effects from the fitted model.
 
 ```{r}
+par(mar = c(4, 4, 1, 1))
 plot(b)
 ```
 
@@ -164,24 +176,25 @@ These visualizations help us interpret how storm counts vary across space and ti
 
 ## Prediction
 
-First we predict the spatial effects on the scale of the predictors. Therefore, we
+We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
 set up a new data frame containing only the unique loactions.
 
 ```{r}
 nd <- unique(storms[, "id", drop = FALSE])
 
-## set some dummy values, not needed when predicting single model term
-nd$alt <- 1000
-nd$year <- 2020
+## add the year
+nd$year <- 2022
 
-## prediction for the mu predictor
+## add altitude information, this is stored
+## in a raster file in
+library
+rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
+alt <- st_read(rf)
+
+## prediction for the mu predictor,
+## which is the mean of the NBI distribution
 nd$fmu <- predict(b, newdata = nd,
   model = "mu", term = "s(id)",
-  type = "link")
-
-## same for sigma
-nd$fsigma <- predict(b, newdata = nd,
-  model = "sigma", term = "s(id)",
   type = "link")
 
 ## add fitted values to map of Germany
@@ -198,11 +211,35 @@ scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
 ## predictions in such regions by averaging using the neighbors
 ## of a region. we use the neighbour list object nb to compute
 ## the predictions, this is iterated.
-while(any(is.na(m$fmu))) {
-  m$fmu <- sapply(nb, function(i) mean(m$fmu[i], na.rm = TRUE))
+fill_missing_mrf <- function(m, nb, j = "fmu") {
+  ## while there are still NAs in the specified column (e.g., 'fmu')
+  while(any(is.na(m[[j]]))) {
+    
+    ## recalculate the number of non-NA neighbors for each region
+    na_counts <- sapply(seq_along(nb), function(i) {
+      if(is.na(m[[j]][i])) {
+        sum(!is.na(m[[j]][nb[[i]]])) ## count non-NA neighbors
+      } else {
+        -1 ## region already filled, deprioritize
+      }
+    })
+    
+    ## find the region with the most non-NA neighbors
+    max_index <- which.max(na_counts)
+    
+    ## update that region using the mean of its neighbors' values
+    if(length(nb[[max_index]]) > 0) {
+      m[[j]][max_index] <- mean(m[[j]][nb[[max_index]]], na.rm = TRUE)
+    }
+  }
+  
+  ## return the updated predictions
+  return(m)
 }
 
-## plot final spatial effect
+m <- fill_missing_mrf(m, nb, j = "fmu")
+
+## plot final spatial effects
 ggplot(m) + geom_sf(aes(fill = fmu)) +
 scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
 ```

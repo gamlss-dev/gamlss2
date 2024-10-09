@@ -98,8 +98,8 @@ function of `x`.
 b <- gamlss2(y ~ s(x) | s(x) | 1 | 1 | x, data = d, family = NOmx)
 
 ## plot the estimated effects
-par(mar = c(4, 4, 1, 1))
-plot(b)
+par(mar = c(4, 4, 4, 1))
+plot(b, main = c("mu1", "mu2"))
 ```
 
 ## Predicting and Visualizing Results
@@ -112,7 +112,7 @@ class probabilities and plot the fitted means along with the data.
 ## predict the parameters
 p <- predict(b, type = "parameter")
 
-## compare estimated vs true class probabilities
+## compare estimated vs. true class probabilities
 plot(p$pi, mix_prob, main = "Estimated vs True Class Probabilities", 
      xlab = "Estimated Probability", ylab = "True Probability")
 abline(0, 1)

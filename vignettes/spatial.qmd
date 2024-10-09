@@ -18,7 +18,23 @@ vignette: >
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
+
+if(!("sf" %in% installed.packages()))
+  install.packages("sf")
+if(!("spdep" %in% installed.packages()))
+  install.packages("spdep")
+if(!("ggplot2" %in% installed.packages()))
+  install.packages("ggplot2")
+if(!("raster" %in% installed.packages()))
+  install.packages("raster")
+if(!("exactextractr" %in% installed.packages()))
+  install.packages("exactextractr")
+
 library("sf")
+library("spdep")
+library("ggplot2")
+library("raster")
+library("colorspace")
 ```
 
 Spatial data analysis is important in many fields such as environmental science, epidemiology,
@@ -138,7 +154,7 @@ Spatial effects are incorporated using the `bs = "mrf"` option.
 ```{r, results="hide"}
 ## estimate count model using the NBI family,
 ## model formula is
-f <- ~ s(alt) + s(year) + s(id, bs = "mrf", xt = list("penalty" = K), k = 100)
+f <- ~ s(log(alt + 10)) + s(year) + s(id, bs = "mrf", xt = list("penalty" = K), k = 100)
 f <- list(update(f, counts ~ .), f)
 
 ## estimate model using BIC for shrinkage parameter selection
@@ -167,7 +183,7 @@ Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.
 
 Finally, we visualize the estimated effects from the fitted model.
 
-```{r, fig.height=7}
+```{r, fig.height=8}
 par(mar = c(4, 4, 1, 1))
 plot(b)
 ```
@@ -178,34 +194,42 @@ These visualizations help us interpret how storm counts vary across space and ti
 ## Prediction
 
 We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
-set up a new data frame containing only the unique loactions.
+set up a new data frame containing only the unique locations.
 
-```{r, eval=FALSE}
+```{r, message=FALSE, results="hide"}
 nd <- unique(storms[, "id", drop = FALSE])
 
 ## add the year
-nd$year <- 2022
+nd$year <- 2025
 
 ## add altitude information, this is stored
 ## in a raster file in
+rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
 
-#FIXME# library
-#FIXME# rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
-#FIXME# alt <- st_read(rf)
+## needs the raster package
+library("raster")
 
-## prediction for the mu predictor,
-## which is the mean of the NBI distribution
-nd$fmu <- predict(b, newdata = nd,
-  model = "mu", term = "s(id)",
-  type = "link")
+## read altitude raster file
+alt <- raster(rf)
 
-## add fitted values to map of Germany
-m <- merge(Germany, nd, by = "id", all.x = TRUE)
+## aggregate altitude to regions
+library("exactextractr")
+Germany$alt <- exact_extract(alt, Germany, fun = "median")
+nd <- merge(nd, Germany[, c("id", "alt")], by = "id")
 
-## plot spatial effects
+## predict parameters of the NBI distribution
+par <- predict(b, newdata = nd)
+
+## estimated probability of more than 2 severe storms
+nd$prob2 <- 1 - family(b)$p(2, par)
+
+## add fitted probabilities to map of Germany
+m <- merge(Germany, nd[, c("id", "prob2")], by = "id", all.x = TRUE)
+
+## plot spatial risk
 library("ggplot2")
 library("colorspace")
-ggplot(m) + geom_sf(aes(fill = fmu)) +
+ggplot(m) + geom_sf(aes(fill = prob2)) +
 scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
 
 ## note that because of the discrete spatial effect,
@@ -239,10 +263,10 @@ fill_missing_mrf <- function(m, nb, j = "fmu") {
   return(m)
 }
 
-m <- fill_missing_mrf(m, nb, j = "fmu")
+m <- fill_missing_mrf(m, nb, j = "prob2")
 
-## plot final spatial effects
-ggplot(m) + geom_sf(aes(fill = fmu)) +
+## plot final spatial risk
+ggplot(m) + geom_sf(aes(fill = prob2)) +
 scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
 ```
 

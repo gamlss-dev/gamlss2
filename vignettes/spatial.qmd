@@ -87,7 +87,7 @@ Next, we define the neighborhood structure among the weather stations using a di
 criterion. This is crucial for the Markov random field, as it specifies how spatial
 correlation should be penalized.
 
-```{r}
+```{r, message=FALSE, results="hide"}
 ## estimate spatial count model using
 ## a Markov random field, first a neighbor matrix
 ## needs to be computed, here we use distance based

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Top Models – gamlss2</title>
+<title>Forecasting and Assessment with topmodels – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -160,7 +160,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/topmodels.html">Top Models</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/topmodels.html">Forecasting and Assessment with topmodels</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -238,7 +238,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/topmodels.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Top Models</span></a>
+ <span class="menu-text">Forecasting and Assessment with topmodels</span></a>
   </div>
 </li>
       </ul>
@@ -409,25 +409,62 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#probabilistic-model-infrastructure" id="toc-probabilistic-model-infrastructure" class="nav-link active" data-scroll-target="#probabilistic-model-infrastructure"><span class="header-section-number">1</span> Probabilistic model infrastructure</a></li>
+  <li><a href="#data-and-models" id="toc-data-and-models" class="nav-link" data-scroll-target="#data-and-models"><span class="header-section-number">2</span> Data and models</a></li>
+  <li><a href="#probabilistic-forecasting" id="toc-probabilistic-forecasting" class="nav-link" data-scroll-target="#probabilistic-forecasting"><span class="header-section-number">3</span> Probabilistic forecasting</a></li>
+  <li><a href="#graphical-model-assessment" id="toc-graphical-model-assessment" class="nav-link" data-scroll-target="#graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</a></li>
+  <li><a href="#scoring-rules" id="toc-scoring-rules" class="nav-link" data-scroll-target="#scoring-rules"><span class="header-section-number">5</span> Scoring rules</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header">
-<h1 class="title display-7">Top Models</h1>
+<h1 class="title display-7">Forecasting and Assessment with topmodels</h1>
 
 </header>
 
 
+<p><img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="120"></p>
+<section id="probabilistic-model-infrastructure" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="probabilistic-model-infrastructure"><span class="header-section-number">1</span> Probabilistic model infrastructure</h2>
+<p>Introduction on how to use the <a href="https://topmodels.R-Forge.R-project.org/topmodels/">topmodels</a> package <span class="citation" data-cites="topmodels">(<a href="#ref-topmodels" role="doc-biblioref">Zeileis, Lang, and Stauffer 2024</a>)</span> with <em>gamlss2</em>.</p>
+<p>Currently not on CRAN, yet, so install from <a href="https://zeileis.R-universe.dev/">R-universe</a> (if not done already).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Installing package into '/usr/local/lib/R/site-library'
-(as 'lib' is unspecified)</code></pre>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">search</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] ".GlobalEnv"        "package:stats"     "package:graphics" 
+[4] "package:grDevices" "package:datasets"  "package:utils"    
+[7] "package:methods"   "Autoloads"         "package:base"     </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"gamlss"</span>, <span class="st">"gamlss2"</span>, <span class="st">"gamlss.dist"</span>)) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  pkg <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"package:"</span>, i)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(pkg <span class="sc">%in%</span> <span class="fu">search</span>()) {</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">detach</span>(pkg, <span class="at">character.only =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unloadNamespace</span>(<span class="at">ns =</span> i)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="st">"package:gamlss2"</span> <span class="sc">%in%</span> <span class="fu">search</span>()) {</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">detach</span>(<span class="st">"package:gamlss2"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">detach</span>(<span class="st">"package:gamlss.dist"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"gamlss.dist"</span>, <span class="at">repos =</span> <span class="st">"https://gamlss-dev.R-universe.dev"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: gamlss.dist</code></pre>
 </div>
@@ -440,50 +477,239 @@ div.csl-indent {
 <div class="cell-output cell-output-stderr">
 <pre><code>This is mgcv 1.9-1. For overview type 'help("mgcv-package")'.</code></pre>
 </div>
-</div>
-<p>Introduction on how to use the <em>topmodels</em> package with <em>gamlss2</em>.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 413.1546 eps = 0.113045     
-GAMLSS-RS iteration  2: Global Deviance = 411.5309 eps = 0.003929     
-GAMLSS-RS iteration  3: Global Deviance = 411.4561 eps = 0.000181     
-GAMLSS-RS iteration  4: Global Deviance = 411.4527 eps = 0.000008     </code></pre>
-</div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">proscore</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required namespace: scoringRules</code></pre>
-</div>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      logs     crps
-1 4.114527 8.146923</code></pre>
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.5 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+time zone: Etc/UTC
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices datasets  utils     methods   base     
+
+other attached packages:
+[1] topmodels_0.3-0   gamlss2_0.1-0     mgcv_1.9-1        nlme_3.1-165     
+[5] gamlss.dist_6.1-1
+
+loaded via a namespace (and not attached):
+ [1] cli_3.6.3            knitr_1.48           rlang_1.1.4         
+ [4] xfun_0.48            Formula_1.2-5        jsonlite_1.8.9      
+ [7] glue_1.8.0           colorspace_2.1-1     htmltools_0.5.8.1   
+[10] rmarkdown_2.28       grid_4.4.1           evaluate_1.0.0      
+[13] MASS_7.3-61          fastmap_1.2.0        yaml_2.3.10         
+[16] mvtnorm_1.3-1        compiler_4.4.1       lattice_0.22-5      
+[19] digest_0.6.37        distributions3_0.2.2 parallel_4.4.1      
+[22] splines_4.4.1        Matrix_1.6-5         tools_4.4.1         
+[25] bspm_0.5.7          </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="topmodels_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">packageDescription</span>(<span class="st">"topmodels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Package: topmodels
+Title: Infrastructure for Forecasting and Assessment of Probabilistic
+        Models
+Version: 0.3-0
+Date: 2024-08-06
+Authors@R: c(person(given = "Achim", family = "Zeileis", role =
+        c("aut", "cre"), email = "Achim.Zeileis@R-project.org", comment
+        = c(ORCID = "0000-0003-0918-3766")), person(given = c("Moritz",
+        "N."), family = "Lang", role = "aut", email =
+        "moritz.n.lang@gmail.com", comment = c(ORCID =
+        "0000-0002-2533-9903")), person(given = "Reto", family =
+        "Stauffer", role = "aut", email = "reto.stauffer@uibk.ac.at",
+        comment = c(ORCID = "0000-0002-3798-5507")), person(given =
+        "Christian", family = "Kleiber", role = "ctb", email =
+        "Christian.Kleiber@unibas.ch", comment = c(ORCID =
+        "0000-0002-6781-4733")), person(given = "Ioannis", family =
+        "Kosmidis", role = "ctb", email = "i.kosmidis@ucl.ac.uk",
+        comment = c(ORCID = "0000-0003-1556-0302")), person(given =
+        "Jakob", family = "Messner", role = "ctb", email =
+        "jakob.messner@posteo.net", comment = c(ORCID =
+        "0000-0002-1027-3673")))
+Depends: R (&gt;= 3.6.0)
+Imports: graphics, grDevices, grid, stats, utils, colorspace,
+        distributions3 (&gt;= 0.2.1), ggplot2
+Suggests: bamlss (&gt;= 1.2-1), countreg, crch (&gt;= 1.1-1), digest, gamlss
+        (&gt;= 5.4-20), gamlss.dist (&gt;= 6.1-1), MASS, PoissonBinomial,
+        qqconf, scoringRules, tibble, tinytest
+Description: Unified infrastructure for probabilistic models and
+        distributional regressions: Probabilistic forecasting of
+        in-sample and out-of-sample of probabilities, densities,
+        quantiles, and moments. Probabilistic residuals and scoring via
+        log-score (or log-likelihood), (continuous) ranked probability
+        score, etc. Diagnostic graphics like rootograms, PIT
+        histograms, (randomized) quantile residual Q-Q plots, and
+        reliagrams (reliability diagrams).
+License: GPL-2 | GPL-3
+Encoding: UTF-8
+URL: https://topmodels.R-Forge.R-project.org/topmodels/
+Additional_repositories: https://zeileis.R-universe.dev
+RoxygenNote: 7.3.2
+Repository: https://zeileis.r-universe.dev
+RemoteUrl: https://github.com/r-forge/topmodels
+RemoteRef: HEAD
+RemoteSha: c318a96e6e134481a53fc63eba0d735b855cd095
+NeedsCompilation: yes
+Packaged: 2024-09-25 07:18:36 UTC; root
+Author: Achim Zeileis [aut, cre]
+        (&lt;https://orcid.org/0000-0003-0918-3766&gt;), Moritz N. Lang [aut]
+        (&lt;https://orcid.org/0000-0002-2533-9903&gt;), Reto Stauffer [aut]
+        (&lt;https://orcid.org/0000-0002-3798-5507&gt;), Christian Kleiber
+        [ctb] (&lt;https://orcid.org/0000-0002-6781-4733&gt;), Ioannis
+        Kosmidis [ctb] (&lt;https://orcid.org/0000-0003-1556-0302&gt;), Jakob
+        Messner [ctb] (&lt;https://orcid.org/0000-0002-1027-3673&gt;)
+Maintainer: Achim Zeileis &lt;Achim.Zeileis@R-project.org&gt;
+Built: R 4.4.1; x86_64-pc-linux-gnu; 2024-10-09 23:54:07 UTC; unix
+
+-- File: /usr/local/lib/R/site-library/topmodels/Meta/package.rds </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">packageDescription</span>(<span class="st">"gamlss.dist"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Package: gamlss.dist
+Title: Distributions for Generalized Additive Models for Location Scale
+        and Shape
+Version: 6.1-1
+Date: 2023-08-01
+Authors@R: c(person("Mikis", "Stasinopoulos", role = c("aut", "cre",
+        "cph"), email = "d.stasinopoulos@gre.ac.uk", comment = c(ORCID
+        = "0000-0003-2407-5704")), person("Robert", "Rigby", role =
+        "aut", email = "r.rigby@gre.ac.uk", comment = c(ORCID =
+        "0000-0003-3853-1707")), person("Calliope", "Akantziliotou",
+        role = "ctb"), person("Vlasios", "Voudouris", role = "ctb"),
+        person("Gillian", "Heller", role = "ctb", comment = c(ORCID =
+        "0000-0003-1270-1499")), person("Fernanda", "De Bastiani", role
+        = "ctb", comment = c(ORCID = "0000-0001-8532-639X")),
+        person("Raydonal", "Ospina", role = "ctb", email=
+        "rospina@ime.usp.br", comment = c(ORCID =
+        "0000-0002-9884-9090")), person("Nicoletta", "Motpan", role =
+        "ctb"), person("Fiona", "McElduff", role = "ctb"),
+        person("Majid", "Djennad", role = "ctb"), person("Marco",
+        "Enea", role = "ctb"), person("Alexios", "Ghalanos", role =
+        "ctb"), person("Christos", "Argyropoulos", role = "ctb"),
+        person("Almond", "Stöcker", role = "ctb", comment = c(ORCID =
+        "0000-0001-9160-2397")), person("Jens", "Lichter", role =
+        "ctb"), person("Stanislaus", "Stadlmann", role = "ctb", comment
+        = c(ORCID = "0000-0001-6542-6342")), person("Achim", "Zeileis",
+        role = "ctb", email = "Achim.Zeileis@R-project.org", comment =
+        c(ORCID = "0000-0003-0918-3766")) )
+Description: A set of distributions which can be used for modelling the
+        response variables in Generalized Additive Models for Location
+        Scale and Shape, Rigby and Stasinopoulos (2005),
+        &lt;doi:10.1111/j.1467-9876.2005.00510.x&gt;. The distributions can
+        be continuous, discrete or mixed distributions. Extra
+        distributions can be created, by transforming, any continuous
+        distribution defined on the real line, to a distribution
+        defined on ranges 0 to infinity or 0 to 1, by using a 'log' or
+        a 'logit' transformation respectively.
+License: GPL-2 | GPL-3
+URL: https://www.gamlss.com/
+BugReports:
+        https://github.com/mstasinopoulos/GAMLSS-Distibutions/issues
+Depends: R (&gt;= 3.5.0)
+Imports: MASS, graphics, stats, methods, grDevices
+Suggests: distributions3 (&gt;= 0.2.1)
+Encoding: UTF-8
+NeedsCompilation: yes
+Packaged: 2023-08-23 19:47:28 UTC; dimitriosstasinopoulos
+Author: Mikis Stasinopoulos [aut, cre, cph]
+        (&lt;https://orcid.org/0000-0003-2407-5704&gt;), Robert Rigby [aut]
+        (&lt;https://orcid.org/0000-0003-3853-1707&gt;), Calliope
+        Akantziliotou [ctb], Vlasios Voudouris [ctb], Gillian Heller
+        [ctb] (&lt;https://orcid.org/0000-0003-1270-1499&gt;), Fernanda De
+        Bastiani [ctb] (&lt;https://orcid.org/0000-0001-8532-639X&gt;),
+        Raydonal Ospina [ctb]
+        (&lt;https://orcid.org/0000-0002-9884-9090&gt;), Nicoletta Motpan
+        [ctb], Fiona McElduff [ctb], Majid Djennad [ctb], Marco Enea
+        [ctb], Alexios Ghalanos [ctb], Christos Argyropoulos [ctb],
+        Almond Stöcker [ctb] (&lt;https://orcid.org/0000-0001-9160-2397&gt;),
+        Jens Lichter [ctb], Stanislaus Stadlmann [ctb]
+        (&lt;https://orcid.org/0000-0001-6542-6342&gt;), Achim Zeileis [ctb]
+        (&lt;https://orcid.org/0000-0003-0918-3766&gt;)
+Maintainer: Mikis Stasinopoulos &lt;d.stasinopoulos@gre.ac.uk&gt;
+Repository: RSPM
+Date/Publication: 2023-08-23 21:40:08 UTC
+Built: R 4.2.0; x86_64-pc-linux-gnu; 2023-08-24 11:27:14 UTC; unix
+
+-- File: /usr/lib/R/site-library/gamlss.dist/Meta/package.rds </code></pre>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="topmodels_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+</section>
+<section id="data-and-models" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="data-and-models"><span class="header-section-number">2</span> Data and models</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> <span class="fu">poly</span>(yday, <span class="dv">3</span>), <span class="at">data =</span> HarzTraffic)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>), <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> SN2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="probabilistic-forecasting" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="probabilistic-forecasting"><span class="header-section-number">3</span> Probabilistic forecasting</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">365</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">cbind</span>(nd,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">procast</span>(m1, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"quantile"</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>)),</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">procast</span>(m2, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"quantile"</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>)))</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic, <span class="at">type =</span> <span class="st">"n"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd[[<span class="dv">1</span>]], <span class="fu">rev</span>(nd[[<span class="dv">1</span>]])), <span class="fu">c</span>(nd[[<span class="dv">2</span>]], <span class="fu">rev</span>(nd[[<span class="dv">4</span>]])),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">2</span>, <span class="at">alpha.f =</span> <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"transparent"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd[[<span class="dv">1</span>]], <span class="fu">rev</span>(nd[[<span class="dv">1</span>]])), <span class="fu">c</span>(nd[[<span class="dv">5</span>]], <span class="fu">rev</span>(nd[[<span class="dv">7</span>]])),</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="at">alpha.f =</span> <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"transparent"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd[[<span class="dv">1</span>]], nd[[<span class="dv">3</span>]], <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd[[<span class="dv">1</span>]], nd[[<span class="dv">6</span>]], <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="graphical-model-assessment" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m1)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m1)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m1)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m2)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m2)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m2)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(p1, p2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>, <span class="at">style =</span> <span class="st">"line"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>w1 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>w2 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(w1, w2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="scoring-rules" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="scoring-rules"><span class="header-section-number">5</span> Scoring rules</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lm =</span> m1, <span class="at">gamlss2 =</span> m2)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(m, proscore, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"logs"</span>, <span class="st">"crps"</span>, <span class="st">"mae"</span>, <span class="st">"mse"</span>, <span class="st">"dss"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
-Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society Series C (Applied Statistics)</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+<div id="ref-topmodels" class="csl-entry" role="listitem">
+Zeileis, Achim, Moritz N. Lang, and Reto Stauffer. 2024. <em><span class="nocase">topmodels</span>: Infrastructure for Forecasting and Assessment of Probabilistic Models</em>. <a href="https://topmodels.R-Forge.R-project.org/topmodels/">https://topmodels.R-Forge.R-project.org/topmodels/</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

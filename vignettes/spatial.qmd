@@ -46,6 +46,7 @@ the model.
 data("storms", package = "gamlss2")
 
 ## plot storm counts per station and year
+par(mar = c(4, 4, 1, 1))
 plot(range(storms$year), range(storms$counts), type = "n",
   xlab = "Year", ylab = "Counts")
 for(j in levels(storms$id)) {
@@ -71,7 +72,7 @@ library("sf")
 data("Germany", package = "gamlss2")
 
 ## plot station locations
-par(mar = c(1, 1, 1, 1))
+par(mar = rep(0.5, 4))
 plot(st_geometry(Germany))
 co <- unique(storms[, c("lat", "lon")])
 points(co, col = 2, pch = 4, lwd = 2)
@@ -93,7 +94,7 @@ correlation should be penalized.
 ## neighbors
 library("spdep")
 nb <- dnearneigh(st_centroid(st_geometry(Germany)), d1 = 0, d2 = 80)
-par(mar = c(1, 1, 1, 1))
+par(mar = rep(0.5, 4))
 plot(st_geometry(Germany), border = "lightgray")
 plot.nb(nb, st_geometry(Germany), add = TRUE)
 ```

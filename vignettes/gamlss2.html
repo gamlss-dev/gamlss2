@@ -415,6 +415,8 @@ div.csl-indent {
    
   <ul>
   <li><a href="#residual-diagnostics" id="toc-residual-diagnostics" class="nav-link active" data-scroll-target="#residual-diagnostics"><span class="header-section-number">1</span> Residual Diagnostics</a></li>
+  <li><a href="#estimating-nonlinear-effects" id="toc-estimating-nonlinear-effects" class="nav-link" data-scroll-target="#estimating-nonlinear-effects"><span class="header-section-number">2</span> Estimating Nonlinear Effects</a></li>
+  <li><a href="#count-models" id="toc-count-models" class="nav-link" data-scroll-target="#count-models"><span class="header-section-number">3</span> Count Models</a></li>
   </ul>
 </nav>
     </div>
@@ -451,12 +453,12 @@ div.csl-indent {
 </div>
 <p>The data consists of seasonal time information (variable <code>yday</code>) along with a number of environmental variables (e.g.&nbsp;mean daily <code>temp</code>erature). As a first model, we estimate a linear regression model with normal errors (which is the default)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 14325.7146 eps = 0.046095     
 GAMLSS-RS iteration  2: Global Deviance = 14325.7146 eps = 0.000000     </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = bikes ~ temp + rain + sunshine + wind, data = HarzTraffic)
@@ -490,19 +492,117 @@ AIC = 14337.7146 elapsed =  0.02sec</code></pre>
 <p>Note that the summary output is very similar to <code>lm()</code> and <code>glm()</code> with the main difference being that summary outputs are provided for all parameters of the distribution. In this case, the model is estimated using the <code>NO</code> family of the <em>gamlss.dist</em> package, a two-parameter distribution with parameters <code>mu</code> and <code>sigma</code>.</p>
 <section id="residual-diagnostics" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="residual-diagnostics"><span class="header-section-number">1</span> Residual Diagnostics</h2>
-<p>Since we estimated a simple linear model with Gaussian errors up to now, we are assuming that the distribution of the response variable, the number of motorcycles (<code>bikes</code>), follows a normal distribution with constant variance. However, this assumption may not always hold true, especially when the response variable is count data, which often exhibits overdispersion or non-constant variance.</p>
-<p>To assess whether the normal distribution with constant variance is appropriate, we can start by examining diagnostic plots.</p>
+<p>Since we estimated a simple linear model with Gaussian errors up to now, we are assuming that the distribution of the response variable, the number of motorcycles (<code>bikes</code>), follows a normal distribution with constant variance. However, this assumption may not always hold true, especially when the response variable is count data, which often exhibits overdispersion or non-constant variance. The data also exhibits a strong seasonal effect that is likely not fully explained by the environmental variables alone. This effect may include nonlinear patterns that require further modeling for proper capture.</p>
+<p>To assess whether the linear normal distribution with constant variance is appropriate, we can start by examining diagnostic plots.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="gamlss2_files/figure-html/resids-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="gamlss2_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>These plots help us visually inspect the residuals for any deviations from the assumptions of normality and constant variance.</p>
+</section>
+<section id="estimating-nonlinear-effects" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="estimating-nonlinear-effects"><span class="header-section-number">2</span> Estimating Nonlinear Effects</h2>
+<p>The <em>gamlss2</em> package uses the <em>mgcv</em> infrastructures for estimating nonlinear smooth effects. Now, let’s inspect the seaonal aspect of the data, there</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Clearly, the number of bikes increases during the summer season. Therefore, we add the seasonal component to the model using the <code>s()</code> smooth constructor of the <em>mgcv</em> package. Moreover, since the variation of the number of bikes increases during the summer season, we now estimate a full GAMLSS and model also the variance parameter of the normal distribution by covariates</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## set up the model formula for</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="do">## the mu and sigma parameter</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="do">## the vertical | separates the two formulae</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> bikes <span class="sc">~</span> temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind <span class="sc">+</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind <span class="sc">+</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 13297.5718 eps = 0.114556     
+GAMLSS-RS iteration  2: Global Deviance = 12597.9982 eps = 0.052609     
+GAMLSS-RS iteration  3: Global Deviance = 12015.6207 eps = 0.046227     
+GAMLSS-RS iteration  4: Global Deviance = 11573.0053 eps = 0.036836     
+GAMLSS-RS iteration  5: Global Deviance = 11473.3928 eps = 0.008607     
+GAMLSS-RS iteration  6: Global Deviance = 11469.6654 eps = 0.000324     
+GAMLSS-RS iteration  7: Global Deviance = 11469.5761 eps = 0.000007     </code></pre>
+</div>
+</div>
+<p>Plot estimated seasonal effect.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The effect for both, <code>mu</code> and <code>sigma</code> show a clear seasonal peak during summer times.</p>
+<p>Inspect again model residuals</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The quantile residuals show a much better model fit, but still show that the model might not be the most appropriate for predicting the number of <code>bikes</code>.</p>
+</section>
+<section id="count-models" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="count-models"><span class="header-section-number">3</span> Count Models</h2>
+<p>Now, instead of a normal distribution, we use the negative binomial distribution for count data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9919.2995 eps = 0.168829     
+GAMLSS-RS iteration  2: Global Deviance = 9831.291 eps = 0.008872     
+GAMLSS-RS iteration  3: Global Deviance = 9822.4009 eps = 0.000904     
+GAMLSS-RS iteration  4: Global Deviance = 9820.9371 eps = 0.000149     
+GAMLSS-RS iteration  5: Global Deviance = 9819.6573 eps = 0.000130     
+GAMLSS-RS iteration  6: Global Deviance = 9819.4805 eps = 0.000018     
+GAMLSS-RS iteration  7: Global Deviance = 9819.3814 eps = 0.000010     
+GAMLSS-RS iteration  8: Global Deviance = 9819.35 eps = 0.000003     </code></pre>
+</div>
+</div>
+<p>Plot again the estimated smooth seasonal effects.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Inspecting the model residuals again shows a major improvement.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 

@@ -100,7 +100,7 @@ b <- gamlss2(y ~ s(x) | s(x) | 1 | 1 | x, data = d, family = NOmx)
 ## plot the estimated effects
 par(mfrow = c(1, 2), mar = c(4, 4, 4, 1))
 plot(b, model = "mu1", main = "mu1")
-plot(b, model = "mu2", main = "mu2")  
+plot(b, model = "mu2", main = "mu2")
 ```
 
 ## Predicting and Visualizing Results
@@ -118,11 +118,21 @@ plot(p$pi, mix_prob, main = "Estimated vs. True Class Probabilities",
      xlab = "Estimated Probability", ylab = "True Probability")
 abline(0, 1)
 
+## compute posterior class probabilities
+d1 <- dnorm(d$y, p$mu1, p$sigma1)
+d2 <- dnorm(d$y, p$mu2, p$sigma2)
+totprob <- rowSums(cbind(p$pi * d1, (1 - p$pi) * d2))
+c1 <- p$pi * d1  / totprob
+c2 <- (1 - p$pi) * d2  / totprob
+
+## get classes
+classes <- apply(cbind(c1, c2), 1, which.max)
+
 ## plot the data and fitted component means
 par(mar = c(4, 4, 4, 1))
 plot(y ~ x, data = d,
   main = "Fitted Component Means",
-  xlab = "x", ylab = "y")
+  xlab = "x", ylab = "y", col = classes)
 lines(p$mu1 ~ x, col = 2, lwd = 2)
 lines(p$mu2 ~ x, col = 4, lwd = 2)
 ```

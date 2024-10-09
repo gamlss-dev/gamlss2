@@ -220,7 +220,7 @@ The `Kumaraswamy()` family in _gamlss2_ is flexible, allowing the user to specif
 different link functions for its parameters, such as the default `shiftlog` link function for
 parameter `a`, which ensures non-negative values.
 
-## Conclusion
+## Summary
 
 Family objects in the _gamlss2_ package are a fundamental component for defining flexible,
 distribution-based regression models, and beyond. By encapsulating the necessary elements,

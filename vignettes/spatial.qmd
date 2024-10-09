@@ -16,7 +16,7 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+```{r preliminaries}
 library("gamlss2")
 
 pkg <- c("sf", "spdep", "ggplot2", "raster", "exactextractr")
@@ -25,6 +25,11 @@ install.packages(pkg)
 #  if(!(p %in% installed.packages())) install.packages(p)
 #}
 
+systemInfo()
+```
+
+```{r}
+#| echo: false
 library("sf")
 library("spdep")
 library("ggplot2")
@@ -53,6 +58,8 @@ its respective county in Germany, enabling us to incorporate the geographical st
 the model.
 
 ```{r}
+#| echo: false
+
 ## load the Germany severe storm data
 data("storms", package = "gamlss2")
 
@@ -77,6 +84,8 @@ We begin by plotting the locations of weather stations on a map of Germany. The 
 used to manage and plot spatial data.
 
 ```{r}
+#| echo: false
+
 ## load map of Germany
 ## needs sf package for plotting
 library("sf")
@@ -98,7 +107,11 @@ Next, we define the neighborhood structure among the weather stations using a di
 criterion. This is crucial for the Markov random field, as it specifies how spatial
 correlation should be penalized.
 
-```{r, message=FALSE, results="hide"}
+```{r}
+#| echo: false
+#| message: false
+#| results: hide
+
 ## estimate spatial count model using
 ## a Markov random field, first a neighbor matrix
 ## needs to be computed, here we use distance based
@@ -120,6 +133,8 @@ The penalty matrix defines the spatial penalties imposed by the Markov random fi
 The matrix is constructed based on the neighbor relationships defined earlier.
 
 ```{r}
+#| echo: false
+
 ## compute final neighbor penalty matrix
 K <- nb2mat(nb, style = "B", zero.policy = TRUE)
 
@@ -146,7 +161,10 @@ The model includes smooth functions of altitude, year, and an interaction betwee
 as well as a (functional) random effect over regions for the time trend.
 Spatial effects are incorporated using the `bs = "mrf"` option.
 
-```{r, results="hide"}
+```{r}
+#| echo: false
+#| results: hide
+
 ## estimate count model using the NBI family,
 ## model formula is
 f <- ~ s(log(alt + 10)) + s(year) + s(id, bs = "mrf", xt = list("penalty" = K), k = 100)
@@ -160,6 +178,8 @@ Note that estimation of this model takes some time, because of the quite high nu
 coefficients for the (functional) random effect `ti(id, year, bs = c("re", "cr"), k = c(157, 5))`.
 
 ```{r}
+#| echo: false
+
 ## model summary
 summary(b)
 ```
@@ -167,6 +187,7 @@ summary(b)
 Model calibration is checked using histogram, Q-Q plot, wormplot etc.
 
 ```{r}
+#| echo: false
 plot(b, which = "resid")
 ```
 
@@ -178,7 +199,10 @@ Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.
 
 Finally, we visualize the estimated effects from the fitted model.
 
-```{r, fig.height=8}
+```{r}
+#| fig-height: 8
+#| echo: false
+
 par(mar = c(4, 4, 1, 1))
 plot(b)
 ```
@@ -191,7 +215,11 @@ These visualizations help us interpret how storm counts vary across space and ti
 We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
 set up a new data frame containing only the unique locations.
 
-```{r, message=FALSE, results="hide"}
+```{r}
+#| echo: false
+#| message: false
+#| results: hide
+
 nd <- unique(storms[, "id", drop = FALSE])
 
 ## add the year

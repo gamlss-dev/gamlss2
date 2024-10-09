@@ -114,7 +114,7 @@ class probabilities and plot the fitted means along with the data.
 p <- predict(b, type = "parameter")
 
 ## compare estimated vs. true class probabilities
-plot(p$pi, mix_prob, main = "Estimated vs True Class Probabilities", 
+plot(p$pi, mix_prob, main = "Estimated vs. True Class Probabilities", 
      xlab = "Estimated Probability", ylab = "True Probability")
 abline(0, 1)
 

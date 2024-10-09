@@ -28,6 +28,7 @@ Currently not on CRAN, yet, so install from [R-universe](https://zeileis.R-unive
 if(!("topmodels" %in% installed.packages())) {
   install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
 }
+install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
 ```
 
 ## Data and models

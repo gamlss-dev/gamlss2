@@ -163,6 +163,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../vignettes/cens.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Censored Estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../vignettes/families.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Family Objects</span></a>
   </div>
@@ -531,10 +537,10 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6976 eps = 0.000000     </code></p
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate random numbers</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        r_1      r_2      r_3       r_4       r_5
-1  43.65755 35.75453 23.77830  21.40911  12.95889
-2  60.28336 81.09082 50.27006  59.59011  48.08075
-3 150.55499 82.24063 55.11813 161.55943 104.41722</code></pre>
+<pre><code>        r_1       r_2       r_3      r_4       r_5
+1  23.71094  9.416849  26.56098 27.16423   9.39405
+2  67.73490 62.821994  60.55494 41.80443  81.56729
+3 188.82258 26.065256 158.44060 83.63914 146.00220</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## density and distribution</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

@@ -166,7 +166,7 @@ Bayesian Information Criterion (BIC) to select the optimal smoothing parameters.
 
 Finally, we visualize the estimated effects from the fitted model.
 
-```{r}
+```{r, fig.height=7}
 par(mar = c(4, 4, 1, 1))
 plot(b)
 ```

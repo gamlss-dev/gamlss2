@@ -16,13 +16,14 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+```{r preliminaries}
+if(!("topmodels" %in% installed.packages())) install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
 library("gamlss2")
 ```
 
 Introduction on how to use the _topmodels_ package with _gamlss2_.
 
-```{r, eval=FALSE}
+```{r}
 library("gamlss2")
 m <- gamlss2(dist ~ s(speed), data = cars)
 library("topmodels")

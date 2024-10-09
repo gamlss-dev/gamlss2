@@ -51,6 +51,12 @@ if("package:gamlss2" %in% search()) {
 install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
 ```
 
+```{r}
+sessionInfo()
+packageDescription("topmodels")
+packageDescription("gamlss.dist")
+```
+
 ## Data and models
 
 ```{r cars}
@@ -65,6 +71,7 @@ m2 <- gamlss2(log(cars) ~ s(yday, bs = "cc") | s(yday, bs = "cc"), data = HarzTr
 ## Probabilistic forecasting
 
 ```{r procast}
+#| eval: false
 #| fig-height: 5
 #| fig-width: 6
 library("topmodels")
@@ -85,6 +92,7 @@ lines(nd[[1]], nd[[6]], col = 4, lwd = 2)
 ## Graphical model assessment
 
 ```{r lm}
+#| eval: false
 #| fig-height: 10
 #| fig-width: 10
 #| echo: -1
@@ -96,6 +104,7 @@ wormplot(m1)
 ```
 
 ```{r gamlss2}
+#| eval: false
 #| fig-height: 10
 #| fig-width: 10
 #| echo: -1
@@ -107,6 +116,7 @@ wormplot(m2)
 ```
 
 ```{r comparison}
+#| eval: false
 #| fig-height: 5
 #| fig-width: 10
 #| echo: -1
@@ -122,6 +132,7 @@ plot(c(w1, w2), col = c(2, 4), single_graph = TRUE)
 ## Scoring rules
 
 ```{r, proscore}
+#| eval: false
 m <- list(lm = m1, gamlss2 = m2)
 sapply(m, proscore, type = c("logs", "crps", "mae", "mse", "dss"))
 ```

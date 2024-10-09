@@ -126,15 +126,15 @@ c1 <- p$pi * d1  / totprob
 c2 <- (1 - p$pi) * d2  / totprob
 
 ## get classes
-classes <- apply(cbind(c1, c2), 1, which.max)
+classes <- apply(cbind(c2, c1), 1, which.max)
 
 ## plot the data and fitted component means
 par(mar = c(4, 4, 4, 1))
 plot(y ~ x, data = d,
   main = "Fitted Component Means",
   xlab = "x", ylab = "y", col = classes)
-lines(p$mu1 ~ x, col = 2, lwd = 2)
-lines(p$mu2 ~ x, col = 4, lwd = 2)
+lines(p$mu1 ~ x, col = 2, lwd = 4)
+lines(p$mu2 ~ x, col = 1, lwd = 4)
 ```
 
 ## Summary

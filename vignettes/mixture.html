@@ -412,7 +412,7 @@ div.csl-indent {
   <li><a href="#defining-a-custom-mixture-family" id="toc-defining-a-custom-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-mixture-family"><span class="header-section-number">2</span> Defining a Custom Mixture Family</a></li>
   <li><a href="#fitting-the-mixture-model" id="toc-fitting-the-mixture-model" class="nav-link" data-scroll-target="#fitting-the-mixture-model"><span class="header-section-number">3</span> Fitting the Mixture Model</a></li>
   <li><a href="#predicting-and-visualizing-results" id="toc-predicting-and-visualizing-results" class="nav-link" data-scroll-target="#predicting-and-visualizing-results"><span class="header-section-number">4</span> Predicting and Visualizing Results</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">5</span> Summary</a></li>
   </ul>
 </nav>
     </div>
@@ -507,8 +507,8 @@ GAMLSS-RS iteration  9: Global Deviance = 428.3982 eps = 0.000024
 GAMLSS-RS iteration 10: Global Deviance = 428.3948 eps = 0.000008     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot the estimated effects</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"mu1"</span>, <span class="st">"mu2"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -525,7 +525,7 @@ GAMLSS-RS iteration 10: Global Deviance = 428.3948 eps = 0.000008     </code></p
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict the parameters</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">type =</span> <span class="st">"parameter"</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## compare estimated vs true class probabilities</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## compare estimated vs. true class probabilities</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(p<span class="sc">$</span>pi, mix_prob, <span class="at">main =</span> <span class="st">"Estimated vs True Class Probabilities"</span>, </span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Estimated Probability"</span>, <span class="at">ylab =</span> <span class="st">"True Probability"</span>)</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -552,8 +552,8 @@ GAMLSS-RS iteration 10: Global Deviance = 428.3948 eps = 0.000008     </code></p
 </div>
 </div>
 </section>
-<section id="conclusion" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5</span> Conclusion</h2>
+<section id="summary" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="summary"><span class="header-section-number">5</span> Summary</h2>
 <p>In this vignette, we have demonstrated how to fit a mixture model where the mixing probabilities depend on a covariate. We simulated data, defined a custom mixture family, and fitted the model to estimate the component means and mixing probabilities. Finally, we compared the predicted class probabilities with the true values and visualized the results.</p>
 
 

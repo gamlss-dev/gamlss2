@@ -20,12 +20,11 @@ vignette: >
 library("gamlss2")
 
 pkg <- c("sf", "spdep", "ggplot2", "raster", "exactextractr")
-install.packages(pkg)
-#for(p in pkg) {
-#  if(!(p %in% installed.packages())) install.packages(p)
-#}
+for(p in pkg) {
+  if(!(p %in% installed.packages())) install.packages(p)
+}
 
-systemInfo()
+sessionInfo()
 ```
 
 ```{r}

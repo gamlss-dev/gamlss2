@@ -52,6 +52,8 @@ install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
 ```
 
 ```{r}
+library("gamlss2")
+library("topmodels")
 sessionInfo()
 packageDescription("topmodels")
 packageDescription("gamlss.dist")

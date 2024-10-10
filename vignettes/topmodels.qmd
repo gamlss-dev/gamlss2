@@ -34,7 +34,7 @@ if(packageVersion("gamlss.dist") < "6.1-3") {
 }
 ```
 
-On GitHub, unfortunately, the `gamlss.dist` package is always taken from CRAN (via `r-cran-gamlss.dist` apparently).
+On GitHub, unfortunately, in the GitHub Action the `gamlss.dist` package is always taken from CRAN (via `r-cran-gamlss.dist` apparently).
 
 ```{r}
 packageVersion("gamlss.dist")
@@ -55,7 +55,7 @@ m2 <- gamlss2(log(cars) ~ s(yday, bs = "cc") | s(yday, bs = "cc"), data = HarzTr
 ## Probabilistic forecasting
 
 ```{r procast}
-#| eval: expr 'gamlss_dist_devel'
+#| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 5
 #| fig-width: 6
 library("topmodels")
@@ -76,7 +76,7 @@ lines(nd[[1]], nd[[6]], col = 4, lwd = 2)
 ## Graphical model assessment
 
 ```{r lm}
-#| eval: expr 'gamlss_dist_devel'
+#| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 10
 #| fig-width: 10
 #| echo: -1
@@ -88,7 +88,7 @@ wormplot(m1)
 ```
 
 ```{r gamlss2}
-#| eval: expr 'gamlss_dist_devel'
+#| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 10
 #| fig-width: 10
 #| echo: -1
@@ -100,7 +100,7 @@ wormplot(m2)
 ```
 
 ```{r comparison}
-#| eval: expr 'gamlss_dist_devel'
+#| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 5
 #| fig-width: 10
 #| echo: -1
@@ -116,7 +116,7 @@ plot(c(w1, w2), col = c(2, 4), single_graph = TRUE)
 ## Scoring rules
 
 ```{r, proscore}
-#| eval: expr 'gamlss_dist_devel'
+#| eval: !expr 'gamlss_dist_devel'
 m <- list(lm = m1, gamlss2 = m2)
 sapply(m, proscore, type = c("logs", "crps", "mae", "mse", "dss"))
 ```

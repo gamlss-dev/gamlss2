@@ -16,17 +16,15 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-```{r preliminaries}
+```{r packages}
 #| message: false
 #| results: hide
-library("gamlss2")
+#| echo: 3:8
 pkg <- c("spdep", "ggplot2", "raster", "exactextractr")
 for(p in pkg) {
   if(!(p %in% installed.packages())) install.packages(p)
 }
-```
-
-```{r library}
+library("gamlss2")
 library("sf")
 library("spdep")
 library("ggplot2")

@@ -21,42 +21,24 @@ vignette: >
 Introduction on how to use the [topmodels](https://topmodels.R-Forge.R-project.org/topmodels/) package [@topmodels] with _gamlss2_.
 
 Currently not on CRAN, yet, so install from [R-universe](https://zeileis.R-universe.dev/) (if not done already).
+The development version of `gamlss.dist` is also needed.
 
-```{r search}
-search()
-```
-
-```{r topmodels}
+```{r installation}
 #| message: false
 #| results: hide
 if(!("topmodels" %in% installed.packages())) {
   install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
 }
+if(packageVersion("gamlss.dist") < "6.1-3") {
+  install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
+}
 ```
 
-```{r gamlss.dist-dev}
-#| message: false
-#| results: hide
-for(i in c("gamlss", "gamlss2", "gamlss.dist")) {
-  pkg <- paste0("package:", i)
-  if(pkg %in% search()) {
-    detach(pkg, character.only = TRUE)
-    unloadNamespace(ns = i)
-  }
-}
-if("package:gamlss2" %in% search()) {
-  detach("package:gamlss2")
-  detach("package:gamlss.dist")
-}
-install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
-```
+On GitHub, unfortunately, the `gamlss.dist` package is always taken from CRAN (via `r-cran-gamlss.dist` apparently).
 
 ```{r}
-library("gamlss2")
-library("topmodels")
-sessionInfo()
-packageDescription("topmodels")
-packageDescription("gamlss.dist")
+packageVersion("gamlss.dist")
+gamlss_dist_devel <- packageVersion("gamlss.dist") >= "6.1-3"
 ```
 
 ## Data and models
@@ -73,7 +55,7 @@ m2 <- gamlss2(log(cars) ~ s(yday, bs = "cc") | s(yday, bs = "cc"), data = HarzTr
 ## Probabilistic forecasting
 
 ```{r procast}
-#| eval: false
+#| eval: expr 'gamlss_dist_devel'
 #| fig-height: 5
 #| fig-width: 6
 library("topmodels")
@@ -94,7 +76,7 @@ lines(nd[[1]], nd[[6]], col = 4, lwd = 2)
 ## Graphical model assessment
 
 ```{r lm}
-#| eval: false
+#| eval: expr 'gamlss_dist_devel'
 #| fig-height: 10
 #| fig-width: 10
 #| echo: -1
@@ -106,7 +88,7 @@ wormplot(m1)
 ```
 
 ```{r gamlss2}
-#| eval: false
+#| eval: expr 'gamlss_dist_devel'
 #| fig-height: 10
 #| fig-width: 10
 #| echo: -1
@@ -118,7 +100,7 @@ wormplot(m2)
 ```
 
 ```{r comparison}
-#| eval: false
+#| eval: expr 'gamlss_dist_devel'
 #| fig-height: 5
 #| fig-width: 10
 #| echo: -1
@@ -134,7 +116,7 @@ plot(c(w1, w2), col = c(2, 4), single_graph = TRUE)
 ## Scoring rules
 
 ```{r, proscore}
-#| eval: false
+#| eval: expr 'gamlss_dist_devel'
 m <- list(lm = m1, gamlss2 = m2)
 sapply(m, proscore, type = c("logs", "crps", "mae", "mse", "dss"))
 ```

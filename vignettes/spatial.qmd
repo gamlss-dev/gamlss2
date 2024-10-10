@@ -19,7 +19,7 @@ vignette: >
 ```{r preliminaries}
 library("gamlss2")
 
-pkg <- c("sf", "spdep", "ggplot2", "raster", "exactextractr")
+pkg <- c("spdep", "ggplot2", "raster", "exactextractr")
 for(p in pkg) {
   if(!(p %in% installed.packages())) install.packages(p)
 }
@@ -28,7 +28,6 @@ sessionInfo()
 ```
 
 ```{r}
-#| eval: false
 library("sf")
 library("spdep")
 library("ggplot2")
@@ -57,8 +56,6 @@ its respective county in Germany, enabling us to incorporate the geographical st
 the model.
 
 ```{r}
-#| eval: false
-
 ## load the Germany severe storm data
 data("storms", package = "gamlss2")
 
@@ -83,8 +80,6 @@ We begin by plotting the locations of weather stations on a map of Germany. The 
 used to manage and plot spatial data.
 
 ```{r}
-#| eval: false
-
 ## load map of Germany
 ## needs sf package for plotting
 library("sf")
@@ -107,10 +102,8 @@ criterion. This is crucial for the Markov random field, as it specifies how spat
 correlation should be penalized.
 
 ```{r}
-#| eval: false
 #| message: false
 #| results: hide
-
 ## estimate spatial count model using
 ## a Markov random field, first a neighbor matrix
 ## needs to be computed, here we use distance based
@@ -132,8 +125,6 @@ The penalty matrix defines the spatial penalties imposed by the Markov random fi
 The matrix is constructed based on the neighbor relationships defined earlier.
 
 ```{r}
-#| eval: false
-
 ## compute final neighbor penalty matrix
 K <- nb2mat(nb, style = "B", zero.policy = TRUE)
 
@@ -161,9 +152,7 @@ as well as a (functional) random effect over regions for the time trend.
 Spatial effects are incorporated using the `bs = "mrf"` option.
 
 ```{r}
-#| eval: false
 #| results: hide
-
 ## estimate count model using the NBI family,
 ## model formula is
 f <- ~ s(log(alt + 10)) + s(year) + s(id, bs = "mrf", xt = list("penalty" = K), k = 100)
@@ -177,8 +166,6 @@ Note that estimation of this model takes some time, because of the quite high nu
 coefficients for the (functional) random effect `ti(id, year, bs = c("re", "cr"), k = c(157, 5))`.
 
 ```{r}
-#| eval: false
-
 ## model summary
 summary(b)
 ```
@@ -186,7 +173,6 @@ summary(b)
 Model calibration is checked using histogram, Q-Q plot, wormplot etc.
 
 ```{r}
-#| eval: false
 plot(b, which = "resid")
 ```
 
@@ -200,8 +186,6 @@ Finally, we visualize the estimated effects from the fitted model.
 
 ```{r}
 #| fig-height: 8
-#| eval: false
-
 par(mar = c(4, 4, 1, 1))
 plot(b)
 ```
@@ -215,10 +199,8 @@ We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
 set up a new data frame containing only the unique locations.
 
 ```{r}
-#| eval: false
 #| message: false
 #| results: hide
-
 nd <- unique(storms[, "id", drop = FALSE])
 
 ## add the year

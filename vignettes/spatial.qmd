@@ -17,17 +17,16 @@ vignette: >
 ---
 
 ```{r preliminaries}
+#| message: false
+#| results: hide
 library("gamlss2")
-
 pkg <- c("spdep", "ggplot2", "raster", "exactextractr")
 for(p in pkg) {
   if(!(p %in% installed.packages())) install.packages(p)
 }
-
-sessionInfo()
 ```
 
-```{r}
+```{r library}
 library("sf")
 library("spdep")
 library("ggplot2")

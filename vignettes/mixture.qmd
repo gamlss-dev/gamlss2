@@ -34,6 +34,9 @@ normal distributions, depending on a covariate `x`. The latent class membership 
 determined by a logistic model, where the mixing probability is a function of `x`.
 
 ```{r}
+#| fig-height: 5
+#| fig-width: 6
+#| fig-align: center
 set.seed(123)
 
 ## simulate covariate
@@ -93,11 +96,17 @@ We now fit the mixture model. The model includes two smooth functions of `x` for
 means of the two components, and the mixing probability `pi` is modeled as a linear
 function of `x`.
 
-```{r}
-## estimate the model
-b <- gamlss2(y ~ s(x) | s(x) | 1 | 1 | x, data = d, family = NOmx)
+The model can be estimated with
 
-## plot the estimated effects
+```{r}
+b <- gamlss2(y ~ s(x) | s(x) | 1 | 1 | x, data = d, family = NOmx)
+```
+
+Plot estimated effects.
+```{r}
+#| fig-height: 4
+#| fig-width: 7
+#| fig-align: center
 par(mfrow = c(1, 2), mar = c(4, 4, 4, 1))
 plot(b, model = "mu1", main = "mu1")
 plot(b, model = "mu2", main = "mu2")
@@ -109,11 +118,18 @@ We predict the component-specific means (`mu1`, `mu2`) and the mixing
 probability (`pi`) from the fitted model. Then, we compare the predicted and true
 class probabilities and plot the fitted means along with the data.
 
-```{r}
-## predict the parameters
-p <- predict(b, type = "parameter")
+First, compute predicted parameters
 
-## compare estimated vs. true class probabilities
+```{r}
+p <- predict(b, type = "parameter")
+```
+
+Plot estimated vs. true component probabilities
+
+```{r}
+#| fig-height: 5
+#| fig-width: 6
+#| fig-align: center
 plot(p$pi, mix_prob, main = "Estimated vs. True Class Probabilities", 
      xlab = "Estimated Probability", ylab = "True Probability")
 abline(0, 1)

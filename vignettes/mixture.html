@@ -121,6 +121,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -414,7 +443,10 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#simulating-data" id="toc-simulating-data" class="nav-link active" data-scroll-target="#simulating-data"><span class="header-section-number">1</span> Simulating Data</a></li>
+  <li><a href="#model-overview" id="toc-model-overview" class="nav-link active" data-scroll-target="#model-overview"><span class="header-section-number">0.1</span> Model Overview</a></li>
+  <li><a href="#two-component-normal-mixture-model" id="toc-two-component-normal-mixture-model" class="nav-link" data-scroll-target="#two-component-normal-mixture-model"><span class="header-section-number">0.2</span> Two-Component Normal Mixture Model</a></li>
+  <li><a href="#gamlss-framework-for-the-mixture-model" id="toc-gamlss-framework-for-the-mixture-model" class="nav-link" data-scroll-target="#gamlss-framework-for-the-mixture-model"><span class="header-section-number">0.3</span> GAMLSS Framework for the Mixture Model</a></li>
+  <li><a href="#simulating-data" id="toc-simulating-data" class="nav-link" data-scroll-target="#simulating-data"><span class="header-section-number">1</span> Simulating Data</a></li>
   <li><a href="#defining-a-custom-mixture-family" id="toc-defining-a-custom-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-mixture-family"><span class="header-section-number">2</span> Defining a Custom Mixture Family</a></li>
   <li><a href="#fitting-the-mixture-model" id="toc-fitting-the-mixture-model" class="nav-link" data-scroll-target="#fitting-the-mixture-model"><span class="header-section-number">3</span> Fitting the Mixture Model</a></li>
   <li><a href="#predicting-and-visualizing-results" id="toc-predicting-and-visualizing-results" class="nav-link" data-scroll-target="#predicting-and-visualizing-results"><span class="header-section-number">4</span> Predicting and Visualizing Results</a></li>
@@ -432,7 +464,46 @@ div.csl-indent {
 
 
 <p>Mixture models are used for modeling data generated from multiple distinct processes, where each process can be described by a separate probability distribution. The challenge is that for each observation, we do not know which process generated it, and therefore we must infer the underlying latent components.</p>
-<p>This vignette demonstrates how to fit a mixture of normal distributions where the mixing probabilities depend on a covariate.</p>
+<p>This vignette demonstrates how to fit a mixture of two normal distributions where the mixing probabilities depend on a covariate.</p>
+<section id="model-overview" class="level3" data-number="0.1">
+<h3 data-number="0.1" class="anchored" data-anchor-id="model-overview"><span class="header-section-number">0.1</span> Model Overview</h3>
+<p>In a finite mixture model, each observation <span class="math inline">\(y_i\)</span>, <span class="math inline">\(i = 1, \ldots, n\)</span>, is assumed to be generated from one of <span class="math inline">\(K\)</span> distinct underlying distributions. The probability that an observation comes from the <span class="math inline">\(k\)</span>-th component is determined by a mixing probability <span class="math inline">\(\pi_k(x)\)</span>, which may depend on covariates. The model for the probability density function (pdf) of <span class="math inline">\(y_i\)</span> is expressed as:</p>
+<p><span class="math display">\[
+f(y_i \mid \boldsymbol{x}_i) = \sum_{k=1}^{K} \pi_k(\boldsymbol{x}_i) f_k(y_i \mid \theta_k(\boldsymbol{x}_i))
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\pi_k(\boldsymbol{x}_i)\)</span> is the probability that the <span class="math inline">\(i\)</span>-th observation belongs to the <span class="math inline">\(k\)</span>-th component.</li>
+<li><span class="math inline">\(f_k(y_i \mid \theta_k(\boldsymbol{x}_i))\)</span> is the pdf of the <span class="math inline">\(k\)</span>-th component, parameterized by <span class="math inline">\(\theta_k(\boldsymbol{x}_i)\)</span>, which depends on covariates <span class="math inline">\(\boldsymbol{x}_i\)</span>.</li>
+<li>The sum of <span class="math inline">\(\pi_k(\boldsymbol{x}_i)\)</span> equals 1.</li>
+</ul>
+</section>
+<section id="two-component-normal-mixture-model" class="level3" data-number="0.2">
+<h3 data-number="0.2" class="anchored" data-anchor-id="two-component-normal-mixture-model"><span class="header-section-number">0.2</span> Two-Component Normal Mixture Model</h3>
+<p>For a two-component normal mixture model, the response <span class="math inline">\(y_i\)</span> comes from one of two normal distributions, where the mixing probability <span class="math inline">\(\pi(x)\)</span> depends on a covariate <span class="math inline">\(x\)</span>. The pdf is given by:</p>
+<p><span class="math display">\[
+f(y_i \mid x_i) = \pi(x_i) \mathcal{N}(y_i \mid \mu_1(x_i), \sigma_1(x_i)) + (1 - \pi(x_i)) \mathcal{N}(y_i \mid \mu_2(x_i), \sigma_2(x_i))
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\pi(x_i) = \frac{1}{1 + \exp(-\eta(x_i))}\)</span> is the mixing probability.</li>
+<li><span class="math inline">\(\mathcal{N}(y_i \mid \mu, \sigma)\)</span> denotes a normal distribution with mean <span class="math inline">\(\mu\)</span> and standard deviation <span class="math inline">\(\sigma\)</span>.</li>
+<li>The parameters <span class="math inline">\(\mu_1(x_i), \sigma_1(x_i), \mu_2(x_i), \sigma_2(x_i)\)</span> are functions of covariates <span class="math inline">\(x_i\)</span>.</li>
+</ul>
+</section>
+<section id="gamlss-framework-for-the-mixture-model" class="level3" data-number="0.3">
+<h3 data-number="0.3" class="anchored" data-anchor-id="gamlss-framework-for-the-mixture-model"><span class="header-section-number">0.3</span> GAMLSS Framework for the Mixture Model</h3>
+<p>In the GAMLSS framework, each parameter can be modeled as a function of covariates. For the two-component normal mixture, we can use GAMLSS to specify models for:</p>
+<ol type="1">
+<li>Component Means <span class="math inline">\(\mu_1(x), \mu_2(x)\)</span>: Modeled as smooth or linear functions of covariates <span class="math inline">\(x\)</span>, e.g., <span class="math inline">\(\mu_1(x) = s(x)\)</span>.</li>
+<li>Component Standard Deviations <span class="math inline">\(\sigma_1(x), \sigma_2(x)\)</span>: These vary with <span class="math inline">\(x\)</span>, e.g., <span class="math inline">\(\log(\sigma_1(x)) = s(x)\)</span>.</li>
+<li>Mixing Probability <span class="math inline">\(\pi(x)\)</span>: Modeled using a logistic regression, <span class="math inline">\(\pi(x) = \frac{1}{1 + \exp(-\gamma_0 - \gamma_1 x)}\)</span>.</li>
+</ol>
+<p>The full model becomes:</p>
+<p><span class="math display">\[
+y_i \mid x_i \sim \pi(x_i) \mathcal{N}(\mu_1(x_i), \sigma_1(x_i)) + (1 - \pi(x_i)) \mathcal{N}(\mu_2(x_i), \sigma_2(x_i))
+\]</span></p>
+</section>
 <section id="simulating-data" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="simulating-data"><span class="header-section-number">1</span> Simulating Data</h2>
 <p>We begin by simulating data where the response <code>y</code> is generated by one of two normal distributions, depending on a covariate <code>x</code>. The latent component membership is determined by a logistic model, where the mixing probability is a function of <code>x</code>.</p>
@@ -473,7 +544,7 @@ div.csl-indent {
 </section>
 <section id="defining-a-custom-mixture-family" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="defining-a-custom-mixture-family"><span class="header-section-number">2</span> Defining a Custom Mixture Family</h2>
-<p>To fit the mixture model in <em>gamlss2</em>, we define a custom family of distributions. In this case, we create a mixture of two normal distributions where the mixing probabilities depend on a covariate.</p>
+<p>To fit the mixture model in <em>gamlss2</em>, we define a custom family of distributions. In this case, we create a mixture of two normal distributions (using <code>dnorm()</code>) where the mixing probabilities depend on a covariate.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mixture family definition for a normal mixture</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>NOmx <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
@@ -493,10 +564,11 @@ div.csl-indent {
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Note that in this case, analytical derivatives for the likelihood function are not explicitly defined in the family. As a result, the parameter estimation relies on numerical derivatives. While this approach is feasible, defining analytical derivatives would significantly speed up the estimation process and improve computational efficiency.</p>
 </section>
 <section id="fitting-the-mixture-model" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="fitting-the-mixture-model"><span class="header-section-number">3</span> Fitting the Mixture Model</h2>
-<p>We now fit the mixture model. The model includes two smooth functions of <code>x</code> for the means of the two components, and the mixing probability <code>pi</code> is modeled as a linear function of <code>x</code>.</p>
+<p>We now fit the mixture model. The model includes two smooth functions <code>s(x)</code> for the means of the two components, and the mixing probability <code>pi</code> is modeled as a linear function of <code>x</code>.</p>
 <p>The model can be estimated with</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="dv">1</span> <span class="sc">|</span> <span class="dv">1</span> <span class="sc">|</span> x, <span class="at">data =</span> d, <span class="at">family =</span> NOmx)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

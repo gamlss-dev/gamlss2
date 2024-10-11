@@ -25,7 +25,65 @@ distinct processes, where each process can be described by a separate probabilit
 The challenge is that for each observation, we do not know which process generated it,
 and therefore we must infer the underlying latent components.
 
-This vignette demonstrates how to fit a mixture of normal distributions where the mixing probabilities depend on a covariate.
+This vignette demonstrates how to fit a mixture of two normal distributions
+where the mixing probabilities depend on a covariate.
+
+### Model Overview
+
+In a finite mixture model, each observation $y_i$, $i = 1, \ldots, n$,
+is assumed to be generated from one of $K$ distinct underlying distributions.
+The probability that an observation comes from the $k$-th component is determined by a 
+mixing probability $\pi_k(x)$, which may depend on covariates. The model for
+the probability density function (pdf) of $y_i$ is expressed as:
+
+$$
+f(y_i \mid \boldsymbol{x}_i) = \sum_{k=1}^{K} \pi_k(\boldsymbol{x}_i) f_k(y_i \mid \theta_k(\boldsymbol{x}_i))
+$$
+
+Where:
+
+- $\pi_k(\boldsymbol{x}_i)$ is the probability that the $i$-th
+  observation belongs to the $k$-th component.
+- $f_k(y_i \mid \theta_k(\boldsymbol{x}_i))$ is the pdf of the $k$-th component,
+  parameterized by $\theta_k(\boldsymbol{x}_i)$, which depends on covariates
+  $\boldsymbol{x}_i$.
+- The sum of $\pi_k(\boldsymbol{x}_i)$ equals 1.
+
+### Two-Component Normal Mixture Model
+
+For a two-component normal mixture model, the response $y_i$ comes from one
+of two normal distributions, where the mixing probability $\pi(x)$ depends on
+a covariate $x$. The pdf is given by:
+
+$$
+f(y_i \mid x_i) = \pi(x_i) \mathcal{N}(y_i \mid \mu_1(x_i), \sigma_1(x_i)) + (1 - \pi(x_i)) \mathcal{N}(y_i \mid \mu_2(x_i), \sigma_2(x_i))
+$$
+
+Where:
+
+- $\pi(x_i) = \frac{1}{1 + \exp(-\eta(x_i))}$ is the mixing probability.
+- $\mathcal{N}(y_i \mid \mu, \sigma)$ denotes a normal distribution with
+  mean $\mu$ and standard deviation $\sigma$.
+- The parameters $\mu_1(x_i), \sigma_1(x_i), \mu_2(x_i), \sigma_2(x_i)$ are
+  functions of covariates $x_i$.
+
+### GAMLSS Framework for the Mixture Model
+
+In the GAMLSS framework, each parameter can be modeled as a function of covariates.
+For the two-component normal mixture, we can use GAMLSS to specify models for:
+
+1. Component Means $\mu_1(x), \mu_2(x)$:
+   Modeled as smooth or linear functions of covariates $x$, e.g., $\mu_1(x) = s(x)$.
+2. Component Standard Deviations $\sigma_1(x), \sigma_2(x)$:
+   These vary with $x$, e.g., $\log(\sigma_1(x)) = s(x)$.
+3. Mixing Probability $\pi(x)$: Modeled using a logistic regression,
+   $\pi(x) = \frac{1}{1 + \exp(-\gamma_0 - \gamma_1 x)}$.
+
+The full model becomes:
+
+$$
+y_i \mid x_i \sim \pi(x_i) \mathcal{N}(\mu_1(x_i), \sigma_1(x_i)) + (1 - \pi(x_i)) \mathcal{N}(\mu_2(x_i), \sigma_2(x_i))
+$$
 
 ## Simulating Data
 
@@ -67,8 +125,8 @@ plot(d, col = z + 1, main = "Simulated Data by Latent Component",
 ## Defining a Custom Mixture Family
 
 To fit the mixture model in _gamlss2_, we define a custom family of distributions.
-In this case, we create a mixture of two normal distributions where the mixing
-probabilities depend on a covariate.
+In this case, we create a mixture of two normal distributions (using `dnorm()`)
+where the mixing probabilities depend on a covariate.
 
 ```{r}
 ## mixture family definition for a normal mixture
@@ -90,9 +148,14 @@ NOmx <- function(...) {
 }
 ```
 
+Note that in this case, analytical derivatives for the likelihood function are not 
+explicitly defined in the family. As a result, the parameter estimation relies on 
+numerical derivatives. While this approach is feasible, defining analytical derivatives 
+would significantly speed up the estimation process and improve computational efficiency.
+
 ## Fitting the Mixture Model
 
-We now fit the mixture model. The model includes two smooth functions of `x` for the
+We now fit the mixture model. The model includes two smooth functions `s(x)` for the
 means of the two components, and the mixing probability `pi` is modeled as a linear
 function of `x`.
 

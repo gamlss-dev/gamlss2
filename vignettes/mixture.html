@@ -443,14 +443,14 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#model-overview" id="toc-model-overview" class="nav-link active" data-scroll-target="#model-overview"><span class="header-section-number">0.1</span> Model Overview</a></li>
-  <li><a href="#two-component-normal-mixture-model" id="toc-two-component-normal-mixture-model" class="nav-link" data-scroll-target="#two-component-normal-mixture-model"><span class="header-section-number">0.2</span> Two-Component Normal Mixture Model</a></li>
-  <li><a href="#gamlss-framework-for-the-mixture-model" id="toc-gamlss-framework-for-the-mixture-model" class="nav-link" data-scroll-target="#gamlss-framework-for-the-mixture-model"><span class="header-section-number">0.3</span> GAMLSS Framework for the Mixture Model</a></li>
-  <li><a href="#simulating-data" id="toc-simulating-data" class="nav-link" data-scroll-target="#simulating-data"><span class="header-section-number">1</span> Simulating Data</a></li>
-  <li><a href="#defining-a-custom-mixture-family" id="toc-defining-a-custom-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-mixture-family"><span class="header-section-number">2</span> Defining a Custom Mixture Family</a></li>
-  <li><a href="#fitting-the-mixture-model" id="toc-fitting-the-mixture-model" class="nav-link" data-scroll-target="#fitting-the-mixture-model"><span class="header-section-number">3</span> Fitting the Mixture Model</a></li>
-  <li><a href="#predicting-and-visualizing-results" id="toc-predicting-and-visualizing-results" class="nav-link" data-scroll-target="#predicting-and-visualizing-results"><span class="header-section-number">4</span> Predicting and Visualizing Results</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">5</span> Summary</a></li>
+  <li><a href="#model-overview" id="toc-model-overview" class="nav-link active" data-scroll-target="#model-overview"><span class="header-section-number">1</span> Model Overview</a></li>
+  <li><a href="#two-component-normal-mixture-model" id="toc-two-component-normal-mixture-model" class="nav-link" data-scroll-target="#two-component-normal-mixture-model"><span class="header-section-number">2</span> Two-Component Normal Mixture Model</a></li>
+  <li><a href="#gamlss-framework-for-the-mixture-model" id="toc-gamlss-framework-for-the-mixture-model" class="nav-link" data-scroll-target="#gamlss-framework-for-the-mixture-model"><span class="header-section-number">3</span> GAMLSS Framework for the Mixture Model</a></li>
+  <li><a href="#example-using-simulated-data" id="toc-example-using-simulated-data" class="nav-link" data-scroll-target="#example-using-simulated-data"><span class="header-section-number">4</span> Example using Simulated Data</a></li>
+  <li><a href="#defining-a-custom-gamlss2-mixture-family" id="toc-defining-a-custom-gamlss2-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <em>gamlss2</em> Mixture Family</a></li>
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">6</span> Estimation</a></li>
+  <li><a href="#predicting-and-visualizing-results" id="toc-predicting-and-visualizing-results" class="nav-link" data-scroll-target="#predicting-and-visualizing-results"><span class="header-section-number">7</span> Predicting and Visualizing Results</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">8</span> Summary</a></li>
   </ul>
 </nav>
     </div>
@@ -464,25 +464,36 @@ window.Quarto = {
 
 
 <p>Mixture models are used for modeling data generated from multiple distinct processes, where each process can be described by a separate probability distribution. The challenge is that for each observation, we do not know which process generated it, and therefore we must infer the underlying latent components.</p>
-<p>This vignette demonstrates how to fit a flexible mixture of two normal distributions.</p>
-<section id="model-overview" class="level3" data-number="0.1">
-<h3 data-number="0.1" class="anchored" data-anchor-id="model-overview"><span class="header-section-number">0.1</span> Model Overview</h3>
+<p>This vignette demonstrates how to fit flexible mixture models using <em>gamlss2</em>.</p>
+<section id="model-overview" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="model-overview"><span class="header-section-number">1</span> Model Overview</h2>
 <p>In a finite mixture model, each observation <span class="math inline">\(y_i\)</span> for <span class="math inline">\(i = 1, \ldots, n\)</span>, is assumed to be generated from one of <span class="math inline">\(K\)</span> distinct underlying distributions. The probability that an observation comes from the <span class="math inline">\(k\)</span>-th component is determined by the mixing probability <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, which may depend on covariates <span class="math inline">\(\mathbf{x}_i\)</span>. The probability density function (pdf) of <span class="math inline">\(y_i\)</span> is expressed as</p>
 <p><span class="math display">\[
-f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^{K} \pi_k(\mathbf{x}_i) f_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i)).
+d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^{K} \pi_k(\mathbf{x}_i) d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i)).
 \]</span></p>
 <p>Where</p>
 <ul>
 <li><span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span> is the probability that the <span class="math inline">\(i\)</span>-th observation belongs to the <span class="math inline">\(k\)</span>-th component,</li>
-<li><span class="math inline">\(f_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))\)</span> is the pdf of the <span class="math inline">\(k\)</span>-th component, parameterized by <span class="math inline">\(\boldsymbol{\theta}_k(\mathbf{x}_i) = (\theta_{1k}(\mathbf{x}_i), \ldots, \theta_{J_k}(\mathbf{x}_i))^\top\)</span>,</li>
+<li><span class="math inline">\(d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))\)</span> is the pdf of the <span class="math inline">\(k\)</span>-th component, parameterized by <span class="math inline">\(\boldsymbol{\theta}_k(\mathbf{x}_i) = (\theta_{1k}(\mathbf{x}_i), \ldots, \theta_{J_kk}(\mathbf{x}_i))^\top\)</span>, <span class="math inline">\(j = 1, \ldots, J_k\)</span>,</li>
 <li>and the sum of <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span> over all components equals 1.</li>
 </ul>
+<p>While <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span> represents the prior probability of the observation belonging to the <span class="math inline">\(k\)</span>-th component, posterior mixing probabilities refine this by considering both the prior and the likelihood of the observed data under each component.</p>
+<p>Given the observation <span class="math inline">\(y_i\)</span> and the estimated model parameters, the posterior probability that <span class="math inline">\(y_i\)</span> belongs to the <span class="math inline">\(k\)</span>-th component is computed as</p>
+<p><span class="math display">\[
+\text{Pr}(z_i = k \mid y_i, \mathbf{x}_i) = \frac{\pi_k(\mathbf{x}_i) d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))}{\sum_{k=1}^K \pi_k(\mathbf{x}_i) d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))}.
+\]</span></p>
+<p>This posterior probability gives a more accurate assessment of which component likely generated the observation, incorporating both the component probability (prior) and the likelihood of observing the data under each component. In mixture models, these posterior probabilities are often used for:</p>
+<ol type="1">
+<li><em>Classifying observations</em>: Assigning each observation to the most likely component.</li>
+<li><em>Analyzing component memberships</em>: Understanding the uncertainty in assigning observations to components.</li>
+</ol>
+<p>In practice, posterior mixing probabilities will not always be close to 0 or 1. If an observation could reasonably belong to multiple components, the probabilities may be more evenly distributed across components.</p>
 </section>
-<section id="two-component-normal-mixture-model" class="level3" data-number="0.2">
-<h3 data-number="0.2" class="anchored" data-anchor-id="two-component-normal-mixture-model"><span class="header-section-number">0.2</span> Two-Component Normal Mixture Model</h3>
+<section id="two-component-normal-mixture-model" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="two-component-normal-mixture-model"><span class="header-section-number">2</span> Two-Component Normal Mixture Model</h2>
 <p>For a two-component normal mixture model, the response <span class="math inline">\(y_i\)</span> is generated by one of two normal distributions. The pdf is given by</p>
 <p><span class="math display">\[
-f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid \boldsymbol{\theta}_k = (\mu_k(\mathbf{x}_i), \sigma_k(\mathbf{x}_i))).
+d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid \boldsymbol{\theta}_k = (\mu_k(\mathbf{x}_i), \sigma_k(\mathbf{x}_i))).
 \]</span></p>
 <p>Where</p>
 <ul>
@@ -491,13 +502,13 @@ f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 <li>and to ensure the component probabilities sum to one, we set <span class="math inline">\(\pi_2(\mathbf{x}_i) = 1 - \pi_1(\mathbf{x}_i)\)</span>.</li>
 </ul>
 </section>
-<section id="gamlss-framework-for-the-mixture-model" class="level3" data-number="0.3">
-<h3 data-number="0.3" class="anchored" data-anchor-id="gamlss-framework-for-the-mixture-model"><span class="header-section-number">0.3</span> GAMLSS Framework for the Mixture Model</h3>
-<p>In the GAMLSS framework, each parameter <span class="math inline">\(\theta_{jk}(\mathbf{x}_i)\)</span> is modeled using GAM-type predictors, given by</p>
+<section id="gamlss-framework-for-the-mixture-model" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="gamlss-framework-for-the-mixture-model"><span class="header-section-number">3</span> GAMLSS Framework for the Mixture Model</h2>
+<p>In the GAMLSS framework, each parameter <span class="math inline">\(\theta_{jk}(\mathbf{x}_i)\)</span>, as well as the mixing probabilities <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, are modeled using GAM-type predictors given by</p>
 <p><span class="math display">\[
 \eta_{jk}(\mathbf{x}_i) = f_1(\mathbf{x}_i) + \dots + f_{L_{jk}}(\mathbf{x}_i),
 \]</span></p>
-<p>which are linked to the parameters through <span class="math inline">\(h_{jk}(\theta_{jk}(\mathbf{x}_i)) = \eta_{jk}(\mathbf{x}_i)\)</span> using suitable link functions <span class="math inline">\(h_{jk}(\cdot)\)</span>. The functions <span class="math inline">\(f_l(\cdot)\)</span> can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others.</p>
+<p>which are linked to the parameters through <span class="math inline">\(h_{jk}(\theta_{jk}(\mathbf{x}_i)) = \eta_{jk}(\mathbf{x}_i)\)</span> using suitable link functions <span class="math inline">\(h_{jk}(\cdot)\)</span>. The functions <span class="math inline">\(f_l(\cdot)\)</span>, <span class="math inline">\(l = 1, \ldots, L_{jk}\)</span>, can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others.</p>
 <p>For the two-component normal mixture, we use</p>
 <ol type="1">
 <li>Identity link for the means: <span class="math inline">\(\mu_k(\mathbf{x}_i) = \eta_{1k}(\mathbf{x}_i)\)</span>,</li>
@@ -505,14 +516,14 @@ f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 <li>Logit-link for the mixing probability: <span class="math inline">\(\pi_k(\mathbf{x}_i) = \frac{1}{1 + \exp(-\eta_{\pi k}(\mathbf{x}_i))}\)</span>.</li>
 </ol>
 </section>
-<section id="simulating-data" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="simulating-data"><span class="header-section-number">1</span> Simulating Data</h2>
-<p>We begin by simulating data where the response <code>y</code> is generated by one of two normal distributions, depending on a covariate <code>x</code>. The latent component membership is determined by a logistic model, where the mixing probability is a function of <code>x</code>.</p>
+<section id="example-using-simulated-data" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="example-using-simulated-data"><span class="header-section-number">4</span> Example using Simulated Data</h2>
+<p>We begin by simulating data where the response <code>y</code> is generated by one of two normal distributions, depending on a covariate <code>x</code>. The latent component membership is determined by a logistic model.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate covariate</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">runif</span>(n, <span class="sc">-</span>pi, pi))</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## logistic model for mixing probability (dependent on x)</span></span>
@@ -524,7 +535,7 @@ f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## generate response based on the latent component</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(z <span class="sc">==</span> <span class="dv">1</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.2</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">cos</span>(x))),</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cos</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.2</span>))</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="do">## combine into a data frame</span></span>
@@ -543,8 +554,8 @@ f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 </div>
 </div>
 </section>
-<section id="defining-a-custom-mixture-family" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="defining-a-custom-mixture-family"><span class="header-section-number">2</span> Defining a Custom Mixture Family</h2>
+<section id="defining-a-custom-gamlss2-mixture-family" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <em>gamlss2</em> Mixture Family</h2>
 <p>To fit the mixture model in <em>gamlss2</em>, we define a custom family of distributions. In this case, we create a mixture of two normal distributions (using <code>dnorm()</code>) where the mixing probabilities depend on a covariate.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mixture family definition for a normal mixture</span></span>
@@ -567,51 +578,44 @@ f(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 </div>
 <p>Note that in this case, analytical derivatives for the likelihood function are not explicitly defined in the family. As a result, the parameter estimation relies on numerical derivatives. While this approach is feasible, defining analytical derivatives would significantly speed up the estimation process and improve computational efficiency.</p>
 </section>
-<section id="fitting-the-mixture-model" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="fitting-the-mixture-model"><span class="header-section-number">3</span> Fitting the Mixture Model</h2>
-<p>We now fit the mixture model. The model includes two smooth functions <code>s(x)</code> for the means of the two components, and the mixing probability <code>pi</code> is modeled as a linear function of <code>x</code>.</p>
+<section id="estimation" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="estimation"><span class="header-section-number">6</span> Estimation</h2>
+<p>We now proceed to fit the mixture model. The model includes smooth functions (<code>s(x)</code>), which are used to model the means, standard deviations, and the mixing probability for the two components. This flexible approach allows the influence of the covariate <code>x</code> to vary smoothly across the different parameters of the mixture distribution.</p>
 <p>The model can be estimated with</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="dv">1</span> <span class="sc">|</span> <span class="dv">1</span> <span class="sc">|</span> x, <span class="at">data =</span> d, <span class="at">family =</span> NOmx)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1187.3406 eps = 0.503790     
-GAMLSS-RS iteration  2: Global Deviance = 814.5071 eps = 0.314007     
-GAMLSS-RS iteration  3: Global Deviance = 558.9776 eps = 0.313722     
-GAMLSS-RS iteration  4: Global Deviance = 439.1062 eps = 0.214447     
-GAMLSS-RS iteration  5: Global Deviance = 429.4598 eps = 0.021968     
-GAMLSS-RS iteration  6: Global Deviance = 428.5728 eps = 0.002065     
-GAMLSS-RS iteration  7: Global Deviance = 428.4328 eps = 0.000326     
-GAMLSS-RS iteration  8: Global Deviance = 428.4087 eps = 0.000056     
-GAMLSS-RS iteration  9: Global Deviance = 428.3982 eps = 0.000024     
-GAMLSS-RS iteration 10: Global Deviance = 428.3948 eps = 0.000008     </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula, spline for each parameter</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate normal GAMLSS mixture model</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> NOmx)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Plot estimated effects.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">model =</span> <span class="st">"mu1"</span>, <span class="at">main =</span> <span class="st">"mu1"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">model =</span> <span class="st">"mu2"</span>, <span class="at">main =</span> <span class="st">"mu2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+<p><img src="mixture_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The estimated effects indicate that the GAMLSS mixture model fits the data very well. Both mean components closely align with the true data-generating process. Additionally, the estimated standard deviation for the first component is also accurately captured, and the linear effect for the mixing probability is well-estimated.</p>
 </section>
-<section id="predicting-and-visualizing-results" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="predicting-and-visualizing-results"><span class="header-section-number">4</span> Predicting and Visualizing Results</h2>
+<section id="predicting-and-visualizing-results" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="predicting-and-visualizing-results"><span class="header-section-number">7</span> Predicting and Visualizing Results</h2>
 <p>We predict the component-specific means (<code>mu1</code>, <code>mu2</code>) and the mixing probability (<code>pi</code>) from the fitted model. Then, we compare the predicted and true component probabilities and plot the fitted means along with the data.</p>
 <p>First, compute predicted parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">type =</span> <span class="st">"parameter"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">type =</span> <span class="st">"parameter"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Plot estimated vs.&nbsp;true component probabilities.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(p<span class="sc">$</span>pi, mix_prob, <span class="at">main =</span> <span class="st">"Estimated vs. True Component Probabilities"</span>, </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Estimated Probability"</span>, <span class="at">ylab =</span> <span class="st">"True Probability"</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mix_prob, p[,<span class="st">"pi"</span>], <span class="at">main =</span> <span class="st">"Mixing Probabilities (True vs. Estimated)"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"True"</span>, <span class="at">ylab =</span> <span class="st">"Estimated"</span>, <span class="at">col =</span> <span class="dv">1</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -619,35 +623,39 @@ GAMLSS-RS iteration 10: Global Deviance = 428.3948 eps = 0.000008     </code></p
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute posterior component probabilities</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(d<span class="sc">$</span>y, p<span class="sc">$</span>mu1, p<span class="sc">$</span>sigma1)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(d<span class="sc">$</span>y, p<span class="sc">$</span>mu2, p<span class="sc">$</span>sigma2)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>totprob <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">cbind</span>(p<span class="sc">$</span>pi <span class="sc">*</span> d1, (<span class="dv">1</span> <span class="sc">-</span> p<span class="sc">$</span>pi) <span class="sc">*</span> d2))</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>c1 <span class="ot">&lt;-</span> p<span class="sc">$</span>pi <span class="sc">*</span> d1  <span class="sc">/</span> totprob</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p<span class="sc">$</span>pi) <span class="sc">*</span> d2  <span class="sc">/</span> totprob</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="do">## get components</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">cbind</span>(c2, c1), <span class="dv">1</span>, which.max)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="do">## plot the data and fitted component means</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y <span class="sc">~</span> x, <span class="at">data =</span> d,</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Fitted Component Means"</span>,</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>, <span class="at">col =</span> comp)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(p<span class="sc">$</span>mu1 <span class="sc">~</span> x, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">4</span>)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(p<span class="sc">$</span>mu2 <span class="sc">~</span> x, <span class="at">col =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Overlay predicted means onto the observed data.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute posterior component probabilities</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(d<span class="sc">$</span>y, p<span class="sc">$</span>mu1, p<span class="sc">$</span>sigma1)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(d<span class="sc">$</span>y, p<span class="sc">$</span>mu2, p<span class="sc">$</span>sigma2)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>totprob <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">cbind</span>(p<span class="sc">$</span>pi <span class="sc">*</span> d1, (<span class="dv">1</span> <span class="sc">-</span> p<span class="sc">$</span>pi) <span class="sc">*</span> d2))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>c1 <span class="ot">&lt;-</span> p<span class="sc">$</span>pi <span class="sc">*</span> d1  <span class="sc">/</span> totprob</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p<span class="sc">$</span>pi) <span class="sc">*</span> d2  <span class="sc">/</span> totprob</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="do">## get components</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">cbind</span>(c2, c1), <span class="dv">1</span>, which.max)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="do">## plot data and fitted values</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(d, <span class="at">col =</span> comp, <span class="at">main =</span> <span class="st">"Fitted Component Means"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(d<span class="sc">$</span>x, p[,<span class="st">"mu1"</span>], <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">5</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(d<span class="sc">$</span>x, p[,<span class="st">"mu2"</span>], <span class="at">col =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">5</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"mu1"</span>, <span class="st">"mu2"</span>), <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><img src="mixture_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The plot demonstrates that the estimated component means are highly accurate, and the observations are correctly assigned to the two components with quite high precision.</p>
 </section>
-<section id="summary" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="summary"><span class="header-section-number">5</span> Summary</h2>
-<p>In this vignette, we have demonstrated how to fit a mixture model where the mixing probabilities depend on a covariate. We simulated data, defined a custom mixture family, and fitted the model to estimate the component means and mixing probabilities. Finally, we compared the predicted component probabilities with the true values and visualized the results.</p>
+<section id="summary" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="summary"><span class="header-section-number">8</span> Summary</h2>
+<p>This vignette demonstrated how to estimate flexible mixture models using <em>gamlss2</em>. The framework allows us to model the means, variances, and mixing probabilities of the components in a very flexible manner using smooth effects of covariates.</p>
 
 
 

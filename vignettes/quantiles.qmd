@@ -20,13 +20,35 @@ vignette: >
 library("gamlss2")
 ```
 
-Describe estimation of quantiles/centiles.
+Quantile estimation, or centile estimation, is a powerful approach in statistics that provides 
+insights into the distributional characteristics of a response variable at various points.
+Rather than estimating just the mean (as in traditional regression), quantiles provide 
+information about the entire distribution of the response variable.
 
+In this vignette, we demonstrate how to estimate quantiles (e.g., the 10th, 50th, and 90th)
+using _gamlss2_.
+
+## `film90` Data
+
+In this example, we use the `film90` dataset from the gamlss.data package to illustrate
+quantile estimation using a flexible `BCPE` distribution. The model allows us to estimate 
+quantiles based on the predictors, providing a richer understanding of the underlying data.
+
+The model is estimated with.
 ```{r}
 library("gamlss2")
 
+## load the data
 data("film90", package = "gamlss.data")
-     
+
+## plotting
+par(mar = c(4, 4, 1, 1))
+plot(lborev1 ~ lboopen, data = film90)
+```
+
+## Estimation
+
+```{r}
 ## model formula
 f <-  ~ s(lboopen, k = 20)
 f <- rep(list(f), 4)
@@ -34,7 +56,13 @@ f[[1]] <- update(f[[1]], lborev1 ~ .)
      
 ## estimate model
 b <- gamlss2(f, data = film90, family = BCPE)
-     
+```
+
+## Quantile Computation
+
+Quantiles can be computed using the generic `quantile()` function.
+
+```{r}
 ## compute quantiles using "newdata"
 nd <- with(film90,
   data.frame("lboopen" = seq(min(lboopen), max(lboopen), length = 300))
@@ -48,3 +76,17 @@ plot(lborev1 ~ lboopen, data = film90,
 matplot(nd$lboopen, fit, type = "l",
   lwd = 2, lty = 1, col = 4, add = TRUE)
 ```
+
+The plot shows the observed data points for Revenue (`lborev1`) versus
+Opening Gross (`lboopen`). The scatter plot is overlaid with lines representing the estimated 
+10th, 50th, and 90th quantiles. These quantiles are estimates of the lower tail
+(10th percentile), median (50th percentile), and upper tail
+(90th percentile) of the distribution of revenue as a function of opening gross.
+
+From the plot, we can see how the distribution of revenue changes across different levels of 
+opening gross. The 10th quantile line shows the lower tail of the distribution, while the 90th 
+quantile shows the upper tail, and the 50th quantile represents the central tendency (median). 
+This provides more insight than merely modeling the mean (as is done in typical linear 
+regression), as it allows us to capture the variation in the response across different points in 
+the distribution.
+

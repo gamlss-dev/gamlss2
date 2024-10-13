@@ -409,8 +409,16 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#film90-data" id="toc-film90-data" class="nav-link active" data-scroll-target="#film90-data"><span class="header-section-number">1</span> <code>film90</code> Data</a></li>
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">2</span> Estimation</a></li>
+  <li><a href="#quantile-computation" id="toc-quantile-computation" class="nav-link" data-scroll-target="#quantile-computation"><span class="header-section-number">3</span> Quantile Computation</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -421,39 +429,21 @@ div.csl-indent {
 </header>
 
 
-<p>Describe estimation of quantiles/centiles.</p>
+<p>Quantile estimation, or centile estimation, is a powerful approach in statistics that provides insights into the distributional characteristics of a response variable at various points. Rather than estimating just the mean (as in traditional regression), quantiles provide information about the entire distribution of the response variable.</p>
+<p>In this vignette, we demonstrate how to estimate quantiles (e.g., the 10th, 50th, and 90th) using <em>gamlss2</em>.</p>
+<section id="film90-data" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="film90-data"><span class="header-section-number">1</span> <code>film90</code> Data</h2>
+<p>In this example, we use the <code>film90</code> dataset from the gamlss.data package to illustrate quantile estimation using a flexible <code>BCPE</code> distribution. The model allows us to estimate quantiles based on the predictors, providing a richer understanding of the underlying data.</p>
+<p>The model is estimated with.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"film90"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span>  <span class="er">~</span> <span class="fu">s</span>(lboopen, <span class="at">k =</span> <span class="dv">20</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">list</span>(f), <span class="dv">4</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>f[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">update</span>(f[[<span class="dv">1</span>]], lborev1 <span class="sc">~</span> .)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> film90, <span class="at">family =</span> BCPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11916.9973 eps = 0.648051     
-GAMLSS-RS iteration  2: Global Deviance = 11753.5193 eps = 0.013718     
-GAMLSS-RS iteration  3: Global Deviance = 11733.1187 eps = 0.001735     
-GAMLSS-RS iteration  4: Global Deviance = 11727.2293 eps = 0.000501     
-GAMLSS-RS iteration  5: Global Deviance = 11726.2108 eps = 0.000086     
-GAMLSS-RS iteration  6: Global Deviance = 11726.1769 eps = 0.000002     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute quantiles using "newdata"</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">with</span>(film90,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="st">"lboopen"</span> <span class="ot">=</span> <span class="fu">seq</span>(<span class="fu">min</span>(lboopen), <span class="fu">max</span>(lboopen), <span class="at">length =</span> <span class="dv">300</span>))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(b, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantiles</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lborev1 <span class="sc">~</span> lboopen, <span class="at">data =</span> film90,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(nd<span class="sc">$</span>lboopen, fit, <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## load the data</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"film90"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## plotting</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lborev1 <span class="sc">~</span> lboopen, <span class="at">data =</span> film90)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -462,9 +452,57 @@ GAMLSS-RS iteration  6: Global Deviance = 11726.1769 eps = 0.000002     </code><
 </div>
 </div>
 </div>
+</section>
+<section id="estimation" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="estimation"><span class="header-section-number">2</span> Estimation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span>  <span class="er">~</span> <span class="fu">s</span>(lboopen, <span class="at">k =</span> <span class="dv">20</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">list</span>(f), <span class="dv">4</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>f[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">update</span>(f[[<span class="dv">1</span>]], lborev1 <span class="sc">~</span> .)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>     </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> film90, <span class="at">family =</span> BCPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11916.9973 eps = 0.648051     
+GAMLSS-RS iteration  2: Global Deviance = 11753.5193 eps = 0.013718     
+GAMLSS-RS iteration  3: Global Deviance = 11733.1187 eps = 0.001735     
+GAMLSS-RS iteration  4: Global Deviance = 11727.2293 eps = 0.000501     
+GAMLSS-RS iteration  5: Global Deviance = 11726.2108 eps = 0.000086     
+GAMLSS-RS iteration  6: Global Deviance = 11726.1769 eps = 0.000002     </code></pre>
+</div>
+</div>
+</section>
+<section id="quantile-computation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="quantile-computation"><span class="header-section-number">3</span> Quantile Computation</h2>
+<p>Quantiles can be computed using the generic <code>quantile()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute quantiles using "newdata"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">with</span>(film90,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="st">"lboopen"</span> <span class="ot">=</span> <span class="fu">seq</span>(<span class="fu">min</span>(lboopen), <span class="fu">max</span>(lboopen), <span class="at">length =</span> <span class="dv">300</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(b, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>     </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantiles</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lborev1 <span class="sc">~</span> lboopen, <span class="at">data =</span> film90,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(nd<span class="sc">$</span>lboopen, fit, <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="quantiles_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows the observed data points for Revenue (<code>lborev1</code>) versus Opening Gross (<code>lboopen</code>). The scatter plot is overlaid with lines representing the estimated 10th, 50th, and 90th quantiles. These quantiles are estimates of the lower tail (10th percentile), median (50th percentile), and upper tail (90th percentile) of the distribution of revenue as a function of opening gross.</p>
+<p>From the plot, we can see how the distribution of revenue changes across different levels of opening gross. The 10th quantile line shows the lower tail of the distribution, while the 90th quantile shows the upper tail, and the 50th quantile represents the central tendency (median). This provides more insight than merely modeling the mean (as is done in typical linear regression), as it allows us to capture the variation in the response across different points in the distribution.</p>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">

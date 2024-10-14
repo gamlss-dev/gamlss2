@@ -35,7 +35,9 @@ quantile estimation using a flexible `BCPE` distribution. The model allows us to
 quantiles based on the predictors, providing a richer understanding of the underlying data.
 
 The model is estimated with.
-```{r}
+#| fig-height: 5
+#| fig-width: 6
+#| fig-align: center
 library("gamlss2")
 
 ## load the data

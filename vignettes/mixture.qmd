@@ -239,23 +239,58 @@ Overlay predicted means onto the observed data.
 d1 <- dnorm(d$y, p$mu1, p$sigma1)
 d2 <- dnorm(d$y, p$mu2, p$sigma2)
 totprob <- rowSums(cbind(p$pi * d1, (1 - p$pi) * d2))
-c1 <- p$pi * d1  / totprob
-c2 <- (1 - p$pi) * d2  / totprob
+p1 <- p$pi * d1  / totprob
+p2 <- (1 - p$pi) * d2  / totprob
 
 ## get components
-comp <- apply(cbind(c2, c1), 1, which.max)
+comp <- apply(cbind(p2, p1), 1, which.max)
+
+## extract component means and quantiles
+f1 <- cbind(
+  "1%" = qnorm(0.01, mean = p[, "mu1"], sd = p[, "sigma1"]),
+  "Mean" = p[, "mu1"],
+  "99%" = qnorm(0.99, mean = p[, "mu1"], sd = p[, "sigma1"])
+)
+
+f2 <- cbind(
+  "1%" = qnorm(0.01, mean = p[, "mu2"], sd = p[, "sigma2"]),
+  "Mean" = p[, "mu2"],
+  "99%" = qnorm(0.99, mean = p[, "mu2"], sd = p[, "sigma2"])
+)
 
 ## plot data and fitted values
 par(mar = c(4, 4, 4, 1))
 plot(d, col = comp, main = "Fitted Component Means",
      xlab = "x", ylab = "y")
-lines(d$x, p[,"mu1"], col = 2, lwd = 5)
-lines(d$x, p[,"mu2"], col = 1, lwd = 5)
-legend("topright", c("mu1", "mu2"), lwd = 3, col = 2:1, bty = "n")
+matplot(d$x, f1, type = "l", lty = c(2, 1, 2),
+  lwd = c(1, 3, 1), col = 2, add = TRUE)
+matplot(d$x, f2, type = "l", lty = c(2, 1, 2),
+  lwd = c(1, 3, 1), col = 1, add = TRUE)
+
+plot(p1 ~ d$x, col = comp,
+  xlab = "x", ylab = "Probability",
+  main = "Posterior Probabilities")
 ```
 
-The plot demonstrates that the estimated component means are highly accurate, and the 
-observations are correctly assigned to the two components with quite high precision.
+The plot shows that the estimated component means are highly accurate, and the observations
+are assigned to the two components with high precision. Moreover, by using a full GAMLSS model
+for both components, we are able to compute corresponding quantile estimates,
+which align well with the data.
+
+The posterior probabilities can be visualized with
+
+```{r}
+#| fig-height: 5
+#| fig-width: 6
+#| fig-align: center
+par(mar = c(4, 4, 4, 1))
+plot(p1 ~ d$x, col = comp,
+  xlab = "x", ylab = "Probability",
+  main = "Posterior Probabilities")
+```
+
+The plot clearly illustrates that component classification is less certain in
+areas where the data points overlap.
 
 ## Summary
 

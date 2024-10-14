@@ -148,7 +148,7 @@ Family objects can also include other functions such as:
 These functions should adhere to the same structure as the density function, taking the response
 (`y`), parameters (`par`), and other relevant arguments.
 
-Note that the CDF `q()` function is mandatory for computing quantile residuals.
+Note that the CDF `p()` function is mandatory for computing quantile residuals.
 
 ## Flexible Links
 

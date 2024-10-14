@@ -20,11 +20,10 @@ vignette: >
 library("gamlss2")
 ```
 
-Note that all family objects of the _gamlss.dist_ package can be used for modeling. However, for
-users wanting to specify their own (new) distribution model, this document provides a guide
-on how to define custom family objects within the gamlss2 framework.
+All family objects of the `gamlss.dist` package, see @Rigbyetal2019, can be used for modelling in `gamlss2`. However, for users wanting to specify their own (new) distribution model, this document provides a guide
+on how to define custom family objects within the `gamlss2` framework.
 
-Family objects in the _gamlss2_ package play an essential role in defining the models used for
+Family objects in the `gamlss2` package play an essential role in defining the models used for
 fitting data to distributions. These objects encapsulate the necessary details about the
 distribution and the parameters, such as:
 
@@ -32,7 +31,7 @@ distribution and the parameters, such as:
 * The link functions that map the parameters to the predictor.
 * Functions for the density, log-likelihood, and their derivatives.
 
-This document provides an overview of how to construct and use family objects within _gamlss2_.
+This document provides an overview of how to construct and use family objects within `gamlss2`.
 By the end, you should have a good understanding of how to implement a custom family for
 use in statistical models.
 
@@ -40,11 +39,11 @@ use in statistical models.
 
 A family object in _gamlss2_ is a list that must meet the following minimum criteria:
 
-* Family Name: The object must contain the family name as a character string.
-* Parameters: The object must list the parameters of the distribution (e.g., `"mu"` and `"sigma"`
+* **Family Name**: The object must contain the family name as a character string.
+* **Parameters**: The object must list the parameters of the distribution (e.g., `"mu"` and `"sigma"`
   for a normal distribution).
-* Link Functions: It must specify the link functions associated with each parameter.
-* Density Function: A `d()` function must be provided to evaluate the (log-)density of the
+* **Link Functions**: It must specify the link functions associated with each parameter.
+* **Density Function**: A `d()` function must be provided to evaluate the (log-)density of the
   distribution.
 
 Optionally, a family object can include functions to calculate the log-likelihood,
@@ -159,6 +158,7 @@ customizable link functions.
 The Kumaraswamy distribution is a continuous distribution defined on the interval $(0, 1)$.
 It is similar to the Beta distribution but has simpler forms for its cumulative distribution and
 inverse cumulative distribution functions, making it more computationally efficient for certain applications.
+Unfortunately the Kumaraswamy distribution parameters do not conform with the _distribution regression principal_ that parameters should have a clear interpretation in terms  of _location_ and _scale_. For example, the mean and variance of the distribution are a rather complicated functions of the parameters `a` and `b`, nevertheless the distribution is a good example of two parameter distribution in which the parameters are not named as `mu` and `sigma` as in all distributions defined in @Rigbyetal2019.        
 
 The probability density function (PDF) of the Kumaraswamy distribution is:
 

@@ -464,22 +464,22 @@ window.Quarto = {
 </header>
 
 
-<p>Note that all family objects of the <em>gamlss.dist</em> package can be used for modeling. However, for users wanting to specify their own (new) distribution model, this document provides a guide on how to define custom family objects within the gamlss2 framework.</p>
-<p>Family objects in the <em>gamlss2</em> package play an essential role in defining the models used for fitting data to distributions. These objects encapsulate the necessary details about the distribution and the parameters, such as:</p>
+<p>All family objects of the <code>gamlss.dist</code> package, see <span class="citation" data-cites="Rigbyetal2019">Rigby et al. (<a href="#ref-Rigbyetal2019" role="doc-biblioref">2019</a>)</span>, can be used for modelling in <code>gamlss2</code>. However, for users wanting to specify their own (new) distribution model, this document provides a guide on how to define custom family objects within the <code>gamlss2</code> framework.</p>
+<p>Family objects in the <code>gamlss2</code> package play an essential role in defining the models used for fitting data to distributions. These objects encapsulate the necessary details about the distribution and the parameters, such as:</p>
 <ul>
 <li>The names of the parameters.</li>
 <li>The link functions that map the parameters to the predictor.</li>
 <li>Functions for the density, log-likelihood, and their derivatives.</li>
 </ul>
-<p>This document provides an overview of how to construct and use family objects within <em>gamlss2</em>. By the end, you should have a good understanding of how to implement a custom family for use in statistical models.</p>
+<p>This document provides an overview of how to construct and use family objects within <code>gamlss2</code>. By the end, you should have a good understanding of how to implement a custom family for use in statistical models.</p>
 <section id="defining-family-objects" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="defining-family-objects"><span class="header-section-number">1</span> Defining Family Objects</h2>
 <p>A family object in <em>gamlss2</em> is a list that must meet the following minimum criteria:</p>
 <ul>
-<li>Family Name: The object must contain the family name as a character string.</li>
-<li>Parameters: The object must list the parameters of the distribution (e.g., <code>"mu"</code> and <code>"sigma"</code> for a normal distribution).</li>
-<li>Link Functions: It must specify the link functions associated with each parameter.</li>
-<li>Density Function: A <code>d()</code> function must be provided to evaluate the (log-)density of the distribution.</li>
+<li><strong>Family Name</strong>: The object must contain the family name as a character string.</li>
+<li><strong>Parameters</strong>: The object must list the parameters of the distribution (e.g., <code>"mu"</code> and <code>"sigma"</code> for a normal distribution).</li>
+<li><strong>Link Functions</strong>: It must specify the link functions associated with each parameter.</li>
+<li><strong>Density Function</strong>: A <code>d()</code> function must be provided to evaluate the (log-)density of the distribution.</li>
 </ul>
 <p>Optionally, a family object can include functions to calculate the log-likelihood, random number generation, cumulative distribution function (CDF), and quantile function.</p>
 <p>Here’s an example of a minimal family object for the normal distribution.</p>
@@ -566,7 +566,7 @@ window.Quarto = {
 <section id="flexible-links" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="flexible-links"><span class="header-section-number">5</span> Flexible Links</h2>
 <p>Note that the example above used static link functions to define the family object. However, users can easily create families with flexible link functions as well. A helpful example of how to implement such flexibility can be found in the Kumaraswamy distribution implementation, which provides a clear template for setting up families with customizable link functions.</p>
-<p>The Kumaraswamy distribution is a continuous distribution defined on the interval <span class="math inline">\((0, 1)\)</span>. It is similar to the Beta distribution but has simpler forms for its cumulative distribution and inverse cumulative distribution functions, making it more computationally efficient for certain applications.</p>
+<p>The Kumaraswamy distribution is a continuous distribution defined on the interval <span class="math inline">\((0, 1)\)</span>. It is similar to the Beta distribution but has simpler forms for its cumulative distribution and inverse cumulative distribution functions, making it more computationally efficient for certain applications. Unfortunately the Kumaraswamy distribution parameters do not conform with the <em>distribution regression principal</em> that parameters should have a clear interpretation in terms of <em>location</em> and <em>scale</em>. For example, the mean and variance of the distribution are a rather complicated functions of the parameters <code>a</code> and <code>b</code>, nevertheless the distribution is a good example of two parameter distribution in which the parameters are not named as <code>mu</code> and <code>sigma</code> as in all distributions defined in <span class="citation" data-cites="Rigbyetal2019">Rigby et al. (<a href="#ref-Rigbyetal2019" role="doc-biblioref">2019</a>)</span>.</p>
 <p>The probability density function (PDF) of the Kumaraswamy distribution is:</p>
 <p><span class="math display">\[
 f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
@@ -643,6 +643,9 @@ GAMLSS-RS iteration  4: Global Deviance = -1504.1294 eps = 0.000002     </code><
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+</div>
+<div id="ref-Rigbyetal2019" class="csl-entry" role="listitem">
+Rigby, R. A., D. M. Stasinopoulos, G. Z. Heller, and F. De Bastiani. 2019. <em>Distributions for Modeling Location, Scale, and Shape: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9780429298547">https://doi.org/10.1201/9780429298547</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

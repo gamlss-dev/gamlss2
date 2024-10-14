@@ -23,7 +23,8 @@ nocite: |
   @Hofneretal2014
   @Mayretal2012
   @stasinopoulos2023p
-  
+  @CarterDavis2015
+  @R:Pinheiro+Bates:2000
   
 vignette: >
   %\VignetteIndexEntry{Smooth Terms}

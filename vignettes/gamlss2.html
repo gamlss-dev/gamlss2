@@ -430,7 +430,7 @@ div.csl-indent {
 
 
 <p>The package is designed to follow the workflow of well-established model fitting functions like <code>lm()</code> or <code>glm()</code>, i.e., the step of estimating full distributional regression models is actually not very difficult.</p>
-<p>To illustrate the workflow using <em>gamlss2</em>, we analyze the <code>HarzTraffic</code> data, where we model the number of motorcycles (response <code>bikes</code>) at Sonnenberg in the Harz region of Germany. The data can be loaded with</p>
+<p>To illustrate the workflow using <code>gamlss2</code>, we analyze the <code>HarzTraffic</code> data, where we model the number of motorcycles (response <code>bikes</code>) at Sonnenberg in the Harz region of Germany. The data can be loaded with</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -508,7 +508,7 @@ AIC = 14337.7146 elapsed =  0.02sec</code></pre>
 </section>
 <section id="estimating-nonlinear-effects" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="estimating-nonlinear-effects"><span class="header-section-number">2</span> Estimating Nonlinear Effects</h2>
-<p>The <em>gamlss2</em> package uses the <em>mgcv</em> infrastructures for estimating nonlinear smooth effects. Now, let’s inspect the seaonal aspect of the data, there</p>
+<p>The <code>gamlss2</code> package uses the <em>mgcv</em> infrastructures for estimating nonlinear smooth effects. Now, let’s inspect the seaonal aspect of the data, there</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

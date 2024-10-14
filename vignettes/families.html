@@ -474,7 +474,7 @@ window.Quarto = {
 <p>This document provides an overview of how to construct and use family objects within <code>gamlss2</code>. By the end, you should have a good understanding of how to implement a custom family for use in statistical models.</p>
 <section id="defining-family-objects" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="defining-family-objects"><span class="header-section-number">1</span> Defining Family Objects</h2>
-<p>A family object in <em>gamlss2</em> is a list that must meet the following minimum criteria:</p>
+<p>A family object in <code>gamlss2</code> is a list that must meet the following minimum criteria:</p>
 <ul>
 <li><strong>Family Name</strong>: The object must contain the family name as a character string.</li>
 <li><strong>Parameters</strong>: The object must list the parameters of the distribution (e.g., <code>"mu"</code> and <code>"sigma"</code> for a normal distribution).</li>
@@ -629,12 +629,12 @@ GAMLSS-RS iteration  4: Global Deviance = -1504.1294 eps = 0.000002     </code><
 </div>
 </div>
 <p>In this example, we simulated a dataset where the parameter <code>a</code> of the Kumaraswamy distribution varies with <code>x</code> following a sinusoidal pattern. We then used the <code>gamlss2()</code> function to fit a smooth model that estimates this relationship. The effect of <code>x</code> on <code>y</code> is plotted, followed by a diagnostic plot to assess residuals.</p>
-<p>The <code>Kumaraswamy()</code> family in <em>gamlss2</em> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
+<p>The <code>Kumaraswamy()</code> family in <code>gamlss2</code> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
 </section>
 </section>
 <section id="summary" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="summary"><span class="header-section-number">6</span> Summary</h2>
-<p>Family objects in the <em>gamlss2</em> package are a fundamental component for defining flexible, distribution-based regression models, and beyond. By encapsulating the necessary elements, such as parameters, link functions, and density functions, they provide a powerful framework for customizing models to fit specific data. The flexibility to define custom families, as demonstrated with the <code>Kumaraswamy()</code> distribution, enables users to extend the package beyond its default families, making it adaptable to a wide range of modeling scenarios. Furthermore, the ability to define both static and dynamic link functions enhances the versatility of <em>gamlss2</em> for distributional regression, empowering users to tailor models to their unique data and research needs.</p>
+<p>Family objects in the <code>gamlss2</code> package are a fundamental component for defining flexible, distribution-based regression models, and beyond. By encapsulating the necessary elements, such as parameters, link functions, and density functions, they provide a powerful framework for customizing models to fit specific data. The flexibility to define custom families, as demonstrated with the <code>Kumaraswamy()</code> distribution, enables users to extend the package beyond its default families, making it adaptable to a wide range of modeling scenarios. Furthermore, the ability to define both static and dynamic link functions enhances the versatility of <code>gamlss2</code> for distributional regression, empowering users to tailor models to their unique data and research needs.</p>
 
 
 

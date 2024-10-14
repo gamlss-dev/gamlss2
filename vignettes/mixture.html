@@ -447,7 +447,7 @@ window.Quarto = {
   <li><a href="#two-component-normal-mixture-model" id="toc-two-component-normal-mixture-model" class="nav-link" data-scroll-target="#two-component-normal-mixture-model"><span class="header-section-number">2</span> Two-Component Normal Mixture Model</a></li>
   <li><a href="#gamlss-framework-for-the-mixture-model" id="toc-gamlss-framework-for-the-mixture-model" class="nav-link" data-scroll-target="#gamlss-framework-for-the-mixture-model"><span class="header-section-number">3</span> GAMLSS Framework for the Mixture Model</a></li>
   <li><a href="#example-using-simulated-data" id="toc-example-using-simulated-data" class="nav-link" data-scroll-target="#example-using-simulated-data"><span class="header-section-number">4</span> Example using Simulated Data</a></li>
-  <li><a href="#defining-a-custom-gamlss2-mixture-family" id="toc-defining-a-custom-gamlss2-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <em>gamlss2</em> Mixture Family</a></li>
+  <li><a href="#defining-a-custom-gamlss2-mixture-family" id="toc-defining-a-custom-gamlss2-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <code>gamlss2</code> Mixture Family</a></li>
   <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">6</span> Estimation</a></li>
   <li><a href="#predicting-and-visualizing-results" id="toc-predicting-and-visualizing-results" class="nav-link" data-scroll-target="#predicting-and-visualizing-results"><span class="header-section-number">7</span> Predicting and Visualizing Results</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">8</span> Summary</a></li>
@@ -464,7 +464,7 @@ window.Quarto = {
 
 
 <p>Mixture models are used for modeling data generated from multiple distinct processes, where each process can be described by a separate probability distribution. The challenge is that for each observation, we do not know which process generated it, and therefore we must infer the underlying latent components.</p>
-<p>This vignette demonstrates how to fit flexible mixture models using <em>gamlss2</em>.</p>
+<p>This vignette demonstrates how to fit flexible mixture models using <code>gamlss2</code>.</p>
 <section id="model-overview" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="model-overview"><span class="header-section-number">1</span> Model Overview</h2>
 <p>In a finite mixture model, each observation <span class="math inline">\(y_i\)</span> for <span class="math inline">\(i = 1, \ldots, n\)</span>, is assumed to be generated from one of <span class="math inline">\(K\)</span> distinct underlying distributions. The probability that an observation comes from the <span class="math inline">\(k\)</span>-th component is determined by the mixing probability <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, which may depend on covariates <span class="math inline">\(\mathbf{x}_i\)</span>. The probability density function (pdf) of <span class="math inline">\(y_i\)</span> is expressed as</p>
@@ -555,8 +555,8 @@ d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 </div>
 </section>
 <section id="defining-a-custom-gamlss2-mixture-family" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <em>gamlss2</em> Mixture Family</h2>
-<p>To fit the mixture model in <em>gamlss2</em>, we define a custom family of distributions. In this case, we create a mixture of two normal distributions (using <code>dnorm()</code>) where the mixing probabilities depend on a covariate.</p>
+<h2 data-number="5" class="anchored" data-anchor-id="defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <code>gamlss2</code> Mixture Family</h2>
+<p>To fit the mixture model in <code>gamlss2</code>, we define a custom family of distributions. In this case, we create a mixture of two normal distributions (using <code>dnorm()</code>) where the mixing probabilities depend on a covariate.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mixture family definition for a normal mixture</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>NOmx <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
@@ -655,7 +655,7 @@ d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 </section>
 <section id="summary" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="summary"><span class="header-section-number">8</span> Summary</h2>
-<p>This vignette demonstrated how to estimate flexible mixture models using <em>gamlss2</em>. The framework allows us to model the means, variances, and mixing probabilities of the components in a very flexible manner using smooth effects of covariates.</p>
+<p>This vignette demonstrated how to estimate flexible mixture models using <code>gamlss2</code>. The framework allows us to model the means, variances, and mixing probabilities of the components in a very flexible manner using smooth effects of covariates.</p>
 
 
 

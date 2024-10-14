@@ -10,7 +10,7 @@
   GADM (\url{https://gadm.org/}) and slightly simplified to reduce disk space.
 }
 
-\usage{data("storms", package = "gamlss2")}
+\usage{data("Germany", package = "gamlss2")}
 
 \format{
 A class \code{"sf"} data frame containing 403 counties of Germany.
@@ -32,7 +32,8 @@ A class \code{"sf"} data frame containing 403 counties of Germany.
   }
 }
 
-\examples{\dontshow{ if(!requireNamespace("sf")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\examples{
+\dontshow{ if(!requireNamespace("sf")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 ## load sf package for plotting
 library("sf")
 

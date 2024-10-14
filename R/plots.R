@@ -3,11 +3,6 @@ plot.gamlss2 <- function(x, parameter = NULL,
   which = "effects", terms = NULL,
   scale = TRUE, spar = TRUE, ...)
 {
-  if(spar) {
-    owd <- par(no.readonly = TRUE)
-    on.exit(par(owd))
-  }
-
   ## What should be plotted?
   which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection")
   if(!is.character(which)) {
@@ -40,12 +35,23 @@ plot.gamlss2 <- function(x, parameter = NULL,
       which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
 
+  spare <- spar
+
   ## Effect plots.
   if("effects" %in% which) {
     if(is.null(x$results))
       x$results <- results(x)
 
     en <- grep2(parameter, names(x$results$effects), fixed = TRUE, value = TRUE)
+
+    if(length(en) < 2L)
+      spare <- FALSE
+
+    if(spare) {
+      owd <- par(no.readonly = TRUE)
+      on.exit(par(owd))
+    }
+
     if(!is.null(terms)) {
       if(is.character(terms)) {
         en <- grep2(terms, en, fixed = TRUE, value = TRUE)
@@ -57,7 +63,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
     }
 
     if(length(x$results$effects)) {
-      if(spar) {
+      if(spare) {
         nplts <- length(en)
         par(mfrow = if(nplts <= 4) c(1, nplts) else n2mfrow(nplts))
       }
@@ -100,10 +106,20 @@ plot.gamlss2 <- function(x, parameter = NULL,
     return(invisible(NULL))
   }
 
+  spare <- spar
+
   ## Residual plot.
   if(any(grepl("resid", which))) {
+    if(length(which) < 2L)
+      spare <- FALSE
+
+    if(spare) {
+      owd <- par(no.readonly = TRUE)
+      on.exit(par(owd))
+    }
+
     ## Number of plots.
-    if(spar)
+    if(spare)
       par(mfrow = n2mfrow(length(which)))
 
     ## Compute residuals.

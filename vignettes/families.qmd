@@ -147,6 +147,8 @@ Family objects can also include other functions such as:
 These functions should adhere to the same structure as the density function, taking the response
 (`y`), parameters (`par`), and other relevant arguments.
 
+Note that the CDF `p()` function is mandatory for computing quantile residuals.
+
 ## Flexible Links
 
 Note that the example above used static link functions to define the family object.
@@ -220,7 +222,7 @@ The `Kumaraswamy()` family in _gamlss2_ is flexible, allowing the user to specif
 different link functions for its parameters, such as the default `shiftlog` link function for
 parameter `a`, which ensures non-negative values.
 
-## Conclusion
+## Summary
 
 Family objects in the _gamlss2_ package are a fundamental component for defining flexible,
 distribution-based regression models, and beyond. By encapsulating the necessary elements,

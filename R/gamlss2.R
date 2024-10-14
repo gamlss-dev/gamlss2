@@ -192,9 +192,11 @@ gamlss2.formula <- function(formula, data, family = NO,
       if(j %in% Xterms[[i]]) {
         xl <- paste0(j, xlev[[j]])
         xl <- xl[xl %in% colnames(X)]
-        Xterms[[i]][Xterms[[i]] == j] <- NA
-        Xterms[[i]] <- Xterms[[i]][!is.na(Xterms[[i]])]
-        Xterms[[i]] <- c(Xterms[[i]], xl)
+        if(length(xl)) {
+          Xterms[[i]][Xterms[[i]] == j] <- NA
+          Xterms[[i]] <- Xterms[[i]][!is.na(Xterms[[i]])]
+          Xterms[[i]] <- c(Xterms[[i]], xl)
+        }
       }
     }
     ## Others.
@@ -221,7 +223,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   if(!is.null(family$valid.response)) {
     if(!family$valid.response(Y)) {
       stop(paste0("please check the response, family '",
-        family$family, "' validy check not passed!"))
+        family$family, "' validity check not passed!"))
     }
   }
 

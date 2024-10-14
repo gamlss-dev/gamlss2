@@ -18,7 +18,7 @@ vignette: >
 
 ## Probabilistic model infrastructure
 
-Introduction on how to use the [topmodels](https://topmodels.R-Forge.R-project.org/topmodels/) package [@topmodels] with _gamlss2_.
+Introduction on how to use the [topmodels](https://topmodels.R-Forge.R-project.org/topmodels/) package [@topmodels] with `gamlss2`.
 
 Currently not on CRAN, yet, so install from [R-universe](https://zeileis.R-universe.dev/) (if not done already).
 The development version of `gamlss.dist` is also needed.

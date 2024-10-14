@@ -26,7 +26,7 @@ Rather than estimating just the mean (as in traditional regression), quantiles p
 information about the entire distribution of the response variable.
 
 In this vignette, we demonstrate how to estimate quantiles (e.g., the 10th, 50th, and 90th)
-using _gamlss2_.
+using `gamlss2`.
 
 ## `film90` Data
 

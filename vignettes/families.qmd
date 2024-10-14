@@ -37,7 +37,7 @@ use in statistical models.
 
 ## Defining Family Objects
 
-A family object in _gamlss2_ is a list that must meet the following minimum criteria:
+A family object in `gamlss2` is a list that must meet the following minimum criteria:
 
 * **Family Name**: The object must contain the family name as a character string.
 * **Parameters**: The object must list the parameters of the distribution (e.g., `"mu"` and `"sigma"`
@@ -218,19 +218,19 @@ distribution varies with `x` following a sinusoidal pattern. We then used the `g
 to fit a smooth model that estimates this relationship. The effect of `x` on `y` is plotted,
 followed by a diagnostic plot to assess residuals.
 
-The `Kumaraswamy()` family in _gamlss2_ is flexible, allowing the user to specify
+The `Kumaraswamy()` family in `gamlss2` is flexible, allowing the user to specify
 different link functions for its parameters, such as the default `shiftlog` link function for
 parameter `a`, which ensures non-negative values.
 
 ## Summary
 
-Family objects in the _gamlss2_ package are a fundamental component for defining flexible,
+Family objects in the `gamlss2` package are a fundamental component for defining flexible,
 distribution-based regression models, and beyond. By encapsulating the necessary elements,
 such as parameters, link functions, and density functions, they provide a powerful framework
 for customizing models to fit specific data. The flexibility to define custom families,
 as demonstrated with the `Kumaraswamy()` distribution, enables users to extend the package
 beyond its default families, making it adaptable to a wide range of modeling scenarios.
 Furthermore, the ability to define both static and dynamic link functions enhances the
-versatility of _gamlss2_ for distributional regression, empowering users to tailor
+versatility of `gamlss2` for distributional regression, empowering users to tailor
 models to their unique data and research needs.
 

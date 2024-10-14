@@ -24,7 +24,7 @@ The package is designed to follow the workflow of well-established model fitting
 like `lm()` or `glm()`, i.e., the step of estimating full distributional regression models
 is actually not very difficult.
 
-To illustrate the workflow using _gamlss2_, we analyze the `HarzTraffic` data, where we model
+To illustrate the workflow using `gamlss2`, we analyze the `HarzTraffic` data, where we model
 the number of motorcycles (response `bikes`) at Sonnenberg in the Harz region of Germany.
 The data can be loaded with
 ```{r harzdata}
@@ -62,7 +62,7 @@ of normality and constant variance.
 
 ## Estimating Nonlinear Effects
 
-The _gamlss2_ package uses the _mgcv_ infrastructures for estimating nonlinear smooth
+The `gamlss2` package uses the _mgcv_ infrastructures for estimating nonlinear smooth
 effects. Now, let's inspect the seaonal aspect of the data, there
 
 ```{r}

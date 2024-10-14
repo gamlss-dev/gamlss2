@@ -20,5 +20,5 @@ vignette: >
 library("gamlss2")
 ```
 
-Describe how to incorporate random effects in _gamlss2_
+Describe how to incorporate random effects in `gamlss2`
 

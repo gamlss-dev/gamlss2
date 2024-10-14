@@ -25,7 +25,7 @@ distinct processes, where each process can be described by a separate probabilit
 The challenge is that for each observation, we do not know which process generated it,
 and therefore we must infer the underlying latent components.
 
-This vignette demonstrates how to fit flexible mixture models using _gamlss2_.
+This vignette demonstrates how to fit flexible mixture models using `gamlss2`.
 
 ## Model Overview
 
@@ -142,9 +142,9 @@ plot(d, col = z + 1, main = "Simulated Data by Latent Component",
      xlab = "x", ylab = "y")
 ```
 
-## Defining a Custom _gamlss2_ Mixture Family
+## Defining a Custom `gamlss2` Mixture Family
 
-To fit the mixture model in _gamlss2_, we define a custom family of distributions.
+To fit the mixture model in `gamlss2`, we define a custom family of distributions.
 In this case, we create a mixture of two normal distributions (using `dnorm()`)
 where the mixing probabilities depend on a covariate.
 
@@ -259,7 +259,7 @@ observations are correctly assigned to the two components with quite high precis
 
 ## Summary
 
-This vignette demonstrated how to estimate flexible mixture models using _gamlss2_. The 
+This vignette demonstrated how to estimate flexible mixture models using `gamlss2`. The 
 framework allows us to model the means, variances, and mixing probabilities of the components
 in a very flexible manner using smooth effects of covariates.
 

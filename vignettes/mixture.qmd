@@ -295,6 +295,6 @@ areas where the data points overlap.
 ## Summary
 
 This vignette demonstrated how to estimate flexible mixture models using `gamlss2`. The 
-framework allows us to model the means, variances, and mixing probabilities of the components
-in a very flexible manner using smooth effects of covariates.
+framework allows us to model the means, variances, and mixing probabilities of
+the components in a very flexible manner using smooth effects of covariates.
 

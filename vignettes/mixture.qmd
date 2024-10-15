@@ -259,8 +259,8 @@ f2 <- cbind(
 )
 
 ## colors for plotting components
-col <- rep(rgb(0.8745, 0.3255, 0.4196, alpha = 0.3), length(p1))
-col[comp == 1] <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
+col <- rep("#DF536B4D", length(p1))
+col[comp == 1] <- "#1A1A1A4D"
 
 ## plot data and fitted values
 par(mar = c(4, 4, 4, 1))
@@ -284,7 +284,7 @@ The posterior probabilities can be visualized with
 #| fig-width: 6
 #| fig-align: center
 par(mar = c(4, 4, 4, 1))
-plot(p1 ~ d$x, col = col,
+plot(p1 ~ d$x, col = comp,
   xlab = "x", ylab = "Probability",
   main = "Posterior Probabilities")
 ```

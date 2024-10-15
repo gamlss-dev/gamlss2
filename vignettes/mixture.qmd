@@ -284,7 +284,7 @@ The posterior probabilities can be visualized with
 #| fig-width: 6
 #| fig-align: center
 par(mar = c(4, 4, 4, 1))
-plot(p1 ~ d$x, col = comp,
+plot(p1 ~ d$x, col = col,
   xlab = "x", ylab = "Probability",
   main = "Posterior Probabilities")
 ```

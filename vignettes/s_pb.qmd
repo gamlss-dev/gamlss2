@@ -8,23 +8,22 @@ format:
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
-  @eilers2021practical
   @Stasinopoulosetal2021
-  @Stasinopoulosetal2017
-  @Rigbyetal2019
-  @Stasinopoulos2018
-  @Fahrmeir+Kneib+Lang+Marx:2013
-  @Lang+Umlauf+Wechselberger+Harttgen+Kneib:2012
-  @bamlss2018
-  @KleiberZeileis2016
-  @distregvis2019
-  @stasinopoulos2024generalized
-  @hofner2015
-  @Hofneretal2014
-  @Mayretal2012
-  @stasinopoulos2023p
-  @CarterDavis2015
-  @R:Pinheiro+Bates:2000
+ 
+  <!-- @Rigbyetal2019 -->
+  <!-- @Stasinopoulos2018 -->
+  <!-- @Fahrmeir+Kneib+Lang+Marx:2013 -->
+  <!-- @Lang+Umlauf+Wechselberger+Harttgen+Kneib:2012 -->
+  <!-- @bamlss2018 -->
+  <!-- @KleiberZeileis2016 -->
+  <!-- @distregvis2019 -->
+  <!-- @stasinopoulos2024generalized -->
+  <!-- @hofner2015 -->
+  <!-- @Hofneretal2014 -->
+  <!-- @Mayretal2012 -->
+  <!-- @stasinopoulos2023p -->
+  <!-- @CarterDavis2015 -->
+  <!-- @R:Pinheiro+Bates:2000 -->
   
 vignette: >
   %\VignetteIndexEntry{Smooth Terms}
@@ -38,8 +37,14 @@ vignette: >
 library("gamlss2")
 ```
 
+*Smoothers* are non-parametric techniques developed mostly in the 1980 and 90's. The main advadance of a smoother is to suggest possible functional forms on how the explanatory variables effect the parameters of the response. That is, to let the data to detect non-linearities in the model. There are basically two types of smoothers;
 
+-   the **cubic splines** smoothers and techniques associated with them like;
 
-Examples on how to set up models using smooth terms with `s()` and `pb()`.
+    -   **thin plate** splines, @Wood17 and;
+    -   **P- splines,** @eilers2021practical and
 
+-   the **local polynomial** smoothing, @Clevelandetal93.
+
+There are several ways to use smoothers within the original GAMLSS framework and they are described in Chapter 9 of @Stasinopoulosetal2017. Local polynomials smoothers can be used with `gamlss2` by connection the `R` function `loess()` with `gamlss2` using  `specials`. This connection is described in a different vignette `Mikis` reference here.   Here we give an explanation  of how use the smooth terms  `s()` and `pb()` withing `gamlss2`.
 

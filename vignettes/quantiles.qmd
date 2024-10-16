@@ -75,7 +75,6 @@ parameters represent the location, scale, and skewness of the distribution, resp
 The `BCCGo` distribution is almost equivalent to fitting the Cole and Green (LMS) method.
 
 ```{r}
-#| cache: true
 ## model formula as list
 ## note that we set up 4 formulas for
 ## the more complex families later.
@@ -92,7 +91,6 @@ parameters: $\mu$, $\sigma$, $\nu$, and $\tau$. These parameters represent the l
 scale, skewness, and kurtosis of the distribution, respectively.
 
 ```{r}
-#| cache: true
 m2 <- gamlss2(f, data = dbbmi, family = BCPEo)
 ```
 
@@ -104,7 +102,6 @@ Detailed definitions of these three `"gamlss.family"` distributions can be found
 Chapter 19 of @Rigbyetal2019.
 
 ```{r}
-#| cache: true
 m3 <- gamlss2(f, data = dbbmi, family = BCTo)
 ```
 

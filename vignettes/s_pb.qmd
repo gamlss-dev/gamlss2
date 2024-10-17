@@ -84,7 +84,7 @@ plot(gm1)
 
 
 ```{r}
-gm2 <- gamlss2(rent~pb(area,yearc)+location+bath+kitchen,
-               data=rent99, family=GA)
+# gm2 <- gamlss2(rent~pb(area,yearc)+location+bath+kitchen,
+#                data=rent99, family=GA)
 
 ```

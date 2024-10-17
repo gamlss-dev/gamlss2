@@ -50,35 +50,56 @@ There are several ways to use smoothers within the original GAMLSS framework and
 
 ## The `s()` function 
 
-The function `s()` is using penalized regression smoothers  and it is identical  to the function `s()` used in the `R` package `mgcv`. Note that all the argument in the `mgcv` function apply here as well. 
+
+
+The function `s(...)` is using penalized regression smoothers  and it is identical  to the function `s(...)` used in the `R` package `mgcv`. The first argument of the function specifies the term(s).
+For **one dimensional smoother** use something like; 
 ```{r}
 #| warning: false
 library(gamlss2)
 library(gamlss)
-gm11 <- gamlss2(rent~s(area)+s(yearc)+location+bath+kitchen,
+gm11 <- gamlss2(rent~s(area)+s(yearc)+location+bath+kitchen|
+               s(area)+s(yearc)+location+bath+kitchen,
                data=rent99, family=GA)
 
 ```
 
-To see the fited smooth function try 
+Note that **all** the argument for the `s()` function of the `mgcv` package apply here. The most important are;
 
+- `k`; the dimension of the basis;
+
+- `bs`;   indicating the (penalized) smoothing basis to use, e.g. "tp" for thin plate regression spline, "cr" for cubic regression spline etc; 
+
+- `m`;	 The order of the penalty e.g. 2 for cubic spline penalty;
+
+- `by`; a term for **varying coefficient** model;
+
+to find more information  about the extra argument please try; 
+```{r}
+#| eval: false
+?mgcv:::s
+```
+To visualise the fitted smooth functions try; 
 ```{r}
 plot(gm11)
 ```
+It seems tha both the size of the flat, `area`, and the year of construction, `yearc`, need smoothing functions for the $\mu$ model while only `yearc` need smother for the $\sigma$ model.    
 
-
+Modelling interaction in additive smooth model we need two or more dimensional smoothers. Of course more that two ways interactions can not be visualised easily so we usally stick to  **two dimensional** smoothers;
 ```{r}
-gm21 <- gamlss2(rent~s(area,yearc)+location+bath+kitchen,
+gm21 <- gamlss2(rent~s(area,yearc)+location+bath+kitchen|
+                  s(area,yearc)+location+bath+kitchen,
                data=rent99, family=GA)
 plot(gm21)
 ```
 
 
+
 ## The `pb()` function 
 
 ```{r}
-gm1 <- gamlss2(rent~pb(area)+pb(yearc)+location+bath+kitchen,
-               data=rent99, family=GA)
+gm1 <- gamlss2(rent~pb(area)+pb(yearc)+location+bath+kitchen|pb(area)+pb(yearc)+
+                 location+bath+kitchen,data=rent99, family=GA)
 plot(gm1)
 ```
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Quantile Estimation – gamlss2</title>
+<title>Centile (Quantile) Estimation – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -121,6 +121,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -160,7 +189,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/quantiles.html">Quantile Estimation</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/quantiles.html">Centile (Quantile) Estimation</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -208,7 +237,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/quantiles.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Quantile Estimation</span></a>
+ <span class="menu-text">Centile (Quantile) Estimation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -414,9 +443,11 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#film90-data" id="toc-film90-data" class="nav-link active" data-scroll-target="#film90-data"><span class="header-section-number">1</span> <code>film90</code> Data</a></li>
-  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">2</span> Estimation</a></li>
-  <li><a href="#quantile-computation" id="toc-quantile-computation" class="nav-link" data-scroll-target="#quantile-computation"><span class="header-section-number">3</span> Quantile Computation</a></li>
+  <li><a href="#the-bmi-data" id="toc-the-bmi-data" class="nav-link active" data-scroll-target="#the-bmi-data"><span class="header-section-number">1</span> The BMI data</a></li>
+  <li><a href="#fitting-the-model" id="toc-fitting-the-model" class="nav-link" data-scroll-target="#fitting-the-model"><span class="header-section-number">2</span> Fitting the model</a></li>
+  <li><a href="#diagnostics" id="toc-diagnostics" class="nav-link" data-scroll-target="#diagnostics"><span class="header-section-number">3</span> Diagnostics</a></li>
+  <li><a href="#centile-computation" id="toc-centile-computation" class="nav-link" data-scroll-target="#centile-computation"><span class="header-section-number">4</span> Centile Computation</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">5</span> Summary</a></li>
   </ul>
 </nav>
     </div>
@@ -424,89 +455,196 @@ div.csl-indent {
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header">
-<h1 class="title display-7">Quantile Estimation</h1>
+<h1 class="title display-7">Centile (Quantile) Estimation</h1>
 
 </header>
 
 
-<p>Quantile estimation, or centile estimation, is a powerful approach in statistics that provides insights into the distributional characteristics of a response variable at various points. Rather than estimating just the mean (as in traditional regression), quantiles provide information about the entire distribution of the response variable.</p>
-<p>In this vignette, we demonstrate how to estimate quantiles (e.g., the 10th, 50th, and 90th) using <code>gamlss2</code>.</p>
-<section id="film90-data" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="film90-data"><span class="header-section-number">1</span> <code>film90</code> Data</h2>
-<p>In this example, we use the <code>film90</code> dataset from the gamlss.data package to illustrate quantile estimation using a flexible <code>BCPE</code> distribution. The model allows us to estimate quantiles based on the predictors, providing a richer understanding of the underlying data.</p>
-<p>The model is estimated with.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## load the data</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"film90"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## plotting</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lborev1 <span class="sc">~</span> lboopen, <span class="at">data =</span> film90)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="quantiles_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="estimation" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="estimation"><span class="header-section-number">2</span> Estimation</h2>
+<p>Centile estimation or quantile estimation is a powerful approach in statistics that provides insights into the distributional characteristics of a response variable at various values of one of the explanatory variables. A centile is a quantile value multiplied by 100.</p>
+<p>The <code>LMS</code> methods of <span class="citation" data-cites="ColeGreen92">Cole and Green (<a href="#ref-ColeGreen92" role="doc-biblioref">1992</a>)</span> is a subset of the GAMLSS model of <span class="citation" data-cites="Rigby+Stasinopoulos:2005">Rigby and Stasinopoulos (<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">2005</a>)</span>. The BCPE distribution of <span class="citation" data-cites="RigbyStasinopoulos04">Rigby and Stasinopoulos (<a href="#ref-RigbyStasinopoulos04" role="doc-biblioref">2004</a>)</span>, was used by WHO to create of child growth standards which are now used in over 150 countries. Centiles (quantiles) provide information about the entire distribution of the response variable rather than estimating just the mean (as in traditional regression).</p>
+<p>In this vignette, we demonstrate how to estimate quantiles (e.g., the 10th, 50th, and 90th percentiles) using <code>gamlss2</code>.</p>
+<p>Specifically, we will cover:</p>
+<ul>
+<li>How to fit the relevant models;</li>
+<li>How to check model adequacy using diagnostics; and</li>
+<li>How to obtain the corresponding centile curves.</li>
+</ul>
+<section id="the-bmi-data" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-bmi-data"><span class="header-section-number">1</span> The BMI data</h2>
+<p>In this example we use the Dutch boys BMI data, <code>dbbmi</code>, from the package <code>gamlss.data</code>. More infomation about the data can be found in Section 13.1.3 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>. The dataset consists of <span class="math inline">\(7294\)</span> rows and <span class="math inline">\(2\)</span> columns, containing the variables <code>bmi</code> and <code>age</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span>  <span class="er">~</span> <span class="fu">s</span>(lboopen, <span class="at">k =</span> <span class="dv">20</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">list</span>(f), <span class="dv">4</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>f[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">update</span>(f[[<span class="dv">1</span>]], lborev1 <span class="sc">~</span> .)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> film90, <span class="at">family =</span> BCPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11916.9973 eps = 0.648051     
-GAMLSS-RS iteration  2: Global Deviance = 11753.5193 eps = 0.013718     
-GAMLSS-RS iteration  3: Global Deviance = 11733.1187 eps = 0.001735     
-GAMLSS-RS iteration  4: Global Deviance = 11727.2293 eps = 0.000501     
-GAMLSS-RS iteration  5: Global Deviance = 11726.2108 eps = 0.000086     
-GAMLSS-RS iteration  6: Global Deviance = 11726.1769 eps = 0.000002     </code></pre>
-</div>
-</div>
-</section>
-<section id="quantile-computation" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="quantile-computation"><span class="header-section-number">3</span> Quantile Computation</h2>
-<p>Quantiles can be computed using the generic <code>quantile()</code> function.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute quantiles using "newdata"</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">with</span>(film90,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="st">"lboopen"</span> <span class="ot">=</span> <span class="fu">seq</span>(<span class="fu">min</span>(lboopen), <span class="fu">max</span>(lboopen), <span class="at">length =</span> <span class="dv">300</span>))</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(b, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantiles</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lborev1 <span class="sc">~</span> lboopen, <span class="at">data =</span> film90,</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(nd<span class="sc">$</span>lboopen, fit, <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load package and data</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"dbbmi"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## plot the data</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bmi <span class="sc">~</span> age, <span class="at">data =</span> dbbmi, <span class="at">col =</span> <span class="fu">gray</span>(.<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="quantiles_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="quantiles_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The plot shows the observed data points for Revenue (<code>lborev1</code>) versus Opening Gross (<code>lboopen</code>). The scatter plot is overlaid with lines representing the estimated 10th, 50th, and 90th quantiles. These quantiles are estimates of the lower tail (10th percentile), median (50th percentile), and upper tail (90th percentile) of the distribution of revenue as a function of opening gross.</p>
-<p>From the plot, we can see how the distribution of revenue changes across different levels of opening gross. The 10th quantile line shows the lower tail of the distribution, while the 90th quantile shows the upper tail, and the 50th quantile represents the central tendency (median). This provides more insight than merely modeling the mean (as is done in typical linear regression), as it allows us to capture the variation in the response across different points in the distribution.</p>
+<p>Due to the sharp upward trend in BMI at the lower end of age, we will apply a square root transformation (sqrt()) to the age variable to facilitate the fitting of the centile curves. The transformed data are plotted below:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bmi <span class="sc">~</span> <span class="fu">sqrt</span>(age), <span class="at">data =</span> dbbmi, <span class="at">col =</span> <span class="fu">gray</span>(.<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="quantiles_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="fitting-the-model" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="fitting-the-model"><span class="header-section-number">2</span> Fitting the model</h2>
+<p>Next, we will fit three different models to the data. The first model uses the Box-Cox Cole and Green distribution (<code>BCCGo</code>), which has three parameters: <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigma\)</span>, and <span class="math inline">\(\nu\)</span>. These parameters represent the location, scale, and skewness of the distribution, respectively. The <code>BCCGo</code> distribution is almost equivalent to fitting the Cole and Green (LMS) method.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula as list</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## note that we set up 4 formulas for</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## the more complex families later.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="er">~</span> <span class="fu">pb</span>(<span class="fu">sqrt</span>(age))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">list</span>(f), <span class="dv">4</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>f[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">update</span>(f[[<span class="dv">1</span>]], bmi <span class="sc">~</span> .)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> dbbmi, <span class="at">family =</span> BCCGo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 29306.5604 eps = 0.264607     
+GAMLSS-RS iteration  2: Global Deviance = 29192.9585 eps = 0.003876     
+GAMLSS-RS iteration  3: Global Deviance = 29185.1133 eps = 0.000268     
+GAMLSS-RS iteration  4: Global Deviance = 29184.1597 eps = 0.000032     
+GAMLSS-RS iteration  5: Global Deviance = 29184.1352 eps = 0.000000     </code></pre>
+</div>
+</div>
+<p>The second model uses the Box-Cox power exponential distribution (<code>BCPEo</code>), which has four parameters: <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\nu\)</span>, and <span class="math inline">\(\tau\)</span>. These parameters represent the location, scale, skewness, and kurtosis of the distribution, respectively.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> dbbmi, <span class="at">family =</span> BCPEo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 29373.553 eps = 0.284491     
+GAMLSS-RS iteration  2: Global Deviance = 29166.7255 eps = 0.007041     
+GAMLSS-RS iteration  3: Global Deviance = 29152.7734 eps = 0.000478     
+GAMLSS-RS iteration  4: Global Deviance = 29152.1736 eps = 0.000020     
+GAMLSS-RS iteration  5: Global Deviance = 29152.1599 eps = 0.000000     </code></pre>
+</div>
+</div>
+<p>The final model uses the Box-Cox t distribution (<code>BCTo</code>), also with four parameters: <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\nu\)</span>, and <span class="math inline">\(\tau\)</span>, representing location, scale, skewness, and kurtosis, respectively. The key difference between <code>BCPEo</code> and <code>BCTo</code> is that <code>BCPEo</code> can handle both platykurtic and leptokurtic distributions, while <code>BCTo</code> is limited to leptokurtic distributions. Detailed definitions of these three <code>"gamlss.family"</code> distributions can be found in Chapter 19 of <span class="citation" data-cites="Rigbyetal2019">Rigby et al. (<a href="#ref-Rigbyetal2019" role="doc-biblioref">2019</a>)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> dbbmi, <span class="at">family =</span> BCTo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 29167.1765 eps = 0.218025     
+GAMLSS-RS iteration  2: Global Deviance = 29143.0977 eps = 0.000825     
+GAMLSS-RS iteration  3: Global Deviance = 29142.3472 eps = 0.000025     
+GAMLSS-RS iteration  4: Global Deviance = 29142.1955 eps = 0.000005     </code></pre>
+</div>
+</div>
+<p>We can now select the best-fitting model using the generalized Akaike Information Criterion (GAIC), implemented in the <code>GAIC()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(m1, m2, m3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        AIC       df
+m3 29203.92 30.86223
+m2 29211.18 29.50911
+m1 29236.12 25.99076</code></pre>
+</div>
+</div>
+<p>Note that all models were fitted using the square root transformation (<code>sqrt()</code>) for age to facilitate the smoothing function, <code>pb()</code>. Also, by default, the <code>GAIC()</code> function uses the classical Akaike Information Criterion (AIC). Based on the AIC, the <code>m3</code> model appears to provide the best fit.</p>
+</section>
+<section id="diagnostics" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="diagnostics"><span class="header-section-number">3</span> Diagnostics</h2>
+<p>Several diagnostic tools are available to assess the adequacy of a fitted model. One useful tool is the worm plot, a detrended Q-Q plot that provides valuable insight into the fit of the distribution. The plot can be generated with</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m3, <span class="at">which =</span> <span class="st">"wp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="quantiles_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our preferred approach is to use the <code>resid_wp()</code> function from the <code>gamlss.ggplots</code> package, as it provides additional useful information.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss.ggplots"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">resid_wp</span>(m3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The function <code>model_wp()</code> can be use for multiple model worm plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">model_wp</span>(m1, m2, m3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>One of the advantages of the <code>gamlss.ggplots</code> package is its ability to split the worm plot into different age ranges, which is useful for detecting model inadequacies across various age groups. Here’ s how you can use the <code>model_wp_wrap()</code> function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">model_wp_wrap</span>(m1,m2,m3,<span class="at">xvar=</span>dbbmi<span class="sc">$</span>age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="centile-computation" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="centile-computation"><span class="header-section-number">4</span> Centile Computation</h2>
+<p>To obtain plots or tables of fitted centile curves, we can use the <code>gamlss2</code> generic <code>quantile()</code> method to generate a table of predicted values. We then use these values to plot the relevant curves. First, we create a grid for age with a length of 300 and use it to predict the relevant quantiles.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">## set tup new data for prediction</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">with</span>(dbbmi, <span class="fu">data.frame</span>(<span class="st">"age"</span> <span class="ot">=</span> <span class="fu">seq</span>(<span class="fu">min</span>(age), <span class="fu">max</span>(age), <span class="at">length =</span> <span class="dv">300</span>)))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="do">## compute quantiles/centiles</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>qu <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.10</span>, <span class="fl">0.25</span>, <span class="fl">0.50</span>, <span class="fl">0.75</span>, <span class="fl">0.90</span>, <span class="fl">0.98</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m3, <span class="at">newdata =</span> nd, <span class="at">probs =</span> qu)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="do">## estimated values</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        2%      10%      25%      50%      75%      90%      98%
+1 11.20725 12.09278 12.75882 13.50573 14.30283 15.10974 16.35648
+2 12.33387 13.26385 13.96394 14.74787 15.58075 16.41769 17.69525
+3 13.05537 14.01173 14.73189 15.53745 16.39101 17.24505 18.53968
+4 13.58129 14.55547 15.28902 16.10882 16.97577 17.84063 19.14547
+5 13.97783 14.96424 15.70684 16.53615 17.41186 18.28358 19.59438
+6 14.27853 15.27310 16.02164 16.85707 17.73829 18.61413 19.92805</code></pre>
+</div>
+</div>
+<p>Now we plot the data and then fitted curves.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated curves</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>)) </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bmi <span class="sc">~</span> age, <span class="at">data =</span> dbbmi,   <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.1</span>)) </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(nd<span class="sc">$</span>age, fit, <span class="at">type =</span> <span class="st">"l"</span>,   <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="quantiles_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A more elegant plot can be generated using the <code>fitted_centiles()</code> or <code>fitted_centiles_legend()</code> functions from the <code>gamlss.ggplots</code> package. For example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fitted_centiles_legend</span>(m3, <span class="at">cent=</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>, <span class="dv">90</span>, <span class="dv">98</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="summary" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="summary"><span class="header-section-number">5</span> Summary</h2>
+<p>The <code>gamlss2</code> package offers the appropriate models and tools for generating centile curves. For more detailed information and diagnostics related to centile curve estimation, refer to Chapter 13 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>. Additionally, the <code>gamlss.ggplots</code> package provides useful extra functions for plotting and diagnostics.</p>
 
 
 
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-ColeGreen92" class="csl-entry" role="listitem">
+Cole, T. J., and P. J. Green. 1992. <span>“Smoothing Reference Centile Curves: The <span>LMS</span> Method and Penalized Likelihood.”</span> <em>Statistics in Medicine</em> 11: 1305–19. <a href="https://doi.org/10.1002/sim.4780111005">https://doi.org/10.1002/sim.4780111005</a>.
+</div>
+<div id="ref-RigbyStasinopoulos04" class="csl-entry" role="listitem">
+Rigby, R. A., and D. M. Stasinopoulos. 2004. <span>“Smooth Centile Curves for Skew and Kurtotic Data Modelled Using the Box-Cox Power Exponential Distribution.”</span> <em>Statistics in Medicine</em> 23: 3053–76. <a href="https://doi.org/10.1002/sim.1861">https://doi.org/10.1002/sim.1861</a>.
+</div>
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
-Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+———. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+</div>
+<div id="ref-Rigbyetal2019" class="csl-entry" role="listitem">
+Rigby, R. A., D. M. Stasinopoulos, G. Z. Heller, and F. De Bastiani. 2019. <em>Distributions for Modeling Location, Scale, and Shape: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9780429298547">https://doi.org/10.1201/9780429298547</a>.
+</div>
+<div id="ref-Stasinopoulosetal2017" class="csl-entry" role="listitem">
+Stasinopoulos, D. M., R. A. Rigby, G. Z. Heller, V. Voudouris, and F. De Bastiani. 2017. <em>Flexible Regression and Smoothing: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/b21973">https://doi.org/10.1201/b21973</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

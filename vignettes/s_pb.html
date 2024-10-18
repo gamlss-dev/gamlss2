@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -87,6 +121,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -174,7 +237,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/quantiles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Quantile Estimation</span></a>
+ <span class="menu-text">Centile (Quantile) Estimation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -375,8 +438,15 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-s-function" id="toc-the-s-function" class="nav-link active" data-scroll-target="#the-s-function"><span class="header-section-number">1</span> The <code>s()</code> function</a></li>
+  <li><a href="#the-pb-function" id="toc-the-pb-function" class="nav-link" data-scroll-target="#the-pb-function"><span class="header-section-number">2</span> The <code>pb()</code> function</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -387,65 +457,175 @@ div.csl-indent {
 </header>
 
 
-<p>Examples on how to set up models using smooth terms with <code>s()</code> and <code>pb()</code>.</p>
+<p><em>Smoothers</em> are non-parametric techniques developed mostly in the 1980 and 90’s. The main advadance of a smoother is to suggest possible functional forms on how the explanatory variables effect the parameters of the response. That is, to let the data to detect non-linearities in the model. There are basically two types of smoothers;</p>
+<ul>
+<li><p>the <strong>cubic splines</strong> smoothers and techniques associated with them like;</p>
+<ul>
+<li><strong>thin plate</strong> splines, <span class="citation" data-cites="Wood17">Wood (<a href="#ref-Wood17" role="doc-biblioref">2017</a>)</span> and;</li>
+<li><strong>P- splines,</strong> <span class="citation" data-cites="eilers2021practical">Eilers and Marx (<a href="#ref-eilers2021practical" role="doc-biblioref">2021</a>)</span> and</li>
+</ul></li>
+<li><p>the <strong>local polynomial</strong> smoothing, <span class="citation" data-cites="Clevelandetal93">Cleveland, Grosse, and Shyu (<a href="#ref-Clevelandetal93" role="doc-biblioref">1993</a>)</span>.</p></li>
+</ul>
+<p>There are several ways to use smoothers within the original GAMLSS framework and they are described in Chapter 9 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>. Local polynomials smoothers can be used with <code>gamlss2</code> by connection the <code>R</code> function <code>loess()</code> with <code>gamlss2</code> using <code>specials</code>. This connection is described in a different vignette (<code>Mikis</code> reference here). Here we give an explanation of to how use the smooth terms <code>s()</code> and <code>pb()</code> within <code>gamlss2</code>.</p>
+<section id="the-s-function" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-s-function"><span class="header-section-number">1</span> The <code>s()</code> function</h2>
+<p>The function <code>s()</code> is using penalized regression smoothers and it is identical to the function <code>s()</code> used in the <code>R</code> package <code>mgcv</code>. The first argument of the function specifies the explanatory term(s). For <strong>one dimensional smoother</strong> the function can be used as;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss2)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>gm11 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(rent<span class="sc">~</span><span class="fu">s</span>(area)<span class="sc">+</span><span class="fu">s</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">s</span>(area)<span class="sc">+</span><span class="fu">s</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38484.5671 eps = 0.124369     
+GAMLSS-RS iteration  2: Global Deviance = 38437.5655 eps = 0.001221     
+GAMLSS-RS iteration  3: Global Deviance = 38437.2934 eps = 0.000007     </code></pre>
+</div>
+</div>
+<p>We use smooth terms for the two continuous explanatory variables of the data, the size of the flats, <code>area</code>, and the year of construction, <code>yearc</code>. To visualise the fitted smooth functions try;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gm11)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="s_pb_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The first two plot are for the <span class="math inline">\(\mu\)</span> model while the last two for the <span class="math inline">\(\sigma\)</span> model. It seems that both <code>area</code>, and <code>yearc</code>, need smoothing functions for the <span class="math inline">\(\mu\)</span> while only <code>yearc</code> need a smoother for the <span class="math inline">\(\sigma\)</span>.</p>
+<p>Note that the first argument for <code>s()</code> is the continuous variables needed smoothing. Here we used single terms. Single terms represent <code>main effects</code>. More that one terms can be use to represent <code>iteractions</code>. Note that <strong>all</strong> argument of the <code>s()</code> function of the <code>mgcv</code> package apply here. Here we mention the most important ones;</p>
+<ul>
+<li><p><code>k</code>; the dimension of the basis;</p></li>
+<li><p><code>bs</code>; indicating the (penalized) smoothing basis to use, e.g.&nbsp;“tp” for thin plate regression spline, “cr” for cubic regression spline etc;</p></li>
+<li><p><code>m</code>; The order of the penalty e.g.&nbsp;2 for cubic spline penalty;</p></li>
+<li><p><code>by</code>; a term for <strong>varying coefficient</strong> model (a specific form of iteraction);</p></li>
+</ul>
+<p>to find information about all the argument please try;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>?mgcv<span class="sc">:::</span>s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To model <strong>interactions</strong> within a additive smooth model we need two or more dimensional smoothers. The problem of course with more that two dimensional smoothers is that can not be visualised. Here we stick to <strong>two dimensional</strong> smoothers that is, <strong>a two way interaction</strong>;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gm21 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(rent<span class="sc">~</span><span class="fu">s</span>(area,yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">s</span>(area,yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38552.6223 eps = 0.122820     
+GAMLSS-RS iteration  2: Global Deviance = 38467.4636 eps = 0.002208     
+GAMLSS-RS iteration  3: Global Deviance = 38466.8474 eps = 0.000016     
+GAMLSS-RS iteration  4: Global Deviance = 38466.8359 eps = 0.000000     </code></pre>
+</div>
+</div>
+<p>The interaction plots can be visualised using;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gm21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="s_pb_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>One could check for the best model using AIC.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(gm11, gm21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          AIC       df
+gm11 38496.64 29.67116
+gm21 38523.11 28.13775</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that the default value for <code>m</code> in <code>s()</code>, that is, the dimension of the basis for one dimensional smoother, is 10 which could be very small if a lot of degrees of freedom are needed for the smoother. This is important in the constructing of centile curves, see vignette <code>Centile (Quantile) Estimation</code>.</p>
+</div>
+</div>
+<p><code>Mikis</code> I think for two dimensional smoothers it uses <span class="math inline">\(m=5\)</span> but I am not sure.</p>
+</section>
+<section id="the-pb-function" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-pb-function"><span class="header-section-number">2</span> The <code>pb()</code> function</h2>
+<p>The <code>pb()</code> function uses P-splines, see <span class="citation" data-cites="eilers2021practical">Eilers and Marx (<a href="#ref-eilers2021practical" role="doc-biblioref">2021</a>)</span>. It tries to imitate the equivalent function <code>pb()</code> in the older <code>gamlss</code> package but still uses the <code>s()</code> function with different options. The option are <code>s(..., bs="ps", k=20)</code> that is the number of basis is increased from 10 to 20. The way to estimate the hyper-parameter (smoothing-parameter) is also change, It uses <code>criterion="ml"</code>, which amount to a REML estimation of the smoothing parameter. The result should be similar but not necessarily identical to the <code>pb()</code> function of the <code>gamlss</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gm1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(rent<span class="sc">~</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                 location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,<span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38439.2661 eps = 0.125399     
+GAMLSS-RS iteration  2: Global Deviance = 38429.5701 eps = 0.000252     
+GAMLSS-RS iteration  3: Global Deviance = 38429.4305 eps = 0.000003     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gm1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="s_pb_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The smooth functions for <span class="math inline">\(\mu\)</span> using the <code>pv()</code> function are almost identical to the ones when <code>s()</code> was used. The smooth terms for the <span class="math inline">\(\sigma\)</span> model especially for <code>area</code> are different. This could be to the fact that more degrees of freedom are allowed with <code>pb()</code> and possible this lead to overfit.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that there are not two dimensional smoothers with <code>pb()</code></p>
+</div>
+</div>
+<p><code>Mikis</code> It looks that <code>pb()</code> in <code>gamlss2</code> overfits <span class="math inline">\(\sigma\)</span>. Here is what we get in gamnlss</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(rent<span class="sc">~</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,<span class="sc">~</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                 location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,<span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration 1: Global Deviance = 38459.65 
+GAMLSS-RS iteration 2: Global Deviance = 38448.8 
+GAMLSS-RS iteration 3: Global Deviance = 38448.64 
+GAMLSS-RS iteration 4: Global Deviance = 38448.62 
+GAMLSS-RS iteration 5: Global Deviance = 38448.62 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">term.plot</span>(g1, <span class="st">"sigma"</span>, <span class="at">pages=</span><span class="dv">1</span>, <span class="at">term=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">ask=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="s_pb_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-CarterDavis2015" class="csl-entry" role="listitem">
-Davis, Carter. 2015. <em>Sgt: Skewed Generalized t Distribution Tree</em>. <a href="https://CRAN.R-project.org/package=sgt">https://CRAN.R-project.org/package=sgt</a>.
+<div id="ref-Clevelandetal93" class="csl-entry" role="listitem">
+Cleveland, W. S., E. Grosse, and M. Shyu. 1993. <span>“Local Regression Models.”</span> In <em>Statistical Modelling in s</em>, edited by J. M Chambers and T. J Hastie, 309–76. Chapman &amp; Hall: New York. <a href="https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie">https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie</a>.
 </div>
 <div id="ref-eilers2021practical" class="csl-entry" role="listitem">
 Eilers, P. H. C., and B. D. Marx. 2021. <em>Practical Smoothing: The Joys of p-Splines</em>. Cambridge University Press.
 </div>
-<div id="ref-Fahrmeir+Kneib+Lang+Marx:2013" class="csl-entry" role="listitem">
-Fahrmeir, Ludwig, Thomas Kneib, Stefan Lang, and Brian Marx. 2021. <em>Regression – Models, Methods and Applications</em>. 2nd ed. Berlin: Springer-Verlag. <a href="https://doi.org/10.1007/978-3-662-63882-8">https://doi.org/10.1007/978-3-662-63882-8</a>.
-</div>
-<div id="ref-Hofneretal2014" class="csl-entry" role="listitem">
-Hofner, B., A. Mayr, N. Robinzonov, and M. Schmid. 2014. <span>“Model-Based Boosting in <span>R</span>: A Hands-on Tutorial Using the r Package Mboost.”</span> <em>Computational Statistics</em> 29: 3–35. <a href="https://doi.org/10.1007/s00180-012-0382-5">https://doi.org/10.1007/s00180-012-0382-5</a>.
-</div>
-<div id="ref-hofner2015" class="csl-entry" role="listitem">
-Hofner, B., A. Mayr, and M. Schmid. 2016. <span>“<span class="nocase">gamboostLSS</span>: An <span>R</span> Package for Model Building and Variable Selection in the <span>GAMLSS</span> Framework.”</span> <em>Journal of Statistical Software</em> 74 (1): 1–31. <a href="https://doi.org/10.18637/jss.v074.i01">https://doi.org/10.18637/jss.v074.i01</a>.
-</div>
-<div id="ref-KleiberZeileis2016" class="csl-entry" role="listitem">
-Kleiber, C., and A. Zeileis. 2016. <span>“Visualizing Count Data Regressions Using Rootograms.”</span> <em>The American Statistician</em> 70 (3): 296–303. <a href="https://doi.org/10.1080/00031305.2016.1173590">https://doi.org/10.1080/00031305.2016.1173590</a>.
-</div>
-<div id="ref-Lang+Umlauf+Wechselberger+Harttgen+Kneib:2012" class="csl-entry" role="listitem">
-Lang, Stefan, Nikolaus Umlauf, Peter Wechselberger, Kenneth Harttgen, and Thomas Kneib. 2012. <span>“Multilevel Structured Additive Regression.”</span> <em>Statistics and Computing</em> 24 (2): 223–38. <a href="https://doi.org/10.1007/s11222-012-9366-0">https://doi.org/10.1007/s11222-012-9366-0</a>.
-</div>
-<div id="ref-Mayretal2012" class="csl-entry" role="listitem">
-Mayr, A., N. Fenske, B. Hofner, T. Kneib, and M. Schmid. 2012. <span>“Generalized Additive Models for Location, Scale and Shape for High Dimensional Data, a Flexible Approach Based on Boosting.”</span> <em>J. R. Statist. Soc. Series C</em> 61: 403–27. <a href="https://doi.org/10.1111/j.1467-9876.2011.01033.x">https://doi.org/10.1111/j.1467-9876.2011.01033.x</a>.
-</div>
-<div id="ref-R:Pinheiro+Bates:2000" class="csl-entry" role="listitem">
-Pinheiro, J. C., and D. M. Bates. 2000. <em>Mixed-Effects Models in <span>S</span> and <span>S-Plus</span></em>. Springer. <a href="https://link.springer.com/book/10.1007/b98882">https://link.springer.com/book/10.1007/b98882</a>.
-</div>
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
-</div>
-<div id="ref-Rigbyetal2019" class="csl-entry" role="listitem">
-Rigby, R. A., D. M. Stasinopoulos, G. Z. Heller, and F. De Bastiani. 2019. <em>Distributions for Modeling Location, Scale, and Shape: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9780429298547">https://doi.org/10.1201/9780429298547</a>.
-</div>
-<div id="ref-distregvis2019" class="csl-entry" role="listitem">
-Stadlmann, S. 2019. <em>Distreg.vis: Framework for the Visualization of Distributional Regression Models</em>. <a href="https://CRAN.R-project.org/package=distreg.vis">https://CRAN.R-project.org/package=distreg.vis</a>.
-</div>
-<div id="ref-Stasinopoulos2018" class="csl-entry" role="listitem">
-Stasinopoulos, D. M., R. A. Rigby, and F. De Bastiani. 2018. <span>“<span>GAMLSS</span>: A Distributional Regression Approach.”</span> <em>Statistical Modelling</em> 18 (3-4): 248–73. <a href="https://doi.org/10.1177/1471082X18759144">https://doi.org/10.1177/1471082X18759144</a>.
-</div>
-<div id="ref-Stasinopoulosetal2021" class="csl-entry" role="listitem">
-Stasinopoulos, D. M., R. A. Rigby, N. Giorgikopoulos, and F. De Bastiani. 2022. <span>“Principal Component Regression in GAMLSS Applied to Greek-German Government Bond Yield Spreads.”</span> <em>Statistical Modelling</em> 22 (1-2): 127–45. <a href="https://doi.org/10.1177/1471082x211022980">https://doi.org/10.1177/1471082x211022980</a>.
-</div>
-<div id="ref-stasinopoulos2023p" class="csl-entry" role="listitem">
-Stasinopoulos, D. M., R. A. Rigby, G. Z. Heller, and F. De Bastiani. 2023. <span>“P-Splines and GAMLSS: A Powerful Combination, with an Application to Zero-Adjusted Distributions.”</span> <em>Statistical Modelling</em> 23 (5-6): 510–24. <a href="https://doi.org/10.1177/1471082X231176635">https://doi.org/10.1177/1471082X231176635</a>.
 </div>
 <div id="ref-Stasinopoulosetal2017" class="csl-entry" role="listitem">
 Stasinopoulos, D. M., R. A. Rigby, G. Z. Heller, V. Voudouris, and F. De Bastiani. 2017. <em>Flexible Regression and Smoothing: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/b21973">https://doi.org/10.1201/b21973</a>.
 </div>
-<div id="ref-stasinopoulos2024generalized" class="csl-entry" role="listitem">
-Stasinopoulos, M. D., T. Kneib, N. Klein, A. Mayr, and G. Z Heller. 2024. <em>Generalized Additive Models for Location, Scale and Shape: A Distributional Regression Approach, with Applications</em>. Vol. 56. Cambridge University Press. <a href="https://doi.org/10.1017/9781009410076">https://doi.org/10.1017/9781009410076</a>.
-</div>
-<div id="ref-bamlss2018" class="csl-entry" role="listitem">
-Umlauf, N., N. Klein, and A. Zeileis. 2018. <span>“<span>BAMLSS</span>: <span>B</span>ayesian Additive Models for Location, Scale and Shape (and Beyond).”</span> <em>Journal of Computational and Graphical Statistics</em> 27 (3): 612–27. <a href="https://doi.org/10.1080/10618600.2017.1407325">https://doi.org/10.1080/10618600.2017.1407325</a>.
+<div id="ref-Wood17" class="csl-entry" role="listitem">
+Wood, S. N. 2017. <em>Generalized Additive Models. An Introduction with <span>R</span></em>. 2nd ed. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781315370279">https://doi.org/10.1201/9781315370279</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

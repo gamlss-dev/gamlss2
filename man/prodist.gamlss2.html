@@ -188,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/quantiles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Quantile Estimation</span></a>
+ <span class="menu-text">Centile (Quantile) Estimation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -537,10 +537,10 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6976 eps = 0.000000     </code></p
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate random numbers</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1       r_2      r_3      r_4      r_5
-1 15.37084 -2.533171  10.4430 35.49999 30.75930
-2 64.77219 62.518419  69.2861 55.72614 81.56552
-3 62.61429 78.536861 125.3447 74.99453 82.91786</code></pre>
+<pre><code>        r_1      r_2        r_3      r_4       r_5
+1  25.20540 31.84548  22.684166 36.58780  10.37815
+2  58.38204 51.86627   9.593622 49.71352  56.17660
+3 122.34408 74.69756 143.477659 79.68488 122.93593</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## density and distribution</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

@@ -17,7 +17,7 @@ vignette: >
 ---
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
-if(packageVersion("gamlss.ggplots") < "2.1-15") {
+if(!("gamlss.ggplots" %in% installed.packages()) || packageVersion("gamlss.ggplots") < "2.1-15") {
   install.packages("gamlss.ggplots", repos = "https://gamlss-dev.R-universe.dev")
 }
 

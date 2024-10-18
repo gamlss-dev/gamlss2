@@ -20,5 +20,91 @@ vignette: >
 library("gamlss2")
 ```
 
-Describe how to incorporate random effects in `gamlss2`
+Random effects can be included as an additive term for any distribution parameter in a `gamlss2` model by using the `re()` function in package `gamlss2`. Within the GAMLSS model fitting, the random effects additive term is then fitted locally by an interface with `lme` function of  the `nlme` package.
+
+## Random effects only in the $\mu$ model
+
+First we will consider the case of random effects only in the $\mu$ model. In this case the estimates of the fixed effects for the $\sigma$ distribution parameter (and also $\nu$ and $\tau$) in the `gamlss2` fit do **not** use **REML** estimation. 
+
+This is not a problem if the total (effective) degrees of freedom (df) for estimating the fixed and random effects for $\mu$ are **small** relative to the total df (i.e. the sample size). Example 1 below illustrates this.
+
+However, if the total (effective) df for estimating the fixed and random effects for 
+$\mu$ are a significant proportion of the total df, then the estimates of the fixed effects for $\sigma$ will be **seriously** negatively biased. Example 2 below illustrates this. 
+[The estimated fixed effects for $\mu$ are OK (but not their estimated standard errors), and the  random effects parameters are REML type estimates and are also OK.  So, if these estimates are of primary interest, and the estimate of the 
+$\sigma$ parameter is not of interest, then there is no problem.]
+
+The total (effective) df for a random effect is ALWAYS less than the df for the corresponding fixed effects. So a quick check [of whether there might be a problem with serious negative bias in the estimates of the fixed effects for 
+$\sigma$ in the gamlss() fit] is to compare the corresponding fixed effects df with the total df. For example, in a simple random intercepts model for $\mu$, if m is the number of individuals (or levels of the random effects factor), and n is the total sample size, then compare m with n, and if the proportion m/n is, say, greater than 0.05, there may be problem. Similarly for a random intercepts and slopes model for $\mu$, then compare 2m with n, and look and the proportion 2m/n.
+
+
+In the first example below using re() in gamlss for random effects works
+[i.e. where the total number of individuals (or factor levels) is very small relative to the total number of observations and so REML estimation is not needed,
+for example, a relatively low number of individuals, each with a lot of repeated measurements, OR a random factor with a low number of levels, each with a lot of observations]. We show that using LME locally in gamlss() by the re() argument gives very similar results, to using LME directly.
+
+
+
+
+
+## Example 2
+
+
+In the second example below using the `Orthodont` data, the number of individuals (or factor levels) is significant relative to the total number of observations, and there is a problem with a seriously negatively biased estimate of $\sigma$. We show that using `lme` locally in `gamlss2` by the `re()` function gives a very different estimate of $\sigma$ than using LME directly. The `Orthodont` data set is analysed in detail on pages 147-155 of
+ @R:Pinheiro+Bates:2000 "Mixed-Effects Models in S and S-PLUS".
+
+```{r}
+#| warning: false
+library(gamlss)
+library(nlme)
+data(Orthodont)
+```
+First fit a random intercepts model using LME:
+```{r}
+l1 <- lme(distance ~I(age-11),random =~ 1|Subject, data=Orthodont)
+l1
+```
+
+The model is
+
+$$
+\begin{split}
+ \texttt{distance}_{ij} \sim& NO(0, \sigma) \\
+    \mu    =&  \beta_{0}+ \beta_1 (\texttt{age}-11) +\alpha_j \\
+\end{split}
+$$ where $\alpha_j \sim NO(0, \sigma_a)$
+The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.1147$ and
+$\sigma = 1.432$.
+
+Now fit the random intercepts model using function `re()` in `gamlss2`:
+Note that `gamlss2` has problem in interpreting the `I()` function so we create the variable `age_11`
+
+::: {.callout-note}
+there is a problem with random intercepts in `gamlss2` so we use `gamlss`
+:::
+
+
+```{r}
+#| warning: false
+Orthodont$age_11  <- Orthodont$age - 11
+library(gamlss)
+#b1 <- gamlss2(distance ~ s(age,k=3) + re(random =~ 1 | Subject), data = Orthodont)
+
+m1 <- gamlss(distance ~ age_11 + re(random =~ 1 | Subject), data = Orthodont)
+m1
+#b <-gamlss2(distance ~ age11 + re(random =~ age11 | Subject), data = Orthodont)
+#m2
+```
+```{r}
+getSmo(m1)
+```
+
+The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.072$ and $\sigma = 1.254$
+The estimate of $\sigma$ is seriously negatively biased, because it is **not** a `REML` estimate.
+
+For this simple random intercepts model, the estimate of $\sigma$ can be adjusted by multiplying by the local LME residual given by 1.135 giving: adjusted $\sigma = 1.254*1.135 = 1.42$, which is very close to the LME estimate of $\sigma$. 
+
+::: {.callout-warning}
+However this adjustment does NOT work for more complex random effects models.  
+:::
+
+
 

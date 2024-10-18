@@ -5,6 +5,7 @@ format:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    pdf: default
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
@@ -110,7 +111,7 @@ Note that the default value for `m` in `s()`, that is, the dimension of the basi
 
 ## The `pb()` function 
 
-The `pb()` function uses P-splines, see  @eilers2021practical. It tries to imitate the equivalent function `pb()` in the older  `gamlss` package  but still uses the `s()` function with  different options.  The option are `s(..., bs="ps", k=20)` that is the number of basis is increased from 10 to 20. The way to estimate the hyper-parameter (smoothing-parameter) is also change, It uses  `criterion="ml"`, which amount to a REML estimation of the smoothing parameter. The result should be similar but not necessarily identical to the `pb()` function of the `gamlss` package.
+The `pb()` function uses P-splines, see  @eilers2021practical. It tries to imitate the equivalent function `pb()` in the older  `gamlss` package  but still uses the `s()` function with  different options.  The option are `s(..., bs="ps", k=20)` that is the number of basis is increased from 10 to 20. The way to estimate the hyper-parameter (smoothing-parameter) is also change, It uses  `criterion="ml"`, which amount to a REML estimation of the smoothing parameter see @rigby2013automatic. The result should be similar but not necessarily identical to the `pb()` function of the `gamlss` package.
 
 ```{r}
 gm1 <- gamlss2(rent~pb(area)+pb(yearc)+location+bath+kitchen|pb(area)+pb(yearc)+

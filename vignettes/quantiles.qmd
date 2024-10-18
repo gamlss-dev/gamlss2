@@ -17,11 +17,15 @@ vignette: >
 ---
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
-library("gamlss2")
-
 if(packageVersion("gamlss.ggplots") < "2.1-15") {
   install.packages("gamlss.ggplots", repos = "https://gamlss-dev.R-universe.dev")
 }
+
+if(packageVersion("gamlss.dist") < "6.1-3") {
+  install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
+}
+
+library("gamlss2")
 ```
 
 Centile estimation or quantile estimation is a powerful approach in statistics that

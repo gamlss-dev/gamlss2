@@ -51,7 +51,7 @@ There are several ways to use smoothers within the original GAMLSS framework and
 ## The `s()` function 
 
 
-The function `s(...)` is using penalized regression smoothers  and it is identical to the function `s(...)` used in the `R` package `mgcv`. The first argument of the function specifies the explanatory term(s). For **one dimensional smoother** the function can be used  as; 
+The function `s()` is using penalized regression smoothers  and it is identical to the function `s()` used in the `R` package `mgcv`. The first argument of the function specifies the explanatory term(s). For **one dimensional smoother** the function can be used  as; 
 ```{r}
 #| warning: false
 library(gamlss2)
@@ -61,14 +61,14 @@ gm11 <- gamlss2(rent~s(area)+s(yearc)+location+bath+kitchen|
                data=rent99, family=GA)
 
 ```
-Above we use smooth terms for the two continuous explanatory variables  in the data set, the size of the flat, `area`, and the year of construction, `yearc`. To visualise the fitted smooth functions try; 
+We use smooth terms for the two continuous explanatory variables  of the data, the size of the flats, `area`, and the year of construction, `yearc`. To visualise the fitted smooth functions try; 
 ```{r}
 plot(gm11)
 ```
-The first two plot are for the $\mu$ model whike the last two for the $\sigma$ model. It seems that both `area`, and `yearc`, need smoothing functions for the $\mu$ while only `yearc` need smoother for the $\sigma$.    
+The first two plot are for the $\mu$ model while the last two for the $\sigma$ model. It seems that both `area`, and `yearc`, need smoothing functions for the $\mu$ while only `yearc` need a smoother for the $\sigma$.    
 
 
-Note that the first argument for `s()` is the continuous variables needed smoothing. Here we used a single term as a `main effect` but more that one terms can be use as `iteractions`.  Note that **all** other argument of the `s()` function of the `mgcv` package apply here. The most important argument are;
+Note that the first argument for `s()` is the continuous variables needed smoothing. Here we used  single terms. Single terms represent  `main effects`. More that one terms can be use to represent  `iteractions`.  Note that **all** argument of the `s()` function of the `mgcv` package apply here. Here we mention the most important ones;
 
 - `k`; the dimension of the basis;
 
@@ -78,20 +78,24 @@ Note that the first argument for `s()` is the continuous variables needed smooth
 
 - `by`; a term for **varying coefficient** model (a specific form of iteraction);
 
-to find more information  about all the argument please try; 
+to find information  about all the argument please try; 
 ```{r}
 #| eval: false
 ?mgcv:::s
 ```
 
-To model interaction within a  additive smooth model we need two or more dimensional smoothers. The problem of course with more that two dimensional smoothers is that can not be visualised. Here we stick to  **two dimensional** smoothers that is, **two way interaction**;
+To model **interactions** within a  additive smooth model we need two or more dimensional smoothers. The problem of course with more that two dimensional smoothers is that can not be visualised. Here we stick to  **two dimensional** smoothers that is, **a two way interaction**;
 ```{r}
 gm21 <- gamlss2(rent~s(area,yearc)+location+bath+kitchen|
                   s(area,yearc)+location+bath+kitchen,
                data=rent99, family=GA)
-plot(gm21)
 ```
 
+The interaction plots can be visualised using;
+```{r}
+plot(gm21)
+```
+One could check for the best model using AIC.  
 ```{r}
 AIC(gm11, gm21)
 ```
@@ -99,23 +103,25 @@ AIC(gm11, gm21)
 
 
 ::: {.callout-warning}
-Note that the default value for `m` the dimension of the basis, for one dimensional smoother, is 10 which could be very small if a lot of  degrees of freedom are needed for the smoother especially in the constructing centile curves, see vignette `Centile (Quantile) Estimation`.  
+Note that the default value for `m` in `s()`, that is, the dimension of the basis for one dimensional smoother, is 10 which could be very small if a lot of  degrees of freedom are needed for the smoother. This is important in the constructing of centile curves, see vignette `Centile (Quantile) Estimation`.  
 :::
 
+`Mikis` I think for two dimensional smoothers it uses $m=5$ but I am not sure. 
 
 ## The `pb()` function 
 
-The `pb()` function uses P-splines. It tries to imitate the equivalent function `pb()` in the older package `gamlss` but it use the `s()` function with different options to do that.     
+The `pb()` function uses P-splines, see  @eilers2021practical. It tries to imitate the equivalent function `pb()` in the older  `gamlss` package  but still uses the `s()` function with  different options.  The option are `s(..., bs="ps", m=20)` that is the number of basis is increased from 10 to 20. The way to estimate the hyper-parameter (smoothing-parameter) is also change, It uses  `criterion="ml"`, which amount to a REML estimation of the smoothing parameter. The result should be similar but not necessarily identical to the `pb()` function of the `gamlss` package.
 
 ```{r}
 gm1 <- gamlss2(rent~pb(area)+pb(yearc)+location+bath+kitchen|pb(area)+pb(yearc)+
                  location+bath+kitchen,data=rent99, family=GA)
 plot(gm1)
 ```
+The smooth functions for $\mu$ using the `pv()` function are almost identical to the ones when `s()` was used. The smooth terms for the $\sigma$ model especially for `area` are different.  This could be to the fact that more degrees of freedom are allowed with `pb()` and possible this lead to  overfit. 
 
 
-```{r}
-# gm2 <- gamlss2(rent~pb(area,yearc)+location+bath+kitchen,
-#                data=rent99, family=GA)
 
-```
+::: {.callout-note}
+Note that there are no two dimensional smoothers with `pb()`
+:::
+

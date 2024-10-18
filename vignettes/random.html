@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -87,6 +121,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -375,8 +438,15 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#random-effects-only-in-the-mu-model" id="toc-random-effects-only-in-the-mu-model" class="nav-link active" data-scroll-target="#random-effects-only-in-the-mu-model"><span class="header-section-number">1</span> Random effects only in the <span class="math inline">\(\mu\)</span> model</a></li>
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2"><span class="header-section-number">2</span> Example 2</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -387,12 +457,147 @@ div.csl-indent {
 </header>
 
 
-<p>Describe how to incorporate random effects in <code>gamlss2</code></p>
+<p>Random effects can be included as an additive term for any distribution parameter in a <code>gamlss2</code> model by using the <code>re()</code> function in package <code>gamlss2</code>. Within the GAMLSS model fitting, the random effects additive term is then fitted locally by an interface with <code>lme</code> function of the <code>nlme</code> package.</p>
+<section id="random-effects-only-in-the-mu-model" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="random-effects-only-in-the-mu-model"><span class="header-section-number">1</span> Random effects only in the <span class="math inline">\(\mu\)</span> model</h2>
+<p>First we will consider the case of random effects only in the <span class="math inline">\(\mu\)</span> model. In this case the estimates of the fixed effects for the <span class="math inline">\(\sigma\)</span> distribution parameter (and also <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\tau\)</span>) in the <code>gamlss2</code> fit do <strong>not</strong> use <strong>REML</strong> estimation.</p>
+<p>This is not a problem if the total (effective) degrees of freedom (df) for estimating the fixed and random effects for <span class="math inline">\(\mu\)</span> are <strong>small</strong> relative to the total df (i.e.&nbsp;the sample size). Example 1 below illustrates this.</p>
+<p>However, if the total (effective) df for estimating the fixed and random effects for <span class="math inline">\(\mu\)</span> are a significant proportion of the total df, then the estimates of the fixed effects for <span class="math inline">\(\sigma\)</span> will be <strong>seriously</strong> negatively biased. Example 2 below illustrates this. [The estimated fixed effects for <span class="math inline">\(\mu\)</span> are OK (but not their estimated standard errors), and the random effects parameters are REML type estimates and are also OK. So, if these estimates are of primary interest, and the estimate of the <span class="math inline">\(\sigma\)</span> parameter is not of interest, then there is no problem.]</p>
+<p>The total (effective) df for a random effect is ALWAYS less than the df for the corresponding fixed effects. So a quick check [of whether there might be a problem with serious negative bias in the estimates of the fixed effects for <span class="math inline">\(\sigma\)</span> in the gamlss() fit] is to compare the corresponding fixed effects df with the total df. For example, in a simple random intercepts model for <span class="math inline">\(\mu\)</span>, if m is the number of individuals (or levels of the random effects factor), and n is the total sample size, then compare m with n, and if the proportion m/n is, say, greater than 0.05, there may be problem. Similarly for a random intercepts and slopes model for <span class="math inline">\(\mu\)</span>, then compare 2m with n, and look and the proportion 2m/n.</p>
+<p>In the first example below using re() in gamlss for random effects works [i.e.&nbsp;where the total number of individuals (or factor levels) is very small relative to the total number of observations and so REML estimation is not needed, for example, a relatively low number of individuals, each with a lot of repeated measurements, OR a random factor with a low number of levels, each with a lot of observations]. We show that using LME locally in gamlss() by the re() argument gives very similar results, to using LME directly.</p>
+</section>
+<section id="example-2" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="example-2"><span class="header-section-number">2</span> Example 2</h2>
+<p>In the second example below using the <code>Orthodont</code> data, the number of individuals (or factor levels) is significant relative to the total number of observations, and there is a problem with a seriously negatively biased estimate of <span class="math inline">\(\sigma\)</span>. We show that using <code>lme</code> locally in <code>gamlss2</code> by the <code>re()</code> function gives a very different estimate of <span class="math inline">\(\sigma\)</span> than using LME directly. The <code>Orthodont</code> data set is analysed in detail on pages 147-155 of <span class="citation" data-cites="R:Pinheiro+Bates:2000">Pinheiro and Bates (<a href="#ref-R:Pinheiro+Bates:2000" role="doc-biblioref">2000</a>)</span> “Mixed-Effects Models in S and S-PLUS”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>First fit a random intercepts model using LME:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>l1 <span class="ot">&lt;-</span> <span class="fu">lme</span>(distance <span class="sc">~</span><span class="fu">I</span>(age<span class="dv">-11</span>),<span class="at">random =</span><span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Subject, <span class="at">data=</span>Orthodont)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>l1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed-effects model fit by REML
+  Data: Orthodont 
+  Log-restricted-likelihood: -223.5013
+  Fixed: distance ~ I(age - 11) 
+(Intercept) I(age - 11) 
+ 24.0231481   0.6601852 
+
+Random effects:
+ Formula: ~1 | Subject
+        (Intercept) Residual
+StdDev:    2.114724 1.431592
+
+Number of Observations: 108
+Number of Groups: 27 </code></pre>
+</div>
+</div>
+<p>The model is</p>
+<p><span class="math display">\[
+\begin{split}
+\texttt{distance}_{ij} \sim&amp; NO(0, \sigma) \\
+    \mu    =&amp;  \beta_{0}+ \beta_1 (\texttt{age}-11) +\alpha_j \\
+\end{split}
+\]</span> where <span class="math inline">\(\alpha_j \sim NO(0, \sigma_a)\)</span> The fitted model gives estimates <span class="math inline">\(\beta_0 = 24.02\)</span>, <span class="math inline">\(\beta_1 = 0.660\)</span>, <span class="math inline">\(\sigma_a = 2.1147\)</span> and <span class="math inline">\(\sigma = 1.432\)</span>.</p>
+<p>Now fit the random intercepts model using function <code>re()</code> in <code>gamlss2</code>: Note that <code>gamlss2</code> has problem in interpreting the <code>I()</code> function so we create the variable <code>age_11</code></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>there is a problem with random intercepts in <code>gamlss2</code> so we use <code>gamlss</code></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Orthodont<span class="sc">$</span>age_11  <span class="ot">&lt;-</span> Orthodont<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">11</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#b1 &lt;- gamlss2(distance ~ s(age,k=3) + re(random =~ 1 | Subject), data = Orthodont)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(distance <span class="sc">~</span> age_11 <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> Subject), <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration 1: Global Deviance = 355.3077 
+GAMLSS-RS iteration 2: Global Deviance = 355.3077 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Family:  c("NO", "Normal") 
+Fitting method: RS() 
+
+Call:  gamlss(formula = distance ~ age_11 + re(random = ~1 |  
+    Subject), data = Orthodont) 
+
+Mu Coefficients:
+              (Intercept)                     age_11  
+                  24.0231                     0.6602  
+re(random = ~1 | Subject)  
+                       NA  
+Sigma Coefficients:
+(Intercept)  
+      0.226  
+
+ Degrees of Freedom for the fit: 26.15 Residual Deg. of Freedom   81.85 
+Global Deviance:     355.308 
+            AIC:     407.615 
+            SBC:     477.761 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#b &lt;-gamlss2(distance ~ age11 + re(random =~ age11 | Subject), data = Orthodont)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#m2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getSmo</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+  Data: Data 
+  Log-likelihood: -221.6948
+  Fixed: fix.formula 
+ (Intercept) 
+1.278595e-15 
+
+Random effects:
+ Formula: ~1 | Subject
+        (Intercept) Residual
+StdDev:    2.072142  1.13493
+
+Variance function:
+ Structure: fixed weights
+ Formula: ~W.var 
+Number of Observations: 108
+Number of Groups: 27 </code></pre>
+</div>
+</div>
+<p>The fitted model gives estimates <span class="math inline">\(\beta_0 = 24.02\)</span>, <span class="math inline">\(\beta_1 = 0.660\)</span>, <span class="math inline">\(\sigma_a = 2.072\)</span> and <span class="math inline">\(\sigma = 1.254\)</span> The estimate of <span class="math inline">\(\sigma\)</span> is seriously negatively biased, because it is <strong>not</strong> a <code>REML</code> estimate.</p>
+<p>For this simple random intercepts model, the estimate of <span class="math inline">\(\sigma\)</span> can be adjusted by multiplying by the local LME residual given by 1.135 giving: adjusted <span class="math inline">\(\sigma = 1.254*1.135 = 1.42\)</span>, which is very close to the LME estimate of <span class="math inline">\(\sigma\)</span>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>However this adjustment does NOT work for more complex random effects models.</p>
+</div>
+</div>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-R:Pinheiro+Bates:2000" class="csl-entry" role="listitem">
+Pinheiro, J. C., and D. M. Bates. 2000. <em>Mixed-Effects Models in <span>S</span> and <span>S-Plus</span></em>. Springer. <a href="https://link.springer.com/book/10.1007/b98882">https://link.springer.com/book/10.1007/b98882</a>.
+</div>
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
 </div>

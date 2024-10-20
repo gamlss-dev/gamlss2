@@ -17,3 +17,5 @@ README.qmd
 ^vignettes/selection\.qmd$
 ^vignettes/spatial\.qmd$
 ^vignettes/topmodels\.qmd$
+^vignettes/survival\.qmd$
+^vignettes/quantiles\.qmd$

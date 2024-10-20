@@ -1,0 +1,93 @@
+---
+title: "Survival Models"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Survival Models}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, inference, forecasting}
+  %\VignettePackage{gamlss2}
+---
+
+```{r packages}
+#| message: false
+#| results: hide
+#| echo: 3:8
+pkg <- c("spBayesSurv", "gamlss.cens")
+for(p in pkg) {
+  if(!(p %in% installed.packages())) install.packages(p)
+}
+library("gamlss2")
+library("gamlss.cens")
+data("LeukSurv", package = "spBayesSurv")
+```
+
+We need to generate the censored family with
+
+```{r}
+gen.cens(WEI)
+fam <- cens(WEI)
+```
+
+First, we estimate time only models.
+```{r}
+## using gamlss2
+b1 <- gamlss2(Surv(time, cens) ~ 1, family = fam, data = LeukSurv)
+
+## and now with survfit
+s1 <- survfit(Surv(time, cens) ~ 1, data = LeukSurv)
+```
+
+Predict survival curves.
+
+```{r}
+## gamlss2 survival
+p1 <- predict(b1, newdata = LeukSurv)
+p1 <- 1 - family(b1)$p(Surv(LeukSurv$time, rep(1, nrow(LeukSurv))), p1)
+
+## surfit() survival
+f <- stepfun(s1$time, c(1, s1$surv))
+p2 <- f(LeukSurv$time)
+```
+
+Plot estimated curves.
+
+```{r}
+matplot(LeukSurv$time, cbind(p1, p2),
+  type = "l", lty = 1, lwd = 2, col = 1:2,
+  xlab = "Time", ylab = "Survival Prob(t > Time)",
+  main = "Estimated Survival Curves")
+legend("topright", c("gamlss2", "survfit"),
+  lwd = 2, col = 1:2, bty = "n")
+```
+
+Now, we estimate a full spatial survival model.
+
+```{r}
+## model formula
+f <- Surv(time, cens) ~ sex + s(age) + s(wbc) + s(tpi) + s(xcoord,ycoord,k=100) |
+  sex + s(age) + s(wbc) + s(tpi) + s(xcoord,ycoord,k=100)
+
+## estimate model
+b2 <- gamlss2(f, family = fam, data = LeukSurv)
+```
+
+Plot estimated effects.
+
+```{r}
+plot(b2)
+```
+
+Residuals diagnostic plots.
+
+```{r}
+plot(b2, which = "resid")
+```
+

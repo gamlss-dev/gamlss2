@@ -251,7 +251,7 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
 plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
   xlab = NULL, ylab = NULL, zlab = NULL, main = NULL,
   xlim = NULL, ylim = NULL,
-  persp = TRUE, contour = TRUE, symmetric = TRUE,
+  persp = FALSE, contour = TRUE, symmetric = TRUE,
   theta = 40, phi = 40, expand = 0.9, ticktype = "simple", ...)
 {
   n <- sqrt(nrow(x))

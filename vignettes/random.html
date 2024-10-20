@@ -470,9 +470,10 @@ window.Quarto = {
 <h2 data-number="2" class="anchored" data-anchor-id="example-2"><span class="header-section-number">2</span> Example 2</h2>
 <p>In the second example below using the <code>Orthodont</code> data, the number of individuals (or factor levels) is significant relative to the total number of observations, and there is a problem with a seriously negatively biased estimate of <span class="math inline">\(\sigma\)</span>. We show that using <code>lme</code> locally in <code>gamlss2</code> by the <code>re()</code> function gives a very different estimate of <span class="math inline">\(\sigma\)</span> than using LME directly. The <code>Orthodont</code> data set is analysed in detail on pages 147-155 of <span class="citation" data-cites="R:Pinheiro+Bates:2000">Pinheiro and Bates (<a href="#ref-R:Pinheiro+Bates:2000" role="doc-biblioref">2000</a>)</span> “Mixed-Effects Models in S and S-PLUS”.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"nlme"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Orthodont"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First fit a random intercepts model using LME:</p>
 <div class="cell">
@@ -517,43 +518,52 @@ Note
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Orthodont<span class="sc">$</span>age_11  <span class="ot">&lt;-</span> Orthodont<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">11</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#b1 &lt;- gamlss2(distance ~ s(age,k=3) + re(random =~ 1 | Subject), data = Orthodont)</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(distance <span class="sc">~</span> age_11 <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> Subject), <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> Subject), <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 355.3077 eps = 0.339068     
+GAMLSS-RS iteration  2: Global Deviance = 355.3077 eps = 0.000000     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(distance <span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> Subject), <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration 1: Global Deviance = 355.3077 
 GAMLSS-RS iteration 2: Global Deviance = 355.3077 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Family:  c("NO", "Normal") 
-Fitting method: RS() 
-
-Call:  gamlss(formula = distance ~ age_11 + re(random = ~1 |  
-    Subject), data = Orthodont) 
-
-Mu Coefficients:
-              (Intercept)                     age_11  
-                  24.0231                     0.6602  
-re(random = ~1 | Subject)  
-                       NA  
-Sigma Coefficients:
-(Intercept)  
-      0.226  
-
- Degrees of Freedom for the fit: 26.15 Residual Deg. of Freedom   81.85 
-Global Deviance:     355.308 
-            AIC:     407.615 
-            SBC:     477.761 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#b &lt;-gamlss2(distance ~ age11 + re(random =~ age11 | Subject), data = Orthodont)</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#m2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getSmo</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract fitted random intercept special mode term</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>re <span class="ot">&lt;-</span> <span class="fu">specials</span>(b1, <span class="at">term =</span> <span class="st">"random"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grep(p, x, ...): argument 'ignore.case = TRUE' will be ignored</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model summary</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(re)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+  Data: x$data 
+       AIC      BIC    logLik
+  449.3895 457.4359 -221.6948
+
+Random effects:
+ Formula: ~1 | Subject
+        (Intercept) Residual
+StdDev:    2.072142 1.783505
+
+Variance function:
+ Structure: fixed weights
+ Formula: ~weights_w 
+Fixed effects:  list(.fnns) 
+                   Value Std.Error DF      t-value p-value
+(Intercept) 6.824005e-16 0.4235944 81 1.610976e-15       1
+
+Standardized Within-Group Residuals:
+        Min          Q1         Med          Q3         Max 
+-3.68695129 -0.53862941 -0.01232442  0.49100161  3.74701483 
+
+Number of Observations: 108
+Number of Groups: 27 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## same with gamlss</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">getSmo</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed-effects model fit by maximum likelihood
   Data: Data 
@@ -572,6 +582,54 @@ Variance function:
  Formula: ~W.var 
 Number of Observations: 108
 Number of Groups: 27 </code></pre>
+</div>
+</div>
+<p>Compare estimated coefficients</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## main model coefficients</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   mu.p.(Intercept)    mu.p.I(age - 11) sigma.p.(Intercept) 
+         24.0231481           0.6601852           0.2260047 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(l1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed-effects model fit by REML
+  Data: Orthodont 
+       AIC      BIC    logLik
+  455.0025 465.6563 -223.5013
+
+Random effects:
+ Formula: ~1 | Subject
+        (Intercept) Residual
+StdDev:    2.114724 1.431592
+
+Fixed effects:  distance ~ I(age - 11) 
+                Value Std.Error DF  t-value p-value
+(Intercept) 24.023148 0.4296605 80 55.91193       0
+I(age - 11)  0.660185 0.0616059 80 10.71626       0
+ Correlation: 
+            (Intr)
+I(age - 11) 0     
+
+Standardized Within-Group Residuals:
+        Min          Q1         Med          Q3         Max 
+-3.66453932 -0.53507984 -0.01289591  0.48742859  3.72178465 
+
+Number of Observations: 108
+Number of Groups: 27 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## random effect coefficients</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">coef</span>(re)[, <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">coef</span>(b1)[<span class="st">"mu.p.(Intercept)"</span>], <span class="fu">coef</span>(l1)[, <span class="dv">1</span>],</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"gamlss2 random intercepts"</span>, <span class="at">ylab =</span> <span class="st">"lme() random intercepts"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Random Intercepts Comparison"</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The fitted model gives estimates <span class="math inline">\(\beta_0 = 24.02\)</span>, <span class="math inline">\(\beta_1 = 0.660\)</span>, <span class="math inline">\(\sigma_a = 2.072\)</span> and <span class="math inline">\(\sigma = 1.254\)</span> The estimate of <span class="math inline">\(\sigma\)</span> is seriously negatively biased, because it is <strong>not</strong> a <code>REML</code> estimate.</p>

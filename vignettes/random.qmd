@@ -53,9 +53,10 @@ In the second example below using the `Orthodont` data, the number of individual
 
 ```{r}
 #| warning: false
-library(gamlss)
-library(nlme)
-data(Orthodont)
+library("gamlss")
+library("gamlss2")
+library("nlme")
+data("Orthodont")
 ```
 First fit a random intercepts model using LME:
 ```{r}
@@ -84,17 +85,32 @@ there is a problem with random intercepts in `gamlss2` so we use `gamlss`
 
 ```{r}
 #| warning: false
-Orthodont$age_11  <- Orthodont$age - 11
-library(gamlss)
-#b1 <- gamlss2(distance ~ s(age,k=3) + re(random =~ 1 | Subject), data = Orthodont)
-
-m1 <- gamlss(distance ~ age_11 + re(random =~ 1 | Subject), data = Orthodont)
-m1
-#b <-gamlss2(distance ~ age11 + re(random =~ age11 | Subject), data = Orthodont)
-#m2
+b1 <- gamlss2(distance ~ I(age-11) + re(random =~ 1 | Subject), data = Orthodont)
+m1 <- gamlss(distance ~ I(age-11) + re(random =~ 1 | Subject), data = Orthodont)
 ```
+
 ```{r}
+## extract fitted random intercept special mode term
+re <- specials(b1, term = "random", elements = "model")
+
+## model summary
+summary(re)
+
+## same with gamlss
 getSmo(m1)
+```
+
+Compare estimated coefficients
+```{r}
+## main model coefficients
+coef(b1)
+summary(l1)
+
+## random effect coefficients
+plot(coef(re)[, 1] + coef(b1)["mu.p.(Intercept)"], coef(l1)[, 1],
+  xlab = "gamlss2 random intercepts", ylab = "lme() random intercepts",
+  main = "Random Intercepts Comparison")
+abline(0, 1, lty = 2, col = 4)
 ```
 
 The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.072$ and $\sigma = 1.254$

@@ -388,7 +388,7 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
       it <- if(is.null(terms)) {
         names(object$fitted.specials[[i]])
       } else {
-        grep2(terms, names(object$fitted.specials[[i]]), ignore.case = TRUE, value = TRUE, fixed = TRUE)
+        grep2(terms, names(object$fitted.specials[[i]]), value = TRUE, fixed = TRUE)
       }
 
       tmp <- object$fitted.specials[[i]][it]

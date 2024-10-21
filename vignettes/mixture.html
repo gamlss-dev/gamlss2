@@ -510,16 +510,16 @@ d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid
 </section>
 <section id="gamlss-framework-for-the-mixture-model" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="gamlss-framework-for-the-mixture-model"><span class="header-section-number">3</span> GAMLSS Framework for the Mixture Model</h2>
-<p>In the GAMLSS framework, each parameter <span class="math inline">\(\theta_{jk}(\mathbf{x}_i)\)</span>, as well as the mixing probabilities <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, are modeled using GAM-type predictors given by</p>
+<p>In the GAMLSS framework, each parameter <span class="math inline">\(\boldsymbol{\theta}_{k}(\mathbf{x}_i) = (\boldsymbol{\theta}_{1k}(\mathbf{x}_i), \ldots, \boldsymbol{\theta}_{J_kk}(\mathbf{x}_i))^{\top}\)</span>, as well as the mixing probabilities <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, are modeled using GAM-type predictors given by</p>
 <p><span class="math display">\[
-\eta_{jk}(\mathbf{x}_i) = f_1(\mathbf{x}_i) + \dots + f_{L_{jk}}(\mathbf{x}_i),
+\eta_{jk}(\mathbf{x}_i) = f_{1k}(\mathbf{x}_i) + \dots + f_{L_{jk}k}(\mathbf{x}_i),
 \]</span></p>
-<p>which are linked to the parameters through <span class="math inline">\(h_{jk}(\theta_{jk}(\mathbf{x}_i)) = \eta_{jk}(\mathbf{x}_i)\)</span> using suitable link functions <span class="math inline">\(h_{jk}(\cdot)\)</span>. The functions <span class="math inline">\(f_l(\cdot)\)</span>, <span class="math inline">\(l = 1, \ldots, L_{jk}\)</span>, can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others.</p>
+<p>which are linked to the parameters through <span class="math inline">\(h_{jk}(\theta_{jk}(\mathbf{x}_i)) = \eta_{jk}(\mathbf{x}_i)\)</span> using suitable link functions <span class="math inline">\(h_{jk}(\cdot)\)</span>. The functions <span class="math inline">\(f_{lk}(\cdot)\)</span>, <span class="math inline">\(l = 1, \ldots, L_{jk}\)</span>, can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others.</p>
 <p>For the two-component normal mixture, we use</p>
 <ol type="1">
 <li>Identity link for the means: <span class="math inline">\(\mu_k(\mathbf{x}_i) = \eta_{1k}(\mathbf{x}_i)\)</span>,</li>
 <li>Log-link for the standard deviations: <span class="math inline">\(\log(\sigma_k(\mathbf{x}_i)) = \eta_{2k}(\mathbf{x}_i)\)</span>,</li>
-<li>Logit-link for the mixing probability: <span class="math inline">\(\pi_k(\mathbf{x}_i) = \frac{1}{1 + \exp(-\eta_{\pi k}(\mathbf{x}_i))}\)</span>.</li>
+<li>Logit-link for the mixing probability: <span class="math inline">\(\log\left(\frac{\pi_k(\mathbf{x}_i)}{1 - \pi_k(\mathbf{x}_i)}\right) = \eta_{\pi k}(\mathbf{x}_i)\)</span>.</li>
 </ol>
 </section>
 <section id="example-using-simulated-data" class="level2" data-number="4">

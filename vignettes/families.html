@@ -453,10 +453,7 @@ window.Quarto = {
   <li><a href="#density-function" id="toc-density-function" class="nav-link" data-scroll-target="#density-function"><span class="header-section-number">2</span> Density Function</a></li>
   <li><a href="#optional-derivatives" id="toc-optional-derivatives" class="nav-link" data-scroll-target="#optional-derivatives"><span class="header-section-number">3</span> Optional Derivatives</a></li>
   <li><a href="#additional-functions" id="toc-additional-functions" class="nav-link" data-scroll-target="#additional-functions"><span class="header-section-number">4</span> Additional Functions</a></li>
-  <li><a href="#flexible-links" id="toc-flexible-links" class="nav-link" data-scroll-target="#flexible-links"><span class="header-section-number">5</span> Flexible Links</a>
-  <ul class="collapse">
-  <li><a href="#example-modeling-with-the-kumaraswamy-distribution" id="toc-example-modeling-with-the-kumaraswamy-distribution" class="nav-link" data-scroll-target="#example-modeling-with-the-kumaraswamy-distribution"><span class="header-section-number">5.1</span> Example: Modeling with the Kumaraswamy Distribution</a></li>
-  </ul></li>
+  <li><a href="#flexible-links" id="toc-flexible-links" class="nav-link" data-scroll-target="#flexible-links"><span class="header-section-number">5</span> Flexible Links</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">6</span> Summary</a></li>
   </ul>
 </nav>
@@ -578,10 +575,7 @@ window.Quarto = {
 f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
 \]</span></p>
 <p>where <span class="math inline">\(y \in (0, 1)\)</span> is the response, and <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are non-negative parameters that determine the shape of the distribution. The complete implementation, including flexible link functions is provided in the <code>Kumaraswamy()</code> family.</p>
-<p>In the following example, we will create the family object for the Kumaraswamy distribution using the <code>Kumaraswamy()</code> function and estimate a model using this distribution.</p>
-<section id="example-modeling-with-the-kumaraswamy-distribution" class="level3" data-number="5.1">
-<h3 data-number="5.1" class="anchored" data-anchor-id="example-modeling-with-the-kumaraswamy-distribution"><span class="header-section-number">5.1</span> Example: Modeling with the Kumaraswamy Distribution</h3>
-<p>In this example, we will:</p>
+<p>In the following example, we will create the family object for the Kumaraswamy distribution using the <code>Kumaraswamy()</code> function and estimate a model using this distribution. In detail, we will:</p>
 <ul>
 <li>Define the Kumaraswamy family object.</li>
 <li>Simulate data based on this distribution.</li>
@@ -636,7 +630,6 @@ GAMLSS-RS iteration  4: Global Deviance = -1504.1294 eps = 0.000002     </code><
 </div>
 <p>In this example, we simulated a dataset where the parameter <code>a</code> of the Kumaraswamy distribution varies with <code>x</code> following a sinusoidal pattern. We then used the <code>gamlss2()</code> function to fit a smooth model that estimates this relationship. The effect of <code>x</code> on <code>y</code> is plotted, followed by a diagnostic plot to assess residuals.</p>
 <p>The <code>Kumaraswamy()</code> family in <code>gamlss2</code> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
-</section>
 </section>
 <section id="summary" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="summary"><span class="header-section-number">6</span> Summary</h2>

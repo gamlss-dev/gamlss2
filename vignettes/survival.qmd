@@ -16,19 +16,69 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-Here is the text for survival model introduction. Important is, how to estimate survival models with the GAMLSS model class.
+In survival analysis, we aim to model the time until an event occurs, which is typically
+represented as a random variable $T$. The survival function $S(t)$ indicates the probability
+that the event has not occurred by time $t$, mathematically defined as
+$$
+S(t) = P(T > t) = 1 - F(t),
+$$
+where $F(t)$ is the cumulative distribution function (CDF) of the random variable $T$.
+
+The hazard function $\lambda(t)$, which describes the instantaneous risk of the event occurring
+at time $t$, is defined as
+$$
+\lambda(t) = \frac{d(t)}{S(t)},
+$$
+where $d(t)$ is the probability density function (PDF) of $T$.
+
+Within the GAMLSS framework, we can specify a parametric form for the hazard function by
+selecting an appropriate distribution that fits the survival data, denoted as
+$$
+d(t \mid \boldsymbol{\theta}),
+$$
+where $d( \cdot )$ represents a parametric density suitable for modeling survival times and
+$\boldsymbol{\theta} = (\theta_1, \ldots, \theta_K)^\top$ are the parameters that need
+to be estimated.
+
+To incorporate covariates into this model, we can express the parameters as functions of
+explanatory variables $\theta_k(\mathbf{x})$ for $k = 1, \ldots, K$. We utilize GAM-type predictors
+represented by
+$$
+\eta_{k}(\mathbf{x}) = f_1(\mathbf{x}) + \dots + f_{L_{k}}(\mathbf{x}),
+$$
+which are linked to the parameters through suitable link functions
+$$
+h_{k}(\theta_{k}(\mathbf{x})) = \eta_{k}(\mathbf{x}).
+$$
+The functions $f_l(\cdot)$ for $l = 1, \ldots, L_{k}$ can be nonlinear smooth functions
+(typically estimated using regression splines), linear effects, or random effects, among others.
+This flexible modeling approach allows for a richer representation of the relationship between
+covariates and the distribution parameters compared to simple linear effects.
+
+In GAMLSS, model estimation is generally performed using (penalized) maximum likelihood
+estimation (MLE). The likelihood function for a survival model with right-censored data
+for $i = 1, \ldots, n$ observations can be expressed as
+$$
+L(\boldsymbol{\beta}, \boldsymbol{\theta}) = \prod_{i=1}^{n} \left[ d(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i} \left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
+$$
+where $\delta_i$ is the censoring indicator for the $i$-th observation. It takes the value of
+1 if the event is observed (i.e., not censored) and 0 if it is censored. This likelihood
+function effectively accounts for both observed and censored data, facilitating the estimation of model parameters.
+
+## LeukSurv data example
 
 ```{r packages}
 #| message: false
 #| results: hide
 #| echo: 3:8
-pkg <- c("spBayesSurv", "gamlss.cens", "sf")
+pkg <- c("spBayesSurv", "gamlss.cens", "sf", "stars")
 for(p in pkg) {
   if(!(p %in% installed.packages())) install.packages(p)
 }
 library("gamlss2")
 library("gamlss.cens")
 library("sf")
+library("stars")
 data("LeukSurv", package = "spBayesSurv")
 ```
 
@@ -37,6 +87,7 @@ We need to generate the censored family with
 ```{r}
 gen.cens(WEI)
 fam <- cens(WEI)
+fam <- fam(mu.link = "log")
 ```
 
 First, we estimate time only models.
@@ -73,12 +124,14 @@ legend("topright", c("gamlss2", "survfit"),
   lwd = 2, col = 1:2, bty = "n")
 ```
 
+## Spatial survival model
+
 Now, we estimate a full spatial survival model.
 
 ```{r}
 ## model formula
-f <- Surv(time, cens) ~ sex + s(age) + s(wbc) + s(tpi) + s(xcoord,ycoord,k=100) |
-  sex + s(age) + s(wbc) + s(tpi) + s(xcoord,ycoord,k=100)
+f <- Surv(time, cens) ~ sex + s(age) + s(wbc) + s(tpi) + s(xcoord, ycoord) |
+  sex + s(age) + s(wbc) + s(tpi) + s(xcoord, ycoord)
 
 ## estimate model
 b2 <- gamlss2(f, family = fam, data = LeukSurv)
@@ -136,9 +189,12 @@ map$district <- 1:nrow(map)
 ## plot the map
 par(mar = rep(0, 4))
 plot(st_geometry(map))
+```
 
+```{r}
+#| fig-align: center
 ## sample coordinates for plotting
-co <- st_sample(map, size = 1000, type = "regular")
+co <- st_sample(map, size = 10000, type = "regular")
 
 ## create new data for prediction
 nd <- as.data.frame(st_coordinates(co))
@@ -158,9 +214,17 @@ p2 <- 1 - family(b2)$p(Surv(rep(365, nrow(nd)), rep(1, nrow(nd))), par)
 sp <- st_sf(geometry = co)
 sp$survprob <- p2
 
-par(mar = rep(0, 4))
-plot(st_geometry(map))
-plot(sp, pch = 15, cex = 1.3, add = TRUE)
+## reference system, only used for plotting
+sp <- st_set_crs(sp, 4326)
+map <- st_set_crs(map, 4326)
+
+## plot as raster map
+spr <- st_as_stars(sp)
+
+par(mar = c(0, 0, 5, 0))
+plot(spr, main = "Survival Probabilities Prob(t > 365)",
+  reset = FALSE, nbreaks = 100)
 plot(st_geometry(map), add = TRUE)
+box()
 ```
 

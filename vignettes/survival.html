@@ -121,6 +121,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -415,8 +444,15 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#leuksurv-data-example" id="toc-leuksurv-data-example" class="nav-link active" data-scroll-target="#leuksurv-data-example"><span class="header-section-number">1</span> LeukSurv data example</a></li>
+  <li><a href="#spatial-survival-model" id="toc-spatial-survival-model" class="nav-link" data-scroll-target="#spatial-survival-model"><span class="header-section-number">2</span> Spatial survival model</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -427,16 +463,35 @@ div.csl-indent {
 </header>
 
 
-<p>Here is the text for survival model introduction. Important is, how to estimate survival models with the GAMLSS model class.</p>
+<p>In survival analysis, we aim to model the time until an event occurs, which is typically represented as a random variable <span class="math inline">\(T\)</span>. The survival function <span class="math inline">\(S(t)\)</span> indicates the probability that the event has not occurred by time <span class="math inline">\(t\)</span>, mathematically defined as <span class="math display">\[
+S(t) = P(T &gt; t) = 1 - F(t),
+\]</span> where <span class="math inline">\(F(t)\)</span> is the cumulative distribution function (CDF) of the random variable <span class="math inline">\(T\)</span>.</p>
+<p>The hazard function <span class="math inline">\(\lambda(t)\)</span>, which describes the instantaneous risk of the event occurring at time <span class="math inline">\(t\)</span>, is defined as <span class="math display">\[
+\lambda(t) = \frac{d(t)}{S(t)},
+\]</span> where <span class="math inline">\(d(t)\)</span> is the probability density function (PDF) of <span class="math inline">\(T\)</span>.</p>
+<p>Within the GAMLSS framework, we can specify a parametric form for the hazard function by selecting an appropriate distribution that fits the survival data, denoted as <span class="math display">\[
+d(t \mid \boldsymbol{\theta}),
+\]</span> where <span class="math inline">\(d( \cdot )\)</span> represents a parametric density suitable for modeling survival times and <span class="math inline">\(\boldsymbol{\theta} = (\theta_1, \ldots, \theta_K)^\top\)</span> are the parameters that need to be estimated.</p>
+<p>To incorporate covariates into this model, we can express the parameters as functions of explanatory variables <span class="math inline">\(\theta_k(\mathbf{x})\)</span> for <span class="math inline">\(k = 1, \ldots, K\)</span>. We utilize GAM-type predictors represented by <span class="math display">\[
+\eta_{k}(\mathbf{x}) = f_1(\mathbf{x}) + \dots + f_{L_{k}}(\mathbf{x}),
+\]</span> which are linked to the parameters through suitable link functions <span class="math display">\[
+h_{k}(\theta_{k}(\mathbf{x})) = \eta_{k}(\mathbf{x}).
+\]</span> The functions <span class="math inline">\(f_l(\cdot)\)</span> for <span class="math inline">\(l = 1, \ldots, L_{k}\)</span> can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others. This flexible modeling approach allows for a richer representation of the relationship between covariates and the distribution parameters compared to simple linear effects.</p>
+<p>In GAMLSS, model estimation is generally performed using (penalized) maximum likelihood estimation (MLE). The likelihood function for a survival model with right-censored data for <span class="math inline">\(i = 1, \ldots, n\)</span> observations can be expressed as <span class="math display">\[
+L(\boldsymbol{\beta}, \boldsymbol{\theta}) = \prod_{i=1}^{n} \left[ d(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i} \left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
+\]</span> where <span class="math inline">\(\delta_i\)</span> is the censoring indicator for the <span class="math inline">\(i\)</span>-th observation. It takes the value of 1 if the event is observed (i.e., not censored) and 0 if it is censored. This likelihood function effectively accounts for both observed and censored data, facilitating the estimation of model parameters.</p>
+<section id="leuksurv-data-example" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="leuksurv-data-example"><span class="header-section-number">1</span> LeukSurv data example</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pkg <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"spBayesSurv"</span>, <span class="st">"gamlss.cens"</span>, <span class="st">"sf"</span>)</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pkg <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"spBayesSurv"</span>, <span class="st">"gamlss.cens"</span>, <span class="st">"sf"</span>, <span class="st">"stars"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(p <span class="cf">in</span> pkg) {</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span>(p <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) <span class="fu">install.packages</span>(p)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss.cens"</span>)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"sf"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"LeukSurv"</span>, <span class="at">package =</span> <span class="st">"spBayesSurv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"stars"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"LeukSurv"</span>, <span class="at">package =</span> <span class="st">"spBayesSurv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We need to generate the censored family with</p>
 <div class="cell">
@@ -447,7 +502,8 @@ div.csl-indent {
  dWEIrc pWEIrc qWEIrc WEIrc 
 The type of censoring is right  </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">cens</span>(WEI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">cens</span>(WEI)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">fam</span>(<span class="at">mu.link =</span> <span class="st">"log"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First, we estimate time only models.</p>
 <div class="cell">
@@ -489,18 +545,21 @@ GAMLSS-RS iteration  3: Global Deviance = 12267.6904 eps = 0.000000     </code><
 </div>
 </div>
 </div>
+</section>
+<section id="spatial-survival-model" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="spatial-survival-model"><span class="header-section-number">2</span> Spatial survival model</h2>
 <p>Now, we estimate a full spatial survival model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">Surv</span>(time, cens) <span class="sc">~</span> sex <span class="sc">+</span> <span class="fu">s</span>(age) <span class="sc">+</span> <span class="fu">s</span>(wbc) <span class="sc">+</span> <span class="fu">s</span>(tpi) <span class="sc">+</span> <span class="fu">s</span>(xcoord,ycoord,<span class="at">k=</span><span class="dv">100</span>) <span class="sc">|</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  sex <span class="sc">+</span> <span class="fu">s</span>(age) <span class="sc">+</span> <span class="fu">s</span>(wbc) <span class="sc">+</span> <span class="fu">s</span>(tpi) <span class="sc">+</span> <span class="fu">s</span>(xcoord,ycoord,<span class="at">k=</span><span class="dv">100</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">Surv</span>(time, cens) <span class="sc">~</span> sex <span class="sc">+</span> <span class="fu">s</span>(age) <span class="sc">+</span> <span class="fu">s</span>(wbc) <span class="sc">+</span> <span class="fu">s</span>(tpi) <span class="sc">+</span> <span class="fu">s</span>(xcoord, ycoord) <span class="sc">|</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  sex <span class="sc">+</span> <span class="fu">s</span>(age) <span class="sc">+</span> <span class="fu">s</span>(wbc) <span class="sc">+</span> <span class="fu">s</span>(tpi) <span class="sc">+</span> <span class="fu">s</span>(xcoord, ycoord)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">family =</span> fam, <span class="at">data =</span> LeukSurv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11863.604 eps = 0.042545     
-GAMLSS-RS iteration  2: Global Deviance = 11859.5156 eps = 0.000344     
-GAMLSS-RS iteration  3: Global Deviance = 11859.4914 eps = 0.000002     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11869.8787 eps = 0.042038     
+GAMLSS-RS iteration  2: Global Deviance = 11866.6901 eps = 0.000268     
+GAMLSS-RS iteration  3: Global Deviance = 11866.619 eps = 0.000005     </code></pre>
 </div>
 </div>
 <p>Plot estimated effects.</p>
@@ -558,33 +617,7 @@ GAMLSS-RS iteration  3: Global Deviance = 11859.4914 eps = 0.000002     </code><
 <span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="do">## plot the map</span></span>
 <span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">4</span>))</span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(map))</span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="do">## sample coordinates for plotting</span></span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>co <span class="ot">&lt;-</span> <span class="fu">st_sample</span>(map, <span class="at">size =</span> <span class="dv">1000</span>, <span class="at">type =</span> <span class="st">"regular"</span>)</span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="do">## create new data for prediction</span></span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">st_coordinates</span>(co))</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(nd) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"xcoord"</span>, <span class="st">"ycoord"</span>)</span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>sex <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>wbc <span class="ot">&lt;-</span> <span class="fu">mean</span>(LeukSurv<span class="sc">$</span>wbc)</span>
-<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>tpi <span class="ot">&lt;-</span> <span class="fu">mean</span>(LeukSurv<span class="sc">$</span>tpi)</span>
-<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">mean</span>(LeukSurv<span class="sc">$</span>age)</span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="do">## predict parameters</span></span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(b2, <span class="at">newdata =</span> nd)</span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="do">## compute survival probabilities</span></span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">family</span>(b2)<span class="sc">$</span><span class="fu">p</span>(<span class="fu">Surv</span>(<span class="fu">rep</span>(<span class="dv">365</span>, <span class="fu">nrow</span>(nd)), <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(nd))), par)</span>
-<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a><span class="do">## plot on map</span></span>
-<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(<span class="at">geometry =</span> co)</span>
-<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>sp<span class="sc">$</span>survprob <span class="ot">&lt;-</span> p2</span>
-<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">4</span>))</span>
-<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(map))</span>
-<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sp, <span class="at">pch =</span> <span class="dv">15</span>, <span class="at">cex =</span> <span class="fl">1.3</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(map), <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(map))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -593,9 +626,52 @@ GAMLSS-RS iteration  3: Global Deviance = 11859.4914 eps = 0.000002     </code><
 </div>
 </div>
 </div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">## sample coordinates for plotting</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>co <span class="ot">&lt;-</span> <span class="fu">st_sample</span>(map, <span class="at">size =</span> <span class="dv">10000</span>, <span class="at">type =</span> <span class="st">"regular"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="do">## create new data for prediction</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">st_coordinates</span>(co))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(nd) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"xcoord"</span>, <span class="st">"ycoord"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>sex <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>wbc <span class="ot">&lt;-</span> <span class="fu">mean</span>(LeukSurv<span class="sc">$</span>wbc)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>tpi <span class="ot">&lt;-</span> <span class="fu">mean</span>(LeukSurv<span class="sc">$</span>tpi)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>nd<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">mean</span>(LeukSurv<span class="sc">$</span>age)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="do">## predict parameters</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(b2, <span class="at">newdata =</span> nd)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="do">## compute survival probabilities</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">family</span>(b2)<span class="sc">$</span><span class="fu">p</span>(<span class="fu">Surv</span>(<span class="fu">rep</span>(<span class="dv">365</span>, <span class="fu">nrow</span>(nd)), <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(nd))), par)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="do">## plot on map</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(<span class="at">geometry =</span> co)</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>sp<span class="sc">$</span>survprob <span class="ot">&lt;-</span> p2</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="do">## reference system, only used for plotting</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(sp, <span class="dv">4326</span>)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(map, <span class="dv">4326</span>)</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="do">## plot as raster map</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>spr <span class="ot">&lt;-</span> <span class="fu">st_as_stars</span>(sp)</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">0</span>))</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spr, <span class="at">main =</span> <span class="st">"Survival Probabilities Prob(t &gt; 365)"</span>,</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">reset =</span> <span class="cn">FALSE</span>, <span class="at">nbreaks =</span> <span class="dv">100</span>)</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(map), <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="fu">box</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="survival_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">

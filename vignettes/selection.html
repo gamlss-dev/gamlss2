@@ -418,7 +418,11 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#select-a-distribution" id="toc-select-a-distribution" class="nav-link active" data-scroll-target="#select-a-distribution"><span class="header-section-number">1</span> Select a distribution</a></li>
+  <li><a href="#select-a-distribution" id="toc-select-a-distribution" class="nav-link active" data-scroll-target="#select-a-distribution"><span class="header-section-number">1</span> Select a distribution</a>
+  <ul class="collapse">
+  <li><a href="#the-ranse-of-the-response" id="toc-the-ranse-of-the-response" class="nav-link" data-scroll-target="#the-ranse-of-the-response"><span class="header-section-number">1.1</span> The ranse of the response</a></li>
+  <li><a href="#select-appropriate-distribution" id="toc-select-appropriate-distribution" class="nav-link" data-scroll-target="#select-appropriate-distribution"><span class="header-section-number">1.2</span> Select appropriate distribution</a></li>
+  </ul></li>
   <li><a href="#select-appropriate-variables" id="toc-select-appropriate-variables" class="nav-link" data-scroll-target="#select-appropriate-variables"><span class="header-section-number">2</span> Select appropriate variables<br>
   </a></li>
   </ul>
@@ -440,13 +444,23 @@ g(\theta_{1i})  &amp;=&amp; b_{10} + s_1({x}_{1i})  +  \ldots,  s_p({x}_{pi}) \n
 \ldots &amp;=&amp; \ldots \nonumber\\
 g({\theta}_{ki})  &amp;=&amp; b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
 \end{split}
-\tag{1}\]</span></span> where <span class="math inline">\({D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\({D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model takes the form of;</p>
+\tag{1}\]</span></span> where <span class="math inline">\({D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\({D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model could takes the form ;</p>
 <ul>
 <li><p>select the <em>best</em> fitting distribution;</p></li>
 <li><p>select the <em>relevant</em> variables for the parameters and how they effect the parameters.</p></li>
 </ul>
+<p>So a <strong>general algorithm</strong> for searching for a <em>best</em> model could be;</p>
+<ul>
+<li><p><strong>START</strong> by defining a set of appropriate distributions for the response <span class="math inline">\({D_J()}\)</span> for <span class="math inline">\(j=1,\ldots, J.\)</span></p></li>
+<li><p><strong>FOR</strong> <span class="math inline">\(J\)</span> in <span class="math inline">\(j=1,\ldots, J\)</span></p></li>
+<li><p><strong>SELECT</strong> appropriate variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>.</p></li>
+<li><p><strong>SELECT</strong> the distribution <span class="math inline">\(\hat{D}_J()\)</span> and variables with a minimum values of a selected criterion.</p></li>
+</ul>
+<p>The selection criterion could be a criterion as AIC defined on the training data or a criterion defined in the <strong>out of bag</strong> data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a lot of explanatory variables. Cutting some corners could improve the speed of the algorithm.</p>
 <section id="select-a-distribution" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="select-a-distribution"><span class="header-section-number">1</span> Select a distribution</h2>
+<section id="the-ranse-of-the-response" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="the-ranse-of-the-response"><span class="header-section-number">1.1</span> The ranse of the response</h3>
 <p>The first thing to take into the account in the selection of the distribution is that the distribution should be defined in the range of the response variable. <a href="#fig-responseType" class="quarto-xref">Figure&nbsp;1</a> shows the different possibilities depending on whether the response is <code>continuous</code>, <code>discrete</code> of <code>factor</code> If the response is continuous and has negative values a distribution in the real line is appropriate. For positive responses a positive real line distribution is appropriate. For bounded continuous response we have the options to transform the response to values between 0 and 1 or to create an appropriate truncated distribution. For count response the consideration is whether the counts are finite or not. For infinity counts a distribution similar to the Poisson distribution can be used. For finite counts binomial type distributions can be used. The case in which the response is a categorical variable (factor) is called <code>classification</code> regression. If the factor is an <code>ordered</code> factor appropriate models exist but we will not deal with them here. For unordered factor responses a binomial distribution can be use if the classification is binary otherwise a multinomial distribution. Note that for classification problems, there is a vast literature in machine learning to deal with the problem.</p>
 <div class="cell" data-fig-width="10" data-fig-height="6" data-fig-size="10" data-layout-align="default">
 <div class="cell-output-display">
@@ -477,6 +491,10 @@ Figure&nbsp;1: The response determines which type of distribution to use.
 </div>
 </div>
 </div>
+</section>
+<section id="select-appropriate-distribution" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="select-appropriate-distribution"><span class="header-section-number">1.2</span> Select appropriate distribution</h3>
+</section>
 </section>
 <section id="select-appropriate-variables" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="select-appropriate-variables"><span class="header-section-number">2</span> Select appropriate variables<br>

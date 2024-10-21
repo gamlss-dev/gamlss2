@@ -174,10 +174,7 @@ functions is provided in the `Kumaraswamy()` family.
 
 In the following example, we will create the family object for the Kumaraswamy distribution
 using the `Kumaraswamy()` function and estimate a model using this distribution.
-
-### Example: Modeling with the Kumaraswamy Distribution
-
-In this example, we will:
+In detail, we will:
 
 * Define the Kumaraswamy family object.
 * Simulate data based on this distribution.

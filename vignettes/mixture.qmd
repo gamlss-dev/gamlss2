@@ -85,16 +85,16 @@ Where
 
 ## GAMLSS Framework for the Mixture Model
 
-In the GAMLSS framework, each parameter $\theta_{jk}(\mathbf{x}_i)$, as well as the mixing
+In the GAMLSS framework, each parameter $\boldsymbol{\theta}_{k}(\mathbf{x}_i) = (\boldsymbol{\theta}_{1k}(\mathbf{x}_i), \ldots, \boldsymbol{\theta}_{J_kk}(\mathbf{x}_i))^{\top}$, as well as the mixing
 probabilities $\pi_k(\mathbf{x}_i)$, are modeled using GAM-type predictors given by
 
 $$
-\eta_{jk}(\mathbf{x}_i) = f_1(\mathbf{x}_i) + \dots + f_{L_{jk}}(\mathbf{x}_i),
+\eta_{jk}(\mathbf{x}_i) = f_{1k}(\mathbf{x}_i) + \dots + f_{L_{jk}k}(\mathbf{x}_i),
 $$
 
 which are linked to the parameters through
 $h_{jk}(\theta_{jk}(\mathbf{x}_i)) = \eta_{jk}(\mathbf{x}_i)$ using suitable link functions 
-$h_{jk}(\cdot)$. The functions $f_l(\cdot)$, $l = 1, \ldots, L_{jk}$,  can be nonlinear smooth 
+$h_{jk}(\cdot)$. The functions $f_{lk}(\cdot)$, $l = 1, \ldots, L_{jk}$,  can be nonlinear smooth 
 functions (typically estimated using regression splines), linear effects, or random effects, 
 among others.
 
@@ -102,7 +102,8 @@ For the two-component normal mixture, we use
 
 1. Identity link for the means: $\mu_k(\mathbf{x}_i) = \eta_{1k}(\mathbf{x}_i)$,
 2. Log-link for the standard deviations: $\log(\sigma_k(\mathbf{x}_i)) = \eta_{2k}(\mathbf{x}_i)$,
-3. Logit-link for the mixing probability: $\pi_k(\mathbf{x}_i) = \frac{1}{1 + \exp(-\eta_{\pi k}(\mathbf{x}_i))}$.
+3. Logit-link for the mixing probability: $\log\left(\frac{\pi_k(\mathbf{x}_i)}{1 - \pi_k(\mathbf{x}_i)}\right) = \eta_{\pi k}(\mathbf{x}_i)$.
+
 
 ## Example using Simulated Data
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Variable and Model Selection – gamlss2</title>
+<title>Model Selection – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -86,7 +86,39 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -126,7 +158,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/selection.html">Variable and Model Selection</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/selection.html">Model Selection</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -192,7 +224,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/selection.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Variable and Model Selection</span></a>
+ <span class="menu-text">Model Selection</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -381,25 +413,79 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#select-a-distribution" id="toc-select-a-distribution" class="nav-link active" data-scroll-target="#select-a-distribution"><span class="header-section-number">1</span> Select a distribution</a></li>
+  <li><a href="#select-appropriate-variables" id="toc-select-appropriate-variables" class="nav-link" data-scroll-target="#select-appropriate-variables"><span class="header-section-number">2</span> Select appropriate variables<br>
+  </a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header">
-<h1 class="title display-7">Variable and Model Selection</h1>
+<h1 class="title display-7">Model Selection</h1>
 
 </header>
 
 
+<p>A distribution regression model is defined as</p>
+<p><span id="eq-GAMLSS"><span class="math display">\[\begin{split}
+y_i     &amp;  \stackrel{\small{ind}}{\sim }&amp;  {D}( \theta_{1i}, \ldots, \theta_{ki}) \nonumber \\
+g(\theta_{1i})  &amp;=&amp; b_{10} + s_1({x}_{1i})  +  \ldots,  s_p({x}_{pi}) \nonumber\\
+\ldots &amp;=&amp; \ldots \nonumber\\
+g({\theta}_{ki})  &amp;=&amp; b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
+\end{split}
+\tag{1}\]</span></span> where <span class="math inline">\({D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\({D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model takes the form of;</p>
 <ul>
-<li>Find the best fitting distribution.</li>
-<li>Find relevant variables.</li>
+<li><p>select the <em>best</em> fitting distribution;</p></li>
+<li><p>select the <em>relevant</em> variables for the parameters and how they effect the parameters.</p></li>
 </ul>
+<section id="select-a-distribution" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="select-a-distribution"><span class="header-section-number">1</span> Select a distribution</h2>
+<p>The first thing to take into the account in the selection of the distribution is that the distribution should be defined in the range of the response variable. <a href="#fig-responseType" class="quarto-xref">Figure&nbsp;1</a> shows the different possibilities depending on whether the response is <code>continuous</code>, <code>discrete</code> of <code>factor</code> If the response is continuous and has negative values a distribution in the real line is appropriate. For positive responses a positive real line distribution is appropriate. For bounded continuous response we have the options to transform the response to values between 0 and 1 or to create an appropriate truncated distribution. For count response the consideration is whether the counts are finite or not. For infinity counts a distribution similar to the Poisson distribution can be used. For finite counts binomial type distributions can be used. The case in which the response is a categorical variable (factor) is called <code>classification</code> regression. If the factor is an <code>ordered</code> factor appropriate models exist but we will not deal with them here. For unordered factor responses a binomial distribution can be use if the classification is binary otherwise a multinomial distribution. Note that for classification problems, there is a vast literature in machine learning to deal with the problem.</p>
+<div class="cell" data-fig-width="10" data-fig-height="6" data-fig-size="10" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-responseType" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-responseType-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<pre class="mermaid mermaid-js" data-label="fig-responseType">flowchart LR
+  A[responce] --&gt; B(continuous) 
+  A --&gt; C[discrete]
+  A --&gt; D[factor]
+  B --&gt; F[real line]
+  B --&gt; G[pos. real line]
+  B --&gt; H[0 to 1]
+  C --&gt; J[infinite count]
+  C --&gt; I[finite count]
+  D --&gt; K[unordered]
+  D --&gt; L[ordered]
+  I --&gt; N[binary]
+  K --&gt; N[binary]
+</pre>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-responseType-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The response determines which type of distribution to use.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="select-appropriate-variables" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="select-appropriate-variables"><span class="header-section-number">2</span> Select appropriate variables<br>
+</h2>
+<p>hu</p>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">

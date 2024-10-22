@@ -32,28 +32,30 @@ g({\theta}_{ki})  &=& b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
 \end{split} 
 $$ {#eq-GAMLSS}
 where ${D}( )$ is the assumed distribution which depends on parameters $\theta_{1i}, \ldots, \theta_{ki}$ and where all the parameters can be functions of the explanatory variables $({x}_{1i}, \ldots, {x}_{pi})$.
-In reality we do not know the distribution ${D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model could takes the form ;
+In reality we do not know the distribution ${D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model should;
 
 
-* select the _best_ fitting distribution;
+* select the _best_ fitting distribution and,
 
 * select the _relevant_ variables for the parameters and how they effect the parameters. 
 
 
-A  **general algorithm** for searching for a _best_ model could be;
+One way to achieve that is the following  **general algorithm** for searching for _best_ model;
 
--  **step 0**: Defining a set of appropriate distributions for the response ${D_J()}$ for $j=1,\ldots, J.$
+-  **step 0**: Defining a set of appropriate distributions for the response ${D_J()}$ for $j=1,\ldots, J,$ see section @sec-theranseoftherespons how to do that, 
 
 - **step 1**: **FOR** $J$ in   $j=1,\ldots, J$
 
-- **step 2**: use distribution ${D_J()}$  to **SELECT** appropriate   variables $({x}_{1i}, \ldots, {x}_{pi})$.
+- **step 2**: use distribution ${D_J()}$  to **SELECT** the appropriate variables $({x}_{1i}, \ldots, {x}_{pi}).$
 
-- **step 3**: **SELECT** the distribution  $\hat{D}_J()$ and variables which give a  minimum values for a selection  criterion measure.
+-  **step 3**: **END** the loop
+
+- **step 4**: **SELECT** the distribution  $\hat{D}_J()$ and variables which give a  minimum values for a selection  criterion measure.
 
 The selection criterion could be a GAIC defined on the training data a measure defined in the **out of bag** data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a lot of explanatory variables.   
 
 
-Cutting corners could improve the speed of the algorithm. For example, if  the practitioner gives up the smooth additive structure, that `gamlss2` provides, and she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 should be performed. The support for a specific distribution can enforced my the preliminary analysis for choosing a distribution described in @sec-Preliminaryanalysis.
+Cutting corners could improve the speed of the algorithm. For example, if  the practitioner gives up the smooth additive structure, that `gamlss2` provides, and he/she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 should be performed. The support for a specific distribution can enforced my the preliminary analysis for choosing a distribution described in @sec-Preliminaryanalysis and suggested in @stasinopoulos2024generalized.
 
 
 ## Select a distribution {#sec-Selectadistribution}
@@ -112,5 +114,99 @@ The function `chooseDist()` chooses the "best" distribution according to a GAIC 
 ## Select appropriate variables  {#sec-Selectappropriatevariables}
 
 The methodology of "which explanatory variable is needed and for which parameters" depends on the scope of modelling,
-while special attention has to be taken for **non-linear** relationships and for **interaction**.   If the scope of the model is to provide  good interpretation then the additive smooth structure of `gamlss2`is adequate because can cope well with non-linearities and relatively  well with interactions. Note that interactions in an additive structure have to specified explicitly while in some machine learning algorithms like neural network they come part of the model. Machine learning algorithm like random forest and neural networks are more difficult to interpreter.        
+while special attention has to be taken for **non-linear** relationships and for **interaction**.   If the scope of the model is to provide  good interpretation then the additive smooth structure of `gamlss2`is adequate because can cope well with non-linearities and relatively  well with interactions. Note that interactions in an additive structure have to specified explicitly while in some machine learning algorithms like neural network they come as part of the model. Machine learning algorithms like random forest and neural networks are more difficult to interpreter therefore  more suited for prediction purposes. Here we will discuss the the **step-wise** methodology while boosting is discussed in a different  vignette?. 
 
+
+```{r}
+data("rent", package = "gamlss.data")
+```
+
+Because the  possiblility of  linear interactions, we shall scale the two continuous covariates first;
+```{r}
+rent$Fl <- scale(rent$Fl)
+rent$A <- scale(rent$A)
+```
+
+
+The `formula` defines the searching scope of the  search;
+```{r}
+f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+```
+
+Here we use the the stepwise algorithm to find the "best" explanatory variables using a Gamma family model;
+```{r}
+#| cache: true  
+b <- step_gamlss2(f, data = rent, family = GA, K = 2)
+```
+Note that `step_gamlss2()` is equivalent to using 
+```{r}
+#| eval: false
+b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+```
+
+The  `new_formula()` function will  show the new  selected model terms;
+```{r}
+new_formula(b)
+```
+Here is the summary of the  final model;
+```{r}
+summary(b)
+```
+and here are the smooth fitted  plots;
+```{r}
+plot(b)
+```
+
+To get the diagnostic plots of the model use;
+
+```{r}
+plot(b, which = "resid")
+```
+
+The selection path can be plotted using; 
+```{r}
+plot(b, which = "selection")
+```
+
+Now we use a more complex diatributional model using the `BCTo` family. First we define the formula. 
+```{r}
+f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+```
+::: {.callout-note}
+Note that if modelling of certain parameters is not required the formula `1|` could be used. 
+:::
+
+Next we  use the function `step_gamlss2()` but using different options this time, more specificaly we use;
+
+- `K=log(3082)` so the criterion used will be  BIC rather than AIC and therefore  less terms will be allowed in the model. 
+
+- `strategy = c("forward.linear", "both")` so specified explicitly which strategies should be used, see the hlp file for more startegies. 
+
+
+```{r}
+#| cache: true
+#| warning: false
+b <- step_gamlss2(f, data = rent, family = BCTo,
+  K = log(3082), strategy = c("forward.linear", "both"),
+  keeporder = TRUE)
+```
+The final model model seems lot simpler than the one obtain using AIC and the `GA` distribution.  Let us looks at its residual diagnostic plots. 
+
+```{r}
+plot(b, which = "resid")
+```
+The residual plots lok goog. Next  we plot the path of selection. 
+```{r}
+plot(b, which = "selection")
+```
+
+
+
+## Conclusions
+
+Selection in any distributional regression model like `gamlss2` requires both the selection of the distribution and also the selection of the expanatory of variables affecting the parameters of the distribution.
+A general procedure is proposed here but not implemented. `Mikis we should do that`.  We have shown how distibutions and variables can be sellected seperately.   

@@ -13,6 +13,14 @@ gamlss2.formula <- function(formula, data, family = NO,
   menv <- parent.frame()
   fenv <- environment(formula)
 
+  ## Check more formula versions.
+  for(j in c("sigma.f", "nu.f", "tau.f")) {
+    if(length(i <- grep(j, names(control), value = TRUE, fixed = TRUE))) {
+      k <- grep(i, c("sigma.formula", "nu.formula", "tau.formula"), value = TRUE, fixed = TRUE)
+      control[[k]] <- control[[i]]
+    }
+  }
+
   ## Process specific formulas.
   if(!is.null(control$sigma.formula) | !is.null(control$nu.formula) | !is.null(control$tau.formula)) {
     if(!inherits(formula, "list")) {

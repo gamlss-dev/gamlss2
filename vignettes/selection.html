@@ -458,6 +458,7 @@ window.Quarto = {
   <li><a href="#sec-Preliminaryanalysis" id="toc-sec-Preliminaryanalysis" class="nav-link" data-scroll-target="#sec-Preliminaryanalysis"><span class="header-section-number">1.2</span> Preliminary analysis</a></li>
   </ul></li>
   <li><a href="#sec-Selectappropriatevariables" id="toc-sec-Selectappropriatevariables" class="nav-link" data-scroll-target="#sec-Selectappropriatevariables"><span class="header-section-number">2</span> Select appropriate variables</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions"><span class="header-section-number">3</span> Conclusions</a></li>
   </ul>
 </nav>
     </div>
@@ -477,20 +478,21 @@ g(\theta_{1i})  &amp;=&amp; b_{10} + s_1({x}_{1i})  +  \ldots,  s_p({x}_{pi}) \n
 \ldots &amp;=&amp; \ldots \nonumber\\
 g({\theta}_{ki})  &amp;=&amp; b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
 \end{split}
-\tag{1}\]</span></span> where <span class="math inline">\({D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\({D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model could takes the form ;</p>
+\tag{1}\]</span></span> where <span class="math inline">\({D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\({D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model should;</p>
 <ul>
-<li><p>select the <em>best</em> fitting distribution;</p></li>
+<li><p>select the <em>best</em> fitting distribution and,</p></li>
 <li><p>select the <em>relevant</em> variables for the parameters and how they effect the parameters.</p></li>
 </ul>
-<p>A <strong>general algorithm</strong> for searching for a <em>best</em> model could be;</p>
+<p>One way to achieve that is the following <strong>general algorithm</strong> for searching for <em>best</em> model;</p>
 <ul>
-<li><p><strong>step 0</strong>: Defining a set of appropriate distributions for the response <span class="math inline">\({D_J()}\)</span> for <span class="math inline">\(j=1,\ldots, J.\)</span></p></li>
+<li><p><strong>step 0</strong>: Defining a set of appropriate distributions for the response <span class="math inline">\({D_J()}\)</span> for <span class="math inline">\(j=1,\ldots, J,\)</span> see section <a href="#sec-theranseoftherespons" class="quarto-xref">Section&nbsp;1.1</a> how to do that,</p></li>
 <li><p><strong>step 1</strong>: <strong>FOR</strong> <span class="math inline">\(J\)</span> in <span class="math inline">\(j=1,\ldots, J\)</span></p></li>
-<li><p><strong>step 2</strong>: use distribution <span class="math inline">\({D_J()}\)</span> to <strong>SELECT</strong> appropriate variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>.</p></li>
-<li><p><strong>step 3</strong>: <strong>SELECT</strong> the distribution <span class="math inline">\(\hat{D}_J()\)</span> and variables which give a minimum values for a selection criterion measure.</p></li>
+<li><p><strong>step 2</strong>: use distribution <span class="math inline">\({D_J()}\)</span> to <strong>SELECT</strong> the appropriate variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi}).\)</span></p></li>
+<li><p><strong>step 3</strong>: <strong>END</strong> the loop</p></li>
+<li><p><strong>step 4</strong>: <strong>SELECT</strong> the distribution <span class="math inline">\(\hat{D}_J()\)</span> and variables which give a minimum values for a selection criterion measure.</p></li>
 </ul>
 <p>The selection criterion could be a GAIC defined on the training data a measure defined in the <strong>out of bag</strong> data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a lot of explanatory variables.</p>
-<p>Cutting corners could improve the speed of the algorithm. For example, if the practitioner gives up the smooth additive structure, that <code>gamlss2</code> provides, and she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 should be performed. The support for a specific distribution can enforced my the preliminary analysis for choosing a distribution described in <a href="#sec-Preliminaryanalysis" class="quarto-xref">Section&nbsp;1.2</a>.</p>
+<p>Cutting corners could improve the speed of the algorithm. For example, if the practitioner gives up the smooth additive structure, that <code>gamlss2</code> provides, and he/she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 should be performed. The support for a specific distribution can enforced my the preliminary analysis for choosing a distribution described in <a href="#sec-Preliminaryanalysis" class="quarto-xref">Section&nbsp;1.2</a> and suggested in <span class="citation" data-cites="stasinopoulos2024generalized">Stasinopoulos et al. (<a href="#ref-stasinopoulos2024generalized" role="doc-biblioref">2024</a>)</span>.</p>
 <section id="sec-Selectadistribution" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="sec-Selectadistribution"><span class="header-section-number">1</span> Select a distribution</h2>
 <section id="sec-theranseoftherespons" class="level3" data-number="1.1">
@@ -560,7 +562,213 @@ minimum GAIC(k= 8.03 ) family: BCCGo </code></pre>
 </section>
 <section id="sec-Selectappropriatevariables" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-Selectappropriatevariables"><span class="header-section-number">2</span> Select appropriate variables</h2>
-<p>The methodology of “which explanatory variable is needed and for which parameters” depends on the scope of modelling, while special attention has to be taken for <strong>non-linear</strong> relationships and for <strong>interaction</strong>. If the scope of the model is to provide good interpretation then the additive smooth structure of <code>gamlss2</code>is adequate because can cope well with non-linearities and relatively well with interactions. Note that interactions in an additive structure have to specified explicitly while in some machine learning algorithms like neural network they come as part of the model. Machine learning algorithm like random forest and neural networks are more difficult to interpreter therefore more suited for prediction purposes. Here we will discuss the the <strong>step-wise</strong> methodology while boosting is discussed in a different vignette?.</p>
+<p>The methodology of “which explanatory variable is needed and for which parameters” depends on the scope of modelling, while special attention has to be taken for <strong>non-linear</strong> relationships and for <strong>interaction</strong>. If the scope of the model is to provide good interpretation then the additive smooth structure of <code>gamlss2</code>is adequate because can cope well with non-linearities and relatively well with interactions. Note that interactions in an additive structure have to specified explicitly while in some machine learning algorithms like neural network they come as part of the model. Machine learning algorithms like random forest and neural networks are more difficult to interpreter therefore more suited for prediction purposes. Here we will discuss the the <strong>step-wise</strong> methodology while boosting is discussed in a different vignette?.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Because the possiblility of linear interactions, we shall scale the two continuous covariates first;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rent<span class="sc">$</span>Fl <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent<span class="sc">$</span>Fl)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>rent<span class="sc">$</span>A <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent<span class="sc">$</span>A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>formula</code> defines the searching scope of the search;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> Fl <span class="sc">+</span> A <span class="sc">+</span> Fl<span class="sc">:</span>A <span class="sc">+</span> loc <span class="sc">+</span> <span class="fu">s</span>(Fl) <span class="sc">+</span> <span class="fu">s</span>(A) <span class="sc">+</span> <span class="fu">te</span>(Fl, A) <span class="sc">|</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  Fl <span class="sc">+</span> A <span class="sc">+</span> loc <span class="sc">+</span> Fl<span class="sc">:</span>A <span class="sc">+</span> <span class="fu">s</span>(Fl) <span class="sc">+</span> <span class="fu">s</span>(A) <span class="sc">+</span> <span class="fu">te</span>(Fl, A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here we use the the stepwise algorithm to find the “best” explanatory variables using a Gamma family model;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">step_gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> GA, <span class="at">K =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bidirectional Linear Selection
+  GAIC = 28104.4252 &lt;+&gt; parameter mu, term Fl
+  GAIC = 27996.2040 &lt;+&gt; parameter mu, term A
+  GAIC = 27937.8423 &lt;+&gt; parameter sigma, term A
+  GAIC = 27905.5919 &lt;+&gt; parameter mu, term loc3
+  GAIC = 27863.1707 &lt;+&gt; parameter mu, term loc2
+  GAIC = 27860.8491 &lt;+&gt; parameter sigma, term loc3
+  GAIC = 27856.2102 &lt;+&gt; parameter sigma, term loc2
+Bidirectional Selection
+  GAIC = 27766.9437 &lt;+&gt; parameter mu, term te(Fl,A)
+  GAIC = 27736.7146 &lt;+&gt; parameter sigma, term te(Fl,A)
+  GAIC = 27734.7120 &lt;-&gt; parameter mu, term A
+  GAIC = 27732.7116 &lt;-&gt; parameter sigma, term A
+  GAIC = 27730.7149 &lt;-&gt; parameter mu, term Fl
+Continue
+Final Model
+$mu
+.. ~1 + loc3 + loc2 + te(Fl, A)
+$sigma
+.. ~1 + loc3 + loc2 + te(Fl, A)</code></pre>
+</div>
+</div>
+<p>Note that <code>step_gamlss2()</code> is equivalent to using</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> GA, <span class="at">optimizer =</span> stepwise, <span class="at">K =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>new_formula()</code> function will show the new selected model terms;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$mu
+R ~ loc3 + loc2 + te(Fl, A)
+
+$sigma
+~1 + loc3 + loc2 + te(Fl, A)</code></pre>
+</div>
+</div>
+<p>Here is the summary of the final model;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+gamlss2(formula = formula, data = ..1, family = ..2, ... = pairlist(optimizer = stepwise, K = K, strategy = strategy, keeporder = keeporder, cores = cores))
+---
+Family: GA 
+Link function: mu = log, sigma = log
+*--------
+Parameter: mu 
+---
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  6.46626    0.03108 208.053  &lt; 2e-16 ***
+loc3         0.28437    0.03428   8.294  &lt; 2e-16 ***
+loc2         0.18899    0.03273   5.775 8.96e-09 ***
+---
+Smooth terms:
+    te(Fl,A)
+edf   17.834
+*--------
+Parameter: sigma 
+---
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.89132    0.04390 -20.301  &lt; 2e-16 ***
+loc3        -0.17639    0.04950  -3.564 0.000375 ***
+loc2        -0.11723    0.04672  -2.509 0.012183 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+---
+Smooth terms:
+    te(Fl,A)
+edf   22.773
+*--------
+n = 1969 df =  46.61 res.df =  1922.39
+Deviance = 27637.5013 Null Dev. Red. = 3.4%
+AIC = 27730.7149 elapsed = 28.25sec</code></pre>
+</div>
+</div>
+<p>and here are the smooth fitted plots;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="selection_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To get the diagnostic plots of the model use;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="selection_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The selection path can be plotted using;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"selection"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="selection_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now we use a more complex diatributional model using the <code>BCTo</code> family. First we define the formula.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> Fl <span class="sc">+</span> A <span class="sc">+</span> Fl<span class="sc">:</span>A <span class="sc">+</span> loc <span class="sc">+</span> <span class="fu">s</span>(Fl) <span class="sc">+</span> <span class="fu">s</span>(A) <span class="sc">+</span> <span class="fu">te</span>(Fl, A) <span class="sc">|</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  Fl <span class="sc">+</span> A <span class="sc">+</span> loc <span class="sc">+</span> Fl<span class="sc">:</span>A <span class="sc">+</span> <span class="fu">s</span>(Fl) <span class="sc">+</span> <span class="fu">s</span>(A) <span class="sc">+</span> <span class="fu">te</span>(Fl, A) <span class="sc">|</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  Fl <span class="sc">+</span> A <span class="sc">+</span> loc <span class="sc">+</span> Fl<span class="sc">:</span>A <span class="sc">+</span> <span class="fu">s</span>(Fl) <span class="sc">+</span> <span class="fu">s</span>(A) <span class="sc">+</span> <span class="fu">te</span>(Fl, A) <span class="sc">|</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  Fl <span class="sc">+</span> A <span class="sc">+</span> loc <span class="sc">+</span> Fl<span class="sc">:</span>A <span class="sc">+</span> <span class="fu">s</span>(Fl) <span class="sc">+</span> <span class="fu">s</span>(A) <span class="sc">+</span> <span class="fu">te</span>(Fl, A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that if modelling of certain parameters is not required the formula <code>1|</code> could be used.</p>
+</div>
+</div>
+<p>Next we use the function <code>step_gamlss2()</code> but using different options this time, more specificaly we use;</p>
+<ul>
+<li><p><code>K=log(3082)</code> so the criterion used will be BIC rather than AIC and therefore less terms will be allowed in the model.</p></li>
+<li><p><code>strategy = c("forward.linear", "both")</code> so specified explicitly which strategies should be used, see the hlp file for more startegies.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">step_gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> BCTo,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">K =</span> <span class="fu">log</span>(<span class="dv">3082</span>), <span class="at">strategy =</span> <span class="fu">c</span>(<span class="st">"forward.linear"</span>, <span class="st">"both"</span>),</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">keeporder =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Forward Linear Selection
+  GAIC = 28121.0230 &lt;+&gt; parameter mu, term Fl
+  GAIC = 28028.2802 &lt;+&gt; parameter mu, term A
+  GAIC = 28001.2470 &lt;+&gt; parameter mu, term loc3
+  GAIC = 27947.0011 &lt;+&gt; parameter sigma, term A
+  GAIC = 27936.1483 &lt;+&gt; parameter nu, term A
+Bidirectional Selection
+  GAIC = 27895.7041 &lt;+&gt; parameter mu, term s(A)
+  GAIC = 27860.3933 &lt;+&gt; parameter mu, term loc2
+  GAIC = 27852.4835 &lt;-&gt; parameter mu, term A
+Continue
+Final Model
+$mu
+.. ~1 + Fl + loc3 + loc2 + s(A)
+$sigma
+.. ~1 + A
+$nu
+.. ~1 + A
+$tau
+.. ~1</code></pre>
+</div>
+</div>
+<p>The final model model seems lot simpler than the one obtain using AIC and the <code>GA</code> distribution. Let us looks at its residual diagnostic plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="selection_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The residual plots lok goog. Next we plot the path of selection.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"selection"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="selection_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusions" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="conclusions"><span class="header-section-number">3</span> Conclusions</h2>
+<p>Selection in any distributional regression model like <code>gamlss2</code> requires both the selection of the distribution and also the selection of the expanatory of variables affecting the parameters of the distribution. A general procedure is proposed here but not implemented. <code>Mikis we should do that</code>. We have shown how distibutions and variables can be sellected seperately.</p>
 
 
 
@@ -569,6 +777,9 @@ minimum GAIC(k= 8.03 ) family: BCCGo </code></pre>
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+</div>
+<div id="ref-stasinopoulos2024generalized" class="csl-entry" role="listitem">
+Stasinopoulos, M. D., T. Kneib, N. Klein, A. Mayr, and G. Z Heller. 2024. <em>Generalized Additive Models for Location, Scale and Shape: A Distributional Regression Approach, with Applications</em>. Vol. 56. Cambridge University Press. <a href="https://doi.org/10.1017/9781009410076">https://doi.org/10.1017/9781009410076</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

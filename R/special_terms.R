@@ -343,6 +343,7 @@ special_fit.re <- function(x, z, w, control, ...)
 {
   ## Model formula needs to be updated.
   .fnns <- update(x$fixed, response_z ~ .)
+  assign(".fnss", .fnns, envir = .GlobalEnv)
 
   ## Assign current working response.
   x$data$response_z <- z

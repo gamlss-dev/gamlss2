@@ -298,7 +298,7 @@ gamlss2.formula <- function(formula, data, family = NO,
       for(j in names(rval$specials)) {
         if(!is.null(rval$specials[[j]][["X"]])) {
           rval$specials[[j]][["X"]] <- NULL
-          rval$specials[[j]][["Xu"]] <- NULL
+          ##rval$specials[[j]][["Xu"]] <- NULL
         }
       }
     }

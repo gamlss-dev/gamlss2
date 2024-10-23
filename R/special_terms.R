@@ -302,6 +302,8 @@ re <- function(fixed = ~ 1, random = NULL, ...)
   ## Put all information together.
   st$control <- ctr$control
   st$fixed <- fixed
+  ## Update fixed formula for working response z.
+  st$fixed <- update(st$fixed, response_z ~ .)
   st$random <- random
   st$term <- c(all.vars(fixed), all.vars(random))
   st$label <- gsub(" ", "", deparse(call))
@@ -341,17 +343,13 @@ re <- function(fixed = ~ 1, random = NULL, ...)
 ## Set up the special "re" model term fitting function
 special_fit.re <- function(x, z, w, control, ...)
 {
-  ## Model formula needs to be updated.
-  .fnns <- update(x$fixed, response_z ~ .)
-  assign(".fnss", .fnns, envir = .GlobalEnv)
-
   ## Assign current working response.
   x$data$response_z <- z
   x$data$weights_w <- w
 
   ## Estimate model.
   rem <- parse(text = paste0(
-    'nlme::lme(fixed = .fnns, data = x$data, random = x$random, weights = varFixed(~weights_w),',
+    'nlme::lme(fixed = x$fixed, data = x$data, random = x$random, weights = varFixed(~weights_w),',
     'method="', x$method, '",control=x$control,correlation=x$correlation,keep.data=FALSE)'))
 
   rval <- list("model" = eval(rem))

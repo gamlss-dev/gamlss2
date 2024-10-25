@@ -1,0 +1,272 @@
+---
+title: "Creating a special function in `gamlss2`"
+subtitle: "`loess` in gamlss2"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{specials}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, loess}
+  %\VignettePackage{gamlss2}
+---
+
+## Introduction
+
+In order to add any new machine learning type algorithm in `gamlss2` you need to define three `special` functions. 
+
+-   a **definition** function
+
+-   a **fitting** function and
+
+-   a **prediction** function
+
+
+Here we demonstrate how this can be done using the local polynomial smoothing function `loess()` in **R** , @Clevelandetal93.
+
+Note that any regression type machine learning function is **R** can be easily incorporated in `gamlss2` especially if there is a **prior weights** argument in the function. `loess()` has the argument `weights` for prior weights so it can be incorporated easily.
+
+Let us bring in the relevant packages;
+
+```{r}
+#| warning: false
+rm(list=ls())
+library(gamlss2)
+library(gamlss)
+library(Formula)
+library(gamlss.ggplots)
+```
+
+
+
+In order to incorporate  `loess()`  we need the three  functions dicribed in the next three sections;
+
+
+### The definition function
+
+The definition function needs a `special` name. 
+Names for all new special terms are stored in the `gamlss2` function `fake.formula()`. 
+The name is  **needed** to be added into the `fake.formula()` otherwise the function will not work.
+
+
+`Mikis:` I suggest to add in dummy names "own", "test" etc   in the 'fake.formula' so anyone can use it to start off a new function but in order to be include it properly he/she need to contact us (so we can keep some control). 
+
+
+The definition function can take all relevant `loess` and `loess.control` arguments so it can pass them later into the fitting function.
+
+```{r}
+lo <- function(formula, ...) 
+{  stopifnot(requireNamespace("nnet")) 
+  ## List for setting up the special model term. 
+  st <- list() 
+  ## List of control arguments. 
+  ctr <- list(...) 
+  if(is.null(ctr$span)) 
+    ctr$span <- 0.75 
+  if(is.null(ctr$enp.target)) 
+    ctr$enp.target <- NULL
+  if(is.null(ctr$degree)) 
+    ctr$degree <- 2 
+  if(is.null(ctr$parametric)) 
+    ctr$parametric<- "parametric" 
+  if(is.null(ctr$drop.square)) 
+    ctr$drop.square <- FALSE 
+  if(is.null(ctr$normalize)) 
+    ctr$normalize <- TRUE 
+  if(is.null(ctr$family)) 
+    ctr$family <- c("gaussian")
+  if(is.null(ctr$method)) 
+    ctr$method <- c("loess")      
+  if(is.null(ctr$surface)) 
+    ctr$surface <- c("interpolate")
+  if(is.null(ctr$statistics))        
+    ctr$statistics <- c("approximate")
+  if(is.null(ctr$trace.hat))        
+    ctr$trace.hat <-c("exact")
+  if(is.null(ctr$cell))        
+    ctr$cell <- 0.2
+  if(is.null(ctr$iterations))        
+    ctr$iterationsl <- 4
+  if(is.null(ctr$iterTrace))        
+    ctr$iterTrace <- FALSE 
+  ## Put all information together
+  st$control <- ctr 
+  st$formula <- formula 
+  st$term <- all.vars(formula) 
+  st$label <- paste0("n(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")") 
+  st$data <- model.frame(formula) 
+  ## Assign the "special" class and the new class "n".
+  class(st) <- c("special", "lo") 
+  return(st) 
+} 
+```
+
+
+
+## The fitting function
+
+The fitting function takes the current working response, the iterative weights and the corresponding relevant term and fits and creates a call to the  `loess` function to fit the relevant mdel. It save the fitted values and the fitted objects for later use.  
+<!-- and exporting the partial residuals. -->
+
+```{r}
+special_fit.lo <- function(x, z, w, control, ...)
+{
+  ## Model formula needs to be updated.
+  f <- update(x$formula, response_z ~ .)
+  ## Assign current working response.
+  x$data$response_z <- z
+  x$data$weights_w <- w 
+  ## Possible weights from last iteration. 
+  ##Wts <- list(...)$transfer$Wts
+  ## Estimate model.
+  nnc <- parse(text =
+          paste0('loess(formula = f, data = x$data, weights = weights_w,',
+                 'span = x$control$span, degree=x$control$degree, parametric=x$control$parametric,',
+                 'drop.square = x$control$drop.square, normalize=x$control$normalize,',
+                 'family=x$control$family, surface=x$control$surface,statistics=x$control$statistics,',
+                 'trace=x$control$trace, cell=x$control$cell,iteration=x$control$iteration,',
+                  ')'))
+  rval <- list("model" = eval(nnc)) 
+  ## Get the fitted.values.
+  rval$fitted.values <- fitted(rval$model) 
+  ## Transferring the weights for the next backfitting iteration.
+  ## Note, "transfer" can be used to transfer anything from one
+  ## iteration to the next.
+  ## save the fitted object 
+  ## Center fitted values. 
+  rval$shift <- mean(rval$fitted.values)
+  rval$fitted.values <- rval$fitted.values - rval$shift 
+  ## Degrees of freedom.
+  rval$edf <-  rval$model$trace.hat
+  ## Possible scaling. -->
+  rval$scalex <- x$scalex 
+  ## Assign class for predict method. 
+  class(rval) <- "lo.fitted" 
+  return(rval) 
+} 
+```
+
+## The predict function
+
+The prediction function show how the predicted values of the model can be extracted.
+
+```{r}
+special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...) 
+{ 
+  p <- predict(x$model, newdata = data) 
+  p <- p - x$shift 
+  if(se.fit)
+    p <- data.frame("fit" = p)
+  return(p) 
+}  
+```
+
+## Example: rent99 data
+
+We use the `rent99` data to demonstrate the use of the functions
+
+```{r}
+library(gamlss.prepdata)
+## Example with data.
+#data("rent", package = "gamlss.data") 
+data("rent99", package = "gamlss.data") 
+da <- rent99[,-c(2,9)]
+da <- gamlss.prepdata:::data_scale(da, response=rent) 
+data_names(da) 
+head(da)
+###########################################################
+```
+Note that the continuous variables have been standardised. 
+We defined three formulae for modelling the rent data. The first two use `loess` and the third uses the additive smoothing function `s()` for comparison.  Formula `f` uses main effect smoothing terms for `area` and `yearc` for parameters $\mu$ and $\sigma$ while the second, `f1`, uses  two dimensional smoothing functions for interaction. The third formula uses two dimensional cubic splines smoothing for interactions.  Note that in this exapm ple we only use explanatory terms for the first two parameters  $\mu$ and $\sigma$  and constant for the rest, $\nu$ and $\tau$.
+
+```{r}
+
+f <- rent ~ lo(~area)+lo(~yearc)+location+bath+kitchen| 
+            lo(~area)+lo(~yearc)+location+bath+kitchen|
+            1|1 
+
+f1 <- rent ~ lo(~area*yearc)+location+bath+kitchen| 
+             lo(~area*yearc)+location+bath+kitchen|
+             1|1
+
+f2 <- rent ~ s(area,yearc)+location+bath+kitchen| 
+             s(~area,yearc)+location+bath+kitchen|
+             1|1
+
+```
+
+## The fits
+
+We will use the package `tictoc` to measure the amound of time is taken to fit each model.
+The main effect fit is; 
+```{r}
+#| cache: true
+## Estimate model. 
+## Set the seed for reproducibility. 
+library(tictoc)
+tic()
+b <- gamlss2(f, data = da, family = BCTo) 
+toc()
+```
+
+
+The first order interaction fit is;
+```{r}
+#| cache: true
+#| warning: false
+library(tictoc)
+tic()
+b1 <- gamlss2(f1, data = da, family = BCTo) 
+toc()
+```
+```{r}
+library(tictoc)
+tic()
+a<- gamlss2(f2, data = da, family = BCT) 
+toc()
+```
+The cubic spline function is lot faster that the `loess()` implementation `lo()` in `gamlss2` but let us now compare the models using AIC;
+
+```{r}
+AIC(b,b1, a, k=0) # deviance
+AIC(b,b1, a, k=log(dim(rent99)[1]))# BIC
+```
+
+
+It seems that the two `lo()` models do better that the `s()` as far as the GAIC criteria are concern. 
+
+
+## Visualise the fits
+
+The function `vis.lo()` of ther package `gamlss` can be use to visualised the fitted terms.
+Here we show the `area` fitted values for model `b` and for parameter $\mu$ including the partial residuals from the model.
+
+```{r}
+ gamlss:::vis.lo(specials(b, model="mu")[[1]]$model, partial=TRUE)
+```
+
+Next we shos again from model `b` the fitted values for year of construction `yearc`, without partial residuals.
+
+```{r}
+gamlss:::vis.lo(specials(b, model="mu")[[2]]$model, partial=FALSE)
+```
+
+Here we plot the fitted surface fit from the $\mu$ model of `b1`;
+```{r}
+gamlss:::vis.lo(specials(b1, model="mu")$model, partial=FALSE)
+```
+Here we plot the same fitted surface as above adding  95% confidence intervals;
+```{r}
+gamlss:::vis.lo(specials(b1, model="mu")$model, se=1.97)
+```
+Finaly we plot the fitted surface fit from the $\mu$ model of `b1` adding the patial residuals. 
+```{r}
+gamlss:::vis.lo(specials(b1, model="mu")$model, partial=TRUE)
+```
+Note that similar plots are given in section 9.6.3 of @Stasinopoulosetal2017.

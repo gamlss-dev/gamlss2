@@ -444,6 +444,7 @@ special_fit.lo <- function(x, z, w, control, ...)
 special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...) 
 {
   p <- as.numeric(predict(x$model, newdata = data))
+  p <- p - x$shift
   if(se.fit)
     p <- data.frame("fit" = p)
   return(p)

@@ -19,6 +19,10 @@ vignette: >
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss")
 library("gamlss2")
+
+if(!("tictoc" %in% installed.packages())) {
+  install.packages("tictoc")
+}
 ```
 
 ## Introduction
@@ -131,6 +135,7 @@ The prediction function shows how the predicted values of the model can be extra
 special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...) 
 {
   p <- as.numeric(predict(x$model, newdata = data))
+  p <- p - x$shift
   if(se.fit)
     p <- data.frame("fit" = p)
   return(p)

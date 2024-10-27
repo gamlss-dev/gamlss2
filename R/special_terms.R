@@ -376,3 +376,76 @@ special_predict.re.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
+## Loess smoother.
+lo <- function(formula, ...) 
+{
+  ## Ensure it's a formula.
+  if(!inherits(formula, "formula")) {
+    formula <- as.character(substitute(formula))
+    formula <- as.formula(paste("~", formula))
+    environment(formula) <- sys.frame(-1)
+  }
+
+  ## List for setting up the special model term. 
+  st <- list()
+
+  st$control <- list(...)
+  st$term <- all.vars(formula) 
+  st$label <- paste0("lo(", paste0(gsub(" ", "",
+    as.character(formula)), collapse = ""), ")") 
+  st$data <- model.frame(formula)
+
+  ## New model formula used for fitting.
+  st$formula <- update(formula, response_z ~ .)
+
+  ## Assign the "special" class and the new class "n".
+  class(st) <- c("special", "lo")
+
+  return(st) 
+}
+
+special_fit.lo <- function(x, z, w, control, ...)
+{
+  ## Assign current working response.
+  x$data$response_z <- z
+  x$data$weights_w <- w
+
+  ## Set up loess call.
+  call <- "loess(formula = x$formula, data = x$data, weights = weights_w"
+
+  ## Add optional control parameters.
+  if(!is.null(x$control)) {
+    for(j in names(x$control))
+      call <- paste0(call, ", ", j, "= x$control$", j)
+  }
+
+  call <- paste0(call, ")")
+
+  ## Estimate model.
+  rval <- list("model" = eval(parse(text = call)))
+
+  ## Get the fitted.values.
+  rval$fitted.values <- fitted(rval$model) 
+
+  ## Center fitted values. 
+  rval$shift <- mean(rval$fitted.values)
+  rval$fitted.values <- rval$fitted.values - rval$shift 
+
+  ## Degrees of freedom.
+  rval$edf <-  rval$model$trace.hat
+
+  ## Assign class for predict method. 
+  class(rval) <- "lo.fitted" 
+
+  return(rval) 
+}
+
+## Loess predict method.
+special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...) 
+{
+  p <- as.numeric(predict(x$model, newdata = data))
+  if(se.fit)
+    p <- data.frame("fit" = p)
+  return(p)
+}
+

@@ -99,7 +99,6 @@ results.gamlss2 <- function(x, ...)
           ## special terms.
           if(("special" %in% class(x$specials[[i]])) & (i %in% names(x$fitted.specials[[j]]))) {
             dim <- length(x$specials[[i]]$term)
-
             if(dim > 2)
               next
 
@@ -107,7 +106,7 @@ results.gamlss2 <- function(x, ...)
 
             if(dim > 1) {
               xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
-              if(all(xc == "numeric")) {
+              if(all(xc %in% c("numeric", "matrix", "array"))) {
                 nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
                   max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
                   seq(min(x$model[[x$specials[[i]]$term[2L]]]),

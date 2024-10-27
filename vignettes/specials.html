@@ -455,13 +455,12 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#the-special-model-term-constructor" id="toc-the-special-model-term-constructor" class="nav-link" data-scroll-target="#the-special-model-term-constructor"><span class="header-section-number">2</span> The special model term constructor</a></li>
-  <li><a href="#the-fitting-function" id="toc-the-fitting-function" class="nav-link" data-scroll-target="#the-fitting-function"><span class="header-section-number">3</span> The fitting function</a></li>
-  <li><a href="#the-predict-function" id="toc-the-predict-function" class="nav-link" data-scroll-target="#the-predict-function"><span class="header-section-number">4</span> The predict function</a></li>
-  <li><a href="#example-rent99-data" id="toc-example-rent99-data" class="nav-link" data-scroll-target="#example-rent99-data"><span class="header-section-number">5</span> Example: rent99 data</a></li>
-  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">6</span> Estimation</a></li>
-  <li><a href="#visualise-the-fits" id="toc-visualise-the-fits" class="nav-link" data-scroll-target="#visualise-the-fits"><span class="header-section-number">7</span> Visualise the fits</a></li>
+  <li><a href="#the-special-model-term-constructor" id="toc-the-special-model-term-constructor" class="nav-link active" data-scroll-target="#the-special-model-term-constructor"><span class="header-section-number">1</span> The special model term constructor</a></li>
+  <li><a href="#the-fitting-function" id="toc-the-fitting-function" class="nav-link" data-scroll-target="#the-fitting-function"><span class="header-section-number">2</span> The fitting function</a></li>
+  <li><a href="#the-predict-function" id="toc-the-predict-function" class="nav-link" data-scroll-target="#the-predict-function"><span class="header-section-number">3</span> The predict function</a></li>
+  <li><a href="#example-rent99-data" id="toc-example-rent99-data" class="nav-link" data-scroll-target="#example-rent99-data"><span class="header-section-number">4</span> Example: rent99 data</a></li>
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">5</span> Estimation</a></li>
+  <li><a href="#visualise-the-fits" id="toc-visualise-the-fits" class="nav-link" data-scroll-target="#visualise-the-fits"><span class="header-section-number">6</span> Visualise the fits</a></li>
   </ul>
 </nav>
     </div>
@@ -474,8 +473,6 @@ window.Quarto = {
 </header>
 
 
-<section id="introduction" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
 <p>In order to add any new machine learning type algorithm in <code>gamlss2</code> you need to define three <em>special</em> functions:</p>
 <ul>
 <li>A <strong>special term constructor</strong> function,</li>
@@ -484,9 +481,8 @@ window.Quarto = {
 </ul>
 <p>Here we demonstrate how this can be done using the local polynomial smoothing function <code>loess()</code> in <strong>R</strong>, <span class="citation" data-cites="Clevelandetal93">Cleveland, Grosse, and Shyu (<a href="#ref-Clevelandetal93" role="doc-biblioref">1993</a>)</span>.</p>
 <p>Note that any regression type machine learning function is <strong>R</strong> can be easily incorporated in <code>gamlss2</code> especially if there is a <strong>prior weights</strong> argument in the function. <code>loess()</code> has the argument <code>weights</code> for prior weights so it can be incorporated easily.</p>
-</section>
-<section id="the-special-model-term-constructor" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="the-special-model-term-constructor"><span class="header-section-number">2</span> The special model term constructor</h2>
+<section id="the-special-model-term-constructor" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-special-model-term-constructor"><span class="header-section-number">1</span> The special model term constructor</h2>
 <p>Any special model term cosntructor <strong>must</strong> be registered in the <code>fake_formula()</code> function. If not yet registered, the user can provide a new special name in the <code>specials</code> argument of <code>fake_formula()</code>. Another option is to use the special model term constructor name ‘“user”’, which is already part of the special names list in <code>fake_formula()</code>.</p>
 <p>The definition function can take all relevant <code>loess</code> and <code>loess.control</code> arguments so it can pass them later into the fitting function.</p>
 <div class="cell">
@@ -521,8 +517,8 @@ window.Quarto = {
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="the-fitting-function" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="the-fitting-function"><span class="header-section-number">3</span> The fitting function</h2>
+<section id="the-fitting-function" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-fitting-function"><span class="header-section-number">2</span> The fitting function</h2>
 <p>The fitting function takes the current working response, the iterative weights and the corresponding relevant term and fits and creates a call to the <code>loess</code> function to fit the relevant mdel. It saves the fitted values and the fitted objects for later use.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>special_fit.lo <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...)</span>
@@ -562,8 +558,8 @@ window.Quarto = {
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="the-predict-function" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="the-predict-function"><span class="header-section-number">4</span> The predict function</h2>
+<section id="the-predict-function" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-predict-function"><span class="header-section-number">3</span> The predict function</h2>
 <p>The prediction function shows how the predicted values of the model can be extracted.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>special_predict.lo.fitted <span class="ot">&lt;-</span> <span class="cf">function</span>(x, data, <span class="at">se.fit =</span> <span class="cn">FALSE</span>, ...) </span>
@@ -576,8 +572,8 @@ window.Quarto = {
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="example-rent99-data" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="example-rent99-data"><span class="header-section-number">5</span> Example: rent99 data</h2>
+<section id="example-rent99-data" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="example-rent99-data"><span class="header-section-number">4</span> Example: rent99 data</h2>
 <p>We use the <code>rent99</code> data to demonstrate the use of the functions</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load the Munich rent data</span></span>
@@ -599,8 +595,8 @@ window.Quarto = {
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="estimation" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="estimation"><span class="header-section-number">6</span> Estimation</h2>
+<section id="estimation" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="estimation"><span class="header-section-number">5</span> Estimation</h2>
 <p>We will use the package <code>tictoc</code> to measure the amound of time is taken to fit each model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tictoc"</span>)</span>
@@ -616,7 +612,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38359.6113 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.737 sec elapsed</code></pre>
+<pre><code>4.704 sec elapsed</code></pre>
 </div>
 </div>
 <p>The first order interaction fit is.</p>
@@ -632,7 +628,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>8.307 sec elapsed</code></pre>
+<pre><code>8.245 sec elapsed</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -648,7 +644,7 @@ GAMLSS-RS iteration  6: Global Deviance = 38359.7641 eps = 0.000003     </code><
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.11 sec elapsed</code></pre>
+<pre><code>1.078 sec elapsed</code></pre>
 </div>
 </div>
 <p>The cubic spline function is lot faster than the <code>loess()</code> implementation <code>lo()</code> in <code>gamlss2</code>, but let us now compare the models using AIC.</p>
@@ -672,8 +668,8 @@ b3 38668.11 38.38334</code></pre>
 </div>
 <p>It seems that the two <code>lo()</code> models do better that the <code>s()</code> as far as the AIC criteria are concern.</p>
 </section>
-<section id="visualise-the-fits" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="visualise-the-fits"><span class="header-section-number">7</span> Visualise the fits</h2>
+<section id="visualise-the-fits" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="visualise-the-fits"><span class="header-section-number">6</span> Visualise the fits</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">

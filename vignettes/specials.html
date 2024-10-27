@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Mixture Models – gamlss2</title>
+<title>Special Model Terms – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -189,7 +189,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/mixture.html">Mixture Models</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/specials.html">Special Model Terms</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -230,7 +230,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/mixture.html" class="sidebar-item-text sidebar-link active">
+  <a href="../vignettes/mixture.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Mixture Models</span></a>
   </div>
 </li>
@@ -266,7 +266,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/specials.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/specials.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Special Model Terms</span></a>
   </div>
 </li>
@@ -455,14 +455,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#model-overview" id="toc-model-overview" class="nav-link active" data-scroll-target="#model-overview"><span class="header-section-number">1</span> Model Overview</a></li>
-  <li><a href="#two-component-normal-mixture-model" id="toc-two-component-normal-mixture-model" class="nav-link" data-scroll-target="#two-component-normal-mixture-model"><span class="header-section-number">2</span> Two-Component Normal Mixture Model</a></li>
-  <li><a href="#gamlss-framework-for-the-mixture-model" id="toc-gamlss-framework-for-the-mixture-model" class="nav-link" data-scroll-target="#gamlss-framework-for-the-mixture-model"><span class="header-section-number">3</span> GAMLSS Framework for the Mixture Model</a></li>
-  <li><a href="#example-using-simulated-data" id="toc-example-using-simulated-data" class="nav-link" data-scroll-target="#example-using-simulated-data"><span class="header-section-number">4</span> Example using Simulated Data</a></li>
-  <li><a href="#defining-a-custom-gamlss2-mixture-family" id="toc-defining-a-custom-gamlss2-mixture-family" class="nav-link" data-scroll-target="#defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <code>gamlss2</code> Mixture Family</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#the-special-model-term-constructor" id="toc-the-special-model-term-constructor" class="nav-link" data-scroll-target="#the-special-model-term-constructor"><span class="header-section-number">2</span> The special model term constructor</a></li>
+  <li><a href="#the-fitting-function" id="toc-the-fitting-function" class="nav-link" data-scroll-target="#the-fitting-function"><span class="header-section-number">3</span> The fitting function</a></li>
+  <li><a href="#the-predict-function" id="toc-the-predict-function" class="nav-link" data-scroll-target="#the-predict-function"><span class="header-section-number">4</span> The predict function</a></li>
+  <li><a href="#example-rent99-data" id="toc-example-rent99-data" class="nav-link" data-scroll-target="#example-rent99-data"><span class="header-section-number">5</span> Example: rent99 data</a></li>
   <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">6</span> Estimation</a></li>
-  <li><a href="#predicting-and-visualizing-results" id="toc-predicting-and-visualizing-results" class="nav-link" data-scroll-target="#predicting-and-visualizing-results"><span class="header-section-number">7</span> Predicting and Visualizing Results</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">8</span> Summary</a></li>
+  <li><a href="#visualise-the-fits" id="toc-visualise-the-fits" class="nav-link" data-scroll-target="#visualise-the-fits"><span class="header-section-number">7</span> Visualise the fits</a></li>
   </ul>
 </nav>
     </div>
@@ -470,245 +469,311 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header">
-<h1 class="title display-7">Mixture Models</h1>
+<h1 class="title display-7">Special Model Terms</h1>
 
 </header>
 
 
-<p>Mixture models are used for modeling data generated from multiple distinct processes, where each process can be described by a separate probability distribution. The challenge is that for each observation, we do not know which process generated it, and therefore we must infer the underlying latent components.</p>
-<p>This vignette demonstrates how to fit flexible mixture models using <code>gamlss2</code>.</p>
-<section id="model-overview" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="model-overview"><span class="header-section-number">1</span> Model Overview</h2>
-<p>In a finite mixture model, each observation <span class="math inline">\(y_i\)</span> for <span class="math inline">\(i = 1, \ldots, n\)</span>, is assumed to be generated from one of <span class="math inline">\(K\)</span> distinct underlying distributions. The probability that an observation comes from the <span class="math inline">\(k\)</span>-th component is determined by the mixing probability <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, which may depend on covariates <span class="math inline">\(\mathbf{x}_i\)</span>. The probability density function (pdf) of <span class="math inline">\(y_i\)</span> is expressed as</p>
-<p><span class="math display">\[
-d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^{K} \pi_k(\mathbf{x}_i) d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i)).
-\]</span></p>
-<p>Where</p>
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>In order to add any new machine learning type algorithm in <code>gamlss2</code> you need to define three <em>special</em> functions:</p>
 <ul>
-<li><span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span> is the probability that the <span class="math inline">\(i\)</span>-th observation belongs to the <span class="math inline">\(k\)</span>-th component,</li>
-<li><span class="math inline">\(d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))\)</span> is the pdf of the <span class="math inline">\(k\)</span>-th component, parameterized by <span class="math inline">\(\boldsymbol{\theta}_k(\mathbf{x}_i) = (\theta_{1k}(\mathbf{x}_i), \ldots, \theta_{J_kk}(\mathbf{x}_i))^\top\)</span>, <span class="math inline">\(j = 1, \ldots, J_k\)</span>,</li>
-<li>and the sum of <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span> over all components equals 1.</li>
+<li>A <strong>special term constructor</strong> function,</li>
+<li>a <strong>fitting</strong> function and,</li>
+<li>a <strong>predict</strong> function.</li>
 </ul>
-<p>While <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span> represents the prior probability of the observation belonging to the <span class="math inline">\(k\)</span>-th component, posterior mixing probabilities refine this by considering both the prior and the likelihood of the observed data under each component.</p>
-<p>Given the observation <span class="math inline">\(y_i\)</span> and the estimated model parameters, the posterior probability that <span class="math inline">\(y_i\)</span> belongs to the <span class="math inline">\(k\)</span>-th component is computed as</p>
-<p><span class="math display">\[
-\text{Pr}(z_i = k \mid y_i, \mathbf{x}_i) = \frac{\pi_k(\mathbf{x}_i) d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))}{\sum_{k=1}^K \pi_k(\mathbf{x}_i) d_k(y_i \mid \boldsymbol{\theta}_k(\mathbf{x}_i))}.
-\]</span></p>
-<p>This posterior probability gives a more accurate assessment of which component likely generated the observation, incorporating both the component probability (prior) and the likelihood of observing the data under each component. In mixture models, these posterior probabilities are often used for:</p>
-<ol type="1">
-<li><em>Classifying observations</em>: Assigning each observation to the most likely component.</li>
-<li><em>Analyzing component memberships</em>: Understanding the uncertainty in assigning observations to components.</li>
-</ol>
-<p>In practice, posterior mixing probabilities will not always be close to 0 or 1. If an observation could reasonably belong to multiple components, the probabilities may be more evenly distributed across components.</p>
+<p>Here we demonstrate how this can be done using the local polynomial smoothing function <code>loess()</code> in <strong>R</strong>, <span class="citation" data-cites="Clevelandetal93">Cleveland, Grosse, and Shyu (<a href="#ref-Clevelandetal93" role="doc-biblioref">1993</a>)</span>.</p>
+<p>Note that any regression type machine learning function is <strong>R</strong> can be easily incorporated in <code>gamlss2</code> especially if there is a <strong>prior weights</strong> argument in the function. <code>loess()</code> has the argument <code>weights</code> for prior weights so it can be incorporated easily.</p>
 </section>
-<section id="two-component-normal-mixture-model" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="two-component-normal-mixture-model"><span class="header-section-number">2</span> Two-Component Normal Mixture Model</h2>
-<p>For a two-component normal mixture model, the response <span class="math inline">\(y_i\)</span> is generated by one of two normal distributions. The pdf is given by</p>
-<p><span class="math display">\[
-d(y_i \mid \mathbf{x}_i) = \sum_{k=1}^2 \pi_k(\mathbf{x}_i) \mathcal{N}(y_i \mid \boldsymbol{\theta}_k = (\mu_k(\mathbf{x}_i), \sigma_k(\mathbf{x}_i))).
-\]</span></p>
-<p>Where</p>
-<ul>
-<li><span class="math inline">\(\mathcal{N}(y \mid \boldsymbol{\theta} = (\mu, \sigma))\)</span> denotes a normal distribution with mean <span class="math inline">\(\mu\)</span> and standard deviation <span class="math inline">\(\sigma\)</span>,</li>
-<li>the parameters <span class="math inline">\(\boldsymbol{\theta}_k = (\mu_k(\mathbf{x}_i), \sigma_k(\mathbf{x}_i))^\top\)</span> are functions of covariates <span class="math inline">\(\mathbf{x}_i\)</span>,</li>
-<li>and to ensure the component probabilities sum to one, we set <span class="math inline">\(\pi_2(\mathbf{x}_i) = 1 - \pi_1(\mathbf{x}_i)\)</span>.</li>
-</ul>
-</section>
-<section id="gamlss-framework-for-the-mixture-model" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="gamlss-framework-for-the-mixture-model"><span class="header-section-number">3</span> GAMLSS Framework for the Mixture Model</h2>
-<p>In the GAMLSS framework, each parameter <span class="math inline">\(\boldsymbol{\theta}_{k}(\mathbf{x}_i) = (\boldsymbol{\theta}_{1k}(\mathbf{x}_i), \ldots, \boldsymbol{\theta}_{J_kk}(\mathbf{x}_i))^{\top}\)</span>, as well as the mixing probabilities <span class="math inline">\(\pi_k(\mathbf{x}_i)\)</span>, are modeled using GAM-type predictors given by</p>
-<p><span class="math display">\[
-\eta_{jk}(\mathbf{x}_i) = f_{1k}(\mathbf{x}_i) + \dots + f_{L_{jk}k}(\mathbf{x}_i),
-\]</span></p>
-<p>which are linked to the parameters through <span class="math inline">\(h_{jk}(\theta_{jk}(\mathbf{x}_i)) = \eta_{jk}(\mathbf{x}_i)\)</span> using suitable link functions <span class="math inline">\(h_{jk}(\cdot)\)</span>. The functions <span class="math inline">\(f_{lk}(\cdot)\)</span>, <span class="math inline">\(l = 1, \ldots, L_{jk}\)</span>, can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others.</p>
-<p>For the two-component normal mixture, we use</p>
-<ol type="1">
-<li>Identity link for the means: <span class="math inline">\(\mu_k(\mathbf{x}_i) = \eta_{1k}(\mathbf{x}_i)\)</span>,</li>
-<li>Log-link for the standard deviations: <span class="math inline">\(\log(\sigma_k(\mathbf{x}_i)) = \eta_{2k}(\mathbf{x}_i)\)</span>,</li>
-<li>Logit-link for the mixing probability: <span class="math inline">\(\log\left(\frac{\pi_k(\mathbf{x}_i)}{1 - \pi_k(\mathbf{x}_i)}\right) = \eta_{\pi k}(\mathbf{x}_i)\)</span>.</li>
-</ol>
-</section>
-<section id="example-using-simulated-data" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="example-using-simulated-data"><span class="header-section-number">4</span> Example using Simulated Data</h2>
-<p>We begin by simulating data where the response <code>y</code> is generated by one of two normal distributions, depending on a covariate <code>x</code>. The latent component membership is determined by a logistic model. Morover, we let the standard deviation of the first component also depend on <code>x</code>.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate covariate</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">runif</span>(n, <span class="sc">-</span>pi, pi))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## logistic model for mixing probability (dependent on x)</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## this creates a probability that varies with x using a logistic function</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>mix_prob <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> x))</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate latent component assignment based on covariate-dependent probability</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, mix_prob)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## generate response based on the latent component</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(z <span class="sc">==</span> <span class="dv">1</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">cos</span>(x))),</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cos</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.2</span>))</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="do">## combine into a data frame</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"x"</span> <span class="ot">=</span> x, <span class="st">"y"</span> <span class="ot">=</span> y)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## plot the data, color by latent component z</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(d, <span class="at">col =</span> z <span class="sc">+</span> <span class="dv">1</span>, <span class="at">main =</span> <span class="st">"Simulated Data by Latent Component"</span>, </span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="defining-a-custom-gamlss2-mixture-family" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="defining-a-custom-gamlss2-mixture-family"><span class="header-section-number">5</span> Defining a Custom <code>gamlss2</code> Mixture Family</h2>
-<p>To fit the mixture model in <code>gamlss2</code>, we define a custom family of distributions. In this case, we create a mixture of two normal distributions (using <code>dnorm()</code>) where the mixing probabilities depend on a covariate.</p>
+<section id="the-special-model-term-constructor" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-special-model-term-constructor"><span class="header-section-number">2</span> The special model term constructor</h2>
+<p>Any special model term cosntructor <strong>must</strong> be registered in the <code>fake_formula()</code> function. If not yet registered, the user can provide a new special name in the <code>specials</code> argument of <code>fake_formula()</code>. Another option is to use the special model term constructor name ‘“user”’, which is already part of the special names list in <code>fake_formula()</code>.</p>
+<p>The definition function can take all relevant <code>loess</code> and <code>loess.control</code> arguments so it can pass them later into the fitting function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mixture family definition for a normal mixture</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>NOmx <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"family"</span> <span class="ot">=</span> <span class="st">"Normal Mixture"</span>,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"names"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"mu1"</span>, <span class="st">"mu2"</span>, <span class="st">"sigma1"</span>, <span class="st">"sigma2"</span>, <span class="st">"pi"</span>),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"links"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"mu1"</span> <span class="ot">=</span> <span class="st">"identity"</span>, <span class="st">"mu2"</span> <span class="ot">=</span> <span class="st">"identity"</span>,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">"sigma1"</span> <span class="ot">=</span> <span class="st">"log"</span>, <span class="st">"sigma2"</span> <span class="ot">=</span> <span class="st">"log"</span>, <span class="st">"pi"</span> <span class="ot">=</span> <span class="st">"logit"</span>),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"d"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      d <span class="ot">&lt;-</span> par<span class="sc">$</span>pi <span class="sc">*</span> <span class="fu">dnorm</span>(y, par<span class="sc">$</span>mu1, par<span class="sc">$</span>sigma1) <span class="sc">+</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span> <span class="sc">-</span> par<span class="sc">$</span>pi) <span class="sc">*</span> <span class="fu">dnorm</span>(y, par<span class="sc">$</span>mu2, par<span class="sc">$</span>sigma2)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(log) d <span class="ot">&lt;-</span> <span class="fu">log</span>(d)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(d)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>lo <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, ...) </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## ensure it's a formula</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">inherits</span>(formula, <span class="st">"formula"</span>)) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">substitute</span>(formula))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"~"</span>, formula))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">environment</span>(formula) <span class="ot">&lt;-</span> <span class="fu">sys.frame</span>(<span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## list for setting up the special model term </span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  st <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="do">## control arguments</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>control <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="do">## variables, label and data</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>term <span class="ot">&lt;-</span> <span class="fu">all.vars</span>(formula) </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"lo("</span>, <span class="fu">paste0</span>(<span class="fu">gsub</span>(<span class="st">" "</span>, <span class="st">""</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.character</span>(formula)), <span class="at">collapse =</span> <span class="st">""</span>), <span class="st">")"</span>) </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>data <span class="ot">&lt;-</span> <span class="fu">model.frame</span>(formula)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="do">## New model formula used for fitting.</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>formula <span class="ot">&lt;-</span> <span class="fu">update</span>(formula, response_z <span class="sc">~</span> .)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Assign the "special" class and the new class "n".</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(st) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"special"</span>, <span class="st">"lo"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(st) </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Note that in this case, analytical derivatives for the likelihood function are not explicitly defined in the family. As a result, the parameter estimation relies on numerical derivatives. While this approach is feasible, defining analytical derivatives would significantly speed up the estimation process and improve computational efficiency.</p>
+</section>
+<section id="the-fitting-function" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-fitting-function"><span class="header-section-number">3</span> The fitting function</h2>
+<p>The fitting function takes the current working response, the iterative weights and the corresponding relevant term and fits and creates a call to the <code>loess</code> function to fit the relevant mdel. It saves the fitted values and the fitted objects for later use.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>special_fit.lo <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## assign current working response and weights</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">$</span>data<span class="sc">$</span>response_z <span class="ot">&lt;-</span> z</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">$</span>data<span class="sc">$</span>weights_w <span class="ot">&lt;-</span> w</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## set up loess call</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="st">"loess(formula = x$formula, data = x$data, weights = weights_w"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## add optional control parameters</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(x<span class="sc">$</span>control)) {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">names</span>(x<span class="sc">$</span>control))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      call <span class="ot">&lt;-</span> <span class="fu">paste0</span>(call, <span class="st">", "</span>, j, <span class="st">"= x$control$"</span>, j)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="fu">paste0</span>(call, <span class="st">")"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="do">## estimate model</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  rval <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"model"</span> <span class="ot">=</span> <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> call)))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="do">## get the fitted.values</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> <span class="fu">fitted</span>(rval<span class="sc">$</span>model) </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="do">## center fitted values</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(rval<span class="sc">$</span>fitted.values)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> rval<span class="sc">$</span>fitted.values <span class="sc">-</span> rval<span class="sc">$</span>shift </span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="do">## degrees of freedom</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>edf <span class="ot">&lt;-</span>  rval<span class="sc">$</span>model<span class="sc">$</span>trace.hat</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="do">## assign class for predict method </span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(rval) <span class="ot">&lt;-</span> <span class="st">"lo.fitted"</span> </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rval) </span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-predict-function" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="the-predict-function"><span class="header-section-number">4</span> The predict function</h2>
+<p>The prediction function shows how the predicted values of the model can be extracted.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>special_predict.lo.fitted <span class="ot">&lt;-</span> <span class="cf">function</span>(x, data, <span class="at">se.fit =</span> <span class="cn">FALSE</span>, ...) </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(x<span class="sc">$</span>model, <span class="at">newdata =</span> data))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> p <span class="sc">-</span> x<span class="sc">$</span>shift</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(se.fit)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"fit"</span> <span class="ot">=</span> p)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="example-rent99-data" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="example-rent99-data"><span class="header-section-number">5</span> Example: rent99 data</h2>
+<p>We use the <code>rent99</code> data to demonstrate the use of the functions</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load the Munich rent data</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent99"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>) </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="do">## scale covariates</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>rent99<span class="sc">$</span>area <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent99<span class="sc">$</span>area)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>rent99<span class="sc">$</span>yearc <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent99<span class="sc">$</span>yearc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that the continuous variables have been standardised. We defined three formulae for modelling the rent data. The first two use <code>loess</code> and the third uses the additive smoothing function <code>s()</code> for comparison. Formula <code>f</code> uses main effect smoothing terms for <code>area</code> and <code>yearc</code> for parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> while the second, <code>f1</code>, uses two dimensional smoothing functions for interaction. The third formula uses two dimensional cubic splines smoothing for interactions. Note that in this exapm ple we only use explanatory terms for the first two parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> and constant for the rest, <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\tau\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(area) <span class="sc">+</span> <span class="fu">lo</span>(yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lo</span>(area) <span class="sc">+</span> <span class="fu">lo</span>(yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="estimation" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="estimation"><span class="header-section-number">6</span> Estimation</h2>
-<p>We now proceed to fit the mixture model. The model includes smooth functions (<code>s(x)</code>), which are used to model the means, standard deviations, and the mixing probability for the two components. This flexible approach allows the influence of the covariate <code>x</code> to vary smoothly across the different parameters of the mixture distribution.</p>
-<p>The model can be estimated with</p>
+<p>We will use the package <code>tictoc</code> to measure the amound of time is taken to fit each model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula, spline for each parameter</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate normal GAMLSS mixture model</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> NOmx)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tictoc"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38409.6672 eps = 0.286141     
+GAMLSS-RS iteration  2: Global Deviance = 38363.6237 eps = 0.001198     
+GAMLSS-RS iteration  3: Global Deviance = 38360.7687 eps = 0.000074     
+GAMLSS-RS iteration  4: Global Deviance = 38359.9016 eps = 0.000022     
+GAMLSS-RS iteration  5: Global Deviance = 38359.6113 eps = 0.000007     </code></pre>
 </div>
-<p>Plot estimated effects.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
-</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4.737 sec elapsed</code></pre>
 </div>
 </div>
-<p>The estimated effects indicate that the GAMLSS mixture model fits the data very well. Both mean components closely align with the true data-generating process. Additionally, the estimated standard deviation for the first component is also accurately captured, and the linear effect for the mixing probability is well-estimated.</p>
-</section>
-<section id="predicting-and-visualizing-results" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="predicting-and-visualizing-results"><span class="header-section-number">7</span> Predicting and Visualizing Results</h2>
-<p>We predict the component-specific means (<code>mu1</code>, <code>mu2</code>) and the mixing probability (<code>pi</code>) from the fitted model. Then, we compare the predicted and true component probabilities and plot the fitted means along with the data.</p>
-<p>First, compute predicted parameters.</p>
+<p>The first order interaction fit is.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">type =</span> <span class="st">"parameter"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38410.5652 eps = 0.286125     
+GAMLSS-RS iteration  2: Global Deviance = 38359.84 eps = 0.001320     
+GAMLSS-RS iteration  3: Global Deviance = 38356.7695 eps = 0.000080     
+GAMLSS-RS iteration  4: Global Deviance = 38355.8814 eps = 0.000023     
+GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code></pre>
 </div>
-<p>Plot estimated vs.&nbsp;true component probabilities.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mix_prob, p[,<span class="st">"pi"</span>], <span class="at">main =</span> <span class="st">"Mixing Probabilities (True vs. Estimated)"</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"True"</span>, <span class="at">ylab =</span> <span class="st">"Estimated"</span>, <span class="at">col =</span> <span class="dv">1</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
-</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>8.307 sec elapsed</code></pre>
 </div>
 </div>
-<p>Overlay predicted means onto the observed data.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compute posterior component probabilities</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(d<span class="sc">$</span>y, p<span class="sc">$</span>mu1, p<span class="sc">$</span>sigma1)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(d<span class="sc">$</span>y, p<span class="sc">$</span>mu2, p<span class="sc">$</span>sigma2)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>totprob <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">cbind</span>(p<span class="sc">$</span>pi <span class="sc">*</span> d1, (<span class="dv">1</span> <span class="sc">-</span> p<span class="sc">$</span>pi) <span class="sc">*</span> d2))</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p<span class="sc">$</span>pi <span class="sc">*</span> d1  <span class="sc">/</span> totprob</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p<span class="sc">$</span>pi) <span class="sc">*</span> d2  <span class="sc">/</span> totprob</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="do">## get components</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">cbind</span>(p2, p1), <span class="dv">1</span>, which.max)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="do">## extract component means and quantiles</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"1%"</span> <span class="ot">=</span> <span class="fu">qnorm</span>(<span class="fl">0.01</span>, <span class="at">mean =</span> p[, <span class="st">"mu1"</span>], <span class="at">sd =</span> p[, <span class="st">"sigma1"</span>]),</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Mean"</span> <span class="ot">=</span> p[, <span class="st">"mu1"</span>],</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"99%"</span> <span class="ot">=</span> <span class="fu">qnorm</span>(<span class="fl">0.99</span>, <span class="at">mean =</span> p[, <span class="st">"mu1"</span>], <span class="at">sd =</span> p[, <span class="st">"sigma1"</span>])</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"1%"</span> <span class="ot">=</span> <span class="fu">qnorm</span>(<span class="fl">0.01</span>, <span class="at">mean =</span> p[, <span class="st">"mu2"</span>], <span class="at">sd =</span> p[, <span class="st">"sigma2"</span>]),</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Mean"</span> <span class="ot">=</span> p[, <span class="st">"mu2"</span>],</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"99%"</span> <span class="ot">=</span> <span class="fu">qnorm</span>(<span class="fl">0.99</span>, <span class="at">mean =</span> p[, <span class="st">"mu2"</span>], <span class="at">sd =</span> p[, <span class="st">"sigma2"</span>])</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="do">## colors for plotting components</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>col <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"#DF536B4D"</span>, <span class="fu">length</span>(p1))</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>col[comp <span class="sc">==</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"#1A1A1A4D"</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="do">## plot data and fitted values</span></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(d, <span class="at">col =</span> col, <span class="at">main =</span> <span class="st">"Fitted Component Means"</span>,</span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(d<span class="sc">$</span>x, f1, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>),</span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">col =</span> <span class="dv">2</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(d<span class="sc">$</span>x, f2, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>),</span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">col =</span> <span class="dv">1</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38409.1594 eps = 0.286206     
+GAMLSS-RS iteration  2: Global Deviance = 38364.6191 eps = 0.001159     
+GAMLSS-RS iteration  3: Global Deviance = 38361.2928 eps = 0.000086     
+GAMLSS-RS iteration  4: Global Deviance = 38360.2823 eps = 0.000026     
+GAMLSS-RS iteration  5: Global Deviance = 38359.898 eps = 0.000010     
+GAMLSS-RS iteration  6: Global Deviance = 38359.7641 eps = 0.000003     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1.11 sec elapsed</code></pre>
 </div>
 </div>
+<p>The cubic spline function is lot faster than the <code>loess()</code> implementation <code>lo()</code> in <code>gamlss2</code>, but let us now compare the models using AIC.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## deviance</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, b3, <span class="at">k =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        AIC       df
+b2 38355.61 36.77363
+b1 38359.61 33.15714
+b3 38359.76 38.38334</code></pre>
 </div>
-<p>The plot shows that the estimated component means are highly accurate, and the observations are assigned to the two components with high precision. Moreover, by using a full GAMLSS model for both components, we are able to compute corresponding quantile estimates, which align well with the data.</p>
-<p>The posterior probabilities can be visualized with</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(p1 <span class="sc">~</span> d<span class="sc">$</span>x, <span class="at">col =</span> comp,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"Probability"</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Posterior Probabilities"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="mixture_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">## BIC</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, b3, <span class="at">k =</span> <span class="fu">log</span>(<span class="fu">nrow</span>(rent99)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        AIC       df
+b1 38625.97 33.15714
+b2 38651.03 36.77363
+b3 38668.11 38.38334</code></pre>
 </div>
 </div>
-</div>
-<p>The plot clearly illustrates that component classification is less certain in areas where the data points overlap.</p>
+<p>It seems that the two <code>lo()</code> models do better that the <code>s()</code> as far as the AIC criteria are concern.</p>
 </section>
-<section id="summary" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="summary"><span class="header-section-number">8</span> Summary</h2>
-<p>This vignette demonstrated how to estimate flexible mixture models using <code>gamlss2</code>. The framework allows us to model the means, variances, and mixing probabilities of the components in a very flexible manner using smooth effects of covariates.</p>
+<section id="visualise-the-fits" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="visualise-the-fits"><span class="header-section-number">7</span> Visualise the fits</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The function <code>vis.lo()</code> of ther package <code>gamlss</code> can be use to visualised the fitted terms. Here we show the <code>area</code> fitted values for model <code>b</code> and for parameter <span class="math inline">\(\mu\)</span> including the partial residuals from the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model=</span><span class="st">"mu"</span>)[[<span class="dv">1</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Next we shos again from model <code>b</code> the fitted values for year of construction <code>yearc</code>, without partial residuals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model =</span> <span class="st">"mu"</span>)[[<span class="dv">2</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we plot the fitted surface fit from the <span class="math inline">\(\mu\)</span> model of <code>b1</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we plot the same fitted surface as above adding 95% confidence intervals;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">se =</span> <span class="fl">1.97</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Finally we plot the fitted surface fit from the <span class="math inline">\(\mu\)</span> model of <code>b2</code> adding the patial residuals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that similar plots are given in section 9.6.3 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>.</p>
 
 
 
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Clevelandetal93" class="csl-entry" role="listitem">
+Cleveland, W. S., E. Grosse, and M. Shyu. 1993. <span>“Local Regression Models.”</span> In <em>Statistical Modelling in s</em>, edited by J. M Chambers and T. J Hastie, 309–76. Chapman &amp; Hall: New York. <a href="https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie">https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie</a>.
+</div>
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
+</div>
+<div id="ref-Stasinopoulosetal2017" class="csl-entry" role="listitem">
+Stasinopoulos, D. M., R. A. Rigby, G. Z. Heller, V. Voudouris, and F. De Bastiani. 2017. <em>Flexible Regression and Smoothing: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/b21973">https://doi.org/10.1201/b21973</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

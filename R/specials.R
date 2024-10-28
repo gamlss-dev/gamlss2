@@ -422,7 +422,11 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
     }
   }
 
-  if(length(rval) < 2L)
+  drop <- list(...)$drop
+  if(is.null(drop))
+    drop <- TRUE
+
+  if((length(rval) < 2L) && drop)
     rval <- rval[[1L]]
 
   return(rval)

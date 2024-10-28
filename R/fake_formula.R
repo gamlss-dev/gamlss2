@@ -59,6 +59,9 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       ff <- NULL
       for(j in tls) {
         p <- parse(text = j)
+        if(as.character(p[[1]][[1]]) %in% c("la")) {
+          p <- p[[1]][1:2]
+        }
         v <- all.vars(p)
         e <- eval(parse(text = paste0("quote(", j, ")")))
         for(i in seq_along(e)) {

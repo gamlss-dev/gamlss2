@@ -450,3 +450,153 @@ special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
+## Lasso.
+la <- function(formula, ...)
+{
+  stopifnot(requireNamespace("glmnet"))
+
+  ## Ensure it's a formula.
+  if(inherits(formula, "matrix"))
+    stop("matrices are not allowed!")
+  if(!inherits(formula, "formula")) {
+    formula <- as.character(substitute(formula))
+    formula <- as.formula(paste("~", formula))
+    environment(formula) <- sys.frame(-1)
+  }
+
+  ## List for setting up the special model term. 
+  st <- list()
+  st$control <- list(...)
+  if(is.null(st$control$criterion))
+    st$control$criterion <- "bic"
+  st$term <- all.vars(formula) 
+  st$label <- paste0("la(", paste0(gsub(" ", "",
+    as.character(formula)), collapse = ""), ")") 
+  st$X <- model.matrix(formula)
+  if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
+    st$X <- st$X[, -j, drop = FALSE]
+  }
+  st$formula <- formula
+
+  ## Assign the "special" class and the new class "n".
+  class(st) <- c("special", "lasso")
+
+  return(st) 
+}
+
+special_fit.lasso <- function(x, z, w, control, ...)
+{
+  ## Set up glmnet call.
+  call <- "glmnet::glmnet(x = x$X, y = z, weights = w"
+
+  ## Add optional control parameters.
+  if(!is.null(x$control)) {
+    nc <- names(x$control)
+    nc <- nc[nc != "criterion"]
+    for(j in nc)
+      call <- paste0(call, ", ", j, "= x$control$", j)
+  }
+
+  call <- paste0(call, ")")
+
+  ## Estimate model.
+  rval <- list("model" = eval(parse(text = call)))
+
+  ## Get optimum lambda using IC.
+  p <- predict(rval$model, newx = x$X)
+  cm <- coef(rval$model)
+  rss <- apply(p, 2, function(f) {
+    sum(w * (z - f)^2)
+  })
+  edf <- apply(cm , 2, function(b) { sum(abs(b) >  1e-10) })
+  n <- length(z)
+  ic <- switch(tolower(x$control$criterion),
+    "gcv" = rss * n / (n - edf)^2,
+    "aic" = rss + 2 * edf,
+    "gaic" = rss + K * edf,
+    "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+    "bic" = rss + log(n) * edf
+  )
+  i <- which.min(ic)
+
+  ## Save optimum lambda.
+  rval$lambda <- rval$model$lambda[i]
+
+  ## Get the fitted.values.
+  rval$fitted.values <- p[, i]
+
+  ## Save coefficients.
+  rval$coefficients <- cm[, i]
+
+  ## Center fitted values. 
+  rval$shift <- mean(rval$fitted.values)
+  rval$fitted.values <- rval$fitted.values - rval$shift
+
+  ## Degrees of freedom.
+  rval$edf <-  edf[i]
+
+  ## Formula, needed for prediction.
+  rval$formula <- x$formula
+
+  ## IC and full edfs for plotting.
+  rval$ic <- list("criterion" = x$control$criterion, "value" = ic, "edf" = edf)
+
+  ## Assign class for predict method. 
+  class(rval) <- "lasso.fitted" 
+
+  return(rval) 
+}
+
+## Lasso predict method.
+special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...) 
+{
+  X <- model.matrix(x$formula, data = data)
+  if(length(j <- grep("(Intercept)", colnames(X), fixed = TRUE))) {
+    X <- X[, -j, drop = FALSE]
+  }
+  p <- as.numeric(predict(x$model, newx = X, s = x$lambda))
+  p <- p - x$shift
+  if(se.fit)
+    p <- data.frame("fit" = p)
+  return(p)
+}
+
+## Lasso plotting function.
+lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, ...)
+{
+  which <- match.arg(which)
+
+  if(inherits(x, "gamlss2")) {
+    x <- specials(x, drop = FALSE)
+    cx <- sapply(x, class)
+
+    if(!any(j <- cx == "lasso.fitted"))
+      return(invisible(NULL))
+
+    j <- which(j)
+
+    if(spar)
+      par(mfrow = n2mfrow(length(j)))
+
+    for(i in j)
+      lasso_plot(x[[i]], which = which, ...)
+  } else {
+    lambdas <- log(x$model$lambda)
+    i <- which.min(x$ic$value)
+    if(which == "criterion") {
+      plot(lambdas, x$ic$value, type = "l",
+        xlab = expression(log(lambda)), ylab = toupper(x$ic$criterion),
+        lwd = 2, ...)
+    } else {
+      cm <- as.matrix(coef(x$model))
+      matplot(lambdas, t(cm), type = "l", lty = 1,
+        xlab = expression(log(lambda)), ylab = "Coefficients")
+    }
+
+    abline(v = lambdas[i], lty = 2, col = "lightgray")
+
+    axis(3, at = lambdas[i], labels = bquote(lambda == .(round(exp(lambdas[i]), 4)) ~ ", edf =" ~ .(x$ic$edf[i])))
+  }
+  return(invisible(NULL))
+}
+

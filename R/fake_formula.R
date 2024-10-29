@@ -59,7 +59,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       ff <- NULL
       for(j in tls) {
         p <- parse(text = j)
-        if(as.character(p[[1]][[1]]) %in% c("la")) {
+        if(as.character(p[[1]][[1]]) %in% c("la", "lasso")) {
           p <- p[[1]][1:2]
         }
         v <- all.vars(p)

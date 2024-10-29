@@ -451,13 +451,13 @@ special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 ## Lasso.
-la <- function(formula, ...)
+lasso <- function(formula, ...)
 {
   stopifnot(requireNamespace("glmnet"))
 
   ## Ensure it's a formula.
   if(inherits(formula, "matrix"))
-    stop("matrices are not allowed!")
+    stop("only formulas are allowed!")
   if(!inherits(formula, "formula")) {
     formula <- as.character(substitute(formula))
     formula <- as.formula(paste("~", formula))
@@ -479,12 +479,12 @@ la <- function(formula, ...)
   st$formula <- formula
 
   ## Assign the "special" class and the new class "n".
-  class(st) <- c("special", "lasso")
+  class(st) <- c("special", "glmnet")
 
   return(st) 
 }
 
-special_fit.lasso <- function(x, z, w, control, ...)
+special_fit.glmnet <- function(x, z, w, control, ...)
 {
   ## Set up glmnet call.
   call <- "glmnet::glmnet(x = x$X, y = z, weights = w"
@@ -542,13 +542,13 @@ special_fit.lasso <- function(x, z, w, control, ...)
   rval$ic <- list("criterion" = x$control$criterion, "value" = ic, "edf" = edf)
 
   ## Assign class for predict method. 
-  class(rval) <- "lasso.fitted" 
+  class(rval) <- "glmnet.fitted" 
 
   return(rval) 
 }
 
-## Lasso predict method.
-special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...) 
+## glmnet predict method.
+special_predict.glmnet.fitted <- function(x, data, se.fit = FALSE, ...) 
 {
   X <- model.matrix(x$formula, data = data)
   if(length(j <- grep("(Intercept)", colnames(X), fixed = TRUE))) {
@@ -598,5 +598,220 @@ lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, .
     axis(3, at = lambdas[i], labels = bquote(lambda == .(round(exp(lambdas[i]), 4)) ~ ", edf =" ~ .(x$ic$edf[i])))
   }
   return(invisible(NULL))
+}
+
+## Matrix block standardization.
+blockstand <- function(x, n)
+{
+  cn <- colnames(x)
+  decomp <- qr(x)
+  if(decomp$rank < ncol(x))
+    stop("block standardization cannot be computed, matrix is not of full rank!")
+  scale <- qr.R(decomp) * 1 / sqrt(n)
+  x <- qr.Q(decomp) * sqrt(n)
+  attr(x, "blockscale") <- scale
+  colnames(x) <- cn
+  x
+}
+
+## Special lasso from Groll et al.
+la <- function(x, fuse = 0, contrasts.arg = NULL, xlev = NULL, ...)
+{
+  call <- match.call()
+
+  xn <- substitute(x)
+
+  formula <- try(as.formula(xn), silent = TRUE)
+
+  if(!inherits(formula, "try-error")) {
+    xn <- all.vars(formula)
+    environment(formula) <- environment(x)
+  } else {
+    xn <- as.character(xn)
+    formula <- NULL
+  }
+
+  ## List for setting up the special model term. 
+  st <- list()
+  st$control <- list(...)
+  if(is.null(st$control$criterion))
+    st$control$criterion <- "bic"
+  st$term <- xn 
+  st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
+
+  if(!is.null(formula)) {
+    st$X <- model.matrix(formula, contrasts.arg = contrasts.arg, xlev = xlev)
+  } else {
+    if(is.factor(x)) {
+      st$X <- model.matrix(~ x, contrasts.arg = contrasts.arg, xlev = xlev)
+      colnames(st$X) <- gsub("x", "", colnames(st$X))
+      st$is_factor <- TRUE
+    } else {
+      st$X <- x
+    }
+  }
+
+  if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
+    st$X <- st$X[, -j, drop = FALSE]
+  }
+
+  if(isTRUE(st$is_factor)) {
+    st$X <- blockstand(st$X, n = nrow(st$X))
+    st$blockscale <- attr(st$X, "blockscale")
+  }
+
+  st$formula <- formula
+  st$contrasts.arg <- contrasts.arg
+  st$xlev <- xlev
+
+  ## Assign the "special" class and the new class "n".
+  class(st) <- c("special", "lasso")
+
+  return(st) 
+}
+
+special_fit.lasso <- function(x, z, w, control, transfer, ...)
+{
+  if(is.null(control$criterion))
+    control$criterion <- x$control$criterion
+
+  k <- ncol(x$X)
+  XW <- x$X * w
+  XWX <- crossprod(XW, x$X)
+  XWz <- crossprod(XW, z)
+  n <- length(z)
+  logn <- log(n)
+
+  bml <- drop(solve(XWX + diag(1e-08, k), XWz))
+  b0 <- transfer$coefficients
+
+  if(is.null(b0))
+    b0 <- bml
+
+  df <- sqrt(rep(ncol(x$X), ncol(x$X)))
+
+  const <- 1e-05
+
+  ## Penalty function.
+  pen <- function(b) {
+    A <- df / sqrt(b^2 + const)
+    A <- A * 1 / abs(bml)
+    A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+    A
+  }
+
+  S <- pen(b0)
+
+  fl <- function(l, rf = FALSE, coef = FALSE) {
+    P <- try(chol2inv(chol(XWX + l*S)), silent = TRUE)
+
+    if(inherits(P, "try-error"))
+      P <- solve(XWX + S)
+
+    b <- drop(P %*% XWz)
+
+    fit <- drop(x$X %*% b)
+
+    edf <- sum(diag(XWX %*% P))
+
+    if(rf) {
+      names(b) <- colnames(x$X)
+      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
+        "lambda" = l, "vcov" = P, "df" = n - edf))
+    } else {
+      if(isTRUE(control$logLik)) {
+        eta[[j]] <- eta[[j]] + fit
+        rss <- family$loglik(y, family$map2par(eta))
+      } else {
+        rss <- sum(w * (z - fit)^2)
+      }
+
+      rval <- switch(tolower(control$criterion),
+        "gcv" = rss * n / (n - edf)^2,
+        "aic" = rss + 2 * edf,
+        "gaic" = rss + K * edf,
+        "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+        "bic" = rss + logn * edf
+      )
+
+      if(coef) {
+        rval <- list("ic" = rval, "coefficients" = b)
+        names(rval$coefficients) <- colnames(x$X)
+      }
+
+      return(rval)
+    }
+  }
+
+  ## Set up smoothing parameters.
+  lambda <- if(is.null(transfer$lambda)) 10 else transfer$lambda
+
+  opt <- nlminb(lambda, objective = fl, lower = lambda / 10, upper = lambda * 10)
+
+  rval <- fl(opt$par, rf = TRUE)
+
+  ## Tranfer arguments.
+  rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
+
+  ## Arguments needed for prediction.
+  rval[c("formula", "term", "is_factor", "blockscale")] <- x[c("formula", "term", "is_factor", "blockscale")]
+
+  ## Compute paths.
+  if(TRUE) {
+    lambdas <- unique(c(seq(log(1e-8), log(rval$lambda), length = 50), log(rval$lambda),
+      seq(log(rval$lambda), log(rval$lambda) + abs(log(rval$lambda)) * 1.5, length = 50)))
+    lambdas <- exp(lambdas)
+    cm <- NULL; ic <- NULL
+    for(i in seq_along(lambdas)) {
+      o <- fl(lambdas[i], coef = TRUE)
+      ic <- c(ic, o$ic)
+      cm <- rbind(cm, o$coefficients)
+    }
+
+    par(mfrow = c(1, 2))
+    plot(lambdas, ic, type = "l")
+    abline(v = lambdas[which.min(ic)], lty = 2, col = "lightgray")
+    matplot(lambdas, cm, type = "l", lty = 1)
+    abline(v = lambdas[which.min(ic)], lty = 2, col = "lightgray")
+  }
+
+  ## Assign class for predict method. 
+  class(rval) <- "lasso.fitted" 
+
+  return(rval)
+}
+
+## Lasso predict method.
+special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...) 
+{
+  if(!is.null(x$formula)) {
+    X <- model.matrix(x$formula, data = data,
+      contrasts.arg = x$contrasts.arg, xlev = x$xlev)
+  } else {
+    if(is.factor(data[[x$term]])) {
+      X <- model.matrix(~ data[[x$term]], contrasts.arg = x$contrasts.arg, xlev = x$xlev)
+      colnames(X) <- gsub("data[[x$term]]", "", colnames(X), fixed = TRUE)
+    } else {
+      X <- data[[x$term]]
+    }
+  }
+
+  if(length(j <- grep("(Intercept)", colnames(X), fixed = TRUE))) {
+    X <- X[, -j, drop = FALSE]
+  }
+
+  if(isTRUE(x$is_factor)) {
+    X <- X %*% x$blockscale
+  }
+
+  fit <- drop(X %*% x$coefficients)
+
+  if(se.fit) {
+    se <- rowSums((X %*% x$vcov) * X)
+    se <- 2 * sqrt(se)
+    fit <- cbind("fit" = fit, "lower" = fit - se, "upper" = fit + se)
+  }
+
+  return(fit)
 }
 

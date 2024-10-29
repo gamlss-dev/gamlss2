@@ -561,45 +561,6 @@ special_predict.glmnet.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## Lasso plotting function.
-lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, ...)
-{
-  which <- match.arg(which)
-
-  if(inherits(x, "gamlss2")) {
-    x <- specials(x, drop = FALSE)
-    cx <- sapply(x, class)
-
-    if(!any(j <- cx == "lasso.fitted"))
-      return(invisible(NULL))
-
-    j <- which(j)
-
-    if(spar)
-      par(mfrow = n2mfrow(length(j)))
-
-    for(i in j)
-      lasso_plot(x[[i]], which = which, ...)
-  } else {
-    lambdas <- log(x$model$lambda)
-    i <- which.min(x$ic$value)
-    if(which == "criterion") {
-      plot(lambdas, x$ic$value, type = "l",
-        xlab = expression(log(lambda)), ylab = toupper(x$ic$criterion),
-        lwd = 2, ...)
-    } else {
-      cm <- as.matrix(coef(x$model))
-      matplot(lambdas, t(cm), type = "l", lty = 1,
-        xlab = expression(log(lambda)), ylab = "Coefficients")
-    }
-
-    abline(v = lambdas[i], lty = 2, col = "lightgray")
-
-    axis(3, at = lambdas[i], labels = bquote(lambda == .(round(exp(lambdas[i]), 4)) ~ ", edf =" ~ .(x$ic$edf[i])))
-  }
-  return(invisible(NULL))
-}
-
 ## Matrix block standardization.
 blockstand <- function(x, n)
 {
@@ -615,7 +576,7 @@ blockstand <- function(x, n)
 }
 
 ## Special lasso from Groll et al.
-la <- function(x, fuse = 0, contrasts.arg = NULL, xlev = NULL, ...)
+la <- function(x, type = 2, contrasts.arg = NULL, xlev = NULL, ...)
 {
   call <- match.call()
 
@@ -655,7 +616,8 @@ la <- function(x, fuse = 0, contrasts.arg = NULL, xlev = NULL, ...)
     st$X <- st$X[, -j, drop = FALSE]
   }
 
-  if(isTRUE(st$is_factor)) {
+  ## !FIXME
+  if(isTRUE(st$is_factor) & FALSE) {
     st$X <- blockstand(st$X, n = nrow(st$X))
     st$blockscale <- attr(st$X, "blockscale")
   }
@@ -663,6 +625,11 @@ la <- function(x, fuse = 0, contrasts.arg = NULL, xlev = NULL, ...)
   st$formula <- formula
   st$contrasts.arg <- contrasts.arg
   st$xlev <- xlev
+
+  lt <- c("normal", "group", "nominal", "ordinal")
+  if(!is.character(type))
+    type <- lt[type[1L]]
+  st$lasso_type <- lt[match(type, lt)]
 
   ## Assign the "special" class and the new class "n".
   class(st) <- c("special", "lasso")
@@ -688,16 +655,67 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   if(is.null(b0))
     b0 <- bml
 
-  df <- sqrt(rep(ncol(x$X), ncol(x$X)))
-
   const <- 1e-05
 
   ## Penalty function.
-  pen <- function(b) {
-    A <- df / sqrt(b^2 + const)
-    A <- A * 1 / abs(bml)
-    A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
-    A
+  if(x$lasso_type == "normal") {
+    pen <- function(b) {
+      A <- 1 / sqrt(b^2 + const)
+      A <- A * 1 / abs(bml)
+      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+      A
+    }
+  }
+
+  if(x$lasso_type == "group") {
+    pen <- function(b) {
+      df <- ncol(x$X)
+      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
+      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+      A
+    }
+  }
+
+  if(x$lasso_type == "nominal") {
+    pen <- function(b) {
+      k <- ncol(x$X)
+      Af <- matrix(0, ncol = choose(k, 2), nrow = k)
+      combis <- combn(k, 2)
+      for(ff in 1:ncol(combis)){
+        Af[combis[1, ff], ff] <- 1
+        Af[combis[2, ff], ff] <- -1
+      }
+      Af <- cbind(diag(k), Af)
+      w <- rep(1, length = ncol(Af))
+      for(k in 1:ncol(Af))
+        w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
+      A <- 0
+      for(k in 1:ncol(Af)) {
+        tAf <- t(Af[, k])
+        d <- drop(tAf %*% b)
+        A <- A + w[k] / sqrt(d^2 + const) * Af[, k] %*% tAf
+      }
+      A
+    }
+  }
+
+  if(x$lasso_type == "ordinal") {
+    pen <- function(b) {
+      k <- ncol(x$X)
+      Af <- diff(diag(k + 1))
+      Af[1, 1] <- 1
+      Af <- Af[, -ncol(Af), drop = FALSE]
+      w <- rep(1, length = ncol(Af))
+      for(k in 1:ncol(Af))
+        w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
+      A <- 0
+      for(k in 1:ncol(Af)) {
+        tAf <- t(Af[, k])
+        d <- drop(tAf %*% b)
+        A <- A + w[k] / sqrt(d^2 + const) * Af[, k] %*% tAf
+      }
+      A
+    }
   }
 
   S <- pen(b0)
@@ -753,13 +771,21 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   ## Tranfer arguments.
   rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
 
-  ## Arguments needed for prediction.
-  rval[c("formula", "term", "is_factor", "blockscale")] <- x[c("formula", "term", "is_factor", "blockscale")]
+  ## Arguments needed for prediction and path plots.
+  keep <- c("formula", "term", "is_factor", "blockscale", "X")
+  rval[keep] <- x[keep]
+  rval$z <- z
+  rval$w <- w
+  rval$XWX <- XWX
+  rval$XWz <- XWz
+  rval$S <- S
+  rval$criterion <- control$criterion
+  rval$label <- x$label
 
   ## Compute paths.
-  if(TRUE) {
+  if(FALSE) {
     lambdas <- unique(c(seq(log(1e-8), log(rval$lambda), length = 50), log(rval$lambda),
-      seq(log(rval$lambda), log(rval$lambda) + abs(log(rval$lambda)) * 1.5, length = 50)))
+      seq(log(rval$lambda), log(rval$lambda) + abs(log(rval$lambda)) * 10, length = 50)))
     lambdas <- exp(lambdas)
     cm <- NULL; ic <- NULL
     for(i in seq_along(lambdas)) {
@@ -769,14 +795,14 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
     }
 
     par(mfrow = c(1, 2))
-    plot(lambdas, ic, type = "l")
-    abline(v = lambdas[which.min(ic)], lty = 2, col = "lightgray")
-    matplot(lambdas, cm, type = "l", lty = 1)
-    abline(v = lambdas[which.min(ic)], lty = 2, col = "lightgray")
+    plot(log(lambdas), ic, type = "l")
+    abline(v = log(lambdas[which.min(ic)]), lty = 2, col = "lightgray")
+    matplot(log(lambdas), cm, type = "l", lty = 1)
+    abline(v = log(lambdas[which.min(ic)]), lty = 2, col = "lightgray")
   }
 
   ## Assign class for predict method. 
-  class(rval) <- "lasso.fitted" 
+  class(rval) <- "lasso.fitted"
 
   return(rval)
 }
@@ -800,7 +826,8 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
     X <- X[, -j, drop = FALSE]
   }
 
-  if(isTRUE(x$is_factor)) {
+  ## !FIXME
+  if(isTRUE(x$is_factor) & FALSE) {
     X <- X %*% x$blockscale
   }
 
@@ -813,5 +840,149 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
   }
 
   return(fit)
+}
+
+if(FALSE) {
+  set.seed(123)
+
+  n <- 500
+
+  x <- matrix(rnorm(100 * n), ncol = 100)
+  b <- rep(0, 100)
+  b[c(2, 6, 10)] <- c(1, -1, 0.5)
+  y <- 10 + x %*% b + rnorm(n, sd = 0.3)
+  
+  b <- gamlss2(y ~ la(x))
+
+  set.seed(123)
+
+  n <- 500
+  x <- runif(n, -3, 3)
+  y <- 10 + sin(x) + rnorm(n, sd = exp(-1 + cos(x)))
+  xf <- cut(x, breaks = 40, include.lowest = TRUE)
+
+  b <- gamlss2(y ~ la(xf,type=4) | la(xf,type=4))
+
+  par <- predict(b)
+
+  plot(x, y)
+
+  i <- order(x)
+
+  for(q in c(0.05, 0.5, 0.95)) {
+    p <- family(b)$q(q, par)
+    lines(p[i] ~ x[i], lwd = 3, col = 4)
+  }
+}
+
+## Lasso plotting function.
+lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, ...)
+{
+  which <- match.arg(which)
+
+  if(inherits(x, "gamlss2")) {
+    x <- specials(x, drop = FALSE)
+    cx <- sapply(x, class)
+    nx <- names(x)
+
+    if(!any(j <- cx %in% c("lasso.fitted", "glmnet.fitted")))
+      return(invisible(NULL))
+
+    j <- which(j)
+
+    if(spar)
+      par(mfrow = n2mfrow(length(j)))
+ 
+    lmbd <- NULL
+    if(any(jj <- cx == "lasso.fitted"))
+      lmbd <- sapply(x[jj], function(x) x$lambda)
+
+    if(!is.null(lmbd)) {
+      lambdas <- NULL
+      scale <- list(...)$scale
+      if(is.null(scale))
+        scale <- 5
+      scale <- rep(scale, length.out = 2L)
+      grid <- 50
+      for(l in lmbd) {
+        lambdas <- c(lambdas, c(seq(log(l) - abs(log(l)) * scale[1L], log(l), length = grid), log(l),
+          seq(log(l), log(l) + abs(log(l)) * scale[2L], length = grid)))
+      }
+      lambdas <- exp(sort(unique(lambdas)))
+    }
+    for(i in j)
+      lasso_plot(x[[i]], which = which, lambdas = lambdas, label = nx[i], ...)
+  } else {
+    if(!is.null(x$model)) {
+      lambdas <- log(x$model$lambda)
+      i <- which.min(x$ic$value)
+      if(which == "criterion") {
+        plot(lambdas, x$ic$value, type = "l",
+          xlab = expression(log(lambda)), ylab = toupper(x$ic$criterion),
+          lwd = 2, ...)
+      } else {
+        cm <- as.matrix(coef(x$model))
+        matplot(lambdas, t(cm), type = "l", lty = 1,
+          xlab = expression(log(lambda)), ylab = "Coefficients")
+      }
+
+      abline(v = lambdas[i], lty = 2, col = "lightgray")
+
+      axis(3, at = lambdas[i], labels = bquote(lambda == .(round(exp(lambdas[i]), 4)) ~ ", edf =" ~ .(x$ic$edf[i])))
+    } else {
+      lambdas <- list(...)$lambdas
+      n <- length(x$z)
+      logn <- log(n)
+
+      cm <- ic <- edfs <- NULL
+
+      for(l in lambdas) {
+        P <- try(chol2inv(chol(x$XWX + l*x$S)), silent = TRUE)
+
+        if(inherits(P, "try-error"))
+          P <- solve(x$XWX + x$S)
+
+        b <- drop(P %*% x$XWz)
+
+        fit <- drop(x$X %*% b)
+
+        edf <- sum(diag(x$XWX %*% P))
+
+        rss <- sum(x$w * (x$z - fit)^2)
+
+        icl <- switch(tolower(x$criterion),
+          "gcv" = rss * n / (n - edf)^2,
+          "aic" = rss + 2 * edf,
+          "gaic" = rss + K * edf,
+          "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+          "bic" = rss + logn * edf
+        )
+
+        ic <- c(ic, icl)
+        edfs <- c(edfs, edf)
+
+        cm <- rbind(cm, b)
+      }
+
+      lab <- list(...)$label
+
+      if(which == "criterion") {
+        plot(ic ~ log(lambdas), type = "l", lwd = 2,
+          xlab = expression(log(lambda)), ylab = toupper(x$criterion),
+          main = lab)
+      } else {
+        matplot(log(lambdas), cm, type = "l", lty = 1, lwd = 1, col = 1,
+          xlab = expression(log(lambda)), ylab = "Coefficients",
+          main = lab)
+      }
+
+      i <- which.min(ic)
+      lo <- log(lambdas)[i]
+
+      abline(v = lo, lty = 2, col = "lightgray")
+      mtext(bquote(lambda == .(round(exp(lo), 4)) ~ " edf =" ~ .(edfs[i])), side = 3, line = 0.3, cex = 0.8)
+    }
+  }
+  return(invisible(NULL))
 }
 

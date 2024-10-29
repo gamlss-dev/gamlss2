@@ -114,19 +114,27 @@ results.gamlss2 <- function(x, ...)
               } else {
                 next
               }
+              nd <- as.data.frame(nd)
+              names(nd) <- x$specials[[i]]$term
             } else {
-              if(!is.factor(x$model[[x$specials[[i]]$term]])) {
-                xr <- range(x$model[[x$specials[[i]]$term]])
-                nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+              if(!is.matrix(x$model[[x$specials[[i]]$term]])) {
+                if(!is.factor(x$model[[x$specials[[i]]$term]])) {
+                  xr <- range(x$model[[x$specials[[i]]$term]])
+                  nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+                } else {
+                  xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
+                  nd <- data.frame(xf)
+                }
+                nd <- as.data.frame(nd)
+                names(nd) <- x$specials[[i]]$term
               } else {
-                xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
-                nd <- data.frame(xf)
+                 nd <- list()
+                 nd[[x$specials[[i]]$term]] <- x$model[[x$specials[[i]]$term]]
               }
             }
 
-            nd <- as.data.frame(nd)
-            names(nd) <- x$specials[[i]]$term
             p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
+
             if(is.null(dim(p))) {
               nd$fit <- as.numeric(p)
             } else {

@@ -117,6 +117,10 @@ results.gamlss2 <- function(x, ...)
               nd <- as.data.frame(nd)
               names(nd) <- x$specials[[i]]$term
             } else {
+              if(!is.null(dim(x$model[[x$specials[[i]]$term]]))) {
+                if(ncol(x$model[[x$specials[[i]]$term]]) < 2L)
+                  x$model[[x$specials[[i]]$term]] <- as.numeric(x$model[[x$specials[[i]]$term]])
+              }
               if(!is.matrix(x$model[[x$specials[[i]]$term]])) {
                 if(!is.factor(x$model[[x$specials[[i]]$term]])) {
                   xr <- range(x$model[[x$specials[[i]]$term]])

@@ -576,7 +576,7 @@ blockstand <- function(x, n)
 }
 
 ## Special lasso from Groll et al.
-la <- function(x, type = 2, contrasts.arg = NULL, xlev = NULL, ...)
+la <- function(x, type = 1, contrasts.arg = NULL, xlev = NULL, ...)
 {
   call <- match.call()
 

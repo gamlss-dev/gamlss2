@@ -25,7 +25,9 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
           names(lambdas) <- paste0("lambda", 1:length(lambdas))
         }
         if(!is.null(cij)) {
-          names(cij) <- as.character(1:length(cij))
+          if(is.null(names(cij))) {
+            names(cij) <- as.character(1:length(cij))
+          }
           cos[[i]]$s[[j]] <- cij
         }
         if(!is.null(lambdas))

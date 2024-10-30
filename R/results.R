@@ -99,7 +99,6 @@ results.gamlss2 <- function(x, ...)
           ## special terms.
           if(("special" %in% class(x$specials[[i]])) & (i %in% names(x$fitted.specials[[j]]))) {
             dim <- length(x$specials[[i]]$term)
-
             if(dim > 2)
               next
 
@@ -107,7 +106,7 @@ results.gamlss2 <- function(x, ...)
 
             if(dim > 1) {
               xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
-              if(all(xc == "numeric")) {
+              if(all(xc %in% c("numeric", "matrix", "array"))) {
                 nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
                   max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
                   seq(min(x$model[[x$specials[[i]]$term[2L]]]),
@@ -115,19 +114,31 @@ results.gamlss2 <- function(x, ...)
               } else {
                 next
               }
+              nd <- as.data.frame(nd)
+              names(nd) <- x$specials[[i]]$term
             } else {
-              if(!is.factor(x$model[[x$specials[[i]]$term]])) {
-                xr <- range(x$model[[x$specials[[i]]$term]])
-                nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+              if(!is.null(dim(x$model[[x$specials[[i]]$term]]))) {
+                if(ncol(x$model[[x$specials[[i]]$term]]) < 2L)
+                  x$model[[x$specials[[i]]$term]] <- as.numeric(x$model[[x$specials[[i]]$term]])
+              }
+              if(!is.matrix(x$model[[x$specials[[i]]$term]])) {
+                if(!is.factor(x$model[[x$specials[[i]]$term]])) {
+                  xr <- range(x$model[[x$specials[[i]]$term]])
+                  nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
+                } else {
+                  xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
+                  nd <- data.frame(xf)
+                }
+                nd <- as.data.frame(nd)
+                names(nd) <- x$specials[[i]]$term
               } else {
-                xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
-                nd <- data.frame(xf)
+                 nd <- list()
+                 nd[[x$specials[[i]]$term]] <- x$model[[x$specials[[i]]$term]]
               }
             }
 
-            nd <- as.data.frame(nd)
-            names(nd) <- x$specials[[i]]$term
             p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
+
             if(is.null(dim(p))) {
               nd$fit <- as.numeric(p)
             } else {

@@ -45,7 +45,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       "tx", "tx2", "tx3", "tx4", "la", "n", "lin",
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
       "random", "ra", "lo", "tr", "tree", "cf", "NN", "pb2", "ct",
-      "st", "ps2", "pdDiag")
+      "st", "ps2", "pdDiag", "user")
     stn <- unique(c(stn, specials))
     formula <- ff_replace(formula)
 
@@ -59,6 +59,9 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       ff <- NULL
       for(j in tls) {
         p <- parse(text = j)
+        if(as.character(p[[1]][[1]]) %in% c("la", "lasso")) {
+          p <- p[[1]][1:2]
+        }
         v <- all.vars(p)
         e <- eval(parse(text = paste0("quote(", j, ")")))
         for(i in seq_along(e)) {

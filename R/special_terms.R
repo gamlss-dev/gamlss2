@@ -576,7 +576,7 @@ blockstand <- function(x, n)
 }
 
 ## Special lasso from Groll et al.
-la <- function(x, type = 1, contrasts.arg = NULL, xlev = NULL, ...)
+la <- function(x, type = 1, const = 1e-05, contrasts.arg = NULL, xlev = NULL, ...)
 {
   call <- match.call()
 
@@ -618,13 +618,14 @@ la <- function(x, type = 1, contrasts.arg = NULL, xlev = NULL, ...)
 
   ## !FIXME
   if(isTRUE(st$is_factor) & FALSE) {
-    st$X <- blockstand(st$X, n = nrow(st$X))
-    st$blockscale <- attr(st$X, "blockscale")
+    st$blockscale <- attr(blockstand(st$X, n = nrow(st$X)), "blockscale")
+    st$X <- st$X %*% st$blockscale
   }
 
   st$formula <- formula
   st$contrasts.arg <- contrasts.arg
   st$xlev <- xlev
+  st$const <- const
 
   lt <- c("normal", "group", "nominal", "ordinal")
   if(!is.character(type))
@@ -648,19 +649,16 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   XWz <- crossprod(XW, z)
   n <- length(z)
   logn <- log(n)
-
   bml <- drop(solve(XWX + diag(1e-08, k), XWz))
   b0 <- transfer$coefficients
 
   if(is.null(b0))
     b0 <- bml
 
-  const <- 1e-05
-
   ## Penalty function.
   if(x$lasso_type == "normal") {
     pen <- function(b) {
-      A <- 1 / sqrt(b^2 + const)
+      A <- 1 / sqrt(b^2 + x$const)
       A <- A * 1 / abs(bml)
       A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
       A
@@ -686,14 +684,23 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
         Af[combis[2, ff], ff] <- -1
       }
       Af <- cbind(diag(k), Af)
-      w <- rep(1, length = ncol(Af))
-      for(k in 1:ncol(Af))
+      w <- rep(0, length = ncol(Af))
+      df <- colSums(abs(x$X) > 0)
+      nref <- n - sum(df)
+      for(k in 1:ncol(Af)) {
+        ok <- which(Af[, k] != 0)
+        w[k] <- if(length(ok) < 2) {
+          2 / (k + 1) * sqrt((df[ok[1]] + nref) / n)
+        } else {
+          2 / (k + 1) * sqrt((df[ok[1]] + df[ok[2]]) / n)
+        }
         w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
+      }
       A <- 0
       for(k in 1:ncol(Af)) {
         tAf <- t(Af[, k])
         d <- drop(tAf %*% b)
-        A <- A + w[k] / sqrt(d^2 + const) * Af[, k] %*% tAf
+        A <- A + w[k] / sqrt(d^2 + x$const) * Af[, k] %*% tAf
       }
       A
     }
@@ -705,14 +712,23 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       Af <- diff(diag(k + 1))
       Af[1, 1] <- 1
       Af <- Af[, -ncol(Af), drop = FALSE]
-      w <- rep(1, length = ncol(Af))
-      for(k in 1:ncol(Af))
+      w <- rep(0, length = ncol(Af))
+      df <- colSums(abs(x$X) > 0)
+      nref <- n - sum(df)
+      for(k in 1:ncol(Af)) {
+        ok <- which(Af[, k] != 0)
+        w[k] <- if(length(ok) < 2) {
+          sqrt((df[ok[1]] + nref) / n)
+        } else {
+          sqrt((df[ok[1]] + df[ok[2]]) / n)
+        }
         w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
+      }
       A <- 0
       for(k in 1:ncol(Af)) {
         tAf <- t(Af[, k])
         d <- drop(tAf %*% b)
-        A <- A + w[k] / sqrt(d^2 + const) * Af[, k] %*% tAf
+        A <- A + w[k] / sqrt(d^2 + x$const) * Af[, k] %*% tAf
       }
       A
     }
@@ -782,25 +798,6 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$criterion <- control$criterion
   rval$label <- x$label
 
-  ## Compute paths.
-  if(FALSE) {
-    lambdas <- unique(c(seq(log(1e-8), log(rval$lambda), length = 50), log(rval$lambda),
-      seq(log(rval$lambda), log(rval$lambda) + abs(log(rval$lambda)) * 10, length = 50)))
-    lambdas <- exp(lambdas)
-    cm <- NULL; ic <- NULL
-    for(i in seq_along(lambdas)) {
-      o <- fl(lambdas[i], coef = TRUE)
-      ic <- c(ic, o$ic)
-      cm <- rbind(cm, o$coefficients)
-    }
-
-    par(mfrow = c(1, 2))
-    plot(log(lambdas), ic, type = "l")
-    abline(v = log(lambdas[which.min(ic)]), lty = 2, col = "lightgray")
-    matplot(log(lambdas), cm, type = "l", lty = 1)
-    abline(v = log(lambdas[which.min(ic)]), lty = 2, col = "lightgray")
-  }
-
   ## Assign class for predict method. 
   class(rval) <- "lasso.fitted"
 
@@ -827,7 +824,7 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
   }
 
   ## !FIXME
-  if(isTRUE(x$is_factor) & FALSE) {
+  if(!is.null(x$blockscale)) {
     X <- X %*% x$blockscale
   }
 
@@ -876,22 +873,19 @@ if(FALSE) {
 }
 
 ## Lasso plotting function.
-lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, ...)
+lasso_plot <- function(x, terms = NULL,
+  which = c("criterion", "coefficients"), spar = TRUE, ...)
 {
   which <- match.arg(which)
 
   if(inherits(x, "gamlss2")) {
     x <- specials(x, drop = FALSE)
     cx <- sapply(x, class)
-    nx <- names(x)
 
     if(!any(j <- cx %in% c("lasso.fitted", "glmnet.fitted")))
       return(invisible(NULL))
 
     j <- which(j)
-
-    if(spar)
-      par(mfrow = n2mfrow(length(j)))
  
     lmbd <- NULL
     if(any(jj <- cx == "lasso.fitted"))
@@ -903,14 +897,33 @@ lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, .
       if(is.null(scale))
         scale <- 5
       scale <- rep(scale, length.out = 2L)
-      grid <- 50
+      grid <- list(...)$grid
+      if(is.null(grid))
+        grid <- 50
       for(l in lmbd) {
         lambdas <- c(lambdas, c(seq(log(l) - abs(log(l)) * scale[1L], log(l), length = grid), log(l),
           seq(log(l), log(l) + abs(log(l)) * scale[2L], length = grid)))
       }
       lambdas <- exp(sort(unique(lambdas)))
     }
-    for(i in j)
+
+    if(!is.null(terms)) {
+      if(is.character(terms))
+        terms <- grep2(terms, names(x), fixed = TRUE)
+      x <- x[terms]
+    }
+
+    nx <- names(x)
+
+    if(spar) {
+      opar <- par(no.readonly = TRUE)
+      par(mfrow = n2mfrow(length(nx)))
+      if(which == "coefficients")
+        par(mar = c(4, 4, 4, 8))
+      on.exit(par(opar))
+    }
+
+    for(i in 1:length(nx))
       lasso_plot(x[[i]], which = which, lambdas = lambdas, label = nx[i], ...)
   } else {
     if(!is.null(x$model)) {
@@ -967,20 +980,63 @@ lasso_plot <- function(x, which = c("criterion", "coefficients"), spar = TRUE, .
       lab <- list(...)$label
 
       if(which == "criterion") {
-        plot(ic ~ log(lambdas), type = "l", lwd = 2,
+        plot(rev(ic) ~ log(lambdas), type = "l", lwd = 2,
           xlab = expression(log(lambda)), ylab = toupper(x$criterion),
-          main = lab)
+          main = "", axes = FALSE)
       } else {
-        matplot(log(lambdas), cm, type = "l", lty = 1, lwd = 1, col = 1,
+        cm <- cm[nrow(cm):1, , drop = FALSE]
+        matplot(log(lambdas), cm,
+          type = "l", lty = 1, lwd = 1, col = 1,
           xlab = expression(log(lambda)), ylab = "Coefficients",
-          main = lab)
+          main = "", axes = FALSE)
+
+        names <- list(...)$names
+        if(is.null(names))
+          names <- TRUE
+        if(isFALSE(names))
+          names <- NULL
+        if(!is.null(names)) {
+          if(!is.character(names))
+            names <- colnames(x$X)
+          names <- names[1:ncol(x$X)]
+          at <- cm[nrow(cm), ]
+
+          labs <- labs0 <- names
+          plab <- at
+          o <- order(plab, decreasing = TRUE)
+          labs <- labs[o]
+          plab <- plab[o]
+          rplab <- diff(range(plab))
+          for(i in 1:(length(plab) - 1)) {
+            dp <- abs(plab[i] - plab[i + 1]) / rplab
+            if(dp <= 0.02) {
+              labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
+              labs[i] <- ""
+            }
+          }
+          labs <- labs[order(o)]
+
+          axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
+        }
       }
 
-      i <- which.min(ic)
-      lo <- log(lambdas)[i]
+      box()
+      at <- rev(pretty(log(lambdas)))
+      axis(1, at = at, labels = at)
+      axis(2)
+
+      i <- which.min(rev(ic))
+      lo <- rev(log(lambdas))[i]
 
       abline(v = lo, lty = 2, col = "lightgray")
-      mtext(bquote(lambda == .(round(exp(lo), 4)) ~ " edf =" ~ .(edfs[i])), side = 3, line = 0.3, cex = 0.8)
+
+      main <- list(...)$main
+      if(is.null(main))
+        main <- TRUE
+      if(isTRUE(main)) {
+        mtext(bquote(log(lambda) == .(round(lo, 3)) ~ " edf =" ~ .(round(edfs[i], 2))), side = 3, line = 0.5, cex = 0.8)
+        mtext(lab, side = 3, line = 2, font = 2)
+      }
     }
   }
   return(invisible(NULL))

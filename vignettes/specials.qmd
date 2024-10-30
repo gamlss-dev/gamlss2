@@ -46,8 +46,16 @@ If not yet registered, the user can provide a new special name in the `specials`
 of `fake_formula()`. Another option is to use the special model term constructor name '"user"',
 which is already part of the special names list in `fake_formula()`.
 
+<<<<<<< HEAD
+
+`Mikis:` I suggest to add in the in the 'fake.formula' of the package dummy names, like,  "own", "test" etc  so anyone can use it to start off a new function in `gamlss2`. But in order to be include it properly he/she need to contact us (so we can keep some control over the new functions). 
+
+
+The definition function can take all relevant `loess` and `loess.control` arguments so it can pass them into the fitting function.
+=======
 The definition function can take all relevant `loess` and `loess.control` arguments so it
 can pass them later into the fitting function.
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 
 ```{r}
 lo <- function(formula, ...) 
@@ -83,15 +91,35 @@ lo <- function(formula, ...)
 
 ## The fitting function
 
+<<<<<<< HEAD
+The fitting function takes the current working response, the iterative weights and the corresponding relevant term  and creates a call to the  `loess` function to fit the relevant model. It then saves the fitted values and the fitted objects for later use.  
+
+=======
 The fitting function takes the current working response, the iterative weights and the 
 corresponding relevant term and fits and creates a call to the `loess` function to fit the
 relevant mdel. It saves the fitted values and the fitted objects for later use.  
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 
 ```{r}
 special_fit.lo <- function(x, z, w, control, ...)
 {
   ## assign current working response and weights
   x$data$response_z <- z
+<<<<<<< HEAD
+  x$data$weights_w <- w 
+  ## Estimate model.
+  nnc <- parse(text =
+          paste0('loess(formula = f, data = x$data, weights = weights_w,',
+                 'span = x$control$span, degree=x$control$degree, parametric=x$control$parametric,',
+                 'drop.square = x$control$drop.square, normalize=x$control$normalize,',
+                 'family=x$control$family, surface=x$control$surface,statistics=x$control$statistics,',
+                 'trace=x$control$trace, cell=x$control$cell,iteration=x$control$iteration,',
+                  ')'))
+  rval <- list("model" = eval(nnc)) 
+  ## Get the fitted.values.
+  rval$fitted.values <- fitted(rval$model) 
+  ## Center fitted values. 
+=======
   x$data$weights_w <- w
 
   ## set up loess call
@@ -112,18 +140,30 @@ special_fit.lo <- function(x, z, w, control, ...)
   rval$fitted.values <- fitted(rval$model) 
 
   ## center fitted values
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
   rval$shift <- mean(rval$fitted.values)
   rval$fitted.values <- rval$fitted.values - rval$shift 
 
   ## degrees of freedom
   rval$edf <-  rval$model$trace.hat
+<<<<<<< HEAD
+  ## Assign class for predict method. 
+=======
 
   ## assign class for predict method 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
   class(rval) <- "lo.fitted" 
 
   return(rval) 
 } 
 ```
+
+<!-- ## Transferring the weights for the next backfitting iteration. -->
+<!--   ## Note, "transfer" can be used to transfer anything from one -->
+<!--   ## iteration to the next. -->
+<!--   ## save the fitted object  -->
+<!--   ## Possible scaling.  -->
+<!--   rval$scalex <- x$scalex  -->
 
 ## The predict function
 
@@ -152,16 +192,39 @@ data("rent99", package = "gamlss.data")
 rent99$area <- scale(rent99$area)
 rent99$yearc <- scale(rent99$yearc)
 ```
+<<<<<<< HEAD
+Note that the continuous variables in the data `area` and `yearc` have been standardised. 
+We defined four formulae for modelling the rent data. The first two use `loess` and the third and fourth uses the additive smoothing function `s()` for comparison.  Formula `f` uses main effect smoothing terms for `area` and `yearc` for parameters $\mu$ and $\sigma$, respectively,  while the second, `f1`, uses  two dimensional smoothing functions for modelling one way interaction. The third formula uses one dimensional smoother for main effects and the fourth  two dimensional cubic splines smoothers for interactions.  Note that in this example we only use explanatory terms for the first two parameters  $\mu$ and $\sigma$  and constants for the rest, $\nu$ and $\tau$.
+=======
 
 Note that the continuous variables have been standardised. 
 We defined three formulae for modelling the rent data. The first two use `loess` and the third uses the additive smoothing function `s()` for comparison.  Formula `f` uses main effect smoothing terms for `area` and `yearc` for parameters $\mu$ and $\sigma$ while the second, `f1`, uses  two dimensional smoothing functions for interaction. The third formula uses two dimensional cubic splines smoothing for interactions.  Note that in this exapm ple we only use explanatory terms for the first two parameters  $\mu$ and $\sigma$  and constant for the rest, $\nu$ and $\tau$.
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 
 ```{r}
 f1 <- rent ~ lo(area) + lo(yearc) + location + bath + kitchen | 
   lo(area) + lo(yearc) + location + bath + kitchen
 
+<<<<<<< HEAD
+f <- rent ~ lo(~area)+lo(~yearc)+location+bath+kitchen| 
+            lo(~area)+lo(~yearc)+location+bath+kitchen|
+            1|1 
+
+f1 <- rent ~ lo(~area*yearc)+location+bath+kitchen| 
+             lo(~area*yearc)+location+bath+kitchen|
+             1|1
+
+sf <- rent ~ s(~area)+s(~yearc)+location+bath+kitchen| 
+             s(~area)+s(~yearc)+location+bath+kitchen|
+            1|1 
+
+sf1 <- rent ~ s(area,yearc)+location+bath+kitchen| 
+             s(~area,yearc)+location+bath+kitchen|
+             1|1
+=======
 f2 <- rent ~ lo(~area*yearc) + location + bath + kitchen | 
   lo(~area*yearc) + location + bath + kitchen
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 
 f3 <- rent ~ te(area,yearc) + location + bath + kitchen | 
   te(area,yearc) + location + bath + kitchen
@@ -169,8 +232,13 @@ f3 <- rent ~ te(area,yearc) + location + bath + kitchen |
 
 ## Estimation
 
+<<<<<<< HEAD
+Below we use the package `tictoc` to measure the time is taken to fit each model.
+The main effect fit for `loess`  is; 
+=======
 We will use the package `tictoc` to measure the amound of time is taken to fit each model.
 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 ```{r}
 library("tictoc")
 
@@ -179,8 +247,12 @@ b1 <- gamlss2(f1, data = rent99, family = BCTo)
 toc()
 ```
 
+<<<<<<< HEAD
+The first order interaction fit for `loess` is;
+=======
 The first order interaction fit is.
 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 ```{r}
 tic()
 b2 <- gamlss2(f2, data = rent99, family = BCTo) 
@@ -189,6 +261,29 @@ toc()
 
 ```{r}
 tic()
+<<<<<<< HEAD
+a<- gamlss2(sf, data = da, family = BCT) 
+toc()
+```
+
+```{r}
+library(tictoc)
+tic()
+a1<- gamlss2(sf1, data = da, family = BCT) 
+toc()
+```
+
+The cubic spline function `s()` is lot faster that the `lo()`, the `loess()`  implementation  of `gamlss2`.  We now compare the models using AIC;
+
+```{r}
+AIC(b,b1,a,a1, k=0) # deviance
+AIC(b,b1,a,a1,  k=log(dim(rent99)[1]))# BIC
+```
+
+
+It seems that the two `lo()` models do better that the `s()` as far as the BIC criterion is concern. 
+
+=======
 b3 <- gamlss2(f3, data = rent99, family = BCT) 
 toc()
 ```
@@ -206,6 +301,7 @@ AIC(b1, b2, b3, k = log(nrow(rent99)))
 
 It seems that the two `lo()` models do better that the `s()` as far as the
 AIC criteria are concern. 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 
 ## Visualise the fits
 
@@ -222,35 +318,51 @@ plot(b3)
 ```
 
 The function `vis.lo()` of ther package `gamlss` can be use to visualised the fitted terms.
-Here we show the `area` fitted values for model `b` and for parameter $\mu$ including the partial residuals from the model.
+Here we show the `area` fitted values for model `b` and for parameter  including the partial residuals from the model.
 
 ```{r}
 gamlss:::vis.lo(specials(b1, model="mu")[[1]]$model, partial = TRUE)
 ```
 
-Next we shos again from model `b` the fitted values for year of construction `yearc`, without partial residuals.
+Next we show the year of construction `yearc` fit from model `b` and parameter $\mu$ without partial residuals.
 
 ```{r}
 gamlss:::vis.lo(specials(b1, model = "mu")[[2]]$model, partial = FALSE)
 ```
 
+<<<<<<< HEAD
+Here we plot the fitted surface fit from model `b2` and parameters $\mu$;
+=======
 Here we plot the fitted surface fit from the $\mu$ model of `b1`.
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 
 ```{r}
 gamlss:::vis.lo(specials(b2, model = "mu")$model, partial = FALSE)
 ```
+<<<<<<< HEAD
+Here we plot the same fitted surface as above adding  a 95% confidence intervals;
+=======
 
 Here we plot the same fitted surface as above adding  95% confidence intervals;
 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 ```{r}
 gamlss:::vis.lo(specials(b2, model = "mu")$model, se = 1.97)
 ```
+<<<<<<< HEAD
+Finally we plot the fitted surface fit as above  adding the partial residuals. 
+=======
 
 Finally we plot the fitted surface fit from the $\mu$ model of `b2` adding the patial residuals. 
 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3
 ```{r}
 gamlss:::vis.lo(specials(b2, model = "mu")$model, partial = TRUE)
 ```
+<<<<<<< HEAD
+Note that similar plots are given in section 9.6.3 of @Stasinopoulosetal2017 where the `lo()` function within package `gamlss` is described.
+=======
 
 Note that similar plots are given in section 9.6.3 of @Stasinopoulosetal2017.
 
+>>>>>>> 461b2186d4ba44ba131481a0bab5cf24cd7422d3

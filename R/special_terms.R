@@ -576,7 +576,7 @@ blockstand <- function(x, n)
 }
 
 ## Special lasso from Groll et al.
-la <- function(x, type = 1, const = 1e-05, contrasts.arg = NULL, xlev = NULL, ...)
+la <- function(x, type = 1, const = 1e-05, ...)
 {
   call <- match.call()
 
@@ -601,10 +601,13 @@ la <- function(x, type = 1, const = 1e-05, contrasts.arg = NULL, xlev = NULL, ..
   st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
 
   if(!is.null(formula)) {
-    st$X <- model.matrix(formula, contrasts.arg = contrasts.arg, xlev = xlev)
+    st$X <- model.matrix(formula,
+      contrasts.arg = st$control$contrasts.arg,
+      xlev = st$control$xlev)
   } else {
     if(is.factor(x)) {
-      st$X <- model.matrix(~ x, contrasts.arg = contrasts.arg, xlev = xlev)
+      st$X <- model.matrix(~ x, contrasts.arg = st$control$contrasts.arg,
+        xlev = st$control$xlev)
       colnames(st$X) <- gsub("x", "", colnames(st$X))
       st$is_factor <- TRUE
     } else {
@@ -623,9 +626,7 @@ la <- function(x, type = 1, const = 1e-05, contrasts.arg = NULL, xlev = NULL, ..
   }
 
   st$formula <- formula
-  st$contrasts.arg <- contrasts.arg
-  st$xlev <- xlev
-  st$const <- const
+  st$control$const <- const
 
   lt <- c("normal", "group", "nominal", "ordinal")
   if(!is.character(type))
@@ -658,7 +659,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   ## Penalty function.
   if(x$lasso_type == "normal") {
     pen <- function(b) {
-      A <- 1 / sqrt(b^2 + x$const)
+      A <- 1 / sqrt(b^2 + x$control$const)
       A <- A * 1 / abs(bml)
       A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
       A
@@ -700,7 +701,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       for(k in 1:ncol(Af)) {
         tAf <- t(Af[, k])
         d <- drop(tAf %*% b)
-        A <- A + w[k] / sqrt(d^2 + x$const) * Af[, k] %*% tAf
+        A <- A + w[k] / sqrt(d^2 + x$control$const) * Af[, k] %*% tAf
       }
       A
     }
@@ -728,7 +729,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       for(k in 1:ncol(Af)) {
         tAf <- t(Af[, k])
         d <- drop(tAf %*% b)
-        A <- A + w[k] / sqrt(d^2 + x$const) * Af[, k] %*% tAf
+        A <- A + w[k] / sqrt(d^2 + x$control$const) * Af[, k] %*% tAf
       }
       A
     }
@@ -812,7 +813,7 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
       contrasts.arg = x$contrasts.arg, xlev = x$xlev)
   } else {
     if(is.factor(data[[x$term]])) {
-      X <- model.matrix(~ data[[x$term]], contrasts.arg = x$contrasts.arg, xlev = x$xlev)
+      X <- model.matrix(~ data[[x$term]], contrasts.arg = x$control$contrasts.arg, xlev = x$control$xlev)
       colnames(X) <- gsub("data[[x$term]]", "", colnames(X), fixed = TRUE)
     } else {
       X <- data[[x$term]]
@@ -870,10 +871,27 @@ if(FALSE) {
     p <- family(b)$q(q, par)
     lines(p[i] ~ x[i], lwd = 3, col = 4)
   }
+
+  data("rent", package = "gamlss.data")
+
+  rent$Flc <- cut(rent$Fl, breaks = seq(20, 160, by = 10),
+    include.lowest = TRUE)
+  rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
+    include.lowest = TRUE)
+
+  ## Normal lasso: type = 1
+  ## Group lasso: type = 2
+  ## Nominal fused lasso: type = 3
+  ## Ordinal fused lasso: type = 4
+  f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) |
+    la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) |
+    la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4)
+
+  b <- gamlss2(f, data = rent, family = BCT)
 }
 
 ## Lasso plotting function.
-lasso_plot <- function(x, terms = NULL,
+plot_lasso <- function(x, terms = NULL,
   which = c("criterion", "coefficients"), spar = TRUE, ...)
 {
   which <- match.arg(which)
@@ -924,7 +942,7 @@ lasso_plot <- function(x, terms = NULL,
     }
 
     for(i in 1:length(nx))
-      lasso_plot(x[[i]], which = which, lambdas = lambdas, label = nx[i], ...)
+      plot_lasso(x[[i]], which = which, lambdas = lambdas, label = nx[i], ...)
   } else {
     if(!is.null(x$model)) {
       lambdas <- log(x$model$lambda)

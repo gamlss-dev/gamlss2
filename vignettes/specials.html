@@ -483,8 +483,8 @@ window.Quarto = {
 <p>Note that any regression type machine learning function is <strong>R</strong> can be easily incorporated in <code>gamlss2</code> especially if there is a <strong>prior weights</strong> argument in the function. <code>loess()</code> has the argument <code>weights</code> for prior weights so it can be incorporated easily.</p>
 <section id="the-special-model-term-constructor" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="the-special-model-term-constructor"><span class="header-section-number">1</span> The special model term constructor</h2>
-<p>Any special model term cosntructor <strong>must</strong> be registered in the <code>fake_formula()</code> function. If not yet registered, the user can provide a new special name in the <code>specials</code> argument of <code>fake_formula()</code>. Another option is to use the special model term constructor name ‘“user”’, which is already part of the special names list in <code>fake_formula()</code>.</p>
-<p>The definition function can take all relevant <code>loess</code> and <code>loess.control</code> arguments so it can pass them later into the fitting function.</p>
+<p>Any special model term constructor <strong>must</strong> be registered in the <code>fake_formula()</code> function. If not yet registered, the user can provide a new special name in the <code>specials</code> argument of <code>fake_formula()</code>. Another option is to use the special model term constructor name ‘“user”’, which is already part of the special names list in <code>fake_formula()</code>.</p>
+<p>The definition function can take all relevant <code>loess</code> and <code>loess.control</code> arguments so it can pass them into the fitting function.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>lo <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, ...) </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>{</span>
@@ -519,44 +519,43 @@ window.Quarto = {
 </section>
 <section id="the-fitting-function" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="the-fitting-function"><span class="header-section-number">2</span> The fitting function</h2>
-<p>The fitting function takes the current working response, the iterative weights and the corresponding relevant term and fits and creates a call to the <code>loess</code> function to fit the relevant mdel. It saves the fitted values and the fitted objects for later use.</p>
+<p>The fitting function takes the current working response, the iterative weights and the corresponding relevant term and creates a call to the <code>loess</code> function to fit the relevant model. It then saves the fitted values and the fitted objects for later use.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>special_fit.lo <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## assign current working response and weights</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">## assign current working response and weights</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">$</span>data<span class="sc">$</span>response_z <span class="ot">&lt;-</span> z</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">$</span>data<span class="sc">$</span>weights_w <span class="ot">&lt;-</span> w</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## set up loess call</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="st">"loess(formula = x$formula, data = x$data, weights = weights_w"</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## add optional control parameters</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(x<span class="sc">$</span>control)) {</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">names</span>(x<span class="sc">$</span>control))</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      call <span class="ot">&lt;-</span> <span class="fu">paste0</span>(call, <span class="st">", "</span>, j, <span class="st">"= x$control$"</span>, j)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="fu">paste0</span>(call, <span class="st">")"</span>)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="do">## estimate model</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  rval <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"model"</span> <span class="ot">=</span> <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> call)))</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="do">## get the fitted.values</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> <span class="fu">fitted</span>(rval<span class="sc">$</span>model) </span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="do">## center fitted values</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(rval<span class="sc">$</span>fitted.values)</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> rval<span class="sc">$</span>fitted.values <span class="sc">-</span> rval<span class="sc">$</span>shift </span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="do">## degrees of freedom</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>edf <span class="ot">&lt;-</span>  rval<span class="sc">$</span>model<span class="sc">$</span>trace.hat</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="do">## assign class for predict method </span></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(rval) <span class="ot">&lt;-</span> <span class="st">"lo.fitted"</span> </span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rval) </span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># set up loess call</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="st">"loess(formula = x$formula, data = x$data, weights = weights_w"</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">## add optional control parameters</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(x<span class="sc">$</span>control)) {</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">names</span>(x<span class="sc">$</span>control))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      call <span class="ot">&lt;-</span> <span class="fu">paste0</span>(call, <span class="st">", "</span>, j, <span class="st">"= x$control$"</span>, j)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>call <span class="ot">&lt;-</span> <span class="fu">paste0</span>(call, <span class="st">")"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>rval <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"model"</span> <span class="ot">=</span> <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> call)))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="do">## get the fitted.values</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> <span class="fu">fitted</span>(rval<span class="sc">$</span>model) </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="do">## center fitted values</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(rval<span class="sc">$</span>fitted.values)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> rval<span class="sc">$</span>fitted.values <span class="sc">-</span> rval<span class="sc">$</span>shift </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="do">## degrees of freedom</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>edf <span class="ot">&lt;-</span>  rval<span class="sc">$</span>model<span class="sc">$</span>trace.hat</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="do">## assign class for predict method </span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(rval) <span class="ot">&lt;-</span> <span class="st">"lo.fitted"</span> </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rval) </span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<!-- ## Transferring the weights for the next backfitting iteration. -->
+<!--   ## Note, "transfer" can be used to transfer anything from one -->
+<!--   ## iteration to the next. -->
+<!--   ## save the fitted object  -->
+<!--   ## Possible scaling.  -->
+<!--   rval$scalex <- x$scalex  -->
 </section>
 <section id="the-predict-function" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="the-predict-function"><span class="header-section-number">3</span> The predict function</h2>
@@ -583,26 +582,32 @@ window.Quarto = {
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>rent99<span class="sc">$</span>area <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent99<span class="sc">$</span>area)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>rent99<span class="sc">$</span>yearc <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent99<span class="sc">$</span>yearc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Note that the continuous variables have been standardised. We defined three formulae for modelling the rent data. The first two use <code>loess</code> and the third uses the additive smoothing function <code>s()</code> for comparison. Formula <code>f</code> uses main effect smoothing terms for <code>area</code> and <code>yearc</code> for parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> while the second, <code>f1</code>, uses two dimensional smoothing functions for interaction. The third formula uses two dimensional cubic splines smoothing for interactions. Note that in this exapm ple we only use explanatory terms for the first two parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> and constant for the rest, <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\tau\)</span>.</p>
+<p>Note that the continuous variables in the data <code>area</code> and <code>yearc</code> have been standardised. We defined four formulae for modelling the rent data. The first two use <code>loess</code> and the third and fourth uses the additive smoothing function <code>s()</code> for comparison. Formula <code>f</code> uses main effect smoothing terms for <code>area</code> and <code>yearc</code> for parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>, respectively, while the second, <code>f1</code>, uses two dimensional smoothing functions for modelling one way interaction. The third formula uses one dimensional smoother for main effects and the fourth two dimensional cubic splines smoothers for interactions. Note that in this example we only use explanatory terms for the first two parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> and constants for the rest, <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\tau\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(area) <span class="sc">+</span> <span class="fu">lo</span>(yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lo</span>(area) <span class="sc">+</span> <span class="fu">lo</span>(yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">lo</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">lo</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">lo</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>             <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>sf <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">s</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">s</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span> </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>             <span class="fu">s</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">s</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span> </span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>sf1 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>              <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="estimation" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="estimation"><span class="header-section-number">5</span> Estimation</h2>
-<p>We will use the package <code>tictoc</code> to measure the amound of time is taken to fit each model.</p>
+<p>Below we use the package <code>tictoc</code> to measure the time is taken to fit each model. The main effect fit for <code>loess</code> is;</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tictoc"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 38409.6672 eps = 0.286141     
 GAMLSS-RS iteration  2: Global Deviance = 38363.6237 eps = 0.001198     
@@ -612,13 +617,13 @@ GAMLSS-RS iteration  5: Global Deviance = 38359.6113 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.727 sec elapsed</code></pre>
+<pre><code>4.751 sec elapsed</code></pre>
 </div>
 </div>
-<p>The first order interaction fit is.</p>
+<p>The first order interaction fit for <code>loess</code> is;</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 38410.5652 eps = 0.286125     
 GAMLSS-RS iteration  2: Global Deviance = 38359.84 eps = 0.001320     
@@ -628,12 +633,32 @@ GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>8.287 sec elapsed</code></pre>
+<pre><code>8.302 sec elapsed</code></pre>
 </div>
 </div>
+<p>Now the main effect model using <code>s()</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>a1<span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(sf, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38462.5283 eps = 0.285214     
+GAMLSS-RS iteration  2: Global Deviance = 38416.2184 eps = 0.001204     
+GAMLSS-RS iteration  3: Global Deviance = 38412.248 eps = 0.000103     
+GAMLSS-RS iteration  4: Global Deviance = 38410.7531 eps = 0.000038     
+GAMLSS-RS iteration  5: Global Deviance = 38410.2172 eps = 0.000013     
+GAMLSS-RS iteration  6: Global Deviance = 38410.034 eps = 0.000004     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1.037 sec elapsed</code></pre>
+</div>
+</div>
+<p>The interaction model using <code>te()</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>a2<span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(sf1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 38409.1594 eps = 0.286206     
 GAMLSS-RS iteration  2: Global Deviance = 38364.6191 eps = 0.001159     
@@ -642,46 +667,39 @@ GAMLSS-RS iteration  4: Global Deviance = 38360.2823 eps = 0.000026
 GAMLSS-RS iteration  5: Global Deviance = 38359.898 eps = 0.000010     
 GAMLSS-RS iteration  6: Global Deviance = 38359.7641 eps = 0.000003     </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.099 sec elapsed</code></pre>
+<pre><code>1.244 sec elapsed</code></pre>
 </div>
 </div>
 <p>The cubic spline function is lot faster than the <code>loess()</code> implementation <code>lo()</code> in <code>gamlss2</code>, but let us now compare the models using AIC.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## deviance</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, b3, <span class="at">k =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## deviance</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, a1, a2, <span class="at">k =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
 b2 38355.61 36.77363
 b1 38359.61 33.15714
-b3 38359.76 38.38334</code></pre>
+a2 38359.76 38.38334
+a1 38410.03 31.24265</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">## BIC</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, b3, <span class="at">k =</span> <span class="fu">log</span>(<span class="fu">nrow</span>(rent99)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">## BIC</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, a1, a2, <span class="at">k =</span> <span class="fu">log</span>(<span class="fu">nrow</span>(rent99)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
 b1 38625.97 33.15714
 b2 38651.03 36.77363
-b3 38668.11 38.38334</code></pre>
+a1 38661.02 31.24265
+a2 38668.11 38.38334</code></pre>
 </div>
 </div>
 <p>It seems that the two <code>lo()</code> models do better that the <code>s()</code> as far as the AIC criteria are concern.</p>
 </section>
 <section id="visualise-the-fits" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="visualise-the-fits"><span class="header-section-number">6</span> Visualise the fits</h2>
+<p>The standard <code>plot()</code> function of <code>gamlss2</code> can be used to visualises the smooth curves fits (under certain circumstances). For example for the main effect model using <code>lo()</code> we have;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -690,8 +708,9 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
+<p>Note that no standard errors are shown here compare to the <code>s()</code> function model shown below;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(a1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -700,9 +719,9 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
-<p>The function <code>vis.lo()</code> of ther package <code>gamlss</code> can be use to visualised the fitted terms. Here we show the <code>area</code> fitted values for model <code>b</code> and for parameter <span class="math inline">\(\mu\)</span> including the partial residuals from the model.</p>
+<p>For the first order interaction model <code>b2</code> and because the effects are not defined within <code>gamlss2</code> calling <code>plot()</code> produces the standard residual plots;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model=</span><span class="st">"mu"</span>)[[<span class="dv">1</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -711,9 +730,9 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
-<p>Next we shos again from model <code>b</code> the fitted values for year of construction <code>yearc</code>, without partial residuals.</p>
+<p>For the first order interaction model <code>a2</code> using tensor products the plot are more informative;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model =</span> <span class="st">"mu"</span>)[[<span class="dv">2</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(a2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -722,9 +741,9 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
-<p>Here we plot the fitted surface fit from the <span class="math inline">\(\mu\)</span> model of <code>b1</code>.</p>
+<p>One can use the function <code>vis.lo()</code> of the package <code>gamlss</code> to visualised the fitted terms fitted with <code>lo()</code>. Here we show the <code>area</code> fitted values for parameter <span class="math inline">\(\mu\)</span> and model <code>b</code> including the partial residuals from the model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model=</span><span class="st">"mu"</span>)[[<span class="dv">1</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -733,9 +752,9 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
-<p>Here we plot the same fitted surface as above adding 95% confidence intervals;</p>
+<p>Next we show the year of construction <code>yearc</code> fit for parameters <span class="math inline">\(\mu\)</span> from model <code>b</code> without partial residuals.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">se =</span> <span class="fl">1.97</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model =</span> <span class="st">"mu"</span>)[[<span class="dv">2</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -744,9 +763,9 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
-<p>Finally we plot the fitted surface fit from the <span class="math inline">\(\mu\)</span> model of <code>b2</code> adding the patial residuals.</p>
+<p>Here we plot the fitted surface fit from model <code>b2</code> and parameters <span class="math inline">\(\mu\)</span>;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -755,7 +774,29 @@ b3 38668.11 38.38334</code></pre>
 </div>
 </div>
 </div>
-<p>Note that similar plots are given in section 9.6.3 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>.</p>
+<p>Here we plot the same fitted surface as above adding a 95% confidence intervals;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">se =</span> <span class="fl">1.97</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Finally we plot the fitted surface fit from the <span class="math inline">\(\mu\)</span> model of <code>b2</code> adding the partial residuals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="specials_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that similar plots are given in section 9.6.3 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>, where the <code>lo()</code> function within package <code>gamlss</code>, is described.</p>
 
 
 

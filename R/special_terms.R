@@ -903,8 +903,13 @@ plot_lasso <- function(x, terms = NULL,
     if(!any(j <- cx %in% c("lasso.fitted", "glmnet.fitted")))
       return(invisible(NULL))
 
-    j <- which(j)
+    if(!is.null(terms)) {
+      if(is.character(terms))
+        terms <- grep2(terms, names(x), fixed = TRUE)
+      x <- x[terms]
+    }
  
+    cx <- sapply(x, class)
     lmbd <- NULL
     if(any(jj <- cx == "lasso.fitted"))
       lmbd <- sapply(x[jj], function(x) x$lambda)
@@ -923,12 +928,6 @@ plot_lasso <- function(x, terms = NULL,
           seq(log(l), log(l) + abs(log(l)) * scale[2L], length = grid)))
       }
       lambdas <- exp(sort(unique(lambdas)))
-    }
-
-    if(!is.null(terms)) {
-      if(is.character(terms))
-        terms <- grep2(terms, names(x), fixed = TRUE)
-      x <- x[terms]
     }
 
     nx <- names(x)
@@ -995,18 +994,26 @@ plot_lasso <- function(x, terms = NULL,
         cm <- rbind(cm, b)
       }
 
+#print(ic[log(lambdas) == log(x$lambda)])
+#print(min(ic))
+#cat("---\n")
+
+      edf0 <- edfs[which.min(ic)]
+
       lab <- list(...)$label
 
+      rind <- rev(1:length(ic))
+      xlim <- rev(range(log(lambdas)))
+
       if(which == "criterion") {
-        plot(rev(ic) ~ log(lambdas), type = "l", lwd = 2,
+        plot(log(lambdas), ic, type = "l", lwd = 2,
           xlab = expression(log(lambda)), ylab = toupper(x$criterion),
-          main = "", axes = FALSE)
+          main = "", axes = FALSE, xlim = xlim)
       } else {
-        cm <- cm[nrow(cm):1, , drop = FALSE]
         matplot(log(lambdas), cm,
           type = "l", lty = 1, lwd = 1, col = 1,
           xlab = expression(log(lambda)), ylab = "Coefficients",
-          main = "", axes = FALSE)
+          main = "", axes = FALSE, xlim = xlim)
 
         names <- list(...)$names
         if(is.null(names))
@@ -1017,7 +1024,7 @@ plot_lasso <- function(x, terms = NULL,
           if(!is.character(names))
             names <- colnames(x$X)
           names <- names[1:ncol(x$X)]
-          at <- cm[nrow(cm), ]
+          at <- cm[1, ]
 
           labs <- labs0 <- names
           plab <- at
@@ -1039,12 +1046,11 @@ plot_lasso <- function(x, terms = NULL,
       }
 
       box()
-      at <- rev(pretty(log(lambdas)))
-      axis(1, at = at, labels = at)
+      axis(1)
       axis(2)
 
-      i <- which.min(rev(ic))
-      lo <- rev(log(lambdas))[i]
+      i <- which.min(ic[rind])
+      lo <- log(lambdas)[rind][i]
 
       abline(v = lo, lty = 2, col = "lightgray")
 
@@ -1052,7 +1058,7 @@ plot_lasso <- function(x, terms = NULL,
       if(is.null(main))
         main <- TRUE
       if(isTRUE(main)) {
-        mtext(bquote(log(lambda) == .(round(lo, 3)) ~ " edf =" ~ .(round(edfs[i], 2))), side = 3, line = 0.5, cex = 0.8)
+        mtext(bquote(log(lambda) == .(round(lo, 3)) ~ " edf =" ~ .(round(edf0, 2))), side = 3, line = 0.5, cex = 0.8)
         mtext(lab, side = 3, line = 2, font = 2)
       }
     }

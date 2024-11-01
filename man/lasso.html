@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -383,35 +417,12 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
+  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
-  <li><a href="#transform-numeric-to-factor-variables" id="toc-transform-numeric-to-factor-variables" class="nav-link" data-scroll-target="#transform-numeric-to-factor-variables">transform numeric to factor variables</a></li>
-  <li><a href="#set-up-the-model-formula-for-a-bct-model" id="toc-set-up-the-model-formula-for-a-bct-model" class="nav-link" data-scroll-target="#set-up-the-model-formula-for-a-bct-model">set up the model formula for a BCT model</a></li>
-  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation">estimation</a></li>
-  <li><a href="#summary-shows-the-estimated-degrees-of-freedom" id="toc-summary-shows-the-estimated-degrees-of-freedom" class="nav-link" data-scroll-target="#summary-shows-the-estimated-degrees-of-freedom">summary, shows the estimated degrees of freedom</a></li>
-  <li><a href="#for-each-model-term" id="toc-for-each-model-term" class="nav-link" data-scroll-target="#for-each-model-term">for each model term</a></li>
-  <li><a href="#plot-estimated-coefficients" id="toc-plot-estimated-coefficients" class="nav-link" data-scroll-target="#plot-estimated-coefficients">plot estimated coefficients</a></li>
-  <li><a href="#plot-information-criteria-curves" id="toc-plot-information-criteria-curves" class="nav-link" data-scroll-target="#plot-information-criteria-curves">plot information criteria curves</a></li>
-  <li><a href="#for-each-model-term." id="toc-for-each-model-term." class="nav-link" data-scroll-target="#for-each-model-term.">for each model term.</a></li>
-  <li><a href="#plot-parameter-paths." id="toc-plot-parameter-paths." class="nav-link" data-scroll-target="#plot-parameter-paths.">plot parameter paths.</a></li>
-  <li><a href="#plot-a-single-model-term." id="toc-plot-a-single-model-term." class="nav-link" data-scroll-target="#plot-a-single-model-term.">plot a single model term.</a></li>
-  <li><a href="#same-with" id="toc-same-with" class="nav-link" data-scroll-target="#same-with">same with</a></li>
-  <li><a href="#zoom-out" id="toc-zoom-out" class="nav-link" data-scroll-target="#zoom-out">zoom out</a></li>
-  <li><a href="#set-names" id="toc-set-names" class="nav-link" data-scroll-target="#set-names">set names</a></li>
-  <li><a href="#set-title" id="toc-set-title" class="nav-link" data-scroll-target="#set-title">set title</a></li>
-  <li><a href="#simulated-example-using-the-normal-lasso" id="toc-simulated-example-using-the-normal-lasso" class="nav-link" data-scroll-target="#simulated-example-using-the-normal-lasso">simulated example using the normal lasso</a></li>
-  <li><a href="#and-a-matrix-as-argument-for-la" id="toc-and-a-matrix-as-argument-for-la" class="nav-link" data-scroll-target="#and-a-matrix-as-argument-for-la">and a matrix as argument for la()</a></li>
-  <li><a href="#number-of-observations-and-covariates" id="toc-number-of-observations-and-covariates" class="nav-link" data-scroll-target="#number-of-observations-and-covariates">number of observations and covariates</a></li>
-  <li><a href="#model-matrix-and-coefficients" id="toc-model-matrix-and-coefficients" class="nav-link" data-scroll-target="#model-matrix-and-coefficients">model matrix and coefficients</a></li>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">parameters</a></li>
-  <li><a href="#response" id="toc-response" class="nav-link" data-scroll-target="#response">response</a></li>
-  <li><a href="#model-formula" id="toc-model-formula" class="nav-link" data-scroll-target="#model-formula">model formula</a></li>
-  <li><a href="#estimate-model" id="toc-estimate-model" class="nav-link" data-scroll-target="#estimate-model">estimate model</a></li>
-  <li><a href="#plot-information-criteria-curves-1" id="toc-plot-information-criteria-curves-1" class="nav-link" data-scroll-target="#plot-information-criteria-curves-1">plot information criteria curves</a></li>
-  <li><a href="#coefficient-paths" id="toc-coefficient-paths" class="nav-link" data-scroll-target="#coefficient-paths">coefficient paths</a></li>
-  <li><a href="#zoom-out-1" id="toc-zoom-out-1" class="nav-link" data-scroll-target="#zoom-out-1">zoom out</a></li>
-  <li><a href="#extract-coefficients" id="toc-extract-coefficients" class="nav-link" data-scroll-target="#extract-coefficients">extract coefficients</a></li>
-  <li><a href="#compare-without-intercept" id="toc-compare-without-intercept" class="nav-link" data-scroll-target="#compare-without-intercept">compare (without intercept)</a></li>
-  <li><a href="#endnot-run" id="toc-endnot-run" class="nav-link" data-scroll-target="#endnot-run">End(Not run)</a></li>
   </ul>
 </nav>
     </div>
@@ -439,148 +450,198 @@ plot_lasso(x, terms = NULL,
 </code></pre>
 </section>
 <section id="arguments" class="level3">
-<h3 class="anchored">Arguments</h3>
+<h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
 <table>
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
 <code id="x">x</code>
 </td>
 <td>
-For function <code>la()</code>, a numeric vector or matrix, or a formula. See the examples. For function <code>plot_lasso()</code>, an object returned from <code>gamlss2</code>. or character, the type of the Lasso penalty. <code>type = 1</code> or <code>type = “normal”) uses the normal penalty, <code>type = 2</code> or <code>type = “group”) the group penalty, <code>type = 3</code> or <code>type = “nominal”) the nominal fusion penalty and <code>type = 4</code> or <code>type = “ordinal”) the ordinal fusion penalty.
-{const}{Numeric, the constant that is used for approximating the absolute function.}
-{terms}{Character or integer, the model term that should be plotted. The default <code>terms = NULL</code> is plotting all model terms.}
-{which}{Character, should the information criterion or the coefficient paths be plotted? See the examples.}
-{zoom}{Numeric vector of length 2, the zooming factors for plotting information criteria curves and coefficient paths. The first element sets the distance from the optimum shrinkage parameter lambda to the left side, and the second element to the right side, respectively.}
-{spar}{Logical, should plotting parameters be automatically set in <code>par</code>?}
-</code><p><code>{…}{For function <code>la()</code> further control arguments can be passed: The <code>criterion = “bic”</code> for shrinkage parameter selection, arguments for creating the <code>model.matrix</code> if the model term is specified using a formula. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied.} </code></p>
-<p>{ To implement the Lasso penalty, an approximation of the absolute value function is used, following the approach by Oelker and Tutz (2015). This enables the use of standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has its own shrinkage parameter, allowing a mix of different penalty types within the model. The framework builds on the methodology of Groll et al.&nbsp;(2019), where coefficients are updated through iteratively reweighted least squares (IWLS). This is feasible due to the absolute function approximation, which results in a quadratic penalty matrix similar to that used in penalized splines. By default, the shrinkage parameters are selected using the Bayesian Information Criterion (BIC). }</p>
-<p>{ Andreas Groll, Julien Hambuckers, Thomas Kneib, and Nikolaus Umlauf (2019). Lasso-type penalization in the framework of generalized additive models for location, scale and shape. <em>Computational Statistics &amp; Data Analysis</em>. <a href="https://doi.org/10.1016/j.csda.2019.06.005">doi:10.1016/j.csda.2019.06.005</a></p>
-<p>Oelker Margreth-Ruth and Tutz Gerhard (2015). A uniform framework for combination of penalties in generalized structured models. <em>Adv Data Anal Classif</em>. <a href="https://doi.org/10.1007/s11634-015-0205-y">doi:10.1007/s11634-015-0205-y</a> }</p>
-<p>{ The <code>la()</code> function is used internally within <code>gamlss2</code> and provides the necessary details for estimating Lasso-type model terms. Essentially, it serves as a special model term, as outlined in <code>specials</code>.</p>
-<p>Currently, the <code>plot_lasso()</code> function does not return any output. }</p>
-<p>{ <code>gamlss2</code>, <code>link{specials}</code>. }</p>
-<p>{ ## Not run: ## load data data(“rent”, package = “gamlss.data”)</p>
-
-
-<section id="transform-numeric-to-factor-variables" class="level2">
-<h2 class="anchored" data-anchor-id="transform-numeric-to-factor-variables">transform numeric to factor variables</h2>
-<p>rent$Flc &lt;- cut(rent$Fl, breaks = seq(20, 160, by = 10), include.lowest = TRUE) rent$Ac &lt;- cut(rent$A, breaks = seq(1890, 1990, by = 10), include.lowest = TRUE)</p>
-</section>
-<section id="set-up-the-model-formula-for-a-bct-model" class="level2">
-<h2 class="anchored" data-anchor-id="set-up-the-model-formula-for-a-bct-model">set up the model formula for a BCT model</h2>
-<p>f &lt;- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4)</p>
-</section>
-<section id="estimation" class="level2">
-<h2 class="anchored" data-anchor-id="estimation">estimation</h2>
-<p>b &lt;- gamlss2(f, data = rent, family = BCT)</p>
-</section>
-<section id="summary-shows-the-estimated-degrees-of-freedom" class="level2">
-<h2 class="anchored" data-anchor-id="summary-shows-the-estimated-degrees-of-freedom">summary, shows the estimated degrees of freedom</h2>
-</section>
-<section id="for-each-model-term" class="level2">
-<h2 class="anchored" data-anchor-id="for-each-model-term">for each model term</h2>
-<p>summary(b)</p>
-</section>
-<section id="plot-estimated-coefficients" class="level2">
-<h2 class="anchored" data-anchor-id="plot-estimated-coefficients">plot estimated coefficients</h2>
-<p>plot(b)</p>
-</section>
-<section id="plot-information-criteria-curves" class="level2">
-<h2 class="anchored" data-anchor-id="plot-information-criteria-curves">plot information criteria curves</h2>
-</section>
-<section id="for-each-model-term." class="level2">
-<h2 class="anchored" data-anchor-id="for-each-model-term.">for each model term.</h2>
-<p>plot_lasso(b)</p>
-</section>
-<section id="plot-parameter-paths." class="level2">
-<h2 class="anchored" data-anchor-id="plot-parameter-paths.">plot parameter paths.</h2>
-<p>plot_lasso(b, which = “coefficients”)</p>
-</section>
-<section id="plot-a-single-model-term." class="level2">
-<h2 class="anchored" data-anchor-id="plot-a-single-model-term.">plot a single model term.</h2>
-<p>plot_lasso(b, which = “coefficients”, term = 5)</p>
-</section>
-<section id="same-with" class="level2">
-<h2 class="anchored" data-anchor-id="same-with">same with</h2>
-<p>plot_lasso(b, which = “coefficients”, term = “sigma.la(Ac”)</p>
-</section>
-<section id="zoom-out" class="level2">
-<h2 class="anchored" data-anchor-id="zoom-out">zoom out</h2>
-<p>plot_lasso(b, which = “coefficients”, term = 5, zoom = c(8, 7))</p>
-</section>
-<section id="set-names" class="level2">
-<h2 class="anchored" data-anchor-id="set-names">set names</h2>
-<p>plot_lasso(b, which = “coefficients”, term = 5, zoom = c(8, 7), names = c(“A”, “B”, “C”))</p>
-</section>
-<section id="set-title" class="level2">
-<h2 class="anchored" data-anchor-id="set-title">set title</h2>
-<p>plot_lasso(b, which = “coefficients”, term = 5, zoom = c(8, 7), main = “Fused Lasso”)</p>
-</section>
-<section id="simulated-example-using-the-normal-lasso" class="level2">
-<h2 class="anchored" data-anchor-id="simulated-example-using-the-normal-lasso">simulated example using the normal lasso</h2>
-</section>
-<section id="and-a-matrix-as-argument-for-la" class="level2">
-<h2 class="anchored" data-anchor-id="and-a-matrix-as-argument-for-la">and a matrix as argument for la()</h2>
-<p>set.seed(123)</p>
-</section>
-<section id="number-of-observations-and-covariates" class="level2">
-<h2 class="anchored" data-anchor-id="number-of-observations-and-covariates">number of observations and covariates</h2>
-<p>n &lt;- 500 k &lt;- 50</p>
-</section>
-<section id="model-matrix-and-coefficients" class="level2">
-<h2 class="anchored" data-anchor-id="model-matrix-and-coefficients">model matrix and coefficients</h2>
-<p>X &lt;- matrix(rnorm(n * k), n, k) colnames(X) &lt;- paste0(“x”, 1:k) beta &lt;- cbind(“mu” = rbinom(k, 1, 0.1), “sigma” = rbinom(k, 1, 0.1) * 0.3)</p>
-</section>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">parameters</h2>
-<p>mu &lt;- X sigma &lt;- exp(1 + X</p>
-</section>
-<section id="response" class="level2">
-<h2 class="anchored" data-anchor-id="response">response</h2>
-<p>y &lt;- rnorm(n, mean = mu, sd = sigma)</p>
-</section>
-<section id="model-formula" class="level2">
-<h2 class="anchored" data-anchor-id="model-formula">model formula</h2>
-<p>f &lt;- y ~ la(X) | la(X)</p>
-</section>
-<section id="estimate-model" class="level2">
-<h2 class="anchored" data-anchor-id="estimate-model">estimate model</h2>
-<p>b &lt;- gamlss2(f)</p>
-</section>
-<section id="plot-information-criteria-curves-1" class="level2">
-<h2 class="anchored" data-anchor-id="plot-information-criteria-curves-1">plot information criteria curves</h2>
-<p>plot_lasso(b)</p>
-</section>
-<section id="coefficient-paths" class="level2">
-<h2 class="anchored" data-anchor-id="coefficient-paths">coefficient paths</h2>
-<p>plot_lasso(b, which = “coefficients”)</p>
-</section>
-<section id="zoom-out-1" class="level2">
-<h2 class="anchored" data-anchor-id="zoom-out-1">zoom out</h2>
-<p>plot_lasso(b, which = “coefficients”, zoom = c(8, 9))</p>
-</section>
-<section id="extract-coefficients" class="level2">
-<h2 class="anchored" data-anchor-id="extract-coefficients">extract coefficients</h2>
-<p>cb &lt;- coef(b, full = TRUE)</p>
-</section>
-<section id="compare-without-intercept" class="level2">
-<h2 class="anchored" data-anchor-id="compare-without-intercept">compare (without intercept)</h2>
-<p>cb_mu &lt;- cb[grep(“mu.”, names(cb))][-1] cb_sigma &lt;- cb[grep(“sigma.”, names(cb))][-1]</p>
-<p>print(cbind(beta[, “mu”], round(cb_mu, 2))) print(cbind(beta[, “sigma”], round(cb_sigma, 2)))</p>
-</section>
-</code><section id="endnot-run" class="level2"><code>
-<h2 class="anchored" data-anchor-id="endnot-run">End(Not run)</h2>
-<p>}</p>
-<p>{regression} {models} {distribution}</p>
-</code>  
-</section></code></code></td>
+For function <code>la()</code>, a numeric vector or matrix, or a formula. See the examples. For function <code>plot_lasso()</code>, an object returned from <code>gamlss2</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="type">type</code>
+</td>
+<td>
+Integer or character, the type of the Lasso penalty. <code>type = 1</code> or <code>type = “normal”</code> uses the normal penalty, <code>type = 2</code> or <code>type = “group”</code> the group penalty, <code>type = 3</code> or <code>type = “nominal”</code> the nominal fusion penalty and <code>type = 4</code> or <code>type = “ordinal”</code> the ordinal fusion penalty.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="const">const</code>
+</td>
+<td>
+Numeric, the constant that is used for approximating the absolute function.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="terms">terms</code>
+</td>
+<td>
+Character or integer, the model term that should be plotted. The default <code>terms = NULL</code> is plotting all model terms.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="which">which</code>
+</td>
+<td>
+Character, should the information criterion or the coefficient paths be plotted? See the examples.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="zoom">zoom</code>
+</td>
+<td>
+Numeric vector of length 2, the zooming factors for plotting information criteria curves and coefficient paths. The first element sets the distance from the optimum shrinkage parameter lambda to the left side, and the second element to the right side, respectively.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="spar">spar</code>
+</td>
+<td>
+Logical, should plotting parameters be automatically set in <code>par</code>?
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="...">…</code>
+</td>
+<td>
+For function <code>la()</code> further control arguments can be passed: The <code>criterion = “bic”</code> for shrinkage parameter selection, arguments for creating the <code>model.matrix</code> if the model term is specified using a formula. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied.
+</td>
 </tr>
 </tbody></table>
+</section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>To implement the Lasso penalty, an approximation of the absolute value function is used, following the approach by Oelker and Tutz (2015). This enables the use of standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has its own shrinkage parameter, allowing a mix of different penalty types within the model. The framework builds on the methodology of Groll et al.&nbsp;(2019), where coefficients are updated through iteratively reweighted least squares (IWLS). This is feasible due to the absolute function approximation, which results in a quadratic penalty matrix similar to that used in penalized splines. By default, the shrinkage parameters are selected using the Bayesian Information Criterion (BIC).</p>
+</section>
+<section id="value" class="level3">
+<h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>The <code>la()</code> function is used internally within <code>gamlss2</code> and provides the necessary details for estimating Lasso-type model terms. Essentially, it serves as a special model term, as outlined in <code>specials</code>.</p>
+<p>Currently, the <code>plot_lasso()</code> function does not return any output.</p>
+</section>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Andreas Groll, Julien Hambuckers, Thomas Kneib, and Nikolaus Umlauf (2019). Lasso-type penalization in the framework of generalized additive models for location, scale and shape. <em>Computational Statistics &amp; Data Analysis</em>. <a href="https://doi.org/10.1016/j.csda.2019.06.005">doi:10.1016/j.csda.2019.06.005</a></p>
+<p>Oelker Margreth-Ruth and Tutz Gerhard (2015). A uniform framework for combination of penalties in generalized structured models. <em>Adv Data Anal Classif</em>. <a href="https://doi.org/10.1007/s11634-015-0205-y">doi:10.1007/s11634-015-0205-y</a></p>
+</section>
+<section id="see-also" class="level3">
+<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
+<p><code>gamlss2</code>, <code>specials</code>.</p>
+</section>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## transform numeric to factor variables</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>rent<span class="sc">$</span>Flc <span class="ot">&lt;-</span> <span class="fu">cut</span>(rent<span class="sc">$</span>Fl, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">20</span>, <span class="dv">160</span>, <span class="at">by =</span> <span class="dv">10</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>rent<span class="sc">$</span>Ac <span class="ot">&lt;-</span> <span class="fu">cut</span>(rent<span class="sc">$</span>A, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1890</span>, <span class="dv">1990</span>, <span class="at">by =</span> <span class="dv">10</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## set up the model formula for a BCT model</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">la</span>(Flc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(Ac,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(loc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">|</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">la</span>(Flc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(Ac,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(loc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">|</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">la</span>(Flc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(Ac,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(loc,<span class="at">type=</span><span class="dv">4</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="do">## summary, shows the estimated degrees of freedom</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## for each model term</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated coefficients</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="do">## plot information criteria curves</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## for each model term.</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="do">## plot parameter paths.</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="do">## plot a single model term.</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>, <span class="at">term =</span> <span class="dv">5</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="do">## same with</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>, <span class="at">term =</span> <span class="st">"sigma.la(Ac"</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="do">## zoom out</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>, <span class="at">term =</span> <span class="dv">5</span>,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">zoom =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">7</span>))</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="do">## set names</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>, <span class="at">term =</span> <span class="dv">5</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">zoom =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">7</span>), <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="do">## set title</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>, <span class="at">term =</span> <span class="dv">5</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="at">zoom =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">7</span>), <span class="at">main =</span> <span class="st">"Fused Lasso"</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="do">## simulated example using the normal lasso</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="do">## and a matrix as argument for la()</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="do">## number of observations and covariates</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="do">## model matrix and coefficients</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> k), n, k)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(X) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"x"</span>, <span class="dv">1</span><span class="sc">:</span>k)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="st">"mu"</span> <span class="ot">=</span> <span class="fu">rbinom</span>(k, <span class="dv">1</span>, <span class="fl">0.1</span>), <span class="st">"sigma"</span> <span class="ot">=</span> <span class="fu">rbinom</span>(k, <span class="dv">1</span>, <span class="fl">0.1</span>) <span class="sc">*</span> <span class="fl">0.3</span>)</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="do">## parameters</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> X </span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="dv">1</span> <span class="sc">+</span> X </span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="do">## response</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma)</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">la</span>(X) <span class="sc">|</span> <span class="fu">la</span>(X)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="do">## plot information criteria curves</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a><span class="do">## coefficient paths</span></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>)</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="do">## zoom out</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(b, <span class="at">which =</span> <span class="st">"coefficients"</span>,</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>  <span class="at">zoom =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">9</span>))</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="do">## extract coefficients</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> <span class="fu">coef</span>(b, <span class="at">full =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="do">## compare (without intercept)</span></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>cb_mu <span class="ot">&lt;-</span> cb[<span class="fu">grep</span>(<span class="st">"mu."</span>, <span class="fu">names</span>(cb))][<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>cb_sigma <span class="ot">&lt;-</span> cb[<span class="fu">grep</span>(<span class="st">"sigma."</span>, <span class="fu">names</span>(cb))][<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">cbind</span>(beta[, <span class="st">"mu"</span>], <span class="fu">round</span>(cb_mu, <span class="dv">2</span>)))</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">cbind</span>(beta[, <span class="st">"sigma"</span>], <span class="fu">round</span>(cb_sigma, <span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 </section>
+</section>
 
-</section></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

@@ -47,7 +47,10 @@ export(
   "softplus",
   "shiftlog",
   "Kumaraswamy",
-  "make.link2"
+  "make.link2",
+  "plot_lasso",
+  "la",
+  "lasso"
 )
 
 S3method(gamlss2, formula)

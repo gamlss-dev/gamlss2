@@ -896,7 +896,8 @@ if(FALSE) {
 
 ## Lasso plotting function.
 plot_lasso <- function(x, terms = NULL,
-  which = c("criterion", "coefficients"), spar = TRUE, ...)
+  which = c("criterion", "coefficients"),
+  zoom = c(3, 4), spar = TRUE, ...)
 {
   which <- match.arg(which)
 
@@ -927,17 +928,16 @@ plot_lasso <- function(x, terms = NULL,
 
     if(!is.null(lmbd)) {
       lambdas <- NULL
-      scale <- list(...)$scale
-      if(is.null(scale))
-        scale <- c(3, 4)
-      scale <- rep(scale, length.out = 2L)
-      scale <- rev(scale)
+      if(is.null(zoom))
+        zoom <- c(3, 4)
+      zoom <- rep(zoom, length.out = 2L)
+      zoom <- rev(zoom)
       grid <- list(...)$grid
       if(is.null(grid))
         grid <- 50
       for(l in lmbd) {
-        lambdas <- c(lambdas, c(seq(log(l) - abs(log(l)) * scale[1L], log(l), length = grid), log(l),
-          seq(log(l), log(l) + abs(log(l)) * scale[2L], length = grid)))
+        lambdas <- c(lambdas, c(seq(log(l) - abs(log(l)) * zoom[1L], log(l), length = grid), log(l),
+          seq(log(l), log(l) + abs(log(l)) * zoom[2L], length = grid)))
       }
       lambdas <- exp(sort(unique(lambdas)))
     }
@@ -1073,9 +1073,13 @@ plot_lasso <- function(x, terms = NULL,
       main <- list(...)$main
       if(is.null(main))
         main <- TRUE
-      if(isTRUE(main)) {
-        mtext(bquote(log(lambda) == .(round(log(x$lambda), 3)) ~ " edf =" ~ .(round(x$edf, 2))), side = 3, line = 0.3, cex = 0.8)
-        mtext(lab, side = 3, line = 2, font = 2)
+      if(isTRUE(main) | is.character(main)) {
+        if(is.character(main)) {
+          mtext(main, side = 3, line = 1.5, font = 2, cex = 1.2)
+        } else {
+          mtext(bquote(log(lambda) == .(round(log(x$lambda), 3)) ~ " edf =" ~ .(round(x$edf, 2))), side = 3, line = 0.3, cex = 0.8)
+          mtext(lab, side = 3, line = 1.5, font = 2, cex = 1.2)
+        }
       }
     }
   }

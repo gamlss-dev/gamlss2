@@ -25,7 +25,7 @@ fit_family(y, family = NO, plot = TRUE, ...)
   \item{type}{Character, is the reponse continuous or discrete?}
   \item{families}{Character, the names of the family objects of the \pkg{gamlss.dist}
     package that should be returned.}
-  \item{y}{The reponse vector or matrix.}
+  \item{y}{The response vector or matrix.}
   \item{k}{Numeric, the penalty factor that should be used for the \code{\link{GAIC}}.}
   \item{verbose}{Logical, should runtime information be printed?}
   \item{family}{A famnily object that should be used for estimation,

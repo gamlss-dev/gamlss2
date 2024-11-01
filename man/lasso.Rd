@@ -21,7 +21,7 @@ plot_lasso(x, terms = NULL,
 \arguments{
   \item{x}{For function \code{la()}, a numeric vector or matrix, or a formula.
     See the examples. For function \code{plot_lasso()}, an object returned from
-    \code{\link{gamlss2}}}.
+    \code{\link{gamlss2}}.}
   \item{type}{Integer or character, the type of the Lasso penalty.
     \code{type = 1} or \code{type = "normal"} uses the normal penalty,
     \code{type = 2} or \code{type = "group"} the group penalty,

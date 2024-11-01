@@ -1046,11 +1046,13 @@ plot_lasso <- function(x, terms = NULL,
           labs <- labs[o]
           plab <- plab[o]
           rplab <- diff(range(plab))
-          for(i in 1:(length(plab) - 1)) {
-            dp <- abs(plab[i] - plab[i + 1]) / rplab
-            if(dp <= 0.02) {
-              labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
-              labs[i] <- ""
+          if(length(plab) > 2L) {
+            for(i in 1:(length(plab) - 1)) {
+              dp <- abs(plab[i] - plab[i + 1]) / rplab
+              if(dp <= 0.02) {
+                labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
+                labs[i] <- ""
+              }
             }
           }
           labs <- labs[order(o)]

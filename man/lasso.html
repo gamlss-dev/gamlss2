@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Smooth Terms using s() and pb() – gamlss2</title>
+<title>lasso – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,61 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -121,35 +67,6 @@ div.csl-indent {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -189,7 +106,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../vignettes/cens.html">Articles</a></li><li class="breadcrumb-item"><a href="../vignettes/s_pb.html">Smooth Terms using s() and pb()</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/lasso.html">lasso</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -203,13 +120,13 @@ window.Quarto = {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
  <span class="menu-text">Articles</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vignettes/cens.html" class="sidebar-item-text sidebar-link">
@@ -248,7 +165,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/s_pb.html" class="sidebar-item-text sidebar-link active">
+  <a href="../vignettes/s_pb.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Smooth Terms using s() and pb()</span></a>
   </div>
 </li>
@@ -286,13 +203,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
  <span class="menu-text">Reference</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/fake_formula.html" class="sidebar-item-text sidebar-link">
@@ -349,7 +266,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">lasso</span></a>
   </div>
 </li>
@@ -461,194 +378,209 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-s-function" id="toc-the-s-function" class="nav-link active" data-scroll-target="#the-s-function"><span class="header-section-number">1</span> The <code>s()</code> function</a></li>
-  <li><a href="#the-pb-function" id="toc-the-pb-function" class="nav-link" data-scroll-target="#the-pb-function"><span class="header-section-number">2</span> The <code>pb()</code> function</a></li>
+  <li><a href="#lasso-model-terms" id="toc-lasso-model-terms" class="nav-link active" data-scroll-target="#lasso-model-terms">Lasso Model Terms</a>
+  <ul class="collapse">
+  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  </ul></li>
+  <li><a href="#transform-numeric-to-factor-variables" id="toc-transform-numeric-to-factor-variables" class="nav-link" data-scroll-target="#transform-numeric-to-factor-variables">transform numeric to factor variables</a></li>
+  <li><a href="#set-up-the-model-formula-for-a-bct-model" id="toc-set-up-the-model-formula-for-a-bct-model" class="nav-link" data-scroll-target="#set-up-the-model-formula-for-a-bct-model">set up the model formula for a BCT model</a></li>
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation">estimation</a></li>
+  <li><a href="#summary-shows-the-estimated-degrees-of-freedom" id="toc-summary-shows-the-estimated-degrees-of-freedom" class="nav-link" data-scroll-target="#summary-shows-the-estimated-degrees-of-freedom">summary, shows the estimated degrees of freedom</a></li>
+  <li><a href="#for-each-model-term" id="toc-for-each-model-term" class="nav-link" data-scroll-target="#for-each-model-term">for each model term</a></li>
+  <li><a href="#plot-estimated-coefficients" id="toc-plot-estimated-coefficients" class="nav-link" data-scroll-target="#plot-estimated-coefficients">plot estimated coefficients</a></li>
+  <li><a href="#plot-information-criteria-curves" id="toc-plot-information-criteria-curves" class="nav-link" data-scroll-target="#plot-information-criteria-curves">plot information criteria curves</a></li>
+  <li><a href="#for-each-model-term." id="toc-for-each-model-term." class="nav-link" data-scroll-target="#for-each-model-term.">for each model term.</a></li>
+  <li><a href="#plot-parameter-paths." id="toc-plot-parameter-paths." class="nav-link" data-scroll-target="#plot-parameter-paths.">plot parameter paths.</a></li>
+  <li><a href="#plot-a-single-model-term." id="toc-plot-a-single-model-term." class="nav-link" data-scroll-target="#plot-a-single-model-term.">plot a single model term.</a></li>
+  <li><a href="#same-with" id="toc-same-with" class="nav-link" data-scroll-target="#same-with">same with</a></li>
+  <li><a href="#zoom-out" id="toc-zoom-out" class="nav-link" data-scroll-target="#zoom-out">zoom out</a></li>
+  <li><a href="#set-names" id="toc-set-names" class="nav-link" data-scroll-target="#set-names">set names</a></li>
+  <li><a href="#set-title" id="toc-set-title" class="nav-link" data-scroll-target="#set-title">set title</a></li>
+  <li><a href="#simulated-example-using-the-normal-lasso" id="toc-simulated-example-using-the-normal-lasso" class="nav-link" data-scroll-target="#simulated-example-using-the-normal-lasso">simulated example using the normal lasso</a></li>
+  <li><a href="#and-a-matrix-as-argument-for-la" id="toc-and-a-matrix-as-argument-for-la" class="nav-link" data-scroll-target="#and-a-matrix-as-argument-for-la">and a matrix as argument for la()</a></li>
+  <li><a href="#number-of-observations-and-covariates" id="toc-number-of-observations-and-covariates" class="nav-link" data-scroll-target="#number-of-observations-and-covariates">number of observations and covariates</a></li>
+  <li><a href="#model-matrix-and-coefficients" id="toc-model-matrix-and-coefficients" class="nav-link" data-scroll-target="#model-matrix-and-coefficients">model matrix and coefficients</a></li>
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">parameters</a></li>
+  <li><a href="#response" id="toc-response" class="nav-link" data-scroll-target="#response">response</a></li>
+  <li><a href="#model-formula" id="toc-model-formula" class="nav-link" data-scroll-target="#model-formula">model formula</a></li>
+  <li><a href="#estimate-model" id="toc-estimate-model" class="nav-link" data-scroll-target="#estimate-model">estimate model</a></li>
+  <li><a href="#plot-information-criteria-curves-1" id="toc-plot-information-criteria-curves-1" class="nav-link" data-scroll-target="#plot-information-criteria-curves-1">plot information criteria curves</a></li>
+  <li><a href="#coefficient-paths" id="toc-coefficient-paths" class="nav-link" data-scroll-target="#coefficient-paths">coefficient paths</a></li>
+  <li><a href="#zoom-out-1" id="toc-zoom-out-1" class="nav-link" data-scroll-target="#zoom-out-1">zoom out</a></li>
+  <li><a href="#extract-coefficients" id="toc-extract-coefficients" class="nav-link" data-scroll-target="#extract-coefficients">extract coefficients</a></li>
+  <li><a href="#compare-without-intercept" id="toc-compare-without-intercept" class="nav-link" data-scroll-target="#compare-without-intercept">compare (without intercept)</a></li>
+  <li><a href="#endnot-run" id="toc-endnot-run" class="nav-link" data-scroll-target="#endnot-run">End(Not run)</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header">
-<h1 class="title display-7">Smooth Terms using s() and pb()</h1>
-
-</header>
 
 
-<p><em>Smoothers</em> are non-parametric techniques developed mostly in the 1980 and 90’s. The main advadance of a smoother is to suggest possible functional forms on how the explanatory variables effect the parameters of the response. That is, to let the data to detect non-linearities in the model. There are basically two types of smoothers;</p>
-<ul>
-<li><p>the <strong>cubic splines</strong> smoothers and techniques associated with them like;</p>
-<ul>
-<li><strong>thin plate</strong> splines, <span class="citation" data-cites="Wood17">Wood (<a href="#ref-Wood17" role="doc-biblioref">2017</a>)</span> and;</li>
-<li><strong>P- splines,</strong> <span class="citation" data-cites="eilers2021practical">Eilers and Marx (<a href="#ref-eilers2021practical" role="doc-biblioref">2021</a>)</span> and</li>
-</ul></li>
-<li><p>the <strong>local polynomial</strong> smoothing, <span class="citation" data-cites="Clevelandetal93">Cleveland, Grosse, and Shyu (<a href="#ref-Clevelandetal93" role="doc-biblioref">1993</a>)</span>.</p></li>
-</ul>
-<p>There are several ways to use smoothers within the original GAMLSS framework and they are described in Chapter 9 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>. Local polynomials smoothers can be used with <code>gamlss2</code> by connection the <code>R</code> function <code>loess()</code> with <code>gamlss2</code> using <code>specials</code>. This connection is described in a different vignette (<code>Mikis</code> reference here). Here we give an explanation of to how use the smooth terms <code>s()</code> and <code>pb()</code> within <code>gamlss2</code>.</p>
-<section id="the-s-function" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="the-s-function"><span class="header-section-number">1</span> The <code>s()</code> function</h2>
-<p>The function <code>s()</code> is using penalized regression smoothers and it is identical to the function <code>s()</code> used in the <code>R</code> package <code>mgcv</code>. The first argument of the function specifies the explanatory term(s). For <strong>one dimensional smoother</strong> the function can be used as;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss2)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>gm11 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(rent<span class="sc">~</span><span class="fu">s</span>(area)<span class="sc">+</span><span class="fu">s</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">s</span>(area)<span class="sc">+</span><span class="fu">s</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38484.5671 eps = 0.124369     
-GAMLSS-RS iteration  2: Global Deviance = 38437.5655 eps = 0.001221     
-GAMLSS-RS iteration  3: Global Deviance = 38437.2934 eps = 0.000007     </code></pre>
-</div>
-</div>
-<p>We use smooth terms for the two continuous explanatory variables of the data, the size of the flats, <code>area</code>, and the year of construction, <code>yearc</code>. To visualise the fitted smooth functions try;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gm11)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="s_pb_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The first two plot are for the <span class="math inline">\(\mu\)</span> model while the last two for the <span class="math inline">\(\sigma\)</span> model. It seems that both <code>area</code>, and <code>yearc</code>, need smoothing functions for the <span class="math inline">\(\mu\)</span> while only <code>yearc</code> need a smoother for the <span class="math inline">\(\sigma\)</span>.</p>
-<p>Note that the first argument for <code>s()</code> is the continuous variables needed smoothing. Here we used single terms. Single terms represent <code>main effects</code>. More that one terms can be use to represent <code>iteractions</code>. Note that <strong>all</strong> argument of the <code>s()</code> function of the <code>mgcv</code> package apply here. Here we mention the most important ones;</p>
-<ul>
-<li><p><code>k</code>; the dimension of the basis;</p></li>
-<li><p><code>bs</code>; indicating the (penalized) smoothing basis to use, e.g.&nbsp;“tp” for thin plate regression spline, “cr” for cubic regression spline etc;</p></li>
-<li><p><code>m</code>; The order of the penalty e.g.&nbsp;2 for cubic spline penalty;</p></li>
-<li><p><code>by</code>; a term for <strong>varying coefficient</strong> model (a specific form of iteraction);</p></li>
-</ul>
-<p>to find information about all the argument please try;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>?mgcv<span class="sc">:::</span>s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>To model <strong>interactions</strong> within a additive smooth model we need two or more dimensional smoothers. The problem of course with more that two dimensional smoothers is that can not be visualised. Here we stick to <strong>two dimensional</strong> smoothers that is, <strong>a two way interaction</strong>;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gm21 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(rent<span class="sc">~</span><span class="fu">s</span>(area,yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">s</span>(area,yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38552.6223 eps = 0.122820     
-GAMLSS-RS iteration  2: Global Deviance = 38467.4636 eps = 0.002208     
-GAMLSS-RS iteration  3: Global Deviance = 38466.8474 eps = 0.000016     
-GAMLSS-RS iteration  4: Global Deviance = 38466.8359 eps = 0.000000     </code></pre>
-</div>
-</div>
-<p>The interaction plots can be visualised using;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gm21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="s_pb_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>One could check for the best model using AIC.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(gm11, gm21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          AIC       df
-gm11 38496.64 29.67116
-gm21 38523.11 28.13775</code></pre>
-</div>
-</div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Note that the default value for <code>m</code> in <code>s()</code>, that is, the dimension of the basis for one dimensional smoother, is 10 which could be very small if a lot of degrees of freedom are needed for the smoother. This is important in the constructing of centile curves, see vignette <code>Centile (Quantile) Estimation</code>.</p>
-</div>
-</div>
-<p><code>Mikis</code> I think for two dimensional smoothers it uses <span class="math inline">\(m=5\)</span> but I am not sure.</p>
+
+<section id="lasso-model-terms" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="lasso-model-terms">Lasso Model Terms</h2>
+<section id="description" class="level3">
+<h3 class="anchored" data-anchor-id="description">Description</h3>
+<p>Constructor function and plotting for Lasso penalized model terms for GAMLSS.</p>
 </section>
-<section id="the-pb-function" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="the-pb-function"><span class="header-section-number">2</span> The <code>pb()</code> function</h2>
-<p>The <code>pb()</code> function uses P-splines, see <span class="citation" data-cites="eilers2021practical">Eilers and Marx (<a href="#ref-eilers2021practical" role="doc-biblioref">2021</a>)</span>. It tries to imitate the equivalent function <code>pb()</code> in the older <code>gamlss</code> package but still uses the <code>s()</code> function with different options. The option are <code>s(..., bs="ps", k=20)</code> that is the number of basis is increased from 10 to 20. The way to estimate the hyper-parameter (smoothing-parameter) is also change, It uses <code>criterion="ml"</code>, which amount to a REML estimation of the smoothing parameter see <span class="citation" data-cites="rigby2013automatic">Rigby and Stasinopoulos (<a href="#ref-rigby2013automatic" role="doc-biblioref">2013</a>)</span>. The result should be similar but not necessarily identical to the <code>pb()</code> function of the <code>gamlss</code> package.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gm1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(rent<span class="sc">~</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                 location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,<span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38439.2661 eps = 0.125399     
-GAMLSS-RS iteration  2: Global Deviance = 38429.5701 eps = 0.000252     
-GAMLSS-RS iteration  3: Global Deviance = 38429.4305 eps = 0.000003     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gm1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="s_pb_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The smooth functions for <span class="math inline">\(\mu\)</span> using the <code>pv()</code> function are almost identical to the ones when <code>s()</code> was used. The smooth terms for the <span class="math inline">\(\sigma\)</span> model especially for <code>area</code> are different. This could be to the fact that more degrees of freedom are allowed with <code>pb()</code> and possible this lead to overfit.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Note that there are not two dimensional smoothers with <code>pb()</code></p>
-</div>
-</div>
-<p><code>Mikis</code> It looks that <code>pb()</code> in <code>gamlss2</code> overfits <span class="math inline">\(\sigma\)</span>. Here is what we get in gamnlss</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(rent<span class="sc">~</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,<span class="sc">~</span><span class="fu">pb</span>(area)<span class="sc">+</span><span class="fu">pb</span>(yearc)<span class="sc">+</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                 location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,<span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration 1: Global Deviance = 38459.65 
-GAMLSS-RS iteration 2: Global Deviance = 38448.8 
-GAMLSS-RS iteration 3: Global Deviance = 38448.64 
-GAMLSS-RS iteration 4: Global Deviance = 38448.62 
-GAMLSS-RS iteration 5: Global Deviance = 38448.62 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">term.plot</span>(g1, <span class="st">"sigma"</span>, <span class="at">pages=</span><span class="dv">1</span>, <span class="at">term=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">ask=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="s_pb_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
+<section id="usage" class="level3">
+<h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<pre><code class="language-R">## Model term constructor function.
+la(x, type = 1, const = 1e-05, ...)
 
+## Plotting function.
+plot_lasso(x, terms = NULL,
+  which = c("criterion", "coefficients"),
+  zoom = c(3, 4), spar = TRUE, ...)
+</code></pre>
+</section>
+<section id="arguments" class="level3">
+<h3 class="anchored">Arguments</h3>
+<table>
+<tbody><tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="x">x</code>
+</td>
+<td>
+For function <code>la()</code>, a numeric vector or matrix, or a formula. See the examples. For function <code>plot_lasso()</code>, an object returned from <code>gamlss2</code>. or character, the type of the Lasso penalty. <code>type = 1</code> or <code>type = “normal”) uses the normal penalty, <code>type = 2</code> or <code>type = “group”) the group penalty, <code>type = 3</code> or <code>type = “nominal”) the nominal fusion penalty and <code>type = 4</code> or <code>type = “ordinal”) the ordinal fusion penalty.
+{const}{Numeric, the constant that is used for approximating the absolute function.}
+{terms}{Character or integer, the model term that should be plotted. The default <code>terms = NULL</code> is plotting all model terms.}
+{which}{Character, should the information criterion or the coefficient paths be plotted? See the examples.}
+{zoom}{Numeric vector of length 2, the zooming factors for plotting information criteria curves and coefficient paths. The first element sets the distance from the optimum shrinkage parameter lambda to the left side, and the second element to the right side, respectively.}
+{spar}{Logical, should plotting parameters be automatically set in <code>par</code>?}
+</code><p><code>{…}{For function <code>la()</code> further control arguments can be passed: The <code>criterion = “bic”</code> for shrinkage parameter selection, arguments for creating the <code>model.matrix</code> if the model term is specified using a formula. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied.} </code></p>
+<p>{ To implement the Lasso penalty, an approximation of the absolute value function is used, following the approach by Oelker and Tutz (2015). This enables the use of standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has its own shrinkage parameter, allowing a mix of different penalty types within the model. The framework builds on the methodology of Groll et al.&nbsp;(2019), where coefficients are updated through iteratively reweighted least squares (IWLS). This is feasible due to the absolute function approximation, which results in a quadratic penalty matrix similar to that used in penalized splines. By default, the shrinkage parameters are selected using the Bayesian Information Criterion (BIC). }</p>
+<p>{ Andreas Groll, Julien Hambuckers, Thomas Kneib, and Nikolaus Umlauf (2019). Lasso-type penalization in the framework of generalized additive models for location, scale and shape. <em>Computational Statistics &amp; Data Analysis</em>. <a href="https://doi.org/10.1016/j.csda.2019.06.005">doi:10.1016/j.csda.2019.06.005</a></p>
+<p>Oelker Margreth-Ruth and Tutz Gerhard (2015). A uniform framework for combination of penalties in generalized structured models. <em>Adv Data Anal Classif</em>. <a href="https://doi.org/10.1007/s11634-015-0205-y">doi:10.1007/s11634-015-0205-y</a> }</p>
+<p>{ The <code>la()</code> function is used internally within <code>gamlss2</code> and provides the necessary details for estimating Lasso-type model terms. Essentially, it serves as a special model term, as outlined in <code>specials</code>.</p>
+<p>Currently, the <code>plot_lasso()</code> function does not return any output. }</p>
+<p>{ <code>gamlss2</code>, <code>link{specials}</code>. }</p>
+<p>{ ## Not run: ## load data data(“rent”, package = “gamlss.data”)</p>
+
+
+<section id="transform-numeric-to-factor-variables" class="level2">
+<h2 class="anchored" data-anchor-id="transform-numeric-to-factor-variables">transform numeric to factor variables</h2>
+<p>rent$Flc &lt;- cut(rent$Fl, breaks = seq(20, 160, by = 10), include.lowest = TRUE) rent$Ac &lt;- cut(rent$A, breaks = seq(1890, 1990, by = 10), include.lowest = TRUE)</p>
+</section>
+<section id="set-up-the-model-formula-for-a-bct-model" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-the-model-formula-for-a-bct-model">set up the model formula for a BCT model</h2>
+<p>f &lt;- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4)</p>
+</section>
+<section id="estimation" class="level2">
+<h2 class="anchored" data-anchor-id="estimation">estimation</h2>
+<p>b &lt;- gamlss2(f, data = rent, family = BCT)</p>
+</section>
+<section id="summary-shows-the-estimated-degrees-of-freedom" class="level2">
+<h2 class="anchored" data-anchor-id="summary-shows-the-estimated-degrees-of-freedom">summary, shows the estimated degrees of freedom</h2>
+</section>
+<section id="for-each-model-term" class="level2">
+<h2 class="anchored" data-anchor-id="for-each-model-term">for each model term</h2>
+<p>summary(b)</p>
+</section>
+<section id="plot-estimated-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="plot-estimated-coefficients">plot estimated coefficients</h2>
+<p>plot(b)</p>
+</section>
+<section id="plot-information-criteria-curves" class="level2">
+<h2 class="anchored" data-anchor-id="plot-information-criteria-curves">plot information criteria curves</h2>
+</section>
+<section id="for-each-model-term." class="level2">
+<h2 class="anchored" data-anchor-id="for-each-model-term.">for each model term.</h2>
+<p>plot_lasso(b)</p>
+</section>
+<section id="plot-parameter-paths." class="level2">
+<h2 class="anchored" data-anchor-id="plot-parameter-paths.">plot parameter paths.</h2>
+<p>plot_lasso(b, which = “coefficients”)</p>
+</section>
+<section id="plot-a-single-model-term." class="level2">
+<h2 class="anchored" data-anchor-id="plot-a-single-model-term.">plot a single model term.</h2>
+<p>plot_lasso(b, which = “coefficients”, term = 5)</p>
+</section>
+<section id="same-with" class="level2">
+<h2 class="anchored" data-anchor-id="same-with">same with</h2>
+<p>plot_lasso(b, which = “coefficients”, term = “sigma.la(Ac”)</p>
+</section>
+<section id="zoom-out" class="level2">
+<h2 class="anchored" data-anchor-id="zoom-out">zoom out</h2>
+<p>plot_lasso(b, which = “coefficients”, term = 5, zoom = c(8, 7))</p>
+</section>
+<section id="set-names" class="level2">
+<h2 class="anchored" data-anchor-id="set-names">set names</h2>
+<p>plot_lasso(b, which = “coefficients”, term = 5, zoom = c(8, 7), names = c(“A”, “B”, “C”))</p>
+</section>
+<section id="set-title" class="level2">
+<h2 class="anchored" data-anchor-id="set-title">set title</h2>
+<p>plot_lasso(b, which = “coefficients”, term = 5, zoom = c(8, 7), main = “Fused Lasso”)</p>
+</section>
+<section id="simulated-example-using-the-normal-lasso" class="level2">
+<h2 class="anchored" data-anchor-id="simulated-example-using-the-normal-lasso">simulated example using the normal lasso</h2>
+</section>
+<section id="and-a-matrix-as-argument-for-la" class="level2">
+<h2 class="anchored" data-anchor-id="and-a-matrix-as-argument-for-la">and a matrix as argument for la()</h2>
+<p>set.seed(123)</p>
+</section>
+<section id="number-of-observations-and-covariates" class="level2">
+<h2 class="anchored" data-anchor-id="number-of-observations-and-covariates">number of observations and covariates</h2>
+<p>n &lt;- 500 k &lt;- 50</p>
+</section>
+<section id="model-matrix-and-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="model-matrix-and-coefficients">model matrix and coefficients</h2>
+<p>X &lt;- matrix(rnorm(n * k), n, k) colnames(X) &lt;- paste0(“x”, 1:k) beta &lt;- cbind(“mu” = rbinom(k, 1, 0.1), “sigma” = rbinom(k, 1, 0.1) * 0.3)</p>
+</section>
+<section id="parameters" class="level2">
+<h2 class="anchored" data-anchor-id="parameters">parameters</h2>
+<p>mu &lt;- X sigma &lt;- exp(1 + X</p>
+</section>
+<section id="response" class="level2">
+<h2 class="anchored" data-anchor-id="response">response</h2>
+<p>y &lt;- rnorm(n, mean = mu, sd = sigma)</p>
+</section>
+<section id="model-formula" class="level2">
+<h2 class="anchored" data-anchor-id="model-formula">model formula</h2>
+<p>f &lt;- y ~ la(X) | la(X)</p>
+</section>
+<section id="estimate-model" class="level2">
+<h2 class="anchored" data-anchor-id="estimate-model">estimate model</h2>
+<p>b &lt;- gamlss2(f)</p>
+</section>
+<section id="plot-information-criteria-curves-1" class="level2">
+<h2 class="anchored" data-anchor-id="plot-information-criteria-curves-1">plot information criteria curves</h2>
+<p>plot_lasso(b)</p>
+</section>
+<section id="coefficient-paths" class="level2">
+<h2 class="anchored" data-anchor-id="coefficient-paths">coefficient paths</h2>
+<p>plot_lasso(b, which = “coefficients”)</p>
+</section>
+<section id="zoom-out-1" class="level2">
+<h2 class="anchored" data-anchor-id="zoom-out-1">zoom out</h2>
+<p>plot_lasso(b, which = “coefficients”, zoom = c(8, 9))</p>
+</section>
+<section id="extract-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="extract-coefficients">extract coefficients</h2>
+<p>cb &lt;- coef(b, full = TRUE)</p>
+</section>
+<section id="compare-without-intercept" class="level2">
+<h2 class="anchored" data-anchor-id="compare-without-intercept">compare (without intercept)</h2>
+<p>cb_mu &lt;- cb[grep(“mu.”, names(cb))][-1] cb_sigma &lt;- cb[grep(“sigma.”, names(cb))][-1]</p>
+<p>print(cbind(beta[, “mu”], round(cb_mu, 2))) print(cbind(beta[, “sigma”], round(cb_sigma, 2)))</p>
+</section>
+</code><section id="endnot-run" class="level2"><code>
+<h2 class="anchored" data-anchor-id="endnot-run">End(Not run)</h2>
+<p>}</p>
+<p>{regression} {models} {distribution}</p>
+</code>  
+</section></code></code></td>
+</tr>
+</tbody></table>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-Clevelandetal93" class="csl-entry" role="listitem">
-Cleveland, W. S., E. Grosse, and M. Shyu. 1993. <span>“Local Regression Models.”</span> In <em>Statistical Modelling in s</em>, edited by J. M Chambers and T. J Hastie, 309–76. Chapman &amp; Hall: New York. <a href="https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie">https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie</a>.
-</div>
-<div id="ref-eilers2021practical" class="csl-entry" role="listitem">
-Eilers, P. H. C., and B. D. Marx. 2021. <em>Practical Smoothing: The Joys of p-Splines</em>. Cambridge University Press.
-</div>
-<div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
-Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
-</div>
-<div id="ref-rigby2013automatic" class="csl-entry" role="listitem">
-———. 2013. <span>“Automatic Smoothing Parameter Selection in <span>GAMLSS</span> with an Application to Centile Estimation.”</span> <em>Statistical Methods in Medical Research</em> 23 (4): 318–32.
-</div>
-<div id="ref-Stasinopoulosetal2017" class="csl-entry" role="listitem">
-Stasinopoulos, D. M., R. A. Rigby, G. Z. Heller, V. Voudouris, and F. De Bastiani. 2017. <em>Flexible Regression and Smoothing: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/b21973">https://doi.org/10.1201/b21973</a>.
-</div>
-<div id="ref-Wood17" class="csl-entry" role="listitem">
-Wood, S. N. 2017. <em>Generalized Additive Models. An Introduction with <span>R</span></em>. 2nd ed. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781315370279">https://doi.org/10.1201/9781315370279</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</section></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

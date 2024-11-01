@@ -782,6 +782,10 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   lambda <- if(is.null(transfer$lambda)) 10 else transfer$lambda
 
   opt <- nlminb(lambda, objective = fl, lower = lambda / 10, upper = lambda * 10)
+#  lower <- exp(log(lambda) - 10 * abs(log(lambda)))
+#  upper <- exp(log(lambda) + 10 * abs(log(lambda)))
+#  opt <- optimize(fl, lower = lower, upper = upper)
+#  opt <- list("par" = opt$minimum)
 
   rval <- fl(opt$par, rf = TRUE)
 
@@ -789,7 +793,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
 
   ## Arguments needed for prediction and path plots.
-  keep <- c("formula", "term", "is_factor", "blockscale", "X")
+  keep <- c("formula", "term", "blockscale", "X")
   rval[keep] <- x[keep]
   rval$z <- z
   rval$w <- w
@@ -896,6 +900,13 @@ plot_lasso <- function(x, terms = NULL,
 {
   which <- match.arg(which)
 
+  lwd <- list(...)$lwd
+  col <- list(...)$col
+  if(is.null(lwd))
+    lwd <- 1.5
+  if(is.null(col))
+    col = 1
+
   if(inherits(x, "gamlss2")) {
     x <- specials(x, drop = FALSE)
     cx <- sapply(x, class)
@@ -918,8 +929,9 @@ plot_lasso <- function(x, terms = NULL,
       lambdas <- NULL
       scale <- list(...)$scale
       if(is.null(scale))
-        scale <- 5
+        scale <- c(3, 4)
       scale <- rep(scale, length.out = 2L)
+      scale <- rev(scale)
       grid <- list(...)$grid
       if(is.null(grid))
         grid <- 50
@@ -949,10 +961,11 @@ plot_lasso <- function(x, terms = NULL,
       if(which == "criterion") {
         plot(lambdas, x$ic$value, type = "l",
           xlab = expression(log(lambda)), ylab = toupper(x$ic$criterion),
-          lwd = 2, ...)
+          lwd = lwd, col = col, ...)
       } else {
         cm <- as.matrix(coef(x$model))
         matplot(lambdas, t(cm), type = "l", lty = 1,
+          lwd = lwd, col = col,
           xlab = expression(log(lambda)), ylab = "Coefficients")
       }
 
@@ -990,29 +1003,30 @@ plot_lasso <- function(x, terms = NULL,
 
         ic <- c(ic, icl)
         edfs <- c(edfs, edf)
-
         cm <- rbind(cm, b)
       }
-
-#print(ic[log(lambdas) == log(x$lambda)])
-#print(min(ic))
-#cat("---\n")
-
-      edf0 <- edfs[which.min(ic)]
 
       lab <- list(...)$label
 
       rind <- rev(1:length(ic))
       xlim <- rev(range(log(lambdas)))
 
+      xlab <- list(...)$xlab
+      if(is.null(xlab))
+        xlab <- expression(log(lambda))
+
+      ylab <- list(...)$ylab
+      if(is.null(ylab))
+        ylab <- if(which == "criterion") toupper(x$criterion) else "Coefficients"
+
       if(which == "criterion") {
-        plot(log(lambdas), ic, type = "l", lwd = 2,
-          xlab = expression(log(lambda)), ylab = toupper(x$criterion),
+        plot(log(lambdas), ic, type = "l", lwd = lwd, col = col,
+          xlab = xlab, ylab = ylab,
           main = "", axes = FALSE, xlim = xlim)
       } else {
         matplot(log(lambdas), cm,
-          type = "l", lty = 1, lwd = 1, col = 1,
-          xlab = expression(log(lambda)), ylab = "Coefficients",
+          type = "l", lty = 1, lwd = lwd, col = col,
+          xlab = xlab, ylab = ylab,
           main = "", axes = FALSE, xlim = xlim)
 
         names <- list(...)$names
@@ -1052,13 +1066,13 @@ plot_lasso <- function(x, terms = NULL,
       i <- which.min(ic[rind])
       lo <- log(lambdas)[rind][i]
 
-      abline(v = lo, lty = 2, col = "lightgray")
+      abline(v = log(x$lambda), lty = 2, col = "lightgray")
 
       main <- list(...)$main
       if(is.null(main))
         main <- TRUE
       if(isTRUE(main)) {
-        mtext(bquote(log(lambda) == .(round(lo, 3)) ~ " edf =" ~ .(round(edf0, 2))), side = 3, line = 0.5, cex = 0.8)
+        mtext(bquote(log(lambda) == .(round(log(x$lambda), 3)) ~ " edf =" ~ .(round(x$edf, 2))), side = 3, line = 0.3, cex = 0.8)
         mtext(lab, side = 3, line = 2, font = 2)
       }
     }

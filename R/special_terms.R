@@ -644,6 +644,8 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   if(is.null(control$criterion))
     control$criterion <- x$control$criterion
 
+  ridge <- isTRUE(control$add_ridge)
+
   k <- ncol(x$X)
   XW <- x$X * w
   XWX <- crossprod(XW, x$X)
@@ -737,8 +739,15 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   S <- pen(b0)
 
+  if(ridge)
+    S <- list(S, diag(ncol(S)))
+
   fl <- function(l, rf = FALSE, coef = FALSE) {
-    P <- try(chol2inv(chol(XWX + l*S)), silent = TRUE)
+    if(ridge) {
+      P <- try(chol2inv(chol(XWX + l[1]*S[[1]] + l[2]*S[[2]])), silent = TRUE)
+    } else {
+      P <- try(chol2inv(chol(XWX + l*S)), silent = TRUE)
+    }
 
     if(inherits(P, "try-error"))
       P <- solve(XWX + S)
@@ -780,12 +789,10 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   ## Set up smoothing parameters.
   lambda <- if(is.null(transfer$lambda)) 10 else transfer$lambda
+  if(ridge)
+    lambda <- rep(lambda, length.out = 2L)
 
-  opt <- nlminb(lambda, objective = fl, lower = lambda / 10, upper = lambda * 10)
-#  lower <- exp(log(lambda) - 10 * abs(log(lambda)))
-#  upper <- exp(log(lambda) + 10 * abs(log(lambda)))
-#  opt <- optimize(fl, lower = lower, upper = upper)
-#  opt <- list("par" = opt$minimum)
+  opt <- nlminb(lambda, objective = fl, lower = lambda / 100, upper = lambda * 100)
 
   rval <- fl(opt$par, rf = TRUE)
 
@@ -844,56 +851,6 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
   return(fit)
 }
 
-if(FALSE) {
-  set.seed(123)
-
-  n <- 500
-
-  x <- matrix(rnorm(100 * n), ncol = 100)
-  b <- rep(0, 100)
-  b[c(2, 6, 10)] <- c(1, -1, 0.5)
-  y <- 10 + x %*% b + rnorm(n, sd = 0.3)
-  
-  b <- gamlss2(y ~ la(x))
-
-  set.seed(123)
-
-  n <- 500
-  x <- runif(n, -3, 3)
-  y <- 10 + sin(x) + rnorm(n, sd = exp(-1 + cos(x)))
-  xf <- cut(x, breaks = 40, include.lowest = TRUE)
-
-  b <- gamlss2(y ~ la(xf,type=4) | la(xf,type=4))
-
-  par <- predict(b)
-
-  plot(x, y)
-
-  i <- order(x)
-
-  for(q in c(0.05, 0.5, 0.95)) {
-    p <- family(b)$q(q, par)
-    lines(p[i] ~ x[i], lwd = 3, col = 4)
-  }
-
-  data("rent", package = "gamlss.data")
-
-  rent$Flc <- cut(rent$Fl, breaks = seq(20, 160, by = 10),
-    include.lowest = TRUE)
-  rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
-    include.lowest = TRUE)
-
-  ## Normal lasso: type = 1
-  ## Group lasso: type = 2
-  ## Nominal fused lasso: type = 3
-  ## Ordinal fused lasso: type = 4
-  f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) |
-    la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) |
-    la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4)
-
-  b <- gamlss2(f, data = rent, family = BCT)
-}
-
 ## Lasso plotting function.
 plot_lasso <- function(x, terms = NULL,
   which = c("criterion", "coefficients"),
@@ -924,7 +881,7 @@ plot_lasso <- function(x, terms = NULL,
     cx <- sapply(x, class)
     lmbd <- NULL
     if(any(jj <- cx == "lasso.fitted"))
-      lmbd <- sapply(x[jj], function(x) x$lambda)
+      lmbd <- sapply(x[jj], function(x) x$lambda[1L])
 
     if(!is.null(lmbd)) {
       lambdas <- NULL
@@ -976,6 +933,9 @@ plot_lasso <- function(x, terms = NULL,
       lambdas <- list(...)$lambdas
       n <- length(x$z)
       logn <- log(n)
+
+      if(is.list(x$S))
+        x$S <- x$S[[1L]]
 
       cm <- ic <- edfs <- NULL
 
@@ -1068,7 +1028,7 @@ plot_lasso <- function(x, terms = NULL,
       i <- which.min(ic[rind])
       lo <- log(lambdas)[rind][i]
 
-      abline(v = log(x$lambda), lty = 2, col = "lightgray")
+      abline(v = log(x$lambda[1L]), lty = 2, col = "lightgray")
 
       main <- list(...)$main
       if(is.null(main))

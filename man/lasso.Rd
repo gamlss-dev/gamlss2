@@ -43,7 +43,9 @@ plot_lasso(x, terms = NULL,
     for creating the \code{\link[stats]{model.matrix}} if the model term is specified
     using a formula. For function \code{plot_lasso()} arguments like
     \code{lwd}, \code{col}, \code{main}, etc., that control plotting parameters
-    can be supplied.}
+    can be supplied. An additional ridge penalty (elastic net) can be added to
+    each \code{la()} term be setting \code{add_ridge = TRUE}
+    in the \code{\link{gamlss2()}} call.}
 }
 
 \details{

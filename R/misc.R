@@ -112,6 +112,7 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
     if(is.null(xlab))
       xlab <- "Response"
     ylim <- list(...)$ylim
+    xlim <- list(...)$xlim
 
     if(is.null(b$family$type))
       b$family$type <- "continuous"
@@ -132,7 +133,8 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
       if(is.null(ylim))
         ylim <- range(c(h$density, dy))
 
-      hist(y, breaks = "Scott", freq = FALSE, ylim = ylim,
+      hist(y, breaks = "Scott", freq = FALSE,
+        ylim = ylim, xlim = xlim,
         xlab = xlab, main = main)
       i <- order(y)
       lines(dy[i] ~ y[i], col = 4, lwd = 2)
@@ -161,7 +163,7 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
       if(is.null(ylab))
         ylab <- "Probability"
 
-      bp <- barplot(tab, ylim = ylim,
+      bp <- barplot(tab, ylim = ylim, xlim = xlim,
         xlab = xlab, main = main, ylab = ylab)
 
       bp <- as.numeric(bp)

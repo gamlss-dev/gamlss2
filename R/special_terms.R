@@ -887,9 +887,14 @@ plot_lasso <- function(x, terms = NULL,
     }
  
     cx <- sapply(x, class)
+
     lmbd <- NULL
-    if(any(jj <- cx == "lasso.fitted"))
-      lmbd <- sapply(x[jj], function(x) x$lambda[1L])
+    if(any(jj <- cx == "lasso.fitted")) {
+      x <- x[jj]
+      lmbd <- sapply(x, function(z) z$lambda[1L])
+    } else {
+      return(invisible(NULL))
+    }
 
     if(!is.null(lmbd)) {
       lambdas <- NULL

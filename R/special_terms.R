@@ -1003,8 +1003,11 @@ plot_lasso <- function(x, terms = NULL,
         if(isFALSE(names))
           names <- NULL
         if(!is.null(names)) {
-          if(!is.character(names))
+          if(!is.character(names)) {
             names <- colnames(x$X)
+            if(is.null(names))
+              names <- paste0("x", 1:ncol(X))
+          }
           names <- names[1:ncol(x$X)]
           at <- cm[1, ]
 

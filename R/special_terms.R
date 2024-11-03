@@ -691,11 +691,15 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       df <- colSums(abs(x$X) > 0)
       nref <- n - sum(df)
       for(k in 1:ncol(Af)) {
-        ok <- which(Af[, k] != 0)
-        w[k] <- if(length(ok) < 2) {
-          2 / (k + 1) * sqrt((df[ok[1]] + nref) / n)
+        if(nref < 0) {
+          w[k] <- 1
         } else {
-          2 / (k + 1) * sqrt((df[ok[1]] + df[ok[2]]) / n)
+          ok <- which(Af[, k] != 0)
+          w[k] <- if(length(ok) < 2) {
+            2 / (k + 1) * sqrt((df[ok[1]] + nref) / n)
+          } else {
+            2 / (k + 1) * sqrt((df[ok[1]] + df[ok[2]]) / n)
+          }
         }
         w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
       }
@@ -719,11 +723,15 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       df <- colSums(abs(x$X) > 0)
       nref <- n - sum(df)
       for(k in 1:ncol(Af)) {
-        ok <- which(Af[, k] != 0)
-        w[k] <- if(length(ok) < 2) {
-          sqrt((df[ok[1]] + nref) / n)
+        if(nref < 0) {
+          w[k] <- 1
         } else {
-          sqrt((df[ok[1]] + df[ok[2]]) / n)
+          ok <- which(Af[, k] != 0)
+          w[k] <- if(length(ok) < 2) {
+            sqrt((df[ok[1]] + nref) / n)
+          } else {
+            sqrt((df[ok[1]] + df[ok[2]]) / n)
+          }
         }
         w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
       }

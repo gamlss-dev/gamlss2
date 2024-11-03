@@ -142,23 +142,29 @@ set.seed(123)
 n <- 500
 k <- 50
 
-## model matrix and coefficients
+## model matrix
 X <- matrix(rnorm(n * k), n, k)
 colnames(X) <- paste0("x", 1:k)
-beta <- cbind("mu" = rbinom(k, 1, 0.1), "sigma" = rbinom(k, 1, 0.1) * 0.3)
+
+## true coefficients
+beta <- list(
+  "mu" = rbinom(k, 1, 0.1),
+  "sigma" = rbinom(k, 1, 0.1) * 0.3
+)
 
 ## parameters
-mu <- X %*% beta[, "mu"]
-sigma <- exp(1 + X %*% beta[, "sigma"])
+mu <- X %*% beta$mu
+sigma <- exp(-1 + X %*% beta$sigma)
 
 ## response
 y <- rnorm(n, mean = mu, sd = sigma)
 
-## model formula
-f <- y ~ la(X) | la(X)
+## model formula with nominal fused lasso
+f <- y ~ la(X,type=3) | la(X,type=3)
 
-## estimate model
-b <- gamlss2(f)
+## estimate model incl. extra ridge penalty
+## for all la() model terms
+b <- gamlss2(f, add_ridge = TRUE)
 
 ## plot information criteria curves
 plot_lasso(b)
@@ -177,8 +183,14 @@ cb <- coef(b, full = TRUE)
 cb_mu <- cb[grep("mu.", names(cb))][-1]
 cb_sigma <- cb[grep("sigma.", names(cb))][-1]
 
-print(cbind(beta[, "mu"], round(cb_mu, 2)))
-print(cbind(beta[, "sigma"], round(cb_sigma, 2)))
+## true positive rate
+tp <- mean(c(cb_mu[beta$mu > 0] > 0,
+  cb_sigma[beta$sigma > 0] > 0))
+
+## false positive rate, needs threshold
+thres <- 0.01
+fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
+  abs(cb_sigma[beta$sigma == 0]) > thres))
 }
 }
 

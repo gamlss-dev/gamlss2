@@ -75,11 +75,12 @@ lines(nd[[1]], nd[[6]], col = 4, lwd = 2)
 
 ## Graphical model assessment
 
+### Within model diagnostics 
 ```{r lm}
 #| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 10
 #| fig-width: 10
-#| echo: -1
+#| echo: true
 par(mfrow = c(2, 2))
 rootogram(m1)
 pithist(m1)
@@ -91,7 +92,7 @@ wormplot(m1)
 #| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 10
 #| fig-width: 10
-#| echo: -1
+#| echo: true
 par(mfrow = c(2, 2))
 rootogram(m2)
 pithist(m2)
@@ -99,11 +100,14 @@ qqrplot(m2)
 wormplot(m2)
 ```
 
+
+### Between Models diagnostics
+
 ```{r comparison}
 #| eval: !expr 'gamlss_dist_devel'
 #| fig-height: 5
 #| fig-width: 10
-#| echo: -1
+#| echo: true
 par(mfrow = c(1, 2))
 p1 <- pithist(m1, plot = FALSE)
 p2 <- pithist(m2, plot = FALSE)
@@ -115,6 +119,8 @@ plot(c(w1, w2), col = c(2, 4), single_graph = TRUE)
 
 ## Scoring rules
 
+
+
 ```{r, proscore}
 #| eval: !expr 'gamlss_dist_devel'
 m <- list(lm = m1, gamlss2 = m2)
@@ -122,3 +128,4 @@ sapply(m, proscore, type = c("logs", "crps", "mae", "mse", "dss"))
 ```
 
 
+`Mikis` : can we do the same with `newdata` ?

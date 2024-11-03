@@ -16,10 +16,10 @@ re(fixed =~ 1, random = NULL, ...)
 
 \arguments{
  
-  \item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model. In most cases, this can also be included in the \code{\link{gamlss2}} parameter formula.}
-  \item{random}{A formula specifying the random effect part of the model,
+\item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model. In most cases, this can also be included in the \code{\link{gamlss2}} parameter formula.}
+\item{random}{A formula specifying the random effect part of the model,
     as in the \code{\link{nlme}{lme()}} function.}
- \item{\dots}{ For the \code{re()} function, the dots argument is used
+\item{\dots}{ For the \code{re()} function, the dots argument is used
     to specify additional control arguments for the \code{\link{nlme}{lme}} function,
     such as the \code{method} and \code{correlation} arguments.}
 }

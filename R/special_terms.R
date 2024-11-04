@@ -947,13 +947,15 @@ plot_lasso <- function(x, terms = NULL,
       n <- length(x$z)
       logn <- log(n)
 
-      if(is.list(x$S))
-        x$S <- x$S[[1L]]
-
       cm <- ic <- edfs <- NULL
 
       for(l in lambdas) {
-        P <- try(chol2inv(chol(x$XWX + l*x$S)), silent = TRUE)
+        if(is.list(x$S)) {
+          P <- try(chol2inv(chol(x$XWX + l*x$S[[1]] + x$lambda[2]*x$S[[2]])),
+            silent = TRUE)
+        } else {
+          P <- try(chol2inv(chol(x$XWX + l*x$S)), silent = TRUE)
+        }
 
         if(inherits(P, "try-error"))
           P <- solve(x$XWX + x$S)
@@ -1056,6 +1058,12 @@ plot_lasso <- function(x, terms = NULL,
           mtext(bquote(log(lambda) == .(round(log(x$lambda), 3)) ~ " edf =" ~ .(round(x$edf, 2))), side = 3, line = 0.3, cex = 0.8)
           mtext(lab, side = 3, line = 1.5, font = 2, cex = 1.2)
         }
+      }
+      if(isTRUE(list(...)$info)) {
+        cex.info <- list(...)$cex.info
+        if(is.null(cex.info))
+          cex.info <- 1
+        mtext(bquote(log(lambda) == .(round(log(x$lambda), 3)) ~ " edf =" ~ .(round(x$edf, 2))), side = 3, line = 0.3, cex = cex.info)
       }
     }
   }

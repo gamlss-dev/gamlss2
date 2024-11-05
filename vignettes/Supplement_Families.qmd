@@ -12,6 +12,20 @@ author: The GAMLSS working party
 bibliography: gamlss2.bib
 ---
 
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+if(!("gamlss.ggplots" %in% installed.packages()) || packageVersion("gamlss.ggplots") < "2.1-15") {
+  install.packages("gamlss.ggplots", repos = "https://gamlss-dev.R-universe.dev")
+}
+
+if(packageVersion("gamlss.dist") < "6.1-3") {
+  install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
+}
+
+dev_version <- packageVersion("gamlss.ggplots") >= "2.1-15" && packageVersion("gamlss.dist") >= "6.1-3"
+
+library("gamlss2")
+```
+
 ## Introduction {#sec-Introduction}
 
 
@@ -27,6 +41,7 @@ In this vignette we are trying to;
 First we import the packages we are going to need later.
 
 ```{r}
+#| eval: !expr 'dev_version'
 #| warning: false
 rm(list=ls())
 library(gamlss)
@@ -139,6 +154,7 @@ p[order(p)]
 Note that similar results can be achieved in `gamlss` using the function `fidDist()`;
 
 ```{r}
+#| eval: !expr 'dev_version'
 #| cache: true
 #| results: "hide" 
 #| warning: false 
@@ -160,6 +176,7 @@ fit_family(rent$R, family=BCTo)
 Here is the output for the older `fitDist()` function;
 
 ```{r}
+#| eval: !expr 'dev_version'
 gamlss:::histDist(rent$R, family=BCTo, nbins=30)
 ```
 
@@ -186,12 +203,14 @@ plot(mNormal)
 and the residuals of the model using;
 
 ```{r}
+#| eval: !expr 'dev_version'
 resid_plots(mNormal)
 ```
 
 We can improve the residual plots by fitting a more sophisticated distribution with 4 parameters.
 
 ```{r}
+#| eval: !expr 'dev_version'
  mBCTo <- gamlss2(f, data = rent, family = BCTo) 
 resid_plots(mBCTo)
 ```
@@ -201,6 +220,7 @@ resid_plots(mBCTo)
 The function `chooseDist()` of the package `gamlss` can be used here.
 
 ```{r}
+#| eval: !expr 'dev_version'
 #| cache: true
 T1 <- gamlss:::chooseDist(mNormal, type="realplus")
 ```
@@ -208,6 +228,7 @@ T1 <- gamlss:::chooseDist(mNormal, type="realplus")
 The function creates a table of GAIC's which be printed;
 
 ```{r}
+#| eval: !expr 'dev_version'
 library(knitr)
 T1  |> kable(digits = c(2, 2, 3, 3 ))
  
@@ -228,7 +249,7 @@ nNO <- gamlss2:::tF(NO)
 We can now fit a model using either new tranform distribution `nNO` or use the old `NO` distribution which automatically is transformed within `gamlss2()`;
 
 ```{r}
-
+#| eval: !expr 'dev_version'
 ## Model formula. 
 f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") | 
          ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") 
@@ -302,6 +323,7 @@ The *Skew Generalised T* distribution and its sub-distributions (The figure is t
 Let us import the package `sgt`.
 
 ```{r}
+#| eval: !expr 'dev_version'
 #| warning: false
 library("sgt")
 ```
@@ -315,6 +337,7 @@ Now using the `d`, `p`, and `q` function of the package `sgt` we create the func
 -   `variance`
 
 ```{r}
+#| eval: !expr 'dev_version'
 ## Skewed Generalized T Distribution.
 SGT <- function(...) {
   stopifnot(requireNamespace("sgt"))
@@ -346,6 +369,7 @@ SGT <- function(...) {
 ```
 
 ```{r}
+#| eval: !expr 'dev_version'
 #| cache: true
 #| warning: false
 data("abdom", package = "gamlss.data")

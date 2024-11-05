@@ -89,40 +89,39 @@ The fitting function takes the current working response, the iterative weights a
 ```{r}
 special_fit.lo <- function(x, z, w, control, ...)
 {
-## assign current working response and weights
+  ## assign current working response and weights
   x$data$response_z <- z
   x$data$weights_w <- w
-# set up loess call
+
+  ## set up loess call
   call <- "loess(formula = x$formula, data = x$data, weights = weights_w"
-## add optional control parameters
+
+  ## add optional control parameters
   if(!is.null(x$control)) {
     for(j in names(x$control))
       call <- paste0(call, ", ", j, "= x$control$", j)
   }
-call <- paste0(call, ")")
-## estimate model
-rval <- list("model" = eval(parse(text = call)))
-## get the fitted.values
-rval$fitted.values <- fitted(rval$model) 
-## center fitted values
+  call <- paste0(call, ")")
+
+  ## estimate model
+  rval <- list("model" = eval(parse(text = call)))
+
+  ## get the fitted.values
+  rval$fitted.values <- fitted(rval$model) 
+
+  ## center fitted values
   rval$shift <- mean(rval$fitted.values)
   rval$fitted.values <- rval$fitted.values - rval$shift 
 
-## degrees of freedom
+  ## degrees of freedom
   rval$edf <-  rval$model$trace.hat
-## assign class for predict method 
+
+  ## assign class for predict method 
   class(rval) <- "lo.fitted" 
 
   return(rval) 
-} 
+}
 ```
-
-<!-- ## Transferring the weights for the next backfitting iteration. -->
-<!--   ## Note, "transfer" can be used to transfer anything from one -->
-<!--   ## iteration to the next. -->
-<!--   ## save the fitted object  -->
-<!--   ## Possible scaling.  -->
-<!--   rval$scalex <- x$scalex  -->
 
 ## The predict function
 
@@ -279,7 +278,4 @@ gamlss:::vis.lo(specials(b2, model = "mu")$model, partial = TRUE)
 ```
 
 Note that similar plots are given in section 9.6.3 of @Stasinopoulosetal2017, where the `lo()` function within package `gamlss`, is described.
-
-
-
 

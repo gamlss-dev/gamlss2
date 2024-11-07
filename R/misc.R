@@ -132,6 +132,8 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
 
       if(is.null(ylim))
         ylim <- range(c(h$density, dy))
+      if(is.null(xlim))
+        xlim <- range(y, na.rm = TRUE)
 
       hist(y, breaks = "Scott", freq = FALSE,
         ylim = ylim, xlim = xlim,

@@ -249,7 +249,11 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
     polygon(cbind(c(px, rev(px)), c(fx, rev(polyu[i, ]))),
       col = colr[i], border = NA)
   }
-  lines(x[, "fit"] ~ x[, 1L], lwd = 1)
+  addline <- list(...)$addline
+  if(is.null(addline))
+    addline <- TRUE
+  if(addline)
+    lines(x[, "fit"] ~ x[, 1L], lwd = 1)
 }
 
 ## Plot bivariate smooth effects.

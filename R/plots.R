@@ -236,7 +236,10 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
     xlab <- colnames(x)[1L]
   if(is.null(ylab))
     ylab <- attr(x, "label")
-  if(isFALSE(list(...)$add)) {
+  add <- list(...)$add
+  if(is.null(add))
+    add <- FALSE
+  if(!add) {
     plot(1, 1, xlim = xlim, ylim = ylim,
       xlab = xlab, ylab = ylab, type = "n", main = main)
   }

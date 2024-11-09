@@ -236,8 +236,10 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
     xlab <- colnames(x)[1L]
   if(is.null(ylab))
     ylab <- attr(x, "label")
-  plot(1, 1, xlim = xlim, ylim = ylim,
-    xlab = xlab, ylab = ylab, type = "n", main = main)
+  if(isFALSE(list(...)$add)) {
+    plot(1, 1, xlim = xlim, ylim = ylim,
+      xlab = xlab, ylab = ylab, type = "n", main = main)
+  }
   for(i in 1:nrow(polyl)) {
     polygon(cbind(c(px, rev(px)), c(polyl[i, ], rev(fx))),
       col = colr[i], border = NA)

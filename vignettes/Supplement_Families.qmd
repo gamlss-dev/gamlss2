@@ -1,6 +1,6 @@
 ---
-title: "Suplement to Distribution Families in `gamlss2`"
-subtitle: "A comparison to families in gamlss"
+title: "Supplement to Distribution Families in `gamlss2`"
+subtitle: "A comparison to families in `gamlss`"
 format: 
   html:
     html-math-method: mathjax
@@ -26,104 +26,186 @@ dev_version <- packageVersion("gamlss.ggplots") >= "2.1-15" && packageVersion("g
 library("gamlss2")
 ```
 
-## Introduction {#sec-Introduction}
+The distributions in the `gamlss2` package differ from those in the original `gamlss` 
+family, as described by @Rigbyetal2019. The structure of the `"gamlss.family"` object
+(see @StasinopoulosRigby07) differs from that of the `"gamlss2.family"`. While both 
+families contain the same core information about the distribution, it is represented in 
+different formats. The key reason for this change is that the new `"gamlss2.family"` 
+structure is more flexible and can be more easily generalized to accommodate models with 
+more than four parameters—something that was a limitation of the earlier GAMLSS 
+implementation in the `gamlss` package.
 
+In this vignette, we aim to:
 
-The `gamlss2` distributions differ from the original `gamlss` family distributions, @Rigbyetal2019. The structure of the `gamlss.family` object, see @StasinopoulosRigby07, is different from `gamlss2.family`. The two families, contain the same amount of information about the distribution but in a different form. The main reason for the change is that the new `gamlss2.family` is more flexible and can be generalised easier to more that 4 parameters which was one of the restriction of the older implementation of GAMLSS in the `gamlss` package.
-
-In this vignette we are trying to;
-
--   highlight the structure of a `gamlss2.family` object, @sec-Thestructureofgamlss2family;
--   show how to fit a `marginal`, @sec-fittingmarginal; and a `conditional` distribution for the response $y$, @sec-fittingConditional;
--   show how to transform an old `gamlss.family` objects into a new `gamlss2.family` objects, @sec-Tranformingtheold;
--   use a five parameters distribution,  @sec-Fittinga5parameterdistribution.
+- Highlight the structure of a `"gamlss2.family"` object
+  (@sec-Thestructureofgamlss2family);
+- Demonstrate how to fit a *marginal* distribution (@sec-fittingmarginal) and a 
+  *conditional* distribution for the response $y$ (@sec-fittingConditional);
+- Fit a five-parameter distribution (@sec-Fittinga5parameterdistribution).
 
 First we import the packages we are going to need later.
 
 ```{r}
 #| eval: !expr 'dev_version'
 #| warning: false
-rm(list=ls())
-library(gamlss)
-library(gamlss2)
-library(Formula)
-library(gamlss.ggplots)
+library("gamlss")
+library("gamlss2")
+library("gamlss.ggplots")
 ```
 
-## The structure of `gamlss2.family` object {#sec-Thestructureofgamlss2family}
 
-A `gamlss2.family` object is a list, called `fam`, with the following components:
+## The structure of `"gamlss2.family"` object {#sec-Thestructureofgamlss2family}
 
--   `family`: the name of the family
--   `names`: the names of the parameters
--   `links`: the link function of the parameters
--   `scores`: the first derivatives of the loh likelihood
--   `hess`: the Hessian (second derivatives)
--   `loglik`: the log likelihood denote as $\ell$, the global deviance is $-2 \times \ell$
--   `mu`: the $\mu$ parameter of the distribution
--   `d`: the pdf
--   `p`: the cdf
--   `r`: random function
--   `q`: the quantile function (inverse cdf)
--   `initialise`: starting values
--   `mean` the mean (if exist)
--   `variance`: the variance (if exist)
--   `valid.response`: the range of the response.
+A `"gamlss2.family"` object is a list with the following components:
 
-### The Normal distribution as `gamlss2` family {#sec-Normaldistribution}
+- `family`: The name of the family.
+- `names`: The names of the distribution parameters.
+- `links`: The link functions for the parameters.
+- `d`: The probability density function (PDF). If the log-likelihood
+   function (`loglik()`) is not provided, it will be evaluated using `d()`.
 
-Here, as an example we show how the normal distribution can be defined as a `gamlss2.family`;
+- `scores`: A named list of the first derivatives of the log-likelihood with
+  respect to the predictors. There is one list entry for each parameter.
+  If these derivatives are not provided, they will be automatically
+  approximated numerically.
+
+- `hess`: A named list of second derivatives with respect to the predictors.
+  If these derivatives are missing or not supplied, they will be approximated
+  numerically using information from the `scores` component.
+
+- `p`: The cumulative distribution function (CDF).
+
+- `r`: The random number generation function.
+
+- `q`: The quantile function (inverse CDF).
+
+- `initialize`: A named list of functions used to set starting values for
+  the distribution parameters.
+
+- `mean`: The mean function of the distribution (if it exists).
+
+- `variance`: The variance function of the distribution (if it exists).
+
+- `valid.response`: A function that checks the validity of the response range.
+
+The first four components (`family`, `names`, `links`, and `d`) are mandatory for
+setting up a `"gamlss2.family"` object. The remaining components are optional.
+However, for model diagnostics using (randomized) quantile residuals, it is
+recommended to also provide the `p()` function. Additionally, to compute
+quantiles, the `q()` function is necessary. In practice, it is advised to always
+include the `q()` function in the family object.
+
+
+### The normal distribution as `gamlss2` family {#sec-Normaldistribution}
+
+As an example, we demonstrate how to define the normal distribution as
+a `"gamlss2.family"` object.
 
 ```{r}
-Normal <- function(...) 
-  { fam <- list( 
-    "family" = "Normal", 
-    "names" = c("mu", "sigma"), 
-    "links" = c("mu" = "identity", "sigma" = "log"), 
-    "score" = list( "mu" = function(y, par, ...) 
-      { (y - par$mu) / (par$sigma^2) }, 
-    "sigma" = function(y, par, ...) 
-      { -1 + (y - par$mu)^2 / (par$sigma^2) 
-      } ), 
-    "hess" = list( 
-    "mu" = function(y, par, ...) { 1 / (par$sigma^2)  },  
-    "sigma" = function(y, par, ...) {  rep(2, length(y))  },  
-    "mu.sigma" = function(y, par, ...) {  rep(0, length(y))  
-      } ),  
-    "loglik" = function(y, par, ...) 
-      {sum(dnorm(y, par$mu, par$sigma, log = TRUE))  
-      },  
-     "mu" = function(par, ...) {  par$mu },
-    "sigma" =  function(par, ...) {  par$sigma},
-    "d" = function(y, par, log = FALSE) 
-      { dnorm(y, mean = par$mu, sd = par$sigma, log = log) }, 
-    "p" = function(y, par, ...) 
-      { pnorm(y, mean = par$mu, sd = par$sigma, ...)},
-    "r" = function(n, par)
-      { rnorm(n, mean = par$mu, sd = par$sigma)}, 
-    "q" = function(p, par) {qnorm(p, mean = par$mu, sd = par$sigma)},
-    "initialize" = list( 
-     "mu"    = function(y, ...) { (y + mean(y)) / 2 },
-      "sigma" = function(y, ...) { rep(sd(y), length(y)) }),
-      "mean"= function(par) par$mu, 
-"variance"  = function(par) par$sigma^2, 
-"valid.response" = function(x) 
-  { if(is.factor(x) | is.character(x)) stop("the response should be numeric!")
-    return(TRUE)})  
-class(fam) <- "gamlss2.family" 
-return(fam) 
+Normal <- function(...) {
+  fam <- list(
+    "family" = "Normal",
+    "names" = c("mu", "sigma"),
+    "links" = c("mu" = "identity", "sigma" = "log"),
+    
+    ## PDF and log-likelihood function
+    "d" = function(y, par, log = FALSE) {
+      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
+    },
+    "loglik" = function(y, par, ...) {
+      sum(dnorm(y, par$mu, par$sigma, log = TRUE))
+    },
+    
+    ## derivatives (first and second)
+    "scores" = list(
+      "mu" = function(y, par, ...) {
+        (y - par$mu) / (par$sigma^2)
+      },
+      "sigma" = function(y, par, ...) {
+        -1 + (y - par$mu)^2 / (par$sigma^2)
+      }
+    ),
+    
+    "hess" = list(
+      "mu" = function(y, par, ...) {
+        1 / (par$sigma^2)
+      },
+      "sigma" = function(y, par, ...) {
+        rep(2, length(y))
+      },
+      "mu.sigma" = function(y, par, ...) {
+        rep(0, length(y))
+      }
+    ),
+    
+    ## CDF, quantile, and random functions
+    "p" = function(y, par, ...) { 
+      pnorm(y, mean = par$mu, sd = par$sigma, ...)
+    },
+    "r" = function(n, par) {
+      rnorm(n, mean = par$mu, sd = par$sigma)
+    },
+    "q" = function(p, par) {
+      qnorm(p, mean = par$mu, sd = par$sigma)
+    },
+    
+    ## initialization functions
+    "initialize" = list(
+      "mu" = function(y, ...) {
+        (y + mean(y)) / 2
+      },
+      "sigma" = function(y, ...) {
+        rep(sd(y), length(y))
+      }
+    ),
+    
+    ## mean and variance functions
+    "mean" = function(par) {
+      par$mu
+    },
+    "variance" = function(par) {
+      par$sigma^2
+    },
+    
+    ## valid response check
+    "valid.response" = function(x) {
+      if(is.factor(x) | is.character(x))
+        stop("The response should be numeric!")
+      return(TRUE)
+    }
+  )
+  
+  class(fam) <- "gamlss2.family"
+
+  return(fam)
 }
 ```
 
-`family` and `names` are defining the name of the distribution and the names of the parameters of the distribution, respectively.
+The `family` and `names` components define the name of the distribution and
+the names of the distribution’s parameters, respectively.
 
-`links` defines the defaul links functions for the parameters of the distribution. Link functions are basically defined the range of the parameters for example for the scale parameter $\sigma$ a `log` link ensures that the parameter is always positive. Note that the `link` functions change the interpretation of the model. For example an `identical` link implies an additive structure $b_1 x_1+\ldots+ b_p x_p$ while a `log` link is additive is in the predictor scale but has a multiplicative structure in the original parameter scale.
+The `links` component specifies the default link functions for the parameters.
+Link functions govern the range and behavior of the parameters. For example, using a
+`log` link for the scale parameter $\sigma$ ensures that it remains positive.
+Note that link functions alter the interpretation of the model. For instance,
+an `identity` link implies an additive relationship on the parameter scale, such as
+$b_1 x_1 + \dots + b_p x_p$, whereas a `log` link is additive on the predictor
+scale but introduces a multiplicative structure on the original parameter scale.
 
-The objects `score`, `hess` and `logLik` defined the first and second derivative and the log-likelihood of the distribution, respectively. This information is used when fitting the model. Also useful in the fitting of the model is the information from `initialise` and `valid.response` which define how the initial values for the parameters are defined and the right range of the response $y$ .
+The `scores()`, `hess()`, and `loglik()` functions define the first and second
+derivatives and the log-likelihood of the distribution, respectively. These
+derivatives are crucial for model fitting. The `initialize()` and
+`valid.response()` functions also play important roles in model fitting:
+`initialize()` specifies how the initial values for the parameters are determined,
+and `valid.response()` defines the valid range for the response variable $y$.
 
-The `d`, `p`, `q` and `r` function defined the pdf, cdf, inverse cdf (or q-function) and the randomised function of the distribution family.
+The `d()`, `p()`, `q()`, and `r()` functions define the probability density
+function (PDF), cumulative distribution function (CDF), quantile function
+(inverse CDF), and random number generation function for the distribution family.
 
-The `mean` and `variance` define the mean the variance of the distribution (if exist). Note that the mean and variance (or possible other moments) maybe do not exist for a specific distribution. This occurs with distribution with heavy tails.
+The `mean()` and `variance()` functions define the mean and variance of the
+distribution (if they exist). Note that for some distributions—especially those
+with heavy tails—these moments may not exist.
 
 |  `Mikis commends`
 | it needs to say here which of the options are compulsory and
@@ -131,196 +213,154 @@ The `mean` and `variance` define the mean the variance of the distribution (if e
 |  `family`, `names`, `links`, `d` and `p` are compulsory the rest not. Am I right?
 | I am not clear when and why `rqres` is needed.
 
-## Fitting a `marginal` distributiions {#sec-fittingmarginal}
 
-What we mean by **marginal**, is situations, where we are interested to fit a theoretical distribution, $f(y|\theta)$, to a single vector $y$, without considering explanatory variables. We will use the term **conditional** distribution for $y$ where the x's are used to explain the parameters $\theta$, $f(y|\theta(X))$.
+## Fitting a `marginal` distribution {#sec-fittingmarginal}
+
+By **marginal** distribution, we refer to the situation where we are interested in
+fitting a theoretical distribution, $f(y|\theta)$, to a single vector $y$
+without considering any explanatory variables. In contrast, we use the term
+**conditional** distribution to describe the scenario where the response variable
+$y$ is modeled based on explanatory variables $X$, such that the parameters
+$\theta$ are a function of $X$, i.e., $f(y|\theta(X))$.
+
 
 ### The function `find_family()`
 
-Here are are trying to find the "best" family for the variable $y$ among all relevant available families:
+In this section, we aim to find the "best" family for the variable $y$ from a
+set of relevant available families:
 
 ```{r}
+#| eval: !expr 'dev_version'
 #| cache: true
 #| output: false
-p <- find_family(rent$R, families=available_families("continuous"))
+p <- find_family(rent$R, families = available_families("continuous"))
 ```
 
-The option `available_families="continuous"` has been used to limited the available distributions to the `continuous` distributions. So the function `find_family` fits all continuous distributions and saves the GAIC in a vectors called `p`. The values of the vector can be printed in order;
+The option `families = "continuous"` limits the available distributions to those in
+the continuous category. The function `find_family()` tries to fit all
+continuous distributions and stores the Generalized Akaike Information Criterion (GAIC) 
+values in a vector. The values of this vector are sorted in decreasing order of GAIC.
 
 ```{r}
-p[order(p)]
+#| eval: !expr 'dev_version'
+print(p)
 ```
 
-Note that similar results can be achieved in `gamlss` using the function `fidDist()`;
+Note that similar results can be obtained in `gamlss` using the `fitDist()` function:
 
 ```{r}
 #| eval: !expr 'dev_version'
 #| cache: true
 #| results: "hide" 
 #| warning: false 
-a <- gamlss:::fitDist(rent$R)
+a <- gamlss::fitDist(rent$R)
 ```
 
+Note here, the results are sorted in increasing order of GAIC:
+
 ```{r}
+#| eval: !expr 'dev_version'
 a$fits
 ```
 
+
 ### The function `fit_family()`
 
-The function `fit_family()` is similar to the older `gamlss` function `fitDist()`. It fits a marginal distribution to $y$ and then plots a histogram of $y$ together with the fitted distribution for $y$.
+The function `fit_family()` is similar to the older `gamlss` function `fitDist()`.
+It fits a marginal distribution to the variable $y$ and then generates a histogram of
+$y$ alongside the fitted distribution.
 
 ```{r}
+#| eval: !expr 'dev_version'
 fit_family(rent$R, family=BCTo)
 ```
 
-Here is the output for the older `fitDist()` function;
+Here is the output from the older `fitDist()` function:
 
 ```{r}
 #| eval: !expr 'dev_version'
 gamlss:::histDist(rent$R, family=BCTo, nbins=30)
 ```
 
-## Fitting Conditional distributions {#sec-fittingConditional}
+
+## Fitting conditional distributions {#sec-fittingConditional}
 
 ### Single conditional distributions
 
-Here we use the \`Normal' family defined in @sec-Normaldistribution to fit a Normal distribution to a model defined by the formula below;
+In this section, we use the `Normal` family defined in @sec-Normaldistribution to fit a Normal distribution to a model specified by the following formula
 
 ```{r}
-## Model formula. 
+#| eval: !expr 'dev_version'
+## model formula 
 f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") | 
-         ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") 
-## Estimate model
- mNormal <- gamlss2(f, data = rent, family = Normal) 
+  ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") 
+
+## estimate model
+mNormal <- gamlss2(f, data = rent, family = Normal)
 ```
 
-The fitted smoothing terms can be displayed using;
+We can visualize the fitted smoothing terms using
 
 ```{r}
+#| eval: !expr 'dev_version'
 plot(mNormal)
 ```
 
-and the residuals of the model using;
+To inspect the residuals of the model, use
 
 ```{r}
 #| eval: !expr 'dev_version'
 resid_plots(mNormal)
 ```
 
-We can improve the residual plots by fitting a more sophisticated distribution with 4 parameters.
+To improve the residual plots, we can fit a more sophisticated distribution
+with four parameters.
 
 ```{r}
 #| eval: !expr 'dev_version'
- mBCTo <- gamlss2(f, data = rent, family = BCTo) 
+mBCTo <- gamlss2(f, data = rent, family = BCTo) 
 resid_plots(mBCTo)
 ```
 
+
 ### Fitting multiple conditional distributions
 
-The function `chooseDist()` of the package `gamlss` can be used here.
+The function `chooseDist()` from the `gamlss` package can be used to compare
+multiple conditional distributions.
 
 ```{r}
 #| eval: !expr 'dev_version'
 #| cache: true
-T1 <- gamlss:::chooseDist(mNormal, type="realplus")
+T1 <- gamlss:::chooseDist(mNormal, type = "realplus")
 ```
 
-The function creates a table of GAIC's which be printed;
+This function generates a table of GAIC values, which can be printed as follows:
 
 ```{r}
 #| eval: !expr 'dev_version'
 library(knitr)
 T1  |> kable(digits = c(2, 2, 3, 3 ))
- 
 ```
 
-Note that the function using the same formula `f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") | ti(Fl) + ti(A) + ti(Fl, A, bs = "ps")` to fit all distributional regression models. Also note that `f`, do not contain a model for parameters $\nu$ and $\tau$ and therefore constants are fitted for those two parameters when the distributions have more than 2 parameters.
+Note that the function uses the same formula `f` to fit all the distributional regression 
+models. Also, note that `f` does not include a model for the parameters
+$\nu$ and $\tau$; therefore, constants (intercepts) are fitted for these two
+parameters when the distributions have more than two parameters.
 
-## Tranforming the old `gamlss.family` to a `gamlss2.family` {#sec-Tranformingtheold}
 
-Any old `gamlss.family` distribution can be transformed to a new `gamlss2` family using the function `tF()`. Below we use the function `tF()` to create a `gamlss2` family `nNO` distribution. Note that the function `gamlss2()` automatically is using `tF()` to translated any old `gamlss.famlily` to a new one in order to fit it.
+## Fitting a 5-Parameter distribution {#sec-Fittinga5parameterdistribution}
 
-`Mikis; how the link will be changed then?`
+In this section, we demonstrate the advantage of using `gamlss2` over `gamlss` for fitting distribution families, specifically highlighting the ease with which a five-parameter distribution can be fitted. As an example, we use the *Skew Generalized T* (SGT) distribution.
 
-```{r}
-nNO <- gamlss2:::tF(NO)
-```
-
-We can now fit a model using either new tranform distribution `nNO` or use the old `NO` distribution which automatically is transformed within `gamlss2()`;
-
-```{r}
-#| eval: !expr 'dev_version'
-## Model formula. 
-f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") | 
-         ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") 
-## Estimate model
- mnNO <- gamlss2(f, data = rent, family = nNO) 
- mNO <- gamlss2(f, data = rent, family = NO) 
- AIC(mNormal, mnNO, mNO)
-```
-
-Similar fits, but note that from the residual diagnostic plots of the previous section we know that the normal distribution have not taken into the account the `skewness` of the response variable and therefore is inadequate.
-
-Here we disply the names of the `nNO` `gamlss2.family`
-
-```{r}
-names(nNO)
-```
-
-to compare them with the names of the `gamlss.family`
-
-```{r}
-names(NO())
-```
-
-| gamlss        | gamlss2        | needed |
-|---------------|:---------------|:-------|
-| family        | family         | YES    |
-| parameter     | names          | YES    |
-| nopar         | NA             | NO     |
-| type          | type           | ?      |
-| mu.link       | links          | YES    |
-| mu.linkfun.   | links          | YES    |
-| sigma.link    | links          | YES    |
-| sigma.linkfun | links          | YES    |
-| \-            | map2par        | ?      |
-| dldm          | score          | NO     |
-| dldd          | score          | NO     |
-| d2ldm2        | hess           | NO     |
-| d2ldd2        | hess           | NO     |
-| dd2ldmdd      | hess           | NO     |
-| G.dev.incr    | logLik         | NO     |
-| d             | d              | YES    |
-| P             | p              | YES    |
-| q             | q              | ?      |
-| r             | r              | NO     |
-| rqres         | rqres          | ?      |
-| mu.initial    | initialize     | ?      |
-| sigma.initial | initialize     | ?      |
-| mu.valid      | ?              | ?      |
-| sigma.valid   | ?              | ?      |
-| y.valid       | valid.response | ?      |
-| mean          | mean           | NO     |
-| varriane      | variance       | NO     |
-
-: Maping the differnt options for `gamlss.family` and `gamlss2.family` {#tbl-comparison .striped .hover}
-
-|  `Mikis commends`
-| We have to make sure we map this correctly
-
-## Fitting a 5 parameter distribution {#sec-Fittinga5parameterdistribution}
-
-Here we try to emphasise the advantage of using `gamlss2` compared with `gamlss` as far as distribution families are concerned. We will show that a five parameter distribution can be fitted with little effort. We use as an example the `skew generalised t` distribution.
-
-The distribution has been introduce into **R** by the package `sgt` of @CarterDavis2015. The beauty of the distribution is that it contains a lot of other sub-distributions as special cases see for example @fig-SGT beloow taken from the vignette of the package `sgt`.
+The SGT distribution was introduced to **R** by the `sgt` package (Carter & Davis, 2015). Its key feature is that it includes a wide range of sub-distributions as special cases, making it highly versatile. The figure below, taken from the `sgt` package vignette, illustrates the Skew Generalized T distribution and its various sub-distributions.
 
 ::: {#fig-SGT}
-![The Skew Generalised T distributions and its sub-distributions (The figure is taken from the vignette of the R package sgt.](SGT.png){{width=1000}
+![The Skew Generalized T distributions and its sub-distributions (Image from the vignette of the R package `sgt`)](SGT.png){width=1000}
 :::
 
-The *Skew Generalised T* distribution and its sub-distributions (The figure is taken from the vignette of the R package `sgt`.
+### Importing the `sgt` Package
 
-Let us import the package `sgt`.
+First, load the `sgt` package:
 
 ```{r}
 #| eval: !expr 'dev_version'
@@ -328,17 +368,24 @@ Let us import the package `sgt`.
 library("sgt")
 ```
 
-Now using the `d`, `p`, and `q` function of the package `sgt` we create the function `SGT()` which is a `gamlss2.family` object. Note that the function we created bellow is sort off some of the element of the function `Normal` created in @sec-Normaldistribution. In particular the following ellements are not includedd
+### Defining the SGT distribution as a `"gamlss2.family"`
 
--   `score`
--   `hess`
--   `loglik`
--   `mean`
--   `variance`
+We now define the Skew Generalized T distribution as a `"gamlss2.family"` object
+using the `d()`, `p()`, and `q()` functions from the `sgt` package. The function
+below shares similarities with the Normal distribution created in
+@sec-Normaldistribution, though it omits some elements, including:
+
+- `score`
+- `hess`
+- `loglik()`
+- `mean()`
+- `variance()`
+
+Here is how the `SGT()` function is defined:
 
 ```{r}
 #| eval: !expr 'dev_version'
-## Skewed Generalized T Distribution.
+## Skewed generalized T distribution
 SGT <- function(...) {
   stopifnot(requireNamespace("sgt"))
 
@@ -373,13 +420,13 @@ SGT <- function(...) {
 #| cache: true
 #| warning: false
 data("abdom", package = "gamlss.data")
-## Specify the model Formula.
+## specify the model formula
 f <- y ~ s(x) | s(x) | s(x) | s(x) | s(x)
-# SGT
-# # ## Estimate model.
- msgt <- gamlss2(f, data = abdom, family = SGT,
-                 maxit = c(100, 100), eps = 1e-07, trace=FALSE)
-# # changing eps makes a difference  
-# ## Plot estimated effects.
-plot(msgt, which = "effects")
+
+## estimate SGT model
+b <- gamlss2(f, data = abdom, family = SGT,
+  maxit = c(100, 100), eps = 1e-04)
+
+## plot estimated effects
+plot(b, which = "effects")
 ```

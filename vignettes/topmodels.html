@@ -223,6 +223,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../vignettes/Supplement_Families.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supplement to Distribution Families in <code>gamlss2</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../vignettes/survival.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Survival Models</span></a>
   </div>
@@ -415,7 +421,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#probabilistic-model-infrastructure" id="toc-probabilistic-model-infrastructure" class="nav-link active" data-scroll-target="#probabilistic-model-infrastructure"><span class="header-section-number">1</span> Probabilistic model infrastructure</a></li>
   <li><a href="#data-and-models" id="toc-data-and-models" class="nav-link" data-scroll-target="#data-and-models"><span class="header-section-number">2</span> Data and models</a></li>
   <li><a href="#probabilistic-forecasting" id="toc-probabilistic-forecasting" class="nav-link" data-scroll-target="#probabilistic-forecasting"><span class="header-section-number">3</span> Probabilistic forecasting</a></li>
-  <li><a href="#graphical-model-assessment" id="toc-graphical-model-assessment" class="nav-link" data-scroll-target="#graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</a></li>
+  <li><a href="#graphical-model-assessment" id="toc-graphical-model-assessment" class="nav-link" data-scroll-target="#graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</a>
+  <ul class="collapse">
+  <li><a href="#within-model-diagnostics" id="toc-within-model-diagnostics" class="nav-link" data-scroll-target="#within-model-diagnostics"><span class="header-section-number">4.1</span> Within model diagnostics</a></li>
+  <li><a href="#between-models-diagnostics" id="toc-between-models-diagnostics" class="nav-link" data-scroll-target="#between-models-diagnostics"><span class="header-section-number">4.2</span> Between Models diagnostics</a></li>
+  </ul></li>
   <li><a href="#scoring-rules" id="toc-scoring-rules" class="nav-link" data-scroll-target="#scoring-rules"><span class="header-section-number">5</span> Scoring rules</a></li>
   </ul>
 </nav>
@@ -480,26 +490,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="graphical-model-assessment" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</h2>
+<section id="within-model-diagnostics" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="within-model-diagnostics"><span class="header-section-number">4.1</span> Within model diagnostics</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m1)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m1)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m1)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m1)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m1)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m1)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m2)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m2)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m2)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m2)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m2)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m2)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="between-models-diagnostics" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="between-models-diagnostics"><span class="header-section-number">4.2</span> Between Models diagnostics</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(p1, p2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>, <span class="at">style =</span> <span class="st">"line"</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>w1 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>w2 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(w1, w2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(p1, p2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>, <span class="at">style =</span> <span class="st">"line"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>w1 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>w2 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(w1, w2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
 </section>
 <section id="scoring-rules" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="scoring-rules"><span class="header-section-number">5</span> Scoring rules</h2>
@@ -507,6 +526,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lm =</span> m1, <span class="at">gamlss2 =</span> m2)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(m, proscore, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"logs"</span>, <span class="st">"crps"</span>, <span class="st">"mae"</span>, <span class="st">"mse"</span>, <span class="st">"dss"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><code>Mikis</code> : can we do the same with <code>newdata</code> ?</p>
 
 
 </section>

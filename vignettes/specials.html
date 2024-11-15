@@ -629,7 +629,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38359.6113 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.724 sec elapsed</code></pre>
+<pre><code>4.768 sec elapsed</code></pre>
 </div>
 </div>
 <p>The first order interaction fit for <code>loess</code> is;</p>
@@ -645,7 +645,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>8.29 sec elapsed</code></pre>
+<pre><code>8.291 sec elapsed</code></pre>
 </div>
 </div>
 <p>Now the main effect model using <code>s()</code></p>
@@ -654,16 +654,16 @@ GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code><
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>a1<span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(sf, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38462.5283 eps = 0.285214     
-GAMLSS-RS iteration  2: Global Deviance = 38416.2184 eps = 0.001204     
-GAMLSS-RS iteration  3: Global Deviance = 38412.248 eps = 0.000103     
-GAMLSS-RS iteration  4: Global Deviance = 38410.7531 eps = 0.000038     
-GAMLSS-RS iteration  5: Global Deviance = 38410.2172 eps = 0.000013     
-GAMLSS-RS iteration  6: Global Deviance = 38410.034 eps = 0.000004     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38462.44 eps = 0.285216     
+GAMLSS-RS iteration  2: Global Deviance = 38414.9787 eps = 0.001233     
+GAMLSS-RS iteration  3: Global Deviance = 38411.2225 eps = 0.000097     
+GAMLSS-RS iteration  4: Global Deviance = 38409.6335 eps = 0.000041     
+GAMLSS-RS iteration  5: Global Deviance = 38409.0103 eps = 0.000016     
+GAMLSS-RS iteration  6: Global Deviance = 38408.8217 eps = 0.000004     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.017 sec elapsed</code></pre>
+<pre><code>1.168 sec elapsed</code></pre>
 </div>
 </div>
 <p>The interaction model using <code>te()</code></p>
@@ -672,16 +672,15 @@ GAMLSS-RS iteration  6: Global Deviance = 38410.034 eps = 0.000004     </code></
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>a2<span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(sf1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38409.1594 eps = 0.286206     
-GAMLSS-RS iteration  2: Global Deviance = 38364.6191 eps = 0.001159     
-GAMLSS-RS iteration  3: Global Deviance = 38361.2928 eps = 0.000086     
-GAMLSS-RS iteration  4: Global Deviance = 38360.2823 eps = 0.000026     
-GAMLSS-RS iteration  5: Global Deviance = 38359.898 eps = 0.000010     
-GAMLSS-RS iteration  6: Global Deviance = 38359.7641 eps = 0.000003     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38433.744 eps = 0.285749     
+GAMLSS-RS iteration  2: Global Deviance = 38391.1221 eps = 0.001108     
+GAMLSS-RS iteration  3: Global Deviance = 38388.3527 eps = 0.000072     
+GAMLSS-RS iteration  4: Global Deviance = 38387.4626 eps = 0.000023     
+GAMLSS-RS iteration  5: Global Deviance = 38387.1819 eps = 0.000007     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.228 sec elapsed</code></pre>
+<pre><code>1.243 sec elapsed</code></pre>
 </div>
 </div>
 <p>The cubic spline function is lot faster than the <code>loess()</code> implementation <code>lo()</code> in <code>gamlss2</code>, but let us now compare the models using AIC.</p>
@@ -692,8 +691,8 @@ GAMLSS-RS iteration  6: Global Deviance = 38359.7641 eps = 0.000003     </code><
 <pre><code>        AIC       df
 b2 38355.61 36.77363
 b1 38359.61 33.15714
-a2 38359.76 38.38334
-a1 38410.03 31.24265</code></pre>
+a2 38387.18 33.61847
+a1 38408.82 32.80415</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">## BIC</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, a1, a2, <span class="at">k =</span> <span class="fu">log</span>(<span class="fu">nrow</span>(rent99)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -701,8 +700,8 @@ a1 38410.03 31.24265</code></pre>
 <pre><code>        AIC       df
 b1 38625.97 33.15714
 b2 38651.03 36.77363
-a1 38661.02 31.24265
-a2 38668.11 38.38334</code></pre>
+a2 38657.25 33.61847
+a1 38672.35 32.80415</code></pre>
 </div>
 </div>
 <p>It seems that the two <code>lo()</code> models do better that the <code>s()</code> as far as the AIC criteria are concern.</p>

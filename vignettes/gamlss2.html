@@ -555,13 +555,13 @@ AIC = 14337.7146 elapsed =  0.02sec</code></pre>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 13297.5718 eps = 0.114556     
-GAMLSS-RS iteration  2: Global Deviance = 12597.9982 eps = 0.052609     
-GAMLSS-RS iteration  3: Global Deviance = 12015.6207 eps = 0.046227     
-GAMLSS-RS iteration  4: Global Deviance = 11573.0053 eps = 0.036836     
-GAMLSS-RS iteration  5: Global Deviance = 11473.3928 eps = 0.008607     
-GAMLSS-RS iteration  6: Global Deviance = 11469.6654 eps = 0.000324     
-GAMLSS-RS iteration  7: Global Deviance = 11469.5761 eps = 0.000007     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 13299.0381 eps = 0.114458     
+GAMLSS-RS iteration  2: Global Deviance = 12599.4086 eps = 0.052607     
+GAMLSS-RS iteration  3: Global Deviance = 12016.9723 eps = 0.046227     
+GAMLSS-RS iteration  4: Global Deviance = 11573.6582 eps = 0.036890     
+GAMLSS-RS iteration  5: Global Deviance = 11473.4168 eps = 0.008661     
+GAMLSS-RS iteration  6: Global Deviance = 11469.6536 eps = 0.000328     
+GAMLSS-RS iteration  7: Global Deviance = 11469.5638 eps = 0.000007     </code></pre>
 </div>
 </div>
 <p>Plot estimated seasonal effect.</p>
@@ -595,14 +595,14 @@ GAMLSS-RS iteration  7: Global Deviance = 11469.5761 eps = 0.000007     </code><
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9919.2995 eps = 0.168829     
-GAMLSS-RS iteration  2: Global Deviance = 9831.291 eps = 0.008872     
-GAMLSS-RS iteration  3: Global Deviance = 9822.4009 eps = 0.000904     
-GAMLSS-RS iteration  4: Global Deviance = 9820.9371 eps = 0.000149     
-GAMLSS-RS iteration  5: Global Deviance = 9819.6573 eps = 0.000130     
-GAMLSS-RS iteration  6: Global Deviance = 9819.4805 eps = 0.000018     
-GAMLSS-RS iteration  7: Global Deviance = 9819.3814 eps = 0.000010     
-GAMLSS-RS iteration  8: Global Deviance = 9819.35 eps = 0.000003     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9919.2998 eps = 0.168829     
+GAMLSS-RS iteration  2: Global Deviance = 9831.2959 eps = 0.008871     
+GAMLSS-RS iteration  3: Global Deviance = 9822.4038 eps = 0.000904     
+GAMLSS-RS iteration  4: Global Deviance = 9820.9377 eps = 0.000149     
+GAMLSS-RS iteration  5: Global Deviance = 9819.6614 eps = 0.000129     
+GAMLSS-RS iteration  6: Global Deviance = 9819.4837 eps = 0.000018     
+GAMLSS-RS iteration  7: Global Deviance = 9819.3844 eps = 0.000010     
+GAMLSS-RS iteration  8: Global Deviance = 9819.3528 eps = 0.000003     </code></pre>
 </div>
 </div>
 <p>Plot again the estimated smooth seasonal effects.</p>

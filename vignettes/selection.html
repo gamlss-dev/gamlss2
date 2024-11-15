@@ -607,17 +607,16 @@ minimum GAIC(k= 8.03 ) family: BCCGo </code></pre>
   GAIC = 27860.8491 &lt;+&gt; parameter sigma, term loc3
   GAIC = 27856.2102 &lt;+&gt; parameter sigma, term loc2
 Bidirectional Selection
-  GAIC = 27766.9437 &lt;+&gt; parameter mu, term te(Fl,A)
-  GAIC = 27736.7146 &lt;+&gt; parameter sigma, term te(Fl,A)
-  GAIC = 27734.7120 &lt;-&gt; parameter mu, term A
-  GAIC = 27732.7116 &lt;-&gt; parameter sigma, term A
-  GAIC = 27730.7149 &lt;-&gt; parameter mu, term Fl
+  GAIC = 27768.8887 &lt;+&gt; parameter mu, term te(Fl,A)
+  GAIC = 27750.6688 &lt;+&gt; parameter sigma, term s(A)
+  GAIC = 27748.6682 &lt;-&gt; parameter mu, term Fl
+  GAIC = 27746.7130 &lt;-&gt; parameter mu, term A
 Continue
 Final Model
 $mu
 .. ~1 + loc3 + loc2 + te(Fl, A)
 $sigma
-.. ~1 + loc3 + loc2 + te(Fl, A)</code></pre>
+.. ~1 + A + loc3 + loc2 + s(A)</code></pre>
 </div>
 </div>
 <p>Note that <code>step_gamlss2()</code> is equivalent to using</p>
@@ -632,7 +631,7 @@ $sigma
 R ~ loc3 + loc2 + te(Fl, A)
 
 $sigma
-~1 + loc3 + loc2 + te(Fl, A)</code></pre>
+~1 + A + loc3 + loc2 + s(A)</code></pre>
 </div>
 </div>
 <p>Here is the summary of the final model;</p>
@@ -649,31 +648,32 @@ Parameter: mu
 ---
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  6.46626    0.03108 208.053  &lt; 2e-16 ***
-loc3         0.28437    0.03428   8.294  &lt; 2e-16 ***
-loc2         0.18899    0.03273   5.775 8.96e-09 ***
+(Intercept)  6.44057    0.03170 203.171  &lt; 2e-16 ***
+loc3         0.31100    0.03475   8.950  &lt; 2e-16 ***
+loc2         0.21511    0.03334   6.452 1.39e-10 ***
 ---
 Smooth terms:
     te(Fl,A)
-edf   17.834
+edf     9.51
 *--------
 Parameter: sigma 
 ---
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -0.89132    0.04390 -20.301  &lt; 2e-16 ***
-loc3        -0.17639    0.04950  -3.564 0.000375 ***
-loc2        -0.11723    0.04672  -2.509 0.012183 *  
+(Intercept) -0.86451    0.04454 -19.410  &lt; 2e-16 ***
+A           -0.14138    0.01388 -10.186  &lt; 2e-16 ***
+loc3        -0.19338    0.04989  -3.876  0.00011 ***
+loc2        -0.12580    0.04746  -2.651  0.00810 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-    te(Fl,A)
-edf   22.773
+      s(A)
+edf 4.8959
 *--------
-n = 1969 df =  46.61 res.df =  1922.39
-Deviance = 27637.5013 Null Dev. Red. = 3.4%
-AIC = 27730.7149 elapsed = 27.40sec</code></pre>
+n = 1969 df =  21.41 res.df =  1947.59
+Deviance = 27703.9013 Null Dev. Red. = 3.17%
+AIC = 27746.713 elapsed = 20.88sec</code></pre>
 </div>
 </div>
 <p>and here are the smooth fitted plots;</p>
@@ -746,9 +746,9 @@ Note
   GAIC = 27947.0011 &lt;+&gt; parameter sigma, term A
   GAIC = 27936.1483 &lt;+&gt; parameter nu, term A
 Bidirectional Selection
-  GAIC = 27895.7041 &lt;+&gt; parameter mu, term s(A)
-  GAIC = 27860.3933 &lt;+&gt; parameter mu, term loc2
-  GAIC = 27852.4835 &lt;-&gt; parameter mu, term A
+  GAIC = 27894.8174 &lt;+&gt; parameter mu, term s(A)
+  GAIC = 27857.4438 &lt;+&gt; parameter mu, term loc2
+  GAIC = 27849.3901 &lt;-&gt; parameter mu, term A
 Continue
 Final Model
 $mu

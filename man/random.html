@@ -541,19 +541,20 @@ mu.re(random=~age11|Subject) 19     lme    list</code></pre>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">s</span>(Subject, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> <span class="fu">s</span>(Subject, age11, <span class="at">bs =</span> <span class="st">"re"</span>),</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 427.3879 eps = 0.204987     
-GAMLSS-RS iteration  2: Global Deviance = 370.2269 eps = 0.133744     
-GAMLSS-RS iteration  3: Global Deviance = 340.2986 eps = 0.080837     
-GAMLSS-RS iteration  4: Global Deviance = 325.4086 eps = 0.043755     
-GAMLSS-RS iteration  5: Global Deviance = 319.3603 eps = 0.018586     
-GAMLSS-RS iteration  6: Global Deviance = 316.706 eps = 0.008311     
-GAMLSS-RS iteration  7: Global Deviance = 315.7332 eps = 0.003071     
-GAMLSS-RS iteration  8: Global Deviance = 315.3835 eps = 0.001107     
-GAMLSS-RS iteration  9: Global Deviance = 315.2588 eps = 0.000395     
-GAMLSS-RS iteration 10: Global Deviance = 315.2156 eps = 0.000137     
-GAMLSS-RS iteration 11: Global Deviance = 315.2007 eps = 0.000047     
-GAMLSS-RS iteration 12: Global Deviance = 315.1956 eps = 0.000016     
-GAMLSS-RS iteration 13: Global Deviance = 315.1933 eps = 0.000007     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 427.4959 eps = 0.204786     
+GAMLSS-RS iteration  2: Global Deviance = 370.4036 eps = 0.133550     
+GAMLSS-RS iteration  3: Global Deviance = 359.232 eps = 0.030160     
+GAMLSS-RS iteration  4: Global Deviance = 334.3919 eps = 0.069147     
+GAMLSS-RS iteration  5: Global Deviance = 322.7385 eps = 0.034849     
+GAMLSS-RS iteration  6: Global Deviance = 317.984 eps = 0.014731     
+GAMLSS-RS iteration  7: Global Deviance = 316.1982 eps = 0.005615     
+GAMLSS-RS iteration  8: Global Deviance = 315.5502 eps = 0.002049     
+GAMLSS-RS iteration  9: Global Deviance = 315.3187 eps = 0.000733     
+GAMLSS-RS iteration 10: Global Deviance = 315.2356 eps = 0.000263     
+GAMLSS-RS iteration 11: Global Deviance = 315.206 eps = 0.000094     
+GAMLSS-RS iteration 12: Global Deviance = 315.1956 eps = 0.000032     
+GAMLSS-RS iteration 13: Global Deviance = 315.1921 eps = 0.000011     
+GAMLSS-RS iteration 14: Global Deviance = 315.1912 eps = 0.000002     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m))</span>
@@ -584,10 +585,10 @@ GAMLSS-RS iteration 13: Global Deviance = 315.1933 eps = 0.000007     </code></p
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1553.7576 eps = 0.168812     
-GAMLSS-RS iteration  2: Global Deviance = 1550.0142 eps = 0.002409     
-GAMLSS-RS iteration  3: Global Deviance = 1549.9734 eps = 0.000026     
-GAMLSS-RS iteration  4: Global Deviance = 1549.9731 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1178 eps = 0.165409     
+GAMLSS-RS iteration  2: Global Deviance = 1551.3069 eps = 0.005647     
+GAMLSS-RS iteration  3: Global Deviance = 1551.1747 eps = 0.000085     
+GAMLSS-RS iteration  4: Global Deviance = 1551.1728 eps = 0.000001     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## smooth random effects</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">ti</span>(Time) <span class="sc">+</span> <span class="fu">ti</span>(Mare, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> </span>
@@ -595,12 +596,12 @@ GAMLSS-RS iteration  4: Global Deviance = 1549.9731 eps = 0.000000     </code></
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1522.1007 eps = 0.185747     
-GAMLSS-RS iteration  2: Global Deviance = 1436.4746 eps = 0.056255     
-GAMLSS-RS iteration  3: Global Deviance = 1426.662 eps = 0.006831     
-GAMLSS-RS iteration  4: Global Deviance = 1425.7706 eps = 0.000624     
-GAMLSS-RS iteration  5: Global Deviance = 1425.692 eps = 0.000055     
-GAMLSS-RS iteration  6: Global Deviance = 1425.6854 eps = 0.000004     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1522.1073 eps = 0.185743     
+GAMLSS-RS iteration  2: Global Deviance = 1436.4785 eps = 0.056256     
+GAMLSS-RS iteration  3: Global Deviance = 1426.6643 eps = 0.006832     
+GAMLSS-RS iteration  4: Global Deviance = 1425.7728 eps = 0.000624     
+GAMLSS-RS iteration  5: Global Deviance = 1425.6943 eps = 0.000055     
+GAMLSS-RS iteration  6: Global Deviance = 1425.6873 eps = 0.000004     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">n2mfrow</span>(<span class="fu">nlevels</span>(Ovary<span class="sc">$</span>Mare)), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>

@@ -502,37 +502,36 @@ Arguments passed on to <code>predict.gamlss2</code>, e.g., <code>newdata</code>.
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## stopping distance (ft) explained by speed (mph)</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 407.3541 eps = 0.125497     
-GAMLSS-RS iteration  2: Global Deviance = 405.7146 eps = 0.004024     
-GAMLSS-RS iteration  3: Global Deviance = 405.6978 eps = 0.000041     
-GAMLSS-RS iteration  4: Global Deviance = 405.6976 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 407.3619 eps = 0.125480     
+GAMLSS-RS iteration  2: Global Deviance = 405.6533 eps = 0.004194     
+GAMLSS-RS iteration  3: Global Deviance = 405.6527 eps = 0.000001     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## obtain predicted distributions for three levels of speed</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">prodist</span>(m, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                     1                                      2 
-"GAMLSS NO(mu = 23.04, sigma = 10.06)" "GAMLSS NO(mu = 59.04, sigma = 18.51)" 
+"GAMLSS NO(mu = 22.75, sigma = 10.17)" "GAMLSS NO(mu = 59.91, sigma = 18.34)" 
                                      3 
-"GAMLSS NO(mu = 96.35, sigma = 33.95)" </code></pre>
+"GAMLSS NO(mu = 99.11, sigma = 33.06)" </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## obtain quantiles (works the same for any distribution object 'd' !)</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
-23.03912 59.03607 96.34896 </code></pre>
+22.74910 59.90736 99.11111 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>), <span class="at">elementwise =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     q_0.05    q_0.5    q_0.95
-1  6.486962 23.03912  39.59128
-2 28.589641 59.03607  89.48250
-3 40.504887 96.34896 152.19303</code></pre>
+1  6.026267 22.74910  39.47193
+2 29.747446 59.90736  90.06727
+3 44.733611 99.11111 153.48860</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>), <span class="at">elementwise =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3 
-  6.486962  59.036073 152.193030 </code></pre>
+  6.026267  59.907359 153.488600 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## visualization</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars)</span>
@@ -551,35 +550,35 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6976 eps = 0.000000     </code></p
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
-23.03912 59.03607 96.34896 </code></pre>
+22.74910 59.90736 99.11111 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">variance</span>(d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3 
- 101.2639  342.6244 1152.6558 </code></pre>
+ 103.3630  336.2062 1092.9087 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate random numbers</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        r_1       r_2        r_3      r_4      r_5
-1  21.03758  4.331403   9.323949 11.18922 38.30317
-2  80.21635 69.952705  77.696056 91.24612 56.77686
-3 138.22185 82.717139 162.490013 32.31164 72.51778</code></pre>
+<pre><code>       r_1       r_2        r_3       r_4       r_5
+1 27.97381  34.16142   3.450852  26.39794  21.68603
+2 48.76507  40.30704  47.380069  63.90371  67.94385
+3 91.30684 147.63330 112.633324 147.10857 123.61611</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## density and distribution</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        d_-100        d_-50          d_0        d_50        d_100
-1 1.365786e-34 1.440750e-13 0.0028836944 0.001095127 7.891037e-15
-2 2.012473e-18 6.289547e-10 0.0001332376 0.019131662 1.862073e-03
-3 6.414012e-10 1.084300e-06 0.0002095201 0.004627633 1.168286e-02</code></pre>
+1 8.708367e-34 2.987273e-13 0.0032100154 0.001080522 1.139342e-14
+2 6.642657e-19 3.433006e-10 0.0001046239 0.018802294 1.992574e-03
+3 1.601799e-10 4.612933e-07 0.0001348680 0.004003167 1.206316e-02</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        p_-100        p_-50          p_0       p_50     p_100
-1 1.116699e-34 1.961566e-13 0.0110254856 0.99631019 1.0000000
-2 4.279141e-18 1.923739e-09 0.0007128545 0.31271491 0.9865531
-3 3.661574e-09 8.139843e-06 0.0022705648 0.08609812 0.5428194</code></pre>
+1 7.283729e-34 4.165906e-13 0.0126237148 0.99632319 1.0000000
+2 1.378940e-18 1.023081e-09 0.0005430611 0.29448645 0.9856127
+3 8.567511e-10 3.234801e-06 0.0013588267 0.06869887 0.5107255</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Poisson example</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"FIFA2018"</span>, <span class="at">package =</span> <span class="st">"distributions3"</span>)</span>

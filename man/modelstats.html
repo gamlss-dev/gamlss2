@@ -577,13 +577,13 @@ GAMLSS-RS iteration  3: Global Deviance = 492.6373 eps = 0.000000     </code></p
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">+</span> <span class="fu">s</span>(qrt, <span class="at">bs =</span> <span class="st">"re"</span>), <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 406.0278 eps = 0.298340     
-GAMLSS-RS iteration  2: Global Deviance = 373.0395 eps = 0.081246     
-GAMLSS-RS iteration  3: Global Deviance = 363.9491 eps = 0.024368     
-GAMLSS-RS iteration  4: Global Deviance = 363.1967 eps = 0.002067     
-GAMLSS-RS iteration  5: Global Deviance = 363.1423 eps = 0.000149     
-GAMLSS-RS iteration  6: Global Deviance = 363.1339 eps = 0.000023     
-GAMLSS-RS iteration  7: Global Deviance = 363.1323 eps = 0.000004     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 406.747 eps = 0.297097     
+GAMLSS-RS iteration  2: Global Deviance = 374.1346 eps = 0.080178     
+GAMLSS-RS iteration  3: Global Deviance = 364.2545 eps = 0.026407     
+GAMLSS-RS iteration  4: Global Deviance = 363.228 eps = 0.002818     
+GAMLSS-RS iteration  5: Global Deviance = 363.1599 eps = 0.000187     
+GAMLSS-RS iteration  6: Global Deviance = 363.154 eps = 0.000016     
+GAMLSS-RS iteration  7: Global Deviance = 363.1529 eps = 0.000003     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare models</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -601,24 +601,24 @@ $CraggUhler
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       b1        b2 
-0.8095853 0.9892885 </code></pre>
+0.8095853 0.9892836 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(b1, b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 388.9107 12.88923
+b2 388.9822 12.91461
 b1 504.6373  6.00000</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 388.9107 12.88923
+b2 388.9822 12.91461
 b1 504.6373  6.00000</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(b1, b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 412.1972 12.88923
+b2 412.3145 12.91461
 b1 515.4773  6.00000</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>

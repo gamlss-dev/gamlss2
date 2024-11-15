@@ -634,10 +634,10 @@ f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Estimate a model using the Kumaraswamy family.</span></span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x), <span class="at">data =</span> d, <span class="at">family =</span> fam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = -1503.9982 eps = 0.674665     
-GAMLSS-RS iteration  2: Global Deviance = -1504.1075 eps = 0.000072     
-GAMLSS-RS iteration  3: Global Deviance = -1504.1262 eps = 0.000012     
-GAMLSS-RS iteration  4: Global Deviance = -1504.1294 eps = 0.000002     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = -1503.9979 eps = 0.674665     
+GAMLSS-RS iteration  2: Global Deviance = -1504.1074 eps = 0.000072     
+GAMLSS-RS iteration  3: Global Deviance = -1504.1261 eps = 0.000012     
+GAMLSS-RS iteration  4: Global Deviance = -1504.1293 eps = 0.000002     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot the estimated effect.</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

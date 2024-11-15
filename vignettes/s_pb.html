@@ -501,9 +501,9 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">s</span>(area)<span class="sc">+</span><span class="fu">s</span>(yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">data=</span>rent99, <span class="at">family=</span>GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38484.5671 eps = 0.124369     
-GAMLSS-RS iteration  2: Global Deviance = 38437.5655 eps = 0.001221     
-GAMLSS-RS iteration  3: Global Deviance = 38437.2934 eps = 0.000007     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38525.2498 eps = 0.123443     
+GAMLSS-RS iteration  2: Global Deviance = 38471.5007 eps = 0.001395     
+GAMLSS-RS iteration  3: Global Deviance = 38471.1621 eps = 0.000008     </code></pre>
 </div>
 </div>
 <p>We use smooth terms for the two continuous explanatory variables of the data, the size of the flats, <code>area</code>, and the year of construction, <code>yearc</code>. To visualise the fitted smooth functions try;</p>
@@ -537,8 +537,8 @@ GAMLSS-RS iteration  3: Global Deviance = 38437.2934 eps = 0.000007     </code><
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 38552.6223 eps = 0.122820     
 GAMLSS-RS iteration  2: Global Deviance = 38467.4636 eps = 0.002208     
-GAMLSS-RS iteration  3: Global Deviance = 38466.8474 eps = 0.000016     
-GAMLSS-RS iteration  4: Global Deviance = 38466.8359 eps = 0.000000     </code></pre>
+GAMLSS-RS iteration  3: Global Deviance = 38466.85 eps = 0.000015     
+GAMLSS-RS iteration  4: Global Deviance = 38466.8348 eps = 0.000000     </code></pre>
 </div>
 </div>
 <p>The interaction plots can be visualised using;</p>
@@ -557,8 +557,8 @@ GAMLSS-RS iteration  4: Global Deviance = 38466.8359 eps = 0.000000     </code><
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(gm11, gm21)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          AIC       df
-gm11 38496.64 29.67116
-gm21 38523.11 28.13775</code></pre>
+gm11 38522.57 25.70484
+gm21 38523.11 28.13797</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">

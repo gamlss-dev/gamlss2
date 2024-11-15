@@ -28,7 +28,7 @@ library("gamlss2")
 
 The distributions in the `gamlss2` package differ from those in the original `gamlss` 
 family, as described by @Rigbyetal2019. The structure of the `"gamlss.family"` object
-(see @StasinopoulosRigby07) differs from that of the `"gamlss2.family"`. While both 
+[see @StasinopoulosRigby07] differs from that of the `"gamlss2.family"`. While both 
 families contain the same core information about the distribution, it is represented in 
 different formats. The key reason for this change is that the new `"gamlss2.family"` 
 structure is more flexible and can be more easily generalized to accommodate models with 
@@ -96,7 +96,7 @@ quantiles, the `q()` function is necessary. In practice, it is advised to always
 include the `q()` function in the family object.
 
 
-### The normal distribution as `gamlss2` family {#sec-Normaldistribution}
+## The normal distribution as `gamlss2` family {#sec-Normaldistribution}
 
 As an example, we demonstrate how to define the normal distribution as
 a `"gamlss2.family"` object.
@@ -236,7 +236,7 @@ set of relevant available families:
 p <- find_family(rent$R, families = available_families("continuous"))
 ```
 
-The option `families = "continuous"` limits the available distributions to those in
+The option `"continuous"` limits the available distributions to those in
 the continuous category. The function `find_family()` tries to fit all
 continuous distributions and stores the Generalized Akaike Information Criterion (GAIC) 
 values in a vector. The values of this vector are sorted in decreasing order of GAIC.
@@ -256,7 +256,7 @@ Note that similar results can be obtained in `gamlss` using the `fitDist()` func
 a <- gamlss::fitDist(rent$R)
 ```
 
-Note here, the results are sorted in increasing order of GAIC:
+Here, the results are sorted in increasing order of GAIC:
 
 ```{r}
 #| eval: !expr 'dev_version'
@@ -279,7 +279,7 @@ Here is the output from the older `fitDist()` function:
 
 ```{r}
 #| eval: !expr 'dev_version'
-gamlss:::histDist(rent$R, family=BCTo, nbins=30)
+gamlss::histDist(rent$R, family=BCTo, nbins=30)
 ```
 
 
@@ -296,21 +296,22 @@ f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") |
   ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") 
 
 ## estimate model
-mNormal <- gamlss2(f, data = rent, family = Normal)
+b1 <- gamlss2(f, data = rent, family = Normal)
 ```
 
 We can visualize the fitted smoothing terms using
 
 ```{r}
 #| eval: !expr 'dev_version'
-plot(mNormal)
+#| fig-height: 10 
+plot(b1)
 ```
 
 To inspect the residuals of the model, use
 
 ```{r}
 #| eval: !expr 'dev_version'
-resid_plots(mNormal)
+resid_plots(b1)
 ```
 
 To improve the residual plots, we can fit a more sophisticated distribution
@@ -318,8 +319,8 @@ with four parameters.
 
 ```{r}
 #| eval: !expr 'dev_version'
-mBCTo <- gamlss2(f, data = rent, family = BCTo) 
-resid_plots(mBCTo)
+b2 <- gamlss2(f, data = rent, family = BCTo) 
+resid_plots(b2)
 ```
 
 
@@ -331,7 +332,7 @@ multiple conditional distributions.
 ```{r}
 #| eval: !expr 'dev_version'
 #| cache: true
-T1 <- gamlss:::chooseDist(mNormal, type = "realplus")
+T1 <- gamlss::chooseDist(m, type = "realplus")
 ```
 
 This function generates a table of GAIC values, which can be printed as follows:
@@ -352,7 +353,7 @@ parameters when the distributions have more than two parameters.
 
 In this section, we demonstrate the advantage of using `gamlss2` over `gamlss` for fitting distribution families, specifically highlighting the ease with which a five-parameter distribution can be fitted. As an example, we use the *Skew Generalized T* (SGT) distribution.
 
-The SGT distribution was introduced to **R** by the `sgt` package (Carter & Davis, 2015). Its key feature is that it includes a wide range of sub-distributions as special cases, making it highly versatile. The figure below, taken from the `sgt` package vignette, illustrates the Skew Generalized T distribution and its various sub-distributions.
+The SGT distribution was introduced to *R* by the `sgt` package [@Davis:2015]. Its key feature is that it includes a wide range of sub-distributions as special cases, making it highly versatile. The figure below, taken from the `sgt` package vignette, illustrates the Skew Generalized T distribution and its various sub-distributions.
 
 ::: {#fig-SGT}
 ![The Skew Generalized T distributions and its sub-distributions (Image from the vignette of the R package `sgt`)](SGT.png){width=1000}
@@ -419,6 +420,7 @@ SGT <- function(...) {
 #| eval: !expr 'dev_version'
 #| cache: true
 #| warning: false
+#| fig-height: 10
 data("abdom", package = "gamlss.data")
 ## specify the model formula
 f <- y ~ s(x) | s(x) | s(x) | s(x) | s(x)

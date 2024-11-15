@@ -1,9 +1,12 @@
 ## Model term selection based on null space penalties.
-select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.1)
+select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.2)
 {
+  criterion <- rep(criterion, length.out = 2L)
+
   m <- match.call()
   m[[1L]] <- as.name("gamlss2")
-  m["criterion"] <- criterion
+  m["criterion"] <- criterion[1L]
+  m["criterion_refit"] <- criterion[2L]
   m["select"] <- TRUE
   m["thres"] <- thres
   m["optimizer"] <- expression(.select_gamlss2)
@@ -13,9 +16,16 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.1)
   return(model)
 }
 
+## Internal selection optimizer function.
 .select_gamlss2 <- function(x, y, specials, family, offsets, weights,
   start, xterms, sterms, control)
 {
+  trace <- control$trace
+  control$trace <- FALSE
+
+  if(trace)
+    cat(".. selection step\n")
+
   m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 
   if(length(m$fitted.specials)) {
@@ -42,9 +52,21 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.1)
         }
       }
 
+      if(trace)
+        cat(".. refitting step\n")
+
+      control$trace <- trace
+      control$criterion <- control$criterion_refit
+
       m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 
       m$selection <- list("formula" = xs2formula(xterms, sterms), "select" = TRUE)
+    } else {
+      if(control$criterion_refit != control$criterion) {
+        control$trace <- trace
+        control$criterion <- control$criterion_refit
+        m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
+      }
     }
   }
 

@@ -1039,7 +1039,14 @@ xs2formula <- function(x, s)
 {
   f <- list()
   for(j in unique(names(x), names(s))) {
-    f[[j]] <- paste(c(unique(x[[j]]), unique(s[[j]])), collapse = "+")
+    sj <- s[[j]]
+    if(length(sj)) {
+      if(any(grepl(").", sj, fixed = TRUE))) {
+        sj <- sapply(strsplit(sj, ").", fixed = TRUE), function(x) x[1L])
+        sj <- paste0(sj, ")")
+      }
+    }
+    f[[j]] <- paste(c(unique(x[[j]]), unique(sj)), collapse = "+")
     f[[j]] <- gsub("(Intercept)", "1", f[[j]], fixed = TRUE)
     f[[j]] <- as.formula(paste("~", f[[j]]), env = .GlobalEnv)
   }

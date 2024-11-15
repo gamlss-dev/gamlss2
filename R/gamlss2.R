@@ -266,7 +266,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$contrasts <- attr(X, "contrasts")
   rval$na.action <- attr(mf, "na.action")
   attr(Xterms, "terms") <- mt
-  if(is.null(rval$selection)) {
+  if(is.null(rval$selection) | isTRUE(rval$selection$select)) {
     rval$xterms <- Xterms
     rval$sterms <- Sterms
     rval$specials <- Specials

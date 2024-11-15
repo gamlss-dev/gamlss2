@@ -337,7 +337,14 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     }
 
     if(is.null(x$sp)) {
-      opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
+      eps <- 1
+      lambdas0 <- lambdas
+       while(eps > 0.00001) {
+         opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
+         eps <- mean(abs((opt$par - lambdas0) / lambdas0))
+         lambdas0 <- lambdas
+         lambdas <- opt$par
+       }
     } else {
       opt <- list(par = x$sp)
     }

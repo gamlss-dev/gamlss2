@@ -468,24 +468,22 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#sec-Thestructureofgamlss2family" id="toc-sec-Thestructureofgamlss2family" class="nav-link active" data-scroll-target="#sec-Thestructureofgamlss2family"><span class="header-section-number">1</span> The structure of <code>"gamlss2.family"</code> object</a>
+  <li><a href="#sec-Thestructureofgamlss2family" id="toc-sec-Thestructureofgamlss2family" class="nav-link active" data-scroll-target="#sec-Thestructureofgamlss2family"><span class="header-section-number">1</span> The structure of <code>"gamlss2.family"</code> object</a></li>
+  <li><a href="#sec-Normaldistribution" id="toc-sec-Normaldistribution" class="nav-link" data-scroll-target="#sec-Normaldistribution"><span class="header-section-number">2</span> The normal distribution as <code>gamlss2</code> family</a></li>
+  <li><a href="#sec-fittingmarginal" id="toc-sec-fittingmarginal" class="nav-link" data-scroll-target="#sec-fittingmarginal"><span class="header-section-number">3</span> Fitting a <code>marginal</code> distribution</a>
   <ul class="collapse">
-  <li><a href="#sec-Normaldistribution" id="toc-sec-Normaldistribution" class="nav-link" data-scroll-target="#sec-Normaldistribution"><span class="header-section-number">1.1</span> The normal distribution as <code>gamlss2</code> family</a></li>
+  <li><a href="#the-function-find_family" id="toc-the-function-find_family" class="nav-link" data-scroll-target="#the-function-find_family"><span class="header-section-number">3.1</span> The function <code>find_family()</code></a></li>
+  <li><a href="#the-function-fit_family" id="toc-the-function-fit_family" class="nav-link" data-scroll-target="#the-function-fit_family"><span class="header-section-number">3.2</span> The function <code>fit_family()</code></a></li>
   </ul></li>
-  <li><a href="#sec-fittingmarginal" id="toc-sec-fittingmarginal" class="nav-link" data-scroll-target="#sec-fittingmarginal"><span class="header-section-number">2</span> Fitting a <code>marginal</code> distribution</a>
+  <li><a href="#sec-fittingConditional" id="toc-sec-fittingConditional" class="nav-link" data-scroll-target="#sec-fittingConditional"><span class="header-section-number">4</span> Fitting conditional distributions</a>
   <ul class="collapse">
-  <li><a href="#the-function-find_family" id="toc-the-function-find_family" class="nav-link" data-scroll-target="#the-function-find_family"><span class="header-section-number">2.1</span> The function <code>find_family()</code></a></li>
-  <li><a href="#the-function-fit_family" id="toc-the-function-fit_family" class="nav-link" data-scroll-target="#the-function-fit_family"><span class="header-section-number">2.2</span> The function <code>fit_family()</code></a></li>
+  <li><a href="#single-conditional-distributions" id="toc-single-conditional-distributions" class="nav-link" data-scroll-target="#single-conditional-distributions"><span class="header-section-number">4.1</span> Single conditional distributions</a></li>
+  <li><a href="#fitting-multiple-conditional-distributions" id="toc-fitting-multiple-conditional-distributions" class="nav-link" data-scroll-target="#fitting-multiple-conditional-distributions"><span class="header-section-number">4.2</span> Fitting multiple conditional distributions</a></li>
   </ul></li>
-  <li><a href="#sec-fittingConditional" id="toc-sec-fittingConditional" class="nav-link" data-scroll-target="#sec-fittingConditional"><span class="header-section-number">3</span> Fitting conditional distributions</a>
+  <li><a href="#sec-Fittinga5parameterdistribution" id="toc-sec-Fittinga5parameterdistribution" class="nav-link" data-scroll-target="#sec-Fittinga5parameterdistribution"><span class="header-section-number">5</span> Fitting a 5-Parameter distribution</a>
   <ul class="collapse">
-  <li><a href="#single-conditional-distributions" id="toc-single-conditional-distributions" class="nav-link" data-scroll-target="#single-conditional-distributions"><span class="header-section-number">3.1</span> Single conditional distributions</a></li>
-  <li><a href="#fitting-multiple-conditional-distributions" id="toc-fitting-multiple-conditional-distributions" class="nav-link" data-scroll-target="#fitting-multiple-conditional-distributions"><span class="header-section-number">3.2</span> Fitting multiple conditional distributions</a></li>
-  </ul></li>
-  <li><a href="#sec-Fittinga5parameterdistribution" id="toc-sec-Fittinga5parameterdistribution" class="nav-link" data-scroll-target="#sec-Fittinga5parameterdistribution"><span class="header-section-number">4</span> Fitting a 5-Parameter distribution</a>
-  <ul class="collapse">
-  <li><a href="#importing-the-sgt-package" id="toc-importing-the-sgt-package" class="nav-link" data-scroll-target="#importing-the-sgt-package"><span class="header-section-number">4.1</span> Importing the <code>sgt</code> Package</a></li>
-  <li><a href="#defining-the-sgt-distribution-as-a-gamlss2.family" id="toc-defining-the-sgt-distribution-as-a-gamlss2.family" class="nav-link" data-scroll-target="#defining-the-sgt-distribution-as-a-gamlss2.family"><span class="header-section-number">4.2</span> Defining the SGT distribution as a <code>"gamlss2.family"</code></a></li>
+  <li><a href="#importing-the-sgt-package" id="toc-importing-the-sgt-package" class="nav-link" data-scroll-target="#importing-the-sgt-package"><span class="header-section-number">5.1</span> Importing the <code>sgt</code> Package</a></li>
+  <li><a href="#defining-the-sgt-distribution-as-a-gamlss2.family" id="toc-defining-the-sgt-distribution-as-a-gamlss2.family" class="nav-link" data-scroll-target="#defining-the-sgt-distribution-as-a-gamlss2.family"><span class="header-section-number">5.2</span> Defining the SGT distribution as a <code>"gamlss2.family"</code></a></li>
   </ul></li>
   </ul>
 </nav>
@@ -501,12 +499,12 @@ window.Quarto = {
 </header>
 
 
-<p>The distributions in the <code>gamlss2</code> package differ from those in the original <code>gamlss</code> family, as described by <span class="citation" data-cites="Rigbyetal2019">Rigby et al. (<a href="#ref-Rigbyetal2019" role="doc-biblioref">2019</a>)</span>. The structure of the <code>"gamlss.family"</code> object (see <span class="citation" data-cites="StasinopoulosRigby07">Stasinopoulos and Rigby (<a href="#ref-StasinopoulosRigby07" role="doc-biblioref">2007</a>)</span>) differs from that of the <code>"gamlss2.family"</code>. While both families contain the same core information about the distribution, it is represented in different formats. The key reason for this change is that the new <code>"gamlss2.family"</code> structure is more flexible and can be more easily generalized to accommodate models with more than four parameters—something that was a limitation of the earlier GAMLSS implementation in the <code>gamlss</code> package.</p>
+<p>The distributions in the <code>gamlss2</code> package differ from those in the original <code>gamlss</code> family, as described by <span class="citation" data-cites="Rigbyetal2019">Rigby et al. (<a href="#ref-Rigbyetal2019" role="doc-biblioref">2019</a>)</span>. The structure of the <code>"gamlss.family"</code> object <span class="citation" data-cites="StasinopoulosRigby07">(see <a href="#ref-StasinopoulosRigby07" role="doc-biblioref">Stasinopoulos and Rigby 2007</a>)</span> differs from that of the <code>"gamlss2.family"</code>. While both families contain the same core information about the distribution, it is represented in different formats. The key reason for this change is that the new <code>"gamlss2.family"</code> structure is more flexible and can be more easily generalized to accommodate models with more than four parameters—something that was a limitation of the earlier GAMLSS implementation in the <code>gamlss</code> package.</p>
 <p>In this vignette, we aim to:</p>
 <ul>
 <li>Highlight the structure of a <code>"gamlss2.family"</code> object (<a href="#sec-Thestructureofgamlss2family" class="quarto-xref">Section&nbsp;1</a>);</li>
-<li>Demonstrate how to fit a <em>marginal</em> distribution (<a href="#sec-fittingmarginal" class="quarto-xref">Section&nbsp;2</a>) and a <em>conditional</em> distribution for the response <span class="math inline">\(y\)</span> (<a href="#sec-fittingConditional" class="quarto-xref">Section&nbsp;3</a>);</li>
-<li>Fit a five-parameter distribution (<a href="#sec-Fittinga5parameterdistribution" class="quarto-xref">Section&nbsp;4</a>).</li>
+<li>Demonstrate how to fit a <em>marginal</em> distribution (<a href="#sec-fittingmarginal" class="quarto-xref">Section&nbsp;3</a>) and a <em>conditional</em> distribution for the response <span class="math inline">\(y\)</span> (<a href="#sec-fittingConditional" class="quarto-xref">Section&nbsp;4</a>);</li>
+<li>Fit a five-parameter distribution (<a href="#sec-Fittinga5parameterdistribution" class="quarto-xref">Section&nbsp;5</a>).</li>
 </ul>
 <p>First we import the packages we are going to need later.</p>
 <div class="cell">
@@ -533,8 +531,9 @@ window.Quarto = {
 <li><p><code>valid.response</code>: A function that checks the validity of the response range.</p></li>
 </ul>
 <p>The first four components (<code>family</code>, <code>names</code>, <code>links</code>, and <code>d</code>) are mandatory for setting up a <code>"gamlss2.family"</code> object. The remaining components are optional. However, for model diagnostics using (randomized) quantile residuals, it is recommended to also provide the <code>p()</code> function. Additionally, to compute quantiles, the <code>q()</code> function is necessary. In practice, it is advised to always include the <code>q()</code> function in the family object.</p>
-<section id="sec-Normaldistribution" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="sec-Normaldistribution"><span class="header-section-number">1.1</span> The normal distribution as <code>gamlss2</code> family</h3>
+</section>
+<section id="sec-Normaldistribution" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sec-Normaldistribution"><span class="header-section-number">2</span> The normal distribution as <code>gamlss2</code> family</h2>
 <p>As an example, we demonstrate how to define the normal distribution as a <code>"gamlss2.family"</code> object.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Normal <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
@@ -626,17 +625,16 @@ which are not. By undestanding is that<br>
 &nbsp;<code>family</code>, <code>names</code>, <code>links</code>, <code>d</code> and <code>p</code> are compulsory the rest not. Am I right?<br>
 I am not clear when and why <code>rqres</code> is needed.</div>
 </section>
-</section>
-<section id="sec-fittingmarginal" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="sec-fittingmarginal"><span class="header-section-number">2</span> Fitting a <code>marginal</code> distribution</h2>
+<section id="sec-fittingmarginal" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-fittingmarginal"><span class="header-section-number">3</span> Fitting a <code>marginal</code> distribution</h2>
 <p>By <strong>marginal</strong> distribution, we refer to the situation where we are interested in fitting a theoretical distribution, <span class="math inline">\(f(y|\theta)\)</span>, to a single vector <span class="math inline">\(y\)</span> without considering any explanatory variables. In contrast, we use the term <strong>conditional</strong> distribution to describe the scenario where the response variable <span class="math inline">\(y\)</span> is modeled based on explanatory variables <span class="math inline">\(X\)</span>, such that the parameters <span class="math inline">\(\theta\)</span> are a function of <span class="math inline">\(X\)</span>, i.e., <span class="math inline">\(f(y|\theta(X))\)</span>.</p>
-<section id="the-function-find_family" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="the-function-find_family"><span class="header-section-number">2.1</span> The function <code>find_family()</code></h3>
+<section id="the-function-find_family" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="the-function-find_family"><span class="header-section-number">3.1</span> The function <code>find_family()</code></h3>
 <p>In this section, we aim to find the “best” family for the variable <span class="math inline">\(y\)</span> from a set of relevant available families:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">find_family</span>(rent<span class="sc">$</span>R, <span class="at">families =</span> <span class="fu">available_families</span>(<span class="st">"continuous"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The option <code>families = "continuous"</code> limits the available distributions to those in the continuous category. The function <code>find_family()</code> tries to fit all continuous distributions and stores the Generalized Akaike Information Criterion (GAIC) values in a vector. The values of this vector are sorted in decreasing order of GAIC.</p>
+<p>The option <code>"continuous"</code> limits the available distributions to those in the continuous category. The function <code>find_family()</code> tries to fit all continuous distributions and stores the Generalized Akaike Information Criterion (GAIC) values in a vector. The values of this vector are sorted in decreasing order of GAIC.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -644,55 +642,55 @@ I am not clear when and why <code>rqres</code> is needed.</div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> gamlss<span class="sc">::</span><span class="fu">fitDist</span>(rent<span class="sc">$</span>R)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Note here, the results are sorted in increasing order of GAIC:</p>
+<p>Here, the results are sorted in increasing order of GAIC:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a<span class="sc">$</span>fits</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="the-function-fit_family" class="level3" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="the-function-fit_family"><span class="header-section-number">2.2</span> The function <code>fit_family()</code></h3>
+<section id="the-function-fit_family" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="the-function-fit_family"><span class="header-section-number">3.2</span> The function <code>fit_family()</code></h3>
 <p>The function <code>fit_family()</code> is similar to the older <code>gamlss</code> function <code>fitDist()</code>. It fits a marginal distribution to the variable <span class="math inline">\(y\)</span> and then generates a histogram of <span class="math inline">\(y\)</span> alongside the fitted distribution.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(rent<span class="sc">$</span>R, <span class="at">family=</span>BCTo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here is the output from the older <code>fitDist()</code> function:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">histDist</span>(rent<span class="sc">$</span>R, <span class="at">family=</span>BCTo, <span class="at">nbins=</span><span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">::</span><span class="fu">histDist</span>(rent<span class="sc">$</span>R, <span class="at">family=</span>BCTo, <span class="at">nbins=</span><span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
-<section id="sec-fittingConditional" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="sec-fittingConditional"><span class="header-section-number">3</span> Fitting conditional distributions</h2>
-<section id="single-conditional-distributions" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="single-conditional-distributions"><span class="header-section-number">3.1</span> Single conditional distributions</h3>
-<p>In this section, we use the <code>Normal</code> family defined in <a href="#sec-Normaldistribution" class="quarto-xref">Section&nbsp;1.1</a> to fit a Normal distribution to a model specified by the following formula</p>
+<section id="sec-fittingConditional" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-fittingConditional"><span class="header-section-number">4</span> Fitting conditional distributions</h2>
+<section id="single-conditional-distributions" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="single-conditional-distributions"><span class="header-section-number">4.1</span> Single conditional distributions</h3>
+<p>In this section, we use the <code>Normal</code> family defined in <a href="#sec-Normaldistribution" class="quarto-xref">Section&nbsp;2</a> to fit a Normal distribution to a model specified by the following formula</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula </span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">ti</span>(Fl) <span class="sc">+</span> <span class="fu">ti</span>(A) <span class="sc">+</span> <span class="fu">ti</span>(Fl, A, <span class="at">bs =</span> <span class="st">"ps"</span>) <span class="sc">|</span> </span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(Fl) <span class="sc">+</span> <span class="fu">ti</span>(A) <span class="sc">+</span> <span class="fu">ti</span>(Fl, A, <span class="at">bs =</span> <span class="st">"ps"</span>) </span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>mNormal <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> Normal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> Normal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can visualize the fitted smoothing terms using</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mNormal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To inspect the residuals of the model, use</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">resid_plots</span>(mNormal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">resid_plots</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To improve the residual plots, we can fit a more sophisticated distribution with four parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mBCTo <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> BCTo) </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">resid_plots</span>(mBCTo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> BCTo) </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">resid_plots</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="fitting-multiple-conditional-distributions" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="fitting-multiple-conditional-distributions"><span class="header-section-number">3.2</span> Fitting multiple conditional distributions</h3>
+<section id="fitting-multiple-conditional-distributions" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="fitting-multiple-conditional-distributions"><span class="header-section-number">4.2</span> Fitting multiple conditional distributions</h3>
 <p>The function <code>chooseDist()</code> from the <code>gamlss</code> package can be used to compare multiple conditional distributions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>T1 <span class="ot">&lt;-</span> gamlss<span class="sc">:::</span><span class="fu">chooseDist</span>(mNormal, <span class="at">type =</span> <span class="st">"realplus"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>T1 <span class="ot">&lt;-</span> gamlss<span class="sc">::</span><span class="fu">chooseDist</span>(m, <span class="at">type =</span> <span class="st">"realplus"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This function generates a table of GAIC values, which can be printed as follows:</p>
 <div class="cell">
@@ -702,10 +700,10 @@ I am not clear when and why <code>rqres</code> is needed.</div>
 <p>Note that the function uses the same formula <code>f</code> to fit all the distributional regression models. Also, note that <code>f</code> does not include a model for the parameters <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\tau\)</span>; therefore, constants (intercepts) are fitted for these two parameters when the distributions have more than two parameters.</p>
 </section>
 </section>
-<section id="sec-Fittinga5parameterdistribution" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="sec-Fittinga5parameterdistribution"><span class="header-section-number">4</span> Fitting a 5-Parameter distribution</h2>
+<section id="sec-Fittinga5parameterdistribution" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="sec-Fittinga5parameterdistribution"><span class="header-section-number">5</span> Fitting a 5-Parameter distribution</h2>
 <p>In this section, we demonstrate the advantage of using <code>gamlss2</code> over <code>gamlss</code> for fitting distribution families, specifically highlighting the ease with which a five-parameter distribution can be fitted. As an example, we use the <em>Skew Generalized T</em> (SGT) distribution.</p>
-<p>The SGT distribution was introduced to <strong>R</strong> by the <code>sgt</code> package (Carter &amp; Davis, 2015). Its key feature is that it includes a wide range of sub-distributions as special cases, making it highly versatile. The figure below, taken from the <code>sgt</code> package vignette, illustrates the Skew Generalized T distribution and its various sub-distributions.</p>
+<p>The SGT distribution was introduced to <em>R</em> by the <code>sgt</code> package <span class="citation" data-cites="Davis:2015">(<a href="#ref-Davis:2015" role="doc-biblioref">Davis 2015</a>)</span>. Its key feature is that it includes a wide range of sub-distributions as special cases, making it highly versatile. The figure below, taken from the <code>sgt</code> package vignette, illustrates the Skew Generalized T distribution and its various sub-distributions.</p>
 <div id="fig-SGT" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-SGT-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -721,16 +719,16 @@ Figure&nbsp;1
 </figcaption>
 </figure>
 </div>
-<section id="importing-the-sgt-package" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="importing-the-sgt-package"><span class="header-section-number">4.1</span> Importing the <code>sgt</code> Package</h3>
+<section id="importing-the-sgt-package" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="importing-the-sgt-package"><span class="header-section-number">5.1</span> Importing the <code>sgt</code> Package</h3>
 <p>First, load the <code>sgt</code> package:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"sgt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="defining-the-sgt-distribution-as-a-gamlss2.family" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="defining-the-sgt-distribution-as-a-gamlss2.family"><span class="header-section-number">4.2</span> Defining the SGT distribution as a <code>"gamlss2.family"</code></h3>
-<p>We now define the Skew Generalized T distribution as a <code>"gamlss2.family"</code> object using the <code>d()</code>, <code>p()</code>, and <code>q()</code> functions from the <code>sgt</code> package. The function below shares similarities with the Normal distribution created in <a href="#sec-Normaldistribution" class="quarto-xref">Section&nbsp;1.1</a>, though it omits some elements, including:</p>
+<section id="defining-the-sgt-distribution-as-a-gamlss2.family" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="defining-the-sgt-distribution-as-a-gamlss2.family"><span class="header-section-number">5.2</span> Defining the SGT distribution as a <code>"gamlss2.family"</code></h3>
+<p>We now define the Skew Generalized T distribution as a <code>"gamlss2.family"</code> object using the <code>d()</code>, <code>p()</code>, and <code>q()</code> functions from the <code>sgt</code> package. The function below shares similarities with the Normal distribution created in <a href="#sec-Normaldistribution" class="quarto-xref">Section&nbsp;2</a>, though it omits some elements, including:</p>
 <ul>
 <li><code>score</code></li>
 <li><code>hess</code></li>
@@ -788,6 +786,9 @@ Figure&nbsp;1
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Davis:2015" class="csl-entry" role="listitem">
+Davis, Carter. 2015. <em>Sgt: Skewed Generalized t Distribution Tree</em>. <a href="https://CRAN.R-project.org/package=sgt">https://CRAN.R-project.org/package=sgt</a>.
+</div>
 <div id="ref-Rigbyetal2019" class="csl-entry" role="listitem">
 Rigby, R. A., D. M. Stasinopoulos, G. Z. Heller, and F. De Bastiani. 2019. <em>Distributions for Modeling Location, Scale, and Shape: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9780429298547">https://doi.org/10.1201/9780429298547</a>.
 </div>

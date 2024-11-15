@@ -223,6 +223,22 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(is.null(control$criterion))
     control$criterion <- "aicc"
 
+  ## Extra penalty for selection.
+  if(isTRUE(control$select)) {
+    df <- ncol(x$X)
+    bml <- drop(solve(XWX + diag(1e-08, df), XWz))
+
+    pen <- function(b) {
+      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
+      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+      A
+    }
+
+    b0 <- if(is.null(transfer$coefficients)) bml else  transfer$coefficients
+
+    x$S <- c(x$S, list(pen(b0)))
+  }
+
   ## Set up smoothing parameters.
   if(iter[1L] > -1) {
     lambdas <- transfer$lambdas
@@ -329,7 +345,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
   rval <- fl(opt$par, rf = TRUE)
 
-  rval$transfer <- list("lambdas" = rval$lambdas)
+  rval$transfer <- list("lambdas" = rval$lambdas, "coefficients" = rval$coefficients)
 
   return(rval)
 }

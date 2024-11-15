@@ -224,7 +224,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     control$criterion <- "aicc"
 
   ## Extra penalty for selection.
-  if(isTRUE(control$select)) {
+  if(isTRUE(control$termselect)) {
     df <- ncol(x$X)
     bml <- drop(solve(XWX + diag(1e-08, df), XWz))
 
@@ -236,7 +236,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
     b0 <- if(is.null(transfer$coefficients)) bml else  transfer$coefficients
 
-    x$S <- c(x$S, list(pen(b0)))
+    x$S[[length(x$S) + 1L]] <- pen(b0)
   }
 
   ## Set up smoothing parameters.

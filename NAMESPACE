@@ -11,14 +11,15 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "formula", "logLik", "na.omit", "var", "optim", "median", "pchisq",
   "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess")
 
-importFrom("utils", "flush.console", "tail", "getFromNamespace", "capture.output")
+importFrom("utils", "flush.console", "tail", "getFromNamespace",
+  "capture.output", "combn")
 
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d",
   "dev.off", "png")
 
 importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
-  "points", "legend")
+  "points", "legend", "mtext")
 
 importFrom("parallel", "mclapply")
 
@@ -43,6 +44,8 @@ export(
   "response_name",
   "stepwise",
   "step_gamlss2",
+  "select_gamlss2",
+  "sRS",
   "new_formula",
   "softplus",
   "shiftlog",
@@ -83,6 +86,8 @@ S3method(c, gamlss2)
 S3method(quantile, gamlss2)
 S3method(smooth.construct, lin.smooth.spec)
 S3method(Predict.matrix, lin.effect)
+S3method(new_formula, default)
+S3method(new_formula, select)
 
 S3method(distributions3::prodist, gamlss2)
 

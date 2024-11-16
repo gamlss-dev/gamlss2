@@ -510,6 +510,12 @@ special_fit.glmnet <- function(x, z, w, control, ...)
   })
   edf <- apply(cm , 2, function(b) { sum(abs(b) >  1e-10) })
   n <- length(z)
+
+  ## Penalty.
+  K <- control$K
+  if(is.null(K))
+    K <- 2
+
   ic <- switch(tolower(x$control$criterion),
     "gcv" = rss * n / (n - edf)^2,
     "aic" = rss + 2 * edf,
@@ -646,6 +652,10 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   ridge <- isTRUE(control$add_ridge)
 
+  K <- control$K
+  if(is.null(K))
+    K <- 2
+
   k <- ncol(x$X)
   XW <- x$X * w
   XWX <- crossprod(XW, x$X)
@@ -771,12 +781,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
         "lambda" = l, "vcov" = P, "df" = n - edf))
     } else {
-      if(isTRUE(control$logLik)) {
-        eta[[j]] <- eta[[j]] + fit
-        rss <- family$loglik(y, family$map2par(eta))
-      } else {
-        rss <- sum(w * (z - fit)^2)
-      }
+      rss <- sum(w * (z - fit)^2)
 
       rval <- switch(tolower(control$criterion),
         "gcv" = rss * n / (n - edf)^2,
@@ -815,6 +820,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$XWX <- XWX
   rval$XWz <- XWz
   rval$S <- S
+  rval$K <- K
   rval$criterion <- control$criterion
   rval$label <- x$label
 
@@ -971,7 +977,7 @@ plot_lasso <- function(x, terms = NULL,
         icl <- switch(tolower(x$criterion),
           "gcv" = rss * n / (n - edf)^2,
           "aic" = rss + 2 * edf,
-          "gaic" = rss + K * edf,
+          "gaic" = rss + x$K * edf,
           "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
           "bic" = rss + logn * edf
         )
@@ -1013,7 +1019,7 @@ plot_lasso <- function(x, terms = NULL,
           if(!is.character(names)) {
             names <- colnames(x$X)
             if(is.null(names))
-              names <- paste0("x", 1:ncol(X))
+              names <- paste0("x", 1:ncol(x$X))
           }
           names <- names[1:ncol(x$X)]
           at <- cm[1, ]

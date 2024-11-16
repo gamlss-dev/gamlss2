@@ -15,19 +15,21 @@
 }
 
 \usage{
-gamlss2(x, \dots)
+gamlss2(formula, \dots)
 
 \method{gamlss2}{formula}(formula, data, family = NO,
   subset, na.action, weights, offset, start = NULL,
   control = gamlss2_control(\dots), \dots)
 
-\method{gamlss2}{list}(x, \dots)
+\method{gamlss2}{list}(formula, \dots)
 }
 
 \arguments{
-  \item{formula}{A GAM-type \code{\link[stats]{formula}} or \code{\link[Formula]{Formula}}. All
-    smooth terms of the \pkg{mgcv} package are supported, see also \code{\link[mgcv]{formula.gam}}.}
-  \item{x}{For \code{gamlss.list()} \code{x} is a list of \code{\link[stats]{formula}}s.}
+  \item{formula}{A GAM-type \code{\link[stats]{formula}} or
+    \code{\link[Formula]{Formula}}. All smooth terms of the \pkg{mgcv} package
+    are supported, see also \code{\link[mgcv]{formula.gam}}.
+    For \code{gamlss.list()} \code{formula} is a list of
+    \code{\link[stats]{formula}}s.}
   \item{data}{A data frame or list or environment containing the variables in the model.
     If not found in \code{data}, the variables are taken from \code{environment(formula)},
     typically the environment from which \code{gamlss2} is called.}

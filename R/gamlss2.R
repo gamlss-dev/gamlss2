@@ -1,5 +1,5 @@
 ## Generic gamlss method.
-gamlss2 <- function(x, ...)
+gamlss2 <- function(formula, ...)
 {
   UseMethod("gamlss2")
 }
@@ -310,12 +310,12 @@ gamlss2.formula <- function(formula, data, family = NO,
 }
 
 ## List method.
-gamlss2.list <- function(x, ...)
+gamlss2.list <- function(formula, ...)
 {
   cl <- match.call()
   fl <- list()
-  for(j in seq_along(x)) {
-    fl[[j]] <- as.character(x[[j]])
+  for(j in seq_along(formula)) {
+    fl[[j]] <- as.character(formula[[j]])
     if(length(fl[[j]]) > 2L) { 
       fl[[j]] <- as.formula(paste(fl[[j]][2L], "~", fl[[j]][3L]))
     } else {

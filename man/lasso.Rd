@@ -45,7 +45,7 @@ plot_lasso(x, terms = NULL,
     \code{lwd}, \code{col}, \code{main}, etc., that control plotting parameters
     can be supplied. An additional ridge penalty (elastic net) can be added to
     each \code{la()} term be setting \code{add_ridge = TRUE}
-    in the \code{\link{gamlss2()}} call.}
+    in the \code{\link{gamlss2}} call.}
 }
 
 \details{

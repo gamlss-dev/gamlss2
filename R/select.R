@@ -1,5 +1,5 @@
 ## Model term selection based on null space penalties.
-select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.2)
+select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = c(0.9, 0.2))
 {
   criterion <- rep(criterion, length.out = 2L)
 
@@ -8,8 +8,8 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.2)
   m["criterion"] <- criterion[1L]
   m["criterion_refit"] <- criterion[2L]
   m["select"] <- TRUE
-  m["thres"] <- thres
-  m["optimizer"] <- expression(.select_gamlss2)
+  m["thres"] <- parse(text = paste("c(", thres[1L], ",", thres[2L], ")"))
+  m["optimizer"] <- parse(text = "sRS")
 
   model <- eval(m, parent.frame())
 
@@ -17,7 +17,7 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.2)
 }
 
 ## Internal selection optimizer function.
-.select_gamlss2 <- function(x, y, specials, family, offsets, weights,
+sRS <- function(x, y, specials, family, offsets, weights,
   start, xterms, sterms, control)
 {
   trace <- control$trace
@@ -28,14 +28,39 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.2)
 
   m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 
-  if(length(m$fitted.specials)) {
-    drop <- list()
+  refit <- control$refit
+  if(is.null(refit))
+    refit <- TRUE
+
+  if(length(m$fitted.specials) & refit) {
+    drop <- fr <- list()
+
+    thres <- control$thres
+    if(length(thres) < 2)
+      thres <- c(thres, 0.2)
+
+    ## edf threshold.
     for(j in names(m$fitted.specials)) {
       if(length(m$fitted.specials[[j]])) {
         for(i in names(m$fitted.specials[[j]])) {
-          if(m$fitted.specials[[j]][[i]]$edf <= control$thres)
+          fr[[j]] <- c(fr[[j]], range(m$fitted.specials[[j]][[i]]$fitted.values))
+          if(m$fitted.specials[[j]][[i]]$edf <= thres[1L])
             if(inherits(specials[[i]], "mgcv.smooth"))
-              drop[[j]] <- c(drop[[j]], i)
+              drop[[j]] <- unique(c(drop[[j]], i))
+        }
+      }
+    }
+
+    ## range threshold.
+    fr <- lapply(fr, function(x) diff(range(x)))
+    for(j in names(m$fitted.specials)) {
+      if(length(m$fitted.specials[[j]])) {
+        for(i in names(m$fitted.specials[[j]])) {
+          fri <- diff(range(m$fitted.specials[[j]][[i]]$fitted.values))
+          if(fri/fr[[j]] <= thres[2L]) {
+            if(inherits(specials[[i]], "mgcv.smooth"))
+              drop[[j]] <- unique(c(drop[[j]], i))
+          }
         }
       }
     }
@@ -70,6 +95,15 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = 0.2)
     }
   }
 
+  class(m) <- c(class(m), "select")
+
   return(m)
+}
+
+new_formula.select <- function(object, ...) {
+  f <- object$selection$formula
+  rn <- response_name(object)
+  f[[1L]] <- eval(parse(text = paste("update(f[[1L]], ", rn, " ~ .)")))
+  return(f)
 }
 

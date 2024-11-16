@@ -76,6 +76,9 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
             sj[[i]]$binning <- bn
             sj[[i]]$sparse_index <- calc_sparse_index(sj[[i]]$X)
           }
+          if(select) {
+            sj[[i]]$S[[length(sj[[i]]$S)]] <- sj[[i]]$S[[length(sj[[i]]$S)]] + diag(1/sqrt(ncol(sj[[i]]$X)), ncol(sj[[i]]$X))
+          }
         }
         sjn <- sapply(sj, function(x) x$label)
         if(changed) {
@@ -339,11 +342,13 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     if(is.null(x$sp)) {
       eps <- 1
       lambdas0 <- lambdas
-       while(eps > 0.00001) {
+      lk <- 0
+       while((eps > 0.000001) & (lk < 1000L)) {
          opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
          eps <- mean(abs((opt$par - lambdas0) / lambdas0))
          lambdas0 <- lambdas
          lambdas <- opt$par
+         lk <- lk + 1L
        }
     } else {
       opt <- list(par = x$sp)

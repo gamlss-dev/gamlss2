@@ -1,7 +1,6 @@
 \name{stepwise} 
 \alias{stepwise}
 \alias{step_gamlss2}
-\alias{new_formula}
 
 \title{Stepwise Model Term Selection Using GAIC}
 
@@ -17,9 +16,6 @@
 step_gamlss2(formula, ..., K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
-
-## After stepwise search, extract the new formula.
-new_formula(object)
 
 ## Stepwise optimizer function.
 stepwise(x, y, specials, family, offsets,
@@ -40,7 +36,6 @@ stepwise(x, y, specials, family, offsets,
     or should the selection search be performed across all parameters?}
   \item{cores}{Integer, if \code{cores > 1L}, function \code{\link[parallel]{mclapply}}
     function is used to speed up computations using multiple cores within the selection steps.}
-  \item{object}{An object fitted using \code{step_gamlss2()}.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and
@@ -106,7 +101,7 @@ stepwise(x, y, specials, family, offsets,
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
+  \code{\link{new_formula}}, \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}

@@ -314,6 +314,12 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HarzTraffic</span></a>
   </div>
@@ -346,6 +352,12 @@ div.csl-indent {
   <div class="sidebar-item-container"> 
   <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">modelstats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/new_formula.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">new_formula</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -388,6 +400,12 @@ div.csl-indent {
   <div class="sidebar-item-container"> 
   <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RS_CG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/select_gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">select_gamlss2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -559,9 +577,9 @@ AIC = 14337.7146 elapsed =  0.02sec</code></pre>
 GAMLSS-RS iteration  2: Global Deviance = 12599.4086 eps = 0.052607     
 GAMLSS-RS iteration  3: Global Deviance = 12016.9723 eps = 0.046227     
 GAMLSS-RS iteration  4: Global Deviance = 11573.6582 eps = 0.036890     
-GAMLSS-RS iteration  5: Global Deviance = 11473.4168 eps = 0.008661     
-GAMLSS-RS iteration  6: Global Deviance = 11469.6536 eps = 0.000328     
-GAMLSS-RS iteration  7: Global Deviance = 11469.5638 eps = 0.000007     </code></pre>
+GAMLSS-RS iteration  5: Global Deviance = 11473.417 eps = 0.008661     
+GAMLSS-RS iteration  6: Global Deviance = 11469.6537 eps = 0.000328     
+GAMLSS-RS iteration  7: Global Deviance = 11469.5639 eps = 0.000007     </code></pre>
 </div>
 </div>
 <p>Plot estimated seasonal effect.</p>
@@ -595,14 +613,14 @@ GAMLSS-RS iteration  7: Global Deviance = 11469.5638 eps = 0.000007     </code><
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9919.2998 eps = 0.168829     
-GAMLSS-RS iteration  2: Global Deviance = 9831.2959 eps = 0.008871     
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9919.3001 eps = 0.168829     
+GAMLSS-RS iteration  2: Global Deviance = 9831.2958 eps = 0.008872     
 GAMLSS-RS iteration  3: Global Deviance = 9822.4038 eps = 0.000904     
-GAMLSS-RS iteration  4: Global Deviance = 9820.9377 eps = 0.000149     
-GAMLSS-RS iteration  5: Global Deviance = 9819.6614 eps = 0.000129     
-GAMLSS-RS iteration  6: Global Deviance = 9819.4837 eps = 0.000018     
-GAMLSS-RS iteration  7: Global Deviance = 9819.3844 eps = 0.000010     
-GAMLSS-RS iteration  8: Global Deviance = 9819.3528 eps = 0.000003     </code></pre>
+GAMLSS-RS iteration  4: Global Deviance = 9820.9376 eps = 0.000149     
+GAMLSS-RS iteration  5: Global Deviance = 9819.6601 eps = 0.000130     
+GAMLSS-RS iteration  6: Global Deviance = 9819.4848 eps = 0.000017     
+GAMLSS-RS iteration  7: Global Deviance = 9819.3533 eps = 0.000013     
+GAMLSS-RS iteration  8: Global Deviance = 9819.3298 eps = 0.000002     </code></pre>
 </div>
 </div>
 <p>Plot again the estimated smooth seasonal effects.</p>

@@ -294,6 +294,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HarzTraffic</span></a>
   </div>
@@ -326,6 +332,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">modelstats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/new_formula.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">new_formula</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -368,6 +380,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RS_CG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/select_gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">select_gamlss2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -450,9 +468,6 @@ step_gamlss2(formula, ..., K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
 
-## After stepwise search, extract the new formula.
-new_formula(object)
-
 ## Stepwise optimizer function.
 stepwise(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
@@ -507,14 +522,6 @@ Logical, For the different strategies of the stepwise algorithm, should the upda
 </td>
 <td>
 Integer, if <code>cores &gt; 1L</code>, function <code>mclapply</code> function is used to speed up computations using multiple cores within the selection steps.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="object">object</code>
-</td>
-<td>
-An object fitted using <code>step_gamlss2()</code>.
 </td>
 </tr>
 <tr>
@@ -635,7 +642,7 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code>, <code>gamlss2_control</code>, <code>RS</code></p>
+<p><code>new_formula</code>, <code>gamlss2</code>, <code>gamlss2_control</code>, <code>RS</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>random – gamlss2</title>
+<title>glmnet – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -140,7 +140,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/random.html">random</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/fake_formula.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/glmnet.html">glmnet</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -294,7 +294,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">glmnet</span></a>
   </div>
 </li>
@@ -372,7 +372,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/random.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/random.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">random</span></a>
   </div>
 </li>
@@ -436,7 +436,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#random-effects" id="toc-random-effects" class="nav-link active" data-scroll-target="#random-effects">Random Effects</a>
+  <li><a href="#lasso-with-glmnet" id="toc-lasso-with-glmnet" class="nav-link active" data-scroll-target="#lasso-with-glmnet">Lasso with <span class="pkg">glmnet</span></a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
@@ -455,16 +455,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="random-effects" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="random-effects">Random Effects</h2>
+<section id="lasso-with-glmnet" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="lasso-with-glmnet">Lasso with <span class="pkg">glmnet</span></h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>There are two ways of fitting a random effect within <code>gamlss2</code>. The first, using <code>s()</code>, is for a simple random effect, that is, when only one factor is entered the model as a smoother. This method uses the function <code>s()</code> of the package <span class="pkg">mgcv</span> with argument <code>bs = “re”</code>. For example, if <code>area</code> is factor with several levels, <code>s(area, bs = “re”)</code> will sringh the levels of <code>area</code> towards their mean level. The second, more general way, allows to fit more complicated random effect models using the function <code>re()</code>. The function <code>re()</code> is an interface connecting <code>gamlss2</code> with the specialised package for random effects <span class="pkg">nlme</span>.</p>
-<p>Here we document only the <code>re()</code> function only but we also give examples using <code>s(…, bs = “re”)</code>.</p>
+<p>Constructor function for estimating Lasso model terms using the <span class="pkg">glmnet</span> package.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">re(fixed =~ 1, random = NULL, ...)
+<pre><code class="language-R">## Model term constructor function.
+lasso(formula, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -472,18 +472,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table>
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="fixed">fixed</code>
+<code id="formula">formula</code>
 </td>
 <td>
-A formula that specifies the fixed effects of the <code>nlme{lme}</code> model. In most cases, this can also be included in the <code>gamlss2</code> parameter formula.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="random">random</code>
-</td>
-<td>
-A formula specifying the random effect part of the model, as in the <code>nlme{lme()}</code> function.
+A formula specifying the covariates that should be estimated using the Lasso implementation in <span class="pkg">glmnet</span>.
 </td>
 </tr>
 <tr>
@@ -491,23 +483,22 @@ A formula specifying the random effect part of the model, as in the <code>nlme{l
 <code id="...">…</code>
 </td>
 <td>
-For the <code>re()</code> function, the dots argument is used to specify additional control arguments for the <code>nlme{lme}</code> function, such as the <code>method</code> and <code>correlation</code> arguments.
+Control arguments to be passed to function <code>glmnet</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Both functions set up model terms that can be estimated using a backfitting algorithm, e.g., the default <code>RS</code> algorithm.</p>
+<p>The <code>formula</code> is used to generate a <code>model.matrix</code>, which is then used for estimation. Note that the data is not scaled, so the user must scale the covariates manually. The function <code>glmnet</code> is employed within the backfitting algorithm implemented in <code>RS</code>. The optimal Lasso shrinkage parameter is selected based on an information criterion. Available options for the criterion are <code>criterion = c(“gcv”, “aic”, “gaic”, “aicc”, “bic”)</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Function <code>s</code> with <code>bs = “re”</code> returns a smooth specification object of class <code>“re.smooth.spec”</code>, see also <code>smooth.construct.re.smooth.spec</code>.</p>
-<p>The <code>re()</code> function returns a special model term specification object, see <code>specials</code> for details.</p>
+<p>The <code>lasso()</code> function is used internally within <code>gamlss2</code> and provides the necessary details for estimating Lasso-type model terms using function <code>glmnet</code>.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code>, <code>smooth.construct.re.smooth.spec</code>, <code>s</code>, <code>lme</code></p>
+<p><code>gamlss2</code>, <code>specials</code>.</p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
@@ -515,136 +506,35 @@ For the <code>re()</code> function, the dots argument is used to specify additio
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## orthdontic measurement data</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Orthodont"</span>, <span class="at">package =</span> <span class="st">"nlme"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## model using lme()</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lme</span>(distance <span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>), <span class="at">data =</span> Orthodont,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">random =</span><span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>) <span class="sc">|</span> Subject, <span class="at">method =</span> <span class="st">"ML"</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## using re(), function I() is not supported,</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## please transform all variables in advance</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>Orthodont<span class="sc">$</span>age11  <span class="ot">&lt;-</span> Orthodont<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">11</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation using the re() constructor</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> age11 <span class="sc">|</span> Subject),</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 326.6569 eps = 0.392363     
-GAMLSS-RS iteration  2: Global Deviance = 326.0931 eps = 0.001726     
-GAMLSS-RS iteration  3: Global Deviance = 326.0758 eps = 0.000053     
-GAMLSS-RS iteration  4: Global Deviance = 326.0754 eps = 0.000001     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="random_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract summary for re() model term</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>st <span class="ot">&lt;-</span> <span class="fu">specials</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                             Length Class  Mode
-mu.s(age)                     9     -none- list
-mu.re(random=~age11|Subject) 19     lme    list</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## random intercepts and slopes with s() using AIC</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">s</span>(Subject, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> <span class="fu">s</span>(Subject, age11, <span class="at">bs =</span> <span class="st">"re"</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 427.4959 eps = 0.204786     
-GAMLSS-RS iteration  2: Global Deviance = 370.4036 eps = 0.133550     
-GAMLSS-RS iteration  3: Global Deviance = 359.232 eps = 0.030160     
-GAMLSS-RS iteration  4: Global Deviance = 334.3919 eps = 0.069147     
-GAMLSS-RS iteration  5: Global Deviance = 322.9054 eps = 0.034350     
-GAMLSS-RS iteration  6: Global Deviance = 318.0482 eps = 0.015042     
-GAMLSS-RS iteration  7: Global Deviance = 316.2218 eps = 0.005742     
-GAMLSS-RS iteration  8: Global Deviance = 315.5587 eps = 0.002096     
-GAMLSS-RS iteration  9: Global Deviance = 315.3218 eps = 0.000750     
-GAMLSS-RS iteration 10: Global Deviance = 315.2367 eps = 0.000269     
-GAMLSS-RS iteration 11: Global Deviance = 315.2063 eps = 0.000096     
-GAMLSS-RS iteration 12: Global Deviance = 315.1955 eps = 0.000034     
-GAMLSS-RS iteration 13: Global Deviance = 315.1917 eps = 0.000012     
-GAMLSS-RS iteration 14: Global Deviance = 315.1902 eps = 0.000004     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m))</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">fitted</span>(a, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m), <span class="at">col =</span> <span class="dv">2</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="random_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## more complicated correlation structures.</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Ovary"</span>, <span class="at">package =</span> <span class="st">"nlme"</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## ARMA model</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lme</span>(follicles <span class="sc">~</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> Time) <span class="sc">+</span> <span class="fu">cos</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> Time), <span class="at">data =</span> Ovary, </span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">random =</span> <span class="fu">pdDiag</span>(<span class="sc">~</span><span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>Time)), <span class="at">correlation =</span> <span class="fu">corARMA</span>(<span class="at">q =</span> <span class="dv">2</span>))</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="do">## now with gamlss2(), transform in advance</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>Ovary<span class="sc">$</span>sin1 <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> Ovary<span class="sc">$</span>Time)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>Ovary<span class="sc">$</span>cos1 <span class="ot">&lt;-</span> <span class="fu">cos</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> Ovary<span class="sc">$</span>Time)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">s</span>(Time) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> sin1 <span class="sc">|</span> Mare,</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">correlation =</span> <span class="fu">corARMA</span>(<span class="at">q =</span> <span class="dv">2</span>), <span class="at">control =</span> <span class="fu">lmeControl</span>(<span class="at">maxIter =</span> <span class="dv">100</span>))</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1178 eps = 0.165409     
-GAMLSS-RS iteration  2: Global Deviance = 1551.3069 eps = 0.005647     
-GAMLSS-RS iteration  3: Global Deviance = 1551.1747 eps = 0.000085     
-GAMLSS-RS iteration  4: Global Deviance = 1551.1728 eps = 0.000001     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## smooth random effects</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">ti</span>(Time) <span class="sc">+</span> <span class="fu">ti</span>(Mare, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(Mare, Time, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"re"</span>, <span class="st">"cr"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">11</span>, <span class="dv">5</span>))</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1522.1073 eps = 0.185743     
-GAMLSS-RS iteration  2: Global Deviance = 1436.4785 eps = 0.056256     
-GAMLSS-RS iteration  3: Global Deviance = 1426.6643 eps = 0.006832     
-GAMLSS-RS iteration  4: Global Deviance = 1425.7728 eps = 0.000624     
-GAMLSS-RS iteration  5: Global Deviance = 1425.6942 eps = 0.000055     
-GAMLSS-RS iteration  6: Global Deviance = 1425.6873 eps = 0.000004     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">n2mfrow</span>(<span class="fu">nlevels</span>(Ovary<span class="sc">$</span>Mare)), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">levels</span>(Ovary<span class="sc">$</span>Mare)) {</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  ds <span class="ot">&lt;-</span> <span class="fu">subset</span>(Ovary, Mare <span class="sc">==</span> j)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(follicles <span class="sc">~</span> Time, <span class="at">data =</span> ds)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>)[Ovary<span class="sc">$</span>Mare <span class="sc">==</span> j]</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(f <span class="sc">~</span> ds<span class="sc">$</span>Time, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">fitted</span>(g, <span class="at">model =</span> <span class="st">"mu"</span>)[Ovary<span class="sc">$</span>Mare <span class="sc">==</span> j]</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(f <span class="sc">~</span> ds<span class="sc">$</span>Time, <span class="at">col =</span> <span class="dv">3</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">fitted</span>(m)[Ovary<span class="sc">$</span>Mare <span class="sc">==</span> j]</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(f <span class="sc">~</span> ds<span class="sc">$</span>Time, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a> }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="random_files/figure-html/unnamed-chunk-1-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## transform numeric to factor variables</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>rent<span class="sc">$</span>Flc <span class="ot">&lt;-</span> <span class="fu">cut</span>(rent<span class="sc">$</span>Fl, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">20</span>, <span class="dv">160</span>, <span class="at">by =</span> <span class="dv">10</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>rent<span class="sc">$</span>Ac <span class="ot">&lt;-</span> <span class="fu">cut</span>(rent<span class="sc">$</span>A, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1890</span>, <span class="dv">1990</span>, <span class="at">by =</span> <span class="dv">10</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## set up the model formula for a BCT model</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">lasso</span>(<span class="sc">~</span>Flc <span class="sc">+</span> Ac <span class="sc">+</span> loc) <span class="sc">|</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lasso</span>(<span class="sc">~</span>Flc <span class="sc">+</span> Ac <span class="sc">+</span> loc) <span class="sc">|</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lasso</span>(<span class="sc">~</span>Flc <span class="sc">+</span> Ac <span class="sc">+</span> loc) <span class="sc">|</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lasso</span>(<span class="sc">~</span>Flc <span class="sc">+</span> Ac <span class="sc">+</span> loc)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## summary, shows the estimated degrees of freedom</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## for each model term</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="do">## extract fitted special lasso model term</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>st <span class="ot">&lt;-</span> <span class="fu">specials</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## plot coefficient paths</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(st<span class="sc">$</span>model)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="do">## same for sigma</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">specials</span>(b, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">elements =</span> <span class="st">"model"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

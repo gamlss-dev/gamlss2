@@ -314,6 +314,12 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HarzTraffic</span></a>
   </div>
@@ -346,6 +352,12 @@ div.csl-indent {
   <div class="sidebar-item-container"> 
   <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">modelstats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/new_formula.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">new_formula</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -388,6 +400,12 @@ div.csl-indent {
   <div class="sidebar-item-container"> 
   <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RS_CG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/select_gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">select_gamlss2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -590,7 +608,7 @@ correct results for longitude/latitude data</code></pre>
 gamlss2(formula = counts ~ s(log(alt + 10)) + s(year) + s(id, 
     bs = "mrf", xt = list(penalty = K), k = 100) | s(log(alt + 
     10)) + s(year) + s(id, bs = "mrf", xt = list(penalty = K), 
-    k = 100), data = storms, family = NBI, ... = pairlist(x = FALSE, criterion = "BIC"))
+    k = 100), data = storms, family = NBI, ... = pairlist(criterion = "BIC", x = FALSE))
 ---
 Family: NBI 
 Link function: mu = log, sigma = log
@@ -599,27 +617,27 @@ Parameter: mu
 ---
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  1.26169    0.01667   75.69   &lt;2e-16 ***
+(Intercept)  1.26559    0.01672   75.71   &lt;2e-16 ***
 ---
 Smooth terms:
     s(log(alt + 10)) s(year)  s(id)
-edf           7.7494  2.3151 61.572
+edf           7.8066  2.3246 61.332
 *--------
 Parameter: sigma 
 ---
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -0.25243    0.02541  -9.936   &lt;2e-16 ***
+(Intercept) -0.23726    0.02536  -9.355   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
     s(log(alt + 10)) s(year)  s(id)
-edf           7.7675  2.1585 0.0067
+edf           7.8596  1.0023 0.0067
 *--------
-n = 3494 df =  83.57 res.df =  3410.43
-Deviance = 16510.3134 Null Dev. Red. = 14.32%
-AIC = 16677.4517 elapsed =  6.58sec</code></pre>
+n = 3494 df =  82.33 res.df =  3411.67
+Deviance = 16536.7289 Null Dev. Red. = 14.18%
+AIC = 16701.393 elapsed =  8.33sec</code></pre>
 </div>
 </div>
 <p>Model calibration is checked using histogram, Q-Q plot, wormplot etc.</p>

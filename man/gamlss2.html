@@ -294,6 +294,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HarzTraffic</span></a>
   </div>
@@ -326,6 +332,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">modelstats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/new_formula.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">new_formula</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -368,6 +380,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RS_CG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/select_gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">select_gamlss2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -446,7 +464,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">gamlss2(x, ...)
+<pre><code class="language-R">gamlss2(formula, ...)
 
 ## S3 method for class 'formula'
 gamlss2(formula, data, family = NO,
@@ -454,7 +472,7 @@ gamlss2(formula, data, family = NO,
   control = gamlss2_control(...), ...)
 
 ## S3 method for class 'list'
-gamlss2(x, ...)
+gamlss2(formula, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -465,15 +483,7 @@ gamlss2(x, ...)
 <code id="formula">formula</code>
 </td>
 <td>
-A GAM-type <code>formula</code> or <code>Formula</code>. All smooth terms of the <span class="pkg">mgcv</span> package are supported, see also <code>formula.gam</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="x">x</code>
-</td>
-<td>
-For <code>gamlss.list()</code> <code>x</code> is a list of <code>formula</code>s.
+A GAM-type <code>formula</code> or <code>Formula</code>. All smooth terms of the <span class="pkg">mgcv</span> package are supported, see also <code>formula.gam</code>. For <code>gamlss.list()</code> <code>formula</code> is a list of <code>formula</code>s.
 </td>
 </tr>
 <tr>
@@ -653,7 +663,7 @@ edf 1.0004
 *--------
 n = 610 df =  13.12 res.df =  596.88
 Deviance = 4770.1566 Null Dev. Red. = 33.39%
-AIC = 4796.3906 elapsed =  0.85sec</code></pre>
+AIC = 4796.3906 elapsed =  0.84sec</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -721,10 +731,10 @@ GAMLSS-RS iteration  3: Global Deviance = 4795.2666 eps = 0.000002     </code></
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">fitted</span>(m))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4902.0842 eps = 0.372275     
-GAMLSS-RS iteration  2: Global Deviance = 4775.399 eps = 0.025843     
-GAMLSS-RS iteration  3: Global Deviance = 4774.5521 eps = 0.000177     
-GAMLSS-RS iteration  4: Global Deviance = 4774.5283 eps = 0.000004     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4902.0841 eps = 0.372275     
+GAMLSS-RS iteration  2: Global Deviance = 4775.4062 eps = 0.025841     
+GAMLSS-RS iteration  3: Global Deviance = 4774.5631 eps = 0.000176     
+GAMLSS-RS iteration  4: Global Deviance = 4774.539 eps = 0.000005     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## same with</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>

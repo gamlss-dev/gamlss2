@@ -106,10 +106,10 @@ d$f5 <- cos(d$x5)
 
 ## true parameters
 mu <- with(d, f1 + f3 + f4)
-sigma <- with(d, 1.5 + f2 + f4 + f5)
+sigma <- with(d, exp(1.5 + f2 + f4 + f5))
 
 ## simulate response
-d$y <- rnorm(n, mean = mu, sd = exp(sigma))
+d$y <- rnorm(n, mean = mu, sd = sigma)
 
 ## model formula
 f <- paste("~", paste0("s(x", 1:k, ")", collapse = "+"))

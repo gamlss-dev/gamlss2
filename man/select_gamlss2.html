@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -407,26 +441,11 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
+  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
-  <li><a href="#not-run-simulate-data" id="toc-not-run-simulate-data" class="nav-link" data-scroll-target="#not-run-simulate-data">Not run: ## simulate data</a></li>
-  <li><a href="#number-of-observations" id="toc-number-of-observations" class="nav-link" data-scroll-target="#number-of-observations">number of observations</a></li>
-  <li><a href="#covariates" id="toc-covariates" class="nav-link" data-scroll-target="#covariates">covariates</a></li>
-  <li><a href="#true-effects" id="toc-true-effects" class="nav-link" data-scroll-target="#true-effects">true effects</a></li>
-  <li><a href="#true-parameters" id="toc-true-parameters" class="nav-link" data-scroll-target="#true-parameters">true parameters</a></li>
-  <li><a href="#simulate-response" id="toc-simulate-response" class="nav-link" data-scroll-target="#simulate-response">simulate response</a></li>
-  <li><a href="#model-formula" id="toc-model-formula" class="nav-link" data-scroll-target="#model-formula">model formula</a></li>
-  <li><a href="#estimate-model" id="toc-estimate-model" class="nav-link" data-scroll-target="#estimate-model">estimate model</a></li>
-  <li><a href="#plot-selected-estimated-effects" id="toc-plot-selected-estimated-effects" class="nav-link" data-scroll-target="#plot-selected-estimated-effects">plot selected estimated effects</a></li>
-  <li><a href="#final-model" id="toc-final-model" class="nav-link" data-scroll-target="#final-model">final model</a></li>
-  <li><a href="#example-taken-from-gam.selection" id="toc-example-taken-from-gam.selection" class="nav-link" data-scroll-target="#example-taken-from-gam.selection">example taken from ?gam.selection</a></li>
-  <li><a href="#simulate-data" id="toc-simulate-data" class="nav-link" data-scroll-target="#simulate-data">simulate data</a></li>
-  <li><a href="#spurious" id="toc-spurious" class="nav-link" data-scroll-target="#spurious">spurious</a></li>
-  <li><a href="#formula" id="toc-formula" class="nav-link" data-scroll-target="#formula">formula</a></li>
-  <li><a href="#estimate-model-1" id="toc-estimate-model-1" class="nav-link" data-scroll-target="#estimate-model-1">estimate model</a></li>
-  <li><a href="#same-with-gamlss2" id="toc-same-with-gamlss2" class="nav-link" data-scroll-target="#same-with-gamlss2">same with gamlss2</a></li>
-  <li><a href="#plot-selected-effects" id="toc-plot-selected-effects" class="nav-link" data-scroll-target="#plot-selected-effects">plot selected effects</a></li>
-  <li><a href="#final-model-1" id="toc-final-model-1" class="nav-link" data-scroll-target="#final-model-1">final model</a></li>
-  <li><a href="#endnot-run" id="toc-endnot-run" class="nav-link" data-scroll-target="#endnot-run">End(Not run)</a></li>
   </ul>
 </nav>
     </div>
@@ -476,92 +495,189 @@ Arguments passed to argument <code>control</code> in function <code>sRS()</code>
 <code id="criterion">criterion</code>
 </td>
 <td>
-<p>The information criterion to be used for estimating the shrinkage parameters. This can also be a vector of length 2, where the first element specifies the criterion to be used during the selection step, and the second element specifies the criterion to be used during the refitting step. Possible options are <code>“BIC”</code>, <code>“GCV”</code>, <code>“AIC”</code>, <code>“AICc”</code> and <code>“GAIC”</code> with user defined penalty <code>K</code>, default is <code>K = 2</code>. vector of thresholds used for model term selection. The first element controls the minimum allowed estimated degrees of freedom for a model term to enter the model. The second element specifies the minimum percentage of the total estimated predictor range required for a term to be included in the model. full model matrix to be used for fitting. response vector or matrix. named list of special model terms, e.g., including design and penalty matrices for fitting smooth terms using <code>smooth.construct</code>. family object, see <code>gamlss2.family</code>. supplied, a list or data frame of possible model offset. supplied, a numeric vector of weights. values, either for the parameters of the response distribution or, if specified as a named list in which each element of length one is named with <code>“(Intercept)”</code>, the respective intercepts are initialized. If starting values are specified as a named list, data frame or matrix, where each element/column is a vector with the same length as the number of observations in the data, the respective predictors are initialized with these. See the examples for <code>gamlss2</code>. named list specifying the linear model terms. Each named list element represents one parameter as specified in the family object. named list specifying the special model terms. Each named list element represents one parameter as specified in the family object. control arguments as specified within the call of <code>gamlss2</code>.</p>
+The information criterion to be used for estimating the shrinkage parameters. This can also be a vector of length 2, where the first element specifies the criterion to be used during the selection step, and the second element specifies the criterion to be used during the refitting step. Possible options are <code>“BIC”</code>, <code>“GCV”</code>, <code>“AIC”</code>, <code>“AICc”</code> and <code>“GAIC”</code> with user defined penalty <code>K</code>, default is <code>K = 2</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="thres">thres</code>
+</td>
+<td>
+A vector of thresholds used for model term selection. The first element controls the minimum allowed estimated degrees of freedom for a model term to enter the model. The second element specifies the minimum percentage of the total estimated predictor range required for a term to be included in the model.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="x">x</code>
+</td>
+<td>
+The full model matrix to be used for fitting.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="y">y</code>
+</td>
+<td>
+The response vector or matrix.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="specials">specials</code>
+</td>
+<td>
+A named list of special model terms, e.g., including design and penalty matrices for fitting smooth terms using <code>smooth.construct</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="family">family</code>
+</td>
+<td>
+A family object, see <code>gamlss2.family</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="offsets">offsets</code>
+</td>
+<td>
+If supplied, a list or data frame of possible model offset.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="weights">weights</code>
+</td>
+<td>
+If supplied, a numeric vector of weights.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="start">start</code>
+</td>
+<td>
+Starting values, either for the parameters of the response distribution or, if specified as a named list in which each element of length one is named with <code>“(Intercept)”</code>, the respective intercepts are initialized. If starting values are specified as a named list, data frame or matrix, where each element/column is a vector with the same length as the number of observations in the data, the respective predictors are initialized with these. See the examples for <code>gamlss2</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="xterms">xterms</code>
+</td>
+<td>
+A named list specifying the linear model terms. Each named list element represents one parameter as specified in the family object.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="sterms">sterms</code>
+</td>
+<td>
+A named list specifying the special model terms. Each named list element represents one parameter as specified in the family object.
+</td>
+</tr>
+<tr>
+<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<code id="control">control</code>
+</td>
+<td>
+Further control arguments as specified within the call of <code>gamlss2</code>.
 </td>
 </tr>
 </tbody></table>
+</section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The function <code>select_gamlss2</code> selects model terms by identifying those with estimated degrees of freedom greater than a pre-specified threshold (e.g., <code>thres = 0.9</code>). In addition, model term selection can also be based on the percentage of the total predictor range covered by the model term to ensure that the term represents a substantial portion of the total effect. After the selection step, the model is refitted using only the selected terms, excluding the additional penalty applied during the initial fitting process. The additional penalty for automatic term selection is described in <code>?gam.selection</code>. Please note that this is experimental, and careful consideration should always be given to the modeling process.</p>
+</section>
+<section id="value" class="level3">
+<h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>An object of class <code>“gamlss2”</code>.</p>
+</section>
+<section id="see-also" class="level3">
+<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
 <p><code>gamlss2</code>, <code>new_formula</code>.</p>
 </section>
-</section>
-<section id="not-run-simulate-data" class="level2">
-<h2 class="anchored" data-anchor-id="not-run-simulate-data">Not run: ## simulate data</h2>
-<p>set.seed(123)</p>
-</section>
-<section id="number-of-observations" class="level2">
-<h2 class="anchored" data-anchor-id="number-of-observations">number of observations</h2>
-<p>n &lt;- 1000</p>
-</section>
-<section id="covariates" class="level2">
-<h2 class="anchored" data-anchor-id="covariates">covariates</h2>
-<p>k &lt;- 100 x &lt;- matrix(runif(n * k, -3, 3), ncol = k) colnames(x) &lt;- paste0(“x”, 1:k) d &lt;- as.data.frame(x)</p>
-</section>
-<section id="true-effects" class="level2">
-<h2 class="anchored" data-anchor-id="true-effects">true effects</h2>
-<p>d$f1 &lt;- sin(d$x1) d$f2 &lt;- exp(d$x2)/15 - 1 d$f3 &lt;- -d$x3 / 3 d$f4 &lt;- d$x4^2/5 - 1 d$f5 &lt;- cos(d$x5)</p>
-</section>
-<section id="true-parameters" class="level2">
-<h2 class="anchored" data-anchor-id="true-parameters">true parameters</h2>
-<p>mu &lt;- with(d, f1 + f3 + f4) sigma &lt;- with(d, 1.5 + f2 + f4 + f5)</p>
-</section>
-<section id="simulate-response" class="level2">
-<h2 class="anchored" data-anchor-id="simulate-response">simulate response</h2>
-<p>d$y &lt;- rnorm(n, mean = mu, sd = exp(sigma))</p>
-</section>
-<section id="model-formula" class="level2">
-<h2 class="anchored" data-anchor-id="model-formula">model formula</h2>
-<p>f &lt;- paste(“~”, paste0(“s(x”, 1:k, “)”, collapse = “+”)) f &lt;- as.formula(f) f &lt;- list(f, f) f[[1]] &lt;- update(f[[1]], y ~ .)</p>
-</section>
-<section id="estimate-model" class="level2">
-<h2 class="anchored" data-anchor-id="estimate-model">estimate model</h2>
-<p>b &lt;- select_gamlss2(f, data = d, family = NO)</p>
-</section>
-<section id="plot-selected-estimated-effects" class="level2">
-<h2 class="anchored" data-anchor-id="plot-selected-estimated-effects">plot selected estimated effects</h2>
-<p>plot(b)</p>
-</section>
-<section id="final-model" class="level2">
-<h2 class="anchored" data-anchor-id="final-model">final model</h2>
-<p>new_formula(b)</p>
-</section>
-<section id="example-taken-from-gam.selection" class="level2">
-<h2 class="anchored" data-anchor-id="example-taken-from-gam.selection">example taken from ?gam.selection</h2>
-<p>library(“mgcv”) set.seed(3) n &lt;- 200</p>
-</section>
-<section id="simulate-data" class="level2">
-<h2 class="anchored" data-anchor-id="simulate-data">simulate data</h2>
-<p>dat &lt;- gamSim(1, n = n, scale = .15, dist = “poisson”)</p>
-</section>
-<section id="spurious" class="level2">
-<h2 class="anchored" data-anchor-id="spurious">spurious</h2>
-<p>dat$x4 &lt;- runif(n, 0, 1) dat$x5 &lt;- runif(n, 0, 1)</p>
-</section>
-<section id="formula" class="level2">
-<h2 class="anchored" data-anchor-id="formula">formula</h2>
-<p>f &lt;- y ~ s(x0) + s(x1) + s(x2) + s(x3) + s(x4) + s(x5)</p>
-</section>
-<section id="estimate-model-1" class="level2">
-<h2 class="anchored" data-anchor-id="estimate-model-1">estimate model</h2>
-<p>b1 &lt;- gam(f, data = dat, family = poisson, select = TRUE, method = “REML”) summary(b1) plot(b1, pages = 1)</p>
-</section>
-<section id="same-with-gamlss2" class="level2">
-<h2 class="anchored" data-anchor-id="same-with-gamlss2">same with gamlss2</h2>
-<p>b2 &lt;- select_gamlss2(f, data = dat, family = PO)</p>
-</section>
-<section id="plot-selected-effects" class="level2">
-<h2 class="anchored" data-anchor-id="plot-selected-effects">plot selected effects</h2>
-<p>plot(b2)</p>
-</section>
-<section id="final-model-1" class="level2">
-<h2 class="anchored" data-anchor-id="final-model-1">final model</h2>
-<p>new_formula(b2)</p>
-</section>
-<section id="endnot-run" class="level2">
-<h2 class="anchored" data-anchor-id="endnot-run">End(Not run)</h2>
-<p>regression models</p>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## number of observations</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## covariates</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(n <span class="sc">*</span> k, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">ncol =</span> k)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(x) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"x"</span>, <span class="dv">1</span><span class="sc">:</span>k)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(x)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## true effects</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>f1 <span class="ot">&lt;-</span> <span class="fu">sin</span>(d<span class="sc">$</span>x1)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>f2 <span class="ot">&lt;-</span> <span class="fu">exp</span>(d<span class="sc">$</span>x2)<span class="sc">/</span><span class="dv">15</span> <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>f3 <span class="ot">&lt;-</span> <span class="sc">-</span>d<span class="sc">$</span>x3 <span class="sc">/</span> <span class="dv">3</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>f4 <span class="ot">&lt;-</span> d<span class="sc">$</span>x4<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="dv">5</span> <span class="sc">-</span> <span class="dv">1</span> </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>f5 <span class="ot">&lt;-</span> <span class="fu">cos</span>(d<span class="sc">$</span>x5)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## true parameters</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">with</span>(d, f1 <span class="sc">+</span> f3 <span class="sc">+</span> f4)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">with</span>(d, <span class="fu">exp</span>(<span class="fl">1.5</span> <span class="sc">+</span> f2 <span class="sc">+</span> f4 <span class="sc">+</span> f5))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate response</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"~"</span>, <span class="fu">paste0</span>(<span class="st">"s(x"</span>, <span class="dv">1</span><span class="sc">:</span>k, <span class="st">")"</span>, <span class="at">collapse =</span> <span class="st">"+"</span>))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(f)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">list</span>(f, f)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>f[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">update</span>(f[[<span class="dv">1</span>]], y <span class="sc">~</span> .)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">select_gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> NO)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="do">## plot selected estimated effects</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="do">## final model</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(b)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="do">## example taken from ?gam.selection</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"mgcv"</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate data</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">gamSim</span>(<span class="dv">1</span>, <span class="at">n =</span> n, <span class="at">scale =</span> .<span class="dv">15</span>, <span class="at">dist =</span> <span class="st">"poisson"</span>)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="do">## spurious</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>x4 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>x5 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="do">## formula</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x0) <span class="sc">+</span> <span class="fu">s</span>(x1) <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> <span class="fu">s</span>(x3) <span class="sc">+</span> <span class="fu">s</span>(x4) <span class="sc">+</span> <span class="fu">s</span>(x5)</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gam</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> poisson,</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">select =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"REML"</span>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b1)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1, <span class="at">pages =</span> <span class="dv">1</span>)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="do">## same with gamlss2</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">select_gamlss2</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> PO)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="do">## plot selected effects</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="do">## final model</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

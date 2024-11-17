@@ -1038,7 +1038,8 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
 xs2formula <- function(x, s)
 {
   f <- list()
-  for(j in unique(names(x), names(s))) {
+  un <- na.omit(unique(names(x), names(s)))
+  for(j in un) {
     sj <- s[[j]]
     if(length(sj)) {
       if(any(grepl(").", sj, fixed = TRUE))) {

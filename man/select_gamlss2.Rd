@@ -36,7 +36,7 @@ sRS(x, y, specials, family, offsets,
     element specifies the criterion to be used during the selection step, and the
     second element specifies the criterion to be used during the refitting step.
     Possible options are \code{"BIC"}, \code{"GCV"}, \code{"AIC"}, \code{"AICc"} and
-    \code{"GAIC"} with user defined penalty \code{K}, default is \code{K = 2}.
+    \code{"GAIC"} with user defined penalty \code{K}, default is \code{K = 2}.}
   \item{thres}{A vector of thresholds used for model term selection. The first
     element controls the minimum allowed estimated degrees of freedom for a model
     term to enter the model. The second element specifies the minimum percentage of

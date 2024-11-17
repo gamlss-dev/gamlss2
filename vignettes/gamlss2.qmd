@@ -34,6 +34,14 @@ head(HarzTraffic)
 The data consists of seasonal time information (variable `yday`) along with a number of
 environmental variables (e.g. mean daily `temp`erature). As a first model,
 we estimate a linear regression model with normal errors (which is the default)
+
+::: {.callout-note}
+Note that the use of the `HarzTraffic` data here is for demonstration purpose only and should not be taken as a proper final analysis. 
+:::
+
+ 
+
+
 ```{r}
 b1 <- gamlss2(bikes ~ temp + rain + sunshine + wind, data = HarzTraffic)
 summary(b1)

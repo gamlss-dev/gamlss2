@@ -509,23 +509,23 @@ window.Quarto = {
 
 <p>A distribution regression model is defined as</p>
 <p><span id="eq-GAMLSS"><span class="math display">\[\begin{split}
-y_i     &amp;  \stackrel{\small{ind}}{\sim }&amp;  {D}( \theta_{1i}, \ldots, \theta_{ki}) \nonumber \\
+y_i     &amp;  \stackrel{\small{ind}}{\sim }&amp; \mathcal{D}( \theta_{1i}, \ldots, \theta_{ki}) \nonumber \\
 g(\theta_{1i})  &amp;=&amp; b_{10} + s_1({x}_{1i})  +  \ldots,  s_p({x}_{pi}) \nonumber\\
 \ldots &amp;=&amp; \ldots \nonumber\\
 g({\theta}_{ki})  &amp;=&amp; b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
 \end{split}
-\tag{1}\]</span></span> where <span class="math inline">\({D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\({D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model should;</p>
+\tag{1}\]</span></span> where <span class="math inline">\(\mathcal{D}( )\)</span> is the assumed distribution which depends on parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span> and where all the parameters can be functions of the explanatory variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span>. In reality we do not know the distribution <span class="math inline">\(\mathcal{D}( )\)</span> and also we do not know <strong>which</strong> and <strong>how</strong> the variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi})\)</span> effect the parameters <span class="math inline">\(\theta_{1i}, \ldots, \theta_{ki}\)</span>. So the model selection in a distributional regression model should;</p>
 <ul>
 <li><p>select the <em>best</em> fitting distribution and,</p></li>
 <li><p>select the <em>relevant</em> variables for the parameters and how they effect the parameters.</p></li>
 </ul>
 <p>One way to achieve that is the following <strong>general algorithm</strong> for searching for <em>best</em> model;</p>
 <ul>
-<li><p><strong>step 0</strong>: Defining a set of appropriate distributions for the response <span class="math inline">\({D_J()}\)</span> for <span class="math inline">\(j=1,\ldots, J,\)</span> see section <a href="#sec-theranseoftherespons" class="quarto-xref">Section&nbsp;1.1</a> how to do that,</p></li>
+<li><p><strong>step 0</strong>: Defining a set of appropriate distributions for the response <span class="math inline">\(\mathcal{D}_J()\)</span> for <span class="math inline">\(j=1,\ldots, J,\)</span> see section <a href="#sec-theranseoftherespons" class="quarto-xref">Section&nbsp;1.1</a> how to do that,</p></li>
 <li><p><strong>step 1</strong>: <strong>FOR</strong> <span class="math inline">\(J\)</span> in <span class="math inline">\(j=1,\ldots, J\)</span></p></li>
-<li><p><strong>step 2</strong>: use distribution <span class="math inline">\({D_J()}\)</span> to <strong>SELECT</strong> the appropriate variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi}).\)</span></p></li>
+<li><p><strong>step 2</strong>: use distribution <span class="math inline">\(\mathcal{D}_J()\)</span> to <strong>SELECT</strong> the appropriate variables <span class="math inline">\(({x}_{1i}, \ldots, {x}_{pi}).\)</span></p></li>
 <li><p><strong>step 3</strong>: <strong>END</strong> the loop</p></li>
-<li><p><strong>step 4</strong>: <strong>SELECT</strong> the distribution <span class="math inline">\(\hat{D}_J()\)</span> and variables which give a minimum values for a selection criterion measure.</p></li>
+<li><p><strong>step 4</strong>: <strong>SELECT</strong> the distribution <span class="math inline">\(\hat{\mathcal{D}}_J()\)</span> and variables which give a minimum values for a selection criterion measure.</p></li>
 </ul>
 <p>The selection criterion could be a GAIC defined on the training data a measure defined in the <strong>out of bag</strong> data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a lot of explanatory variables.</p>
 <p>Cutting corners could improve the speed of the algorithm. For example, if the practitioner gives up the smooth additive structure, that <code>gamlss2</code> provides, and he/she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 should be performed. The support for a specific distribution can enforced my the preliminary analysis for choosing a distribution described in <a href="#sec-Preliminaryanalysis" class="quarto-xref">Section&nbsp;1.2</a> and suggested in <span class="citation" data-cites="stasinopoulos2024generalized">Stasinopoulos et al. (<a href="#ref-stasinopoulos2024generalized" role="doc-biblioref">2024</a>)</span>.</p>
@@ -691,7 +691,7 @@ edf 4.8959
 *--------
 n = 1969 df =  21.41 res.df =  1947.59
 Deviance = 27703.9013 Null Dev. Red. = 3.17%
-AIC = 27746.713 elapsed = 19.82sec</code></pre>
+AIC = 27746.713 elapsed = 19.68sec</code></pre>
 </div>
 </div>
 <p>and here are the smooth fitted plots;</p>

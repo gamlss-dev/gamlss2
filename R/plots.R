@@ -35,6 +35,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
       which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
 
+
+  ask <- list(...)$ask
+  if(is.null(ask))
+    ask <- FALSE
   spare <- spar
 
   ## Effect plots.
@@ -64,8 +68,12 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if(length(x$results$effects)) {
       if(spare) {
-        nplts <- length(en)
-        par(mfrow = if(nplts <= 4) c(1, nplts) else n2mfrow(nplts))
+        if(isTRUE(ask)) {
+          par(ask = TRUE)
+        } else {
+          nplts <- length(en)
+          par(mfrow = if(nplts <= 4) c(1, nplts) else n2mfrow(nplts))
+        }
       }
 
       ylim <- list(...)$ylim

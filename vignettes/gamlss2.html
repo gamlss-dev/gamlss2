@@ -494,6 +494,19 @@ div.csl-indent {
 </div>
 </div>
 <p>The data consists of seasonal time information (variable <code>yday</code>) along with a number of environmental variables (e.g.&nbsp;mean daily <code>temp</code>erature). As a first model, we estimate a linear regression model with normal errors (which is the default)</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that the use of the <code>HarzTraffic</code> data here is for demonstration purpose only and should not be taken as a proper final analysis.</p>
+</div>
+</div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> temp <span class="sc">+</span> rain <span class="sc">+</span> sunshine <span class="sc">+</span> wind, <span class="at">data =</span> HarzTraffic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">

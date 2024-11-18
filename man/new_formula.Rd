@@ -18,7 +18,7 @@ new_formula(object, ...)
 }
 
 \value{
-  A \code{link[Formula]{Formula}} of selected model terms.
+  A \code{\link[Formula]{Formula}} of selected model terms.
 }
 
 \seealso{

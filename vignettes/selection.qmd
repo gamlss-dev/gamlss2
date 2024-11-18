@@ -25,14 +25,14 @@ library("gamlss2")
 A distribution regression model is defined as 
 
 $$\begin{split}
-y_i     &  \stackrel{\small{ind}}{\sim }&  {D}( \theta_{1i}, \ldots, \theta_{ki}) \nonumber \\
+y_i     &  \stackrel{\small{ind}}{\sim }& \mathcal{D}( \theta_{1i}, \ldots, \theta_{ki}) \nonumber \\
 g(\theta_{1i})  &=& b_{10} + s_1({x}_{1i})  +  \ldots,  s_p({x}_{pi}) \nonumber\\
  \ldots &=& \ldots \nonumber\\
 g({\theta}_{ki})  &=& b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
 \end{split} 
 $$ {#eq-GAMLSS}
-where ${D}( )$ is the assumed distribution which depends on parameters $\theta_{1i}, \ldots, \theta_{ki}$ and where all the parameters can be functions of the explanatory variables $({x}_{1i}, \ldots, {x}_{pi})$.
-In reality we do not know the distribution ${D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model should;
+where $\mathcal{D}( )$ is the assumed distribution which depends on parameters $\theta_{1i}, \ldots, \theta_{ki}$ and where all the parameters can be functions of the explanatory variables $({x}_{1i}, \ldots, {x}_{pi})$.
+In reality we do not know the distribution $\mathcal{D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model should;
 
 
 * select the _best_ fitting distribution and,
@@ -42,15 +42,15 @@ In reality we do not know the distribution ${D}( )$  and also we do not know **w
 
 One way to achieve that is the following  **general algorithm** for searching for _best_ model;
 
--  **step 0**: Defining a set of appropriate distributions for the response ${D_J()}$ for $j=1,\ldots, J,$ see section @sec-theranseoftherespons how to do that, 
+-  **step 0**: Defining a set of appropriate distributions for the response $\mathcal{D}_J()$ for $j=1,\ldots, J,$ see section @sec-theranseoftherespons how to do that, 
 
 - **step 1**: **FOR** $J$ in   $j=1,\ldots, J$
 
-- **step 2**: use distribution ${D_J()}$  to **SELECT** the appropriate variables $({x}_{1i}, \ldots, {x}_{pi}).$
+- **step 2**: use distribution $\mathcal{D}_J()$  to **SELECT** the appropriate variables $({x}_{1i}, \ldots, {x}_{pi}).$
 
 -  **step 3**: **END** the loop
 
-- **step 4**: **SELECT** the distribution  $\hat{D}_J()$ and variables which give a  minimum values for a selection  criterion measure.
+- **step 4**: **SELECT** the distribution  $\hat{\mathcal{D}}_J()$ and variables which give a  minimum values for a selection  criterion measure.
 
 The selection criterion could be a GAIC defined on the training data a measure defined in the **out of bag** data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a lot of explanatory variables.   
 

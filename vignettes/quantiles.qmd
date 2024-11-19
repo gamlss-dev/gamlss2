@@ -51,7 +51,7 @@ Specifically, we will cover:
 
 
 ::: {.callout-warning}
-Note that we are not using the `s()` function for smoothing here because the default value for `m=10`,  the number of knots in `s()` is small, that is, the dimension of the basis for one dimensional smoother, is up to 10 which could be very small if a lot of  degrees of freedom are needed for the smoother like in centile estimation. We use instead `pb()` where the default values for  `m=20`.  
+Note that we are not using the `s()` function for smoothing here. This is  because the default value for `m=10`,  the number of knots in `s()` is small, therefore the flexibility of the one dimensional smoother small if a lot of  degrees of freedom are needed for smoothng a very common occurrence in centile estimation. We use instead `pb()` which uses `m=20`  as a default.  
 :::
 
 ## The BMI data

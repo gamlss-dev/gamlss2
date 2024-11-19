@@ -32,7 +32,7 @@ g({\theta}_{ki})  &=& b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
 \end{split} 
 $$ {#eq-GAMLSS}
 where $\mathcal{D}( )$ is the assumed distribution which depends on parameters $\theta_{1i}, \ldots, \theta_{ki}$ and where all the parameters can be functions of the explanatory variables $({x}_{1i}, \ldots, {x}_{pi})$.
-In reality we do not know the distribution $\mathcal{D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model should;
+In reality we do not know the distribution $\mathcal{D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model should have the following steps;
 
 
 * select the _best_ fitting distribution and,
@@ -52,17 +52,29 @@ One way to achieve that is the following  **general algorithm** for searching fo
 
 - **step 4**: **SELECT** the distribution  $\hat{\mathcal{D}}_J()$ and variables which give a  minimum values for a selection  criterion measure.
 
-The selection criterion could be a GAIC defined on the training data a measure defined in the **out of bag** data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a lot of explanatory variables.   
+The selection criterion could be a GAIC defined on the training data or a measure defined on the test, **out of bag**, data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a large number of explanatory variables.   
 
 
-Cutting corners could improve the speed of the algorithm. For example, if  the practitioner gives up the smooth additive structure, that `gamlss2` provides, and he/she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 should be performed. The support for a specific distribution can enforced my the preliminary analysis for choosing a distribution described in @sec-Preliminaryanalysis and suggested in @stasinopoulos2024generalized.
+Cutting corners could improve the speed of the algorithm. For example, if  the practitioner gives up the smooth additive structure, that `gamlss2` provides, and he/she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 could be performed. The support for a specific distribution can be enforced my the preliminary analysis for choosing a distribution described in @sec-Preliminaryanalysis and suggested in @stasinopoulos2024generalized.
 
 
 ## Select a distribution {#sec-Selectadistribution}
 
 ### The range of the response {#sec-theranseoftherespons}
 
-The first thing to take into the account in the selection of the distribution is that the distribution should be defined in the range of the response variable. @fig-responseType shows the different possibilities depending on whether the response is `continuous`, `discrete` of `factor`  If the response is continuous and has negative values a distribution in the real line is appropriate. For positive responses a positive real line distribution is appropriate. For bounded continuous response we have the options to transform the response to values between 0 and 1 or to create an appropriate truncated distribution. For count response the consideration is whether the counts are finite or not. For infinity counts a distribution similar to the Poisson distribution can be used. For finite counts binomial type distributions can be used. The case in which the  response is a categorical variable (factor) is called  `classification` regression.  If the factor is an `ordered` factor appropriate models exist but we will not deal with them here.  For unordered factor responses a binomial distribution can be use if the classification is binary otherwise a multinomial distribution. Note that   for classification problems, there is a vast literature in machine learning to deal with the problem.
+The first thing to take into the account in the selection of the distribution is the range of the response variable, that is, the distribution should be defined in right range. @fig-responseType shows the different possibilities depending on whether the response is `continuous`, `discrete` of `factor`  If the response is continuous and has negative values a distribution in the real line is appropriate. For positive responses a positive real line distribution is appropriate. For bounded continuous response we have the options; 
+
+i) to use a distributions in the range between 0 and 1, i.e. the beta distribution see Chapter 21 of @Rigbyetal2019; 
+
+ii) to transform a continuous distribution with range $(-\infty, \infty)$ to  a range $(0,1)$ using the `logit` transformation see Section 13.2.2 of @Rigbyetal2019;  
+
+iii) to create an appropriate truncated distribution which takes values $(0,1)$ see Section 13.7 of @Rigbyetal2019;  or 
+
+iv) to create a generalised `Tobit` distribution using censoring. This methodology is  also appropriate for inflated distributions see Chapter 9 of  @Rigbyetal2019.
+
+
+
+For count response the only consideration is whether the counts are finite or not. For infinite counts a discrete distribution similar to the Poisson distribution can be used. For finite counts a discrete distribution like the  binomial can be used. The case in which the  response is a categorical variable (taht is a factor) is called  `classification` regression. If the factor is an `ordered` factor appropriate models, **ordinal regression models**, exist but we will not deal with them here. For unordered factor responses a binomial distribution can be use if the classification is binary otherwise a multinomial distribution if the resposnse has more than two categories. Note that for classification problems, there is a vast literature in machine learning to deal with the problem.
 
 
 ```{mermaid}

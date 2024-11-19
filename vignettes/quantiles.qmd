@@ -49,6 +49,11 @@ Specifically, we will cover:
 * How to check model adequacy using diagnostics; and
 * How to obtain the corresponding centile curves.
 
+
+::: {.callout-warning}
+Note that we are not using the `s()` function for smoothing here because the default value for `m=10`,  the number of knots in `s()` is small, that is, the dimension of the basis for one dimensional smoother, is up to 10 which could be very small if a lot of  degrees of freedom are needed for the smoother like in centile estimation. We use instead `pb()` where the default values for  `m=20`.  
+:::
+
 ## The BMI data
 
 In this example we use the Dutch boys BMI data, `dbbmi`, from the package `gamlss.data`.

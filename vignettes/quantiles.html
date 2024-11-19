@@ -521,7 +521,7 @@ Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Note that we are not using the <code>s()</code> function for smoothing here because the default value for <code>m=10</code>, the number of knots in <code>s()</code> is small, that is, the dimension of the basis for one dimensional smoother, is up to 10 which could be very small if a lot of degrees of freedom are needed for the smoother like in centile estimation. We use instead <code>pb()</code> where the default values for <code>m=20</code>.</p>
+<p>Note that we are not using the <code>s()</code> function for smoothing here. This is because the default value for <code>m=10</code>, the number of knots in <code>s()</code> is small, therefore the flexibility of the one dimensional smoother small if a lot of degrees of freedom are needed for smoothng a very common occurrence in centile estimation. We use instead <code>pb()</code> which uses <code>m=20</code> as a default.</p>
 </div>
 </div>
 <section id="the-bmi-data" class="level2" data-number="1">

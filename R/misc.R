@@ -117,7 +117,7 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
     if(is.null(b$family$type))
       b$family$type <- "continuous"
 
-    if(b$family$type == "continuous") {
+    if((b$family$type == "continuous") || (b$family$type == "mixed")) {
       if(is.null(main)) {
         k <- list(...)$k
         if(is.null(k))

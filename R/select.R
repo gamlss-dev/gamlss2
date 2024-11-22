@@ -20,10 +20,13 @@ select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = c(0.9, 0.2))
 sRS <- function(x, y, specials, family, offsets, weights,
   start, xterms, sterms, control)
 {
-  trace <- control$trace
-  control$trace <- FALSE
+  if(is.null(control$trace))
+    control$trace <- TRUE
 
-  if(trace)
+  trace <- rep(control$trace, length.out = 2L)
+  control$trace <- trace[1L]
+
+  if(trace[1L])
     cat(".. selection step\n")
 
   m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
@@ -77,10 +80,10 @@ sRS <- function(x, y, specials, family, offsets, weights,
         }
       }
 
-      if(trace)
+      if(trace[2L])
         cat(".. refitting step\n")
 
-      control$trace <- trace
+      control$trace <- trace[2L]
       control$criterion <- control$criterion_refit
 
       m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
@@ -88,7 +91,7 @@ sRS <- function(x, y, specials, family, offsets, weights,
       m$selection <- list("formula" = xs2formula(xterms, sterms), "select" = TRUE)
     } else {
       if(control$criterion_refit != control$criterion) {
-        control$trace <- trace
+        control$trace <- trace[2L]
         control$criterion <- control$criterion_refit
         m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
       }

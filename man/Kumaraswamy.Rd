@@ -1,5 +1,6 @@
 \name{Kumaraswamy}
 \alias{Kumaraswamy}
+\alias{KS}
 \alias{shiftlog}
 
 \title{Kumaraswamy Distribution}
@@ -11,6 +12,7 @@
 \usage{
 ## The Kumaraswamy family.
 Kumaraswamy(a.link = shiftlog, b.link = shiftlog, ...)
+KS(a.link = shiftlog, b.link = shiftlog, ...)
 
 ## The exp(x) + shift link specification.
 shiftlog(shift = 1)

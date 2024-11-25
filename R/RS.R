@@ -165,7 +165,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   dev0 <- -2 * family$loglik(y, family$map2par(eta))
 
   ## Estimate intercept only model first.
-  if(isTRUE(control$nullmodel) & length(xterms)) {
+  if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
     beta <- ieta <- list()
     for(j in np) {
       beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])

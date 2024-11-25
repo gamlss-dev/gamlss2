@@ -55,7 +55,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   if(is.list(formula)) {
     formula <- do.call("as.Formula", formula)
   }
-  if(length(formula)[2L] < 2L) {
+  if(length(formula)[2L] < 2L & FALSE) {
     formula <- as.Formula(formula(formula), ~ 1)
   }
 
@@ -180,8 +180,18 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
 
   ## Set names.
-  names(Xterms) <- family$names[1:length(Xterms)]
-  names(Sterms) <- family$names[1:length(Sterms)]
+  if((length(family$names) < 2)) {
+    Xterms <- list(unlist(Xterms))
+    names(Xterms) <- family$names
+  } else {
+    names(Xterms) <- family$names[1:length(Xterms)]
+  }
+  if((length(family$names) < 2)) {
+    Sterms <- list(unlist(Sterms))
+    names(Sterms) <- family$names
+  } else {
+    names(Sterms) <- family$names[1:length(Sterms)]
+  }
   if(length(offsets)) {
     names(offsets) <- family$names[1:length(offsets)]
     offsets <- do.call("cbind", offsets)

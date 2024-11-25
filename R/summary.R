@@ -54,14 +54,18 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
   if(drop) {
     nc <- names(cos)
     cos <- unlist(cos)
-    if((length(nc) < 2L) & !isFALSE(list(...)$dropall)) {
+    if((length(nc) < 2L) & !isFALSE(list(...)$dropall) & !is.null(cos)) {
       names(cos) <- gsub(paste0(nc, "."), "", names(cos), fixed = TRUE)
       for(j in c("p.", "s."))
         names(cos) <- gsub(j, "", names(cos), fixed = TRUE)
     }
   }
 
+  if(is.null(cos))
+    cos <- numeric(0)
+
   class(cos) <- "coef.gamlss2"
+
   return(cos)
 }
 
@@ -240,12 +244,15 @@ summary.gamlss2 <- function(object, ...)
   ct <- cbind(par, se, tvalue, pvalue)
   dimnames(ct) <- list(names(par),
     c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-  nx <- unique(sapply(strsplit(names(par), ".", fixed = TRUE),
-    function(x) x[1L]))
-  ctl <- list()
-  for(i in nx) {
-    ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
-    rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
+  ctl <- NULL
+  if(nrow(ct) > 0L) {
+    nx <- unique(sapply(strsplit(names(par), ".", fixed = TRUE),
+      function(x) x[1L]))
+    ctl <- list()
+    for(i in nx) {
+      ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
+      rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
+    }
   }
   sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "iterations", "elapsed")]
   sg$call[[1L]] <- as.name("gamlss2")

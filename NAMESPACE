@@ -50,6 +50,7 @@ export(
   "softplus",
   "shiftlog",
   "Kumaraswamy",
+  "KS",
   "make.link2",
   "plot_lasso",
   "la",

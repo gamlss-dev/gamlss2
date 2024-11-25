@@ -1117,8 +1117,79 @@ shiftlog <- function(shift = 1) {
   )
 }
 
-## Kumaraswamy distriubtion.
-Kumaraswamy <- function(a.link = shiftlog, b.link = shiftlog, ...) {
+## Kumaraswamy distribution.
+Kumaraswamy <- KS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
+  lfa <- make.link2(a.link)
+  lfb <- make.link2(b.link)
+
+  fam <- list(
+    "family" = "Kumaraswamy",
+    "names" = c("a", "b"),
+    "links" = c("a" = a.link, "b" = b.link),
+    "d" = function(y, par, log = FALSE, ...) {
+      d <- log(par$a) + log(par$b) + (par$a - 1) * log(y) + (par$b - 1) * log(1 - y^(par$a))
+      if(!log)
+        d <- exp(d)
+      return(d)
+    },
+    "score" = list(
+      "a" = function(y, par, ...) {
+        ly <- log(y)
+        ya <- y^par$a
+        (1/par$a + ly - (par$b - 1) * (ya * ly/(1 - ya))) * lfa$mu.eta(lfa$linkfun(par$a))
+      },
+      "b" = function(y, par, ...) {
+        (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
+      }
+    ),
+    "hess" = list(
+      "a" = function(y, par, ...) {
+        ya <- y^par$a
+        ly <- log(y)
+        y1a <- 1 - ya
+        ly2 <- ly^2
+
+        (1/par$a^2 + (par$b - 1) * (ya * ly2/(y1a) + ya^2 * ly2 /(y1a)^2)) * lfa$mu.eta(lfa$linkfun(par$a))^2
+      },
+      "b" = function(y, par, ...) {
+        1/par$b^2 * lfb$mu.eta(lfb$linkfun(par$b))^2
+      }
+    ),
+    "p" = function(y, par) {
+      1 - (1 - y^par$a)^par$b
+    },
+    "q" = function(p, par) {
+      (1 - (1 - p)^par$b)^(1 / par$a)
+    },
+    "r" = function(n, par) {
+      par <- as.data.frame(par)
+      rn <- apply(par, 1, function(p2) {
+        p <- runif(n)
+        (1 - (1 - p)^p2["b"])^(1 / p2["a"])
+      })
+      if(!is.null(dim(rn)))
+        rn <- t(rn)
+      return(rn)
+    },
+    "mean" = function(par) {
+      par$b * gamma(1 + 1/par$a) * gamma(par$b) / gamma(1 + 1/par$a + par$b)
+    },
+    "mode" = function(par) {
+      ((par$a - 1) / (par$a * par$b - 1))^(1/par$a)
+    },
+    "valid.response" = function(x) {
+      if(any(x < 0) | any(x > 1))
+        stop("the response should be in (0,1)!")
+      return(TRUE)
+    }
+  )
+
+  class(fam) <- "gamlss2.family"
+  return(fam)
+}
+
+## The log-Kumaraswamy distribution.
+LKS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
   lfa <- make.link2(a.link)
   lfb <- make.link2(b.link)
 

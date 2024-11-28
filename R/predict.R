@@ -85,10 +85,15 @@ predict.gamlss2 <- function(object,
         matrix(0.0, nrow = nrow(mf), ncol = nrow(samples))
       }
     }
+    terms <- gsub(" ", "", terms)
     tj <- if(is.null(terms)) {
       c(object$xterms[[j]], object$sterms[[j]])
     } else {
-      grep2(terms, c(object$xterms[[j]], object$sterms[[j]]), fixed = TRUE, value = TRUE)
+      if(isTRUE(list(...)$nogrep)) {
+        terms
+      } else {
+        grep2(terms, c(object$xterms[[j]], object$sterms[[j]]), fixed = TRUE, value = TRUE)
+      }
     }
     tj <- unique(tj)
     if(length(tj)) {
@@ -158,9 +163,13 @@ predict.gamlss2 <- function(object,
       }
       ## Special effects.
       if(length(object$sterms[[j]])) {
-        xn <- NULL
-        for(i in tj) {
-          xn <- c(xn, grep(i, object$sterms[[j]], fixed = TRUE, value = TRUE))      
+        if(isTRUE(list(...)$nogrep)) {
+           xn <- object$sterms[[j]][object$sterms[[j]] %in% tj]
+        } else {
+          xn <- NULL
+          for(i in tj) {
+            xn <- c(xn, grep(i, object$sterms[[j]], fixed = TRUE, value = TRUE))      
+          }
         }
         xn <- unique(xn)
         if(length(xn)) {

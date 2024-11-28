@@ -359,7 +359,7 @@ special_fit.re <- function(x, z, w, control, ...)
 
   ## Degrees of freedom.
   N <- sum(w != 0)
-  rval$edf <- sum(w * (z - rval$fitted.values)^2)/(rval$model$sigma^2)
+  rval$edf <- N - sum(w * (z - rval$fitted.values)^2)/(rval$model$sigma^2)
 
   ## Assign class for predict method.
   class(rval) <- "re.fitted"

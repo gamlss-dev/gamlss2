@@ -352,7 +352,7 @@ special_fit.re <- function(x, z, w, control, ...)
     'nlme::lme(fixed = x$fixed, data = x$data, random = x$random, weights = varFixed(~weights_w),',
     'method="', x$method, '",control=x$control,correlation=x$correlation,keep.data=FALSE)'))
 
-  rval <- list("model" = eval(rem))
+  rval <- list("model" = eval(rem, envir = environment()))
 
   ## Get the fitted.values.
   rval$fitted.values <- fitted(rval$model)

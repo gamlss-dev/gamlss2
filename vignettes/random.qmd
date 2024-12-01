@@ -18,6 +18,11 @@ vignette: >
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
+library(ggplot2)
+library(gtreg)
+library(gt)
+library(flextable)
+library(dplyr)
 ```
 
 Random effects can be included as an additive term for any distribution parameter in a `gamlss2` model by using the `re()` function in package `gamlss2`. Within the GAMLSS model fitting, the random effects additive term is then fitted locally by an interface with `lme` function of  the `nlme` package.
@@ -41,7 +46,88 @@ In the first example below using re() in gamlss for random effects works
 [i.e. where the total number of individuals (or factor levels) is very small relative to the total number of observations and so REML estimation is not needed,
 for example, a relatively low number of individuals, each with a lot of repeated measurements, OR a random factor with a low number of levels, each with a lot of observations]. We show that using LME locally in gamlss() by the re() argument gives very similar results, to using LME directly.
 
+## Example 1
 
+```{r echo=FALSE}
+set.seed(2345)
+
+m=5  # number of clusters
+N=1000  # number of cases
+n=N/m   # cases per cluster
+
+cluster = factor(rep(1:m, each=n))
+
+# linear predictor
+b0 = 1
+b1 = 0.2
+b2 = 0.5
+
+c0=0.1
+c1 = 0.1
+
+tau = 1
+
+x1 = round(rnorm(N), 3)
+x2 = round(runif(N))
+
+u = rnorm(m, 0, tau)
+mu = exp(b0 + b1*x1 + b2*x2 + rep(u, each=n))
+sigma = exp(c0 + c1*x2)
+
+y = round(rGA(N, mu=mu, sigma=sigma),5)
+
+toydata <- data.frame(cluster=cluster, y=y, x1=x1, x2=x2)
+```
+
+This example is based on a simulated data set and is presented  to illustrate usage of the `gamlss2` functions. 
+We have generated a data set with
+
+-   number of clusters: m = `r m`
+
+-   number of subjects: N = `r N`
+
+-   subjects per cluster: N/m = `r n`
+
+-   `x1` a continuous covariate; `x2` a binary covariate
+
+-   `y` is Gamma distributed, with a random intercept in the $\mu$ model:
+
+\begin{align*}
+y_{ij}&\sim\text{GA}(\mu_{ij}, \sigma_{ij})\\
+\log(\mu_{ij})&=\beta_0^\mu+\beta_1^\mu x_{i1}+\beta_2^\mu x_{i2} +\alpha_j\\
+\log(\sigma_{ij})&=\beta_0^\sigma+\beta_2^\sigma x_{i2}\\
+\alpha_j&\sim\text{NO}(0, \sigma_\alpha)
+\end{align*}
+
+-   the first and last 5 observations are shown below:
+
+```{r}
+
+
+toydata |>
+  slice(1:5, 996:1000) |>
+  tbl_listing() |>
+  as_flex_table() |>
+  align(j=2:4, align = "right", part="all")
+
+```
+
+Boxplot of `y` by `cluster`:
+
+```{r fig.height=3, fig.width=4}
+toydata |>
+  ggplot(aes(x=cluster,y=y)) +
+  geom_boxplot() +
+  theme_bw()
+```
+
+
+
+```{r}
+m1 <- gamlss2(y ~ x1 + x2 + re(random=~1|cluster), 
+              sigma.formula = ~ x2,
+              data=toydata, family=GA)
+```
 
 
 

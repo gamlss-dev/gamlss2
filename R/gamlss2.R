@@ -226,8 +226,21 @@ gamlss2.formula <- function(formula, data, family = NO,
           Xterms[[i]] <- c(Xterms[[i]], colnames(X)[ij])
         }
       }
+      ## Interactions.
+      if(grepl(":", j, fixed = TRUE)) {
+        xl <- strsplit(j, ":", fixed = TRUE)[[1]][2]
+        xl <- paste0(":", xl)
+        xl <- grep(xl, colnames(X), fixed = TRUE, value = TRUE)
+        Xterms[[i]] <- unique(c(Xterms[[i]], xl))
+      }
     }
   }
+
+  ## Drop.
+  for(i in names(Xterms)) {
+    Xterms[[i]] <- Xterms[[i]][Xterms[[i]] %in% colnames(X)]
+  }
+
   attr(Xterms, "xlevels") <- xlev
 
   ## Optionally, use optimizer function provided from family

@@ -332,7 +332,7 @@ multiple conditional distributions.
 ```{r}
 #| eval: !expr 'dev_version'
 #| cache: true
-T1 <- gamlss::chooseDist(m, type = "realplus")
+T1 <- gamlss::chooseDist(b1, type = "realplus")
 ```
 
 This function generates a table of GAIC values, which can be printed as follows:

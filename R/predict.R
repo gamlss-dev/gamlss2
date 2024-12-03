@@ -86,6 +86,8 @@ predict.gamlss2 <- function(object,
       }
     }
     terms <- gsub(" ", "", terms)
+    if(length(terms) < 1L)
+      terms <- NULL
     tj <- if(is.null(terms)) {
       c(object$xterms[[j]], object$sterms[[j]])
     } else {
@@ -100,8 +102,12 @@ predict.gamlss2 <- function(object,
       ## Linear effects.
       if(length(object$xterms[[j]])) {
         xn <- NULL
-        for(i in tj) {
-          xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
+        if(isTRUE(list(...)$nogrep)) {
+          xn <- object$xterms[[j]][object$xterms[[j]] %in% tj]
+        } else {
+          for(i in tj) {
+            xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
+          }
         }
         if(length(xn)) {
           xn2 <- list()
@@ -164,7 +170,7 @@ predict.gamlss2 <- function(object,
       ## Special effects.
       if(length(object$sterms[[j]])) {
         if(isTRUE(list(...)$nogrep)) {
-           xn <- object$sterms[[j]][object$sterms[[j]] %in% tj]
+          xn <- object$sterms[[j]][object$sterms[[j]] %in% tj]
         } else {
           xn <- NULL
           for(i in tj) {

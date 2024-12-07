@@ -192,6 +192,10 @@ an `identity` link implies an additive relationship on the parameter scale, such
 $b_1 x_1 + \dots + b_p x_p$, whereas a `log` link is additive on the predictor
 scale but introduces a multiplicative structure on the original parameter scale.
 
+::: {.callout-note}
+Mikis: we need an example how different link can  be used here. 
+:::
+
 The `scores()`, `hess()`, and `loglik()` functions define the first and second
 derivatives and the log-likelihood of the distribution, respectively. These
 derivatives are crucial for model fitting. The `initialize()` and
@@ -218,7 +222,15 @@ with heavy tails—these moments may not exist.
 
 By **marginal** distribution, we refer to the situation where we are interested in
 fitting a theoretical distribution, $f(y|\theta)$, to a single vector $y$
-without considering any explanatory variables. In contrast, we use the term
+without considering any explanatory variables. 
+
+::: {.callout-note}
+Note that synonymous to margical often we used the expressions **intercept only** model or  **null** model.  
+:::
+
+
+
+In contrast, we use the term
 **conditional** distribution to describe the scenario where the response variable
 $y$ is modeled based on explanatory variables $X$, such that the parameters
 $\theta$ are a function of $X$, i.e., $f(y|\theta(X))$.
@@ -241,6 +253,10 @@ the continuous category. The function `find_family()` tries to fit all
 continuous distributions and stores the Generalized Akaike Information Criterion (GAIC) 
 values in a vector. The values of this vector are sorted in decreasing order of GAIC.
 
+::: {.callout-note}
+Mikis: maybe we need to explain the function `available_families()`
+:::
+
 ```{r}
 #| eval: !expr 'dev_version'
 print(p)
@@ -253,7 +269,7 @@ Note that similar results can be obtained in `gamlss` using the `fitDist()` func
 #| cache: true
 #| results: "hide" 
 #| warning: false 
-a <- gamlss::fitDist(rent$R)
+a <- gamlss::fitDist(rent$R, type="realAll")
 ```
 
 Here, the results are sorted in increasing order of GAIC:
@@ -262,7 +278,6 @@ Here, the results are sorted in increasing order of GAIC:
 #| eval: !expr 'dev_version'
 a$fits
 ```
-
 
 ### The function `fit_family()`
 
@@ -275,7 +290,7 @@ $y$ alongside the fitted distribution.
 fit_family(rent$R, family=BCTo)
 ```
 
-Here is the output from the older `fitDist()` function:
+Here is the output from the older `histDist()` function of packege `gamlss`:
 
 ```{r}
 #| eval: !expr 'dev_version'

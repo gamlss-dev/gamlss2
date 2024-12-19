@@ -108,6 +108,14 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   lambda <- control$lambda
   if(is.null(lambda))
     lambda <- 1e-05
+
+  ## Process offsets.
+  if(!is.null(offsets)) {
+    if(nrow(offsets) < 1L)
+      offsets <- NULL
+    else
+      offsets <- as.data.frame(offsets)
+  }
   
   ## Initialize fitted values for each model term.
   fit <- sfit <- eta <- nes <- list()
@@ -157,6 +165,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         }
       }
     }
+    if(!is.null(offsets)) {
+      if(!is.null(offsets[[j]]))
+        eta[[j]] <- eta[[j]] + offsets[[j]]
+    }
     if(nes[[j]])
       etastart[[j]] <- eta[[j]]
   }
@@ -170,6 +182,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     for(j in np) {
       beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
       ieta[[j]] <- rep(beta[[j]], n)
+      if(!is.null(offsets)) {
+        if(!is.null(offsets[[j]]))
+          ieta[[j]] <- ieta[[j]] + offsets[[j]]
+      }
     }
     beta <- unlist(beta)
 
@@ -177,8 +193,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       lli <- family$loglik(y, family$map2par(ieta))
 
       fn_ll <- function(par) {
-        for(j in np)
+        for(j in np) {
           ieta[[j]] <- rep(par[j], n)
+          if(!is.null(offsets)) {
+            if(!is.null(offsets[[j]]))
+              ieta[[j]] <- ieta[[j]] + offsets[[j]]
+          }
+        }
         ll <- family$loglik(y, family$map2par(ieta)) - lambda * sum(par^2)
         return(-ll)
       }
@@ -194,6 +215,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               fit[[j]]$coefficients["(Intercept)"] <- beta[j]
               fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
               eta[[j]] <- fit[[j]]$fitted.values
+              if(!is.null(offsets)) {
+                if(!is.null(offsets[[j]]))
+                  eta[[j]] <- eta[[j]] + offsets[[j]]
+              }
             }
           }
         }

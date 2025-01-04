@@ -3,6 +3,7 @@ title: "Random Effects"
 format: 
   html:
     html-math-method: mathjax
+    self-contained: true
     toc: true
     number-sections: true
 bibliography: gamlss2.bib

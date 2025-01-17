@@ -33,6 +33,7 @@ export(
   "gamlss2_control",
   "RS",
   "CG",
+  "discretize",
   "special_fit",
   "special_predict",
   "specials",

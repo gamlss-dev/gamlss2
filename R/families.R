@@ -1259,3 +1259,51 @@ LKS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
   return(fam)
 }
 
+discretize <- function(family = NO) {
+  if(is.function(family))
+    family <- family()
+
+  if(inherits(family, "gamlss.family"))
+    family <- tF(family)
+
+  fam <- list(
+    "family" = paste("discretized", family$family),
+    "names" = family$names,
+    "links" = family$links,
+    "valid.response" = function(x) {
+      if(is.factor(x))
+        return(FALSE)
+      if(!(ok <- all(x >= 0)))
+        stop("response values smaller than 0 not allowed!", call. = FALSE)
+      ok
+    }
+  )
+
+  fam$d <- function(y, par, log = FALSE, ...) {
+    n <- length(y)
+    par <- lapply(par, function(x) rep(x, length.out = n))
+    d <- family$p(y + 1, par) - family$p(y, par)
+    if(log)
+      d <- log(d)
+    return(d)
+  }
+
+  fam$p <- function(y, par, log = FALSE, ...) {
+    n <- length(y)
+    par <- lapply(par, function(x) rep(x, length.out = n))
+    par <- as.data.frame(par)
+    n <- length(y)
+    p <- rep(0, n)
+    for(i in 1:n) {
+      dy <- family$p((y[i] + 1):1, par[i, , drop = FALSE]) - family$p((y[i]):0, par[i, , drop = FALSE])
+      p[i] <- sum(dy)
+    }
+    return(p)
+  }
+
+  fam$type <- "discrete"
+  class(fam) <- "gamlss2.family"
+
+  return(fam)
+}
+

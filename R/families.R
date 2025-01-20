@@ -1289,7 +1289,11 @@ discretize <- function(family = NO) {
   }
 
   fam$p <- function(y, par, log = FALSE, ...) {
-    n <- length(y)
+    par <- as.data.frame(par)
+    np <- nrow(par)
+    ny <- length(y)
+    n <- max(c(ny, np))
+    y <- rep(y, length.out = n)
     par <- lapply(par, function(x) rep(x, length.out = n))
     par <- as.data.frame(par)
     n <- length(y)

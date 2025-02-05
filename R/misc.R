@@ -70,6 +70,15 @@ find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
     families <- available_families(families = families)
   }
 
+  if(is.null(names(families))) {
+    nf <- sapply(families, function(x) {
+      if(is.function(x))
+        x <- x()
+      x$family[1L]
+    })
+    names(families) <- nf
+  }
+
   ic <- rep(NA, length(families))
   names(ic) <- names(families)
 

@@ -2,15 +2,6 @@
 
 # gamlss2: Infrastructure for Flexible Distributional Regression
 
-## Installation
-
-The development version of _gamlss2_ can be installed via
-
-```{r installation, eval = FALSE}
-install.packages("gamlss2",
-  repos = c("https://gamlss-dev.R-universe.dev", "https://cloud.R-project.org"))
-```
-
 ## Overview 
 
 The primary purpose of this package is to facilitate the creation of advanced infrastructures
@@ -37,3 +28,158 @@ For examples, please visit the manual pages.
 ```{r help, eval = FALSE}
 help(package = "gamlss2")
 ```
+
+## Installation
+
+The development version of _gamlss2_ can be installed via
+
+```{r installation, eval = FALSE}
+install.packages("gamlss2",
+  repos = c("https://gamlss-dev.R-universe.dev",
+            "https://cloud.R-project.org"))
+```
+
+## Licence
+
+The package is available under the
+[General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html)
+or [version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+
+## Illustration
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss2")
+```
+
+The package is designed to follow the workflow of well-established model fitting functions
+like `lm()` or `glm()`, i.e., the step of estimating full distributional regression models
+is actually not very difficult.
+
+To illustrate the workflow using `gamlss2`, we analyze the `WeatherGermany` data, 
+
+```{r WeatherGermany}
+if(!("WeatherGermany" %in% installed.packages())) {
+  install.packages('WeatherGermany',
+    repos = c("https://gamlss-dev.r-universe.dev",
+              "https://cloud.r-project.org"))
+}
+data("WeatherGermany", package = "WeatherGermany")
+head(WeatherGermany)
+```
+
+The data consists of daily data and includes the meteorological station `id`s,
+the `date` of recording, the maximum wind speed `Wmax` in m/s, the precipitation amount
+`pre` in mm, the maximum and minimum temperature `Tmax` (`Tmin`) in degree Celsius, the hours
+of sunshine `sun`, the `name` of the station, the `alt`itude in m.a.s.l., as well as the `lon`gitude and
+`latìtude coordinates of the station location in Germany.
+
+In this example we use the daily maximum temperature `Tmax` in order estimate a climatology
+model using over 37 years of data on the top of Germany at the Zugspitz mountain, the highest
+meteorological station in Germany with an altitude of 2956 m.a.s.l.
+
+First, we subset for the Zugspitze
+
+```{r subset}
+d <- subset(WeatherGermany, name == "Zugspitze")
+```
+
+In order to estimate a good climatology model using _gamlss2_, it is always a good idea to
+inspect the distribution of the response
+
+```{r hist_Tmax}
+hist(d$Tmax, freq = FALSE, breaks = "Scott")
+```
+
+The data seems to be slightly left skewed with longer tales for temperatures below zero. This
+is a first hint, that the commonly used normal distribution may not be the most appropriate
+distribution for modeling daily maximum temperatures.
+
+Therefore the _gamlss2_ package includes the function `find_family()`, which tries
+to identify the most suitable distribution by minimizing an information criterion, the AIC by
+default. In this case, we could try out several continuous distributions that are part of the
+_gamlss.dist_ package
+
+```{r find_family}
+fams <- find_family(d$Tmax,
+  families = c(NO, TF, JSU, SEP4))
+print(fams)
+```
+
+Here, the `SEP4` family seems to have the best fit, we can also visualize the fitted density
+with
+
+```{r fit_family}
+fit_family(d$Tmax, family = SEP4)
+```
+
+After finding a suitable distributional model, we can start including covariates to estimate
+a full GAMLSS. Since there is a strong seasonal effect in temperature data, illustrated by
+the following scatterplot
+
+```{r season_scatter}
+d$yday <- as.POSIXlt(d$date)$yday
+plot(Tmax ~ yday, data = d, col = rgb(0.1, 0.1, 0.1, alpha = 0.4))
+```
+
+we need to include a model term for seasonal effects. As the _gamlss2_ package supports
+all the model terms of the _mgcv_ package we can use the `s()` constructor to set this up.
+In addition, we add a time trend to investigate if the maximum temperature has increased
+over this period in time. For the full GAMLSS we model each parameter of the selected `SEP4`
+distribution. Therefore we first create a new covariate `year` for the overall time trend
+
+```{r time_trend}
+d$year <- as.POSIXlt(d$date)$year + 1900
+```
+
+afterwards we create the model formula for the four parametric `SEP4` distribution
+
+```{r formula}
+f <- Tmax ~ s(yday, bs = "cc") + s(year) |
+  s(yday, bs = "cc") + s(year) |
+  s(yday, bs = "cc") + s(year) |
+  s(yday, bs = "cc") + s(year)
+```
+
+Here, the vertical bars `|` seperate the formulas for the parameters of the `SEP4` distribution
+and `bs = "cc"` stands for a cyclical spline for the seasonal effect.
+Finally, the model is estimated with
+
+```{r model}
+b <- gamlss2(f, data = d, family = SEP4)
+```
+
+After the model is estimated, we can inspect the model summary output with
+
+```{r summary}
+summary(b)
+```
+
+Note that the summary output is very similar to `lm()` and `glm()` with the main difference
+being that summary outputs are provided for all parameters of the distribution. The summary
+shows all estimated linear coefficients (in this case just the intercepts) along the estimated
+degrees of freedom for each smooth term in the model. Additionally, the AIC and deviance is reported,
+the AIC can also be extracted with
+
+```{r aic}
+AIC(b)
+```
+
+The log-likelihood using
+
+```{r loglik}
+logLik(b)
+logLik(b, newdata = d)
+```
+
+Here we use the `newdata` argument just to show, that the log-likelihood can also be evaluated on,
+e.g., out-of-sample data.
+
+Moreover, estimated effects can be visualized instantly with
+
+```{r effects}
+#| fig-height: 6
+#| echo: 2
+par(mar = c(4, 4, 1, 1))
+plot(b, which = "effects")
+```
+

@@ -6,22 +6,23 @@
 
 The primary purpose of this package is to facilitate the creation of advanced infrastructures
 designed to enhance the GAMLSS modeling framework. Notably, the `gamlss2` package represents a
-significant overhaul of its predecessor, `gamlss`, with a key emphasis on improving estimation
+significant overhaul of its predecessor, [gamlss`](https://cran.r-project.org/package=gamlss),
+with a key emphasis on improving estimation
 speed and incorporating more flexible infrastructures. These enhancements enable the seamless
 integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
 regression trees, and forests, fostering a more versatile and powerful modeling environment.
 
 Moreover, the package expands its compatibility by supporting all model terms from the base
-R `mgcv` package. Additionally, the `gamlss2` package introduces the capability to
-accommodate more than four parameter families. Essentially, this means that users can now
-specify any type of model using these new infrastructures, making the package highly
-flexible and accommodating to a wide range of modeling requirements.
+R [`mgcv](https://cran.r-project.org/package=mgcv) package. Additionally, the `gamlss2` package
+introduces the capability to accommodate more than four parameter families. Essentially, this
+means that users can now specify any type of model using these new infrastructures, making the
+package highly flexible and accommodating to a wide range of modeling requirements.
 
-* The main model function is `gamlss2()`.
-* The default optimizer functions is `RS()`. Optimizer functions can be exchanged.
-* Most important methods: `summary()`, `plot()`, `predict()`.
-* Easy development of new family objects, see `?family.gamlss2`.
-* User-specific "special" terms are possible, see `?special_terms`.
+* The main model function is [`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html).
+* The default optimizer functions is [`RS()`](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html). Optimizer functions can be exchanged.
+* Most important methods: `summary()`, [`plot()`](https://gamlss-dev.github.io/gamlss2/man/plots.html), [`predict()`](https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html).
+* Easy development of new family objects, see [`?gamlss2,family`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.family.html).
+* User-specific "special" terms are possible, see [`?special_terms`](https://gamlss-dev.github.io/gamlss2/man/special_terms.html).
 
 For examples, please visit the manual pages.
 
@@ -31,7 +32,7 @@ help(package = "gamlss2")
 
 ## Installation
 
-The development version of _gamlss2_ can be installed via
+The development version of `gamlss2` can be installed via
 
 ```{r installation, eval = FALSE}
 install.packages("gamlss2",
@@ -67,37 +68,25 @@ data("WeatherGermany", package = "WeatherGermany")
 head(WeatherGermany)
 ```
 
-The data consists of daily data and includes the meteorological station `id`s,
-the `date` of recording, the maximum wind speed `Wmax` in m/s, the precipitation amount
-`pre` in mm, the maximum and minimum temperature `Tmax` (`Tmin`) in degree Celsius, the hours
-of sunshine `sun`, the `name` of the station, the `alt`itude in m.a.s.l., as well as the `lon`gitude and
-`latìtude coordinates of the station location in Germany.
+The dataset contains daily observations from weather stations across Germany. It includes the station identifier (`id`), the recording `date`, the maximum wind speed (`Wmax`, in m/s), the precipitation amount (`pre`, in mm), the maximum and minimum temperatures (`Tmax` and `Tmin`, in °C), and the number of sunshine hours (`sun`). Additionally, it provides the station's `name`, `alt`itude (in meters above sea level), and its geographic coordinates (`lon`gitude and `lat`itude).
 
-In this example we use the daily maximum temperature `Tmax` in order estimate a climatology
-model using over 37 years of data on the top of Germany at the Zugspitz mountain, the highest
-meteorological station in Germany with an altitude of 2956 m.a.s.l.
+In this example, we use daily maximum temperature (`Tmax`) data to estimate a climatology model based on over 37 years of observations from Germany's highest meteorological station, located at Zugspitze. Situated at an altitude of 2956 meters above sea level, this station provides a unique dataset for high-altitude climate analysis.
 
-First, we subset for the Zugspitze
+First, we subset the dataset to include only observations from the Zugspitze station.
 
 ```{r subset}
 d <- subset(WeatherGermany, name == "Zugspitze")
 ```
 
-In order to estimate a good climatology model using _gamlss2_, it is always a good idea to
-inspect the distribution of the response
+Before estimating a climatology model using `gamlss2`, it is good practice to inspect the distribution of the response variable
 
 ```{r hist_Tmax}
 hist(d$Tmax, freq = FALSE, breaks = "Scott")
 ```
 
-The data seems to be slightly left skewed with longer tales for temperatures below zero. This
-is a first hint, that the commonly used normal distribution may not be the most appropriate
-distribution for modeling daily maximum temperatures.
+The histogram suggests that the data is slightly left-skewed, with longer tails for temperatures below zero. This indicates that the commonly used normal distribution may not be the most appropriate choice for modeling daily maximum temperatures.
 
-Therefore the _gamlss2_ package includes the function `find_family()`, which tries
-to identify the most suitable distribution by minimizing an information criterion, the AIC by
-default. In this case, we could try out several continuous distributions that are part of the
-_gamlss.dist_ package
+To address this, the `gamlss2` package provides the [`find_family()`](https://gamlss-dev.github.io/gamlss2/man/find_family.html) function, which helps identify the most suitable distribution by minimizing an information criterion, AIC by default. Here, we evaluate several continuous distributions available in the [`gamlss.dist`](https://cran.r-project.org/package=gamlss.dist) package.
 
 ```{r find_family}
 fams <- find_family(d$Tmax,
@@ -105,33 +94,30 @@ fams <- find_family(d$Tmax,
 print(fams)
 ```
 
-Here, the `SEP4` family seems to have the best fit, we can also visualize the fitted density
-with
+Here, the SEP4 family appears to provide the best fit. To further assess its suitability, we can visualize the fitted density using
 
 ```{r fit_family}
 fit_family(d$Tmax, family = SEP4)
 ```
 
-After finding a suitable distributional model, we can start including covariates to estimate
-a full GAMLSS. Since there is a strong seasonal effect in temperature data, illustrated by
-the following scatterplot
+After identifying a suitable distributional model, we can now incorporate covariates to estimate a full GAMLSS. Since temperature data exhibits a strong seasonal pattern, as illustrated in the following scatterplot
 
 ```{r season_scatter}
+#| echo: 2:3
+par(mar = c(4, 4, 1, 1))
 d$yday <- as.POSIXlt(d$date)$yday
 plot(Tmax ~ yday, data = d, col = rgb(0.1, 0.1, 0.1, alpha = 0.4))
 ```
 
-we need to include a model term for seasonal effects. As the _gamlss2_ package supports
-all the model terms of the _mgcv_ package we can use the `s()` constructor to set this up.
-In addition, we add a time trend to investigate if the maximum temperature has increased
-over this period in time. For the full GAMLSS we model each parameter of the selected `SEP4`
-distribution. Therefore we first create a new covariate `year` for the overall time trend
+It is essential to include a model term that captures these seasonal effects. The `gamlss2 package supports all model terms from the [`mgcv`](https://cran.r-project.org/package=mgcv) package, allowing us to use the `s()` constructor to model seasonality.
+
+Additionally, we include a time trend to examine whether maximum temperatures have increased over the observed period. In the full GAMLSS model, each parameter of the selected `SEP4` distribution is estimated separately. To incorporate the time trend, we first create a new covariate, `year`, representing the long-term temporal effect
 
 ```{r time_trend}
 d$year <- as.POSIXlt(d$date)$year + 1900
 ```
 
-afterwards we create the model formula for the four parametric `SEP4` distribution
+Next, we define the model formula for the four parameters of the `SEP4` distribution.
 
 ```{r formula}
 f <- Tmax ~ s(yday, bs = "cc") + s(year) |
@@ -140,31 +126,31 @@ f <- Tmax ~ s(yday, bs = "cc") + s(year) |
   s(yday, bs = "cc") + s(year)
 ```
 
-Here, the vertical bars `|` seperate the formulas for the parameters of the `SEP4` distribution
-and `bs = "cc"` stands for a cyclical spline for the seasonal effect.
-Finally, the model is estimated with
+In this formula, the vertical bars `|` separate the specifications for each parameter of the `SEP4` distribution. The argument `bs = "cc"` specifies a cyclical spline to account for the seasonal effect, ensuring continuity at the beginning and end of the year.
+
+Finally, we estimate the model using
 
 ```{r model}
 b <- gamlss2(f, data = d, family = SEP4)
 ```
 
-After the model is estimated, we can inspect the model summary output with
+This approach allows us to flexibly capture both seasonal patterns and long-term trends in daily maximum temperatures.
+
+After estimating the model, we can examine the model summary using
 
 ```{r summary}
 summary(b)
 ```
 
-Note that the summary output is very similar to `lm()` and `glm()` with the main difference
-being that summary outputs are provided for all parameters of the distribution. The summary
-shows all estimated linear coefficients (in this case just the intercepts) along the estimated
-degrees of freedom for each smooth term in the model. Additionally, the AIC and deviance is reported,
-the AIC can also be extracted with
+The summary output is structured similarly to those of `lm()` and `glm()`, with the key difference being that it provides results for all parameters of the selected distribution. Specifically, it displays the estimated linear coefficients (in this case, primarily the intercepts), along with the effective degrees of freedom for each smooth term. Additionally, the AIC and deviance values are reported.
+
+To extract the AIC separately, we use
 
 ```{r aic}
 AIC(b)
 ```
 
-The log-likelihood using
+Similarly, the log-likelihood can be obtained with
 
 ```{r loglik}
 logLik(b)
@@ -174,7 +160,7 @@ logLik(b, newdata = d)
 Here we use the `newdata` argument just to show, that the log-likelihood can also be evaluated on,
 e.g., out-of-sample data.
 
-Moreover, estimated effects can be visualized instantly with
+Additionally, the estimated effects can be visualized instantly using
 
 ```{r effects}
 #| fig-height: 6
@@ -182,4 +168,35 @@ Moreover, estimated effects can be visualized instantly with
 par(mar = c(4, 4, 1, 1))
 plot(b, which = "effects")
 ```
+
+This plot provides a direct visualization of the smooth effects included in the model, helping to interpret seasonal variations and long-term trends efficiently.
+
+Model predictions can be obtained for various statistical quantities, including the mean, quantiles, probability density function (PDF), and cumulative distribution function (CDF). To illustrate this, we first examine the marginal effect of the long-term time trend. For this purpose, we create a new data frame containing only the years of interest.
+
+```{r year_effect}
+nd <- data.frame("year" = 1981:2018, "yday" = 182)
+```
+
+Next, we predict quantiles by first computing the estimated parameters
+
+```{r parameters}
+par <- predict(b, newdata = nd)
+```
+
+To compute, e.g., the 50% quantile (median), we extract the [`gamlss2.family`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.family.html) of the fitted model and call the corresponding `$q()` (quantile) function provided by the family.
+
+```{r quantiles}
+q50 <- family(b)$q(0.5, par)
+```
+
+Finally, we visualize the long-term trend in median temperature.
+
+```{r long_term}
+#| echo: 2:3
+par(mar = c(4, 4, 1, 1))
+plot(nd$year, q50, type = "l", lwd = 2,
+  xlab = "Year", ylab = "50% Quantile")
+```
+
+The plot reveals a clear upward trend in the median temperature over time, highlighting the effects of long-term climate change.
 

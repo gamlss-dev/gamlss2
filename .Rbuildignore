@@ -25,3 +25,5 @@ README.qmd
 ^vignettes/s_pb\.qmd$
 ^vignettes/topmodels\.qmd$
 inst/README_files
+inst/vignettes0
+

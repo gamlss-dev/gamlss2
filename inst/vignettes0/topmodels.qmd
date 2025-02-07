@@ -1,0 +1,131 @@
+---
+title: "Forecasting and Assessment with topmodels"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+vignette: >
+  %\VignetteIndexEntry{Top Models}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, inference, forecasting}
+  %\VignettePackage{gamlss2}
+---
+
+<img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="120"/>
+
+## Probabilistic model infrastructure
+
+Introduction on how to use the [topmodels](https://topmodels.R-Forge.R-project.org/topmodels/) package [@topmodels] with `gamlss2`.
+
+Currently not on CRAN, yet, so install from [R-universe](https://zeileis.R-universe.dev/) (if not done already).
+The development version of `gamlss.dist` is also needed.
+
+```{r installation}
+#| message: false
+#| results: hide
+if(!("topmodels" %in% installed.packages())) {
+  install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
+}
+if(packageVersion("gamlss.dist") < "6.1-3") {
+  install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
+}
+```
+
+On GitHub, unfortunately, in the GitHub Action the `gamlss.dist` package is always taken from CRAN (via `r-cran-gamlss.dist` apparently).
+
+```{r}
+packageVersion("gamlss.dist")
+gamlss_dist_devel <- packageVersion("gamlss.dist") >= "6.1-3"
+```
+
+## Data and models
+
+```{r cars}
+#| message: false
+#| results: hide
+library("gamlss2")
+data("HarzTraffic", package = "gamlss2")
+m1 <- lm(log(cars) ~ poly(yday, 3), data = HarzTraffic)
+m2 <- gamlss2(log(cars) ~ s(yday, bs = "cc") | s(yday, bs = "cc"), data = HarzTraffic, family = SN2)
+```
+
+## Probabilistic forecasting
+
+```{r procast}
+#| eval: !expr 'gamlss_dist_devel'
+#| fig-height: 5
+#| fig-width: 6
+library("topmodels")
+nd <- data.frame(yday = 1:365)
+nd <- cbind(nd,
+  procast(m1, newdata = nd, type = "quantile", at = c(0.025, 0.5, 0.975)),
+  procast(m2, newdata = nd, type = "quantile", at = c(0.025, 0.5, 0.975)))
+plot(log(cars) ~ yday, data = HarzTraffic, type = "n")
+polygon(c(nd[[1]], rev(nd[[1]])), c(nd[[2]], rev(nd[[4]])),
+  col = adjustcolor(2, alpha.f = 0.4), border = "transparent")
+polygon(c(nd[[1]], rev(nd[[1]])), c(nd[[5]], rev(nd[[7]])),
+  col = adjustcolor(4, alpha.f = 0.4), border = "transparent")
+points(log(cars) ~ yday, data = HarzTraffic)
+lines(nd[[1]], nd[[3]], col = 2, lwd = 2)
+lines(nd[[1]], nd[[6]], col = 4, lwd = 2)
+```
+
+## Graphical model assessment
+
+### Within model diagnostics 
+```{r lm}
+#| eval: !expr 'gamlss_dist_devel'
+#| fig-height: 10
+#| fig-width: 10
+#| echo: true
+par(mfrow = c(2, 2))
+rootogram(m1)
+pithist(m1)
+qqrplot(m1)
+wormplot(m1)
+```
+
+```{r gamlss2}
+#| eval: !expr 'gamlss_dist_devel'
+#| fig-height: 10
+#| fig-width: 10
+#| echo: true
+par(mfrow = c(2, 2))
+rootogram(m2)
+pithist(m2)
+qqrplot(m2)
+wormplot(m2)
+```
+
+
+### Between Models diagnostics
+
+```{r comparison}
+#| eval: !expr 'gamlss_dist_devel'
+#| fig-height: 5
+#| fig-width: 10
+#| echo: true
+par(mfrow = c(1, 2))
+p1 <- pithist(m1, plot = FALSE)
+p2 <- pithist(m2, plot = FALSE)
+plot(c(p1, p2), col = c(2, 4), single_graph = TRUE, style = "line")
+w1 <- wormplot(m1, plot = FALSE)
+w2 <- wormplot(m2, plot = FALSE)
+plot(c(w1, w2), col = c(2, 4), single_graph = TRUE)
+```
+
+## Scoring rules
+
+
+
+```{r, proscore}
+#| eval: !expr 'gamlss_dist_devel'
+m <- list(lm = m1, gamlss2 = m2)
+sapply(m, proscore, type = c("logs", "crps", "mae", "mse", "dss"))
+```
+
+
+`Mikis` : can we do the same with `newdata` ?

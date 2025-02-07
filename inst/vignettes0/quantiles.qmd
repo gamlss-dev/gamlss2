@@ -1,0 +1,210 @@
+---
+title: "Centile (Quantile) Estimation"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Quantile Estimation}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, inference, forecasting}
+  %\VignettePackage{gamlss2}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+if(!("gamlss.ggplots" %in% installed.packages()) || packageVersion("gamlss.ggplots") < "2.1-15") {
+  install.packages("gamlss.ggplots", repos = "https://gamlss-dev.R-universe.dev")
+}
+
+if(packageVersion("gamlss.dist") < "6.1-3") {
+  install.packages("gamlss.dist", repos = "https://gamlss-dev.R-universe.dev")
+}
+
+dev_version <- packageVersion("gamlss.ggplots") >= "2.1-15" && packageVersion("gamlss.dist") >= "6.1-3"
+
+library("gamlss2")
+```
+
+Centile estimation or quantile estimation is a powerful approach in statistics that
+provides insights into the distributional characteristics of a response variable at
+various values of one of the explanatory variables. A centile is a quantile value multiplied by 100.
+
+The `LMS` methods of @ColeGreen92 is a subset of the GAMLSS model of @Rigby+Stasinopoulos:2005.
+The BCPE  distribution  of @RigbyStasinopoulos04, was used by WHO to create of child growth
+standards which are now used in over 150 countries. Centiles (quantiles) provide information
+about the entire distribution of the response variable rather than estimating just the mean
+(as in traditional regression).
+
+In this vignette, we demonstrate how to estimate quantiles
+(e.g., the 10th, 50th, and 90th percentiles) using `gamlss2`.
+
+Specifically, we will cover:
+
+* How to fit the relevant models;
+* How to check model adequacy using diagnostics; and
+* How to obtain the corresponding centile curves.
+
+
+::: {.callout-warning}
+Note that we are not using the `s()` function for smoothing here. This is  because the default value for `m=10`,  the number of knots in `s()` is small, therefore the flexibility of the one dimensional smoother small if a lot of  degrees of freedom are needed for smoothng a very common occurrence in centile estimation. We use instead `pb()` which uses `m=20`  as a default.  
+:::
+
+## The BMI data
+
+In this example we use the Dutch boys BMI data, `dbbmi`, from the package `gamlss.data`.
+More infomation about the data can be found in Section 13.1.3 of @Stasinopoulosetal2017.
+The dataset consists of $7294$ rows and $2$ columns, containing the variables `bmi` and `age`.
+
+```{r}
+#| warning: false 
+## load package and data
+library("gamlss2")
+data("dbbmi", package = "gamlss.data")
+
+## plot the data
+plot(bmi ~ age, data = dbbmi, col = gray(.5))
+```
+
+Due to the sharp upward trend in BMI at the lower end of age, we will apply a square root
+transformation (sqrt()) to the age variable to facilitate the fitting of the centile curves.
+The transformed data are plotted below:
+
+```{r}
+plot(bmi ~ sqrt(age), data = dbbmi, col = gray(.5))
+```
+
+## Fitting the model
+
+Next, we will fit three different models to the data. The first model uses the Box-Cox Cole and
+Green distribution (`BCCGo`), which has three parameters: $\mu$, $\sigma$, and $\nu$. These
+parameters represent the location, scale, and skewness of the distribution, respectively.
+The `BCCGo` distribution is almost equivalent to fitting the Cole and Green (LMS) method.
+
+```{r}
+## model formula as list
+## note that we set up 4 formulas for
+## the more complex families later.
+f <- ~ pb(sqrt(age))
+f <- rep(list(f), 4)
+f[[1]] <- update(f[[1]], bmi ~ .)
+
+## estimate model
+m1 <- gamlss2(f, data = dbbmi, family = BCCGo)
+```
+
+The second model uses the Box-Cox power exponential distribution (`BCPEo`), which has four
+parameters: $\mu$, $\sigma$, $\nu$, and $\tau$. These parameters represent the location,
+scale, skewness, and kurtosis of the distribution, respectively.
+
+```{r}
+m2 <- gamlss2(f, data = dbbmi, family = BCPEo)
+```
+
+The final model uses the Box-Cox t distribution (`BCTo`), also with four parameters:
+$\mu$, $\sigma$, $\nu$, and $\tau$, representing location, scale, skewness, and kurtosis,
+respectively. The key difference between `BCPEo` and `BCTo` is that `BCPEo` can handle both
+platykurtic and leptokurtic distributions, while `BCTo` is limited to leptokurtic distributions.
+Detailed definitions of these three `"gamlss.family"` distributions can be found in
+Chapter 19 of @Rigbyetal2019.
+
+```{r}
+m3 <- gamlss2(f, data = dbbmi, family = BCTo)
+```
+
+We can now select the best-fitting model using the generalized Akaike Information Criterion (GAIC),
+implemented in the `GAIC()` function.
+
+```{r}
+GAIC(m1, m2, m3)
+```
+
+Note that all models were fitted using the square root transformation (`sqrt()`) for age to
+facilitate the smoothing function, `pb()`. Also, by default, the `GAIC()` function uses
+the classical Akaike Information Criterion (AIC). Based on the AIC, the `m3` model appears
+to provide the best fit.
+
+## Diagnostics
+
+Several diagnostic tools are available to assess the adequacy of a fitted model. One useful tool
+is the worm plot, a detrended Q-Q plot that provides valuable insight into the fit of the
+distribution. The plot can be generated with   
+
+```{r}
+plot(m3, which = "wp")
+```
+
+Our preferred approach is to use the `resid_wp()` function from the `gamlss.ggplots` package,
+as it provides additional useful information.
+
+```{r}
+#| eval: !expr 'dev_version'
+#| message: false
+library("gamlss.ggplots")
+resid_wp(m3)
+```
+The function `model_wp()` can be use for multiple model worm plots.  
+```{r}
+#| eval: !expr 'dev_version'
+#| message: false
+model_wp(m1, m2, m3)
+```
+
+One of the advantages of the `gamlss.ggplots` package is its ability to split the worm plot
+into different age ranges, which is useful for detecting model inadequacies across various
+age groups. Here' s how you can use the `model_wp_wrap()` function:
+    
+```{r}
+#| eval: !expr 'dev_version'
+#| message: false
+model_wp_wrap(m1,m2,m3,xvar=dbbmi$age)
+```
+
+## Centile Computation
+
+To obtain plots or tables of fitted centile curves, we can use the `gamlss2` generic `quantile()`
+method to generate a table of predicted values. We then use these values to plot the
+relevant curves. First, we create a grid for age with a length of 300 and use it to
+predict the relevant quantiles.
+
+```{r}
+## set tup new data for prediction
+nd <- with(dbbmi, data.frame("age" = seq(min(age), max(age), length = 300)))
+
+## compute quantiles/centiles
+qu <- c(0.02, 0.10, 0.25, 0.50, 0.75, 0.90, 0.98)
+fit <- quantile(m3, newdata = nd, probs = qu)
+
+## estimated values
+head(fit)
+```
+
+Now we plot the data and then fitted curves. 
+
+```{r}
+## plot estimated curves
+par(mar = c(4, 4, 1, 1)) 
+plot(bmi ~ age, data = dbbmi,   pch = 16, col = rgb(0.1, 0.1, 0.1, alpha = 0.1)) 
+matplot(nd$age, fit, type = "l",   lwd = 2, lty = 1, col = 4, add = TRUE)
+```
+
+A more elegant plot can be generated using the `fitted_centiles()` or `fitted_centiles_legend()`
+functions from the `gamlss.ggplots` package. For example:
+
+```{r}
+#| eval: !expr 'dev_version'
+#| warning: false   
+fitted_centiles_legend(m3, cent= c(2, 10, 25, 50, 75, 90, 98))
+```
+
+## Summary
+
+The `gamlss2` package offers the appropriate models and tools for generating centile curves.
+For more detailed information and diagnostics related to centile curve estimation, refer to
+Chapter 13 of @Stasinopoulosetal2017. Additionally, the `gamlss.ggplots` package provides
+useful extra functions for plotting and diagnostics.
+

@@ -1,0 +1,361 @@
+---
+title: "Spatial Effects"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Spatial Effects}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, spatial effects}
+  %\VignettePackage{gamlss2}
+---
+
+```{r packages}
+#| message: false
+#| results: hide
+#| echo: 4:8
+pkg <- c("stars")
+for(p in pkg) {
+  if(!(p %in% installed.packages())) install.packages(p)
+}
+library("gamlss2")
+library("sf")
+library("stars")
+library("colorspace")
+```
+
+In generalized additive models for location, scale, and shape (GAMLSS), spatial effects 
+can be integrated in a variety of ways, enabling more flexible modeling of spatially 
+correlated data. These effects account for spatial dependencies that can arise due to 
+geographical proximity or other spatial structures, which is crucial when working with 
+spatial data such as environmental measurements, regional economics, or ecological data.
+
+Spatial effects in GAMLSS can be incorporated using several techniques, including:
+
+* Thin-plate splines and tensor splines, which are commonly used to model
+  smooth spatial effects. These splines allow for flexible, non-linear
+  relationships between spatial coordinates and the
+  response, capturing complex spatial patterns without assuming a specific
+  functional form.
+* Markov Random Fields (MRFs), which offer a way to model spatial dependencies
+  through a network of neighboring regions. MRFs introduce spatial structure by
+  imposing conditional dependencies between neighboring locations, ensuring that
+  the model accounts for local variations and
+  smoothing out spatial fluctuations.
+
+This vignette demonstrates how to estimate spatial distributional regression
+models within the GAMLSS framework. Additionally, we will show how to visualize
+estimated spatial effects, which can help in interpreting the impact of
+geographical factors on the outcome of interest.
+
+## Example: modeling severe storm counts in Germany
+
+In this example, we analyze severe storm counts recorded at various weather
+stations across Germany over multiple years. The aim is to model these storm counts
+while accounting for spatial dependencies between stations. By incorporating
+spatial effects, we strive to gain deeper insights into the geographic distribution
+of storm frequencies and their temporal evolution. Ultimately, our goal is to
+develop a risk map identifying regions with a higher likelihood of severe storms
+and associated damage.
+
+The data used in this example is provided in the `WeatherGermany` package,
+which can be installed and loaded as follows
+
+```{r}
+## install the WeatherGermany package if not already installed
+if(!("WeatherGermany" %in% installed.packages())) {
+  if(!("devtools" %in% installed.packages())) {
+    install.packages("devtools")
+  }
+  devtools::install_github("https://github.com/gamlss-dev/WeatherGermany")
+}
+
+## load the package
+library("WeatherGermany")
+```
+
+After installing the package, we can load the storm data using
+
+```{r}
+data("storms", package = "WeatherGermany")
+```
+
+The `storms` dataset contains annual storm counts for different weather stations.
+To get an initial understanding of the data, we can visualize the storm counts
+per station and
+year. This preliminary visualization allows us to inspect patterns in storm
+frequency over time and across stations, which might help us identify trends
+and anomalies.
+
+```{r}
+## plot storm counts per station and year
+par(mar = c(4, 4, 1, 1))
+plot(range(storms$year), range(storms$counts), type = "n",
+  xlab = "Year", ylab = "Counts")
+for(j in levels(storms$id)) {
+  dj <- subset(storms, id == j)
+  dj <- dj[order(dj$year), ]
+  with(dj, lines(counts ~ year, type = "b", pch = 16,
+    col = rgb(0.1, 0.1, 0.1, alpha = 0.4)))
+}
+```
+
+Interestingly, the number of severe storms appears to be decreasing over the years.
+However, certain regions experience a quite high frequency of severe storms annually.
+
+## Visualizing the station distribution
+
+To begin the analysis, we first visualize the locations of the weather stations
+on a map of Germany. This will help us understand the geographical spread of the
+stations and lay the foundation for incorporating spatial effects into our model.
+We use the `sf` package for managing and visualizing spatial data.
+
+```{r}
+## load map of Germany
+## needs sf package for plotting
+library("sf")
+data("Germany", package = "WeatherGermany")
+
+## plot the map of Germany with station locations
+par(mar = rep(0.5, 4))
+plot(st_geometry(Germany))
+co <- unique(storms[, c("lon", "lat")])
+points(co, col = 2, pch = 4, lwd = 2)
+```
+
+This map illustrates the distribution of weather stations across Germany.
+Each red cross represents a weather station. In the context of our spatial
+distributional regression model, it's important to account for this spatial structure.
+By incorporating the spatial dependencies between nearby stations,
+we can better estimate the storm counts at each location in Germany.
+
+## Response distribution
+
+A common choice for count data is to use the Negative Binomial distribution (`NBI`).
+Since the data encounters quite some zero counts we also use the
+zero-adjusted NBI (`ZANBI`) distribution. We can get a first impression, how well
+the distribution models fit to the data by using the `fit_family()` function.
+
+```{r}
+par(mfrow = c(1, 2))
+fit_family(storms$counts, family = NBI)
+fit_family(storms$counts, family = ZANBI)
+```
+
+The `ZANBI` distribution seems to have the best fit to the storms count data according
+to the resulting GAIC scores.
+
+## Estimating the Model
+
+We now estimate the spatial count model using the zero-adjusted Negative
+Binomial distribution (`ZANBI` family). The model includes smooth functions of
+altitude, year and a spatial effect, as well as an space-time interaction effect.
+Spatial effects are incorporated using thin-plate splines [@Wood:2003].
+The `ZANBI` family has 3 parameters and we include all model terms in each
+parameter here.
+
+```{r}
+#| results: hide
+## estimate count model using the NBI family,
+## model formula is
+f <- ~ ti(year) + ti(log(alt + 10)) +
+  ti(lon) + ti(lat) + ti(lon, lat, bs = "tp", d = 2, k = 100) +
+  ti(year, log(alt + 10)) +
+  ti(year, lon, lat, bs = "tp", d = c(1, 2), k = c(5, 100)) +
+  ti(alt, lon, lat, bs = "tp", d = c(1, 2), k = c(5, 100))
+f <- list(update(f, counts ~ .), f)
+
+## estimate model
+b <- select_gamlss2(f, data = storms, family = PIG)
+```
+
+```{r}
+## save(b, file = "../../WeatherGermany/inst/storm_model.rda", compress = "xz")
+```
+
+The model summary gives
+
+```{r}
+summary(b)
+```
+
+The model summary shows that the year trend is basically linear, however, the space-time
+interaction effect `t(year, lon, lat)` seems to have some effect, i.e., there might be some
+sort of spatial variation over time.
+
+Model calibration is checked using histogram, Q-Q plot, wormplot etc.
+
+```{r}
+plot(b, which = "resid")
+```
+
+The quantile residuals indicate that the model is already quite good calibrated.
+
+## Visualizing the Estimated Effects
+
+Finally, we visualize the estimated effects from the fitted model.
+
+```{r}
+#| fig-height: 8
+par(mar = c(4, 4, 1, 1))
+plot(b)
+```
+
+The plot shows the estimated smooth functions for altitude, year, and the spatial effect.
+These visualizations help us interpret how storm counts vary across space and time.
+The most pronounced effects are the altitude and the spacial effect, i.e., higher altitudes have
+positive effects on estimated parameters and therefore on the number of yearly storm counts.
+
+## Prediction
+
+### Single stations
+
+Predict storm counts for one station. To see, if predictions are any meaningful, we
+set up a small function that predicts the expected median number of storm counts of one
+meteorological station.
+
+```{r}
+plot_fx <- function(i = "3") {
+  if(!is.character(i)) {
+    i <- as.character(unique(storms$id))[i]
+  } else {
+    if(length(j <- grep(i, storms$name, fixed = TRUE)))
+      i <- as.character(storms$id)[j][1L]
+  }
+
+  ## subset data for station
+  dj <- subset(storms, id == i)
+
+  ## create new data for predictions
+  nd <- data.frame("year" = 1981:2024)
+  nd$alt <- dj$alt[1L]
+  nd$lon <- dj$lon[1L]
+  nd$lat <- dj$lat[1L]
+
+  ## predict parameters
+  par <- predict(b, newdata = nd)
+
+  ## predict counts (median)
+  nd$fit <- family(b)$mean(par)
+  nd$up <- family(b)$q(0.95, par)
+  nd$lo <- family(b)$q(0.05, par)
+
+  ## plot predictions
+  plot(fit ~ year, data = nd, type = "b",
+    pch = 16, col = 4,
+    ylim = range(c(nd$fit, nd$lo, nd$up, dj$counts)),
+    xlab = "Date", ylab = "#Storms",
+    main = paste0(dj$name[1], "\n",  round(dj$alt[1L]), " m.a.s.l."))
+  with(dj, lines(counts ~ year, type = "b"))
+  with(nd, lines(up ~ year, col = 4, lty = 2))
+  with(nd, lines(lo ~ year, col = 4, lty = 2))
+}
+
+par(mfrow = c(3, 3))
+
+plot_fx("Zugspitze")
+plot_fx("Brocken")
+plot_fx("Großer Arber")
+
+plot_fx("List auf Sylt")
+plot_fx("Sankt Peter-Ording")
+plot_fx("Arkona")
+
+plot_fx("Dresden")
+plot_fx("Würzburg")
+plot_fx("Aachen")
+```
+
+All predictions (blue lines and dots) align quite well with the
+observed counts (black lines and dots). Predicted 5% and 95% quantiles are shown by the
+blue dashed lines.
+Note that the model predicts a quite strong decrease of severe storm counts for high altitude regions,
+while stations at the sea, e.g., Sankt Peter-Ording a slight increase is predicted. For the
+predictions of some cities, there is also a slight increase visible.
+
+
+We predict the spatial risk of more than 2 severe storms in 2022. Therefore, we
+set up a new data frame containing only the unique locations.
+
+```{r}
+#| message: false
+#| results: hide
+nd <- unique(storms[, "id", drop = FALSE])
+
+## add the year
+nd$year <- 2025
+
+## add altitude information, this is stored
+## in a raster file in
+rf <- file.path(system.file(package = "gamlss2"), "extra", "GermanyElevation.grd")
+
+## needs the raster package
+library("raster")
+
+## read altitude raster file
+alt <- raster(rf)
+
+## aggregate altitude to regions
+library("exactextractr")
+Germany$alt <- exact_extract(alt, Germany, fun = "median")
+nd <- merge(nd, Germany[, c("id", "alt")], by = "id")
+
+## predict parameters of the NBI distribution
+par <- predict(b, newdata = nd)
+
+## estimated probability of more than 2 severe storms
+nd$prob2 <- 1 - family(b)$p(2, par)
+
+## add fitted probabilities to map of Germany
+m <- merge(Germany, nd[, c("id", "prob2")], by = "id", all.x = TRUE)
+
+## plot spatial risk
+library("ggplot2")
+library("colorspace")
+ggplot(m) + geom_sf(aes(fill = prob2)) +
+scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
+
+## note that because of the discrete spatial effect,
+## there are a lot of NAs, therefore, we need to compute
+## predictions in such regions by averaging using the neighbors
+## of a region. we use the neighbour list object nb to compute
+## the predictions, this is iterated.
+fill_missing_mrf <- function(m, nb, j = "fmu") {
+  ## while there are still NAs in the specified column (e.g., 'fmu')
+  while(any(is.na(m[[j]]))) {
+    
+    ## recalculate the number of non-NA neighbors for each region
+    na_counts <- sapply(seq_along(nb), function(i) {
+      if(is.na(m[[j]][i])) {
+        sum(!is.na(m[[j]][nb[[i]]])) ## count non-NA neighbors
+      } else {
+        -1 ## region already filled, deprioritize
+      }
+    })
+    
+    ## find the region with the most non-NA neighbors
+    max_index <- which.max(na_counts)
+    
+    ## update that region using the mean of its neighbors' values
+    if(length(nb[[max_index]]) > 0) {
+      m[[j]][max_index] <- mean(m[[j]][nb[[max_index]]], na.rm = TRUE)
+    }
+  }
+  
+  ## return the updated predictions
+  return(m)
+}
+
+m <- fill_missing_mrf(m, nb, j = "prob2")
+
+## plot final spatial risk
+ggplot(m) + geom_sf(aes(fill = prob2)) +
+scale_fill_continuous_diverging("Blue-Red 3") + theme_bw()
+```
+

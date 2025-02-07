@@ -1,0 +1,224 @@
+---
+title: "Model Selection"
+format: 
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+nocite: |
+  @Rigby+Stasinopoulos:2005
+vignette: >
+  %\VignetteIndexEntry{Selection}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{distributional regression, model selection, variable selection}
+  %\VignettePackage{gamlss2}
+---
+
+```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+library("gamlss2")
+```
+
+
+
+A distribution regression model is defined as 
+
+$$\begin{split}
+y_i     &  \stackrel{\small{ind}}{\sim }& \mathcal{D}( \theta_{1i}, \ldots, \theta_{ki}) \nonumber \\
+g(\theta_{1i})  &=& b_{10} + s_1({x}_{1i})  +  \ldots,  s_p({x}_{pi}) \nonumber\\
+ \ldots &=& \ldots \nonumber\\
+g({\theta}_{ki})  &=& b_0 + s_1({x}_{1i})  +   \ldots,  s_p({x}_{pi})
+\end{split} 
+$$ {#eq-GAMLSS}
+where $\mathcal{D}( )$ is the assumed distribution which depends on parameters $\theta_{1i}, \ldots, \theta_{ki}$ and where all the parameters can be functions of the explanatory variables $({x}_{1i}, \ldots, {x}_{pi})$.
+In reality we do not know the distribution $\mathcal{D}( )$  and also we do not know **which**  and **how** the variables   $({x}_{1i}, \ldots, {x}_{pi})$ effect the parameters $\theta_{1i}, \ldots, \theta_{ki}$. So the model selection in a distributional regression model should have the following steps;
+
+
+* select the _best_ fitting distribution and,
+
+* select the _relevant_ variables for the parameters and how they effect the parameters. 
+
+
+One way to achieve that is the following  **general algorithm** for searching for _best_ model;
+
+-  **step 0**: Defining a set of appropriate distributions for the response $\mathcal{D}_J()$ for $j=1,\ldots, J,$ see section @sec-theranseoftherespons how to do that, 
+
+- **step 1**: **FOR** $J$ in   $j=1,\ldots, J$
+
+- **step 2**: use distribution $\mathcal{D}_J()$  to **SELECT** the appropriate variables $({x}_{1i}, \ldots, {x}_{pi}).$
+
+-  **step 3**: **END** the loop
+
+- **step 4**: **SELECT** the distribution  $\hat{\mathcal{D}}_J()$ and variables which give a  minimum values for a selection  criterion measure.
+
+The selection criterion could be a GAIC defined on the training data or a measure defined on the test, **out of bag**, data. While the above algorithm could work reasonable with data having a relative small number or explanatory variables could be very slow for data with a large number of explanatory variables.   
+
+
+Cutting corners could improve the speed of the algorithm. For example, if  the practitioner gives up the smooth additive structure, that `gamlss2` provides, and he/she prepare to use only linear terms, a LASSO method can be used at step 2 which will speed up things. Also if the practitioner has confidence on a particular distribution choice, then only the selection step 2 could be performed. The support for a specific distribution can be enforced my the preliminary analysis for choosing a distribution described in @sec-Preliminaryanalysis and suggested in @stasinopoulos2024generalized.
+
+
+## Select a distribution {#sec-Selectadistribution}
+
+### The range of the response {#sec-theranseoftherespons}
+
+The first thing to take into the account in the selection of the distribution is the range of the response variable, that is, the distribution should be defined in right range. @fig-responseType shows the different possibilities depending on whether the response is `continuous`, `discrete` of `factor`  If the response is continuous and has negative values a distribution in the real line is appropriate. For positive responses a positive real line distribution is appropriate. For bounded continuous response we have the options; 
+
+i) to use a distributions in the range between 0 and 1, i.e. the beta distribution see Chapter 21 of @Rigbyetal2019; 
+
+ii) to transform a continuous distribution with range $(-\infty, \infty)$ to  a range $(0,1)$ using the `logit` transformation see Section 13.2.2 of @Rigbyetal2019;  
+
+iii) to create an appropriate truncated distribution which takes values $(0,1)$ see Section 13.7 of @Rigbyetal2019;  or 
+
+iv) to create a generalised `Tobit` distribution using censoring. This methodology is  also appropriate for inflated distributions see Chapter 9 of  @Rigbyetal2019.
+
+
+
+For count response the only consideration is whether the counts are finite or not. For infinite counts a discrete distribution similar to the Poisson distribution can be used. For finite counts a discrete distribution like the  binomial can be used. The case in which the  response is a categorical variable (taht is a factor) is called  `classification` regression. If the factor is an `ordered` factor appropriate models, **ordinal regression models**, exist but we will not deal with them here. For unordered factor responses a binomial distribution can be use if the classification is binary otherwise a multinomial distribution if the resposnse has more than two categories. Note that for classification problems, there is a vast literature in machine learning to deal with the problem.
+
+
+```{mermaid}
+%%| label: fig-responseType
+%%| fig-cap: "The response determines which type of distribution to use."
+%%| fig-width: 10
+%%| fig-height: 6
+%%| fig-size: 10
+flowchart LR
+  A[responce] --> B(continuous) 
+  A --> C[discrete]
+  A --> D[factor]
+  B --> F[real line]
+  B --> G[pos. real line]
+  B --> H[0 to 1]
+  C --> J[infinite count]
+  C --> I[finite count]
+  D --> K[unordered]
+  D --> L[ordered]
+  I --> N[binary]
+  K --> N[binary]
+``` 
+
+
+### Preliminary analysis {#sec-Preliminaryanalysis}
+
+
+A preliminary analysis in selecting the distribution can be performed using the `chooseDist()` function of the package `gamlss`. Here we used the `rent` data of the package `gamlss.data`. We first  bring the package and the data set in;
+
+```{r}
+#| cache: true
+#| warning: false
+library(gamlss2)
+library(gamlss)
+da <- rent99[, -c(2,9)]
+head(da)
+```
+The response variable is is `rent` and there are two continuous, the area of the flat `area` and the year of construction `yearc`  and 4 categorical variables, `location`,  `bath`, `kitchen` and central heating, `cheating`.
+
+Here, first we fit a linear model with all explanatory variables to the location parameters $\mu$ and scale parameter $\sigma$. Later we use the function `chooseDist()` to find out which distribution from the ones in positive real line fit, `type="realplus"`, best fit the data, given that $\mu$ and  $\sigma$ models are fitted linearly with all available variables. Note that, in order to speed up the procedure,  we used here a parallel version of `chooseDist()` using `snow` with 10 NCPUS (the maximum that our machine can take). Please modify accordantly to your machine capabilities.
+
+
+```{r}
+ m1 <- gamlss2(rent~.|., data=da, family=GA,trace=FALSE)
+ M1 <- gamlss:::chooseDist(m1, type="realplus", parallel="snow", ncpus=10)
+```
+The function `chooseDist()` chooses the "best" distribution according to a GAIC criterion. In our case the `BCTo` distribution was chosen using AIC while the `BCCGo` using $\chi^2$ or BIC criteria, respectively.
+
+## Select appropriate variables  {#sec-Selectappropriatevariables}
+
+The methodology of "which explanatory variable is needed and for which parameters" depends on the scope of modelling,
+while special attention has to be taken for **non-linear** relationships and for **interaction**.   If the scope of the model is to provide  good interpretation then the additive smooth structure of `gamlss2`is adequate because can cope well with non-linearities and relatively  well with interactions. Note that interactions in an additive structure have to specified explicitly while in some machine learning algorithms like neural network they come as part of the model. Machine learning algorithms like random forest and neural networks are more difficult to interpreter therefore  more suited for prediction purposes. Here we will discuss the the **step-wise** methodology while boosting is discussed in a different  vignette?. 
+
+
+```{r}
+data("rent", package = "gamlss.data")
+```
+
+Because the  possiblility of  linear interactions, we shall scale the two continuous covariates first;
+```{r}
+rent$Fl <- scale(rent$Fl)
+rent$A <- scale(rent$A)
+```
+
+
+The `formula` defines the searching scope of the  search;
+```{r}
+f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+```
+
+Here we use the the stepwise algorithm to find the "best" explanatory variables using a Gamma family model;
+```{r}
+#| cache: true  
+b <- step_gamlss2(f, data = rent, family = GA, K = 2)
+```
+Note that `step_gamlss2()` is equivalent to using 
+```{r}
+#| eval: false
+b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+```
+
+The  `new_formula()` function will  show the new  selected model terms;
+```{r}
+new_formula(b)
+```
+Here is the summary of the  final model;
+```{r}
+summary(b)
+```
+and here are the smooth fitted  plots;
+```{r}
+plot(b)
+```
+
+To get the diagnostic plots of the model use;
+
+```{r}
+plot(b, which = "resid")
+```
+
+The selection path can be plotted using; 
+```{r}
+plot(b, which = "selection")
+```
+
+Now we use a more complex diatributional model using the `BCTo` family. First we define the formula. 
+```{r}
+f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
+  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+```
+::: {.callout-note}
+Note that if modelling of certain parameters is not required the formula `1|` could be used. 
+:::
+
+Next we  use the function `step_gamlss2()` but using different options this time, more specificaly we use;
+
+- `K=log(3082)` so the criterion used will be  BIC rather than AIC and therefore  less terms will be allowed in the model. 
+
+- `strategy = c("forward.linear", "both")` so specified explicitly which strategies should be used, see the hlp file for more startegies. 
+
+
+```{r}
+#| cache: true
+#| warning: false
+b <- step_gamlss2(f, data = rent, family = BCTo,
+  K = log(3082), strategy = c("forward.linear", "both"),
+  keeporder = TRUE)
+```
+The final model model seems lot simpler than the one obtain using AIC and the `GA` distribution.  Let us looks at its residual diagnostic plots. 
+
+```{r}
+plot(b, which = "resid")
+```
+The residual plots lok goog. Next  we plot the path of selection. 
+```{r}
+plot(b, which = "selection")
+```
+
+
+
+## Conclusions
+
+Selection in any distributional regression model like `gamlss2` requires both the selection of the distribution and also the selection of the expanatory of variables affecting the parameters of the distribution.
+A general procedure is proposed here but not implemented. `Mikis we should do that`.  We have shown how distibutions and variables can be sellected seperately.   

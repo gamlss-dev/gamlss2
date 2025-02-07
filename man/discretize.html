@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>fake_formula – gamlss2</title>
+<title>discretize – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -140,7 +140,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/fake_formula.html">fake_formula</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/discretize.html">discretize</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -186,13 +186,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/discretize.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/discretize.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">discretize</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/fake_formula.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/fake_formula.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">fake_formula</span></a>
   </div>
 </li>
@@ -364,11 +364,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#extended-processing-of-fake-formulas" id="toc-extended-processing-of-fake-formulas" class="nav-link active" data-scroll-target="#extended-processing-of-fake-formulas">Extended Processing of "Fake" Formulas</a>
+  <li><a href="#discretize-continuous-distribution-family-for-count-regression-models" id="toc-discretize-continuous-distribution-family-for-count-regression-models" class="nav-link active" data-scroll-target="#discretize-continuous-distribution-family-for-count-regression-models">Discretize Continuous Distribution Family for Count Regression Models</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
@@ -377,21 +378,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/fake_formula.html">fake_formula</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/discretize.html">discretize</a></li></ol></nav></header>
 
 
 
 
-<section id="extended-processing-of-fake-formulas" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="extended-processing-of-fake-formulas">Extended Processing of "Fake" Formulas</h2>
+<section id="discretize-continuous-distribution-family-for-count-regression-models" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="discretize-continuous-distribution-family-for-count-regression-models">Discretize Continuous Distribution Family for Count Regression Models</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Create a "fake" formula from a <code>formula</code>, a <code>Formula</code>, or a <code>list</code> of <code>formula</code>s. The function extracts all necessary variables (transformation of variables), to build a <code>model.frame</code>. The function also extracts all special model terms within the formulas, the information can be used to setup any special model term specification list.</p>
+<p>This function takes any continuous distribution family object and discretizes it, enabling it to be used for the estimation of count regression models. The discretized family can then be used in <code>gamlss2</code> models that deal with count data.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">fake_formula(formula, specials = NULL,
-  nospecials = FALSE, onlyspecials = FALSE)
+<pre><code class="language-R">discretize(family = NO)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -399,138 +399,59 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table>
 <tbody><tr>
 <td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="formula">formula</code>
+<code id="family">family</code>
 </td>
 <td>
-A <code>formula</code>, <code>Formula</code>, or a <code>list</code> of <code>formula</code>s.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="specials">specials</code>
-</td>
-<td>
-Character, vector of names of special functions in the formula, see <code>terms.formula</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="nospecials">nospecials</code>
-</td>
-<td>
-Logical, should variables of special model terms be part of the "fake formula"?
-</td>
-</tr>
-<tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
-<code id="onlyspecials">onlyspecials</code>
-</td>
-<td>
-Logical, should only the special model terms be returned?
+A continuous distribution family object. The family will be discretized for modeling count data, where the distribution is adapted for count outcomes.
 </td>
 </tr>
 </tbody></table>
 </section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>The function discretizes a continuous distribution family by converting its cumulative distribution function (CDF) into a probability mass function (PMF). This is done by computing the difference between the CDF evaluated at adjacent points. The resulting discretized distribution can be used in count regression models to estimate the relationship between count data and explanatory variables.</p>
+</section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Depending on the input formula, the function returns a <code>formula</code> or <code>Formula</code>. If <code>onlyspecials = TRUE</code> a vector or list of special model term names is returned.</p>
+<p>Returns an object of class <code>“gamlss2.family”</code>, which is a discretized version of the input continuous family object, suitable for use in <code>gamlss2</code> models for count data.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code></p>
+<p><code>gamlss2</code>, <code>gamlss2.family</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## basic formula</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">log</span>(x3)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Simulate count data using the Poisson distribution.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">111</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">1000</span>, <span class="at">lambda =</span> <span class="dv">10</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Create a discretized family using the BCT distribution (with log link for mu).</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">discretize</span>(<span class="at">family =</span> <span class="fu">BCT</span>(<span class="at">mu.link =</span> <span class="st">"log"</span>))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Fit a count regression model using the discretized family.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(y, <span class="at">family =</span> fam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x2 + log(x3)</code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5272.794 eps = 0.498257     
+GAMLSS-RS iteration  2: Global Deviance = 5182.6372 eps = 0.017098     
+GAMLSS-RS iteration  3: Global Deviance = 5169.4641 eps = 0.002541     
+GAMLSS-RS iteration  4: Global Deviance = 5163.3648 eps = 0.001179     
+GAMLSS-RS iteration  5: Global Deviance = 5126.7215 eps = 0.007096     
+GAMLSS-RS iteration  6: Global Deviance = 5123.1815 eps = 0.000690     
+GAMLSS-RS iteration  7: Global Deviance = 5121.8092 eps = 0.000267     
+GAMLSS-RS iteration  8: Global Deviance = 5121.3062 eps = 0.000098     
+GAMLSS-RS iteration  9: Global Deviance = 5121.1198 eps = 0.000036     
+GAMLSS-RS iteration 10: Global Deviance = 5121.0522 eps = 0.000013     
+GAMLSS-RS iteration 11: Global Deviance = 5121.0119 eps = 0.000007     </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## including special model terms</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>~x1 + x3 + x2 + log(x3) + x4</code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="discretize_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## multiple parts on the right-hand side</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4) <span class="sc">|</span> x2 <span class="sc">+</span> <span class="fu">sqrt</span>(x5)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x3 + x2 + log(x3) + x4 | x2 + sqrt(x5)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## collapse all formula parts</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">formula</span>(ff, <span class="at">collapse =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x3 + x2 + log(x3) + x4 + (x2 + sqrt(x5))</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">formula</span>(ff, <span class="at">collapse =</span> <span class="cn">TRUE</span>, <span class="at">update =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x3 + x2 + log(x3) + x4 + sqrt(x5)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## list of formulas</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4),</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> x2 <span class="sc">+</span> <span class="fu">sqrt</span>(x5),</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> z2 <span class="sc">+</span> x1 <span class="sc">+</span> <span class="fu">exp</span>(x3)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x3 + x2 + log(x3) + x4 | x2 + sqrt(x5) | z2 + x1 + exp(x3)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract separate parts on the right-hand side</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">formula</span>(ff, <span class="at">rhs =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ x1 + x3 + x2 + log(x3) + x4</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">formula</span>(ff, <span class="at">rhs =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ x2 + sqrt(x5)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">formula</span>(ff, <span class="at">rhs =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y ~ z2 + x1 + exp(x3)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## formula with multiple responses and multiple parts</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y1 <span class="sc">|</span> y2 <span class="sc">|</span> y3 <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4) <span class="sc">|</span> x2 <span class="sc">+</span> <span class="fu">ti</span>(x5)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y1 | y2 | y3 ~ x1 + x3 + x2 + log(x3) + x4 | x2 + x5</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## list of formulas with multiple responses</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  y1 <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4),</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  y2 <span class="sc">~</span> x2 <span class="sc">+</span> <span class="fu">sqrt</span>(x5),</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  y3 <span class="sc">~</span> z2 <span class="sc">+</span> x1 <span class="sc">+</span> <span class="fu">exp</span>(x3) <span class="sc">+</span> <span class="fu">s</span>(x10)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only without special terms</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">nospecials =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y1 | y2 | y3 ~ x1 + x3 | x2 + sqrt(x5) | z2 + x1 + exp(x3)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only special terms</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">onlyspecials =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[[1]]
-[1] "s(x2)"          "te(log(x3),x4)"
-
-[[2]]
-character(0)
-
-[[3]]
-[1] "s(x10)"</code></pre>
 </div>
 </div>
 

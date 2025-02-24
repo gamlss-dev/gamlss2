@@ -26,4 +26,4 @@ README.qmd
 ^vignettes/topmodels\.qmd$
 inst/README_files
 inst/vignettes0
-
+inst/disttests.R

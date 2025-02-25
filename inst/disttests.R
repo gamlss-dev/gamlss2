@@ -93,7 +93,7 @@ plot(deviance ~ as.factor(fitfun), data = ok)
 
 ok$error <- ok$truth - ok$estimate
 
-a <- subset(ok, error < -2)
+a <- subset(ok, abs(error) > 2)
 
 print(a)
 

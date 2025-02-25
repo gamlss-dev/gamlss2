@@ -97,3 +97,5 @@ a <- subset(ok, error < -2)
 
 print(a)
 
+notok <- subset(ec, is.na(ec$deviance))
+

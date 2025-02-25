@@ -119,6 +119,9 @@ make.link2 <- function(link)
     rval$name <- link
   }
 
+  if(is.null(rval$linkinv) | is.null(rval$linkfun))
+    rval <- gamlss.dist::make.link.gamlss(as.character(rval$name))
+
   rval
 }
 
@@ -163,7 +166,7 @@ tF <- function(x, ...)
     }
     par
   }
-  nx <- names(x$parameters)
+  nx <- names(x$parameters)[unlist(x$parameters)]
   score <- hess <- initialize <- list()
 
   make_call <- function(fun) {

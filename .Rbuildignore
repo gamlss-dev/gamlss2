@@ -1,7 +1,10 @@
 ^R/GA\.R$
 ^inst/tests\.qmd$
 ^inst/SGT\.R$
+^inst/disttests\.R$
 ^inst/OpenTopics\.qmd$
+inst/README_files
+inst/vignettes0
 token
 README.qmd
 .github
@@ -24,6 +27,4 @@ README.qmd
 ^vignettes/quantiles\.qmd$
 ^vignettes/s_pb\.qmd$
 ^vignettes/topmodels\.qmd$
-inst/README_files
-inst/vignettes0
-inst/disttests.R
+

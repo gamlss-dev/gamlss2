@@ -17,6 +17,11 @@ disttest <- function(family = "NO", nobs = 1000)
   rfun <- get(paste0("r", family))
   par <- formals(rfun)
   par[c("n", "...")] <- NULL
+  par <- lapply(par[npar], function(x) {
+    if(is.call(x))
+      x <- eval(x)
+    return(x)
+  })
   y <- rfun(nobs)
 
   start <- proc.time()
@@ -44,7 +49,7 @@ disttest <- function(family = "NO", nobs = 1000)
 
   res <- data.frame(
     "family" = family,
-    "parameter" = rep(names(par), 2),
+    "parameter" = rep(npar, 2),
     "fitfun" = c(rep("gamlss", k), rep("gamlss2", k)),
     "truth" = rep(unlist(par), 2),
     "estimate" = c(c0, c1),
@@ -58,21 +63,37 @@ disttest <- function(family = "NO", nobs = 1000)
   return(res)
 }
 
-e <- disttest("LNO")
-
-if(FALSE) {
 ## Run evaluation for all families.
-fams <- available_families(type = "continuous")
+fams <- c(
+  available_families(type = "continuous"),
+  available_families(type = "discrete")
+)
 
-e <- sapply(names(fams), function(j) {
+set.seed(123)
+
+e <- lapply(names(fams), function(j) {
   res <- try(disttest(j), silent = TRUE)
   if(inherits(res, "try-error")) {
-    return(NA)
+    res <- rep(NA, 8)
+    names(res) <- c("family", "parameter", "fitfun", "truth", "estimate",
+      "deviance", "elapsed", "failed")
+    res <- as.data.frame(t(res))
+    res$family <- j
+    return(res)
   } else {
     return(res)
   }
 })
 
-e <- do.call("rbind", e)
-}
+ec <- do.call("rbind", e)
+
+ok <- subset(ec, !is.na(ec$deviance))
+
+plot(deviance ~ as.factor(fitfun), data = ok)
+
+ok$error <- ok$truth - ok$estimate
+
+a <- subset(ok, error < -2)
+
+print(a)
 

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.42">
+<meta name="generator" content="quarto-1.6.43">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -69,10 +69,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-d4d76bf8491c20bad77d141916dc28e1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6178ac6885fde3a8dcd9fc65e92b4d4f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-b040dc4adb1ac0c90e398fe16a4ea29a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -403,9 +403,9 @@ CG(x, y, specials, family, offsets,
 </section>
 <section id="arguments" class="level3">
 <h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
-<table>
+<table role="presentation">
 <tbody><tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="x">x</code>
 </td>
 <td>
@@ -413,7 +413,7 @@ The full model matrix to be used for fitting.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="y">y</code>
 </td>
 <td>
@@ -421,7 +421,7 @@ The response vector or matrix.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="specials">specials</code>
 </td>
 <td>
@@ -429,7 +429,7 @@ A named list of special model terms, e.g., including design and penalty matrices
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="family">family</code>
 </td>
 <td>
@@ -437,7 +437,7 @@ A family object, see <code>gamlss2.family</code>.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="offsets">offsets</code>
 </td>
 <td>
@@ -445,7 +445,7 @@ If supplied, a list or data frame of possible model offset.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="weights">weights</code>
 </td>
 <td>
@@ -453,7 +453,7 @@ If supplied, a numeric vector of weights.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="start">start</code>
 </td>
 <td>
@@ -461,7 +461,7 @@ Starting values, either for the parameters of the response distribution or, if s
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="xterms">xterms</code>
 </td>
 <td>
@@ -469,7 +469,7 @@ A named list specifying the linear model terms. Each named list element represen
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="sterms">sterms</code>
 </td>
 <td>
@@ -477,7 +477,7 @@ A named list specifying the special model terms. Each named list element represe
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="control">control</code>
 </td>
 <td>
@@ -518,9 +518,9 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>Functions <code>RS()</code> and <code>CG()</code> return a named list of class <code>“gamlss2”</code> containing the following objects:</p>
-<table>
+<table role="presentation">
 <tbody><tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>fitted.values</code>
 </td>
 <td>
@@ -528,7 +528,7 @@ A data frame of the fitted values of the modeled parameters of the selected dist
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>fitted.specials</code>
 </td>
 <td>
@@ -536,7 +536,7 @@ A named list, one element for each parameter of the distribution, containing the
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>fitted.linear</code>
 </td>
 <td>
@@ -544,7 +544,7 @@ A named list, one element for each parameter of the distribution, containing the
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>coefficients</code>
 </td>
 <td>
@@ -552,7 +552,7 @@ A named list, one element for each parameter of the distribution, containing the
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>elapsed</code>
 </td>
 <td>
@@ -560,7 +560,7 @@ The elapsed runtime of the algorithm.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>iterations</code>
 </td>
 <td>
@@ -568,7 +568,7 @@ How many iterations the algorithm performed.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>logLik</code>
 </td>
 <td>
@@ -576,7 +576,7 @@ The final value of the log-likelihood of the model.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>control</code>
 </td>
 <td>

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.42">
+<meta name="generator" content="quarto-1.6.43">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -69,10 +69,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-d4d76bf8491c20bad77d141916dc28e1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6178ac6885fde3a8dcd9fc65e92b4d4f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-b040dc4adb1ac0c90e398fe16a4ea29a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -405,9 +405,9 @@ gamlss2(formula, ...)
 </section>
 <section id="arguments" class="level3">
 <h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
-<table>
+<table role="presentation">
 <tbody><tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="formula">formula</code>
 </td>
 <td>
@@ -415,7 +415,7 @@ A GAM-type <code>formula</code> or <code>Formula</code>. All smooth terms of the
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="data">data</code>
 </td>
 <td>
@@ -423,7 +423,7 @@ A data frame or list or environment containing the variables in the model. If no
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="family">family</code>
 </td>
 <td>
@@ -431,7 +431,7 @@ A <code>gamlss.family</code> or <code>gamlss2.family</code> object used to defin
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="subset">subset</code>
 </td>
 <td>
@@ -439,7 +439,7 @@ An optional vector specifying a subset of observations to be used in the fitting
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="na.action">na.action</code>
 </td>
 <td>
@@ -447,7 +447,7 @@ An optional vector specifying a subset of observations to be used in the fitting
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="weights">weights</code>
 </td>
 <td>
@@ -455,7 +455,7 @@ An optional vector of prior <code>weights</code> to be used in the fitting proce
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="offset">offset</code>
 </td>
 <td>
@@ -463,7 +463,7 @@ This can be used to specify an <em>a priori</em> known components to be included
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="start">start</code>
 </td>
 <td>
@@ -471,7 +471,7 @@ Starting values for estimation algorithms.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="control">control</code>
 </td>
 <td>
@@ -479,7 +479,7 @@ A list of control arguments, see <code>gamlss2_control</code>.
 </td>
 </tr>
 <tr>
-<td style="white-space: nowrap; font-family: monospace; vertical-align: top">
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
@@ -591,7 +591,7 @@ edf 1.0004
 *--------
 n = 610 df =  13.12 res.df =  596.88
 Deviance = 4770.1566 Null Dev. Red. = 33.39%
-AIC = 4796.3906 elapsed =  0.90sec</code></pre>
+AIC = 4796.3906 elapsed =  0.86sec</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

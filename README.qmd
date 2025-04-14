@@ -1,4 +1,11 @@
-<!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
+<!-- README.md is generated from README.qmd via: quarto render README.qmd --output README.md -->
+
+```{r, echo = FALSE}
+if(!file.exists("figures")) {
+  dir.create("figures")
+}
+knitr::opts_chunk$set(fig.path = "figures/")
+```
 
 # gamlss2: Infrastructure for Flexible Distributional Regression
 

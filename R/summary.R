@@ -168,7 +168,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   par <- coef(object, full = full, drop = TRUE, dropall = FALSE)
 
   ## Set NA coefficients to zero.
-  par[is.na(par)] <- 0.0
+  p_na <- is.na(par)
+  par[p_na] <- 0.0
 
   if(type == "coef")
     return(par)
@@ -200,6 +201,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
   if(type == "se")
     v <- sqrt(diag(v))
+
+  v[p_na, p_na] <- NA
 
   return(v)
 }

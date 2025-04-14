@@ -52,7 +52,7 @@ get_df <- function(object)
   df <- 0
   if(length(object$xterms)) {
     if(is.null(attr(object$fitted.linear, "edf"))) {
-      df <- df + sum(sapply(object$fitted.linear, function(x) length(x$coefficients)))
+      df <- df + sum(sapply(object$fitted.linear, function(x) length(x$coefficients[!is.na(x$coefficients)])))
     } else {
       df <- df + sum(attr(object$fitted.linear, "edf"))
     }

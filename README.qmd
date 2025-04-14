@@ -108,7 +108,7 @@ fams <- find_family(d$Tmax,
 print(fams)
 ```
 
-Here, the SEP4 family appears to provide the best fit. To further assess its suitability, we can 
+Here, the `SEP4` family appears to provide the best fit. To further assess its suitability, we can 
 visualize the fitted density using
 
 ```{r fit_family}
@@ -126,7 +126,7 @@ d$yday <- as.POSIXlt(d$date)$yday
 plot(Tmax ~ yday, data = d, col = rgb(0.1, 0.1, 0.1, alpha = 0.4))
 ```
 
-It is essential to include a model term that captures these seasonal effects. The `gamlss2 package 
+It is essential to include a model term that captures these seasonal effects. The `gamlss2` package 
 supports all model terms from the [`mgcv`](https://cran.r-project.org/package=mgcv) package, 
 allowing us to use the `s()` constructor to model seasonality.
 
@@ -142,10 +142,10 @@ d$year <- as.POSIXlt(d$date)$year + 1900
 Next, we define the model formula for the four parameters of the `SEP4` distribution.
 
 ```{r formula}
-f <- Tmax ~ s(yday, bs = "cc", k = 20) + s(year) |
-  s(yday, bs = "cc", k = 20) + s(year) |
-  s(yday, bs = "cc", k = 20) + s(year) |
-  s(yday, bs = "cc", k = 20) + s(year)
+f <- Tmax ~ s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr")) |
+  s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr")) |
+  s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr")) |
+  s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr"))
 ```
 
 In this formula, the vertical bars `|` separate the specifications for each parameter of the `SEP4` 
@@ -193,7 +193,7 @@ e.g., out-of-sample data.
 Additionally, the estimated effects can be visualized instantly using
 
 ```{r effects}
-#| fig-height: 6
+#| fig-height: 8
 #| echo: 2
 par(mar = c(4, 4, 1, 1))
 plot(b, which = "effects")

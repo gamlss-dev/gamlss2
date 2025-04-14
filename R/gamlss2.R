@@ -99,6 +99,11 @@ gamlss2.formula <- function(formula, data, family = NO,
     Y <- mf[, rn]
   }
   X <- model.matrix(mt, mf)
+
+  ## Check for all identical and drop.
+  ident <- apply(X, 2, function(x) length(unique(x)) < 2)
+  X <- X[, !ident, drop = FALSE]
+
   if(!("(Intercept)" %in% colnames(X)))
     X <- cbind("(Intercept)" = 1.0, X)
 

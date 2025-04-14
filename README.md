@@ -114,7 +114,7 @@ practice to inspect the distribution of the response variable
 hist(d$Tmax, freq = FALSE, breaks = "Scott")
 ```
 
-![](inst/README_files/figure-commonmark/hist_Tmax-1.png)
+![](README_files/figure-commonmark/hist_Tmax-1.png)
 
 The histogram suggests that the data is slightly left-skewed, with
 longer tails for temperatures below zero. This indicates that the
@@ -149,8 +149,8 @@ print(fams)
           TF       NO      JSU     SEP4 
     92046.12 92044.10 91975.24 91879.66 
 
-Here, the SEP4 family appears to provide the best fit. To further assess
-its suitability, we can visualize the fitted density using
+Here, the `SEP4` family appears to provide the best fit. To further
+assess its suitability, we can visualize the fitted density using
 
 ``` r
 fit_family(d$Tmax, family = SEP4)
@@ -165,7 +165,7 @@ fit_family(d$Tmax, family = SEP4)
     GAMLSS-RS iteration  7: Global Deviance = 91872.4447 eps = 0.000021     
     GAMLSS-RS iteration  8: Global Deviance = 91871.6641 eps = 0.000008     
 
-![](inst/README_files/figure-commonmark/fit_family-1.png)
+![](README_files/figure-commonmark/fit_family-1.png)
 
 After identifying a suitable distributional model, we can now
 incorporate covariates to estimate a full GAMLSS. Since temperature data
@@ -176,12 +176,12 @@ scatterplot
 d$yday <- as.POSIXlt(d$date)$yday
 ```
 
-![](inst/README_files/figure-commonmark/season_scatter-1.png)
+![](README_files/figure-commonmark/season_scatter-1.png)
 
 It is essential to include a model term that captures these seasonal
-effects. The
-`gamlss2 package  supports all model terms from the [`mgcv`](https://cran.r-project.org/package=mgcv) package,  allowing us to use the`s()\`
-constructor to model seasonality.
+effects. The `gamlss2` package supports all model terms from the
+[`mgcv`](https://cran.r-project.org/package=mgcv) package, allowing us
+to use the `s()` constructor to model seasonality.
 
 Additionally, we include a time trend to examine whether maximum
 temperatures have increased over the observed period. In the full GAMLSS
@@ -197,10 +197,10 @@ Next, we define the model formula for the four parameters of the `SEP4`
 distribution.
 
 ``` r
-f <- Tmax ~ s(yday, bs = "cc", k = 20) + s(year) |
-  s(yday, bs = "cc", k = 20) + s(year) |
-  s(yday, bs = "cc", k = 20) + s(year) |
-  s(yday, bs = "cc", k = 20) + s(year)
+f <- Tmax ~ s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr")) |
+  s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr")) |
+  s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr")) |
+  s(yday, bs = "cc", k = 20) + s(year) + te(yday, year, bs = c("cc", "cr"))
 ```
 
 In this formula, the vertical bars `|` separate the specifications for
@@ -215,14 +215,14 @@ Finally, we estimate the model using
 b <- gamlss2(f, data = d, family = SEP4)
 ```
 
-    GAMLSS-RS iteration  1: Global Deviance = 80024.4293 eps = 0.168423     
-    GAMLSS-RS iteration  2: Global Deviance = 79913.7143 eps = 0.001383     
-    GAMLSS-RS iteration  3: Global Deviance = 79877.0442 eps = 0.000458     
-    GAMLSS-RS iteration  4: Global Deviance = 79864.0999 eps = 0.000162     
-    GAMLSS-RS iteration  5: Global Deviance = 79858.1657 eps = 0.000074     
-    GAMLSS-RS iteration  6: Global Deviance = 79856.0447 eps = 0.000026     
-    GAMLSS-RS iteration  7: Global Deviance = 79854.4101 eps = 0.000020     
-    GAMLSS-RS iteration  8: Global Deviance = 79853.9545 eps = 0.000005     
+    GAMLSS-RS iteration  1: Global Deviance = 79918.3054 eps = 0.169526     
+    GAMLSS-RS iteration  2: Global Deviance = 79804.3251 eps = 0.001426     
+    GAMLSS-RS iteration  3: Global Deviance = 79759.9851 eps = 0.000555     
+    GAMLSS-RS iteration  4: Global Deviance = 79745.0554 eps = 0.000187     
+    GAMLSS-RS iteration  5: Global Deviance = 79738.3587 eps = 0.000083     
+    GAMLSS-RS iteration  6: Global Deviance = 79736.4781 eps = 0.000023     
+    GAMLSS-RS iteration  7: Global Deviance = 79735.2054 eps = 0.000015     
+    GAMLSS-RS iteration  8: Global Deviance = 79734.6366 eps = 0.000007     
 
 This approach allows us to flexibly capture both seasonal patterns and
 long-term trends in daily maximum temperatures.
@@ -243,47 +243,47 @@ summary(b)
     ---
     Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-    (Intercept)  -0.9391     0.1468  -6.398 1.63e-10 ***
+    (Intercept)  -0.9380     0.1507  -6.224    5e-10 ***
     ---
     Smooth terms:
-        s(yday) s(year)
-    edf  16.382   7.543
+        s(yday) s(year) te(yday,year)
+    edf 16.3620  7.6634        17.997
     *--------
     Parameter: sigma 
     ---
     Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-    (Intercept) 1.886075   0.001932   976.2   <2e-16 ***
+    (Intercept)  1.88151    0.00144    1307   <2e-16 ***
     ---
     Smooth terms:
-        s(yday) s(year)
-    edf  15.823  4.1399
+        s(yday) s(year) te(yday,year)
+    edf 15.9695  4.6506        5.9388
     *--------
     Parameter: nu 
     ---
     Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-    (Intercept)  0.64172    0.02103   30.51   <2e-16 ***
+    (Intercept)  0.63884    0.02157   29.62   <2e-16 ***
     ---
     Smooth terms:
-        s(yday) s(year)
-    edf  12.634  5.5508
+        s(yday) s(year) te(yday,year)
+    edf 12.2077  6.0049        2.0948
     *--------
     Parameter: tau 
     ---
     Coefficients:
                 Estimate Std. Error t value Pr(>|t|)    
-    (Intercept) 1.028989   0.009557   107.7   <2e-16 ***
+    (Intercept) 1.027653   0.009979     103   <2e-16 ***
     ---
     Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ---
     Smooth terms:
-        s(yday) s(year)
-    edf  12.144  1.0062
+        s(yday) s(year) te(yday,year)
+    edf  11.060   1.013        1.4077
     *--------
-    n = 13665 df =  79.22 res.df =  13585.78
-    Deviance = 79853.9545 Null Dev. Red. = 13.08%
-    AIC = 80012.3985 elapsed = 26.02sec
+    n = 13665 df =  106.37 res.df =  13558.63
+    Deviance = 79734.6366 Null Dev. Red. = 13.21%
+    AIC = 79947.3743 elapsed = 21.09sec
 
 The summary output is structured similarly to those of `lm()` and
 `glm()`, with the key difference being that it provides results for all
@@ -298,7 +298,7 @@ To extract the AIC separately, we use
 AIC(b)
 ```
 
-    [1] 80012.4
+    [1] 79947.37
 
 Similarly, the log-likelihood can be obtained with
 
@@ -306,13 +306,13 @@ Similarly, the log-likelihood can be obtained with
 logLik(b)
 ```
 
-    'log Lik.' -39926.98 (df=79.22199)
+    'log Lik.' -39867.32 (df=106.3689)
 
 ``` r
 logLik(b, newdata = d)
 ```
 
-    'log Lik.' -39926.98 (df=79.22199)
+    'log Lik.' -39867.32 (df=106.3689)
 
 Here we use the `newdata` argument just to show, that the log-likelihood
 can also be evaluated on, e.g., out-of-sample data.
@@ -323,7 +323,7 @@ Additionally, the estimated effects can be visualized instantly using
 plot(b, which = "effects")
 ```
 
-![](inst/README_files/figure-commonmark/effects-1.png)
+![](README_files/figure-commonmark/effects-1.png)
 
 This plot provides a direct visualization of the smooth effects included
 in the model, helping to interpret seasonal variations and long-term
@@ -336,7 +336,7 @@ quantile residuals using a histogram, Q-Q plot, and worm plot.
 plot(b, which = "resid")
 ```
 
-![](inst/README_files/figure-commonmark/resids-1.png)
+![](README_files/figure-commonmark/resids-1.png)
 
 These diagnostic plots indicate that the model is well-calibrated when
 using the `SEP4` distribution, demonstrating a good fit to the observed
@@ -382,7 +382,7 @@ matplot(nd$year, cbind(q10, q50, q90), type = "l",
   lwd = 2, xlab = "Year", ylab = "Estimated Quantiles")
 ```
 
-![](inst/README_files/figure-commonmark/long_term-1.png)
+![](README_files/figure-commonmark/long_term-1.png)
 
 The plot reveals an upward trend in the median temperature over time,
 highlighting the effects of long-term climate change.
@@ -402,19 +402,19 @@ head(probs)
 ```
 
          Prob(Tmax > 14) Prob(Tmax > 12) Prob(Tmax > 10) Prob(Tmax > 8)
-    [1,]    1.076916e-13    7.994927e-11    2.015706e-08   1.885932e-06
-    [2,]    1.202372e-13    8.379741e-11    2.024026e-08   1.845235e-06
-    [3,]    1.285638e-13    8.538326e-11    1.997686e-08   1.788527e-06
-    [4,]    1.331157e-13    8.509593e-11    1.945703e-08   1.721421e-06
-    [5,]    1.341149e-13    8.345702e-11    1.877488e-08   1.649196e-06
-    [6,]    1.328937e-13    8.103096e-11    1.802007e-08   1.576599e-06
+    [1,]    1.590061e-12    5.501117e-10    7.673712e-08   4.605888e-06
+    [2,]    1.635692e-12    5.493598e-10    7.520458e-08   4.469749e-06
+    [3,]    1.630585e-12    5.369963e-10    7.269465e-08   4.302274e-06
+    [4,]    1.585621e-12    5.161699e-10    6.952153e-08   4.115322e-06
+    [5,]    1.514233e-12    4.901235e-10    6.598375e-08   3.919732e-06
+    [6,]    1.428635e-12    4.618508e-10    6.234650e-08   3.725021e-06
          Prob(Tmax > 6) Prob(Tmax > 4) Prob(Tmax > 2) Prob(Tmax > 0)
-    [1,]   7.184322e-05    0.001228708    0.010461880     0.04946567
-    [2,]   6.942085e-05    0.001184324    0.010125835     0.04824358
-    [3,]   6.679725e-05    0.001140251    0.009804780     0.04709746
-    [4,]   6.408441e-05    0.001097238    0.009500008     0.04602442
-    [5,]   6.138384e-05    0.001055977    0.009212863     0.04502230
-    [6,]   5.878548e-05    0.001017096    0.008944721     0.04408959
+    [1,]   0.0001275031    0.001753963     0.01299744     0.05663021
+    [2,]   0.0001233908    0.001701366     0.01267788     0.05562356
+    [3,]   0.0001188968    0.001647312     0.01236082     0.05464662
+    [4,]   0.0001142025    0.001592977     0.01204944     0.05370176
+    [5,]   0.0001094721    0.001539443     0.01174679     0.05279154
+    [6,]   0.0001048512    0.001487695     0.01145582     0.05191868
 
 To illustrate these exceedance probabilities, we plot them over the
 course of the year
@@ -423,7 +423,7 @@ course of the year
 col <- colorspace::heat_hcl(ncol(probs))
 ```
 
-![](inst/README_files/figure-commonmark/vis_probs-1.png)
+![](README_files/figure-commonmark/vis_probs-1.png)
 
 The plot reveals that even at this high-altitude station, the
 probability of `Tmax` \> 14°C reaches approximately 5% during summer.

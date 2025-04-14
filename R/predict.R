@@ -255,10 +255,19 @@ predict.gamlss2 <- function(object,
   ## Compute mean or median predictions.
   if(type == "response") {
     fm <- family$mean
+    warn <- NULL
     if(is.null(fm)) {
+      warn <- 'Prediction with type = "response", however, the mean function is missing in the family!'
       if(!is.null(family$q)) {
+        warn <- paste(warn, 'Using the median instead!')
         fm <- function(par) family$q(0.5, par)
       }
+    }
+    if(is.null(fm)) {
+      warning('Prediction with type = "response", however, the mean function is missing in the family! Using the first parameter instead!')
+    } else {
+      if(!is.null(warn))
+        warning(warn)
     }
     p <- if(is.null(fm)) p[[1L]] else fm(p)
   }

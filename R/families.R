@@ -1082,24 +1082,154 @@ ologit4 <- function(...) {
   return(fam)
 }
 
-##if(FALSE) {
-#library("bamlss")
+ologit <- function(k) {
+  stopifnot(k >= 2)
+
+  ## Parameter names: location and delta-encoded cutpoints.
+  threshold_names <- c("theta1", paste0("delta", 2:(k - 1)))
+  par_names <- c("location", threshold_names)
+
+  ## Identity links for now.
+  links <- rep("identity", length(par_names))
+  names(links) <- par_names
+
+  fam <- list(
+    family = paste0("Ordered Logit (", k, " categories)"),
+    names = par_names,
+    links = links,
+
+    d = function(y, par, log = FALSE, ...) {
+      n <- length(y)
+
+      ## Build increasing cutpoints for all observations
+      cuts <- matrix(NA, nrow = n, ncol = k - 1)
+      cuts[, 1] <- par$theta1
+
+      if (k > 2) {
+        for (j in 2:(k - 1)) {
+          cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
+        }
+      }
+
+      ## Compute cumulative probabilities
+      cum_probs <- lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
+      cum_probs <- do.call(cbind, cum_probs)
+
+      ## Compute category probabilities
+      probs <- matrix(NA, nrow = n, ncol = k)
+      probs[, 1] <- 1 - cum_probs[, 1]
+      for (j in 2:(k - 1)) {
+        probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
+      }
+      probs[, k] <- cum_probs[, k - 1]
+
+      ## Select correct category
+      p <- probs[cbind(seq_len(n), y)]
+      p[p < 1e-8 | is.na(p)] <- 1e-8
+
+      if (log) {
+        p <- log(p)
+        p[is.na(p)] <- -1e10
+      }
+
+      return(p)
+    },
+
+    initialize = {
+      init_list <- list()
+
+      ## Start value for location
+      init_list$location <- function(y, ...) {
+        rep(mean(as.numeric(y)), length(y))
+      }
+
+      ## Initialize theta1
+      init_list$theta1 <- function(y, ...) {
+        probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
+        q <- qlogis(probs[1])
+        rep(q, length(y))
+      }
+
+      ## Initialize deltas: log of spacing between cutpoints
+      for (j in 2:(k - 1)) {
+        init_list[[paste0("delta", j)]] <- local({
+          jj <- j
+          function(y, ...) {
+            probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
+            q <- qlogis(probs)
+            diffs <- diff(q)
+            val <- if (jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
+            rep(val, length(y))
+          }
+        })
+      }
+
+      init_list
+    }
+  )
+
+  fam$probabilities <- function(par, ...) {
+    n <- length(par$location)
+    k <- length(par) - 1 + 1  ## Infer number of categories from number of deltas.
+
+    ## Reconstruct cutpoints.
+    cuts <- matrix(NA, nrow = n, ncol = k - 1)
+    cuts[, 1] <- par$theta1
+    if (k > 2) {
+      for (j in 2:(k - 1)) {
+        cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
+      }
+    }
+
+    ## Compute cumulative probabilities.
+    cum_probs <- lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
+    cum_probs <- do.call(cbind, cum_probs)
+
+    ## Category probabilities.
+    probs <- matrix(NA, nrow = n, ncol = k)
+    probs[, 1] <- 1 - cum_probs[, 1]
+    for (j in 2:(k - 1)) {
+      probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
+    }
+    probs[, k] <- cum_probs[, k - 1]
+
+    colnames(probs) <- paste0("Pr(Y=", 1:k, ")")
+    return(probs)
+  }
+
+  class(fam) <- c("gamlss2.family", "family.bamlss")
+  return(fam)
+}
+
+#if(FALSE) {
 #library("gamlss2")
 
-#set.seed(123)
+### From MASS.
+#library("MASS")
 
-#n <- 2000
-#x <- runif(n, -3, 3)
-#y <- sin(x) + rnorm(n, sd = 0.3)
-#yf <- cut(y, breaks = seq(min(y), max(y), length = 5), include.lowest = TRUE)
-#yi <- as.integer(yf)
+#options(contrasts = c("contr.treatment", "contr.poly"))
 
-#b <- gamlss2(yi ~ s(x), family = ologit4, step = 0.1, maxit = c(400, 400))
-#plot(b)
+#m <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
+#summary(m)
 
-#m <- bamlss(yi ~ s(x), family = ologit4)
-#plot(m)
-##}
+### Response needs to be integer.
+#housing$Satint <- as.integer(housing$Sat)
+
+### Estimate model.
+#b <- gamlss2(Satint ~ Infl + Type + Cont, data = housing, weights = Freq, family = ologitK(k = 3))
+
+### Compare.
+#coef(m)
+#coef(b)
+
+### Predict probabilities.
+#pm <- predict(m, type = "p")
+#pb <- predict(b)
+#pb <- family(b)$probabilities(pb)
+
+#print(head(pm))
+#print(head(pb))
+#}
 
 ## Shifted log-link.
 shiftlog <- function(shift = 1) {

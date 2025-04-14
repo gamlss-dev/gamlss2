@@ -34,6 +34,7 @@ export(
   "RS",
   "CG",
   "discretize",
+  "ologit",
   "special_fit",
   "special_predict",
   "specials",

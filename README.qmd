@@ -1,4 +1,4 @@
-<!-- README.md is generated from README.qmd via: quarto render README.qmd --output README.md -->
+<!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
 
 ```{r, echo = FALSE}
 if(!file.exists("figures")) {

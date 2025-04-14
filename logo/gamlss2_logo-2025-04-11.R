@@ -28,7 +28,7 @@ graphics.off()
 png <- FALSE
 
 if(png) {
-  png("gamlss2_logo.png", units = "in",
+  png("gamlss2.png", units = "in",
     width = 5, height = 5, res = 500,
     bg = "transparent")
 } else {

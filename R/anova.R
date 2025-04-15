@@ -59,8 +59,11 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
   args <- list(...)
   control[names(args)] <- args
 
-  xterms <- object$xterms
-  sterms <- object$sterms
+  xterms <- xterms0 <- object$xterms
+  sterms <- sterms0 <- object$sterms
+
+  terms <- object$terms
+  xl <- object$xlevels
 
   if(!is.null(scope)) {
     ## Process variables and special term information.
@@ -68,15 +71,22 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
     ff <- fake_formula(scope, nospecials = TRUE)
     for(i in 1:(length(ff)[2])) {
       Xterms[[i]] <- attr(terms(formula(ff, rhs = i, lhs = 0)), "term.labels")
+      if(length(xl)) {
+        for(l in names(xl)) {
+          if(l %in% Xterms[[i]]) {
+            xil <- as.list(Xterms[[i]])
+            names(xil) <- Xterms[[i]]
+            xil[[l]] <- paste0(l, xl[[l]])
+            Xterms[[i]] <- as.character(unlist(xil))
+          }
+        }
+      }
     }
     Sterms <- fake_formula(scope, onlyspecials = TRUE)
     names(Xterms) <- names(Sterms) <- names(xterms)
     xterms <- Xterms
-    sterms <- sterms
+    sterms <- Sterms
   }
-
-  terms <- object$terms
-  xl <- object$xlevels
 
   offsets <- model.offset(model.frame(object))
   weights <- model.weights(model.frame(object))
@@ -102,7 +112,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
           }
         }
         for(l in unique(names(j))) {
-          xtl <- xterms
+          xtl <- xterms0
           xtl[[i]] <- xtl[[i]][!(xtl[[i]] %in% j[names(j) == l])]
 
           m <- RS(x = object$x, y = object$y, specials = object$specials,
@@ -136,7 +146,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
     for(i in names(sterms)) {
       si <- sterms[[i]]
       if(length(si)) {
-        j <- sterms
+        j <- sterms0
         for(l in si) {
           j[[i]] <- sterms[[i]][sterms[[i]] != l]
 

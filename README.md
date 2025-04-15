@@ -174,6 +174,7 @@ scatterplot
 
 ``` r
 d$yday <- as.POSIXlt(d$date)$yday
+plot(Tmax ~ yday, data = d, col = rgb(0.1, 0.1, 0.1, alpha = 0.4))
 ```
 
 ![](figures/season_scatter-1.png)
@@ -283,7 +284,7 @@ summary(b)
     *--------
     n = 13665 df =  106.37 res.df =  13558.63
     Deviance = 79734.6366 Null Dev. Red. = 13.21%
-    AIC = 79947.3743 elapsed = 20.81sec
+    AIC = 79947.3743 elapsed = 20.49sec
 
 The summary output is structured similarly to those of `lm()` and
 `glm()`, with the key difference being that it provides results for all
@@ -380,6 +381,8 @@ Finally, we visualize the long-term trend in temperature.
 ``` r
 matplot(nd$year, cbind(q10, q50, q90), type = "l",
   lwd = 2, xlab = "Year", ylab = "Estimated Quantiles")
+legend("topleft", c("10%", "Median", "90%"),
+  col = 1:3, lty = 1:3, bg = "white")
 ```
 
 ![](figures/long_term-1.png)
@@ -421,6 +424,11 @@ course of the year
 
 ``` r
 col <- colorspace::heat_hcl(ncol(probs))
+matplot(0:365, probs, type = "l", lty = 1, lwd = 2, col = col,
+  xlab = "Day of the Year", ylab = "Estimated Probabilities")
+abline(h = 0.05, lty = 2, col = "lightgray")
+legend("topleft", colnames(probs),
+  lwd = 2, lty = 1, col = col, bty = "n")
 ```
 
 ![](figures/vis_probs-1.png)

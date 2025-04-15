@@ -9,7 +9,7 @@ knitr::opts_chunk$set(fig.path = "figures/")
 
 # gamlss2: Infrastructure for Flexible Distributional Regression
 
-## Overview 
+## Overview
 
 The primary purpose of this package is to facilitate the creation of advanced infrastructures
 designed to enhance the GAMLSS modeling framework. Notably, the `gamlss2` package represents a
@@ -127,7 +127,7 @@ full GAMLSS. Since temperature data exhibits a strong seasonal pattern, as illus
 following scatterplot
 
 ```{r season_scatter}
-#| echo: 2
+#| echo: -1
 par(mar = c(4, 4, 1, 1))
 d$yday <- as.POSIXlt(d$date)$yday
 plot(Tmax ~ yday, data = d, col = rgb(0.1, 0.1, 0.1, alpha = 0.4))
@@ -201,7 +201,7 @@ Additionally, the estimated effects can be visualized instantly using
 
 ```{r effects}
 #| fig-height: 8
-#| echo: 2
+#| echo: -1
 par(mar = c(4, 4, 1, 1))
 plot(b, which = "effects")
 ```
@@ -253,7 +253,7 @@ q90 <- family(b)$q(0.9, par)
 Finally, we visualize the long-term trend in temperature.
 
 ```{r long_term}
-#| echo: 2
+#| echo: -1
 par(mar = c(4, 4, 1, 1))
 matplot(nd$year, cbind(q10, q50, q90), type = "l",
   lwd = 2, xlab = "Year", ylab = "Estimated Quantiles")
@@ -280,7 +280,7 @@ head(probs)
 To illustrate these exceedance probabilities, we plot them over the course of the year
 
 ```{r vis_probs}
-#| echo: 2
+#| echo: -1
 par(mar = c(4, 4, 1, 1))
 col <- colorspace::heat_hcl(ncol(probs))
 matplot(0:365, probs, type = "l", lty = 1, lwd = 2, col = col,

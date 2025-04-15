@@ -195,15 +195,15 @@ print.drop1.gamlss2 <- function(x, digits = max(getOption("digits") - 2L, 3L), .
   return(invisible(NULL))
 }
 
-#if(FALSE) {
-#  data("rent", package = "gamlss.data")
+if(FALSE) {
+  data("rent", package = "gamlss.data")
 
-#  m1 <- gamlss2(R ~ Fl, data = rent)
-#  m2 <- gamlss2(R ~ Fl + A, data = rent)
-#  m3 <- gamlss2(R ~ s(Fl) + A + loc, data = rent)
-#  m4 <- gamlss2(R ~ s(Fl) + A + loc | s(Fl) + s(A) + loc, data = rent)
+  m1 <- gamlss2(R ~ Fl, data = rent)
+  m2 <- gamlss2(R ~ Fl + A, data = rent)
+  m3 <- gamlss2(R ~ s(Fl) + A + loc, data = rent)
+  m4 <- gamlss2(R ~ s(Fl) + A + loc | s(Fl) + s(A) + loc, data = rent)
 
-#  anova(m1, m2, m3, m4)
-#  anova(m4)
-#}
+  anova(m1, m2, m3, m4)
+  anova(m4)
+}
 

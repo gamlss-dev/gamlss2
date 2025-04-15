@@ -94,5 +94,9 @@ S3method(new_formula, select)
 
 S3method(distributions3::prodist, gamlss2)
 
+S3method(anova, gamlss2)
+S3method(drop1, gamlss2)
+S3method(print, drop1.gamlss2)
+
 useDynLib(gamlss2, .registration = TRUE)
 

@@ -68,7 +68,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
   if(!is.null(scope)) {
     ## Process variables and special term information.
     Xterms <- list()
-    ff <- fake_formula(scope, nospecials = TRUE)
+    ff <- as.Formula(fake_formula(scope, nospecials = TRUE))
     for(i in 1:(length(ff)[2])) {
       Xterms[[i]] <- attr(terms(formula(ff, rhs = i, lhs = 0)), "term.labels")
       if(length(xl)) {
@@ -83,7 +83,12 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
       }
     }
     Sterms <- fake_formula(scope, onlyspecials = TRUE)
-    names(Xterms) <- names(Sterms) <- names(xterms)
+    if(length(Xterms)) {
+      names(Xterms) <- names(xterms)[1:length(Xterms)]
+    }
+    if(length(Sterms)) {
+      names(Sterms) <- names(sterms)[1:length(Sterms)]
+    }
     xterms <- Xterms
     sterms <- Sterms
   }
@@ -215,5 +220,10 @@ print.drop1.gamlss2 <- function(x, digits = max(getOption("digits") - 2L, 3L), .
 
 #  anova(m1, m2, m3, m4)
 #  anova(m4)
+
+#  drop1(m4)
+#  drop1(m4, scope =~ A + loc | s(Fl))
+#  drop1(m4, scope =~ loc)
+#  drop1(m4, scope =~ 1 | loc)
 #}
 

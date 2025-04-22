@@ -1,7 +1,7 @@
 ## Install required packages.
 pkgs <- c(
   "gamlss.dist", "ggplot2", "hexSticker",
-  "showtext", "dplyr", "colorspace"
+  "showtext", "dplyr"
 )
 
 for(p in pkgs) {
@@ -16,7 +16,6 @@ library("ggplot2")
 library("hexSticker")
 library("showtext")
 library("dplyr")
-library("colorspace")
 
 ## Add a Google font to use in the logo text.
 font_add_google(name = "Source Code Pro", family = "sourcecode")
@@ -69,7 +68,7 @@ gen_pol <- function(x, mu = 3.5, sigma = 2.5, nu = 3, tau = 4) {
 }
 
 ## Generate a color palette for the quantile polygons.
-col <- rainbow_hcl(length(q))
+col <- hcl.colors(length(q), "Set 2", rev = TRUE)
 
 ## Create layered polygons from outer to inner quantiles.
 polys <- lapply(rev(2:length(q)), function(i) {

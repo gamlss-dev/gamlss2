@@ -439,14 +439,10 @@ tF <- function(x, ...)
     "score" = score,
     "hess" = hess,
     "d" = function(y, par, log = FALSE, ...) {
-       par <- check_range(par)
        d <- eval(dc)
-       if(log)
-         d[!is.finite(d)] <- -100
        return(d)
     },
     "p" = if(!inherits(pfun, "try-error")) function(q, par, log = FALSE, ...) {
-      par <- check_range(par)
       p <- eval(pc)
       if(length(p) < length(par[[1L]])) {
         q <- rep(q, length.out = length(par[[1L]]))
@@ -455,7 +451,6 @@ tF <- function(x, ...)
       return(p)
     } else NULL,
     "q" = if(!inherits(qfun, "try-error")) function(p, par, log = FALSE, ...) {
-      par <- check_range(par)
       q <- eval(qc)
       if(length(q) < length(par[[1L]])) {
         p <- rep(p, length.out = length(par[[1L]]))
@@ -464,7 +459,6 @@ tF <- function(x, ...)
       return(q)
     } else NULL,
     "r" = if(!inherits(rfun, "try-error")) function(n, par, ...) {
-      par <- check_range(par)
       return(eval(rc))
     } else NULL
   )
@@ -476,7 +470,6 @@ tF <- function(x, ...)
   if(!is.null(x$mean)) {
     meanc <- make_call(x$mean)
     rval$mean  <- function(par, ...) {
-      par <- check_range(par)
       res <- eval(meanc)
       if(!is.null(dim(res)))
         res <- res[, 1]
@@ -487,7 +480,6 @@ tF <- function(x, ...)
   if(!is.null(x$variance)) {
     varc <- make_call(x$variance)
     rval$variance  <- function(par, ...) {
-      par <- check_range(par)
       res <- eval(varc)
       if(!is.null(dim(res)))
         res <- res[, 1]
@@ -514,14 +506,19 @@ tF <- function(x, ...)
   }
 
   rval$loglik <- function(y, par) {
-    par <- check_range(par)
     log <- TRUE
     d <- try(eval(dc), silent = TRUE)
     if(inherits(d, "try-error")) {
       warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
       return(-Inf)
     }
-    d[!is.finite(d)] <- -100
+    if(any(is.na(d))) {
+      warning("NA log-density values!")
+    }
+    if(any(i <- !is.finite(d))) {
+      warning("non finite log-density values, set to -100!")
+      d[i] <- -100
+    }
     return(sum(d, na.rm = TRUE))
   }
 
@@ -608,7 +605,11 @@ complete_family <- function(family)
           warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
           return(-Inf)
         }
+        if(any(is.na(logdens))) {
+          warning("NA log-density values!")
+        }
         if(any(i <- !is.finite(logdens))) {
+          warning("non finite log-density values, set to -100!")
           logdens[i] <- -100
         }
         return(sum(logdens, na.rm = TRUE))

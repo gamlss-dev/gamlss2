@@ -531,6 +531,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     attr(fit, "edf") <- unlist(sapply(fit, function(x) x$edf))
   }
 
+  ## Message if not converged due to NAs or Inf!
+  d <- family$d(y, family$map2par(eta), log = TRUE)
+  if(!is.null(weights))
+    d <- d * weights
+  if(any(is.na(d))) {
+    warning("NA log-density values in the last iteration of the RS algorithm!")
+  }
+  if(any(!is.finite(d))) {
+    warning("non-finite log-density values in the last iteration of the RS algorithm!")
+  }
+
   rval <- list(
     "fitted.values" = as.data.frame(eta),
     "fitted.specials" = sfit,

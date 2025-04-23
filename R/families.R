@@ -152,8 +152,9 @@ tF <- function(x, ...)
 {
   if(is.function(x))
     x <- x()
-  if(!inherits(x, "gamlss.family"))
-    stop('only "gamlss.family" objects can be transformed!')
+  if(!inherits(x, "gamlss.family")) {
+    return(x)
+  }
 
   args <- list(...)
   pr <- args$range
@@ -512,11 +513,11 @@ tF <- function(x, ...)
       warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
       return(-Inf)
     }
-    if(any(is.na(d))) {
-      warning("NA log-density values!")
-    }
+#    if(any(is.na(d))) {
+#      warning("NA log-density values!")
+#    }
     if(any(i <- !is.finite(d))) {
-      warning("non finite log-density values, set to -100!")
+      ## warning("non finite log-density values, set to -100!")
       d[i] <- -100
     }
     return(sum(d, na.rm = TRUE))
@@ -605,11 +606,11 @@ complete_family <- function(family)
           warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
           return(-Inf)
         }
-        if(any(is.na(logdens))) {
-          warning("NA log-density values!")
-        }
+#        if(any(is.na(logdens))) {
+#          warning("NA log-density values!")
+#        }
         if(any(i <- !is.finite(logdens))) {
-          warning("non finite log-density values, set to -100!")
+          ## warning("non finite log-density values, set to -100!")
           logdens[i] <- -100
         }
         return(sum(logdens, na.rm = TRUE))

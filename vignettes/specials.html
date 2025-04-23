@@ -581,7 +581,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38359.6113 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.322 sec elapsed</code></pre>
+<pre><code>4.33 sec elapsed</code></pre>
 </div>
 </div>
 <p>The first order interaction fit for <code>loess</code> is;</p>
@@ -597,7 +597,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>7.647 sec elapsed</code></pre>
+<pre><code>7.515 sec elapsed</code></pre>
 </div>
 </div>
 <p>Now the main effect model using <code>s()</code></p>
@@ -615,7 +615,7 @@ GAMLSS-RS iteration  6: Global Deviance = 38408.8217 eps = 0.000004     </code><
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.199 sec elapsed</code></pre>
+<pre><code>1.303 sec elapsed</code></pre>
 </div>
 </div>
 <p>The interaction model using <code>te()</code></p>
@@ -632,7 +632,7 @@ GAMLSS-RS iteration  5: Global Deviance = 38387.1819 eps = 0.000007     </code><
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.29 sec elapsed</code></pre>
+<pre><code>1.166 sec elapsed</code></pre>
 </div>
 </div>
 <p>The cubic spline function is lot faster than the <code>loess()</code> implementation <code>lo()</code> in <code>gamlss2</code>, but let us now compare the models using AIC.</p>

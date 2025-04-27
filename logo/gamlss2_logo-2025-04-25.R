@@ -46,7 +46,7 @@ qmat <- quantile(b, prob = seq(0.01, 0.99, length = 501))
 
 ## Prepare color palette.
 k <- (ncol(qmat) - 1) / 2
-col <- hcl.colors(k, "Sunset", rev = TRUE, alpha = 0.05)
+col <- hcl.colors(floor(1.05 * k), "Blue-Yellow", rev = TRUE, alpha = 0.05)[1:k]
 
 ## Prepare basic plot.
 p <- ggplot() +
@@ -95,14 +95,15 @@ s <- sticker(
   package = "gamlss2",
   p_size = 60,
   p_fontface = "bold",
-  s_width = 1.45,
+  p_color = "white",
+  s_width = 2.2,
   s_height = 1,
   s_x = 1,
-  s_y = 1.38,
+  s_y = 1.36,
   p_x = 1,
-  p_y = 0.75,
-  h_color = tail(hcl.colors(k, "Sunset", rev = TRUE), 1), ##"#2E4F79",
-  h_fill = hcl(240, 80, 62), ## hcl(244, 71, 52)
+  p_y = 0.8,
+  h_color = hcl(180, 60, 75),
+  h_fill = hcl(250, 60, 35),
   h_size = 1.5,
   spotlight = TRUE,
   l_alpha = 0.4,

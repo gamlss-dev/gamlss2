@@ -2,7 +2,7 @@
 
 <!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
 
-<img src="gamlss2.png" align="right" alt="gamlss2 logo" width="120" />
+<img src="https://gamlss-dev.github.io/gamlss2/gamlss2.png" align="right" alt="gamlss2 logo" width="120" />
 
 # gamlss2: Infrastructure for Flexible Distributional Regression
 

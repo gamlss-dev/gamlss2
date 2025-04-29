@@ -78,7 +78,7 @@ gamlss2.formula <- function(formula, data, family = NO,
           vn <- vn[!(vn %in% yn)]
           attr(formula, "rhs")[[i]] <- as.call(str2lang(paste(vn, collapse = "+")))
         } else {
-          attr(formula, "rhs")[[i]] <- attr(formula, "rhs")[[1L]]
+          attr(formula, "rhs")[[i]] <- attr(formula, "rhs")[[i - 1L]]
         }
       } else {
         stop('using "." in formula but no data argument supplied!')

@@ -3,10 +3,16 @@ project:
   output-dir: ../docs/
 
 website:
-  title: "gamlss2"
+  title: gamlss2
+  site-url: https://gamlss-dev.github.io/gamlss2/
+  favicon: gamlss2.png
+  image: gamlss2.png
+  open-graph: true
   navbar:
-    logo: "gamlss2.png"
-    logo-alt: "gamlss2 logo"
+    logo: gamlss2_wide.png
+    logo-alt: gamlss2
+    title: false
+    pinned: false
     search: true
     right:
       - icon: github

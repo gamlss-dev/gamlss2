@@ -3,17 +3,17 @@
 @import url(http://fonts.googleapis.com/css?family=Source+Code+Pro:400italic,700italic,400,700);
 $font-family-sans-serif: 'Roboto';
 
-/* hcl(270, c(60, 65, 15), c(55, 40, 90)) */
+/* hcl(250, 60, 35) hcl(180, 60, 85) */
 $body-color: #333333 !default;
-$link-color: #5F52A5;
+$link-color: #035493;
 $code-color: #333333;
-$navbar-bg: #E2E0F4;
-$navbar-fg: #5F52A5;
-$navbar-hl: #5F52A5;
+$navbar-bg: #035493;
+$navbar-fg: #FFFFFF;
+$navbar-hl: #00CFC0;
 $sidebar-fg: #333333;
-$sidebar-hl: #5F52A5;
-$toc-color: #5F52A5;
-$toc-hl: #5F52A5;
+$sidebar-hl: #035493;
+$toc-color: #035493;
+$toc-hl: #00CFC0;
 
 /*-- scss:rules --*/
 .navbar-brand-container {

@@ -7,6 +7,8 @@ if(!file.exists("figures")) {
 knitr::opts_chunk$set(fig.path = "figures/")
 ```
 
+<img src="gamlss2.png" align="right" alt="gamlss2 logo" width="120" />
+
 # gamlss2: Infrastructure for Flexible Distributional Regression
 
 ## Overview
@@ -126,8 +128,7 @@ After identifying a suitable distributional model, we can now incorporate covari
 full GAMLSS. Since temperature data exhibits a strong seasonal pattern, as illustrated in the 
 following scatterplot
 
-```{r season_scatter}
-#| echo: -1
+```{r season_scatter, echo = -1}
 par(mar = c(4, 4, 1, 1))
 d$yday <- as.POSIXlt(d$date)$yday
 plot(Tmax ~ yday, data = d, col = rgb(0.1, 0.1, 0.1, alpha = 0.4))
@@ -199,9 +200,8 @@ e.g., out-of-sample data.
 
 Additionally, the estimated effects can be visualized instantly using
 
-```{r effects}
+```{r effects, echo = -1}
 #| fig-height: 8
-#| echo: -1
 par(mar = c(4, 4, 1, 1))
 plot(b, which = "effects")
 ```
@@ -252,8 +252,7 @@ q90 <- family(b)$q(0.9, par)
 
 Finally, we visualize the long-term trend in temperature.
 
-```{r long_term}
-#| echo: -1
+```{r long_term, echo = -1}
 par(mar = c(4, 4, 1, 1))
 matplot(nd$year, cbind(q10, q50, q90), type = "l",
   lwd = 2, xlab = "Year", ylab = "Estimated Quantiles")
@@ -279,8 +278,7 @@ head(probs)
 
 To illustrate these exceedance probabilities, we plot them over the course of the year
 
-```{r vis_probs}
-#| echo: -1
+```{r vis_probs, echo = -1}
 par(mar = c(4, 4, 1, 1))
 col <- colorspace::heat_hcl(ncol(probs))
 matplot(0:365, probs, type = "l", lty = 1, lwd = 2, col = col,

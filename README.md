@@ -1,5 +1,8 @@
 
+
 <!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
+
+<img src="gamlss2.png" align="right" alt="gamlss2 logo" width="120" />
 
 # gamlss2: Infrastructure for Flexible Distributional Regression
 
@@ -284,7 +287,7 @@ summary(b)
     *--------
     n = 13665 df =  106.37 res.df =  13558.63
     Deviance = 79734.6366 Null Dev. Red. = 13.21%
-    AIC = 79947.3743 elapsed = 20.49sec
+    AIC = 79947.3743 elapsed = 30.34sec
 
 The summary output is structured similarly to those of `lm()` and
 `glm()`, with the key difference being that it provides results for all

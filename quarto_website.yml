@@ -11,30 +11,102 @@ website:
   image: gamlss2.png
   open-graph: true
   navbar:
-    logo: gamlss2.svg
+    logo: gamlss2-text.svg
     logo-alt: gamlss2
     title: false
     pinned: false
     search: true
+    left:
+      - text: Documentation
+        file: man/gamlss2-package.qmd
+      - text: Vignettes
+        menu:
+        - text: "Families"
+          file: vignettes/families.qmd
+        - text: "Specials"
+          file: vignettes/specials.qmd
+      - text: News
+        file: $ALTDOC_NEWS
+      - text: Citation
+        file: $ALTDOC_CITATION
     right:
       - icon: github
         href: $ALTDOC_PACKAGE_URL_GITHUB
         aria-label: $ALTDOC_PACKAGE_NAME GitHub
-    left:
-      - text: News
-        file: $ALTDOC_NEWS
-      - text: Citation
-        file: $ALTDOC_CITATION
   sidebar:
-    style: docked
-    collapse-level: 1
-    contents:
-      - section: $ALTDOC_VIGNETTE_BLOCK
-      - section: $ALTDOC_MAN_BLOCK
-      - text: News
-        file: $ALTDOC_NEWS
-      - text: Citation
-        file: $ALTDOC_CITATION
+    - id: documentation
+      title: Documentation
+      style: floating
+      collapse-level: 1
+      contents:
+        - section: Package overview
+          contents:
+            - text: gamlss2-package
+              file: man/gamlss2-package.qmd
+        - section: Regression models
+          contents:
+            - text: gamlss2
+              file: man/gamlss2.qmd
+            - text: gamlss2_control
+              file: man/gamlss2_control.qmd
+            - text: select_gamlss2
+              file: man/select_gamlss2.qmd
+            - text: stepwise
+              file: man/stepwise.qmd
+        - section: Model terms
+          contents:
+            - text: glmnet
+              file: man/glmnet.qmd
+            - text: lasso
+              file: man/lasso.qmd
+            - text: pb
+              file: man/pb.qmd
+            - text: random
+              file: man/random.qmd
+            - text: special_terms
+              file: man/special_terms.qmd
+        - section: Predictions and model statistics
+          contents:
+            - text: modelstats
+              file: man/modelstats.qmd
+            - text: plots
+              file: man/plots.qmd
+            - text: predict.gamlss2
+              file: man/predict.gamlss2.qmd
+            - text: prodist.gamlss2
+              file: man/prodist.gamlss2.qmd
+            - text: quantiles
+              file: man/quantiles.qmd
+        - section: Families and links
+          contents:
+            - text: discretize
+              file: man/discretize.qmd
+            - text: find_family
+              file: man/find_family.qmd
+            - text: gamlss2.family
+              file: man/gamlss2.family.qmd
+            - text: Kumaraswamy
+              file: man/Kumaraswamy.qmd
+            - text: make.link2
+              file: man/make.link2.qmd
+            - text: ologit
+              file: man/ologit.qmd
+            - text: softplus
+              file: man/softplus.qmd
+        - section: Data
+          contents:
+            - text: HarzTraffic
+              file: man/HarzTraffic.qmd
+        - section: Misc functionality
+          contents:
+            - text: fake_formula
+              file: man/fake_formula.qmd
+            - text: misc
+              file: man/misc.qmd
+            - text: new_formula
+              file: man/new_formula.qmd
+            - text: RS_CG
+              file: man/RS_CG.qmd
 
 format:
   html:

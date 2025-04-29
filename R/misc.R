@@ -91,9 +91,19 @@ find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
       cat("..", j, "family\n")
     }
 
-    b <- try(gamlss2(y ~ 1, family = families[[j]], trace = FALSE, ...), silent = TRUE)
+    warning_occurred <- FALSE
 
-    if(!inherits(b, "try-error")) {
+    b <- try({
+      withCallingHandlers(
+        gamlss2(y ~ 1, family = families[[j]], trace = FALSE, ...),
+        warning = function(w) {
+          warning_occurred <<- TRUE
+          invokeRestart("muffleWarning")  # optional: suppress the warning output
+        }
+      )
+    }, silent = TRUE)
+
+    if(!inherits(b, "try-error") && !warning_occurred) {
       ic[j] <- GAIC(b, k = k)
       cat(".. .. IC =", round(ic[j], 4), "\n")
     } else {

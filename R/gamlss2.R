@@ -62,7 +62,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Expand formula.
   if((length(attr(formula, "rhs")) < length(family$names)) & control$expand) {
     k <- length(family$names) - length(attr(formula, "rhs"))
-    attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(expression(.), k)))
+    attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(1, k)))
   }
 
   ## Check for "." in formula.

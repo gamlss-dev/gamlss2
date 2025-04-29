@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: ../docs/
+  resources:
+    - "hex-spotlight.svg"
 
 website:
   title: gamlss2
@@ -9,7 +11,7 @@ website:
   image: gamlss2.png
   open-graph: true
   navbar:
-    logo: gamlss2_wide.png
+    logo: gamlss2.svg
     logo-alt: gamlss2
     title: false
     pinned: false
@@ -18,6 +20,11 @@ website:
       - icon: github
         href: $ALTDOC_PACKAGE_URL_GITHUB
         aria-label: $ALTDOC_PACKAGE_NAME GitHub
+    left:
+      - text: News
+        file: $ALTDOC_NEWS
+      - text: Citation
+        file: $ALTDOC_CITATION
   sidebar:
     style: docked
     collapse-level: 1

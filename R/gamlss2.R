@@ -62,7 +62,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Expand formula.
   if((length(attr(formula, "rhs")) < length(family$names)) & control$expand) {
     k <- length(family$names) - length(attr(formula, "rhs"))
-    attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(1, k)))
+    attr(formula, "rhs") <- c(attr(formula, "rhs"), as.list(rep(expression(.), k)))
   }
 
   ## Check for "." in formula.
@@ -73,9 +73,13 @@ gamlss2.formula <- function(formula, data, family = NO,
         yn <- NULL
         for(j in 1:length(formula)[1L])
           yn <- c(yn, as.character(formula(formula, lhs = j))[2L])
-        vn <- names(data)
-        vn <- vn[!(vn %in% yn)]
-        attr(formula, "rhs")[[i]] <- as.call(str2lang(paste(vn, collapse = "+")))
+        if(i < 2) {
+          vn <- names(data)
+          vn <- vn[!(vn %in% yn)]
+          attr(formula, "rhs")[[i]] <- as.call(str2lang(paste(vn, collapse = "+")))
+        } else {
+          attr(formula, "rhs")[[i]] <- attr(formula, "rhs")[[1L]]
+        }
       } else {
         stop('using "." in formula but no data argument supplied!')
       }

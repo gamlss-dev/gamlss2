@@ -20,10 +20,34 @@ $toc-hl: #00CFC0;
     a {
         &.navbar-brand-logo {
             margin: 0;
-            padding: 0;
+            padding: 0 1.5em 0 0;
             img {
                 max-height: 2em;
             }
         }
     }
 }
+
+/*-- customizing navbar with hex spotlight background --*/
+header {
+    nav {
+        &.navbar {
+            background-image: url("hex-spotlight.svg");
+            background-position: top left;
+            background-repeat: no-repeat;
+            background-size: 400px auto;
+        }
+        ul {
+            &.navbar-nav {
+                li {
+                    border-bottom: 4px solid transparent;
+                    transition: border-bottom 1s;
+                    &:hover {
+                        border-color: $navbar-hl;
+                    }
+                }
+            }
+        }
+    }
+}
+

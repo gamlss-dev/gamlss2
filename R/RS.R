@@ -280,14 +280,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       } else {
         family$map2par(etastart)
       }
-      score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-      hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
 
-      z <- if(iter[1L] > 0L) {
-        eta[[j]] + 1 / hess * score
-      } else {
-        etastart[[j]] + 1 / hess * score
-      }
+      ## Compute working response z and weights hess from family.
+      zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
 
       ## Start inner loop.
       while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
@@ -309,7 +304,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               hess_l <- family$hess[[h[l]]](y, peta, id = j)  ## FIXME: deriv_checks()?
               adj <- adj + hess_l * (eta[[j]] - eta_old[[j]])
             }
-            adj <- adj * hess
+            adj <- adj * zw$weights
           }
         }
 
@@ -318,13 +313,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           ## Compute partial residuals.
           eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
           if(iter[1L] >= CGk) {
-            e <- (z - adj) - eta[[j]]
+            e <- (zw$z - adj) - eta[[j]]
           } else {
-            e <- z - eta[[j]]
+            e <- zw$z - eta[[j]]
           }
 
           ## Weights.
-          wj <- if(is.null(weights)) hess else hess * weights
+          wj <- if(is.null(weights)) zw$weights else zw$weights * weights
 
           ## Estimate weighted linear model.
           if(ridge) {
@@ -384,17 +379,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
             if(iter[1L] >= CGk) {
-              e <- (z - adj) - eta[[j]]
+              e <- (zw$z - adj) - eta[[j]]
             } else {
-              e <- z - eta[[j]]
+              e <- zw$z - eta[[j]]
             }
 
             ## Additive model term fit.
             fs <- if(is.null(weights)) {
-              special.wfit(specials[[k]], e, hess, y, eta, j, family, control,
+              special.wfit(specials[[k]], e, zw$weights, y, eta, j, family, control,
                 transfer = sfit[[j]][[k]]$transfer, iter = iter)
             } else {
-              special.wfit(specials[[k]], e, hess * weights, y, eta, j, family, control,
+              special.wfit(specials[[k]], e, zw$weights * weights, y, eta, j, family, control,
                 transfer = sfit[[j]][[k]]$transfer, iter = iter)
             }
 
@@ -443,9 +438,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Update working response.
         if(eps[2L] > stop.eps[2L]) {
           peta <- family$map2par(eta)
-          score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-          hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
-          z <- eta[[j]] + 1 / hess * score
+          zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
         }
 
         ## Update inner loop iterator.
@@ -603,6 +596,19 @@ deriv_checks <- function(x, is.weight = FALSE)
     x[x < -1e+10] <- -1e+10
   }
   return(x)
+}
+
+## Compute working response z and weights hess from family.
+z_weights <- function(y, eta, peta, family, j)
+{
+  if(is.null(family$z_weights)) {
+    score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
+    hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+    z <- eta + 1 / hess * score
+    return(list("z" = z, "weights" = hess))
+  } else {
+    return(family$z_weights(y, eta, par, j))
+  }
 }
 
 ## Formatting for printing.

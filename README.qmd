@@ -182,6 +182,9 @@ This yields a distribution vector `pf` using the infrastructure from the
 with the corresponding `cdf()` method.
 
 ```{r cdf, message=FALSE, results="hide"}
+if(!("distributions3" %in% installed.packages())) {
+  install.packages("distributions3")
+}
 library("distributions3")
 probs <- 1 - cdf(pf, 30)
 ```

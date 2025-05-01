@@ -122,17 +122,6 @@ if(!("gamlss.add" %in% installed.packages())) {
 library("gamlss.add")
 ```
 
-    Loading required package: nnet
-
-
-    Attaching package: 'nnet'
-
-    The following object is masked from 'package:mgcv':
-
-        multinom
-
-    Loading required package: rpart
-
 ``` r
 f1 <- Tmax ~ ga(~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc")))
@@ -263,28 +252,6 @@ calculated with the corresponding `cdf()` method.
 
 ``` r
 library("distributions3")
-```
-
-
-    Attaching package: 'distributions3'
-
-    The following object is masked from 'package:gamlss':
-
-        random
-
-    The following object is masked from 'package:gamlss.dist':
-
-        GP
-
-    The following object is masked from 'package:stats':
-
-        Gamma
-
-    The following object is masked from 'package:grDevices':
-
-        pdf
-
-``` r
 probs <- 1 - cdf(pf, 30)
 ```
 

@@ -151,6 +151,7 @@ inspected using the `summary()` method for both packages. Using `plot()` in
 ```{r gamlss2_plot}
 #| fig-height: 10
 #| fig-width: 8
+#| fig-align: center
 plot(b3)
 ```
 
@@ -161,6 +162,7 @@ E.g., a PIT histogram can be created by
 ```{r pithist}
 #| fig-height: 5
 #| fig-width: 5
+#| fig-align: center
 if(!("topmodels" %in% installed.packages())) {
   install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
 }
@@ -194,7 +196,7 @@ and visualized, for example, by
 ```{r probs}
 #| fig-height: 4
 #| fig-width: 5
-#| echo: -1
+#| fig-align: center
 par(mar = c(4, 4, 1, 1))
 plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")

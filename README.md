@@ -219,7 +219,7 @@ diagnostic plots, whereas in `gamlss2`
 plot(b3)
 ```
 
-![](figures/gamlss2_plot-1.png)
+<img src="figures/gamlss2_plot-1.png" data-fig-align="center" />
 
 displays all estimated covariate effects. For residual diagnostics,
 `gamlss2` leverages the `topmodels` package, which provides
@@ -235,7 +235,7 @@ library("topmodels")
 pithist(b3)
 ```
 
-![](figures/pithist-1.png)
+<img src="figures/pithist-1.png" data-fig-align="center" />
 
 showing good model calibration. Finally, we compute the probability of a
 heat day for 2025. First, the `procast()` function from \`topmodels
@@ -261,11 +261,12 @@ probs <- 1 - cdf(pf, 30)
 and visualized, for example, by
 
 ``` r
+par(mar = c(4, 4, 1, 1))
 plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")
 ```
 
-![](figures/probs-1.png)
+<img src="figures/probs-1.png" data-fig-align="center" />
 
 Note that a `predict()` method is available for both `gamlss` and
 `gamlss2`, allowing direct prediction of distribution parameters.

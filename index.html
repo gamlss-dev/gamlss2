@@ -104,12 +104,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <meta property="og:title" content="gamlss2">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/figures/hist_Tmax-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/figures/gamlss2_plot-1.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="960">
-<meta property="og:image:width" content="1344">
+<meta property="og:image:height" content="1920">
+<meta property="og:image:width" content="1536">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -231,303 +260,175 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="illustration" class="level2">
 <h2 class="anchored" data-anchor-id="illustration">Illustration</h2>
 <p>The package is designed to follow the workflow of well-established model fitting functions like <code>lm()</code> or <code>glm()</code>, i.e., the step of estimating full distributional regression models is actually not very difficult.</p>
-<p>To illustrate the workflow using <code>gamlss2</code>, we analyze the <code>WeatherGermany</code> data,</p>
+<p>We illustrate how <code>gamlss2</code> builds on the established <code>gamlss</code> framework by modeling daily maximum temperature (<code>Tmax</code>) at Munich Airport (MUC) to estimate the probability of “heat days” (<code>Tmax</code> <span class="math inline">\(\geq 30^\circ\text{C}\)</span>). Heat days can have serious impacts by stressing highways and railways, increasing the load on healthcare facilities, and affecting airport operations. Using 30 years of historical <code>Tmax</code> data, we fit a flexible distributional regression model that captures the full conditional distribution of daily temperatures. By evaluating this fitted distribution at the 30<span class="math inline">\(^\circ\)</span>C threshold, we obtain heat-day probabilities. Required packages can be loaded by</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"WeatherGermany"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">'WeatherGermany'</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">"https://gamlss-dev.r-universe.dev"</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"https://cloud.r-project.org"</span>))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"gamlss"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"gamlss"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The data comes from the same R-universe as <code>gamlss2</code> and is loaded with</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"WeatherGermany"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">'WeatherGermany'</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">"https://gamlss-dev.r-universe.dev"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"https://cloud.r-project.org"</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Installing package into '/usr/local/lib/R/site-library'
 (as 'lib' is unspecified)</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"WeatherGermany"</span>, <span class="at">package =</span> <span class="st">"WeatherGermany"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(WeatherGermany)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"WeatherGermany"</span>, <span class="at">package =</span> <span class="st">"WeatherGermany"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>MUC <span class="ot">&lt;-</span> <span class="fu">subset</span>(WeatherGermany, id <span class="sc">==</span> <span class="dv">1262</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We find that the four-parameter <code>SEP</code> family fits the marginal distribution of <code>Tmax</code> quite well. To estimate a full distributional model, we specify the following additive predictor <span class="math display">\[
+\eta = \beta_0 + f_1(\texttt{year}) + f_2(\texttt{yday}) + f_3(\texttt{year}, \texttt{yday})
+\]</span> for each parameter. Here, <span class="math inline">\(f_1( \cdot )\)</span> captures the long-term trend, <span class="math inline">\(f_2( \cdot )\)</span> models seasonal variation, and <span class="math inline">\(f_3( \cdot, \cdot )\)</span> represents a time-varying seasonal effect. The required variables can be added to the data by</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>MUC<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(MUC<span class="sc">$</span>date)<span class="sc">$</span>year <span class="sc">+</span> <span class="dv">1900</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>MUC<span class="sc">$</span>yday <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(MUC<span class="sc">$</span>date)<span class="sc">$</span>yday</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In <code>gamlss</code>, model estimation is performed via</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"gamlss.add"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"gamlss.add"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss.add"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ga</span>(<span class="sc">~</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">+</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>)))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(f1, <span class="at">family =</span> SEP,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> MUC[, <span class="fu">c</span>(<span class="st">"Tmax"</span>, <span class="st">"year"</span>, <span class="st">"yday"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  id       date Wmax pre Tmax Tmin sun name alt     lat    lon
-1  1 1981-01-01   NA 1.7  3.4 -5.0  NA Aach 478 47.8413 8.8493
-2  1 1981-01-02   NA 1.7  1.2 -0.4  NA Aach 478 47.8413 8.8493
-3  1 1981-01-03   NA 5.4  5.4  1.0  NA Aach 478 47.8413 8.8493
-4  1 1981-01-04   NA 8.8  5.6 -0.4  NA Aach 478 47.8413 8.8493
-5  1 1981-01-05   NA 3.7  1.2 -2.4  NA Aach 478 47.8413 8.8493
-6  1 1981-01-06   NA 4.0  1.2 -2.2  NA Aach 478 47.8413 8.8493</code></pre>
+<pre><code>GAMLSS-RS iteration 1: Global Deviance = 65081.32 
+GAMLSS-RS iteration 2: Global Deviance = 64953.2 
+GAMLSS-RS iteration 3: Global Deviance = 64893.27 
+GAMLSS-RS iteration 4: Global Deviance = 64869.21 
+GAMLSS-RS iteration 5: Global Deviance = 64859.02 
+GAMLSS-RS iteration 6: Global Deviance = 64854.43 
+GAMLSS-RS iteration 7: Global Deviance = 64852.19 
+GAMLSS-RS iteration 8: Global Deviance = 64850.95 
+GAMLSS-RS iteration 9: Global Deviance = 64850.15 
+GAMLSS-RS iteration 10: Global Deviance = 64849.55 
+GAMLSS-RS iteration 11: Global Deviance = 64849.04 
+GAMLSS-RS iteration 12: Global Deviance = 64848.58 
+GAMLSS-RS iteration 13: Global Deviance = 64848.14 
+GAMLSS-RS iteration 14: Global Deviance = 64847.73 
+GAMLSS-RS iteration 15: Global Deviance = 64847.33 
+GAMLSS-RS iteration 16: Global Deviance = 64846.94 
+GAMLSS-RS iteration 17: Global Deviance = 64846.56 
+GAMLSS-RS iteration 18: Global Deviance = 64846.19 
+GAMLSS-RS iteration 19: Global Deviance = 64845.84 
+GAMLSS-RS iteration 20: Global Deviance = 64845.49 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in RS(): Algorithm RS has not yet converged</code></pre>
 </div>
 </div>
-<p>The dataset contains daily observations from weather stations across Germany. It includes the station identifier (<code>id</code>), the recording <code>date</code>, the maximum wind speed (<code>Wmax</code>, in m/s), the precipitation amount (<code>pre</code>, in mm), the maximum and minimum temperatures (<code>Tmax</code> and <code>Tmin</code>, in °C), and the number of sunshine hours (<code>sun</code>). Additionally, it provides the station’s <code>name</code>, <code>alt</code>itude (in meters above sea level), and its geographic coordinates (<code>lon</code>gitude and <code>lat</code>itude).</p>
-<p>In this example, we use daily maximum temperature (<code>Tmax</code>) data to estimate a climatology model based on over 37 years of observations from Germany’s highest meteorological station, located at Zugspitze. Situated at an altitude of 2956 meters above sea level, this station provides a unique dataset for high-altitude climate analysis.</p>
-<p>First, we subset the dataset to include only observations from the Zugspitze station.</p>
+<p>This setup requires loading the <code>gamlss.add</code> package to access <code>mgcv</code>-based smooth terms. Estimation takes 20 iterations of the backfitting algorithm (without full convergence) and about 44 seconds on a 64-bit Linux system. Moreover, <code>gamlss()</code> requires that the input data contains no <code>NA</code> values. In <code>gamlss2</code> the model can be specified directly, following <code>mgcv</code> syntax</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">subset</span>(WeatherGermany, name <span class="sc">==</span> <span class="st">"Zugspitze"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 65102.5733 eps = 0.574320     
+GAMLSS-RS iteration  2: Global Deviance = 64949.999 eps = 0.002343     
+GAMLSS-RS iteration  3: Global Deviance = 64891.6543 eps = 0.000898     
+GAMLSS-RS iteration  4: Global Deviance = 64868.3595 eps = 0.000358     
+GAMLSS-RS iteration  5: Global Deviance = 64858.5604 eps = 0.000151     
+GAMLSS-RS iteration  6: Global Deviance = 64854.1832 eps = 0.000067     
+GAMLSS-RS iteration  7: Global Deviance = 64852.0539 eps = 0.000032     
+GAMLSS-RS iteration  8: Global Deviance = 64850.8608 eps = 0.000018     
+GAMLSS-RS iteration  9: Global Deviance = 64850.0759 eps = 0.000012     
+GAMLSS-RS iteration 10: Global Deviance = 64849.4948 eps = 0.000008     </code></pre>
 </div>
-<p>Before estimating a climatology model using <code>gamlss2</code>, it is good practice to inspect the distribution of the response variable</p>
+</div>
+<p>This model converges in 10 iterations and requires only about 2 seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(d<span class="sc">$</span>Tmax, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">breaks =</span> <span class="st">"Scott"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">+</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>)) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 64940.3003 eps = 0.575381     
+GAMLSS-RS iteration  2: Global Deviance = 64721.0181 eps = 0.003376     
+GAMLSS-RS iteration  3: Global Deviance = 64634.6688 eps = 0.001334     
+GAMLSS-RS iteration  4: Global Deviance = 64597.9348 eps = 0.000568     
+GAMLSS-RS iteration  5: Global Deviance = 64582.5418 eps = 0.000238     
+GAMLSS-RS iteration  6: Global Deviance = 64574.6097 eps = 0.000122     
+GAMLSS-RS iteration  7: Global Deviance = 64570.3663 eps = 0.000065     
+GAMLSS-RS iteration  8: Global Deviance = 64567.5089 eps = 0.000044     
+GAMLSS-RS iteration  9: Global Deviance = 64565.4716 eps = 0.000031     
+GAMLSS-RS iteration 10: Global Deviance = 64563.7761 eps = 0.000026     
+GAMLSS-RS iteration 11: Global Deviance = 64562.4298 eps = 0.000020     
+GAMLSS-RS iteration 12: Global Deviance = 64561.2848 eps = 0.000017     
+GAMLSS-RS iteration 13: Global Deviance = 64560.2679 eps = 0.000015     
+GAMLSS-RS iteration 14: Global Deviance = 64559.3577 eps = 0.000014     
+GAMLSS-RS iteration 15: Global Deviance = 64558.5393 eps = 0.000012     
+GAMLSS-RS iteration 16: Global Deviance = 64557.797 eps = 0.000011     
+GAMLSS-RS iteration 17: Global Deviance = 64557.1061 eps = 0.000010     
+GAMLSS-RS iteration 18: Global Deviance = 64556.4892 eps = 0.000009     </code></pre>
+</div>
+</div>
+<p>This model converges in 18 iterations in about 15 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/hist_Tmax-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="figures/gamlss2_plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The histogram suggests that the data is slightly left-skewed, with longer tails for temperatures below zero. This indicates that the commonly used normal distribution may not be the most appropriate choice for modeling daily maximum temperatures.</p>
-<p>To address this, the <code>gamlss2</code> package provides the <a href="https://gamlss-dev.github.io/gamlss2/man/find_family.html"><code>find_family()</code></a> function, which helps identify the most suitable distribution by minimizing an information criterion, AIC by default. Here, we evaluate several continuous distributions available in the <a href="https://cran.r-project.org/package=gamlss.dist"><code>gamlss.dist</code></a> package.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fams <span class="ot">&lt;-</span> <span class="fu">find_family</span>(d<span class="sc">$</span>Tmax,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">families =</span> <span class="fu">c</span>(NO, TF, JSU, SEP4))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>.. NO family
-.. .. IC = 92044.1 
-.. TF family
-.. .. IC = 92046.12 
-.. JSU family
-.. .. IC = 91975.24 
-.. SEP4 family
-.. .. IC = 91879.66 </code></pre>
+<p>displays all estimated covariate effects. For residual diagnostics, <code>gamlss2</code> leverages the <code>topmodels</code> package, which provides infrastructures for probabilistic model assessment. E.g., a PIT histogram can be created by</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Installing package into '/usr/local/lib/R/site-library'
+(as 'lib' is unspecified)</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fams)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      TF       NO      JSU     SEP4 
-92046.12 92044.10 91975.24 91879.66 </code></pre>
-</div>
-</div>
-<p>Here, the <code>SEP4</code> family appears to provide the best fit. To further assess its suitability, we can visualize the fitted density using</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(d<span class="sc">$</span>Tmax, <span class="at">family =</span> SEP4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 91950.4801 eps = 0.044494     
-GAMLSS-RS iteration  2: Global Deviance = 91907.9542 eps = 0.000462     
-GAMLSS-RS iteration  3: Global Deviance = 91889.9353 eps = 0.000196     
-GAMLSS-RS iteration  4: Global Deviance = 91880.9925 eps = 0.000097     
-GAMLSS-RS iteration  5: Global Deviance = 91876.7482 eps = 0.000046     
-GAMLSS-RS iteration  6: Global Deviance = 91874.399 eps = 0.000025     
-GAMLSS-RS iteration  7: Global Deviance = 91872.4447 eps = 0.000021     
-GAMLSS-RS iteration  8: Global Deviance = 91871.6641 eps = 0.000008     </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/fit_family-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="figures/pithist-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>After identifying a suitable distributional model, we can now incorporate covariates to estimate a full GAMLSS. Since temperature data exhibits a strong seasonal pattern, as illustrated in the following scatterplot</p>
+<p>showing good model calibration. Finally, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from `topmodels predicts the fitted distributions</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>yday <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(d<span class="sc">$</span>date)<span class="sc">$</span>yday</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Tmax <span class="sc">~</span> yday, <span class="at">data =</span> d, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">procast</span>(b3, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This yields a distribution vector <code>pf</code> using the infrastructure from the <code>distributions3</code> package. Probabilities of a heat day can then be calculated with the corresponding <code>cdf()</code> method.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"distributions3"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"distributions3"</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"distributions3"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and visualized, for example, by</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(probs, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Day of Year"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Prob(Tmax &gt; 30)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/season_scatter-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="figures/probs-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>It is essential to include a model term that captures these seasonal effects. The <code>gamlss2</code> package supports all model terms from the <a href="https://cran.r-project.org/package=mgcv"><code>mgcv</code></a> package, allowing us to use the <code>s()</code> constructor to model seasonality.</p>
-<p>Additionally, we include a time trend to examine whether maximum temperatures have increased over the observed period. In the full GAMLSS model, each parameter of the selected <code>SEP4</code> distribution is estimated separately. To incorporate the time trend, we first create a new covariate, <code>year</code>, representing the long-term temporal effect</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(d<span class="sc">$</span>date)<span class="sc">$</span>year <span class="sc">+</span> <span class="dv">1900</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Next, we define the model formula for the four parameters of the <code>SEP4</code> distribution.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">te</span>(yday, year, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cc"</span>, <span class="st">"cr"</span>)) <span class="sc">|</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">te</span>(yday, year, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cc"</span>, <span class="st">"cr"</span>)) <span class="sc">|</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">te</span>(yday, year, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cc"</span>, <span class="st">"cr"</span>)) <span class="sc">|</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> <span class="fu">te</span>(yday, year, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cc"</span>, <span class="st">"cr"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>In this formula, the vertical bars <code>|</code> separate the specifications for each parameter of the <code>SEP4</code> distribution. The argument <code>bs = "cc"</code> specifies a cyclical spline to account for the seasonal effect, ensuring continuity at the beginning and end of the year, and argument <code>k</code> controls the dimension of the basis used to represent the smooth term.</p>
-<p>Finally, we estimate the model using</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> SEP4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 79918.3054 eps = 0.169526     
-GAMLSS-RS iteration  2: Global Deviance = 79804.3251 eps = 0.001426     
-GAMLSS-RS iteration  3: Global Deviance = 79759.9851 eps = 0.000555     
-GAMLSS-RS iteration  4: Global Deviance = 79745.0554 eps = 0.000187     
-GAMLSS-RS iteration  5: Global Deviance = 79738.3587 eps = 0.000083     
-GAMLSS-RS iteration  6: Global Deviance = 79736.4781 eps = 0.000023     
-GAMLSS-RS iteration  7: Global Deviance = 79735.2054 eps = 0.000015     
-GAMLSS-RS iteration  8: Global Deviance = 79734.6366 eps = 0.000007     </code></pre>
-</div>
-</div>
-<p>This approach allows us to flexibly capture both seasonal patterns and long-term trends in daily maximum temperatures.</p>
-<p>After estimating the model, we can examine the model summary using</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Call:
-gamlss2(formula = f, data = d, family = SEP4)
----
-Family: SEP4 
-Link function: mu = identity, sigma = log, nu = log, tau = log
-*--------
-Parameter: mu 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  -0.9380     0.1507  -6.224    5e-10 ***
----
-Smooth terms:
-    s(yday) s(year) te(yday,year)
-edf 16.3620  7.6634        17.997
-*--------
-Parameter: sigma 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  1.88151    0.00144    1307   &lt;2e-16 ***
----
-Smooth terms:
-    s(yday) s(year) te(yday,year)
-edf 15.9695  4.6506        5.9388
-*--------
-Parameter: nu 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  0.63884    0.02157   29.62   &lt;2e-16 ***
----
-Smooth terms:
-    s(yday) s(year) te(yday,year)
-edf 12.2077  6.0049        2.0948
-*--------
-Parameter: tau 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) 1.027653   0.009979     103   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
----
-Smooth terms:
-    s(yday) s(year) te(yday,year)
-edf  11.060   1.013        1.4077
-*--------
-n = 13665 df =  106.37 res.df =  13558.63
-Deviance = 79734.6366 Null Dev. Red. = 13.21%
-AIC = 79947.3743 elapsed = 28.29sec</code></pre>
-</div>
-</div>
-<p>The summary output is structured similarly to those of <code>lm()</code> and <code>glm()</code>, with the key difference being that it provides results for all parameters of the selected distribution. Specifically, it displays the estimated linear coefficients (in this case, primarily the intercepts), along with the effective degrees of freedom for each smooth term. Additionally, the AIC and deviance values are reported.</p>
-<p>To extract the AIC separately, we use</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 79947.37</code></pre>
-</div>
-</div>
-<p>Similarly, the log-likelihood can be obtained with</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">logLik</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>'log Lik.' -39867.32 (df=106.3689)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">logLik</span>(b, <span class="at">newdata =</span> d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>'log Lik.' -39867.32 (df=106.3689)</code></pre>
-</div>
-</div>
-<p>Here we use the <code>newdata</code> argument just to show, that the log-likelihood can also be evaluated on, e.g., out-of-sample data.</p>
-<p>Additionally, the estimated effects can be visualized instantly using</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="figures/effects-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>This plot provides a direct visualization of the smooth effects included in the model, helping to interpret seasonal variations and long-term trends efficiently.</p>
-<p>To assess the calibration of the estimated model, we examine the quantile residuals using a histogram, Q-Q plot, and worm plot.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="figures/resids-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>These diagnostic plots indicate that the model is well-calibrated when using the <code>SEP4</code> distribution, demonstrating a good fit to the observed data.</p>
-<p>Model predictions can be obtained for various statistical quantities, including the mean, quantiles, probability density function (PDF), and cumulative distribution function (CDF). To illustrate this, we first examine the marginal effect of the long-term time trend. For this purpose, we create a new data frame containing only the years of interest.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">1981</span><span class="sc">:</span><span class="dv">2018</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">182</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Next, we predict quantiles by first computing the estimated parameters</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">newdata =</span> nd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>To compute, e.g., the 50% quantile (median), we extract the <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.family.html"><code>gamlss2.family</code></a> of the fitted model and call the corresponding <code>$q()</code> (quantile) function provided by the family.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>q50 <span class="ot">&lt;-</span> <span class="fu">family</span>(b)<span class="sc">$</span><span class="fu">q</span>(<span class="fl">0.5</span>, par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Similarly, we can compute the 10% and 90% quantiles</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>q10 <span class="ot">&lt;-</span> <span class="fu">family</span>(b)<span class="sc">$</span><span class="fu">q</span>(<span class="fl">0.1</span>, par)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>q90 <span class="ot">&lt;-</span> <span class="fu">family</span>(b)<span class="sc">$</span><span class="fu">q</span>(<span class="fl">0.9</span>, par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Finally, we visualize the long-term trend in temperature.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(nd<span class="sc">$</span>year, <span class="fu">cbind</span>(q10, q50, q90), <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">xlab =</span> <span class="st">"Year"</span>, <span class="at">ylab =</span> <span class="st">"Estimated Quantiles"</span>)</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"10%"</span>, <span class="st">"Median"</span>, <span class="st">"90%"</span>),</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">bg =</span> <span class="st">"white"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="figures/long_term-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The plot reveals an upward trend in the median temperature over time, highlighting the effects of long-term climate change.</p>
-<p>To visualize exceedance probabilities for the 2019 season, we use the <code>$p()</code> function of the family object. For example, we can compute the probabilities of maximum temperatures exceeding 10, 11, 12, 13, and 14 °C as follows</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2019</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(b, <span class="at">newdata =</span> nd)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> <span class="fu">rev</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">14</span>, <span class="at">by =</span> <span class="dv">2</span>))</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(Tmax, <span class="cf">function</span>(t) <span class="dv">1</span> <span class="sc">-</span> <span class="fu">family</span>(b)<span class="sc">$</span><span class="fu">p</span>(t, par))</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(probs) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Prob(Tmax &gt; "</span>, Tmax, <span class="st">")"</span>)</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(probs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>     Prob(Tmax &gt; 14) Prob(Tmax &gt; 12) Prob(Tmax &gt; 10) Prob(Tmax &gt; 8)
-[1,]    1.590061e-12    5.501117e-10    7.673712e-08   4.605888e-06
-[2,]    1.635692e-12    5.493598e-10    7.520458e-08   4.469749e-06
-[3,]    1.630585e-12    5.369963e-10    7.269465e-08   4.302274e-06
-[4,]    1.585621e-12    5.161699e-10    6.952153e-08   4.115322e-06
-[5,]    1.514233e-12    4.901235e-10    6.598375e-08   3.919732e-06
-[6,]    1.428635e-12    4.618508e-10    6.234650e-08   3.725021e-06
-     Prob(Tmax &gt; 6) Prob(Tmax &gt; 4) Prob(Tmax &gt; 2) Prob(Tmax &gt; 0)
-[1,]   0.0001275031    0.001753963     0.01299744     0.05663021
-[2,]   0.0001233908    0.001701366     0.01267788     0.05562356
-[3,]   0.0001188968    0.001647312     0.01236082     0.05464662
-[4,]   0.0001142025    0.001592977     0.01204944     0.05370176
-[5,]   0.0001094721    0.001539443     0.01174679     0.05279154
-[6,]   0.0001048512    0.001487695     0.01145582     0.05191868</code></pre>
-</div>
-</div>
-<p>To illustrate these exceedance probabilities, we plot them over the course of the year</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>col <span class="ot">&lt;-</span> colorspace<span class="sc">::</span><span class="fu">heat_hcl</span>(<span class="fu">ncol</span>(probs))</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>, probs, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> col,</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of the Year"</span>, <span class="at">ylab =</span> <span class="st">"Estimated Probabilities"</span>)</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.05</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"lightgray"</span>)</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">colnames</span>(probs),</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> col, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="figures/vis_probs-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The plot reveals that even at this high-altitude station, the probability of <code>Tmax</code> &gt; 14°C reaches approximately 5% during summer. This is particularly striking considering that the Zugspitze once had a permanent glacier field, emphasizing the impact of rising temperatures in this region. Likewise, the probability of <code>Tmax</code> &gt; 0°C during the winter months is also about 5%, highlighting significant temperature patterns.</p>
+<p>Note that a <code>predict()</code> method is available for both <code>gamlss</code> and <code>gamlss2</code>, allowing direct prediction of distribution parameters. However, in <code>gamlss</code>, <code>predict()</code> may not fully support new data in all cases.</p>
 
 
 </section>

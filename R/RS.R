@@ -607,7 +607,7 @@ z_weights <- function(y, eta, peta, family, j)
     z <- eta + 1 / hess * score
     return(list("z" = z, "weights" = hess))
   } else {
-    return(family$z_weights(y, eta, par, j))
+    return(family$z_weights(y, eta, peta, j))
   }
 }
 

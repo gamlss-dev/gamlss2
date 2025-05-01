@@ -9,7 +9,8 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "median", "pchisq",
-  "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess")
+  "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess",
+  "deviance", "drop1", "plogis", "qlogis", "setNames")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace",
   "capture.output", "combn")
@@ -97,6 +98,23 @@ S3method(distributions3::prodist, gamlss2)
 S3method(anova, gamlss2)
 S3method(drop1, gamlss2)
 S3method(print, drop1.gamlss2)
+
+## distributions3 class GDF, encapsulating gamlss2 families
+export(GDF)
+S3method(format, GDF)
+S3method(print, GDF)
+S3method(mean, GDF)
+S3method(distributions3::variance, GDF)
+S3method(distributions3::skewness, GDF)
+S3method(distributions3::kurtosis, GDF)
+S3method(distributions3::pdf, GDF)
+S3method(distributions3::log_pdf, GDF)
+S3method(distributions3::cdf, GDF)
+S3method(quantile, GDF)
+S3method(distributions3::random, GDF)
+S3method(distributions3::is_continuous, GDF)
+S3method(distributions3::is_discrete, GDF)
+S3method(distributions3::support, GDF)
 
 useDynLib(gamlss2, .registration = TRUE)
 

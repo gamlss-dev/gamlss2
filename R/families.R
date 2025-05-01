@@ -714,6 +714,8 @@ complete_family <- function(family)
     }
   }
 
+  class(family) <- "gamlss2.family"
+
   return(family)
 }
 
@@ -752,7 +754,7 @@ Gaussian <- function(...)
   links <- c(mu = "identity", sigma = "log")
 
   rval <- list(
-    "family" = "gaussian",
+    "family" = "Gaussian",
     "names" = c("mu", "sigma"),
     "links" = parse_links(links, c(mu = "identity", sigma = "log"), ...),
     "score" = list(
@@ -797,8 +799,22 @@ Gaussian <- function(...)
     }
   )
 
+#  rval$z_weights <- function(y, eta, peta, j) {
+#    score <- deriv_checks(rval$score[[j]](y, peta, id = j), is.weight = FALSE)
+#    hess <- deriv_checks(rval$hess[[j]](y, peta, id = j), is.weight = TRUE)
+#    z <- eta + 1 / hess * score
+#    return(list("z" = z, "weights" = hess))
+#  }
+
+  rval$z_weights <- z_weights_Gaussian
+  rval$type <- "Continuous"
+
   class(rval) <- "gamlss2.family"
   rval
+}
+
+z_weights_Gaussian <- function(y, eta, peta, j) {
+  .Call("z_weights_Gaussian", y, eta, peta, j, PACKAGE = "gamlss2")
 }
 
 Weibull <- function(...)

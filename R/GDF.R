@@ -25,7 +25,7 @@ prodist.gamlss2 <- function(object, ...) {
   d <- predict(object, ..., type = "parameter", drop = FALSE)
 
   ## set class to general GAMLSS or GDF distribution (distributions3 object)
-  if(family(object)$family[1L] %in% getNamespaceExports("gamlss.dist") & FALSE) {
+  if(family(object)$family[1L] %in% getNamespaceExports("gamlss.dist") && FALSE) {
     class(d) <- c("GAMLSS", "distribution")
   } else {
     class(d) <- c("GDF", "distribution")

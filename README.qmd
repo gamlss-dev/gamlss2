@@ -205,7 +205,6 @@ and visualized, for example, by
 #| fig-height: 4
 #| fig-width: 5
 #| fig-align: center
-#| echo: [2, 3]
 par(mar = c(4, 4, 1, 1))
 plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")

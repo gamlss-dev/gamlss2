@@ -261,6 +261,7 @@ probs <- 1 - cdf(pf, 30)
 and visualized, for example, by
 
 ``` r
+par(mar = c(4, 4, 1, 1))
 plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")
 ```

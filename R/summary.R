@@ -325,11 +325,11 @@ print.summary.gamlss2 <- function(x,
   for(i in seq_along(pn)) {
     if(length(x$coefficients[[pn[i]]])) {
       lin_coef[[i]] <- x$coefficients[[pn[i]]]
-      rownames(lin_coef[[i]]) <- paste0(rownames(lin_coef[[i]]), ".", pn[i])
+      rownames(lin_coef[[i]]) <- paste0(pn[i], ".", rownames(lin_coef[[i]]))
     }
     if(length(x$specials[[pn[i]]])) {
       specials[[i]] <- x$specials[[pn[i]]]
-      rownames(specials[[i]]) <- paste0(rownames(specials[[i]]), ".", pn[i])
+      rownames(specials[[i]]) <- paste0(pn[i], ".", rownames(specials[[i]]))
     }
   }
 

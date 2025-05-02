@@ -562,29 +562,19 @@ gamlss2(formula = Satint ~ Infl + Type + Cont, data = housing,
 Family: Ordered Logit (3 categories) 
 Link function: location = identity, theta1 = identity, delta2 = identity
 *--------
-Parameter: location 
----
 Coefficients:
-               Estimate Std. Error t value Pr(&gt;|t|)  
-(Intercept)     -0.1949  3481.4686   0.000   1.0000  
-InflMedium       0.5671     0.5367   1.057   0.2947  
-InflHigh         1.2904     0.5572   2.316   0.0238 *
-TypeApartment   -0.5731     0.6345  -0.903   0.3698  
-TypeAtrium      -0.3666     0.6364  -0.576   0.5666  
-TypeTerrace     -1.0924     0.6401  -1.707   0.0928 .
-ContHigh         0.3607     0.4462   0.808   0.4219  
-*--------
-Parameter: theta1 
+                        Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept).location     -0.1949  3481.4686   0.000   1.0000  
+InflMedium.location       0.5671     0.5367   1.057   0.2947  
+InflHigh.location         1.2904     0.5572   2.316   0.0238 *
+TypeApartment.location   -0.5731     0.6345  -0.903   0.3698  
+TypeAtrium.location      -0.3666     0.6364  -0.576   0.5666  
+TypeTerrace.location     -1.0924     0.6401  -1.707   0.0928 .
+ContHigh.location         0.3607     0.4462   0.808   0.4219  
+(Intercept).theta1       -0.6932  3481.4687   0.000   0.9998  
+(Intercept).delta2        0.1724     0.2191   0.787   0.4344  
 ---
-Coefficients:
-             Estimate Std. Error t value Pr(&gt;|t|)
-(Intercept)   -0.6932  3481.4687       0        1
-*--------
-Parameter: delta2 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)
-(Intercept)   0.1724     0.2191   0.787    0.434
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 72 df =  9 res.df =  63
 Deviance = 3479.1514 Null Dev. Red. = 2099.21%

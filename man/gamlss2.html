@@ -628,47 +628,18 @@ gamlss2(formula = f, data = abdom, family = BCT)
 Family: BCT 
 Link function: mu = identity, sigma = log, nu = identity, tau = log
 *--------
-Parameter: mu 
----
 Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  226.334      1.257     180   &lt;2e-16 ***
----
-Smooth terms:
-     s(x)
-edf 4.551
-*--------
-Parameter: sigma 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -2.92263    0.01101  -265.5   &lt;2e-16 ***
----
-Smooth terms:
-     s(x)
-edf 2.564
-*--------
-Parameter: nu 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -0.18024    0.04599  -3.919 9.93e-05 ***
----
-Smooth terms:
-      s(x)
-edf 1.0015
-*--------
-Parameter: tau 
----
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)   2.6547     0.0144   184.4   &lt;2e-16 ***
+                   Estimate Std. Error  t value Pr(&gt;|t|)    
+(Intercept).mu    226.33436    1.25720  180.030  &lt; 2e-16 ***
+(Intercept).sigma  -2.92263    0.01101 -265.463  &lt; 2e-16 ***
+(Intercept).nu     -0.18024    0.04599   -3.919 9.93e-05 ***
+(Intercept).tau     2.65470    0.01440  184.372  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-      s(x)
-edf 1.0004
+    s(x).mu s(x).sigma s(x).nu s(x).tau
+edf  4.5510     2.5640  1.0015   1.0004
 *--------
 n = 610 df =  13.12 res.df =  596.88
 Deviance = 4770.1566 Null Dev. Red. = 33.39%

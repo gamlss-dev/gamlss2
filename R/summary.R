@@ -318,20 +318,36 @@ print.summary.gamlss2 <- function(x,
   cat("Call:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n", sep = "")
   cat("---\n")
   print(x$family, full = FALSE)
-  for(i in x$family$names) {
-    cat("*--------\n")
-    cat("Parameter:", i, "\n")
-    if(length(x$coefficients[[i]])) {
-      cat("---\nCoefficients:\n")
-      printCoefmat(x$coefficients[[i]], digits = digits,
-        signif.stars = signif.stars, na.print = "NA",
-        signif.legend = i == tail(x$family$names, 1L), ...)
+
+  ## Collect linear coefficients and specials.
+  lin_coef <- specials <- list()
+  pn <- x$family$names
+  for(i in seq_along(pn)) {
+    if(length(x$coefficients[[pn[i]]])) {
+      lin_coef[[i]] <- x$coefficients[[pn[i]]]
+      rownames(lin_coef[[i]]) <- paste0(rownames(lin_coef[[i]]), ".", pn[i])
     }
-    if(length(x$specials[[i]])) {
-      cat("---\nSmooth terms:\n")
-      printCoefmat(t(x$specials[[i]]))
+    if(length(x$specials[[pn[i]]])) {
+      specials[[i]] <- x$specials[[pn[i]]]
+      rownames(specials[[i]]) <- paste0(rownames(specials[[i]]), ".", pn[i])
     }
   }
+
+  cat("*--------\n")
+  if(length(lin_coef)) {
+    lin_coef <- do.call("rbind", lin_coef)
+    cat("Coefficients:\n")
+    printCoefmat(lin_coef, digits = digits,
+      signif.stars = signif.stars, na.print = "NA",
+      signif.legend = TRUE, ...)
+  }
+
+  if(length(specials)) {
+    specials <- do.call("rbind", specials)
+    cat("---\nSmooth terms:\n")
+    printCoefmat(t(specials))
+  }
+
   cat("*--------\n")
   info1 <- c(
     paste("n =", x$nobs),

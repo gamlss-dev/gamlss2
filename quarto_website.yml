@@ -25,6 +25,8 @@ website:
           file: vignettes/families.qmd
         - text: "Specials"
           file: vignettes/specials.qmd
+        - text: "Evaluation"
+          file: vignettes/topmodels.qmd
       - text: News
         file: $ALTDOC_NEWS
       - text: Citation

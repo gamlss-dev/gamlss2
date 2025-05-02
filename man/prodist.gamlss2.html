@@ -146,6 +146,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../vignettes/specials.html">
  <span class="dropdown-text">Specials</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Evaluation</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -585,10 +589,10 @@ GAMLSS-RS iteration  5: Global Deviance = 405.7928 eps = 0.000000     </code></p
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate random numbers</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        r_1      r_2       r_3       r_4      r_5
-1  11.83377 16.33829  26.34264  41.79104 29.43393
-2  33.38162 43.62704  63.82193  63.24931 66.54695
-3 114.91842 81.97900 129.49808 116.58034 55.30672</code></pre>
+<pre><code>        r_1      r_2      r_3       r_4      r_5
+1  13.62507 21.15928 19.00552  3.786158 28.05281
+2  67.87471 64.10419 79.54175 45.896014 30.77371
+3 148.72705 78.20917 63.46140 91.397236 42.61004</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## density and distribution</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

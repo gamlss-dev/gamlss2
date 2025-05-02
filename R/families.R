@@ -452,6 +452,10 @@ tF <- function(x, ...)
       return(p)
     } else NULL,
     "q" = if(!inherits(qfun, "try-error")) function(p, par, log = FALSE, ...) {
+      if(any(i <- p <= 1e-10))
+        p[i] <- 1e-10
+      if(any(i <- p >= (1- 1e-10)))
+        p[i] <- 1 - 1e-10
       q <- eval(qc)
       if(length(q) < length(par[[1L]])) {
         p <- rep(p, length.out = length(par[[1L]]))

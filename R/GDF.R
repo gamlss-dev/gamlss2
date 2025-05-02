@@ -57,16 +57,24 @@ prodist.gamlss2 <- function(object, ...) {
       ', setting type = "Continuous"!'))
     family$type <- "Continuous"
   }
+  cf <- class(family)
+  elmts <- c("family", "names", "d", "p", "q", "r",
+    "mean", "variance", "skewness", "kurtosis")
+  family <- family[elmts]
+  family <- family[!unlist(lapply(family, is.null))]
+  class(family) <- cf
   return(family)
 }
 
 ## S3 methods
 format.GDF <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
+  stopifnot(requireNamespace("distributions3"))
   class(x) <- c(paste("GDF", attr(x, "family")$family[1L]), "distribution")
   NextMethod()
 }
 
 print.GDF <- function(x, digits = pmax(3L, getOption("digits") - 3L), ...) {
+  stopifnot(requireNamespace("distributions3"))
   class(x) <- c(paste("GDF", attr(x, "family")$family[1L]), "distribution")
   NextMethod()
 }

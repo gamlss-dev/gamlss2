@@ -8,6 +8,9 @@ make.link2 <- function(link)
     if(!all(c("linkfun", "linkinv", "mu.eta", "valideta", "name") %in% names(rval)))
       stop("link is spefified wrong!")
   } else {
+    if(inherits(link, "link-glm")) {
+      return(link)
+    }
     link0 <- link
     if(link0 == "tanhalf"){
       rval <- list(
@@ -729,8 +732,10 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
   cat("Family:", x$family, if(!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL,  "\n")
   links <- paste(names(x$links), x$links, sep = " = ")
   links <- paste(links, collapse = ", ")
-  cat(if(length(links) > 1) "Link functions:" else "Link function:", links, sep = " ")
-  cat("\n")
+  if(links != "") {
+    cat(if(length(links) > 1) "Link functions:" else "Link function:", links, sep = " ")
+    cat("\n")
+  }
   if(full) {
     nfun <- names(x[c("transform", "optimizer", "sampler", "results", "predict")])
     if(!all(is.na(nfun))) {

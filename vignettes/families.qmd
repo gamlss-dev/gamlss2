@@ -59,7 +59,8 @@ Normal <- function(...) {
     "links" = c("mu" = "identity", "sigma" = "log"),
     "d" = function(y, par, log = FALSE, ...) {
       dnorm(y, par$mu, par$sigma, log = log)
-    }
+    },
+    "type" = "Continuous"
   )
   class(fam) <- "gamlss2.family"
   return(fam)
@@ -112,6 +113,7 @@ Normal <- function(...) {
     "d" = function(y, par, log = FALSE, ...) {
       dnorm(y, par$mu, par$sigma, log = log)
     },
+    "type" = "Continuous",
     "score" = list(
       "mu" = function(y, par, ...) {
         (y - par$mu) / (par$sigma^2)
@@ -146,83 +148,81 @@ Family objects can also include other functions such as:
 
 These functions should adhere to the same structure as the density function, taking the response
 (`y`), parameters (`par`), and other relevant arguments.
-
-
-::: {.callout-note}
 Note that the CDF `p()` function is needed it for computing the quantile residuals. 
-:::
-
-
 
 ## Flexible Links
 
-Note that the example above used static link functions to define the family object.
-However, users can easily create families with flexible link functions as well.
-A helpful example of how to implement such flexibility can be found in the Kumaraswamy
-distribution implementation, which provides a clear template for setting up families with
-customizable link functions.
+The example above used static link functions to define the family object. However, `gamlss2`
+also allows users to define families with flexible link functions.
+To support this, the helper function `make.link2()` is used. The only nontrivial part is
+adapting the `score` and `hess` functions to work on the linear predictor scale.
+This is not done automatically in `gamlss2` for performance reasons - users may even
+write these functions in C for speed. Below is a minimal example of implementing the
+`Normal` family with flexible link functions:
 
-The Kumaraswamy distribution is a continuous distribution defined on the interval $(0, 1)$.
-It is similar to the Beta distribution but has simpler forms for its cumulative distribution and
-inverse cumulative distribution functions, making it more computationally efficient for certain applications.
-Unfortunately the Kumaraswamy distribution parameters do not conform with the _distribution regression principal_ that parameters should have a clear interpretation in terms  of _location_ and _scale_. For example, the mean and variance of the distribution are a rather complicated functions of the parameters `a` and `b`, nevertheless the distribution is a good example of two parameter distribution in which the parameters are not named as `mu` and `sigma` as in all distributions defined in @Rigbyetal2019.        
+```{r}
+Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
+  mu.link <- make.link2(mu.link)
+  sigma.link <- make.link2(sigma.link)
 
-The probability density function (PDF) of the Kumaraswamy distribution is:
+  fam <- list(
+    "family" = "Normal",
+    "names" = c("mu", "sigma"),
+    "links" = list("mu" = mu.link, "sigma" = sigma.link),
+    "d" = function(y, par, log = FALSE, ...) {
+      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
+    },
+    "type" = "Continuous"
+  )
 
-$$
-f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
-$$
-
-where $y \in (0, 1)$ is the response, and $a$ and $b$ are non-negative parameters that
-determine the shape of the distribution. The complete implementation, including flexible link
-functions is provided in the `Kumaraswamy()` family.
-
-In the following example, we will create the family object for the Kumaraswamy distribution
-using the `Kumaraswamy()` function and estimate a model using this distribution.
-In detail, we will:
-
-* Define the Kumaraswamy family object.
-* Simulate data based on this distribution.
-* Estimate the model and plot the results.
-
-```{r Kumaraswamy-example, eval=TRUE, echo=TRUE}
-## Define the Kumaraswamy family object with specific link functions.
-fam <- Kumaraswamy(a.link = shiftlog, b.link = "log")
-
-## Set seed for reproducibility.
-set.seed(123)
-
-## Simulate data for 1000 observations.
-n <- 1000
-d <- data.frame("x" = runif(n, -pi, pi))
-
-## Specify the true parameters.
-par <- data.frame(
-  "a" = exp(1.2 + sin(d$x)) + 1,  # Parameter 'a' depends on 'x'
-  "b" = 1  # Parameter 'b' is constant
-)
-
-## Sample response values using the family object.
-d$y <- fam$r(1, par)
-
-## Estimate a model using the Kumaraswamy family.
-b <- gamlss2(y ~ s(x), data = d, family = fam)
-
-## Plot the estimated effect.
-plot(b)
-
-## Plot residual diagnostics.
-plot(b, which = "resid")
+  class(fam) <- "gamlss2.family"
+  return(fam)
+}
 ```
 
-In this example, we simulated a dataset where the parameter `a` of the Kumaraswamy
-distribution varies with `x` following a sinusoidal pattern. We then used the `gamlss2()` function
-to fit a smooth model that estimates this relationship. The effect of `x` on `y` is plotted,
-followed by a diagnostic plot to assess residuals.
+Note that in this version, the `"links"` element is a list to support passing full link
+function objects with derivatives. Also, the `score` and `hess` elements are omitted here
+and are approximated numerically in this case.
 
-The `Kumaraswamy()` family in `gamlss2` is flexible, allowing the user to specify
-different link functions for its parameters, such as the default `shiftlog` link function for
-parameter `a`, which ensures non-negative values.
+The following is a small example using the new `Normal` family with different link functions.
+
+```{r}
+set.seed(123)
+
+n <- 200
+age <- sort(runif(n, 0, 20))
+
+## true nonlinear relationship (e.g., growth curve)
+mu_true <- 100 * (1 - exp(-0.2 * age)) ## saturating growth
+sigma_true <- 2 + 0.3 * age            ## increasing variance
+
+## simulate data
+y <- rnorm(n, mean = mu_true, sd = sigma_true)
+d <- data.frame(age = age, y = y)
+```
+
+We now compare two models, one using an identity link (default) and one using a
+flexible `softplus` link.
+
+```{r}
+m1 <- gamlss2(y ~ s(age) | ., data = d, family = Normal(mu.link = "identity"))
+m2 <- gamlss2(y ~ s(age) | ., data = d, family = Normal(mu.link = softplus))
+```
+
+The fitted means are visualized with
+
+```{r}
+plot(age, y, pch = 16, col = rgb(0, 0, 0, 0.2))
+lines(age, fitted(m1)$mu, col = 2, lwd = 5)
+lines(age, fitted(m2)$mu, col = 4, lwd = 2)
+legend("topleft",
+  legend = c("Identity", "Softplus"),
+  col = c(2, 4), lwd = 2, bty = "n")
+```
+
+Both models yield nearly identical fits in this case, however, in practice, flexible links
+can help stabilize estimation or improve fit in more complex scenarios
+(e.g., bounded responses, nonlinear link-scale effects).
 
 ## Summary
 
@@ -230,7 +230,7 @@ Family objects in the `gamlss2` package are a fundamental component for defining
 distribution-based regression models, and beyond. By encapsulating the necessary elements,
 such as parameters, link functions, and density functions, they provide a powerful framework
 for customizing models to fit specific data. The flexibility to define custom families,
-as demonstrated with the `Kumaraswamy()` distribution, enables users to extend the package
+as demonstrated with the `Normal()` distribution, enables users to extend the package
 beyond its default families, making it adaptable to a wide range of modeling scenarios.
 Furthermore, the ability to define both static and dynamic link functions enhances the
 versatility of `gamlss2` for distributional regression, empowering users to tailor

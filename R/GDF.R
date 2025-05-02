@@ -59,7 +59,7 @@ prodist.gamlss2 <- function(object, ...) {
   }
   cf <- class(family)
   elmts <- c("family", "names", "d", "p", "q", "r",
-    "mean", "variance", "skewness", "kurtosis")
+    "mean", "variance", "skewness", "kurtosis", "type")
   family <- family[elmts]
   family <- family[!unlist(lapply(family, is.null))]
   class(family) <- cf

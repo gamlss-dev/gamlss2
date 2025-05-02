@@ -124,39 +124,10 @@ div.csl-indent {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <meta property="og:title" content="Family Objects – gamlss2">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/families_files/figure-html/Kumaraswamy-example-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/families_files/figure-html/unnamed-chunk-8-1.png">
 <meta property="og:site_name" content="gamlss2">
 <meta property="og:image:height" content="960">
 <meta property="og:image:width" content="1344">
@@ -278,11 +249,12 @@ window.Quarto = {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"links"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"mu"</span> <span class="ot">=</span> <span class="st">"identity"</span>, <span class="st">"sigma"</span> <span class="ot">=</span> <span class="st">"log"</span>),</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"d"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(y, par<span class="sc">$</span>mu, par<span class="sc">$</span>sigma, <span class="at">log =</span> log)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span> <span class="ot">=</span> <span class="st">"Continuous"</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In this example, we define a normal distribution with two parameters: <code>"mu"</code> (mean) and <code>"sigma"</code> (standard deviation). The link function for <code>"mu"</code> is the identity, and for <code>"sigma"</code>, it is the log function. The density function uses the standard <code>dnorm()</code> function from to calculate the normal density.</p>
 </section>
@@ -316,26 +288,27 @@ window.Quarto = {
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"d"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(y, par<span class="sc">$</span>mu, par<span class="sc">$</span>sigma, <span class="at">log =</span> log)</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"score"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        (y <span class="sc">-</span> par<span class="sc">$</span>mu) <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      },</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> (y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hess"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span> <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      },</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rep</span>(<span class="dv">2</span>, <span class="fu">length</span>(y))</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span> <span class="ot">=</span> <span class="st">"Continuous"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"score"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        (y <span class="sc">-</span> par<span class="sc">$</span>mu) <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      },</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> (y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hess"</span> <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span> <span class="sc">/</span> (par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      },</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, ...) {</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rep</span>(<span class="dv">2</span>, <span class="fu">length</span>(y))</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If no derivatives are provided, numerical approximations will be used by the package.</p>
 </section>
@@ -347,89 +320,80 @@ window.Quarto = {
 <li>Quantile function (<code>q()</code>).</li>
 <li>Random number generation (<code>r()</code>).</li>
 </ul>
-<p>These functions should adhere to the same structure as the density function, taking the response (<code>y</code>), parameters (<code>par</code>), and other relevant arguments.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Note that the CDF <code>p()</code> function is needed it for computing the quantile residuals.</p>
-</div>
-</div>
+<p>These functions should adhere to the same structure as the density function, taking the response (<code>y</code>), parameters (<code>par</code>), and other relevant arguments. Note that the CDF <code>p()</code> function is needed it for computing the quantile residuals.</p>
 </section>
 <section id="flexible-links" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="flexible-links"><span class="header-section-number">5</span> Flexible Links</h2>
-<p>Note that the example above used static link functions to define the family object. However, users can easily create families with flexible link functions as well. A helpful example of how to implement such flexibility can be found in the Kumaraswamy distribution implementation, which provides a clear template for setting up families with customizable link functions.</p>
-<p>The Kumaraswamy distribution is a continuous distribution defined on the interval <span class="math inline">\((0, 1)\)</span>. It is similar to the Beta distribution but has simpler forms for its cumulative distribution and inverse cumulative distribution functions, making it more computationally efficient for certain applications. Unfortunately the Kumaraswamy distribution parameters do not conform with the <em>distribution regression principal</em> that parameters should have a clear interpretation in terms of <em>location</em> and <em>scale</em>. For example, the mean and variance of the distribution are a rather complicated functions of the parameters <code>a</code> and <code>b</code>, nevertheless the distribution is a good example of two parameter distribution in which the parameters are not named as <code>mu</code> and <code>sigma</code> as in all distributions defined in <span class="citation" data-cites="Rigbyetal2019">Rigby et al. (<a href="#ref-Rigbyetal2019" role="doc-biblioref">2019</a>)</span>.</p>
-<p>The probability density function (PDF) of the Kumaraswamy distribution is:</p>
-<p><span class="math display">\[
-f(y; a, b) = aby^{a-1}(1 - y^a)^{b-1}
-\]</span></p>
-<p>where <span class="math inline">\(y \in (0, 1)\)</span> is the response, and <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are non-negative parameters that determine the shape of the distribution. The complete implementation, including flexible link functions is provided in the <code>Kumaraswamy()</code> family.</p>
-<p>In the following example, we will create the family object for the Kumaraswamy distribution using the <code>Kumaraswamy()</code> function and estimate a model using this distribution. In detail, we will:</p>
-<ul>
-<li>Define the Kumaraswamy family object.</li>
-<li>Simulate data based on this distribution.</li>
-<li>Estimate the model and plot the results.</li>
-</ul>
+<p>The example above used static link functions to define the family object. However, <code>gamlss2</code> also allows users to define families with flexible link functions. To support this, the helper function <code>make.link2()</code> is used. The only nontrivial part is adapting the <code>score</code> and <code>hess</code> functions to work on the linear predictor scale. This is not done automatically in <code>gamlss2</code> for performance reasons - users may even write these functions in C for speed. Below is a minimal example of implementing the <code>Normal</code> family with flexible link functions:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Define the Kumaraswamy family object with specific link functions.</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">Kumaraswamy</span>(<span class="at">a.link =</span> shiftlog, <span class="at">b.link =</span> <span class="st">"log"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Set seed for reproducibility.</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Simulate data for 1000 observations.</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"x"</span> <span class="ot">=</span> <span class="fu">runif</span>(n, <span class="sc">-</span>pi, pi))</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Specify the true parameters.</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"a"</span> <span class="ot">=</span> <span class="fu">exp</span>(<span class="fl">1.2</span> <span class="sc">+</span> <span class="fu">sin</span>(d<span class="sc">$</span>x)) <span class="sc">+</span> <span class="dv">1</span>,  <span class="co"># Parameter 'a' depends on 'x'</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b"</span> <span class="ot">=</span> <span class="dv">1</span>  <span class="co"># Parameter 'b' is constant</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Sample response values using the family object.</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">r</span>(<span class="dv">1</span>, par)</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Estimate a model using the Kumaraswamy family.</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x), <span class="at">data =</span> d, <span class="at">family =</span> fam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Normal <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>, <span class="at">sigma.link =</span> <span class="st">"log"</span>, ...) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  mu.link <span class="ot">&lt;-</span> <span class="fu">make.link2</span>(mu.link)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  sigma.link <span class="ot">&lt;-</span> <span class="fu">make.link2</span>(sigma.link)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"family"</span> <span class="ot">=</span> <span class="st">"Normal"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"names"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"links"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="st">"mu"</span> <span class="ot">=</span> mu.link, <span class="st">"sigma"</span> <span class="ot">=</span> sigma.link),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"d"</span> <span class="ot">=</span> <span class="cf">function</span>(y, par, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, <span class="at">log =</span> log)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span> <span class="ot">=</span> <span class="st">"Continuous"</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that in this version, the <code>"links"</code> element is a list to support passing full link function objects with derivatives. Also, the <code>score</code> and <code>hess</code> elements are omitted here and are approximated numerically in this case.</p>
+<p>The following is a small example using the new <code>Normal</code> family with different link functions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">20</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="do">## true nonlinear relationship (e.g., growth curve)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>mu_true <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">0.2</span> <span class="sc">*</span> age)) <span class="do">## saturating growth</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>sigma_true <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">+</span> <span class="fl">0.3</span> <span class="sc">*</span> age            <span class="do">## increasing variance</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate data</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> mu_true, <span class="at">sd =</span> sigma_true)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age, <span class="at">y =</span> y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now compare two models, one using an identity link (default) and one using a flexible <code>softplus</code> link.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(age) <span class="sc">|</span> ., <span class="at">data =</span> d, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = -1503.9979 eps = 0.674665     
-GAMLSS-RS iteration  2: Global Deviance = -1504.1074 eps = 0.000072     
-GAMLSS-RS iteration  3: Global Deviance = -1504.1261 eps = 0.000012     
-GAMLSS-RS iteration  4: Global Deviance = -1504.1293 eps = 0.000002     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1168.0219 eps = 0.999116     
+GAMLSS-RS iteration  2: Global Deviance = 1168.0219 eps = 0.000000     </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot the estimated effect.</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(age) <span class="sc">|</span> ., <span class="at">data =</span> d, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> softplus))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1168.3561 eps = 0.999101     
+GAMLSS-RS iteration  2: Global Deviance = 1168.3561 eps = 0.000000     </code></pre>
+</div>
+</div>
+<p>The fitted means are visualized with</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(age, y, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.2</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age, <span class="fu">fitted</span>(m1)<span class="sc">$</span>mu, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">5</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age, <span class="fu">fitted</span>(m2)<span class="sc">$</span>mu, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Identity"</span>, <span class="st">"Softplus"</span>),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="families_files/figure-html/Kumaraswamy-example-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot residual diagnostics.</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="families_files/figure-html/Kumaraswamy-example-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="families_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>In this example, we simulated a dataset where the parameter <code>a</code> of the Kumaraswamy distribution varies with <code>x</code> following a sinusoidal pattern. We then used the <code>gamlss2()</code> function to fit a smooth model that estimates this relationship. The effect of <code>x</code> on <code>y</code> is plotted, followed by a diagnostic plot to assess residuals.</p>
-<p>The <code>Kumaraswamy()</code> family in <code>gamlss2</code> is flexible, allowing the user to specify different link functions for its parameters, such as the default <code>shiftlog</code> link function for parameter <code>a</code>, which ensures non-negative values.</p>
+<p>Both models yield nearly identical fits in this case, however, in practice, flexible links can help stabilize estimation or improve fit in more complex scenarios (e.g., bounded responses, nonlinear link-scale effects).</p>
 </section>
 <section id="summary" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="summary"><span class="header-section-number">6</span> Summary</h2>
-<p>Family objects in the <code>gamlss2</code> package are a fundamental component for defining flexible, distribution-based regression models, and beyond. By encapsulating the necessary elements, such as parameters, link functions, and density functions, they provide a powerful framework for customizing models to fit specific data. The flexibility to define custom families, as demonstrated with the <code>Kumaraswamy()</code> distribution, enables users to extend the package beyond its default families, making it adaptable to a wide range of modeling scenarios. Furthermore, the ability to define both static and dynamic link functions enhances the versatility of <code>gamlss2</code> for distributional regression, empowering users to tailor models to their unique data and research needs.</p>
+<p>Family objects in the <code>gamlss2</code> package are a fundamental component for defining flexible, distribution-based regression models, and beyond. By encapsulating the necessary elements, such as parameters, link functions, and density functions, they provide a powerful framework for customizing models to fit specific data. The flexibility to define custom families, as demonstrated with the <code>Normal()</code> distribution, enables users to extend the package beyond its default families, making it adaptable to a wide range of modeling scenarios. Furthermore, the ability to define both static and dynamic link functions enhances the versatility of <code>gamlss2</code> for distributional regression, empowering users to tailor models to their unique data and research needs.</p>
 
 
 

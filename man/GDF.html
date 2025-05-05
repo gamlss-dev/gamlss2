@@ -497,7 +497,7 @@ numeric, matrix, list or data frame, see the examples.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The S3 class <code>GDF</code> is a slightly more general implementation of the S3 class <code>GAMLSS</code>. For details please see the documentation of <code>GAMLSS</code></p>
+<p>The S3 class <code>GDF</code> is a slightly more general implementation of the S3 class <code>GAMLSS</code> tailored for <span class="pkg">gamlss2</span>. For details please see the documentation of <code>GAMLSS</code></p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -540,7 +540,38 @@ numeric, matrix, list or data frame, see the examples.
 <pre><code>[1] "GDF WEI(mu = 1, sigma = 1)" "GDF WEI(mu = 1, sigma = 2)"
 [3] "GDF WEI(mu = 2, sigma = 2)"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## see ?gamlss.dist::GAMLSS for the remainder of this example</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## see ?gamlss.dist::GAMLSS for the remainder of this example</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">## example using gamlss2</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> ., <span class="at">data =</span> abdom, <span class="at">family =</span> GA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5038.5061 eps = 0.357098     
+GAMLSS-RS iteration  2: Global Deviance = 4802.0805 eps = 0.046923     
+GAMLSS-RS iteration  3: Global Deviance = 4800.3708 eps = 0.000356     
+GAMLSS-RS iteration  4: Global Deviance = 4800.3517 eps = 0.000003     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract, also works with newdata</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mean"</span> <span class="ot">=</span> <span class="fu">mean</span>(b),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"median"</span> <span class="ot">=</span> <span class="fu">median</span>(b),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"q95"</span> <span class="ot">=</span> <span class="fu">quantile</span>(b, <span class="at">probs =</span> <span class="fl">0.95</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"variance"</span> <span class="ot">=</span> <span class="fu">variance</span>(b),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pdf"</span> <span class="ot">=</span> <span class="fu">pdf</span>(b),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cdf"</span> <span class="ot">=</span> <span class="fu">cdf</span>(b)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(d))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      mean   median      q95 variance        pdf        cdf
+1 63.03340 62.93126 70.43334 19.32029 0.06243193 0.18020447
+2 63.03340 62.93126 70.43334 19.32029 0.08724146 0.59561443
+3 63.03340 62.93126 70.43334 19.32029 0.02558313 0.05046225
+4 64.38963 64.28559 71.93764 20.10246 0.06981519 0.22771810
+5 67.18914 67.08120 75.04208 21.76233 0.02858682 0.92454713
+6 67.18914 67.08120 75.04208 21.76233 0.02662616 0.05746814</code></pre>
+</div>
 </div>
 
 

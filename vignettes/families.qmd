@@ -39,11 +39,11 @@ use in statistical models.
 
 A family object in `gamlss2` is a list that must meet the following minimum criteria:
 
-* **Family Name**: The object must contain the family name as a character string.
-* **Parameters**: The object must list the parameters of the distribution (e.g., `"mu"` and `"sigma"`
+* Family Name: The object must contain the family name as a character string.
+* Parameters: The object must list the parameters of the distribution (e.g., `"mu"` and `"sigma"`
   for a normal distribution).
-* **Link Functions**: It must specify the link functions associated with each parameter.
-* **Density Function**: A `d()` function must be provided to evaluate the (log-)density of the
+* Link Functions: It must specify the link functions associated with each parameter.
+* Probability Density Function: A `pdf()` function must be provided to evaluate the (log-)density of the
   distribution.
 
 Optionally, a family object can include functions to calculate the log-likelihood,
@@ -57,10 +57,10 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "d" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(y, par, log = FALSE, ...) {
       dnorm(y, par$mu, par$sigma, log = log)
     },
-    "type" = "Continuous"
+    "type" = "continuous"
   )
   class(fam) <- "gamlss2.family"
   return(fam)
@@ -69,7 +69,7 @@ Normal <- function(...) {
 
 In this example, we define a normal distribution with two parameters: `"mu"` (mean) and `"sigma"`
 (standard deviation). The link function for `"mu"` is the identity, and for `"sigma"`,
-it is the log function. The density function uses the standard `dnorm()` function from
+it is the log function. The probability density function uses the standard `dnorm()` function from
 to calculate the normal density.
 
 ## Density Function
@@ -77,7 +77,7 @@ to calculate the normal density.
 The density function must accept the following arguments:
 
 ```{r, eval=FALSE}
-d(y, par, log = FALSE, ...)
+pdf(y, par, log = FALSE, ...)
 ```
 
 * `y`: The response variable.
@@ -98,8 +98,8 @@ function(y, par, ...)
 
 The derivate functions of first order must be provided as a named list, one list element for
 each parameter of the distribution, and is named `"score"`. The second order derivative list
-is named `"hess"`. Note that these functions must return the derivative **w.r.t. predictor**
-and the `"hess"` functions must return the **negative** (expected) second derivatives
+is named `"hess"`. Note that these functions must return the derivative w.r.t. predictor
+and the `"hess"` functions must return the negative (expected) second derivatives.
 
 An example of setting up first and second order derivatives for the normal is
 provided in the following code:
@@ -110,10 +110,14 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "d" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(y, par, log = FALSE, ...) {
       dnorm(y, par$mu, par$sigma, log = log)
     },
-    "type" = "Continuous",
+    "type" = "continuous",
+    "initialize" = list(
+      "mu"    = function(y, ...) { (y + mean(y)) / 2 },
+      "sigma" = function(y, ...) { rep(sd(y), length(y)) }
+    ),
     "score" = list(
       "mu" = function(y, par, ...) {
         (y - par$mu) / (par$sigma^2)
@@ -137,20 +141,23 @@ Normal <- function(...) {
 ```
 
 If no derivatives are provided, numerical approximations will be used by the package.
+Note that the family object may also include a list of
+initialization functions for the model parameters. Providing suitable starting values can
+significantly improve the stability and speed of the estimation process.
 
 ## Additional Functions
 
 Family objects can also include other functions such as
 
-* `p(y, par, ...)`: Cumulative distribution function.
-* `q(p, par, ...)`: Quantile function with probability vector `p`.
-* `r(n, par, ...)`: Random number generation.
+* `cdf(y, par, ...)`: Cumulative distribution function.
+* `quantile(p, par, ...)`: Quantile function with probability vector `p`.
+* `random(n, par, ...)`: Random number generation with number of samples `n`.
 * `mean(par, ...)`: Mean function.
 * `variance(par, ...)`: Variance function.
 * `skewness(par, ...)`: Skewness function.
 * `kurtosis(par, ...)`: Kurtosis function.
 
-Note that the CDF `p()` function is needed it for computing the quantile residuals.
+Note that the `cdf()` function is needed it for computing the quantile residuals.
 
 ## Flexible Links
 
@@ -171,10 +178,10 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = list("mu" = mu.link, "sigma" = sigma.link),
-    "d" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(y, par, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "type" = "Continuous"
+    "type" = "continuous"
   )
 
   class(fam) <- "gamlss2.family"
@@ -182,9 +189,8 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
 }
 ```
 
-Note that in this version, the `"links"` element is a list to support passing full link
-function objects with derivatives. Also, the `score` and `hess` elements are omitted here
-and are approximated numerically in this case.
+Note that the link functions must be provided as a list in this case, and that the `score` and
+`hess` elements are omitted and approximated numerically during estimation.
 
 The following is a small example using the new `Normal` family with different link functions.
 We now compare two models, one using an identity link (default) and one using a
@@ -199,33 +205,30 @@ f <- y ~ s(x) | s(x)
      
 ## estimate models
 m1 <- gamlss2(f, data = abdom, family = Normal(mu.link = "identity"))
-m2 <- gamlss2(f, data = abdom, family = Normal(mu.link = softplus(a = 5)))
+m2 <- gamlss2(f, data = abdom, family = Normal(sigma.link = softplus(a = 5)))
 ```
 
 The fitted means are visualized with
 
 ```{r}
-plot(age, y, pch = 16, col = rgb(0, 0, 0, 0.2))
-lines(age, fitted(m1)$mu, col = 2, lwd = 5)
-lines(age, fitted(m2)$mu, col = 4, lwd = 2)
+plot(y ~ x, data = abdom, pch = 19,
+  col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
+lines(abdom$x, mean(m1), col = 2, lwd = 5)
+lines(abdom$x, mean(m2), col = 4, lwd = 2)
 legend("topleft",
   legend = c("Identity", "Softplus"),
   col = c(2, 4), lwd = 2, bty = "n")
 ```
 
 Both models yield nearly identical fits in this case, however, in practice, flexible links
-can help stabilize estimation or improve fit in more complex scenarios
-(e.g., bounded responses, nonlinear link-scale effects).
+can help stabilize estimation or improve fit in more complex scenarios.
 
 ## Summary
 
 Family objects in the `gamlss2` package are a fundamental component for defining flexible,
-distribution-based regression models, and beyond. By encapsulating the necessary elements,
-such as parameters, link functions, and density functions, they provide a powerful framework
+distributional regression models, and beyond. By encapsulating the necessary elements,
+such as parameters, link functions, and probability density functions, they provide a powerful framework
 for customizing models to fit specific data. The flexibility to define custom families,
 as demonstrated with the `Normal()` distribution, enables users to extend the package
 beyond its default families, making it adaptable to a wide range of modeling scenarios.
-Furthermore, the ability to define both static and dynamic link functions enhances the
-versatility of `gamlss2` for distributional regression, empowering users to tailor
-models to their unique data and research needs.
 

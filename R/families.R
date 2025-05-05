@@ -547,6 +547,11 @@ tF <- function(x, ...)
   rval
 }
 
+## Helper function.
+#"c.link-glm" <- function(...) {
+#  return(list(...))
+#}
+
 ## Complete a family object, e.g.,
 ## if derivatives are not supplied they
 ## will be approximated numerically.

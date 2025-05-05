@@ -140,15 +140,17 @@ If no derivatives are provided, numerical approximations will be used by the pac
 
 ## Additional Functions
 
-Family objects can also include other functions such as:
+Family objects can also include other functions such as
 
-* Cumulative distribution function (`p()`).
-* Quantile function (`q()`).
-* Random number generation (`r()`).
+* `p(y, par, ...)`: Cumulative distribution function.
+* `q(p, par, ...)`: Quantile function with probability vector `p`.
+* `r(n, par, ...)`: Random number generation.
+* `mean(par, ...)`: Mean function.
+* `variance(par, ...)`: Variance function.
+* `skewness(par, ...)`: Skewness function.
+* `kurtosis(par, ...)`: Kurtosis function.
 
-These functions should adhere to the same structure as the density function, taking the response
-(`y`), parameters (`par`), and other relevant arguments.
-Note that the CDF `p()` function is needed it for computing the quantile residuals. 
+Note that the CDF `p()` function is needed it for computing the quantile residuals.
 
 ## Flexible Links
 
@@ -185,28 +187,19 @@ function objects with derivatives. Also, the `score` and `hess` elements are omi
 and are approximated numerically in this case.
 
 The following is a small example using the new `Normal` family with different link functions.
-
-```{r}
-set.seed(123)
-
-n <- 200
-age <- sort(runif(n, 0, 20))
-
-## true nonlinear relationship (e.g., growth curve)
-mu_true <- 100 * (1 - exp(-0.2 * age)) ## saturating growth
-sigma_true <- 2 + 0.3 * age            ## increasing variance
-
-## simulate data
-y <- rnorm(n, mean = mu_true, sd = sigma_true)
-d <- data.frame(age = age, y = y)
-```
-
 We now compare two models, one using an identity link (default) and one using a
 flexible `softplus` link.
 
 ```{r}
-m1 <- gamlss2(y ~ s(age) | ., data = d, family = Normal(mu.link = "identity"))
-m2 <- gamlss2(y ~ s(age) | ., data = d, family = Normal(mu.link = softplus))
+## load the abdominal circumference data
+data("abdom", package = "gamlss.data")
+     
+## specify the model Formula
+f <- y ~ s(x) | s(x)
+     
+## estimate models
+m1 <- gamlss2(f, data = abdom, family = Normal(mu.link = "identity"))
+m2 <- gamlss2(f, data = abdom, family = Normal(mu.link = softplus(a = 5)))
 ```
 
 The fitted means are visualized with

@@ -15,48 +15,51 @@
 }
 
 \details{
-  The following lists the minimum requirements on a \pkg{gamlss2} family object to be used with
-  \code{\link{gamlss2}}:
+  A \pkg{gamlss2} family object must be a \code{list} of class \code{"gamlss2.family"}, containing
+  the necessary elements to define the response distribution and how it is handled during model
+  fitting. The minimum requirements are as follows:
+
   \itemize{
-    \item The family object is expected to return a \code{\link{list}} of class \code{"gamlss2.family"}.
-    \item The object must contain the family name as a character string. 
-    \item The object must contain the names of the parameters as a character string, as well as
-      the corresponding link functions as character string.
-    \item The family object must contain a \code{$d()} function to evaluate the (log-)density.
+    \item \code{family}: the name of the distribution (character string).
+    \item \code{names}: a character vector of parameter names (e.g., \code{c("mu", "sigma")}).
+    \item \code{links}: a named character vector specifying the link function for each parameter
+          (e.g., \code{c(mu = "identity", sigma = "log")}), or a list of link functions, e.g., see
+          \code{\link{softplus}}.
+    \item \code{pdf(y, par, log = FALSE, ...)}: a function to evaluate the (log-)density.
   }
-  Furthermore, it is assumed that the density function in a family object has the
-  following arguments:
 
-  \code{d(y, par, log = FALSE, ...)}
+  The \code{pdf()} function must accept the response \code{y}, a named list \code{par} of evaluated
+  parameter values (e.g., \code{par$mu}, \code{par$sigma}), a logical \code{log}, and optional
+  additional arguments.
 
-  where argument \code{y} is the response (possibly a matrix) and \code{par} is a named list
-  holding the evaluated parameters of the distribution, e.g., using a normal distribution \code{par}
-  has two elements, one for the mean \code{par$mu} and one for the standard deviation
-  \code{par$sigma}. The dots argument is for passing special internally used objects, depending
-  on the type of model this feature is usually not needed.
+  Optionally, the family object may include:
 
-  Optionally, the family object holds derivative functions evaluating
-  derivatives of the log-likelihood w.r.t. the predictors (or expectations of derivatives).
-  For each parameter, these functions must have the following arguments:
- 
-  \code{function(y, par, ...)}
+  \itemize{
+    \item \code{score}: a named list of functions (one per parameter), each computing the
+      first derivative of the log-likelihood with respect to the linear predictor:
+      \code{score[[param]](y, par, ...)}.
+    \item \code{hess}: a named list of functions computing second derivatives (negative Hessian).
+      For parameters \code{mu} and \code{sigma}, this includes:
+      \code{hess[["mu"]]()}, \code{hess[["sigma"]]()}, and optionally
+      cross derivatives like \code{hess[["mu.sigma"]]()}.
+    \item \code{loglik(y, par, ...)}: a function computing the total log-likelihood.
+    \item \code{cdf(y, par, ...)}: cumulative distribution function.
+    \item \code{quantile(p, par, ...)}: quantile function.
+    \item \code{random(n, par, ...)}: random number generator.
+    \item \code{mean(par, ...)}: mean function.
+    \item \code{variance(par, ...)}: variance function.
+    \item \code{skewness(par, ...)}, \code{kurtosis(par, ...)}: optional higher-order moment functions.
+    \item \code{initialize}: a named list of initialization functions, one per parameter (e.g.,
+      \code{initialize$mu(y, ...)}), used to generate starting values.
+    \item \code{valid.response(x)}: a function that checks whether the response is valid (e.g.,
+      numeric, non-factor).
+    \item \code{optimizer()}: an optional function to define a custom optimization method for
+      use with \code{\link{gamlss2}}, see also \code{link{RS}}.
+  }
 
-  for computing the first derivative of the log-likelihood w.r.t. a predictor and
-
-  \code{function(y, par, ...)}
-
-  for computing the _negative_ second derivatives. Within the family object these functions
-  are organized in a named list, see the examples below. If these functions are not specified,
-  all derivatives will be approximated numerically. Note that also cross derivatives can
-  be implemented, e.g., when using the \code{\link{CG}} algorithm for fitting a GAMLSS.
-
-  In addition, for the cumulative distribution function (\code{p(y, par, ...)}), for the quantile
-  function (\code{q(y, par, ...)}) or for creating random numbers (\code{r(n, par, ...)}) the same
-  structure is assumed.
-
-  Using function \code{\link{gamlss2}} the family objects may
-  also specify the \code{optimizer()}er function that
-  should be used with this family.
+  If the analytical score or Hessian functions are not provided, they will be approximated
+  numerically. If quantile residuals are to be computed, a \code{cdf()} function
+  must be provided.
 }
 
 \seealso{
@@ -95,16 +98,16 @@ Normal <- function(...) {
     "mu" = function(par, ...) {
       par$mu
     },
-    "d" = function(y, par, log = FALSE) {
+    "pdf" = function(y, par, log = FALSE) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "p" = function(y, par, ...) {
+    "cdf" = function(y, par, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
-    "r" = function(n, par) {
+    "random" = function(n, par) {
       rnorm(n, mean = par$mu, sd = par$sigma)
     },
-    "q" = function(p, par) {
+    "quantile" = function(p, par) {
       qnorm(p, mean = par$mu, sd = par$sigma)
     },
     "initialize" = list(
@@ -144,7 +147,7 @@ plot(b, which = "resid")
 par <- predict(b)
 
 ## predict quantiles
-pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
+pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$quantile(q, par))
 
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,
@@ -155,23 +158,23 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 ## another example using only the density
 ## function, all derivatives are approximated
 ## in this case; for residual diagnostics,
-## the $p() and $q() function is needed, too.
+## the $cdf() and $quantile() function is needed, too.
 Gamma <- function(...) {
   fam <- list(
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "log", "sigma" = "log"),
-    "d" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(y, par, log = FALSE, ...) {
       shape <- par$sigma
       scale <- par$mu/par$sigma
       dgamma(y, shape = shape, scale = scale, log = log)
     },
-    "p" = function(y, par, lower.tail = TRUE, log.p = FALSE) {
+    "cdf" = function(y, par, lower.tail = TRUE, log.p = FALSE) {
       shape <- par$sigma
       scale <- par$mu/par$sigma
       pgamma(y, shape = shape, scale = scale,
         lower.tail = lower.tail, log.p = log.p)
     },
-    "q" = function(p, par, lower.tail = TRUE, log.p = FALSE) {
+    "quantile" = function(p, par, lower.tail = TRUE, log.p = FALSE) {
       shape <- par$sigma
       scale <- par$mu/par$sigma
        qgamma(p, shape = shape, scale = scale,
@@ -197,7 +200,7 @@ b <- gamlss2(f, data = rent, family = Gamma)
 ## visualize estimated effects
 plot(b, which = "effects")
 
-## diagnostics, needs the $p() and $q() function!
+## diagnostics, needs the $cdf() and $quantile() function!
 plot(b, which = "resid")
 }}
 

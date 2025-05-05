@@ -322,7 +322,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       } else {
         if(isTRUE(control$logLik)) {
           eta[[j]] <- eta[[j]] + fit
-          rss <- family$loglik(y, family$map2par(eta))
+          rss <- family$logLik(y, family$map2par(eta))
         } else {
           rss <- sum(w * (z - fit)^2)
         }

@@ -6,7 +6,7 @@ distfit <- function(..., plot = TRUE)
   yn <- as.character(formula(b$fake_formula, rhs = 0))[2L]
   names(nd) <- yn
   par <- predict(b, newdata = nd, type = "parameter")
-  nd$dy <- family(b)$d(nd[[yn]], par)
+  nd$dy <- family(b)$pdf(nd[[yn]], par)
   attr(y, "fitted.values") <- nd
   class(y) <- "distfit"
   if(plot) {

@@ -61,9 +61,9 @@ residuals.gamlss2 <- function(object,
       if(!is.null(family$rqres)) {
         res <- family$rqres(y, par)
       } else {
-        if(is.null(family$p)) {
+        if(is.null(family$cdf)) {
           type <- "response"
-          warning(paste("no $p() function in family '", family$family,
+          warning(paste("no $cdf() function in family '", family$family,
             "', cannot compute quantile residuals, computing response resdiuals instead!", sep = ""))
         } else {
           discrete <- FALSE
@@ -77,9 +77,9 @@ residuals.gamlss2 <- function(object,
           ## Discrete case.
           if(discrete) {
             ymin <- min(y, na.rm = TRUE)
-            a <- family$p(ifelse(y == ymin, y, y - 1), par)
+            a <- family$cdf(ifelse(y == ymin, y, y - 1), par)
             a <- ifelse(y == ymin, 0, a)
-            b <- family$p(y, par)
+            b <- family$cdf(y, par)
             u <- runif(length(y), a, b)
             u <- ifelse(u > 0.999999, u - 1e-16, u)
             u <- ifelse(u < 1e-06, u + 1e-16, u)
@@ -97,7 +97,7 @@ residuals.gamlss2 <- function(object,
               if(ncol(mass.p) != ncol(prob.mp))
                 stop()
 
-              res <- family$p(y, par)
+              res <- family$cdf(y, par)
               for(j in mass.p) {
                 i <- which(y == j)
                 if(j == 1) {
@@ -106,7 +106,7 @@ residuals.gamlss2 <- function(object,
               }
             } else {
               ## Continuous case.
-              prob <- family$p(y, par)
+              prob <- family$cdf(y, par)
               thres <- 0.999999999999999
               prob[prob > thres] <- thres
               prob[prob < (1 - thres)] <- 1 - thres
@@ -117,7 +117,7 @@ residuals.gamlss2 <- function(object,
       }
 
       if(length(ix <- which(!is.finite(res))) > 0L) {
-        res[ix] <- qnorm(family$p(y[ix], par[ix, , drop = FALSE], log = TRUE), log.p = TRUE)
+        res[ix] <- qnorm(family$cdf(y[ix], par[ix, , drop = FALSE], log = TRUE), log.p = TRUE)
       }
 
       if(any(isnf <- !is.finite(res))) {

@@ -73,10 +73,9 @@ plot(m, which = "resid")
 
 ## fitted parameters for each day of the year
 nd <- data.frame(yday = 1:365)
-par <- predict(m, newdata = nd)
 
 ## corresponding quantiles
-p <- sapply(c(0.05, 0.5, 0.95), function(q) family(m)$q(q, par))
+p <- quantile(m, newdata = nd, probs = c(0.05, 0.5, 0.95))
 
 ## visualization
 plot(bikes ~ yday, data = HarzTraffic, pch = 19, col = gray(0.1, alpha = 0.3))

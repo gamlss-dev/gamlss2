@@ -122,7 +122,7 @@ plot(b, which = "resid")
 par <- predict(b)
 
 ## predict quantiles
-pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
+pq <- quantile(b, probs = c(0.05, 0.5, 0.95))
 
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,

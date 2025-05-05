@@ -42,7 +42,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           for(j in np) {
             if(!is.null(start[[j]])) {
               if(is.na(start[[j]]["(Intercept)"])) {
-                etastart[[j]] <- rep(make.link2(family$links[j])$linkfun(start[[j]]), n)
+                etastart[[j]] <- rep(make.link2(family$links[[j]])$linkfun(start[[j]]), n)
               } else {
                 etastart[[j]] <- rep(start[[j]], n)
               }
@@ -174,7 +174,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Null deviance.
-  dev0 <- -2 * family$loglik(y, family$map2par(eta))
+  dev0 <- -2 * family$logLik(y, family$map2par(eta))
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
@@ -190,7 +190,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     beta <- unlist(beta)
 
     if(!any(is.na(beta))) {
-      lli <- family$loglik(y, family$map2par(ieta))
+      lli <- family$logLik(y, family$map2par(ieta))
 
       fn_ll <- function(par) {
         for(j in np) {
@@ -200,7 +200,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               ieta[[j]] <- ieta[[j]] + offsets[[j]]
           }
         }
-        ll <- family$loglik(y, family$map2par(ieta)) - lambda * sum(par^2)
+        ll <- family$logLik(y, family$map2par(ieta)) - lambda * sum(par^2)
         return(-ll)
       }
 
@@ -259,9 +259,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   while((eps[1L] > stop.eps[1L]) & iter[1L] < maxit[1L]) {
     ## Old log-likelihood.
     if(is.null(weights)) {
-      llo0 <- family$loglik(y, family$map2par(eta))
+      llo0 <- family$logLik(y, family$map2par(eta))
     } else {
-      llo0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+      llo0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## Old predictors.
@@ -288,9 +288,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
         ## Current log-likelihood.
         if(is.null(weights)) {
-          ll0 <- family$loglik(y, family$map2par(eta))
+          ll0 <- family$logLik(y, family$map2par(eta))
         } else {
-          ll0 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
         }
         ll02 <- ll0
 
@@ -332,12 +332,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           ## If linear model does not improve the fit, use ML.
           etai <- eta
           etai[[j]] <- etai[[j]] + m$fitted.values
-          ll1 <- family$loglik(y, family$map2par(etai))
+          ll1 <- family$logLik(y, family$map2par(etai))
 
           if(ll1 < ll02) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
-              -family$loglik(y, family$map2par(eta)) + lambda * sum(par^2)
+              -family$logLik(y, family$map2par(eta)) + lambda * sum(par^2)
             }
             opt <- try(optim(coef(m), fn = ll, method = "BFGS"), silent = TRUE)
             if(!inherits(opt, "try-error")) {
@@ -356,7 +356,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           etai <- eta
           etai[[j]] <- etai[[j]] + m$fitted.values
-          ll1 <- family$loglik(y, family$map2par(etai))
+          ll1 <- family$logLik(y, family$map2par(etai))
 
           if(ll1 > ll02) {
             ## Update predictor.
@@ -403,7 +403,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
             etai <- eta
             etai[[j]] <- etai[[j]] + fs$fitted.values
-            ll1 <- family$loglik(y, family$map2par(etai))
+            ll1 <- family$logLik(y, family$map2par(etai))
 
             if(ll1 > ll02) {
               ## Update predictor.
@@ -427,9 +427,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## New log-likelihood.
         if(is.null(weights)) {
-          ll1 <- family$loglik(y, family$map2par(eta))
+          ll1 <- family$logLik(y, family$map2par(eta))
         } else {
-          ll1 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          ll1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
         }
 
         ## Stopping criterion.
@@ -452,9 +452,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## New log-likelihood.
     if(is.null(weights)) {
-      llo1 <- family$loglik(y, family$map2par(eta))
+      llo1 <- family$logLik(y, family$map2par(eta))
     } else {
-      llo1 <- sum(family$d(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+      llo1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## Stopping criterion.
@@ -525,7 +525,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Message if not converged due to NAs or Inf!
-  d <- family$d(y, family$map2par(eta), log = TRUE)
+  d <- family$pdf(y, family$map2par(eta), log = TRUE)
   if(!is.null(weights))
     d <- d * weights
   if(any(is.na(d))) {
@@ -571,7 +571,7 @@ initialize_eta <- function(y, family, nobs, initialize)
     return(eta)
   for(j in family$names) {
     if(!is.null(family$initialize[[j]])) {
-      linkfun <- make.link2(family$links[j])$linkfun
+      linkfun <- make.link2(family$links[[j]])$linkfun
       eta[[j]] <- try(linkfun(family$initialize[[j]](y)), silent = TRUE)
       if(inherits(eta[[j]], "try-error")) {
         if(is.null(dim(y)))

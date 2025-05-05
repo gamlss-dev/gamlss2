@@ -145,7 +145,7 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
           "density\nGAIC =", round(GAIC(b, k = k), 4))
       }
 
-      dy <- b$family$d(y, par)
+      dy <- b$family$pdf(y, par)
 
       h <- hist(y, breaks = "Scott", plot = FALSE)
 
@@ -170,7 +170,7 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
           "probabilties\nGAIC =", round(GAIC(b, k = k), 4))
       }
 
-      dy <- b$family$d(y, par)
+      dy <- b$family$pdf(y, par)
 
       Y <- unique(cbind(y, dy))
       Y <- Y[order(Y[, 1]), ]

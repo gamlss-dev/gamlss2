@@ -260,7 +260,7 @@ predict.gamlss2 <- function(object,
       warn <- 'Prediction with type = "response", however, the mean function is missing in the family!'
       if(!is.null(family$q)) {
         warn <- paste(warn, 'Using the median instead!')
-        fm <- function(par) family$q(0.5, par)
+        fm <- function(par) family$quantile(0.5, par)
       }
     }
     if(is.null(fm)) {

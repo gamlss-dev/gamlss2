@@ -16,6 +16,18 @@
 \alias{is_discrete.GDF}
 \alias{is_continuous.GDF}
 
+\alias{mean.gamlss2}
+\alias{variance.gamlss2}
+\alias{skewness.gamlss2}
+\alias{kurtosis.gamlss2}
+\alias{pdf.gamlss2}
+\alias{log_pdf.gamlss2}
+\alias{cdf.gamlss2}
+\alias{random.gamlss2}
+\alias{support.gamlss2}
+\alias{is_discrete.gamlss2}
+\alias{is_continuous.gamlss2}
+
 \title{Create a GDF Distribution}
 
 \description{
@@ -39,7 +51,7 @@ GDF(family, parameters)
 
 \details{
 The S3 class \code{GDF} is a slightly more general implementation of the S3 class
-\code{\link[gamlss.dist]{GAMLSS}}. For details please see the documentation of \code{\link[gamlss.dist]{GAMLSS}}
+\code{\link[gamlss.dist]{GAMLSS}} tailored for \pkg{gamlss2}. For details please see the documentation of \code{\link[gamlss.dist]{GAMLSS}}
 }
 
 \value{
@@ -80,5 +92,22 @@ X <- GDF("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
 X
 
 ## see ?gamlss.dist::GAMLSS for the remainder of this example
+
+## example using gamlss2
+data("abdom", package = "gamlss.data")
+
+## estimate model
+b <- gamlss2(y ~ s(x) | . | . | ., data = abdom, family = GA)
+
+## extract, also works with newdata
+d <- data.frame(
+  "mean" = mean(b),
+  "median" = median(b),
+  "q95" = quantile(b, probs = 0.95),
+  "variance" = variance(b),
+  "pdf" = pdf(b),
+  "cdf" = cdf(b)
+)
+print(head(d))
 }
 

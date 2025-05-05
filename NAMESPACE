@@ -26,6 +26,9 @@ importFrom("parallel", "mclapply")
 
 importFrom("mvtnorm", "dmvnorm", "rmvnorm")
 
+importFrom("distributions3", "variance", "pdf", "cdf", "skewness",
+  "kurtosis", "random", "is_continuous", "is_discrete", "prodist")
+
 export(
   "fake_formula",
   "gamlss2",
@@ -115,6 +118,19 @@ S3method(distributions3::random, GDF)
 S3method(distributions3::is_continuous, GDF)
 S3method(distributions3::is_discrete, GDF)
 S3method(distributions3::support, GDF)
+
+S3method(mean, gamlss2)
+S3method(median, gamlss2)
+S3method(distributions3::variance, gamlss2)
+S3method(distributions3::skewness, gamlss2)
+S3method(distributions3::kurtosis, gamlss2)
+S3method(distributions3::pdf, gamlss2)
+S3method(distributions3::log_pdf, gamlss2)
+S3method(distributions3::cdf, gamlss2)
+S3method(distributions3::random, gamlss2)
+S3method(distributions3::is_continuous, gamlss2)
+S3method(distributions3::is_discrete, gamlss2)
+S3method(distributions3::support, gamlss2)
 
 useDynLib(gamlss2, .registration = TRUE)
 

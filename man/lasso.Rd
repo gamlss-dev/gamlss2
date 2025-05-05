@@ -95,9 +95,7 @@ rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
   include.lowest = TRUE)
 
 ## set up the model formula for a BCT model
-f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) |
-  la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) |
-  la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4)
+f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | . | .
 
 ## estimation
 b <- gamlss2(f, data = rent, family = BCT)
@@ -153,8 +151,8 @@ beta <- list(
 )
 
 ## parameters
-mu <- X %*% beta$mu
-sigma <- exp(-1 + X %*% beta$sigma)
+mu <- X \%*\% beta$mu
+sigma <- exp(-1 + X \%*\% beta$sigma)
 
 ## response
 y <- rnorm(n, mean = mu, sd = sigma)

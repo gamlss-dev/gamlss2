@@ -3,6 +3,7 @@
 ## encompassing all distributions using the workflow from
 ## the distributions3 package
 GDF <- function(family, parameters) {
+  stopifnot(requireNamespace("distributions3"))
   ## get family object
   f <- .GDF_family(family)
   ## set up distribution
@@ -21,6 +22,8 @@ GDF <- function(family, parameters) {
 ## S3 method for extracting fitted/predicted distributions3 objects
 ## associated methods are in gamlss.dist (as well as distributions3, topmodels, etc.)
 prodist.gamlss2 <- function(object, ...) {
+  stopifnot(requireNamespace("distributions3"))
+
   ## extract fitted parameters
   d <- predict(object, ..., type = "parameter", drop = FALSE)
 
@@ -58,8 +61,11 @@ prodist.gamlss2 <- function(object, ...) {
     family$type <- "Continuous"
   }
   cf <- class(family)
-  elmts <- c("family", "names", "d", "p", "q", "r",
-    "mean", "variance", "skewness", "kurtosis", "type")
+  elmts <- c(
+    "family", "names", "pdf", "cdf", "quantile", "random",
+    "mean", "mode", "variance", "skewness", "kurtosis",
+    "type"
+  )
   family <- family[elmts]
   family <- family[!unlist(lapply(family, is.null))]
   class(family) <- cf
@@ -114,28 +120,28 @@ kurtosis.GDF <- function(x, ...) {
 pdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$d(at, d) }
+  FUN <- function(at, d) { f$pdf(at, d) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "density", drop = drop, elementwise = elementwise)
 }
 
 log_pdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$d(at, d, log = TRUE) }
+  FUN <- function(at, d) { f$pdf(at, d, log = TRUE) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "logLik", drop = drop, elementwise = elementwise)
 }
 
 cdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$p(at, d) }
+  FUN <- function(at, d) { f$cdf(at, d) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", drop = drop, elementwise = elementwise)
 }
 
 quantile.GDF <- function(x, probs, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(x)
-  FUN <- function(at, d) { f$q(at, d) }
+  FUN <- function(at, d) { f$quantile(at, d) }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = probs, type = "quantile", drop = drop, elementwise = elementwise)
 }
 
@@ -144,7 +150,7 @@ random.GDF <- function(x, n = 1L, drop = TRUE, ...) {
   f <- .GDF_family(x)
   n <- distributions3::make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
-  FUN <- function(at, d) { f$r(at, d) }
+  FUN <- function(at, d) { f$random(at, d) }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
 }
 
@@ -157,11 +163,12 @@ support.GDF <- function(d, drop = TRUE, ...) {
 is_discrete.GDF <- function(d, ...) {
   f <- .GDF_family(d)
   if(is.null(f$type)) stop(sprintf("the type is not implemented for the %s family", attr(d, "family")[1L]))
-  setNames(rep.int(f$type == "Discrete", length(d)), names(d))
+  setNames(rep.int(tolower(f$type) == "discrete", length(d)), names(d))
 }
 
 is_continuous.GDF <- function(d, ...) {
   f <- .GDF_family(d)
-  setNames(rep.int(TRUE, length(d)), names(d))
+  if(is.null(f$type)) stop(sprintf("the type is not implemented for the %s family", attr(d, "family")[1L]))
+  setNames(rep.int(tolower(f$type) == "continuous", length(d)), names(d))
 }
 

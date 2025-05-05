@@ -210,11 +210,8 @@ plot(b, which = "effects")
 ## plot diagnostics
 plot(b, which = "resid")
 
-## predict parameters
-par <- predict(b)
-
 ## predict quantiles
-pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$q(q, par))
+pq <- quantile(b, probs = c(0.05, 0.5, 0.95))
 
 ## plot
 plot(y ~ x, data = abdom, pch = 19,
@@ -245,11 +242,8 @@ nd <- with(rent, expand.grid(
   "A" = seq(min(A), max(A), length = n)
 ))
 
-## predict parameters of the GA distribution
-par <- predict(b, newdata = nd)
-
 ## compute median rent R estimate
-nd$fit <- family(b)$q(0.5, par)
+nd$fit <- quantile(b, newdata = nd, probs = 0.5)
 
 ## visualize
 library("lattice")

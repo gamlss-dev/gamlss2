@@ -10,7 +10,7 @@
     } else {
       model.response(model.frame(object, keepresponse = TRUE))
     }
-    ll <- family(object)$loglik(y, par)
+    ll <- family(object)$logLik(y, par)
     nobs <- length(y)
   }
   attr(ll, "nobs") <- nobs

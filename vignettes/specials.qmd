@@ -242,11 +242,12 @@ AIC(b1, b2)
 
 Finally, we visualize the estimated effects from the second model.
 
-```r
-#| fig-height: 4
+```{r}
+#| fig-height: 8
 #| fig-width: 8
 #| fig-align: center
-plot(b2)
+par(mfrow = c(2, 2))
+plot(b2, spar = FALSE)
 ```
 
 This example illustrates how easy it is to integrate loess smoothers into `gamlss2`

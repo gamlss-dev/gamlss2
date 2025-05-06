@@ -168,7 +168,7 @@ Family objects can also include other functions such as
 * `variance(par, ...)`: Variance function.
 * `skewness(par, ...)`: Skewness function.
 * `kurtosis(par, ...)`: Kurtosis function.
-* `valid.response`: Function to check the values of the response.
+* `valid.response(y)`: Function to check the values of the response.
 
 Note that the `cdf()` function is needed it for computing the quantile residuals.
 
@@ -201,8 +201,8 @@ Normal <- function(...) {
       "mu"    = function(y, ...) { (y + mean(y)) / 2 },
       "sigma" = function(y, ...) { rep(sd(y), length(y)) }
     ),
-    "valid.response" = function(x) {
-      if(is.factor(x) | is.character(x))
+    "valid.response" = function(y) {
+      if(is.factor(y) | is.character(y))
         stop("the response should be numeric!")
       return(TRUE)
     },

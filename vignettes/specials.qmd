@@ -17,36 +17,37 @@ vignette: >
 ---
 
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
-library("gamlss")
 library("gamlss2")
-
-if(!("tictoc" %in% installed.packages())) {
-  install.packages("tictoc")
-}
 ```
 
-In order to add any new machine learning type algorithm in `gamlss2` you need to
-define three _special_ functions:
+Special model terms in `gamlss2` can be virtually any kind of model specification.
+For example, `gamlss2` supports all smooth terms from the `mgcv` package, including `s()`,
+`te()`, and others. Another example is the
+[`la()`](https://gamlss-dev.github.io/gamlss2/man/lasso.html) constructor,
+which provides Lasso-penalized model terms.
 
--   A **special term constructor** function,
--   a **fitting** function and,
--   a **predict** function.
+Defining new special model terms in `gamlss2` is relatively straightforward. To implement a
+new model term, the following three functions need to be provided:
 
-Here we demonstrate how this can be done using the local polynomial smoothing function
-`loess()` in **R**, @Clevelandetal93.
+- a constructor function to define the term,
+- a fitting function to estimate the term from data, and
+- a prediction function for use in model evaluation or forecasting.
 
-Note that any regression type machine learning function is **R** can be easily incorporated in
-`gamlss2` especially if there is a **prior weights** argument in the function.
-`loess()` has the argument `weights` for prior weights so it can be incorporated easily.
+As a demonstration, we show how to incorporate local polynomial regression () via
+`loess()` [@Clevelandetal93]. Since `loess()` supports a `weights` argument, it integrates
+naturally into the `gamlss2` framework, like many other fitting functions that accept weights.
 
 ## The special model term constructor
 
-Any special model term constructor **must** be registered in the `fake_formula()` function.
-If not yet registered, the user can provide a new special name in the `specials` argument
-of `fake_formula()`. Another option is to use the special model term constructor name '"user"',
-which is already part of the special names list in `fake_formula()`.
+Any special model term constructor **must** be registered in the `fake_formula()` function,
+which is called internally by [`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html).
+If a constructor is not yet registered, the user can either:
 
-The definition function can take all relevant `loess` and `loess.control` arguments so it can pass them into the fitting function.
+- provide the new special term name via the `specials` argument of [`fake_formula()`](https://gamlss-dev.github.io/gamlss2/man/fake_formula.html), or
+- use the reserved constructor name `"user"`, which is already recognized by [`fake_formula()`](https://gamlss-dev.github.io/gamlss2/man/fake_formula.html).
+
+To implement a local polynomial smoothing term via `loess()`, we define a new constructor
+function called `lo()` (registered in [`fake_formula()`](https://gamlss-dev.github.io/gamlss2/man/fake_formula.html)). This function can accept all relevant arguments from both `loess()` and `loess.control()`, which are passed on to the fitting function.
 
 ```{r}
 lo <- function(formula, ...) 
@@ -70,6 +71,18 @@ lo <- function(formula, ...)
     as.character(formula)), collapse = ""), ")") 
   st$data <- model.frame(formula)
 
+  ## per default scale the data
+  if(is.null(st$control$scale))
+    st$control$scale <- TRUE
+  if(isTRUE(st$control$scale)) {
+    sx <- list()
+    for(j in colnames(st$data)) {
+      sx[[j]] <- c("mean" = mean(st$data[[j]]), "sd" = sd(st$data[[j]]))
+      st$data[[j]] <- (st$data[[j]] - sx[[j]]["mean"]) / sx[[j]]["sd"]
+    }
+    st$scalex <- sx
+  }
+
   ## New model formula used for fitting.
   st$formula <- update(formula, response_z ~ .)
 
@@ -77,14 +90,26 @@ lo <- function(formula, ...)
   class(st) <- c("special", "lo")
 
   return(st) 
-} 
+}
 ```
+
+Note that the data to be used in model fitting is evaluated directly within the constructor
+function and is scaled per default. The returned list must contain all relevant
+information required for both estimation and prediction. The return value must be of class
+`"special"` and `"lo"` in this case.
 
 ## The fitting function
 
+For estimation within [`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html),
+the generic [`special_fit()`](https://gamlss-dev.github.io/gamlss2/man/special_terms.html)
+function is used. To support the loess model term, a method `special_fit.lo()` must be provided.
 
-The fitting function takes the current working response, the iterative weights and the corresponding relevant term  and creates a call to the  `loess` function to fit the relevant model. It then saves the fitted values and the fitted objects for later use.  
-
+The fitting function takes the list `x` of class `"lo"` (as returned by the constructor `lo()`),
+the current working response `z`, the current working weights `w`, and a list of control
+parameters (which are passed through the dots argument in the
+[`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html) call).
+Estimation is carried out via `loess()`, where `z` and `w` are inserted into the data
+stored in the `x`
 
 ```{r}
 special_fit.lo <- function(x, z, w, control, ...)
@@ -111,10 +136,13 @@ special_fit.lo <- function(x, z, w, control, ...)
 
   ## center fitted values
   rval$shift <- mean(rval$fitted.values)
-  rval$fitted.values <- rval$fitted.values - rval$shift 
+  rval$fitted.values <- rval$fitted.values - rval$shift
 
   ## degrees of freedom
   rval$edf <-  rval$model$trace.hat
+
+  ## pass scaling
+  rval$scalex <- x$scalex
 
   ## assign class for predict method 
   class(rval) <- "lo.fitted" 
@@ -123,159 +151,104 @@ special_fit.lo <- function(x, z, w, control, ...)
 }
 ```
 
+The returned object must be a list containing a `"model"` element that holds the
+fitted `loess()` object. Additionally:
+
+- `"fitted.values"` must contain the centered fitted values to ensure
+  identifiability in the backfitting algorithm,
+- `"edf"` must specify the effective degrees of freedom used in the smoother, and
+- the returned object must be of class `"lo.fitted"` so that
+  [`special_predict()`](https://gamlss-dev.github.io/gamlss2/man/special_terms.html)
+  can dispatch the appropriate prediction method.
+
+This setup integrates seamlessly with the iterative estimation algorithm implemented in
+[`RS()`](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html).
+
 ## The predict function
 
-The prediction function shows how the predicted values of the model can be extracted.
+The prediction function defines how fitted values are obtained from a model term of class
+`"lo.fitted"`. This method is called by
+[`special_predict()`](https://gamlss-dev.github.io/gamlss2/man/special_terms.html)
+during model evaluation and prediction.
 
 ```{r}
 special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...) 
 {
+  ## scaling
+  if(!is.null(x$scalex)) {
+    for(j in names(x$scalex)) {
+      data[[j]] <- (data[[j]] - x$scalex[[j]]["mean"]) / x$scalex[[j]]["sd"]
+    }
+  }
+
+  ## compute predicted values from the loess model
   p <- as.numeric(predict(x$model, newdata = data))
+
+  ## apply centering shift
   p <- p - x$shift
+
+  ## wrap in a data frame if se.fit = TRUE,
+  ## mandatory
   if(se.fit)
     p <- data.frame("fit" = p)
+
   return(p)
 }
 ```
 
-## Example: rent99 data
+This function must return a numeric vector (or data frame if `se.fit = TRUE`)
+containing the predicted values for the given `data`. The `shift` value, computed during
+model fitting, is subtracted to maintain identifiability of the additive predictor.
 
-We use the `rent99` data to demonstrate the use of the functions
+The argument `se.fit` is included for compatibility and can be extended in the future to
+return standard errors.
+
+## Example: Munich rent data
+
+We use the `rent` dataset from the `gamlss.data` package to demonstrate the use of
+custom model terms based on local polynomial smoothing via `loess()`.
 
 ```{r}
 ## load the Munich rent data
-data("rent99", package = "gamlss.data") 
-
-## scale covariates
-rent99$area <- scale(rent99$area)
-rent99$yearc <- scale(rent99$yearc)
-```
-Note that the continuous variables in the data `area` and `yearc` have been standardised. 
-We defined four formulae for modelling the rent data. The first two use `loess` and the third and fourth uses the additive smoothing function `s()` for comparison.  Formula `f` uses main effect smoothing terms for `area` and `yearc` for parameters $\mu$ and $\sigma$, respectively,  while the second, `f1`, uses  two dimensional smoothing functions for modelling one way interaction. The third formula uses one dimensional smoother for main effects and the fourth  two dimensional cubic splines smoothers for interactions.  Note that in this example we only use explanatory terms for the first two parameters  $\mu$ and $\sigma$  and constants for the rest, $\nu$ and $\tau$.
-
-
-
-```{r}
-f <- rent ~ lo(~area)+lo(~yearc)+location+bath+kitchen| 
-            lo(~area)+lo(~yearc)+location+bath+kitchen|
-            1|1 
-
-f1 <- rent ~ lo(~area*yearc)+location+bath+kitchen| 
-             lo(~area*yearc)+location+bath+kitchen|
-             1|1
-
-sf <- rent ~ s(~area)+s(~yearc)+location+bath+kitchen| 
-             s(~area)+s(~yearc)+location+bath+kitchen|
-            1|1 
-
-sf1 <- rent ~ te(area,yearc) + location + bath + kitchen | 
-              te(area,yearc) + location + bath + kitchen |
-            1|1
+data("rent", package = "gamlss.data")
 ```
 
-## Estimation
-
-Below we use the package `tictoc` to measure the time is taken to fit each model.
-The main effect fit for `loess`  is; 
+We first estimate a model using the custom `lo()` constructor for univariate
+smoothers on floor size (`Fl`) and year of construction (`A`).
 
 ```{r}
-library("tictoc")
-tic()
-b1 <- gamlss2(f, data = rent99, family = BCTo) 
-toc()
+## define model formula with univariate smoothers
+f1 <- R ~ lo(~Fl) + lo(~A) + loc + B + H + L | . | . | .
+
+## estimate the model using the BCT distribution
+b1 <- gamlss2(f1, data = rent, family = BCT)
 ```
 
+Next, we include a bivariate loess smoother for `Fl` and `A` to allow for interaction.
 
-The first order interaction fit for `loess` is;
 ```{r}
-tic()
-b2 <- gamlss2(f1, data = rent99, family = BCTo) 
-toc()
-```
-Now the main effect model using `s()`
-```{r}
-library(tictoc)
-tic()
-a1<- gamlss2(sf, data = rent99, family = BCT) 
-toc()
-```
-The interaction model using `te()` 
-```{r}
-library(tictoc)
-tic()
-a2<- gamlss2(sf1, data = rent99, family = BCT) 
-toc()
+## define model formula with bivariate smoother
+f2 <- R ~ lo(~Fl*A) + loc + B + H + L | . | . | .
+
+## estimate the alternative model
+b2 <- gamlss2(f2, data = rent, family = BCT)
 ```
 
-
-The cubic spline function is lot faster than the `loess()` implementation `lo()`
-in `gamlss2`, but let us now compare the models using AIC.
+We can compare the models using the `AIC()`.
 
 ```{r}
-## deviance
-AIC(b1, b2, a1, a2, k = 0)
-
-## BIC
-AIC(b1, b2, a1, a2, k = log(nrow(rent99)))
+AIC(b1, b2)
 ```
 
-It seems that the two `lo()` models do better that the `s()` as far as the
-AIC criteria are concern. 
+Finally, we visualize the estimated effects from the second model.
 
-
-## Visualise the fits
-
-The standard `plot()` function of `gamlss2` can be used to visualises  the smooth curves fits (under certain circumstances). For example for the main effect model using `lo()`   we have; 
-```{r}
-plot(b1)
-```
-Note that no standard errors are shown here compare to the `s()` function model shown below;
-```{r}
-plot(a1)
-```
-
-
-For the first order interaction model `b2` and  because the effects are not defined within `gamlss2` calling `plot()` produces the standard residual plots;  
-```{r}
+```r
+#| fig-height: 4
+#| fig-width: 8
+#| fig-align: center
 plot(b2)
 ```
-For the first order interaction model `a2` using tensor products  the plot are more informative; 
-```{r}
-plot(a2)
-```
 
-One can use the function `vis.lo()` of the package `gamlss`  to visualised the fitted terms fitted with `lo()`. Here we show the `area` fitted values  for parameter $\mu$ and model `b` including the partial residuals from the model.
-
-```{r}
-gamlss:::vis.lo(specials(b1, model="mu")[[1]]$model, partial = TRUE)
-```
-
-Next we show the year of construction `yearc` fit for parameters $\mu$ from model `b`  without partial residuals.
-
-```{r}
-gamlss:::vis.lo(specials(b1, model = "mu")[[2]]$model, partial = FALSE)
-```
-
-
-Here we plot the fitted surface fit from model `b2` and parameters $\mu$;
-
-
-```{r}
-gamlss:::vis.lo(specials(b2, model = "mu")$model, partial = FALSE)
-```
-
-Here we plot the same fitted surface as above adding  a 95% confidence intervals;
-
-```{r}
-gamlss:::vis.lo(specials(b2, model = "mu")$model, se = 1.97)
-```
-
-
-Finally we plot the fitted surface fit from the $\mu$ model of `b2` adding the partial residuals. 
-
-```{r}
-gamlss:::vis.lo(specials(b2, model = "mu")$model, partial = TRUE)
-```
-
-Note that similar plots are given in section 9.6.3 of @Stasinopoulosetal2017, where the `lo()` function within package `gamlss`, is described.
+This example illustrates how easy it is to integrate loess smoothers into `gamlss2`
+using the custom model term interface.
 

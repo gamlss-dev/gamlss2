@@ -9,7 +9,7 @@ make.link2 <- function(link)
       stop("link is spefified wrong!")
   } else {
     if(inherits(link, "link-glm")) {
-      class(link) <- c("gamlss2.link", "link-glm")
+      class(link) <- c("link_gamlss2", "link-glm")
       return(link)
     }
     link0 <- link
@@ -126,9 +126,14 @@ make.link2 <- function(link)
   if(is.null(rval$linkinv) | is.null(rval$linkfun))
     rval <- gamlss.dist::make.link.gamlss(as.character(rval$name))
 
-  class(rval) <- c("gamlss2.link", "link-glm")
+  class(rval) <- c("link_gamlss2", "link-glm")
 
   rval
+}
+
+## Helper function.
+"c.link_gamlss2" <- function(...) {
+  return(list(...))
 }
 
 ## Parsing links helper function.
@@ -548,11 +553,6 @@ tF <- function(x, ...)
 
   class(rval) <- "gamlss2.family"
   rval
-}
-
-## Helper function.
-"c.gamlss2.link" <- function(...) {
-  return(list(...))
 }
 
 ## Complete a family object, e.g.,

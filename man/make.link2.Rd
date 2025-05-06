@@ -22,7 +22,7 @@ make.link2(link)
 }
 
 \value{
-  A list containing the following components:
+  A list of class \code{"link_gamlss2"} containing the following components:
   \item{linkfun}{Link function \code{function(mu)}.}
   \item{linkinv}{Inverse link function \code{function(eta)}.}
   \item{mu.eta}{Derivative \code{function(eta)}: \eqn{d\mu/d\eta}.}

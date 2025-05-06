@@ -324,7 +324,7 @@ div.csl-indent {
 <li><code>variance(par, ...)</code>: Variance function.</li>
 <li><code>skewness(par, ...)</code>: Skewness function.</li>
 <li><code>kurtosis(par, ...)</code>: Kurtosis function.</li>
-<li><code>valid.response</code>: Function to check the values of the response.</li>
+<li><code>valid.response(y)</code>: Function to check the values of the response.</li>
 </ul>
 <p>Note that the <code>cdf()</code> function is needed it for computing the quantile residuals.</p>
 <p>A complete version of the <code>Normal()</code> family is given below:</p>
@@ -354,8 +354,8 @@ div.csl-indent {
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mu"</span>    <span class="ot">=</span> <span class="cf">function</span>(y, ...) { (y <span class="sc">+</span> <span class="fu">mean</span>(y)) <span class="sc">/</span> <span class="dv">2</span> },</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>      <span class="st">"sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(y, ...) { <span class="fu">rep</span>(<span class="fu">sd</span>(y), <span class="fu">length</span>(y)) }</span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"valid.response"</span> <span class="ot">=</span> <span class="cf">function</span>(x) {</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">is.factor</span>(x) <span class="sc">|</span> <span class="fu">is.character</span>(x))</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"valid.response"</span> <span class="ot">=</span> <span class="cf">function</span>(y) {</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">is.factor</span>(y) <span class="sc">|</span> <span class="fu">is.character</span>(y))</span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="st">"the response should be numeric!"</span>)</span>
 <span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="cn">TRUE</span>)</span>
 <span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    },</span>

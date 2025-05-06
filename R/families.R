@@ -9,6 +9,7 @@ make.link2 <- function(link)
       stop("link is spefified wrong!")
   } else {
     if(inherits(link, "link-glm")) {
+      class(link) <- c("gamlss2.link", "link-glm")
       return(link)
     }
     link0 <- link
@@ -124,6 +125,8 @@ make.link2 <- function(link)
 
   if(is.null(rval$linkinv) | is.null(rval$linkfun))
     rval <- gamlss.dist::make.link.gamlss(as.character(rval$name))
+
+  class(rval) <- c("gamlss2.link", "link-glm")
 
   rval
 }
@@ -548,9 +551,9 @@ tF <- function(x, ...)
 }
 
 ## Helper function.
-#"c.link-glm" <- function(...) {
-#  return(list(...))
-#}
+"c.gamlss2.link" <- function(...) {
+  return(list(...))
+}
 
 ## Complete a family object, e.g.,
 ## if derivatives are not supplied they
@@ -829,6 +832,8 @@ Gaussian <- function(...)
     ),
     "mean"      = function(par) par$mu,
     "variance"  = function(par) par$sigma^2,
+    "skewness" = function(par) { rep(0, length(par$mu)) },
+    "kurtosis" = function(par) { rep(3, length(par$mu)) },
     "valid.response" = function(x) {
       if(is.factor(x) | is.character(x))
         stop("the response should be numeric!")

@@ -58,7 +58,7 @@ Normal <- function(...) {
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
     "pdf" = function(y, par, log = FALSE, ...) {
-      dnorm(y, par$mu, par$sigma, log = log)
+      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous"
   )
@@ -69,12 +69,7 @@ Normal <- function(...) {
 
 In this example, we define a normal distribution with two parameters: `"mu"` (mean) and `"sigma"`
 (standard deviation). The link function for `"mu"` is the identity, and for `"sigma"`,
-it is the log function. The probability density function uses the standard `dnorm()` function from
-to calculate the normal density.
-
-## Density Function
-
-The density function must accept the following arguments:
+it is the log function. The probability density function (`pdf()`) must accept the following arguments:
 
 ```{r, eval=FALSE}
 pdf(y, par, log = FALSE, ...)
@@ -84,34 +79,36 @@ pdf(y, par, log = FALSE, ...)
 * `par`: A named list of parameters (e.g., `"mu"`, `"sigma"` for the normal distribution).
 * `log`: A logical value indicating whether to return the log-density.
 
+Here, the `pdf()` function uses the standard `dnorm()` function to calculate the normal density.
+
 ## Optional Derivatives
 
-Family objects can optionally include functions to compute the first and second derivatives of
-the log-likelihood with respect to the predictors (or its expectations). These derivatives are used for
-optimization during model fitting.
+Family objects can optionally include functions to compute the first and second derivatives of the 
+log-likelihood with respect to the predictors (or the expected values of those derivatives). These 
+functions are used during model fitting to improve optimization efficiency and accuracy.
 
-The derivative functions follow the form:
+All derivative functions must follow the structure:
 
-```{r, eval=FALSE}
+```r
 function(y, par, ...)
 ```
 
-The derivate functions of first order must be provided as a named list, one list element for
-each parameter of the distribution, and is named `"score"`. The second order derivative list
-is named `"hess"`. Note that these functions must return the derivative w.r.t. predictor
-and the `"hess"` functions must return the negative (expected) second derivatives.
+First-order derivatives must be provided as a named list called `"score"`, with one function per 
+distribution parameter. Second-order derivatives must be provided in a list named `"hess"`. Each 
+function in `"hess"` must return the **negative (expected)** second derivative with respect to the 
+predictor.
 
-An example of setting up first and second order derivatives for the normal is
-provided in the following code:
+The following code illustrates how to provide both `"score"` and `"hess"` functions for
+a normal distribution:
 
-```{r}
+```r
 Normal <- function(...) {
   fam <- list(
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
     "pdf" = function(y, par, log = FALSE, ...) {
-      dnorm(y, par$mu, par$sigma, log = log)
+      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous",
     "initialize" = list(
@@ -132,6 +129,9 @@ Normal <- function(...) {
       },
       "sigma" = function(y, par, ...) {
         rep(2, length(y))
+      },
+      "mu.sigma" = function(y, par, ...) {
+        rep(0, length(y)) ## example cross-derivative
       }
     )
   )
@@ -140,7 +140,19 @@ Normal <- function(...) {
 }
 ```
 
-If no derivatives are provided, numerical approximations will be used by the package.
+If no derivative functions are provided, all necessary derivatives will be
+approximated numerically. In addition to derivatives with respect to single parameters,
+**cross-derivatives** (i.e., second-order derivatives involving two different parameters)
+can also be specified. These should be added to the `"hess"` list and named using the
+format `"param1.param2"`, for example `"mu.sigma"`. They must use the same function
+arguments as the other derivative functions.
+
+Cross-derivatives can be beneficial when using second-order optimization
+algorithms such as Cole and Green (CG) flavor implemented in the default backfitting algorithm
+[RS](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html) in `gamlss2`.
+Supplying analytical expressions for these derivatives can significantly
+improve convergence speed and numerical stability in such settings.
+
 Note that the family object may also include a list of
 initialization functions for the model parameters. Providing suitable starting values can
 significantly improve the stability and speed of the estimation process.
@@ -156,8 +168,68 @@ Family objects can also include other functions such as
 * `variance(par, ...)`: Variance function.
 * `skewness(par, ...)`: Skewness function.
 * `kurtosis(par, ...)`: Kurtosis function.
+* `valid.response`: Function to check the values of the response.
 
 Note that the `cdf()` function is needed it for computing the quantile residuals.
+
+A complete version of the `Normal()` family is given below:
+
+```r
+Normal <- function(...) {
+  fam <- list(
+    "family" = "Normal",
+    "names" = c("mu", "sigma"),
+    "links" = c("mu" = "identity", "sigma" = "log"),
+    "pdf" = function(y, par, log = FALSE, ...) {
+      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
+    },
+    "cdf" = function(y, par, ...) {
+      pnorm(y, mean = par$mu, sd = par$sigma, ...)
+    },
+    "random" = function(n, par) {
+      rnorm(n, mean = par$mu, sd = par$sigma)
+    },
+    "quantile" = function(p, par) {
+      qnorm(p, mean = par$mu, sd = par$sigma)
+    },
+    "mean" = function(par) { par$mu },
+    "variance"  = function(par) { par$sigma^2 },
+    "skewness" = function(par) { rep(0, length(par$mu)) },
+    "kurtosis" = function(par) { rep(3, length(par$mu)) },
+    "type" = "continuous",
+    "initialize" = list(
+      "mu"    = function(y, ...) { (y + mean(y)) / 2 },
+      "sigma" = function(y, ...) { rep(sd(y), length(y)) }
+    ),
+    "valid.response" = function(x) {
+      if(is.factor(x) | is.character(x))
+        stop("the response should be numeric!")
+      return(TRUE)
+    },
+    "score" = list(
+      "mu" = function(y, par, ...) {
+        (y - par$mu) / (par$sigma^2)
+      },
+      "sigma" = function(y, par, ...) {
+        -1 + (y - par$mu)^2 / (par$sigma^2)
+      }
+    ),
+    "hess" = list(
+      "mu" = function(y, par, ...) {
+        1 / (par$sigma^2)
+      },
+      "sigma" = function(y, par, ...) {
+        rep(2, length(y))
+      },
+      "mu.sigma" = function(y, par, ...) {
+        rep(0, length(y)) ## example cross-derivative
+      }
+    )
+  )
+  class(fam) <- "gamlss2.family"
+  return(fam)
+}
+```
 
 ## Flexible Links
 
@@ -177,7 +249,7 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
   fam <- list(
     "family" = "Normal",
     "names" = c("mu", "sigma"),
-    "links" = list("mu" = mu.link, "sigma" = sigma.link),
+    "links" = c("mu" = mu.link, "sigma" = sigma.link),
     "pdf" = function(y, par, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
@@ -189,8 +261,8 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
 }
 ```
 
-Note that the link functions must be provided as a list in this case, and that the `score` and
-`hess` elements are omitted and approximated numerically during estimation.
+Note that the `score` and `hess` elements are omitted and approximated
+numerically during estimation.
 
 The following is a small example using the new `Normal` family with different link functions.
 We now compare two models, one using an identity link (default) and one using a
@@ -205,7 +277,7 @@ f <- y ~ s(x) | s(x)
      
 ## estimate models
 m1 <- gamlss2(f, data = abdom, family = Normal(mu.link = "identity"))
-m2 <- gamlss2(f, data = abdom, family = Normal(sigma.link = softplus(a = 5)))
+m2 <- gamlss2(f, data = abdom, family = Normal(mu.link = softplus))
 ```
 
 The fitted means are visualized with
@@ -220,7 +292,7 @@ legend("topleft",
   col = c(2, 4), lwd = 2, bty = "n")
 ```
 
-Both models yield nearly identical fits in this case, however, in practice, flexible links
+Both models yield identical fits in this case, however, in practice, flexible links
 can help stabilize estimation or improve fit in more complex scenarios.
 
 ## Summary

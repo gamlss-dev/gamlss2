@@ -117,7 +117,7 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
         }
       }
     }
-    ll <- family$loglik(y, family$map2par(eta))
+    ll <- family$logLik(y, family$map2par(eta))
     return(ll)
   }
 
@@ -415,7 +415,7 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
     par <- fitted(object, newdata = newdata, type = "parameter")
 
     if(is.null(family(object)$mean)) {
-      fit <- family(object)$q(0.5, par)
+      fit <- family(object)$quantile(0.5, par)
     } else {
       fit <- family(object)$mean(par)
     }

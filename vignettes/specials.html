@@ -95,7 +95,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-8b5750a142117b6699f8b1158d9c3506.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-cddb76fcaaefba5b040f8e8886d76da1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -124,42 +124,11 @@ div.csl-indent {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <meta property="og:title" content="Special Model Terms – gamlss2">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/specials_files/figure-html/unnamed-chunk-11-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/gamlss2.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="960">
-<meta property="og:image:width" content="1344">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -236,9 +205,7 @@ window.Quarto = {
   <li><a href="#the-special-model-term-constructor" id="toc-the-special-model-term-constructor" class="nav-link active" data-scroll-target="#the-special-model-term-constructor"><span class="header-section-number">1</span> The special model term constructor</a></li>
   <li><a href="#the-fitting-function" id="toc-the-fitting-function" class="nav-link" data-scroll-target="#the-fitting-function"><span class="header-section-number">2</span> The fitting function</a></li>
   <li><a href="#the-predict-function" id="toc-the-predict-function" class="nav-link" data-scroll-target="#the-predict-function"><span class="header-section-number">3</span> The predict function</a></li>
-  <li><a href="#example-rent99-data" id="toc-example-rent99-data" class="nav-link" data-scroll-target="#example-rent99-data"><span class="header-section-number">4</span> Example: rent99 data</a></li>
-  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">5</span> Estimation</a></li>
-  <li><a href="#visualise-the-fits" id="toc-visualise-the-fits" class="nav-link" data-scroll-target="#visualise-the-fits"><span class="header-section-number">6</span> Visualise the fits</a></li>
+  <li><a href="#example-munich-rent-data" id="toc-example-munich-rent-data" class="nav-link" data-scroll-target="#example-munich-rent-data"><span class="header-section-number">4</span> Example: Munich rent data</a></li>
   </ul>
 </nav>
     </div>
@@ -251,18 +218,22 @@ window.Quarto = {
 </header>
 
 
-<p>In order to add any new machine learning type algorithm in <code>gamlss2</code> you need to define three <em>special</em> functions:</p>
+<p>Special model terms in <code>gamlss2</code> can be virtually any kind of model specification. For example, <code>gamlss2</code> supports all smooth terms from the <code>mgcv</code> package, including <code>s()</code>, <code>te()</code>, and others. Another example is the <a href="https://gamlss-dev.github.io/gamlss2/man/lasso.html"><code>la()</code></a> constructor, which provides Lasso-penalized model terms.</p>
+<p>Defining new special model terms in <code>gamlss2</code> is relatively straightforward. To implement a new model term, the following three functions need to be provided:</p>
 <ul>
-<li>A <strong>special term constructor</strong> function,</li>
-<li>a <strong>fitting</strong> function and,</li>
-<li>a <strong>predict</strong> function.</li>
+<li>a constructor function to define the term,</li>
+<li>a fitting function to estimate the term from data, and</li>
+<li>a prediction function for use in model evaluation or forecasting.</li>
 </ul>
-<p>Here we demonstrate how this can be done using the local polynomial smoothing function <code>loess()</code> in <strong>R</strong>, <span class="citation" data-cites="Clevelandetal93">Cleveland, Grosse, and Shyu (<a href="#ref-Clevelandetal93" role="doc-biblioref">1993</a>)</span>.</p>
-<p>Note that any regression type machine learning function is <strong>R</strong> can be easily incorporated in <code>gamlss2</code> especially if there is a <strong>prior weights</strong> argument in the function. <code>loess()</code> has the argument <code>weights</code> for prior weights so it can be incorporated easily.</p>
+<p>As a demonstration, we show how to incorporate local polynomial regression () via <code>loess()</code> <span class="citation" data-cites="Clevelandetal93">(<a href="#ref-Clevelandetal93" role="doc-biblioref">Cleveland, Grosse, and Shyu 1993</a>)</span>. Since <code>loess()</code> supports a <code>weights</code> argument, it integrates naturally into the <code>gamlss2</code> framework, like many other fitting functions that accept weights.</p>
 <section id="the-special-model-term-constructor" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="the-special-model-term-constructor"><span class="header-section-number">1</span> The special model term constructor</h2>
-<p>Any special model term constructor <strong>must</strong> be registered in the <code>fake_formula()</code> function. If not yet registered, the user can provide a new special name in the <code>specials</code> argument of <code>fake_formula()</code>. Another option is to use the special model term constructor name ‘“user”’, which is already part of the special names list in <code>fake_formula()</code>.</p>
-<p>The definition function can take all relevant <code>loess</code> and <code>loess.control</code> arguments so it can pass them into the fitting function.</p>
+<p>Any special model term constructor <strong>must</strong> be registered in the <code>fake_formula()</code> function, which is called internally by <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.html"><code>gamlss2()</code></a>. If a constructor is not yet registered, the user can either:</p>
+<ul>
+<li>provide the new special term name via the <code>specials</code> argument of <a href="https://gamlss-dev.github.io/gamlss2/man/fake_formula.html"><code>fake_formula()</code></a>, or</li>
+<li>use the reserved constructor name <code>"user"</code>, which is already recognized by <a href="https://gamlss-dev.github.io/gamlss2/man/fake_formula.html"><code>fake_formula()</code></a>.</li>
+</ul>
+<p>To implement a local polynomial smoothing term via <code>loess()</code>, we define a new constructor function called <code>lo()</code> (registered in <a href="https://gamlss-dev.github.io/gamlss2/man/fake_formula.html"><code>fake_formula()</code></a>). This function can accept all relevant arguments from both <code>loess()</code> and <code>loess.control()</code>, which are passed on to the fitting function.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>lo <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, ...) </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>{</span>
@@ -285,19 +256,33 @@ window.Quarto = {
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.character</span>(formula)), <span class="at">collapse =</span> <span class="st">""</span>), <span class="st">")"</span>) </span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>data <span class="ot">&lt;-</span> <span class="fu">model.frame</span>(formula)</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="do">## New model formula used for fitting.</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>formula <span class="ot">&lt;-</span> <span class="fu">update</span>(formula, response_z <span class="sc">~</span> .)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Assign the "special" class and the new class "n".</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(st) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"special"</span>, <span class="st">"lo"</span>)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(st) </span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="do">## per default scale the data</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">is.null</span>(st<span class="sc">$</span>control<span class="sc">$</span>scale))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    st<span class="sc">$</span>control<span class="sc">$</span>scale <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">isTRUE</span>(st<span class="sc">$</span>control<span class="sc">$</span>scale)) {</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    sx <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">colnames</span>(st<span class="sc">$</span>data)) {</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>      sx[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mean"</span> <span class="ot">=</span> <span class="fu">mean</span>(st<span class="sc">$</span>data[[j]]), <span class="st">"sd"</span> <span class="ot">=</span> <span class="fu">sd</span>(st<span class="sc">$</span>data[[j]]))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>      st<span class="sc">$</span>data[[j]] <span class="ot">&lt;-</span> (st<span class="sc">$</span>data[[j]] <span class="sc">-</span> sx[[j]][<span class="st">"mean"</span>]) <span class="sc">/</span> sx[[j]][<span class="st">"sd"</span>]</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    st<span class="sc">$</span>scalex <span class="ot">&lt;-</span> sx</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="do">## New model formula used for fitting.</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  st<span class="sc">$</span>formula <span class="ot">&lt;-</span> <span class="fu">update</span>(formula, response_z <span class="sc">~</span> .)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Assign the "special" class and the new class "n".</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(st) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"special"</span>, <span class="st">"lo"</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(st) </span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Note that the data to be used in model fitting is evaluated directly within the constructor function and is scaled per default. The returned list must contain all relevant information required for both estimation and prediction. The return value must be of class <code>"special"</code> and <code>"lo"</code> in this case.</p>
 </section>
 <section id="the-fitting-function" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="the-fitting-function"><span class="header-section-number">2</span> The fitting function</h2>
-<p>The fitting function takes the current working response, the iterative weights and the corresponding relevant term and creates a call to the <code>loess</code> function to fit the relevant model. It then saves the fitted values and the fitted objects for later use.</p>
+<p>For estimation within <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.html"><code>gamlss2()</code></a>, the generic <a href="https://gamlss-dev.github.io/gamlss2/man/special_terms.html"><code>special_fit()</code></a> function is used. To support the loess model term, a method <code>special_fit.lo()</code> must be provided.</p>
+<p>The fitting function takes the list <code>x</code> of class <code>"lo"</code> (as returned by the constructor <code>lo()</code>), the current working response <code>z</code>, the current working weights <code>w</code>, and a list of control parameters (which are passed through the dots argument in the <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.html"><code>gamlss2()</code></a> call). Estimation is carried out via <code>loess()</code>, where <code>z</code> and <code>w</code> are inserted into the data stored in the <code>x</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>special_fit.lo <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>{</span>
@@ -323,257 +308,110 @@ window.Quarto = {
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="do">## center fitted values</span></span>
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(rval<span class="sc">$</span>fitted.values)</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> rval<span class="sc">$</span>fitted.values <span class="sc">-</span> rval<span class="sc">$</span>shift </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>fitted.values <span class="ot">&lt;-</span> rval<span class="sc">$</span>fitted.values <span class="sc">-</span> rval<span class="sc">$</span>shift</span>
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="do">## degrees of freedom</span></span>
 <span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>edf <span class="ot">&lt;-</span>  rval<span class="sc">$</span>model<span class="sc">$</span>trace.hat</span>
 <span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="do">## assign class for predict method </span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(rval) <span class="ot">&lt;-</span> <span class="st">"lo.fitted"</span> </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="do">## pass scaling</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  rval<span class="sc">$</span>scalex <span class="ot">&lt;-</span> x<span class="sc">$</span>scalex</span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rval) </span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="do">## assign class for predict method </span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(rval) <span class="ot">&lt;-</span> <span class="st">"lo.fitted"</span> </span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rval) </span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>The returned object must be a list containing a <code>"model"</code> element that holds the fitted <code>loess()</code> object. Additionally:</p>
+<ul>
+<li><code>"fitted.values"</code> must contain the centered fitted values to ensure identifiability in the backfitting algorithm,</li>
+<li><code>"edf"</code> must specify the effective degrees of freedom used in the smoother, and</li>
+<li>the returned object must be of class <code>"lo.fitted"</code> so that <a href="https://gamlss-dev.github.io/gamlss2/man/special_terms.html"><code>special_predict()</code></a> can dispatch the appropriate prediction method.</li>
+</ul>
+<p>This setup integrates seamlessly with the iterative estimation algorithm implemented in <a href="https://gamlss-dev.github.io/gamlss2/man/RS_CG.html"><code>RS()</code></a>.</p>
 </section>
 <section id="the-predict-function" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="the-predict-function"><span class="header-section-number">3</span> The predict function</h2>
-<p>The prediction function shows how the predicted values of the model can be extracted.</p>
+<p>The prediction function defines how fitted values are obtained from a model term of class <code>"lo.fitted"</code>. This method is called by <a href="https://gamlss-dev.github.io/gamlss2/man/special_terms.html"><code>special_predict()</code></a> during model evaluation and prediction.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>special_predict.lo.fitted <span class="ot">&lt;-</span> <span class="cf">function</span>(x, data, <span class="at">se.fit =</span> <span class="cn">FALSE</span>, ...) </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(x<span class="sc">$</span>model, <span class="at">newdata =</span> data))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> p <span class="sc">-</span> x<span class="sc">$</span>shift</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(se.fit)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"fit"</span> <span class="ot">=</span> p)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## scaling</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(x<span class="sc">$</span>scalex)) {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">names</span>(x<span class="sc">$</span>scalex)) {</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      data[[j]] <span class="ot">&lt;-</span> (data[[j]] <span class="sc">-</span> x<span class="sc">$</span>scalex[[j]][<span class="st">"mean"</span>]) <span class="sc">/</span> x<span class="sc">$</span>scalex[[j]][<span class="st">"sd"</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## compute predicted values from the loess model</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(x<span class="sc">$</span>model, <span class="at">newdata =</span> data))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="do">## apply centering shift</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> p <span class="sc">-</span> x<span class="sc">$</span>shift</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="do">## wrap in a data frame if se.fit = TRUE,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="do">## mandatory</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(se.fit)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"fit"</span> <span class="ot">=</span> p)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>This function must return a numeric vector (or data frame if <code>se.fit = TRUE</code>) containing the predicted values for the given <code>data</code>. The <code>shift</code> value, computed during model fitting, is subtracted to maintain identifiability of the additive predictor.</p>
+<p>The argument <code>se.fit</code> is included for compatibility and can be extended in the future to return standard errors.</p>
 </section>
-<section id="example-rent99-data" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="example-rent99-data"><span class="header-section-number">4</span> Example: rent99 data</h2>
-<p>We use the <code>rent99</code> data to demonstrate the use of the functions</p>
+<section id="example-munich-rent-data" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="example-munich-rent-data"><span class="header-section-number">4</span> Example: Munich rent data</h2>
+<p>We use the <code>rent</code> dataset from the <code>gamlss.data</code> package to demonstrate the use of custom model terms based on local polynomial smoothing via <code>loess()</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load the Munich rent data</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent99"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>) </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="do">## scale covariates</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>rent99<span class="sc">$</span>area <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent99<span class="sc">$</span>area)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>rent99<span class="sc">$</span>yearc <span class="ot">&lt;-</span> <span class="fu">scale</span>(rent99<span class="sc">$</span>yearc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Note that the continuous variables in the data <code>area</code> and <code>yearc</code> have been standardised. We defined four formulae for modelling the rent data. The first two use <code>loess</code> and the third and fourth uses the additive smoothing function <code>s()</code> for comparison. Formula <code>f</code> uses main effect smoothing terms for <code>area</code> and <code>yearc</code> for parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>, respectively, while the second, <code>f1</code>, uses two dimensional smoothing functions for modelling one way interaction. The third formula uses one dimensional smoother for main effects and the fourth two dimensional cubic splines smoothers for interactions. Note that in this example we only use explanatory terms for the first two parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> and constants for the rest, <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\tau\)</span>.</p>
+<p>We first estimate a model using the custom <code>lo()</code> constructor for univariate smoothers on floor size (<code>Fl</code>) and year of construction (<code>A</code>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">lo</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">lo</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">lo</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span> </span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>             <span class="fu">lo</span>(<span class="sc">~</span>area<span class="sc">*</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>sf <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">s</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">s</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span> </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>             <span class="fu">s</span>(<span class="sc">~</span>area)<span class="sc">+</span><span class="fu">s</span>(<span class="sc">~</span>yearc)<span class="sc">+</span>location<span class="sc">+</span>bath<span class="sc">+</span>kitchen<span class="sc">|</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span> </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>sf1 <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span> </span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>              <span class="fu">te</span>(area,yearc) <span class="sc">+</span> location <span class="sc">+</span> bath <span class="sc">+</span> kitchen <span class="sc">|</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span><span class="sc">|</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## define model formula with univariate smoothers</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>Fl) <span class="sc">+</span> <span class="fu">lo</span>(<span class="sc">~</span>A) <span class="sc">+</span> loc <span class="sc">+</span> B <span class="sc">+</span> H <span class="sc">+</span> L <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate the model using the BCT distribution</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f1, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 27582.0493 eps = 0.293227     
+GAMLSS-RS iteration  2: Global Deviance = 27542.9735 eps = 0.001416     
+GAMLSS-RS iteration  3: Global Deviance = 27540.882 eps = 0.000075     
+GAMLSS-RS iteration  4: Global Deviance = 27540.477 eps = 0.000014     
+GAMLSS-RS iteration  5: Global Deviance = 27540.3653 eps = 0.000004     </code></pre>
 </div>
-</section>
-<section id="estimation" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="estimation"><span class="header-section-number">5</span> Estimation</h2>
-<p>Below we use the package <code>tictoc</code> to measure the time is taken to fit each model. The main effect fit for <code>loess</code> is;</p>
+</div>
+<p>Next, we include a bivariate loess smoother for <code>Fl</code> and <code>A</code> to allow for interaction.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tictoc"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## define model formula with bivariate smoother</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span>Fl<span class="sc">*</span>A) <span class="sc">+</span> loc <span class="sc">+</span> B <span class="sc">+</span> H <span class="sc">+</span> L <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate the alternative model</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38409.6672 eps = 0.286141     
-GAMLSS-RS iteration  2: Global Deviance = 38363.6237 eps = 0.001198     
-GAMLSS-RS iteration  3: Global Deviance = 38360.7687 eps = 0.000074     
-GAMLSS-RS iteration  4: Global Deviance = 38359.9016 eps = 0.000022     
-GAMLSS-RS iteration  5: Global Deviance = 38359.6113 eps = 0.000007     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>4.327 sec elapsed</code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 27569.6524 eps = 0.293545     
+GAMLSS-RS iteration  2: Global Deviance = 27519.2028 eps = 0.001829     
+GAMLSS-RS iteration  3: Global Deviance = 27517.3329 eps = 0.000067     
+GAMLSS-RS iteration  4: Global Deviance = 27516.9219 eps = 0.000014     
+GAMLSS-RS iteration  5: Global Deviance = 27516.7063 eps = 0.000007     </code></pre>
 </div>
 </div>
-<p>The first order interaction fit for <code>loess</code> is;</p>
+<p>We can compare the models using the <code>AIC()</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCTo) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38410.5652 eps = 0.286125     
-GAMLSS-RS iteration  2: Global Deviance = 38359.84 eps = 0.001320     
-GAMLSS-RS iteration  3: Global Deviance = 38356.7695 eps = 0.000080     
-GAMLSS-RS iteration  4: Global Deviance = 38355.8814 eps = 0.000023     
-GAMLSS-RS iteration  5: Global Deviance = 38355.6119 eps = 0.000007     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>7.602 sec elapsed</code></pre>
-</div>
-</div>
-<p>Now the main effect model using <code>s()</code></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>a1<span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(sf, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38462.44 eps = 0.285216     
-GAMLSS-RS iteration  2: Global Deviance = 38414.9787 eps = 0.001233     
-GAMLSS-RS iteration  3: Global Deviance = 38411.2225 eps = 0.000097     
-GAMLSS-RS iteration  4: Global Deviance = 38409.6335 eps = 0.000041     
-GAMLSS-RS iteration  5: Global Deviance = 38409.0103 eps = 0.000016     
-GAMLSS-RS iteration  6: Global Deviance = 38408.8217 eps = 0.000004     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>1.184 sec elapsed</code></pre>
-</div>
-</div>
-<p>The interaction model using <code>te()</code></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>a2<span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(sf1, <span class="at">data =</span> rent99, <span class="at">family =</span> BCT) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 38433.744 eps = 0.285749     
-GAMLSS-RS iteration  2: Global Deviance = 38391.1221 eps = 0.001108     
-GAMLSS-RS iteration  3: Global Deviance = 38388.3527 eps = 0.000072     
-GAMLSS-RS iteration  4: Global Deviance = 38387.4626 eps = 0.000023     
-GAMLSS-RS iteration  5: Global Deviance = 38387.1819 eps = 0.000007     </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>1.272 sec elapsed</code></pre>
-</div>
-</div>
-<p>The cubic spline function is lot faster than the <code>loess()</code> implementation <code>lo()</code> in <code>gamlss2</code>, but let us now compare the models using AIC.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## deviance</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, a1, a2, <span class="at">k =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 38355.61 36.77363
-b1 38359.61 33.15714
-a2 38387.18 33.61847
-a1 38408.82 32.80415</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">## BIC</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2, a1, a2, <span class="at">k =</span> <span class="fu">log</span>(<span class="fu">nrow</span>(rent99)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        AIC       df
-b1 38625.97 33.15714
-b2 38651.03 36.77363
-a2 38657.25 33.61847
-a1 38672.35 32.80415</code></pre>
+b2 27658.12 70.70933
+b1 27670.45 65.04258</code></pre>
 </div>
 </div>
-<p>It seems that the two <code>lo()</code> models do better that the <code>s()</code> as far as the AIC criteria are concern.</p>
-</section>
-<section id="visualise-the-fits" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="visualise-the-fits"><span class="header-section-number">6</span> Visualise the fits</h2>
-<p>The standard <code>plot()</code> function of <code>gamlss2</code> can be used to visualises the smooth curves fits (under certain circumstances). For example for the main effect model using <code>lo()</code> we have;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Note that no standard errors are shown here compare to the <code>s()</code> function model shown below;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(a1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>For the first order interaction model <code>b2</code> and because the effects are not defined within <code>gamlss2</code> calling <code>plot()</code> produces the standard residual plots;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>For the first order interaction model <code>a2</code> using tensor products the plot are more informative;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(a2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>One can use the function <code>vis.lo()</code> of the package <code>gamlss</code> to visualised the fitted terms fitted with <code>lo()</code>. Here we show the <code>area</code> fitted values for parameter <span class="math inline">\(\mu\)</span> and model <code>b</code> including the partial residuals from the model.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model=</span><span class="st">"mu"</span>)[[<span class="dv">1</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Next we show the year of construction <code>yearc</code> fit for parameters <span class="math inline">\(\mu\)</span> from model <code>b</code> without partial residuals.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b1, <span class="at">model =</span> <span class="st">"mu"</span>)[[<span class="dv">2</span>]]<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Here we plot the fitted surface fit from model <code>b2</code> and parameters <span class="math inline">\(\mu\)</span>;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Here we plot the same fitted surface as above adding a 95% confidence intervals;</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">se =</span> <span class="fl">1.97</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Finally we plot the fitted surface fit from the <span class="math inline">\(\mu\)</span> model of <code>b2</code> adding the partial residuals.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gamlss<span class="sc">:::</span><span class="fu">vis.lo</span>(<span class="fu">specials</span>(b2, <span class="at">model =</span> <span class="st">"mu"</span>)<span class="sc">$</span>model, <span class="at">partial =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="specials_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Note that similar plots are given in section 9.6.3 of <span class="citation" data-cites="Stasinopoulosetal2017">Stasinopoulos et al. (<a href="#ref-Stasinopoulosetal2017" role="doc-biblioref">2017</a>)</span>, where the <code>lo()</code> function within package <code>gamlss</code>, is described.</p>
+<p>Finally, we visualize the estimated effects from the second model.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: center</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This example illustrates how easy it is to integrate loess smoothers into <code>gamlss2</code> using the custom model term interface.</p>
 
 
 
@@ -585,9 +423,6 @@ Cleveland, W. S., E. Grosse, and M. Shyu. 1993. <span>“Local Regression Models
 </div>
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
-</div>
-<div id="ref-Stasinopoulosetal2017" class="csl-entry" role="listitem">
-Stasinopoulos, D. M., R. A. Rigby, G. Z. Heller, V. Voudouris, and F. De Bastiani. 2017. <em>Flexible Regression and Smoothing: Using <span>GAMLSS</span> in <span>R</span></em>. Boca Raton: Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/b21973">https://doi.org/10.1201/b21973</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

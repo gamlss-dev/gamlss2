@@ -30,7 +30,9 @@ predicted (out-of-sample) parameters, terms, etc.
   \item{terms}{character. Which of the terms in the additive predictor(s)
     should be included? By default all terms are included.}
   \item{se.fit}{logical. Should standard errors for the predictions be included?
-    \emph{(not implemented yet)}.}
+    Standard errors are computed by simulating from the approximate multivariate normal
+    distribution of the maximum likelihood estimates. The number of simulations is controlled
+    by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
   \item{drop}{logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data.frame (\code{FALSE})?}
   \item{...}{currently only used for catching \code{what} as an alias for \code{model}.}

@@ -626,6 +626,14 @@ GAMLSS-RS iteration  5: Global Deviance = 405.7928 eps = 0.000000     </code></p
 2  0.2826252
 3  0.8967621</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    mu.fit     mu.se    sigma.fit     sigma.se
+1 23.12533  4.934376 1.093734e+01 4.712552e+00
+2 58.79229 12.576674 2.379480e+01 1.807644e+01
+3 95.49447 97.510050 1.417222e+10 2.004210e+11</code></pre>
+</div>
 </div>
 
 

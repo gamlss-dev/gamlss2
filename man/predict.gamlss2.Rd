@@ -84,6 +84,9 @@ predict(m, newdata = nd, model = "sigma", drop = FALSE)
 ## individual terms in additive predictor(s)
 predict(m, newdata = nd, type = "terms", model = "sigma")
 predict(m, newdata = nd, type = "terms", model = "sigma", terms = "s(speed)")
+
+## standard errors
+predict(m, newdata = nd, se.fit = TRUE, R = 200)
 }
 
 \keyword{regression}

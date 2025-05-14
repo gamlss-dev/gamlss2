@@ -1161,7 +1161,7 @@ n_free_knots <- function(..., nk = 10) {
       ic <- c(ic, b$ic)
     }
     if(length(ic) > 1) {
-      if(ic[length(ic)] < ic[length(ic) - 1L]) {
+      if(all(ic[-length(ic)] > ic[length(ic)])) {
         m <- b
       }
     }

@@ -1076,3 +1076,146 @@ plot_lasso <- function(x, terms = NULL,
   return(invisible(NULL))
 }
 
+## Free knots.
+free_knots <- function(x, y, w = NULL, k = -1, degree = 1, criterion = "bic", knots = NULL, ...)
+{
+  if(is.null(k))
+    k <- -1
+  if(is.null(degree))
+    degree <- 1
+  if(is.null(criterion))
+    criterion <- "bic"
+
+  if(k < 0)
+    k <- min(c(2, length(unique(x))))
+  k <- k + 1
+
+  n <- length(y)
+  if(is.null(w))
+    w <- rep(1, n)
+
+  nk <- k - degree
+  xl <- min(x)
+  xu <- max(x)
+  xr <- xu - xl
+  xl <- xl - xr * 0.001
+  xu <- xu + xr * 0.001
+  dx <- (xu - xl)/(nk - 1)
+
+  k <- seq(xl - dx * (degree + 1), xu + dx * (degree + 1), 
+    length = nk + 2 * degree + 2)
+
+  ic_fun <- function(knots, rf = FALSE) {
+    X <- splines::spline.des(knots, x, degree + 1, x * 0)$design
+
+    XW <- X * w
+    XWX <- crossprod(XW, X)
+    XWz <- crossprod(XW, y)
+    S <- diag(1e-10, ncol(X))
+
+    P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
+    if(inherits(P, "try-error"))
+      P <- solve(XWX + S)
+
+    b <- drop(P %*% XWz)
+    fit <- drop(X %*% b)
+    edf <- sum(diag(XWX %*% P))
+
+    rss <- sum(w * (y - fit)^2)
+
+    ic_val <- switch(tolower(criterion),
+      "gcv" = rss * n / (n - edf)^2,
+      "aic" = rss + 2 * edf,
+      "gaic" = rss + K * edf,
+      "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+      "bic" = rss + log(n) * edf
+    )
+
+    if(rf) {
+      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
+        "lambdas" = 0, "vcov" = P, "df" = n - edf, "ic" = ic_val, "knots" = knots, "degree" = degree))
+    } else {
+      return(ic_val)
+    }
+  }
+
+  if(is.null(knots)) {
+    opt <- optim(k, fn = ic_fun, method = "L-BFGS-B",
+      lower = xl - dx * (degree + 1), upper = xu + dx * (degree + 1))
+  } else {
+    opt <- list("par" = knots)
+  }
+
+  return(ic_fun(opt$par, rf = TRUE))
+}
+
+## Search optimum number of free knots.
+n_free_knots <- function(..., nk = 10) {
+  if(is.null(nk))
+    nk <- 10
+  ic <- m <- NULL
+  k <- 1
+  while(k <= nk) {
+    b <- try(free_knots(..., k = k), silent = TRUE)
+    if(!inherits(b, "try-error")) {
+      ic <- c(ic, b$ic)
+    }
+    if(length(ic) > 1) {
+      if(ic[length(ic)] < ic[length(ic) - 1L]) {
+        m <- b
+      }
+    }
+    k <- k + 1L
+  }
+  return(m)
+}
+
+## Free knots model term constructor.
+fk <- function(x, ...)
+{
+  sx <- list()
+  sx$term <- as.character(substitute(x))
+  sx$label <- paste0("fk(", sx$term, ")")
+  f <- as.formula(paste("~", sx$term))
+  sx$x <- model.frame(f)[[1L]]
+  sx$control <- list(...)
+  class(sx) <- c("special", "fk")
+  return(sx)
+}
+
+## Free knots fit function.
+special_fit.fk <- function(x, z, w, y, eta, j, family, control, ...)
+{
+  if(is.null(x$control$nk)) {
+    sx <- n_free_knots(x$x, z, w, nk = x$control$k, degree = x$control$degree, criterion = control$criterion)
+  } else {
+    sx <- free_knots(x$x, z, w, k = x$control$nk, degree = x$control$degree, criterion = control$criterion)
+  }
+  sx$shift <- mean(sx$fitted.values)
+  sx$fitted.values <- sx$fitted.values - sx$shift
+  sx$term <- x$term
+  class(sx) <- "fk.fitted"
+  return(sx)
+}
+
+## Free knots predict function.
+special_predict.fk.fitted <- function(x, data, se.fit = FALSE, ...)
+{
+  X <- splines::spline.des(x$knots, data[[x$term]], x$degree + 1, data[[x$term]] * 0)$design
+  p <- drop(X %*% coef(x))
+
+  if(se.fit) {
+    se <- rowSums((X %*% x$vcov) * X)
+    se <- 2 * sqrt(se)
+    p <- data.frame(
+      "fit" = p - x$shift,
+      "lower" = (p - se) - x$shift,
+      "upper" = (p + se) - x$shift
+    )
+  } else {
+    p <- p - x$shift
+  }
+
+  return(p)
+}
+

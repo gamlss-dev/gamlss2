@@ -75,7 +75,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-cddb76fcaaefba5b040f8e8886d76da1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a5064bece380fb291f4d06f3078411e5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -471,13 +471,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## List of available families from gamlss.dist package.
-available_families(type = c("continuous", "discrete"), families = NULL)
+available_families(type = c("continuous", "discrete"), families = NULL, ...)
 
 ## Find suitable response distribution.
 find_family(y, families = NULL, k = 2, verbose = TRUE, ...)
 
 ## Fit distribution parameters.
 fit_family(y, family = NO, plot = TRUE, ...)
+
+## Find gamlss2 model.
+find_gamlss2(formula, families = NULL, k = 2,
+  select = FALSE, verbose = TRUE, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -539,12 +543,15 @@ A famnily object that should be used for estimation, see also <code>gamlss2.fami
 Logical, should a plot of the fitted density be provided?
 </td>
 </tr>
-<tr>
+</tbody></table>
+<p><code>formula</code>A model formula, see <code>gamlss2</code>. <code>select</code>Logical, if set to <code>select = TRUE</code>, model term selection is enforced using model fitting function <code>select_gamlss2</code>.</p>
+<table role="presentation">
+<tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
-Further arguments to be passed to <code>gamlss2</code> when using <code>find_family()</code>, or arguments <code>legend = TRUE/FALSE</code>, <code>pos = “topright”</code> (see also function <code>legend</code>), <code>main</code>, <code>xlab</code> and <code>ylab</code> when argument <code>plot = TRUE</code> using function <code>fit_family()</code>.
+For function <code>available_families()</code>, arguments passed to the family objects, e.g., for setting link functions <code>mu.link = “log”</code>. Further arguments to be passed to <code>gamlss2</code> when using <code>find_family()</code>, or arguments <code>legend = TRUE/FALSE</code>, <code>pos = “topright”</code> (see also function <code>legend</code>), <code>main</code>, <code>xlab</code> and <code>ylab</code> when argument <code>plot = TRUE</code> using function <code>fit_family()</code>. For function <code>find_gamlss()</code>, arguments are passed to <code>available_families()</code> and <code>gamlss2()</code>.
 </td>
 </tr>
 </tbody></table>
@@ -586,7 +593,11 @@ Further arguments to be passed to <code>gamlss2</code> when using <code>find_fam
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ic)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## fit parameters using the ZASICHEL family</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(polio, <span class="at">family =</span> ZASICHEL)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(polio, <span class="at">family =</span> ZASICHEL)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="do">## search complete model</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="do">## b &lt;- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="do">##   select = TRUE, mu.link = "log")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

@@ -12,13 +12,17 @@
 
 \usage{
 ## List of available families from gamlss.dist package.
-available_families(type = c("continuous", "discrete"), families = NULL)
+available_families(type = c("continuous", "discrete"), families = NULL, ...)
 
 ## Find suitable response distribution.
 find_family(y, families = NULL, k = 2, verbose = TRUE, ...)
 
 ## Fit distribution parameters.
 fit_family(y, family = NO, plot = TRUE, ...)
+
+## Find gamlss2 model.
+find_gamlss2(formula, families = NULL, k = 2,
+  select = FALSE, verbose = TRUE, ...)
 }
 
 \arguments{
@@ -31,11 +35,17 @@ fit_family(y, family = NO, plot = TRUE, ...)
   \item{family}{A famnily object that should be used for estimation,
     see also \code{\link{gamlss2.family}}.}
   \item{plot}{Logical, should a plot of the fitted density be provided?}
-  \item{\dots}{Further arguments to be passed to \code{\link{gamlss2}} when using
+  \code{formula}{A model formula, see \code{\link{gamlss2}}.}
+  \code{select}{Logical, if set to \code{select = TRUE}, model term selection is
+    enforced using model fitting function \code{\link{select_gamlss2}}.}
+  \item{\dots}{For function \code{available_families()}, arguments passed to the family objects,
+    e.g., for setting link functions \code{mu.link = "log"}.
+    Further arguments to be passed to \code{\link{gamlss2}} when using
     \code{find_family()}, or arguments \code{legend = TRUE/FALSE}, \code{pos = "topright"} (see also
     function \code{\link[graphics]{legend}}),
     \code{main}, \code{xlab} and \code{ylab} when argument \code{plot = TRUE} using
-    function \code{fit_family()}.}
+    function \code{fit_family()}. For function \code{find_gamlss()}, arguments
+    are passed to \code{available_families()} and \code{\link{gamlss2()}}.}
 }
 
 \details{
@@ -80,6 +90,10 @@ print(ic)
 
 ## fit parameters using the ZASICHEL family
 fit_family(polio, family = ZASICHEL)
+
+## search complete model
+## b <- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,
+##   select = TRUE, mu.link = "log")
 }
 }
 

@@ -47,6 +47,7 @@ export(
   "available_families",
   "find_family",
   "fit_family",
+  "find_gamlss2",
   "response_name",
   "stepwise",
   "step_gamlss2",

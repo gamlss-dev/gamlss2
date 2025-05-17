@@ -23,7 +23,7 @@ varimp <- function(object, newdata = NULL, scale = TRUE, nrep = 20, ...)
   return(sort(ll))
 }
 
-available_families <- function(type = c("continuous", "discrete"), families = NULL)
+available_families <- function(type = c("continuous", "discrete"), families = NULL, ...)
 {
   stopifnot(requireNamespace("gamlss.dist"))
   if(!("package:gamlss.dist" %in% search()))
@@ -40,14 +40,21 @@ available_families <- function(type = c("continuous", "discrete"), families = NU
   warn <- getOption("warn")
   options("warn" = -1)
   for(j in seq_along(funs)) {
-    fj0 <- get(funs[j])
+    fj0 <- get(funs[j])    
     png(tf)
     capture.output(fj <- try(fj0(), silent = TRUE), file = tf2)
     dev.off()
     if(!inherits(fj, "try-error")) {
       if(inherits(fj, "gamlss.family")) {
         if(tolower(fj$type) == tolower(type)) {
-          d[[funs[j]]] <- fj0
+          args <- list(...)
+          i <- names(args) %in% names(formals(fj0))
+          if(any(i)) {
+            args  <- args[i]
+            d[[funs[j]]] <- do.call("fj0", args)
+          } else {
+            d[[funs[j]]] <- fj0()
+          }
         }
       }
     }
@@ -98,7 +105,7 @@ find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
         gamlss2(y ~ 1, family = families[[j]], trace = FALSE, ...),
         warning = function(w) {
           warning_occurred <<- TRUE
-          invokeRestart("muffleWarning")  # optional: suppress the warning output
+          invokeRestart("muffleWarning")
         }
       )
     }, silent = TRUE)
@@ -218,5 +225,69 @@ fit_family <- function(y, family = NO, plot = TRUE, ...)
   } else {
     return(b)
   }  
+}
+
+find_gamlss2 <- function(formula, families = NULL, k = 2,
+  select = FALSE, verbose = TRUE, ...)
+{
+  if(is.null(families))
+    families <- available_families(...)
+
+  if(is.character(families)) {
+    families <- available_families(families = families, ...)
+  }
+
+  if(is.null(names(families))) {
+    nf <- sapply(families, function(x) {
+      if(is.function(x))
+        x <- x()
+      x$family[1L]
+    })
+    names(families) <- nf
+  }
+
+  engine <- if(select) select_gamlss2 else gamlss2
+
+  ic <- rep(NA, length(families))
+  names(ic) <- names(families)
+
+  m <- NULL
+
+  warn <- options("warn")$warn
+  options("warn" = -1)
+  on.exit(options("warn" = warn))
+
+  for(j in names(families)) {
+    if(verbose) {
+      cat("..", j, "family\n")
+    }
+
+    warning_occurred <- FALSE
+
+    b <- try({
+      withCallingHandlers(
+        engine(formula, family = families[[j]], trace = FALSE, ...),
+        warning = function(w) {
+          warning_occurred <<- TRUE
+          invokeRestart("muffleWarning")
+        }
+      )
+    }, silent = TRUE)
+
+    if(!inherits(b, "try-error") && !warning_occurred) {
+      ic[j] <- GAIC(b, k = k)
+      cat(".. .. IC =", round(ic[j], 4), "\n")
+      if(ic[j] == min(ic, na.rm = TRUE)) {
+        m <- b
+      }
+    } else {
+      cat(".. .. error\n")
+    }
+  }
+
+  if(!is.null(m))
+    m$ic <- sort(ic, decreasing = TRUE)
+
+  return(m)
 }
 

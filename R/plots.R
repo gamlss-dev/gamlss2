@@ -285,9 +285,10 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
     ylab <- names(x)[2L]
   if(is.null(ylim)) {
     ylim <- range(x[, "fit"])
-    if(symmetric)
-      ylim <- c(-max(abs(ylim)), max(abs(ylim)))
   }
+  ylim0 <- ylim
+  if(symmetric)
+    ylim <- c(-max(abs(ylim)), max(abs(ylim)))
 
   image <- list(...)$image
   if(!is.null(image)) {
@@ -300,8 +301,9 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
       range = ylim, symmetric = symmetric)
     col <- pal$map(m)
   } else {
-    col <- make_pal(col, ncol = ncol, data = x[, "fit"],
-      range = ylim, symmetric = symmetric)$colors
+    pal <- make_pal(col, ncol = ncol, data = x[, "fit"],
+      range = ylim, symmetric = symmetric)
+    col <- pal$colors
   }
 
   if(persp) {
@@ -309,7 +311,7 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
       zlab <- attr(x, "label")
     pmat <- persp(x1, x2, m, xlab = xlab, ylab = ylab, col = col,
       theta = theta, phi = phi, zlab = zlab, expand = expand,
-      ticktype = ticktype, zlim = ylim, border = NA)
+      ticktype = ticktype, zlim = ylim0, border = NA)
     cl <- contourLines(x1, x2, m)
     if(length(cl)) {
       for(i in 1:length(cl)) {
@@ -324,8 +326,8 @@ plot_smooth_effect_2d <- function(x, col = NULL, ncol = 20L,
       main <- attr(x, "label")
     }
     image(x1, x2, m, main = main,
-      xlab = xlab, ylab = ylab, zlim = ylim, col = col,
-      xlim = range(x1), ylim = range(x2))
+      xlab = xlab, ylab = ylab, zlim = ylim0, col = col,
+      xlim = range(x1), ylim = range(x2), breaks = pal$breaks)
     contour(x1, x2, m, add = TRUE)
   }
 }
@@ -519,6 +521,10 @@ make_pal <- function(col, ncol = NULL, data = NULL, range = NULL,
     ncol <- 99L
   if(is.null(ncol) && !is.null(breaks))
     ncol <- length(breaks) - 1L
+  if(!is.null(ncol) && symmetric) {
+    if(ncol %% 2 == 0)
+      ncol <- ncol + 1L
+  }
   if(is.function(col))
     col <- col(ncol)    
   else 

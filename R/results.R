@@ -69,13 +69,13 @@ results.gamlss2 <- function(x, ...)
                 lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
                 lab <- paste0(lab[-length(lab)], collapse = "")
                 lab <- paste0(lab, ",", round(x$fitted.specials[[j]][[i]]$edf, 2L), ")")
-                lab <- paste0(j, ".", lab)
               } else {
                 lab <- x$specials[[i]]$label
                 lab <- gsub("):",
                   paste0(",", round(x$fitted.specials[[j]][[i]]$edf, 2L), "):"), lab,
                   fixed = TRUE)
               }
+              lab <- paste0(j, ".", lab)
               attr(nd, "label") <- lab
               res$effects[[lab]] <- nd
             }

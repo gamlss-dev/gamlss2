@@ -102,7 +102,11 @@ plot.gamlss2 <- function(x, parameter = NULL,
           if(length(xn) < 2) {
             plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
           } else {
-            plot_smooth_effect_2d(x$results$effects[[j]], ylim = ylim[[p]], ...)
+            if(any(sapply(x$results$effects[[j]], is.factor))) {
+              plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+            } else {
+              plot_smooth_effect_2d(x$results$effects[[j]], ylim = ylim[[p]], ...)
+            }
           }
         } else {
           plot_factor_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)

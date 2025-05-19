@@ -2,6 +2,7 @@
 \alias{find_family}
 \alias{fit_family}
 \alias{available_families}
+\alias{find_gamlss2}
 
 \title{Find and Fit GAMLSS Families}
 
@@ -35,8 +36,8 @@ find_gamlss2(formula, families = NULL, k = 2,
   \item{family}{A famnily object that should be used for estimation,
     see also \code{\link{gamlss2.family}}.}
   \item{plot}{Logical, should a plot of the fitted density be provided?}
-  \code{formula}{A model formula, see \code{\link{gamlss2}}.}
-  \code{select}{Logical, if set to \code{select = TRUE}, model term selection is
+  \item{formula}{A model formula, see \code{\link{gamlss2}}.}
+  \item{select}{Logical, if set to \code{select = TRUE}, model term selection is
     enforced using model fitting function \code{\link{select_gamlss2}}.}
   \item{\dots}{For function \code{available_families()}, arguments passed to the family objects,
     e.g., for setting link functions \code{mu.link = "log"}.
@@ -45,7 +46,7 @@ find_gamlss2(formula, families = NULL, k = 2,
     function \code{\link[graphics]{legend}}),
     \code{main}, \code{xlab} and \code{ylab} when argument \code{plot = TRUE} using
     function \code{fit_family()}. For function \code{find_gamlss()}, arguments
-    are passed to \code{available_families()} and \code{\link{gamlss2()}}.}
+    are passed to \code{available_families()} and \code{\link{gamlss2}}.}
 }
 
 \details{

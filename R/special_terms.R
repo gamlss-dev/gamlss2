@@ -1077,8 +1077,10 @@ plot_lasso <- function(x, terms = NULL,
 }
 
 ## Free knots.
-free_knots <- function(x, y, w = NULL, k = -1, degree = 1, criterion = "bic", knots = NULL, ...)
+free_knots <- function(x, y, w = NULL, k = -1, degree = 1, criterion = "bic", knots = NULL, K = NULL, ...)
 {
+  if(is.null(K))
+    K <- 2
   if(is.null(k))
     k <- -1
   if(is.null(degree))
@@ -1186,10 +1188,13 @@ fk <- function(x, ...)
 ## Free knots fit function.
 special_fit.fk <- function(x, z, w, y, eta, j, family, control, ...)
 {
+  K <- control$K
+  if(is.null(K))
+    K <- 2
   if(is.null(x$control$nk)) {
-    sx <- n_free_knots(x$x, z, w, nk = x$control$k, degree = x$control$degree, criterion = control$criterion)
+    sx <- n_free_knots(x$x, z, w, nk = x$control$k, degree = x$control$degree, criterion = control$criterion, K = K)
   } else {
-    sx <- free_knots(x$x, z, w, k = x$control$nk, degree = x$control$degree, criterion = control$criterion)
+    sx <- free_knots(x$x, z, w, k = x$control$nk, degree = x$control$degree, criterion = control$criterion, K = K)
   }
   sx$shift <- mean(sx$fitted.values)
   sx$fitted.values <- sx$fitted.values - sx$shift

@@ -543,15 +543,28 @@ A famnily object that should be used for estimation, see also <code>gamlss2.fami
 Logical, should a plot of the fitted density be provided?
 </td>
 </tr>
-</tbody></table>
-<p><code>formula</code>A model formula, see <code>gamlss2</code>. <code>select</code>Logical, if set to <code>select = TRUE</code>, model term selection is enforced using model fitting function <code>select_gamlss2</code>.</p>
-<table role="presentation">
-<tbody><tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="formula">formula</code>
+</td>
+<td>
+A model formula, see <code>gamlss2</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="select">select</code>
+</td>
+<td>
+Logical, if set to <code>select = TRUE</code>, model term selection is enforced using model fitting function <code>select_gamlss2</code>.
+</td>
+</tr>
+<tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
-For function <code>available_families()</code>, arguments passed to the family objects, e.g., for setting link functions <code>mu.link = “log”</code>. Further arguments to be passed to <code>gamlss2</code> when using <code>find_family()</code>, or arguments <code>legend = TRUE/FALSE</code>, <code>pos = “topright”</code> (see also function <code>legend</code>), <code>main</code>, <code>xlab</code> and <code>ylab</code> when argument <code>plot = TRUE</code> using function <code>fit_family()</code>. For function <code>find_gamlss()</code>, arguments are passed to <code>available_families()</code> and <code>gamlss2()</code>.
+For function <code>available_families()</code>, arguments passed to the family objects, e.g., for setting link functions <code>mu.link = “log”</code>. Further arguments to be passed to <code>gamlss2</code> when using <code>find_family()</code>, or arguments <code>legend = TRUE/FALSE</code>, <code>pos = “topright”</code> (see also function <code>legend</code>), <code>main</code>, <code>xlab</code> and <code>ylab</code> when argument <code>plot = TRUE</code> using function <code>fit_family()</code>. For function <code>find_gamlss()</code>, arguments are passed to <code>available_families()</code> and <code>gamlss2</code>.
 </td>
 </tr>
 </tbody></table>

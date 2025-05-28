@@ -298,14 +298,16 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         if(iter[1L] >= CGk) {
           h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
           if(length(h)) {
-            ej <- sapply(strsplit(h, ".", fixed = TRUE), function(x) x[2L])
             adj <- 0.0
             for(l in seq_along(h)) {
-              hess_l <- family$hess[[h[l]]](y, peta, id = j)  ## FIXME: deriv_checks()?
-              adj <- adj + hess_l * (eta[[j]] - eta_old[[j]])
+              parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
+              k <- parts[2L]
+              hess_l <- family$hess[[h[l]]](y, peta)  ## FIXME: deriv_checks()?
+              adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
             }
-            adj <- adj * zw$weights
           }
+          for(k in np)
+            eta_old[[k]] <- eta[[k]]
         }
 
         ## Fit linear part.

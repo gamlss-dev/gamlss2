@@ -310,10 +310,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
             k <- parts[2L]
             hess_l <- family$hess[[h[l]]](y, peta)
-            adj <- adj - hess_l * (eta[[k]] - eta_old[[k]])
+            adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
           }
         }
-        zw$z <- zw$z - adj
+        wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+        zw$z <- zw$z - adj/wj
       }
 
       ## Start inner loop.
@@ -348,7 +349,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$logLik(y, family$map2par(etai))
 
-          if(ll1 < ll02 && isTRUE(control$optsearch)) {
+          if(ll1 < ll02 && isTRUE(control$backup)) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$logLik(y, family$map2par(eta)) + lambda * sum(par^2)
@@ -370,6 +371,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             if(!inherits(opt, "try-error")) {
               m$coefficients <- opt$par
               m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
+              etai[[j]] <- etai[[j]] + m$fitted.values
+              ll1 <- family$logLik(y, family$map2par(etai))
             }
           }
           

@@ -365,7 +365,7 @@ tF <- function(x, ...)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       hess <- -1 * eval(mu.sigma.hs)
-      hess * mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma)
+      hess * (mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma))
     }
     hess$sigma.mu <- hess$mu.sigma
   }
@@ -376,7 +376,7 @@ tF <- function(x, ...)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.nu <- nu.link$linkfun(par$nu)
       hess <- -1 * eval(mu.nu.hs)
-      hess * mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu)
+      hess * (mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu))
     }
     hess$nu.mu <- hess$mu.nu
 
@@ -386,7 +386,7 @@ tF <- function(x, ...)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.nu <- nu.link$linkfun(par$nu)
       hess <- -1 * eval(sigma.nu.hs)
-      hess * sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu)
+      hess * (sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu))
     }
     hess$nu.sigma <- hess$sigma.nu
   }
@@ -398,7 +398,7 @@ tF <- function(x, ...)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.tau <- tau.link$linkfun(par$tau)
       hess <- -1 * eval(mu.tau.hs)
-      hess * mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau)
+      hess * (mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau))
     }
     hess$tau.mu <- hess$mu.tau
 
@@ -408,7 +408,7 @@ tF <- function(x, ...)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.tau <- tau.link$linkfun(par$tau)
       hess <- -1 * eval(sigma.tau.hs)
-      hess * sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau)
+      hess * (sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau))
     }
     hess$tau.sigma <- hess$sigma.tau
 
@@ -418,7 +418,7 @@ tF <- function(x, ...)
       eta.nu <- nu.link$linkfun(par$nu)
       eta.tau <- tau.link$linkfun(par$tau)
       hess <- -1 * eval(nu.tau.hs)
-      hess * nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau)
+      hess * (nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau))
     }
     hess$tau.nu <- hess$nu.tau
   }

@@ -75,7 +75,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-a5064bece380fb291f4d06f3078411e5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-46fb55b361dc594144037d07521a7be4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -537,11 +537,11 @@ Further arguments passed to function <code>s</code>.
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> dbhh, <span class="at">family =</span> BCT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 26377.8229 eps = 0.390162     
-GAMLSS-RS iteration  2: Global Deviance = 26205.3586 eps = 0.006538     
-GAMLSS-RS iteration  3: Global Deviance = 26202.541 eps = 0.000107     
-GAMLSS-RS iteration  4: Global Deviance = 26202.1755 eps = 0.000013     
-GAMLSS-RS iteration  5: Global Deviance = 26202.0501 eps = 0.000004     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 26379.1782 eps = 0.390130     
+GAMLSS-RS iteration  2: Global Deviance = 26205.4924 eps = 0.006584     
+GAMLSS-RS iteration  3: Global Deviance = 26202.6475 eps = 0.000108     
+GAMLSS-RS iteration  4: Global Deviance = 26202.2604 eps = 0.000014     
+GAMLSS-RS iteration  5: Global Deviance = 26202.1179 eps = 0.000005     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## visualize estimated effects</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

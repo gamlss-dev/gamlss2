@@ -95,7 +95,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-a5064bece380fb291f4d06f3078411e5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-46fb55b361dc594144037d07521a7be4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -377,11 +377,11 @@ div.csl-indent {
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate the model using the BCT distribution</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f1, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 27582.0493 eps = 0.293227     
-GAMLSS-RS iteration  2: Global Deviance = 27542.9735 eps = 0.001416     
-GAMLSS-RS iteration  3: Global Deviance = 27540.882 eps = 0.000075     
-GAMLSS-RS iteration  4: Global Deviance = 27540.477 eps = 0.000014     
-GAMLSS-RS iteration  5: Global Deviance = 27540.3653 eps = 0.000004     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 27582.0017 eps = 0.293228     
+GAMLSS-RS iteration  2: Global Deviance = 27543.3096 eps = 0.001402     
+GAMLSS-RS iteration  3: Global Deviance = 27541.3529 eps = 0.000071     
+GAMLSS-RS iteration  4: Global Deviance = 27541.0354 eps = 0.000011     
+GAMLSS-RS iteration  5: Global Deviance = 27540.9221 eps = 0.000004     </code></pre>
 </div>
 </div>
 <p>Next, we include a bivariate loess smoother for <code>Fl</code> and <code>A</code> to allow for interaction.</p>
@@ -392,11 +392,11 @@ GAMLSS-RS iteration  5: Global Deviance = 27540.3653 eps = 0.000004     </code><
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate the alternative model</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 27569.6524 eps = 0.293545     
-GAMLSS-RS iteration  2: Global Deviance = 27519.2028 eps = 0.001829     
-GAMLSS-RS iteration  3: Global Deviance = 27517.3329 eps = 0.000067     
-GAMLSS-RS iteration  4: Global Deviance = 27516.9219 eps = 0.000014     
-GAMLSS-RS iteration  5: Global Deviance = 27516.7063 eps = 0.000007     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 27570.2133 eps = 0.293530     
+GAMLSS-RS iteration  2: Global Deviance = 27520.8741 eps = 0.001789     
+GAMLSS-RS iteration  3: Global Deviance = 27518.9667 eps = 0.000069     
+GAMLSS-RS iteration  4: Global Deviance = 27518.5501 eps = 0.000015     
+GAMLSS-RS iteration  5: Global Deviance = 27518.2997 eps = 0.000009     </code></pre>
 </div>
 </div>
 <p>We can compare the models using the <code>AIC()</code>.</p>
@@ -404,8 +404,8 @@ GAMLSS-RS iteration  5: Global Deviance = 27516.7063 eps = 0.000007     </code><
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 27658.12 70.70933
-b1 27670.45 65.04258</code></pre>
+b2 27659.73 70.71661
+b1 27671.02 65.04671</code></pre>
 </div>
 </div>
 <p>Finally, we visualize the estimated effects from the second model.</p>

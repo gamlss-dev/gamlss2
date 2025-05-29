@@ -74,6 +74,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     control$step <- 1
   if((control$step > 1) | (control$step < 0))
     control$step <- 1
+  if(is.null(control$autostep))
+    control$autostep <- TRUE
+  else
+    control$autostep <- isTRUE(control$autostep)
 
   ## Maximum number of backfitting iterations.
   maxit <- control$maxit
@@ -210,7 +214,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         if(-opt$objective > lli) {
           beta <- opt$par
           dev0 <- 2 * opt$objective
-          if(isTRUE(control$initialize) & missing(start)) {
+          if(isTRUE(control$initialize) & is.null(start)) {
             for(j in np) {
               fit[[j]]$coefficients["(Intercept)"] <- beta[j]
               fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
@@ -239,6 +243,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     CGk <- Inf
   if(!any(grepl(".", names(family$hess), fixed = TRUE)))
     CGk <- Inf
+  if(is.finite(CGk))
+    eta_old <- eta
 
   ## Track iterations
   iter <- c(0, 0)
@@ -255,6 +261,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     }
   }
 
+  step <- sapply(np, function(j) {
+    rval <- list()
+    if(length(xterms[[j]]))
+      rval$xterms <- control$step
+    if(length(sterms[[j]])) {
+      rval$sterms <- rep(control$step, length(sterms[[j]]))
+      names(rval$sterms) <- sterms[[j]]
+    }
+    rval
+  }, simplify = FALSE)
+
   ## Start outer loop.
   while((eps[1L] > stop.eps[1L]) & iter[1L] < maxit[1L]) {
     ## Old log-likelihood.
@@ -264,8 +281,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       llo0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
     }
 
-    ## Old predictors.
-    if(iter[1L] >= CGk) {
+    ## For CG.
+    if(is.finite(CGk)) {
       eta_old <- eta
     }
 
@@ -284,6 +301,21 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       ## Compute working response z and weights hess from family.
       zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
 
+      ## Cole and Green adjustment.
+      if(iter[1L] >= CGk) {
+        h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
+        if(length(h)) {
+          adj <- 0.0
+          for(l in seq_along(h)) {
+            parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
+            k <- parts[2L]
+            hess_l <- family$hess[[h[l]]](y, peta)
+            adj <- adj - hess_l * (eta[[k]] - eta_old[[k]])
+          }
+        }
+        zw$z <- zw$z - adj
+      }
+
       ## Start inner loop.
       while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
         ## Current log-likelihood.
@@ -294,31 +326,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         }
         ll02 <- ll0
 
-        ## Cole and Green adjustment.
-        if(iter[1L] >= CGk) {
-          h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
-          if(length(h)) {
-            adj <- 0.0
-            for(l in seq_along(h)) {
-              parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
-              k <- parts[2L]
-              hess_l <- family$hess[[h[l]]](y, peta)  ## FIXME: deriv_checks()?
-              adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
-            }
-          }
-          for(k in np)
-            eta_old[[k]] <- eta[[k]]
-        }
-
         ## Fit linear part.
         if(length(xterms[[j]])) {
           ## Compute partial residuals.
           eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-          if(iter[1L] >= CGk) {
-            e <- (zw$z - adj) - eta[[j]]
-          } else {
-            e <- zw$z - eta[[j]]
-          }
+          e <- zw$z - eta[[j]]
 
           ## Weights.
           wj <- if(is.null(weights)) zw$weights else zw$weights * weights
@@ -336,12 +348,25 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           etai[[j]] <- etai[[j]] + m$fitted.values
           ll1 <- family$logLik(y, family$map2par(etai))
 
-          if(ll1 < ll02) {
+          if(ll1 < ll02 && isTRUE(control$optsearch)) {
             ll <- function(par) {
               eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
               -family$logLik(y, family$map2par(eta)) + lambda * sum(par^2)
             }
+            warn <- getOption("warn")
+            options("warn" = -1)
             opt <- try(optim(coef(m), fn = ll, method = "BFGS"), silent = TRUE)
+            opt2 <- try(nlminb(coef(m), ll), silent = TRUE)
+            options("warn" = warn)
+            if(!inherits(opt2, "try-error")) {
+              if(!inherits(opt, "try-error")) {
+                if(opt2$objective < opt$value) {
+                  opt$par <- opt2$par
+                }
+              } else {
+                opt <- opt2
+              }
+            }
             if(!inherits(opt, "try-error")) {
               m$coefficients <- opt$par
               m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
@@ -349,10 +374,23 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           }
           
           ## Step length control.
-          if(control$step < 1) {
+          if((step[[j]]$xterms < 1 || control$autostep) && (ll1 < ll02)) {
             if(iter[1L] > 0 | iter[2L] > 0) {
-              m$fitted.values <- control$step * m$fitted.values +
-                (1 - control$step) * fit[[j]]$fitted.values
+              if(control$autostep) {
+                stepfun <- function(nu) {
+                  b <- nu * m$coefficients + (1 - nu) * fit[[j]]$coefficients
+                  f <- drop(x[, xterms[[j]], drop = FALSE] %*% b)
+                  eta[[j]] <- eta[[j]] + f
+                  -family$logLik(y, family$map2par(eta))
+                }
+                s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
+                if(-s$objective > ll02) {
+                  step[[j]]$xterms <- s$minimum
+                }
+              }
+              m$coefficients <- step[[j]]$xterms * m$coefficients +
+                (1- step[[j]]$xterms) * fit[[j]]$coefficients
+              m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% m$coefficients)
             }
           }
 
@@ -369,6 +407,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ll02 <- ll1
             ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
           }
+
           eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
 
           if(iter[1L] < 1L)
@@ -380,11 +419,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           for(k in sterms[[j]]) {
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
-            if(iter[1L] >= CGk) {
-              e <- (zw$z - adj) - eta[[j]]
-            } else {
-              e <- zw$z - eta[[j]]
-            }
+            e <- zw$z - eta[[j]]
 
             ## Additive model term fit.
             fs <- if(is.null(weights)) {
@@ -396,10 +431,18 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             }
 
             ## Step length control.
-            if(control$step < 1) {
+            if(step[[j]]$sterms[k] < 1) {
               if(iter[1L] > 0 | iter[2L] > 0) {
-                fs$fitted.values <- control$step * fs$fitted.values +
-                  (1 - control$step) * sfit[[j]][[k]]$fitted.values
+                if(inherits(specials[[k]], "mgcv.smooth")) {
+                  fs$coefficients <- step[[j]]$sterms[k] * fs$coefficients +
+                    (1 - step[[j]]$sterms[k]) * if(is.null(sfit[[j]][[k]]$coefficients)) 0 else sfit[[j]][[k]]$coefficients
+                  fs$fitted.values <- drop(specials[[k]]$X %*% fs$coefficients)
+                  if(control$binning)
+                    fs$fitted.values <- fs$fitted.values[specials[[k]]$binning$match.index]
+                } else {
+                  fs$fitted.values <- step[[j]]$sterms[k] * fs$fitted.values +
+                    (1 - step[[j]]$sterms[k]) * sfit[[j]][[k]]$fitted.values
+                }
               }
             }
 
@@ -413,12 +456,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               sfit[[j]][[k]]$selected <- TRUE
               ll02 <- ll1
               ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
-            } ##else {
-              ##if(isTRUE(sfit[[j]][[k]]$selected)) {
-              ##  sfit[[j]][[k]] <- fs
-              ##  ll02 <- ll1
-              ##}
-            ##}
+            } else {
+              if(control$autostep) {
+                step[[j]]$sterms[k] <- step[[j]]$sterms[k] * 0.5
+              }
+            }
 
             eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
 

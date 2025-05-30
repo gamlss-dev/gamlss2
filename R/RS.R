@@ -593,7 +593,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     "deviance" = -2 * llo1,
     "null.deviance" = dev0,
     "dev.reduction" = abs((dev0 - (-2 * llo1)) / dev0),
-    "nullmodel" = control$nullmodel
+    "nullmodel" = control$nullmodel,
+    "stepsize" = step
   )
 
   class(rval) <- "gamlss2"

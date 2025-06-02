@@ -71,6 +71,11 @@ predict.gamlss2 <- function(object,
     model <- family$names[model]
   model <- family$names[pmatch(model, family$names)]
 
+  if((type == "response") && (length(family$names) > 1L)) {
+    if(length(model) != length(family$names))
+      stop('Predictions on the response scale require all distributional parameters. Please omit the "model" argument or specify all parameters.')
+  }
+
   tt <- type == "terms"
 
   ## Predict all specified parameters.

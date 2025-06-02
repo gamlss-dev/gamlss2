@@ -66,6 +66,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eps <- 0.00001 ## sqrt(.Machine$double.eps)
   if(length(eps) < 2)
     eps <- c(eps, eps)
+  eps <- rep(eps, length.out = 3)
   stop.eps <- eps
   eps <- eps + 1
 
@@ -245,6 +246,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     CGk <- Inf
   if(is.finite(CGk))
     eta_old <- eta
+  if(length(maxit) < 3L) {
+    if(is.finite(CGk))
+      maxit <- c(maxit, 100)
+    else
+      maxit <- c(maxit, 1)
+  }
 
   ## Track iterations
   iter <- c(0, 0)
@@ -273,7 +280,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }, simplify = FALSE)
 
   ## Start outer loop.
-  while((eps[1L] > stop.eps[1L]) & iter[1L] < maxit[1L]) {
+  while((eps[1L] > stop.eps[1L]) && (iter[1L] < maxit[1L])) {
     ## Old log-likelihood.
     if(is.null(weights)) {
       llo0 <- family$logLik(y, family$map2par(eta))
@@ -282,9 +289,30 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     }
 
     ## For CG.
-    if(is.finite(CGk)) {
-      eta_old <- eta
+    if(iter[1L] >= CGk) {
+      eta_old <- if(iter[1L] > 0L) eta else etastart
+      peta <- if(iter[1L] > 0L) {
+        family$map2par(eta)
+      } else {
+        family$map2par(etastart)
+      }
+      zw_CG <- list()
+      for(j in np) {
+        zw_CG[[j]] <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+      }
     }
+
+    eps_outer <- 1
+    iter_outer <- 0
+
+    while((eps_outer > stop.eps[3L]) && (iter_outer < maxit[3L])) {
+      if(iter[1L] >= CGk) {
+        if(is.null(weights)) {
+          outer_ll0 <- family$logLik(y, family$map2par(eta))
+        } else {
+          outer_ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+        }
+      }
 
     for(j in np) {
       ## Check if paramater is fixed.
@@ -299,8 +327,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       }
 
       ## Compute working response z and weights hess from family.
-      zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
-
       ## Cole and Green adjustment.
       if(iter[1L] >= CGk) {
         h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
@@ -313,12 +339,15 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
           }
         }
+        zw <- zw_CG[[j]]
         wj <- if(is.null(weights)) zw$weights else zw$weights * weights
-        zw$z <- zw$z - adj/wj
+        zw$z <- zw$z - adj / wj
+      } else {
+        zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
       }
 
       ## Start inner loop.
-      while((eps[2L] > stop.eps[2L]) & iter[2L] < maxit[2L]) {
+      while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
         ## Current log-likelihood.
         if(is.null(weights)) {
           ll0 <- family$logLik(y, family$map2par(eta))
@@ -483,7 +512,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         eps[2L] <- abs((ll1 - ll0) / ll0)
 
         ## Update working response.
-        if(eps[2L] > stop.eps[2L]) {
+        if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
           peta <- family$map2par(eta)
           zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
         }
@@ -497,6 +526,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       eps[2L] <- stop.eps[2L] + 1
     }
 
+    iter_outer <- iter_outer + 1L
+    if(iter[1L] >= CGk)
+      eps_outer <- abs((ll1 - outer_ll0) / ll1)
+    }
+
     ## New log-likelihood.
     if(is.null(weights)) {
       llo1 <- family$logLik(y, family$map2par(eta))
@@ -508,7 +542,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eps[1L] <- abs((llo1 - llo0) / llo0)
 
     ## Warning if deviance is increasing?
-    if((llo1 < llo0) & (iter[1L] > 0)) {
+    if((llo1 < llo0) && (iter[1L] > 0)) {
       warning("Deviance is increasing, maybe set argument step in gamlss2_control()!")
     }
 

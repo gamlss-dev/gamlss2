@@ -314,221 +314,222 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         }
       }
 
-    for(j in np) {
-      ## Check if paramater is fixed.
-      if(control$fixed[[j]])
-        next
+      for(j in np) {
+        ## Check if paramater is fixed.
+        if(control$fixed[[j]])
+          next
 
-      ## Outer loop working response and weights.
-      peta <- if(iter[1L] > 0L) {
-        family$map2par(eta)
-      } else {
-        family$map2par(etastart)
-      }
-
-      ## Compute working response z and weights hess from family.
-      ## Cole and Green adjustment.
-      if(iter[1L] >= CGk) {
-        h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
-        if(length(h)) {
-          adj <- 0.0
-          for(l in seq_along(h)) {
-            parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
-            k <- parts[2L]
-            hess_l <- family$hess[[h[l]]](y, peta)
-            adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
-          }
-        }
-        zw <- zw_CG[[j]]
-        wj <- if(is.null(weights)) zw$weights else zw$weights * weights
-        zw$z <- zw$z - adj / wj
-      } else {
-        zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
-      }
-
-      ## Start inner loop.
-      while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
-        ## Current log-likelihood.
-        if(is.null(weights)) {
-          ll0 <- family$logLik(y, family$map2par(eta))
+        ## Outer loop working response and weights.
+        peta <- if(iter[1L] > 0L) {
+          family$map2par(eta)
         } else {
-          ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          family$map2par(etastart)
         }
-        ll02 <- ll0
 
-        ## Fit linear part.
-        if(length(xterms[[j]])) {
-          ## Compute partial residuals.
-          eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-          e <- zw$z - eta[[j]]
-
-          ## Weights.
+        ## Compute working response z and weights hess from family.
+        ## Cole and Green adjustment.
+        if(iter[1L] >= CGk) {
+          h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
+          if(length(h)) {
+            adj <- 0.0
+            for(l in seq_along(h)) {
+              parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
+              k <- parts[2L]
+              hess_l <- family$hess[[h[l]]](y, peta)
+              adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
+            }
+          }
+          zw <- zw_CG[[j]]
           wj <- if(is.null(weights)) zw$weights else zw$weights * weights
-
-          ## Estimate weighted linear model.
-          if(ridge) {
-            m <- ridge.lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, penalty = penalty[j], control)
-            penalty[j] <- m$penalty
-          } else {
-            m <- lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, method = "qr")
-          }
-
-          ## If linear model does not improve the fit, use ML.
-          etai <- eta
-          etai[[j]] <- etai[[j]] + m$fitted.values
-          ll1 <- family$logLik(y, family$map2par(etai))
-
-          if(ll1 < ll02 && isTRUE(control$backup)) {
-            ll <- function(par) {
-              eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
-              -family$logLik(y, family$map2par(eta)) + lambda * sum(par^2)
-            }
-            warn <- getOption("warn")
-            options("warn" = -1)
-            opt <- try(optim(coef(m), fn = ll, method = "BFGS"), silent = TRUE)
-            opt2 <- try(nlminb(coef(m), ll), silent = TRUE)
-            options("warn" = warn)
-            if(!inherits(opt2, "try-error")) {
-              if(!inherits(opt, "try-error")) {
-                if(opt2$objective < opt$value) {
-                  opt$par <- opt2$par
-                }
-              } else {
-                opt <- opt2
-              }
-            }
-            if(!inherits(opt, "try-error")) {
-              m$coefficients <- opt$par
-              m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
-              etai[[j]] <- etai[[j]] + m$fitted.values
-              ll1 <- family$logLik(y, family$map2par(etai))
-            }
-          }
-          
-          ## Step length control.
-          if((step[[j]]$xterms < 1 || control$autostep) && (ll1 < ll02)) {
-            if(iter[1L] > 0 | iter[2L] > 0) {
-              if(control$autostep) {
-                stepfun <- function(nu) {
-                  b <- nu * m$coefficients + (1 - nu) * fit[[j]]$coefficients
-                  f <- drop(x[, xterms[[j]], drop = FALSE] %*% b)
-                  eta[[j]] <- eta[[j]] + f
-                  -family$logLik(y, family$map2par(eta))
-                }
-                s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
-                if(-s$objective > ll02) {
-                  step[[j]]$xterms <- s$minimum
-                }
-              }
-              m$coefficients <- step[[j]]$xterms * m$coefficients +
-                (1- step[[j]]$xterms) * fit[[j]]$coefficients
-              m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% m$coefficients)
-            }
-          }
-
-          etai <- eta
-          etai[[j]] <- etai[[j]] + m$fitted.values
-          ll1 <- family$logLik(y, family$map2par(etai))
-
-          if(ll1 > ll02) {
-            ## Update predictor.
-            fit[[j]]$fitted.values <- m$fitted.values
-            fit[[j]]$coefficients <- m$coefficients
-            if(!is.null(m$edf))
-              fit[[j]]$edf <- m$edf
-            ll02 <- ll1
-            ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
-          }
-
-          eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
-
-          if(iter[1L] < 1L)
-            etastart[[j]] <- eta[[j]]
+          zw$z <- zw$z - adj / wj
+        } else {
+          zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
         }
 
-        ## Fit specials part.
-        if(length(sterms[[j]])) {
-          for(k in sterms[[j]]) {
+        ## Start inner loop.
+        while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
+          ## Current log-likelihood.
+          if(is.null(weights)) {
+            ll0 <- family$logLik(y, family$map2par(eta))
+          } else {
+            ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          }
+          ll02 <- ll0
+
+          ## Fit linear part.
+          if(length(xterms[[j]])) {
             ## Compute partial residuals.
-            eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
+            eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
             e <- zw$z - eta[[j]]
 
-            ## Additive model term fit.
-            fs <- if(is.null(weights)) {
-              special.wfit(specials[[k]], e, zw$weights, y, eta, j, family, control,
-                transfer = sfit[[j]][[k]]$transfer, iter = iter)
+            ## Weights.
+            wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+
+            ## Estimate weighted linear model.
+            if(ridge) {
+              m <- ridge.lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, penalty = penalty[j], control)
+              penalty[j] <- m$penalty
             } else {
-              special.wfit(specials[[k]], e, zw$weights * weights, y, eta, j, family, control,
-                transfer = sfit[[j]][[k]]$transfer, iter = iter)
+              m <- lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, method = "qr")
             }
 
-            ## Step length control.
-            if(step[[j]]$sterms[k] < 1) {
-              if(iter[1L] > 0 | iter[2L] > 0) {
-                if(inherits(specials[[k]], "mgcv.smooth")) {
-                  fs$coefficients <- step[[j]]$sterms[k] * fs$coefficients +
-                    (1 - step[[j]]$sterms[k]) * if(is.null(sfit[[j]][[k]]$coefficients)) 0 else sfit[[j]][[k]]$coefficients
-                  fs$fitted.values <- drop(specials[[k]]$X %*% fs$coefficients)
-                  if(control$binning)
-                    fs$fitted.values <- fs$fitted.values[specials[[k]]$binning$match.index]
+            ## If linear model does not improve the fit, use ML.
+            etai <- eta
+            etai[[j]] <- etai[[j]] + m$fitted.values
+            ll1 <- family$logLik(y, family$map2par(etai))
+
+            if(ll1 < ll02 && isTRUE(control$backup)) {
+              ll <- function(par) {
+                eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
+                -family$logLik(y, family$map2par(eta)) + lambda * sum(par^2)
+              }
+              warn <- getOption("warn")
+              options("warn" = -1)
+              opt <- try(optim(coef(m), fn = ll, method = "BFGS"), silent = TRUE)
+              opt2 <- try(nlminb(coef(m), ll), silent = TRUE)
+              options("warn" = warn)
+              if(!inherits(opt2, "try-error")) {
+                if(!inherits(opt, "try-error")) {
+                  if(opt2$objective < opt$value) {
+                    opt$par <- opt2$par
+                  }
                 } else {
-                  fs$fitted.values <- step[[j]]$sterms[k] * fs$fitted.values +
-                    (1 - step[[j]]$sterms[k]) * sfit[[j]][[k]]$fitted.values
+                  opt <- opt2
                 }
+              }
+              if(!inherits(opt, "try-error")) {
+                m$coefficients <- opt$par
+                m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
+                etai[[j]] <- etai[[j]] + m$fitted.values
+                ll1 <- family$logLik(y, family$map2par(etai))
+              }
+            }
+          
+            ## Step length control.
+            if((step[[j]]$xterms < 1 || control$autostep) && (ll1 < ll02)) {
+              if(iter[1L] > 0 | iter[2L] > 0) {
+                if(control$autostep) {
+                  stepfun <- function(nu) {
+                    b <- nu * m$coefficients + (1 - nu) * fit[[j]]$coefficients
+                    f <- drop(x[, xterms[[j]], drop = FALSE] %*% b)
+                    eta[[j]] <- eta[[j]] + f
+                    -family$logLik(y, family$map2par(eta))
+                  }
+                  s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
+                  if(-s$objective > ll02) {
+                    step[[j]]$xterms <- s$minimum
+                  }
+                }
+                m$coefficients <- step[[j]]$xterms * m$coefficients +
+                  (1- step[[j]]$xterms) * fit[[j]]$coefficients
+                m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% m$coefficients)
               }
             }
 
             etai <- eta
-            etai[[j]] <- etai[[j]] + fs$fitted.values
+            etai[[j]] <- etai[[j]] + m$fitted.values
             ll1 <- family$logLik(y, family$map2par(etai))
 
             if(ll1 > ll02) {
               ## Update predictor.
-              sfit[[j]][[k]] <- fs
-              sfit[[j]][[k]]$selected <- TRUE
+              fit[[j]]$fitted.values <- m$fitted.values
+              fit[[j]]$coefficients <- m$coefficients
+              if(!is.null(m$edf))
+                fit[[j]]$edf <- m$edf
               ll02 <- ll1
-              ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
-            } else {
-              if(control$autostep) {
-                step[[j]]$sterms[k] <- step[[j]]$sterms[k] * 0.5
-              }
+            ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
             }
 
-            eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
+            eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
 
             if(iter[1L] < 1L)
               etastart[[j]] <- eta[[j]]
           }
+
+          ## Fit specials part.
+          if(length(sterms[[j]])) {
+            for(k in sterms[[j]]) {
+              ## Compute partial residuals.
+              eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
+              e <- zw$z - eta[[j]]
+
+              ## Additive model term fit.
+              fs <- if(is.null(weights)) {
+                special.wfit(specials[[k]], e, zw$weights, y, eta, j, family, control,
+                  transfer = sfit[[j]][[k]]$transfer, iter = iter)
+              } else {
+                special.wfit(specials[[k]], e, zw$weights * weights, y, eta, j, family, control,
+                  transfer = sfit[[j]][[k]]$transfer, iter = iter)
+              }
+
+              ## Step length control.
+              if(step[[j]]$sterms[k] < 1) {
+                if(iter[1L] > 0 | iter[2L] > 0) {
+                  if(inherits(specials[[k]], "mgcv.smooth")) {
+                    fs$coefficients <- step[[j]]$sterms[k] * fs$coefficients +
+                      (1 - step[[j]]$sterms[k]) * if(is.null(sfit[[j]][[k]]$coefficients)) 0 else sfit[[j]][[k]]$coefficients
+                    fs$fitted.values <- drop(specials[[k]]$X %*% fs$coefficients)
+                    if(control$binning)
+                      fs$fitted.values <- fs$fitted.values[specials[[k]]$binning$match.index]
+                  } else {
+                    fs$fitted.values <- step[[j]]$sterms[k] * fs$fitted.values +
+                      (1 - step[[j]]$sterms[k]) * sfit[[j]][[k]]$fitted.values
+                  }
+                }
+              }
+
+              etai <- eta
+              etai[[j]] <- etai[[j]] + fs$fitted.values
+              ll1 <- family$logLik(y, family$map2par(etai))
+
+              if(ll1 > ll02) {
+                ## Update predictor.
+                sfit[[j]][[k]] <- fs
+                sfit[[j]][[k]]$selected <- TRUE
+                ll02 <- ll1
+                ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
+              } else {
+                if(control$autostep) {
+                  step[[j]]$sterms[k] <- step[[j]]$sterms[k] * 0.5
+                }
+              }
+
+              eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
+
+              if(iter[1L] < 1L)
+                etastart[[j]] <- eta[[j]]
+            }
+          }
+
+          ## New log-likelihood.
+          if(is.null(weights)) {
+            ll1 <- family$logLik(y, family$map2par(eta))
+          } else {
+            ll1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          }
+
+          ## Stopping criterion.
+          eps[2L] <- abs((ll1 - ll0) / ll0)
+
+          ## Update working response.
+          if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
+            peta <- family$map2par(eta)
+            zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+          }
+
+          ## Update inner loop iterator.
+          iter[2L] <- iter[2L] + 1L
         }
 
-        ## New log-likelihood.
-        if(is.null(weights)) {
-          ll1 <- family$logLik(y, family$map2par(eta))
-        } else {
-          ll1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
-        }
-
-        ## Stopping criterion.
-        eps[2L] <- abs((ll1 - ll0) / ll0)
-
-        ## Update working response.
-        if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
-          peta <- family$map2par(eta)
-          zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
-        }
-
-        ## Update inner loop iterator.
-        iter[2L] <- iter[2L] + 1L
+        ## Reset inner iterator and stopping criterion.
+        iter[2L] <- 0
+        eps[2L] <- stop.eps[2L] + 1
       }
 
-      ## Reset inner iterator and stopping criterion.
-      iter[2L] <- 0
-      eps[2L] <- stop.eps[2L] + 1
-    }
-
-    iter_outer <- iter_outer + 1L
-    if(iter[1L] >= CGk)
-      eps_outer <- abs((ll1 - outer_ll0) / ll1)
+      ## For Cole and Green.
+      iter_outer <- iter_outer + 1L
+      if(iter[1L] >= CGk)
+        eps_outer <- abs((ll1 - outer_ll0) / ll1)
     }
 
     ## New log-likelihood.

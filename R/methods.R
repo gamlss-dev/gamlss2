@@ -95,7 +95,7 @@ quantile.gamlss2 <- function(x,
   rn <- all.vars(formula(x$fake_formula, rhs = 0))
   mf <- mf[, !(names(mf) %in% rn), drop = FALSE]
   if(is.null(variable)) {
-    par <- predict(x, newdata = if(is.null(newdata)) mf else newdata, type = "parameter")
+    par <- predict(x, newdata = if(is.null(newdata)) mf else newdata, type = "parameter", drop = FALSE)
   } else {
     if(length(av <- all.vars(formula(x$fake_formula, lhs = 0))) > 1L)
       stop("variable plot can only be generated for single covariate models!")
@@ -116,7 +116,7 @@ quantile.gamlss2 <- function(x,
     } else {
       newdata <- newdata[order(newdata[[variable]]), ]
     }
-    par <- predict(x, newdata = newdata, type = "parameter")
+    par <- predict(x, newdata = newdata, type = "parameter", drop = FALSE)
   }
   f <- NULL
   for(p in probs)

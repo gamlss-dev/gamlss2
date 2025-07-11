@@ -101,6 +101,8 @@ website:
           contents:
             - text: HarzTraffic
               file: man/HarzTraffic.qmd
+            - text: SpirometryUS
+              file: man/SpirometryUS.qmd
         - section: Misc functionality
           contents:
             - text: fake_formula

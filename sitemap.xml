@@ -2,142 +2,142 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/NEWS.html</loc>
-    <lastmod>2025-07-11T14:19:04.811Z</lastmod>
+    <lastmod>2025-07-11T14:25:36.777Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/index.html</loc>
-    <lastmod>2025-07-11T14:19:04.823Z</lastmod>
+    <lastmod>2025-07-11T14:25:36.789Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/gamlss2-package.html</loc>
-    <lastmod>2025-07-11T14:19:08.155Z</lastmod>
+    <lastmod>2025-07-11T14:25:40.128Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/lasso.html</loc>
-    <lastmod>2025-07-11T14:19:09.586Z</lastmod>
+    <lastmod>2025-07-11T14:25:41.580Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/random.html</loc>
-    <lastmod>2025-07-11T14:19:13.402Z</lastmod>
+    <lastmod>2025-07-11T14:25:45.116Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/discretize.html</loc>
-    <lastmod>2025-07-11T14:19:04.951Z</lastmod>
+    <lastmod>2025-07-11T14:25:36.919Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/new_formula.html</loc>
-    <lastmod>2025-07-11T14:19:11.608Z</lastmod>
+    <lastmod>2025-07-11T14:25:43.318Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/find_family.html</loc>
-    <lastmod>2025-07-11T14:19:06.562Z</lastmod>
+    <lastmod>2025-07-11T14:25:38.582Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/fake_formula.html</loc>
-    <lastmod>2025-07-11T14:19:05.776Z</lastmod>
+    <lastmod>2025-07-11T14:25:37.797Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/softplus.html</loc>
-    <lastmod>2025-07-11T14:19:14.324Z</lastmod>
+    <lastmod>2025-07-11T14:25:46.168Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/gamlss2.family.html</loc>
-    <lastmod>2025-07-11T14:19:08.210Z</lastmod>
+    <lastmod>2025-07-11T14:25:40.181Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/Kumaraswamy.html</loc>
-    <lastmod>2025-07-11T14:19:09.343Z</lastmod>
+    <lastmod>2025-07-11T14:25:41.332Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/stepwise.html</loc>
-    <lastmod>2025-07-11T14:19:15.431Z</lastmod>
+    <lastmod>2025-07-11T14:25:47.242Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/plots.html</loc>
-    <lastmod>2025-07-11T14:19:12.325Z</lastmod>
+    <lastmod>2025-07-11T14:25:44.033Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/misc.html</loc>
-    <lastmod>2025-07-11T14:19:10.828Z</lastmod>
+    <lastmod>2025-07-11T14:25:42.596Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/GDF.html</loc>
-    <lastmod>2025-07-11T14:19:08.510Z</lastmod>
+    <lastmod>2025-07-11T14:25:40.479Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/vignettes/specials.html</loc>
-    <lastmod>2025-07-11T14:19:15.652Z</lastmod>
+    <lastmod>2025-07-11T14:25:47.469Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/vignettes/topmodels.html</loc>
-    <lastmod>2025-07-11T14:19:15.652Z</lastmod>
+    <lastmod>2025-07-11T14:25:47.469Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/vignettes/families.html</loc>
-    <lastmod>2025-07-11T14:19:15.652Z</lastmod>
+    <lastmod>2025-07-11T14:25:47.469Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/quantiles.html</loc>
-    <lastmod>2025-07-11T14:19:13.358Z</lastmod>
+    <lastmod>2025-07-11T14:25:45.068Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/glmnet.html</loc>
-    <lastmod>2025-07-11T14:19:09.243Z</lastmod>
+    <lastmod>2025-07-11T14:25:41.241Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/RS_CG.html</loc>
-    <lastmod>2025-07-11T14:19:13.624Z</lastmod>
+    <lastmod>2025-07-11T14:25:45.336Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/special_terms.html</loc>
-    <lastmod>2025-07-11T14:19:14.584Z</lastmod>
+    <lastmod>2025-07-11T14:25:46.432Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/gamlss2.html</loc>
-    <lastmod>2025-07-11T14:19:08.273Z</lastmod>
+    <lastmod>2025-07-11T14:25:40.243Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/pb.html</loc>
-    <lastmod>2025-07-11T14:19:12.079Z</lastmod>
+    <lastmod>2025-07-11T14:25:43.798Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/gamlss2_control.html</loc>
-    <lastmod>2025-07-11T14:19:07.323Z</lastmod>
+    <lastmod>2025-07-11T14:25:39.386Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/prodist.gamlss2.html</loc>
-    <lastmod>2025-07-11T14:19:13.122Z</lastmod>
+    <lastmod>2025-07-11T14:25:44.837Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/make.link2.html</loc>
-    <lastmod>2025-07-11T14:19:10.600Z</lastmod>
+    <lastmod>2025-07-11T14:25:42.369Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/SpirometryUS.html</loc>
-    <lastmod>2025-07-11T14:19:15.377Z</lastmod>
+    <lastmod>2025-07-11T14:25:47.182Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/modelstats.html</loc>
-    <lastmod>2025-07-11T14:19:10.873Z</lastmod>
+    <lastmod>2025-07-11T14:25:42.641Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html</loc>
-    <lastmod>2025-07-11T14:19:12.370Z</lastmod>
+    <lastmod>2025-07-11T14:25:44.081Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/ologit.html</loc>
-    <lastmod>2025-07-11T14:19:11.843Z</lastmod>
+    <lastmod>2025-07-11T14:25:43.556Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/select_gamlss2.html</loc>
-    <lastmod>2025-07-11T14:19:13.676Z</lastmod>
+    <lastmod>2025-07-11T14:25:45.387Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/man/HarzTraffic.html</loc>
-    <lastmod>2025-07-11T14:19:09.298Z</lastmod>
+    <lastmod>2025-07-11T14:25:41.291Z</lastmod>
   </url>
   <url>
     <loc>https://gamlss-dev.github.io/gamlss2/CITATION.html</loc>
-    <lastmod>2025-07-11T14:19:04.862Z</lastmod>
+    <lastmod>2025-07-11T14:25:36.823Z</lastmod>
   </url>
 </urlset>

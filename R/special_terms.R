@@ -1177,8 +1177,14 @@ fk <- function(x, ...)
 {
   sx <- list()
   sx$term <- as.character(substitute(x))
+  if(sx$term[1L] == "I")
+    sx$term <- paste0("I(", sx$term[2L], ")")
+  if(length(sx$term) > 1L) {
+    stop("check the fk() term, use I()!")
+  }
   sx$label <- paste0("fk(", sx$term, ")")
   f <- as.formula(paste("~", sx$term))
+  environment(f) <- sys.frame(-1)
   sx$x <- model.frame(f)[[1L]]
   sx$control <- list(...)
   class(sx) <- c("special", "fk")

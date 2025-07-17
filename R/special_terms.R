@@ -1021,6 +1021,9 @@ plot_lasso <- function(x, terms = NULL,
             if(is.null(names))
               names <- paste0("x", 1:ncol(x$X))
           }
+
+          if(length(names) < ncol(x$X))
+            names <- rep(names, length.out = ncol(X))
           names <- names[1:ncol(x$X)]
           at <- cm[1, ]
 
@@ -1041,7 +1044,9 @@ plot_lasso <- function(x, terms = NULL,
           }
           labs <- labs[order(o)]
 
-          axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
+          if(!all(labs == "")) {
+            axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
+          }
         }
       }
 

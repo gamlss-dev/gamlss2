@@ -25,8 +25,8 @@ plot_lasso(x, terms = NULL,
   \item{type}{Integer or character, the type of the Lasso penalty.
     \code{type = 1} or \code{type = "normal"} uses the normal penalty,
     \code{type = 2} or \code{type = "group"} the group penalty,
-    \code{type = 3} or \code{type = "nominal"} the nominal fusion penalty and
-    \code{type = 4} or \code{type = "ordinal"} the ordinal fusion penalty.}
+    \code{type = 3} or \code{type = "ordinal"} the ordinal fusion penalty and
+    \code{type = 4} or \code{type = "nominal"} the nominal fusion penalty.}
   \item{const}{Numeric, the constant that is used for approximating the absolute function.}
   \item{terms}{Character or integer, the model term that should be plotted. The
     default \code{terms = NULL} is plotting all model terms.}

@@ -1023,7 +1023,7 @@ plot_lasso <- function(x, terms = NULL,
           }
 
           if(length(names) < ncol(x$X))
-            names <- rep(names, length.out = ncol(X))
+            names <- rep(names, length.out = ncol(x$X))
           names <- names[1:ncol(x$X)]
           at <- cm[1, ]
 

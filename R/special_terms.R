@@ -1025,27 +1025,30 @@ plot_lasso <- function(x, terms = NULL,
           if(length(names) < ncol(x$X))
             names <- rep(names, length.out = ncol(x$X))
           names <- names[1:ncol(x$X)]
-          at <- cm[1, ]
 
-          labs <- labs0 <- names
-          plab <- at
-          o <- order(plab, decreasing = TRUE)
-          labs <- labs[o]
-          plab <- plab[o]
-          rplab <- diff(range(plab))
-          if(length(plab) > 2L) {
-            for(i in 1:(length(plab) - 1)) {
-              dp <- abs(plab[i] - plab[i + 1]) / rplab
-              if(dp <= 0.02) {
-                labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
-                labs[i] <- ""
+          if(!all(names == "")) {
+            at <- cm[1, ]
+
+            labs <- labs0 <- names
+            plab <- at
+            o <- order(plab, decreasing = TRUE)
+            labs <- labs[o]
+            plab <- plab[o]
+            rplab <- diff(range(plab))
+            if(length(plab) > 2L) {
+              for(i in 1:(length(plab) - 1)) {
+                dp <- abs(plab[i] - plab[i + 1]) / rplab
+                if(dp <= 0.02) {
+                  labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
+                  labs[i] <- ""
+                }
               }
             }
-          }
-          labs <- labs[order(o)]
+            labs <- labs[order(o)]
 
-          if(!all(labs == "")) {
-            axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
+            if(!all(labs == "")) {
+              axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
+            }
           }
         }
       }

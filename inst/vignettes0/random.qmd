@@ -3,6 +3,7 @@ title: "Random Effects"
 format: 
   html:
     html-math-method: mathjax
+    code-fold: false
     self-contained: true
     toc: true
     number-sections: true
@@ -17,7 +18,7 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+```{r preliminaries,  message=FALSE, warning=FALSE, results="hide"}
 library("gamlss2")
 library(gamlss)
 library(ggplot2)
@@ -28,37 +29,27 @@ library(dplyr)
 library(gtsummary)
 ```
 
-Random effects can be included as an additive term for any distribution parameter in a `gamlss2` model by using the `re()` function in package `gamlss2`. Within the GAMLSS model fitting, the random effects additive term is then fitted locally by an interface with `lme` function of  the `nlme` package.
+Random effects can be included as an additive term for any distribution parameter in a `gamlss2` model by using the `re()` function in  `gamlss2`. Within the GAMLSS model fitting, the random effects additive term is then fitted locally by an interface with `lme` function of  the `nlme` package. First we will consider the case of random effects only in the $\mu$ model.
 
 ## Random effects only in the $\mu$ model
 
-First we will consider the case of random effects only in the $\mu$ model. In this case the estimates of the fixed effects for the $\sigma$ distribution parameter (and also $\nu$ and $\tau$) in the `gamlss2` fit do **not** use **REML** estimation. 
-
-This is not a problem if the total (effective) degrees of freedom (df) for estimating the fixed and random effects for $\mu$ are **small** relative to the total df (i.e. the sample size). Examples 1 and 2 below illustrate this.
-
-However, if the total (effective) df for estimating the fixed and random effects for 
-$\mu$ are a significant proportion of the total df, then the estimates of the fixed effects for $\sigma$ will be **seriously** negatively biased. Example 3 below illustrates this. 
-[The estimated fixed effects for $\mu$ are OK (but not their estimated standard errors), and the  random effects parameters are REML type estimates and are also OK.  So, if these estimates are of primary interest, and the estimate of the 
-$\sigma$ parameter is not of interest, then there is no problem.]
-
-The total (effective) df for a random effect is ALWAYS less than the df for the corresponding fixed effects. So a quick check (of whether there might be a problem with serious negative bias in the estimates of the fixed effects for 
-$\sigma$ in the `gamlss()` fit) is to compare the corresponding fixed effects df with the total df. For example, in a simple random intercepts model for $\mu$, if m is the number of clusters (**GH: I have changed "individuals" to "clusters"**) (or levels of the random effects factor), and n is the total sample size, then compare m with n, and if the proportion m/n is, say, greater than 0.05, there may be problem. Similarly for a random intercepts and slopes model for $\mu$, then compare 2m with n, and look and the proportion 2m/n.
 
 
-In the first example below using `re()` in `gamlss()` for random effects works
-(i.e. where the total number of clusters (or factor levels) is very small relative to the total number of observations and so REML estimation is not needed,
-for example, a relatively low number of clusters, each with a lot of repeated measurements, OR a random factor with a low number of levels, each with a lot of observations). We show that using LME locally in `gamlss()` by the `re()` argument gives very similar results, to using LME directly.
 
-### Example 1: Simulated data
+### Example 1: Simulated data {-}
 
-```{r echo=FALSE}
+In this example, the total number of clusters (or factor levels) is  small relative to the total number of observations. This will happen, for example, with a relatively low number of clusters, each with many repeated measurements, OR a random factor with a low number of levels, each with a lot of observations.  
+
+
+```{r }
+#| code-fold: true
 set.seed(2345)
 
 m=5  # number of clusters
-N=1000  # number of cases
-n=N/m   # cases per cluster
+n=1000  # number of cases
+nc=n/m   # cases per cluster
 
-cluster = factor(rep(1:m, each=n))
+cluster = factor(rep(1:m, each=nc))
 
 # linear predictor
 b0 = 1
@@ -68,41 +59,47 @@ b2 = 0.5
 c0=0.1
 c1 = 0.1
 
-tau = 1
+tau = 0.3
 
-x1 = round(rnorm(N), 3)
-x2 = round(runif(N))
+x1 = round(rnorm(n), 3)
+x2 = round(runif(n))
 
 u = rnorm(m, 0, tau)
-mu = exp(b0 + b1*x1 + b2*x2 + rep(u, each=n))
+mu = exp(b0 + b1*x1 + b2*x2 + rep(u, each=nc))
 sigma = exp(c0 + c1*x2)
 
-y = round(rGA(N, mu=mu, sigma=sigma),5)
+y = round(rGA(n, mu=mu, sigma=sigma),5)
 
-toydata <- data.frame(cluster=cluster, y=y, x1=x1, x2=x2)
+toydata1 <- data.frame(cluster=cluster, y=y, x1=x1, x2=x2)
 ```
 
 This example is based on a simulated data set and is presented  to illustrate usage of the `gamlss2` functions. 
 We have generated a data set with
 
+
 -   number of clusters: m = `r m`
 
--   number of observations: n = `r N`
+-   number of observations: n = `r n`
 
--   proportion m/n = `r m/N`
+-   proportion m/n = `r m/n`
 
--   observations per cluster: `r n`
+-   observations per cluster: `r n/m`
+
 
 -   `x1` a continuous covariate; `x2` a binary covariate
 
 -   `y` is Gamma distributed, with a random intercept in the $\mu$ model:
 
-\begin{align*}
-y_{ij}&\sim\text{GA}(\mu_{ij}, \sigma_{ij})\\
-\log(\mu_{ij})&=\beta_0^\mu+\beta_1^\mu x_{i1}+\beta_2^\mu x_{i2} +\alpha_j\\
-\log(\sigma_{ij})&=\beta_0^\sigma+\beta_2^\sigma x_{i2}\\
-\alpha_j&\sim\text{NO}(0, \sigma_\alpha)
-\end{align*}
+
+
+$$
+\begin{split}
+y_{ij}&\sim\text{GA}(\mu_{ij}, \sigma_{ij}) \\
+\log(\mu_{ij})&=\beta_0^\mu+\beta_1^\mu x_{1ij}+\beta_2^\mu x_{2ij} +\gamma_{j} \\
+\log(\sigma_{ij})&=\beta_0^\sigma+\beta_2^\sigma x_{i2} \\
+\gamma_j&\sim\text{NO}(0, \sigma_\gamma) 
+\end{split}
+$$ {#eq-toydata1}
 
 for $i=1,\ldots,$ `r n`, $j=1,\ldots,$ `r m`.
 
@@ -111,7 +108,7 @@ for $i=1,\ldots,$ `r n`, $j=1,\ldots,$ `r m`.
 ```{r}
 #| echo: false
 
-toydata |>
+toydata1 |>
   slice(1:3, 998:1000) |>
   tbl_listing() |>
   as_flex_table() |>
@@ -122,7 +119,8 @@ toydata |>
 Boxplot of `y` by `cluster`:
 
 ```{r fig.height=3, fig.width=4}
-toydata |>
+#| code-fold: true
+toydata1 |>
   ggplot(aes(x=cluster,y=y)) +
   geom_boxplot() +
   theme_bw()
@@ -130,166 +128,77 @@ toydata |>
 
 
 
+
+#### Random intercept in $\mu$ model {-}
+
+::: {.callout-note}
+`@Niki`: re() doesn't work in gamlss2 with `random =~1|cluster`. I have used `random =~x1` in the chunk below, when you have fixed re() can you change to `random =~1|cluster` and let me know? Thanks
+:::
+
+We fit  model (@eq-toydata1) with random intercept in the $\mu$ model:
+
 ```{r}
-m1 <- gamlss2(y ~ x1 + x2 + re(random=~1|cluster), 
+#| code-fold: false
+m1 <- gamlss2(y ~ x1 + x2 + re(random=~x1|cluster), 
               sigma.formula = ~ x2,
-              data=toydata, family=GA)
+              data=toydata1, family=GA)
 
 summary(m1)
 ```
-Looks OK, but look at the worm plot (OUCH)
+
+::: {.callout-note}
+`@Niki`: plot doesn't work:
+:::
+
+QQ plot:
 ```{r}
-wp(m1, ylim.all=3)
-```
-
-**GH: What functions should we illustrate?**
-
-### Example 2: Citations data
-
-
-```{r}
-load("Data/citationdata.RData")
-```
-
-<https://www.kaggle.com/datasets/agungpambudi/research-citation-network-5m-papers>
-
-*   The full data set consists of 1.8m articles published in 30917 *venues* (journals).
-
-*   There are lots of variables. 
-
-    * We regard number of citations (`n_citation`) as the response variable;
-  
-    * predictors: `venue`, `year`, `doc_type` (conference/journal) and number of pages (`pages`).
-
-*   We have (more or less randomly) selected `r length(unique(citdatasample$venue))` venues, with a total of `r nrow(citdatasample)` articles, and publication between 2010 and 2014.
-
-*   Regard the venues as clusters.
-
-*   We have m = `r length(unique(citdatasample$venue))`, n = `r nrow(citdatasample)`, m/n = `r round(length(unique(citdatasample$venue))/nrow(citdatasample),3)`
-
-#### Data description {-}
-
-```{r}
-citdatasample |>
-  select(venue, n_citation, year, doc_type, pages) |>
-  tbl_summary() |>
-  bold_labels()
-```
-
-<br>
-
-#### Histogram of `n_citation` {-}
-
-```{r}
-#| fig.height: 4
-#| fig.width: 6
-
-citdatasample |>
-  select(n_citation) |>
-  ggplot(aes(x=n_citation)) +
-  geom_histogram(bins=60) +
-  theme_bw()
-```
-
-Truncate for a better display:
-
-
-```{r}
-#| fig.height: 4
-#| fig.width: 6
-
-citdatasample |>
-  select(n_citation) |>
-  filter(n_citation<200) |>
-  ggplot(aes(x=n_citation)) +
-  geom_histogram(bins=60) +
-  theme_bw()
-```
-
-<br>
-
-#### Boxplots of citations vs doc_type {-}
-
-```{r}
-citdatasample |>
-  select(n_citation, doc_type) |>
-  ggplot(aes(y=n_citation, x=doc_type)) +
-  geom_boxplot() +
-  theme_bw()
-```
-
-<br>
-
-Take logs of citations:
-
-```{r}
-citdatasample |>
-  select(n_citation, doc_type) |>
-  ggplot(aes(y=log(n_citation+1), x=doc_type)) +
-  geom_boxplot() +
-  theme_bw()
-```
-
-#### Boxplots of citations vs venue {-}
-
-```{r}
-citdatasample |>
-  select(n_citation, venue) |>
-  ggplot(aes(y=log(n_citation+1), x=venue)) +
-  geom_boxplot() +
-  theme_bw()
-```
-
-### Model fitting
-
-
-
-We try fitting the NBI, NBII, PIG and SICHEL distributions using `gamlss2`:
-
-
-```{r}
-#| error: true
-library(gamlss2)
-gpnbi  <- try(gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=NBI, trace=FALSE))
-gpnbii  <- gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=NBII, trace=FALSE)
-gppig  <- gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=PIG, trace=FALSE)
-gpsi  <- gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=SICHEL, trace=FALSE)
-```
-
-NBI model hasn't worked. Compare the other models using AIC:
-
-```{r}
-AIC(gpnbii, gppig, gpsi)
-```
-The SICHEL appears best. Now fit covariates. This works, but with error messages:
-
-```{r}
-gpsi.cov1 <- gamlss2(n_citation ~ doc_type + pages + re(random=~1|venue),
-                    sigma.formula =~ 1,
-                    nu.formula =~ 1,
-                    data=citdatasample, family=SICHEL, n.cyc=50)
-
-summary(gpsi.cov1)
-```
-
-This doesn't work:
-
-```{r}
-gpsi.cov2 <- gamlss2(n_citation ~ doc_type + pages + re(random=~1|venue),
-                    sigma.formula =~ doc_type + pages,
-                    nu.formula =~ doc_type + pages,
-                    data=citdatasample, family=SICHEL, n.cyc=50)
-
-try(summary(gpsi.cov2))
+#| eval: false
+plot(m1, which = "qq-resid")
 ```
 
 
 
-### Example 3: Orthodontic data
+#### Random intercept and random slope in $\mu$ model {-}
+
+For illustration purposes, we fit a `gamlss2` model with random intercept and random slope for $x_1$  in the $\mu$ model:
 
 
-In the  `Orthodont` data, the number of individuals (or factor levels) is significant relative to the total number of observations, and there is a problem with a seriously negatively biased estimate of $\sigma$. We show that using `lme` locally in `gamlss2` by the `re()` function gives a very different estimate of $\sigma$ than using LME directly. The `Orthodont` data set is analysed in detail on pages 147-155 of
- @R:Pinheiro+Bates:2000 "Mixed-Effects Models in S and S-PLUS".
+\begin{align*}
+y_{ij}&\sim\text{GA}(\mu_{ij}, \sigma_{ij})\\
+\log(\mu_{ij})&=\beta_0^\mu+\beta_1^\mu x_{1ij}+\beta_2^\mu x_{2ij} +\gamma_{0j} + \gamma_{1j}x_{1ij}\\
+\log(\sigma_{ij})&=\beta_0^\sigma+\beta_2^\sigma x_{2ij}\\
+\gamma_j&\sim\text{NO}(0, \sigma_\gamma)
+\end{align*}
+
+```{r}
+m1 <- gamlss(y ~ x1 + x2 + re(random=~x1|cluster), 
+              sigma.formula = ~ x2,
+              data=toydata1, family=GA)
+
+summary(m1)
+```
+
+::: {.callout-note}
+`@Niki`: how do we test for significance for the random effects?
+:::
+
+
+### Example 2: Orthodontic data {-}
+
+ In the case of random effects in the $\mu$ model only, the estimates of the fixed effects for the $\sigma$ distribution parameter (and also $\nu$ and $\tau$) in  `gamlss2` fit do *not* use REML estimation. 
+This is not a problem if the total (effective) degrees of freedom (df) for estimating the fixed and random effects for $\mu$ are *small* relative to the total df (i.e. the sample size). Example 1 above illustrates this.
+
+However, if the total (effective) df for estimating the fixed and random effects for 
+$\mu$ are a significant proportion of the total df, then the estimates of the fixed effects for $\sigma$ will be *seriously* negatively biased. This example illustrates this. 
+[The estimated fixed effects for $\mu$ are OK (but not their estimated standard errors), and the  random effects parameters are REML type estimates and are also OK.  So, if these estimates are of primary interest, and the estimate of the 
+$\sigma$ parameter is not of interest, then there is no problem.]
+
+The total (effective) df for a random effect is *always* less than the df for the corresponding fixed effects. So a quick check of whether there might be a problem with serious negative bias in the estimates of the fixed effects for 
+$\sigma$  is to compare the corresponding fixed effects df with the total df. For example, in a simple random intercepts model for $\mu$, if m is the number of clusters  (or individuals or levels of the random effects factor), and n is the total sample size, then compare m with n, and if the proportion m/n is, say, greater than 0.05, there may be problem. Similarly for a random intercepts and slopes model for $\mu$, then compare 2m with n, and look and the proportion 2m/n.
+
+
+
+
 
 ```{r}
 #| warning: false
@@ -298,54 +207,82 @@ library("gamlss2")
 library("nlme")
 data("Orthodont")
 ```
-First fit a random intercepts model using LME:
+
+The `Orthodont` data set is analysed in detail on pages 147-155 of
+ @R:Pinheiro+Bates:2000 "Mixed-Effects Models in S and S-PLUS". Details of the data set are given in `help(Orthodont)`. 
+ 
+ 
+```{r}
+m = length(unique(Orthodont$Subject))
+n = nrow(Orthodont)
+```
+
+
+We have
+
+-   number of clusters: m = `r m`
+
+-   number of observations: n = `r n`
+
+-   proportion m/n = `r m/n`
+
+-   observations per cluster: `r n/m`
+
+Here the number of individuals (or clusters) is significant relative to the total number of observations, and there is a problem with a seriously negatively biased estimate of $\sigma$. We show that using `lme` locally in `gamlss2` by the `re()` function gives a very different estimate of $\sigma$ than using `lme` directly. 
+
+
+
+First fit a random intercepts model using `lme()`:
 ```{r}
 l1 <- lme(distance ~I(age-11),random =~ 1|Subject, data=Orthodont)
-l1
+summary(l1)
 ```
 
 The model is
 
 $$
 \begin{split}
- \texttt{distance}_{ij} \sim& NO(0, \sigma) \\
-    \mu    =&  \beta_{0}+ \beta_1 (\texttt{age}-11) +\alpha_j \\
+ \texttt{distance}_{ij} \sim& \text{NO}(\mu_{ij}, \sigma) \\
+    \mu_{ij}    =&  \beta_{0}+ \beta_1 (\texttt{age}_{ij}-11) +\gamma_j \\
+    \gamma_j \sim &\text{NO}(0, \sigma_a)\ .
 \end{split}
-$$ where $\alpha_j \sim NO(0, \sigma_a)$
-The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.1147$ and
-$\sigma = 1.432$.
+$$ 
+ 
+The fitted model gives estimates $\hat\beta_0 = 24.02$,  $\hat\beta_1 = 0.660$, $\hat\sigma_a = 2.1147$ and
+$\hat\sigma = 1.432$.
 
-Now fit the random intercepts model using function `re()` in `gamlss2`:
-Note that `gamlss2` has problem in interpreting the `I()` function so we create the variable `age_11`
+Now fit the random intercepts model using function `re()` in `gamlss2`. 
+(Note that `gamlss2` has problem in interpreting the `I()` function so we create the variable `age11`.)
 
 ::: {.callout-note}
-there is a problem with random intercepts in `gamlss2` so we use `gamlss`
+`@Niki`: re() doesn't work in gamlss2 with `random =~1|Subject`. I have used `random =~age11` in the chunk below, when you have fixed re() can you change to `random =~1|Subject` and let me know? Thanks
 :::
 
 
 ```{r}
 #| warning: false
-b1 <- gamlss2(distance ~ I(age-11) + re(random =~ 1 | Subject), data = Orthodont)
-m1 <- gamlss(distance ~ I(age-11) + re(random =~ 1 | Subject), data = Orthodont)
+Orthodont <- mutate(Orthodont, age11 = age-11)
+b1 <- gamlss2(distance ~ age11 + re(random =~1+age11 | Subject), data = Orthodont)
 ```
 
+Extract fitted random intercept special mode term:
 ```{r}
-## extract fitted random intercept special mode term
 re <- specials(b1, term = "random", elements = "model")
+```
 
-## model summary
+Model summary:
+```{r}
 summary(re)
-
-## same with gamlss
-getSmo(m1)
 ```
 
 Compare estimated coefficients
 ```{r}
-## main model coefficients
 coef(b1)
 summary(l1)
+```
 
+```{r}
+#| eval: false
 ## random effect coefficients
 plot(coef(re)[, 1] + coef(b1)["mu.p.(Intercept)"], coef(l1)[, 1],
   xlab = "gamlss2 random intercepts", ylab = "lme() random intercepts",
@@ -353,14 +290,220 @@ plot(coef(re)[, 1] + coef(b1)["mu.p.(Intercept)"], coef(l1)[, 1],
 abline(0, 1, lty = 2, col = 4)
 ```
 
-The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.072$ and $\sigma = 1.254$
-The estimate of $\sigma$ is seriously negatively biased, because it is **not** a `REML` estimate.
+The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.072$ and $\sigma = 1.254$. 
+The estimate of $\sigma$ is seriously negatively biased, because it is *not* a REML estimate.
 
-For this simple random intercepts model, the estimate of $\sigma$ can be adjusted by multiplying by the local LME residual given by 1.135 giving: adjusted $\sigma = 1.254*1.135 = 1.42$, which is very close to the LME estimate of $\sigma$. 
+For this simple random intercepts model, the estimate of $\sigma$ can be adjusted by multiplying by the local LME residual given by 1.135 giving: adjusted $\sigma = 1.254\times1.135 = 1.42$, which is very close to the `lme` estimate of $\sigma$. 
 
 ::: {.callout-warning}
 However this adjustment does NOT work for more complex random effects models.  
 :::
 
+Compare fitted values:
+```{r}
+plot(fitted(b1, model = "mu"), fitted(l1))
+abline(0, 1, col = 4)
+```
 
 
+## Random effects in the $\mu$ and $\sigma$ models
+
+To illustrate random effects in both $\mu$ and $\sigma$, we simulate data with a random intercept in both:
+
+$$
+\begin{split}
+y_{ij}&\sim\text{GA}(\mu_{ij}, \sigma_{ij}) \\
+\log(\mu_{ij})&=\beta_0^\mu+\beta_1^\mu x_{1ij}+\beta_2^\mu x_{2ij} +\gamma^{\mu}_{j} \\
+\log(\sigma_{ij})&=\beta_0^\sigma+\beta_2^\sigma x_{i2}+\gamma^{\sigma}_{j} \\
+\gamma_j^\mu&\sim\text{NO}(0, \sigma_\gamma^\mu)\\
+\gamma_j^\sigma&\sim\text{NO}(0, \sigma_\gamma^\sigma) 
+\end{split}
+$$ {#eq-toydata2}
+
+```{r }
+#| code-fold: true
+set.seed(5678)
+
+m=5  # number of clusters
+n=1000  # number of cases
+nc=n/m   # cases per cluster
+
+cluster = factor(rep(1:m, each=nc))
+
+# linear predictor
+b0 = 1
+b1 = 0.2
+b2 = 0.5
+
+c0=0.1
+c1 = 0.1
+
+taub = 0.3
+tauc = 0.2
+
+x1 = round(rnorm(n), 3)
+x2 = round(runif(n))
+
+u = rnorm(m, 0, taub)
+v = rnorm(m, 0, tauc)
+mu = exp(b0 + b1*x1 + b2*x2 + rep(u, each=nc))
+sigma = exp(c0 + c1*x2 + rep(v, each=nc))
+
+y = round(rGA(n, mu=mu, sigma=sigma),5)
+
+toydata2 <- data.frame(cluster=cluster, y=y, x1=x1, x2=x2)
+```
+
+We fit  model (@eq-toydata2) with random intercept in the $\mu$ and $\sigma$ models:
+
+::: {.callout-note}
+`@Niki`: this doesn't work:
+:::
+
+```{r}
+#| eval: false
+m2 <- gamlss2(y ~ x1 + x2 + re(random=~1|cluster), 
+              sigma.formula = ~ x2 + re(random=~1|cluster),
+              data=toydata2, family=GA)
+
+summary(m2)
+```
+
+<!-- ### Example 2: Citations data -->
+
+
+<!-- ```{r} -->
+<!-- load("Data/citationdata.RData") -->
+<!-- ``` -->
+
+<!-- <https://www.kaggle.com/datasets/agungpambudi/research-citation-network-5m-papers> -->
+
+<!-- *   The full data set consists of 1.8m articles published in 30917 *venues* (journals). -->
+
+<!-- *   There are lots of variables.  -->
+
+<!--     * We regard number of citations (`n_citation`) as the response variable; -->
+
+<!--     * predictors: `venue`, `year`, `doc_type` (conference/journal) and number of pages (`pages`). -->
+
+<!-- *   We have (more or less randomly) selected `r #length(unique(citdatasample$venue))` venues, with a total of `r #nrow(citdatasample)` articles, and publication between 2010 and 2014. -->
+
+<!-- *   Regard the venues as clusters. -->
+
+<!-- *   We have m = `r #length(unique(citdatasample$venue))`, n = `r # nrow(citdatasample)`, m/n = `r #round(length(unique(citdatasample$venue))/nrow(citdatasample),3)` -->
+
+<!-- #### Data description {-} -->
+
+<!-- ```{r} -->
+<!-- citdatasample |> -->
+<!--   select(venue, n_citation, year, doc_type, pages) |> -->
+<!--   tbl_summary() |> -->
+<!--   bold_labels() -->
+<!-- ``` -->
+
+<!-- <br> -->
+
+<!-- #### Histogram of `n_citation` {-} -->
+
+<!-- ```{r} -->
+<!-- #| fig.height: 4 -->
+<!-- #| fig.width: 6 -->
+
+<!-- citdatasample |> -->
+<!--   select(n_citation) |> -->
+<!--   ggplot(aes(x=n_citation)) + -->
+<!--   geom_histogram(bins=60) + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+<!-- Truncate for a better display: -->
+
+
+<!-- ```{r} -->
+<!-- #| fig.height: 4 -->
+<!-- #| fig.width: 6 -->
+
+<!-- citdatasample |> -->
+<!--   select(n_citation) |> -->
+<!--   filter(n_citation<200) |> -->
+<!--   ggplot(aes(x=n_citation)) + -->
+<!--   geom_histogram(bins=60) + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+<!-- <br> -->
+
+<!-- #### Boxplots of citations vs doc_type {-} -->
+
+<!-- ```{r} -->
+<!-- citdatasample |> -->
+<!--   select(n_citation, doc_type) |> -->
+<!--   ggplot(aes(y=n_citation, x=doc_type)) + -->
+<!--   geom_boxplot() + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+<!-- <br> -->
+
+<!-- Take logs of citations: -->
+
+<!-- ```{r} -->
+<!-- citdatasample |> -->
+<!--   select(n_citation, doc_type) |> -->
+<!--   ggplot(aes(y=log(n_citation+1), x=doc_type)) + -->
+<!--   geom_boxplot() + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+<!-- #### Boxplots of citations vs venue {-} -->
+
+<!-- ```{r} -->
+<!-- citdatasample |> -->
+<!--   select(n_citation, venue) |> -->
+<!--   ggplot(aes(y=log(n_citation+1), x=venue)) + -->
+<!--   geom_boxplot() + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+<!-- ### Model fitting -->
+
+
+
+<!-- We try fitting the NBI, NBII, PIG and SICHEL distributions using `gamlss2`: -->
+
+
+<!-- ```{r} -->
+<!-- #| error: true -->
+<!-- library(gamlss2) -->
+<!-- gpnbi  <- try(gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=NBI, trace=FALSE)) -->
+<!-- gpnbii  <- gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=NBII, trace=FALSE) -->
+<!-- gppig  <- gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=PIG, trace=FALSE) -->
+<!-- gpsi  <- gamlss2(n_citation~re(random=~1|venue), data=citdatasample, family=SICHEL, trace=FALSE) -->
+<!-- ``` -->
+
+<!-- NBI model hasn't worked. Compare the other models using AIC: -->
+
+<!-- ```{r} -->
+<!-- AIC(gpnbii, gppig, gpsi) -->
+<!-- ``` -->
+<!-- The SICHEL appears best. Now fit covariates. This works, but with error messages: -->
+
+<!-- ```{r} -->
+<!-- gpsi.cov1 <- gamlss2(n_citation ~ doc_type + pages + re(random=~1|venue), -->
+<!--                     sigma.formula =~ 1, -->
+<!--                     nu.formula =~ 1, -->
+<!--                     data=citdatasample, family=SICHEL, n.cyc=50) -->
+
+<!-- summary(gpsi.cov1) -->
+<!-- ``` -->
+
+<!-- This doesn't work: -->
+
+<!-- ```{r} -->
+<!-- gpsi.cov2 <- gamlss2(n_citation ~ doc_type + pages + re(random=~1|venue), -->
+<!--                     sigma.formula =~ doc_type + pages, -->
+<!--                     nu.formula =~ doc_type + pages, -->
+<!--                     data=citdatasample, family=SICHEL, n.cyc=50) -->
+
+<!-- try(summary(gpsi.cov2)) -->
+<!-- ``` -->

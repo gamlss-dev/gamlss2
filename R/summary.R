@@ -104,6 +104,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
     for(i in nx) {
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
+      } else {
+        eta[[i]] <- 0.0
       }
       if(full | TRUE) { ## FIXME: always add?
         if(!is.null(par[[i]]$s)) {
@@ -128,6 +130,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
     for(i in nx) {
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
+      } else {
+        eta[[i]] <- 0.0
       }
       if(full | TRUE) { ## FIXME: always add?
         if(!is.null(par[[i]]$s)) {
@@ -178,6 +182,9 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   control$fnscale <- -1
 
   H <- as.matrix(optimHess(par, fn = loglik, gr = gradient, control = control))
+  if(all(is.na(H))) {
+    H <- as.matrix(optimHess(par, fn = loglik, control = control))
+  }
   if(ncol(H) > 1L) {
     v <- try(solve(H), silent = TRUE)
     if(inherits(v, "try-error")) {

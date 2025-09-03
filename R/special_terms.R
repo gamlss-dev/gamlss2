@@ -345,7 +345,7 @@ special_fit.re <- function(x, z, w, control, ...)
 {
   ## Assign current working response.
   x$data$response_z <- z
-  x$data$weights_w <- w
+  x$data$weights_w <- 1 / w
 
   ## Estimate model.
   rem <- parse(text = paste0(

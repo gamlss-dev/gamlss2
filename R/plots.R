@@ -351,6 +351,9 @@ plot_factor_effect <- function(x, col = NULL, ncol = -1L, width = 0.6,
       col <- col(ncol)
   }
   ncol <- length(col)
+  if(!all(c("lower", "upper") %in% colnames(x))) {
+    x <- cbind(x, "lower" = x[, "fit"], "upper" = x[, "fit"])
+  }
   px <- t(x[, c("lower", "fit", "upper")])
   colnames(px) <- levels(x[[1L]])
   pos <- 1:ncol(px)

@@ -173,7 +173,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
   ## Set NA coefficients to zero.
   p_na <- is.na(par)
-  par[p_na] <- 0.0
+  if(any(p_na))
+    par[p_na] <- 0.0
 
   if(type == "coef")
     return(par)
@@ -185,6 +186,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   if(all(is.na(H))) {
     H <- as.matrix(optimHess(par, fn = loglik, control = control))
   }
+  H <- 0.5 * (H + t(H))
+  H <- -1 * H
   if(ncol(H) > 1L) {
     v <- try(solve(H), silent = TRUE)
     if(inherits(v, "try-error")) {
@@ -199,8 +202,6 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
     v <- 1 / H
   }
 
-  v <- -v
-
   if(type == "cor") {
     dv <- sqrt(diag(v))
     v <- v / (dv %*% t(dv))
@@ -209,7 +210,8 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   if(type == "se")
     v <- sqrt(diag(v))
 
-  v[p_na, p_na] <- NA
+  if(any(p_na))
+    v[p_na, p_na] <- NA
 
   return(v)
 }

@@ -547,11 +547,10 @@ For the <code>re()</code> function, the dots argument is used to specify additio
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> age11 <span class="sc">|</span> Subject),</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 326.6569 eps = 0.392363     
-GAMLSS-RS iteration  2: Global Deviance = 326.6292 eps = 0.000085     
-GAMLSS-RS iteration  3: Global Deviance = 326.0947 eps = 0.001636     
-GAMLSS-RS iteration  4: Global Deviance = 326.0795 eps = 0.000046     
-GAMLSS-RS iteration  5: Global Deviance = 326.0778 eps = 0.000005     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 326.6566 eps = 0.392364     
+GAMLSS-RS iteration  2: Global Deviance = 326.0942 eps = 0.001721     
+GAMLSS-RS iteration  3: Global Deviance = 326.0782 eps = 0.000049     
+GAMLSS-RS iteration  4: Global Deviance = 326.0769 eps = 0.000004     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m))</span>
@@ -621,10 +620,10 @@ GAMLSS-RS iteration 16: Global Deviance = 315.8023 eps = 0.000009     </code></p
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1178 eps = 0.165409     
-GAMLSS-RS iteration  2: Global Deviance = 1551.2684 eps = 0.005672     
-GAMLSS-RS iteration  3: Global Deviance = 1551.1322 eps = 0.000087     
-GAMLSS-RS iteration  4: Global Deviance = 1551.1214 eps = 0.000006     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1177 eps = 0.165409     
+GAMLSS-RS iteration  2: Global Deviance = 1551.2682 eps = 0.005672     
+GAMLSS-RS iteration  3: Global Deviance = 1551.132 eps = 0.000087     
+GAMLSS-RS iteration  4: Global Deviance = 1551.1212 eps = 0.000006     </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## smooth random effects</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">ti</span>(Time) <span class="sc">+</span> <span class="fu">ti</span>(Mare, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> </span>

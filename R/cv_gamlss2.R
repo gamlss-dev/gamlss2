@@ -20,7 +20,7 @@ cv_gamlss2 <- function(..., data, folds = 5,
   }
 
   applier <- if(isTRUE(parallel)) {
-    if (!requireNamespace("future.apply", quietly = TRUE))
+    if(!requireNamespace("future.apply", quietly = TRUE))
       stop("parallel = TRUE requires the future.apply package.")
     future.apply::future_lapply
   } else {

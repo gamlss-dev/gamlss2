@@ -474,8 +474,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="random-effects">Random Effects</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>There are two ways of fitting a random effect within <code>gamlss2</code>. The first, using <code>s()</code>, is for a simple random effect, that is, when only one factor is entered the model as a smoother. This method uses the function <code>s()</code> of the package <span class="pkg">mgcv</span> with argument <code>bs = “re”</code>. For example, if <code>area</code> is factor with several levels, <code>s(area, bs = “re”)</code> will sringh the levels of <code>area</code> towards their mean level. The second, more general way, allows to fit more complicated random effect models using the function <code>re()</code>. The function <code>re()</code> is an interface connecting <code>gamlss2</code> with the specialised package for random effects <span class="pkg">nlme</span>.</p>
-<p>Here we document only the <code>re()</code> function only but we also give examples using <code>s(…, bs = “re”)</code>.</p>
+<p>Random effects can be included in <code>gamlss2</code> models in two ways.<br>
+The first uses <code>s()</code> with <code>bs = “re”</code> for simple random effects, i.e., when a single factor is entered into the model as a smoother. This approach relies on the <code>s()</code> function from the <span class="pkg">mgcv</span> package. For example, if <code>area</code> is a factor with several levels, then <code>s(area, bs = “re”)</code> shrinks the level-specific effects of <code>area</code> towards their overall mean.</p>
+<p>The second, more general approach uses the model term constructor <code>re()</code>, which provides an interface to the specialised random-effects functionality in the <span class="pkg">nlme</span> package. This allows fitting more complex random-effects structures.</p>
+<p>This documentation focuses on the <code>re()</code> function, but we also provide examples using <code>s(…, bs = “re”)</code>.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -490,7 +492,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="fixed">fixed</code>
 </td>
 <td>
-A formula that specifies the fixed effects of the <code>nlme{lme}</code> model. In most cases, this can also be included in the <code>gamlss2</code> parameter formula.
+A formula that specifies the fixed effects of the <code>nlme{lme}</code> model. In most cases, this can also be included in the <code>gamlss2</code> formula.
 </td>
 </tr>
 <tr>
@@ -531,21 +533,23 @@ For the <code>re()</code> function, the dots argument is used to specify additio
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## orthdontic measurement data</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Orthodont"</span>, <span class="at">package =</span> <span class="st">"nlme"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## model using lme()</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lme</span>(distance <span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>), <span class="at">data =</span> Orthodont,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">random =</span><span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>) <span class="sc">|</span> Subject, <span class="at">method =</span> <span class="st">"ML"</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## using re(), function I() is not supported,</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## please transform all variables in advance</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>Orthodont<span class="sc">$</span>age11  <span class="ot">&lt;-</span> Orthodont<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">11</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation using the re() constructor</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> age11 <span class="sc">|</span> Subject),</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## orthdontic measurement data</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Orthodont"</span>, <span class="at">package =</span> <span class="st">"nlme"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## model using lme()</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lme</span>(distance <span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>), <span class="at">data =</span> Orthodont,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">random =</span><span class="sc">~</span> <span class="fu">I</span>(age<span class="dv">-11</span>) <span class="sc">|</span> Subject, <span class="at">method =</span> <span class="st">"ML"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## using re(), function I() is not supported,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## please transform all variables in advance</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>Orthodont<span class="sc">$</span>age11  <span class="ot">&lt;-</span> Orthodont<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">11</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation using the re() constructor,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## setup formula first</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> age11 <span class="sc">|</span> Subject)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Orthodont)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 326.6566 eps = 0.392364     
 GAMLSS-RS iteration  2: Global Deviance = 326.0942 eps = 0.001721     
@@ -563,12 +567,35 @@ GAMLSS-RS iteration  4: Global Deviance = 326.0769 eps = 0.000004     </code></p
 </div>
 </div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract summary for re() model term</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>st <span class="ot">&lt;-</span> <span class="fu">specials</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>st <span class="ot">&lt;-</span> <span class="fu">specials</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">term =</span> <span class="st">"age11"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                             Length Class  Mode
-mu.s(age)                     9     -none- list
-mu.re(random=~age11|Subject) 19     lme    list</code></pre>
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+  Data: x$data 
+       AIC     BIC    logLik
+  448.9844 462.395 -219.4922
+
+Random effects:
+ Formula: ~age11 | Subject
+ Structure: General positive-definite, Log-Cholesky parametrization
+            StdDev    Corr  
+(Intercept) 2.0910678 (Intr)
+age11       0.2157607 0.518 
+Residual    1.1939543       
+
+Variance function:
+ Structure: fixed weights
+ Formula: ~weights_w 
+Fixed effects:  x$fixed 
+                    Value Std.Error DF       t-value p-value
+(Intercept) -2.074577e-07  0.404892 81 -5.123779e-07       1
+
+Standardized Within-Group Residuals:
+        Min          Q1         Med          Q3         Max 
+-3.31636025 -0.47633680  0.02042094  0.46926855  3.94312339 
+
+Number of Observations: 108
+Number of Groups: 27 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## random intercepts and slopes with s() using AIC</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">s</span>(Subject, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> <span class="fu">s</span>(Subject, age11, <span class="at">bs =</span> <span class="st">"re"</span>),</span>
@@ -654,7 +681,7 @@ GAMLSS-RS iteration  6: Global Deviance = 1425.6744 eps = 0.000006     </code></
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">fitted</span>(m)[Ovary<span class="sc">$</span>Mare <span class="sc">==</span> j]</span>
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(f <span class="sc">~</span> ds<span class="sc">$</span>Time, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a> }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

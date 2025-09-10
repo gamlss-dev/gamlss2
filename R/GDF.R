@@ -120,7 +120,7 @@ kurtosis.GDF <- function(x, ...) {
 pdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$pdf(at, d) }
+  FUN <- function(at, d) { f$pdf(at, d, log = FALSE) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "density", drop = drop, elementwise = elementwise)
 }
 

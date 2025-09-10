@@ -1,13 +1,22 @@
 \name{re}
 \alias{re}
 
-
 \title{Random Effects}
 
 \description{
-There are two ways of fitting a random effect within \code{gamlss2}. The first, using  \code{s()}, is for a simple random effect, that is, when only one factor is entered the model as a smoother. This method uses the function \code{s()} of the package \pkg{mgcv} with argument \code{bs = "re"}. For example, if \code{area} is factor with several levels, \code{s(area, bs = "re")} will sringh the levels of \code{area} towards their mean level. The second, more general way, allows to fit more complicated random effect models using the function \code{re()}. The function \code{re()} is an interface connecting \code{gamlss2} with the specialised package for random effects \pkg{nlme}.
+  Random effects can be included in \code{gamlss2} models in two ways.  
+  The first uses \code{s()} with \code{bs = "re"} for simple random effects, i.e., when a single
+  factor is entered into the model as a smoother. This approach relies on the \code{s()} function
+  from the \pkg{mgcv} package. For example, if \code{area} is a factor with several levels,
+  then \code{s(area, bs = "re")} shrinks the level-specific effects of \code{area} towards
+  their overall mean.  
 
-Here we document only the \code{re()} function only but we also give examples using \code{s(..., bs = "re")}. 
+  The second, more general approach uses the model term constructor \code{re()}, which provides
+  an interface to the specialised random-effects functionality in the \pkg{nlme} package.
+  This allows fitting more complex random-effects structures.  
+
+  This documentation focuses on the \code{re()} function, but we also provide examples
+  using \code{s(..., bs = "re")}.
 }
 
 \usage{
@@ -15,11 +24,11 @@ re(fixed =~ 1, random = NULL, ...)
 }
 
 \arguments{
- 
-\item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model. In most cases, this can also be included in the \code{\link{gamlss2}} parameter formula.}
-\item{random}{A formula specifying the random effect part of the model,
+  \item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model.
+    In most cases, this can also be included in the \code{\link{gamlss2}} formula.}
+  \item{random}{A formula specifying the random effect part of the model,
     as in the \code{\link{nlme}{lme()}} function.}
-\item{\dots}{ For the \code{re()} function, the dots argument is used
+  \item{\dots}{For the \code{re()} function, the dots argument is used
     to specify additional control arguments for the \code{\link{nlme}{lme}} function,
     such as the \code{method} and \code{correlation} arguments.}
 }
@@ -39,12 +48,11 @@ re(fixed =~ 1, random = NULL, ...)
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.re.smooth.spec}}, \code{\link[mgcv]{s}}, \code{\link[nlme]{lme}}
- }
+  \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.re.smooth.spec}},
+  \code{\link[mgcv]{s}}, \code{\link[nlme]{lme}}
+}
 
-\examples{
-
-\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\examples{\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 
 ## orthdontic measurement data
 data("Orthodont", package = "nlme")
@@ -57,16 +65,19 @@ m <- lme(distance ~ I(age-11), data = Orthodont,
 ## please transform all variables in advance
 Orthodont$age11  <- Orthodont$age - 11
 
-## estimation using the re() constructor
-b <- gamlss2(distance ~ s(age,k=3) + re(random =~ age11 | Subject),
-  data = Orthodont)
+## estimation using the re() constructor,
+## setup formula first
+f <- distance ~ s(age,k=3) + re(random =~ age11 | Subject)
+
+## estimate model
+b <- gamlss2(f, data = Orthodont)
 
 ## compare fitted values
 plot(fitted(b, model = "mu"), fitted(m))
 abline(0, 1, col = 4)
 
 ## extract summary for re() model term
-st <- specials(b, model = "mu", elements = "model")
+st <- specials(b, model = "mu", term = "age11", elements = "model")
 summary(st)
 
 ## random intercepts and slopes with s() using AIC
@@ -118,7 +129,7 @@ for(j in levels(Ovary$Mare)) {
 
   f <- fitted(m)[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 2, lwd = 2)
- }
+}
 }
 
 \keyword{utilities}

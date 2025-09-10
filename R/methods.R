@@ -14,55 +14,67 @@ median.gamlss2 <- function(x, ...) {
 variance.gamlss2 <- function(x, ...) {
   stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
-  variance(d)
+  distributions3::variance(d)
 }
 
 ## Skewness function.
 skewness.gamlss2 <- function(x, ...) {
   stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
-  skewness(d)
+  distributions3::skewness(d)
 }
 
 ## Kurtosis function.
 kurtosis.gamlss2 <- function(x, ...) {
   stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
-  kurtosis(d)
+  distributions3::kurtosis(d)
 }
 
 ## Density function.
 pdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
   stopifnot(requireNamespace("distributions3"))
-  if(missing(x))
-    x <- model.response(model.frame(d))
+  if(!is.null(nd <- list(...)$newdata)) {
+    x <- nd[[response_name(d)]]
+  } else {
+    if(missing(x))
+      x <- model.response(model.frame(d))
+  }
   d <- distributions3::prodist(d, ...)
-  pdf(d, x, drop = drop, ...)
+  distributions3::pdf(d, x, drop = drop, ...)
 }
 
 ## Log-density function.
 log_pdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
   stopifnot(requireNamespace("distributions3"))
-  if(missing(x))
-    x <- model.response(model.frame(d))
+  if(!is.null(nd <- list(...)$newdata)) {
+    x <- nd[[response_name(d)]]
+  } else {
+    if(missing(x))
+      x <- model.response(model.frame(d))
+  }
   d <- distributions3::prodist(d, ...)
-  pdf(d, x, drop = drop, log = TRUE)
+  distributions3::log_pdf(d, x, drop = drop)
 }
 
 ## Cumulative distribution function.
 cdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
   stopifnot(requireNamespace("distributions3"))
-  if(missing(x))
-    x <- model.response(model.frame(d))
+  if(!is.null(nd <- list(...)$newdata)) {
+    x <- nd[[response_name(d)]]
+  } else {
+    if(missing(x))
+      x <- model.response(model.frame(d))
+  }
   d <- distributions3::prodist(d, ...)
-  cdf(d, x, drop = drop, ...)
+  distributions3::cdf(d, x, drop = drop, ...)
 }
 
 ## Random numbers.
 random.gamlss2 <- function(x, n = 1L, drop = TRUE, ...) {
   stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
-  random(d, n, drop = drop, ...)
+  distributions3::random(d, n, drop = drop, ...)
 }
 
 is_discrete.gamlss2 <- function(d, ...) {

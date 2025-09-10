@@ -1,7 +1,7 @@
 Package: gamlss2
 Title: GAMLSS Infrastructure for Flexible Distributional Regression
 Version: 0.1-0
-Date: 2025-06-30
+Date: 2025-09-10
 Authors@R: c(person("Mikis", "Stasinopoulos", role = c("aut", "cph"), 
                email = "d.stasinopoulos@gre.ac.uk", comment = c(ORCID = "0000-0003-2407-5704")),
              person("Robert", "Rigby", role = "aut", email = "r.rigby@gre.ac.uk", comment = c(ORCID = "0000-0003-3853-1707")),
@@ -19,6 +19,6 @@ URL: https://gamlss-dev.github.io/gamlss2/
 BugReports: https://github.com/gamlss-dev/gamlss2/issues
 Depends: R (>= 4.1.0), gamlss.dist, mgcv
 Imports: parallel, Formula, mvtnorm, distributions3
-Suggests: colorspace, gamlss, gamlss.data, glmnet, lattice, Matrix, MASS, nlme, nnet, partykit, quarto, rpart, scoringRules, sf
+Suggests: colorspace, future.apply, gamlss, gamlss.data, glmnet, lattice, Matrix, MASS, nlme, nnet, partykit, quarto, rpart, scoringRules, sf
 LazyLoad: yes
 VignetteBuilder: quarto

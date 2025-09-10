@@ -31,7 +31,9 @@ mse_metric(model, data)
 \arguments{
   \item{...}{model specification passed to \code{\link{gamlss2}} such as
   \code{formula}, \code{family}, etc.}
-  \item{data}{a \code{data.frame} containing the variables in the model.}
+  \item{data}{a \code{data.frame} containing the variables in the model.
+    For functions supplied to argument \code{metric}, a
+    \code{data.frame} for evaluating predictions or residuals.}
   \item{folds}{either an integer specifying the number of folds,
     or a list, matrix, or data frame of index sets for test folds.
     Defaults to 5.}
@@ -42,7 +44,6 @@ mse_metric(model, data)
   \item{simplify}{logical. If \code{TRUE}, results are returned in
     a simplified vector or data frame depending on the metric output.}
   \item{model}{a fitted \code{gamlss2} model.}
-  \item{data}{a \code{data.frame} for evaluating predictions or residuals.}
 }
 
 \details{

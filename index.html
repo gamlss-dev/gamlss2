@@ -288,7 +288,7 @@ window.Quarto = {
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>MUC <span class="ot">&lt;-</span> <span class="fu">subset</span>(WeatherGermany, id <span class="sc">==</span> <span class="dv">1262</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We find that the four-parameter <code>SEP</code> family fits the marginal distribution of <code>Tmax</code> quite well. To estimate a full distributional model, we specify the following additive predictor</p>
-<p><span class="math inline">\(\eta = \beta_0 + f_1(year) + f_2(yday) + f_3(year, yday)\)</span></p>
+<p><span class="math inline">\(\eta = \beta_0 + f_1(\texttt{year}) + f_2(\texttt{yday}) + f_3(\texttt{year}, \texttt{yday})\)</span></p>
 <p>for each parameter. Here, <span class="math inline">\(f_1( \cdot )\)</span> captures the long-term trend, <span class="math inline">\(f_2( \cdot )\)</span> models seasonal variation, and <span class="math inline">\(f_3( \cdot, \cdot )\)</span> represents a time-varying seasonal effect. The required variables can be added to the data by</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>MUC<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(MUC<span class="sc">$</span>date)<span class="sc">$</span>year <span class="sc">+</span> <span class="dv">1900</span></span>

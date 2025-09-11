@@ -222,32 +222,42 @@ diagnostic plots, whereas in `gamlss2`
 plot(b3)
 ```
 
-<img src="figures/gamlss2_plot-1.png" data-fig-align="center" />
+<p align="center">
+<img src="figures/gamlss2_plot-1" alt="plot1">
+</p>
 
-displays all estimated covariate effects. For residual diagnostics,
-`gamlss2` leverages the `topmodels` package, which provides
-infrastructures for probabilistic model assessment. E.g., a PIT
-histogram can be created by
 
-``` r
-if(!("topmodels" %in% installed.packages())) {
-  install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
-}
-library("topmodels")
+    displays all estimated covariate effects. For residual diagnostics, `gamlss2` leverages
+    the `topmodels` package, which provides infrastructures for probabilistic model assessment.
+    E.g., a PIT histogram can be created by
 
-pithist(b3)
-```
+    ::: {.cell}
 
-<img src="figures/pithist-1.png" data-fig-align="center" />
+    ```{.r .cell-code}
+    if(!("topmodels" %in% installed.packages())) {
+      install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
+    }
+    library("topmodels")
 
-showing good model calibration. Finally, we compute the probability of a
-heat day for 2025. First, the `procast()` function from \`topmodels
-predicts the fitted distributions
+    pithist(b3)
 
-``` r
-nd <- data.frame("year" = 2025, "yday" = 0:365)
-pf <- procast(b3, newdata = nd, drop = TRUE)
-```
+:::
+
+<p align="center">
+<img src="figures/pithist-1.png" alt="plot2">
+</p>
+
+
+    showing good model calibration. Finally, we compute the probability of a heat day for 2025.
+    First, the `procast()` function from `topmodels predicts the fitted distributions
+
+    ::: {.cell}
+
+    ```{.r .cell-code}
+    nd <- data.frame("year" = 2025, "yday" = 0:365)
+    pf <- procast(b3, newdata = nd, drop = TRUE)
+
+:::
 
 This yields a distribution vector `pf` using the infrastructure from the
 `distributions3` package. Probabilities of a heat day can then be
@@ -270,7 +280,7 @@ plot(probs, type = "l", xlab = "Day of Year",
 ```
 
 <p align="center">
-  <img src="figures/probs-1.png" alt="probs plot">
+  <img src="figures/probs-1.png" alt="plot3">
 </p>
 
 Note that a `predict()` method is available for both `gamlss` and

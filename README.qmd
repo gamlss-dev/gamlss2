@@ -157,8 +157,13 @@ inspected using the `summary()` method for both packages. Using `plot()` in
 ```{r gamlss2_plot}
 #| fig-height: 10
 #| fig-width: 8
-#| fig-align: "center"
+#| fig-show: "hide"
 plot(b3)
+```
+
+<p align="center">
+  <img src="figures/gamlss2_plot-1" alt="plot1">
+</p>
 ```
 
 displays all estimated covariate effects. For residual diagnostics, `gamlss2` leverages
@@ -170,13 +175,18 @@ E.g., a PIT histogram can be created by
 #| results: hide
 #| fig-height: 5
 #| fig-width: 5
-#| fig-align: "center"
+#| fig-show: "hide"
 if(!("topmodels" %in% installed.packages())) {
   install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
 }
 library("topmodels")
 
 pithist(b3)
+```
+
+<p align="center">
+  <img src="figures/pithist-1.png" alt="plot2">
+</p>
 ```
 
 showing good model calibration. Finally, we compute the probability of a heat day for 2025.
@@ -212,7 +222,7 @@ plot(probs, type = "l", xlab = "Day of Year",
 
 ```{=html}
 <p align="center">
-  <img src="figures/probs-1.png" alt="probs plot">
+  <img src="figures/probs-1.png" alt="plot3">
 </p>
 ```
 

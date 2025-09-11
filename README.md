@@ -75,9 +75,9 @@ stressing highways and railways, increasing the load on healthcare
 facilities, and affecting airport operations. Using 30 years of
 historical `Tmax` data, we fit a flexible distributional regression
 model that captures the full conditional distribution of daily
-temperatures. By evaluating this fitted distribution at the 30$^\circ$C
-threshold, we obtain heat-day probabilities. Required packages can be
-loaded by
+temperatures. By evaluating this fitted distribution at the
+$30^\circ\text{C}$ threshold, we obtain heat-day probabilities. Required
+packages can be loaded by
 
 ``` r
 if(!("gamlss" %in% installed.packages())) {

@@ -121,8 +121,10 @@ library("gamlss.add")
 ```{r gamlss}
 f1 <- Tmax ~ ga(~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc")))
+a <- proc.time()
 b1 <- gamlss(f1, family = SEP,
   data = MUC[, c("Tmax", "year", "yday")])
+e <- a - proc.time()
 ```
 
 This setup requires loading the `gamlss.add` package to access `mgcv`-based
@@ -137,7 +139,7 @@ f2 <- Tmax ~ s(year) + s(yday, bs = "cc") +
 b2 <- gamlss2(f2, family = SEP, data = MUC)
 ```
 
-This model converges in 10 iterations and requires only about 2 seconds of computation time, 
+This model converges in 11 iterations and requires only about 2 seconds of computation time, 
 yielding a similar deviance (small differences arise due to differences in smoothing
 parameter optimization). In many applications, it is desirable to use the same predictor
 structure for all distribution parameters. In `gamlss`, this requires specifying
@@ -150,7 +152,7 @@ f3 <- Tmax ~ s(year) + s(yday, bs = "cc") +
 b3 <- gamlss2(f3, family = SEP, data = MUC)
 ```
 
-This model converges in 18 iterations in about 15 seconds. After estimation, results can be
+This model converges in 20 iterations in about 30 seconds. After estimation, results can be
 inspected using the `summary()` method for both packages. Using `plot()` in
 `gamlss` produces standard residual diagnostic plots, whereas in `gamlss2`
 

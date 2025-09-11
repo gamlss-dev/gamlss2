@@ -125,6 +125,7 @@ library("gamlss.add")
 ``` r
 f1 <- Tmax ~ ga(~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc")))
+a <- proc.time()
 b1 <- gamlss(f1, family = SEP,
   data = MUC[, c("Tmax", "year", "yday")])
 ```
@@ -152,6 +153,10 @@ b1 <- gamlss(f1, family = SEP,
 
     Warning in RS(): Algorithm RS has not yet converged
 
+``` r
+e <- a - proc.time()
+```
+
 This setup requires loading the `gamlss.add` package to access
 `mgcv`-based smooth terms. Estimation takes 20 iterations of the
 backfitting algorithm (without full convergence) and about 44 seconds on
@@ -177,7 +182,7 @@ b2 <- gamlss2(f2, family = SEP, data = MUC)
     GAMLSS-RS iteration 10: Global Deviance = 64850.16 eps = 0.000013     
     GAMLSS-RS iteration 11: Global Deviance = 64849.5251 eps = 0.000009     
 
-This model converges in 10 iterations and requires only about 2 seconds
+This model converges in 11 iterations and requires only about 2 seconds
 of computation time, yielding a similar deviance (small differences
 arise due to differences in smoothing parameter optimization). In many
 applications, it is desirable to use the same predictor structure for
@@ -213,7 +218,7 @@ b3 <- gamlss2(f3, family = SEP, data = MUC)
     GAMLSS-RS iteration 19: Global Deviance = 64578.5027 eps = 0.000010     
     GAMLSS-RS iteration 20: Global Deviance = 64577.8639 eps = 0.000009     
 
-This model converges in 18 iterations in about 15 seconds. After
+This model converges in 20 iterations in about 30 seconds. After
 estimation, results can be inspected using the `summary()` method for
 both packages. Using `plot()` in `gamlss` produces standard residual
 diagnostic plots, whereas in `gamlss2`

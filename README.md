@@ -101,12 +101,12 @@ MUC <- subset(WeatherGermany, id == 1262)
 
 We find that the four-parameter `SEP` family fits the marginal
 distribution of `Tmax` quite well. To estimate a full distributional
-model, we specify the following additive predictor $$
-\eta = \beta_0 + f_1(`year`) + f_2(`yday`) + f_3(`year`, `yday`)
-$$ for each parameter. Here, $f_1( \cdot )$ captures the long-term
-trend, $f_2( \cdot )$ models seasonal variation, and
-$f_3( \cdot, \cdot )$ represents a time-varying seasonal effect. The
-required variables can be added to the data by
+model, we specify the following additive predictor
+$\eta = \beta_0 + f_1(`year`) + f_2(`yday`) + f_3(`year`, `yday`)$ for
+each parameter. Here, $f_1( \cdot )$ captures the long-term trend,
+$f_2( \cdot )$ models seasonal variation, and $f_3( \cdot, \cdot )$
+represents a time-varying seasonal effect. The required variables can be
+added to the data by
 
 ``` r
 MUC$year <- as.POSIXlt(MUC$date)$year + 1900
@@ -125,7 +125,6 @@ library("gamlss.add")
 ``` r
 f1 <- Tmax ~ ga(~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc")))
-a <- proc.time()
 b1 <- gamlss(f1, family = SEP,
   data = MUC[, c("Tmax", "year", "yday")])
 ```
@@ -152,10 +151,6 @@ b1 <- gamlss(f1, family = SEP,
     GAMLSS-RS iteration 20: Global Deviance = 64845.48 
 
     Warning in RS(): Algorithm RS has not yet converged
-
-``` r
-e <- a - proc.time()
-```
 
 This setup requires loading the `gamlss.add` package to access
 `mgcv`-based smooth terms. Estimation takes 20 iterations of the
@@ -228,7 +223,7 @@ plot(b3)
 ```
 
 <p align="center">
-<img src="figures/gamlss2_plot-1" alt="plot1">
+<img src="figures/gamlss2_plot-1.png" alt="plot1">
 </p>
 
 displays all estimated covariate effects. For residual diagnostics,

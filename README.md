@@ -269,7 +269,9 @@ plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")
 ```
 
-<img src="figures/probs-1.png" data-fig-align="center" />
+<p align="center">
+  <img src="figures/probs-1.png" alt="probs plot">
+</p>
 
 Note that a `predict()` method is available for both `gamlss` and
 `gamlss2`, allowing direct prediction of distribution parameters.

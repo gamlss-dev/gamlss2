@@ -204,10 +204,16 @@ and visualized, for example, by
 ```{r probs}
 #| fig-height: 4
 #| fig-width: 5
-#| fig-align: "center"
+#| fig-show: "hide"
 par(mar = c(4, 4, 1, 1))
 plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")
+```
+
+```{=html}
+<p align="center">
+  <img src="figures/probs-1.png" alt="probs plot">
+</p>
 ```
 
 Note that a `predict()` method is available for both `gamlss` and `gamlss2`,

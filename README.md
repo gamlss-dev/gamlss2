@@ -101,12 +101,14 @@ MUC <- subset(WeatherGermany, id == 1262)
 
 We find that the four-parameter `SEP` family fits the marginal
 distribution of `Tmax` quite well. To estimate a full distributional
-model, we specify the following additive predictor $$
-\eta = \beta_0 + f_1(\mathtt{year}) + f_2(\mathtt{yday}) + f_3(\mathtt{year}, \mathtt{yday})
-$$ for each parameter. Here, $f_1( \cdot )$ captures the long-term
-trend, $f_2( \cdot )$ models seasonal variation, and
-$f_3( \cdot, \cdot )$ represents a time-varying seasonal effect. The
-required variables can be added to the data by
+model, we specify the following additive predictor
+
+\[ = \_0 + f_1() + f_2() + f_3(, ) \]
+
+for each parameter. Here, $f_1( \cdot )$ captures the long-term trend,
+$f_2( \cdot )$ models seasonal variation, and $f_3( \cdot, \cdot )$
+represents a time-varying seasonal effect. The required variables can be
+added to the data by
 
 ``` r
 MUC$year <- as.POSIXlt(MUC$date)$year + 1900
@@ -231,38 +233,32 @@ plot(b3)
 <img src="figures/gamlss2_plot-1" alt="plot1">
 </p>
 
+displays all estimated covariate effects. For residual diagnostics,
+`gamlss2` leverages the `topmodels` package, which provides
+infrastructures for probabilistic model assessment. E.g., a PIT
+histogram can be created by
 
-    displays all estimated covariate effects. For residual diagnostics, `gamlss2` leverages
-    the `topmodels` package, which provides infrastructures for probabilistic model assessment.
-    E.g., a PIT histogram can be created by
+``` r
+if(!("topmodels" %in% installed.packages())) {
+  install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
+}
+library("topmodels")
 
-    ::: {.cell}
-
-    ```{.r .cell-code}
-    if(!("topmodels" %in% installed.packages())) {
-      install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
-    }
-    library("topmodels")
-
-    pithist(b3)
-
-:::
+pithist(b3)
+```
 
 <p align="center">
 <img src="figures/pithist-1.png" alt="plot2">
 </p>
 
+showing good model calibration. Finally, we compute the probability of a
+heat day for 2025. First, the `procast()` function from \`topmodels
+predicts the fitted distributions
 
-    showing good model calibration. Finally, we compute the probability of a heat day for 2025.
-    First, the `procast()` function from `topmodels predicts the fitted distributions
-
-    ::: {.cell}
-
-    ```{.r .cell-code}
-    nd <- data.frame("year" = 2025, "yday" = 0:365)
-    pf <- procast(b3, newdata = nd, drop = TRUE)
-
-:::
+``` r
+nd <- data.frame("year" = 2025, "yday" = 0:365)
+pf <- procast(b3, newdata = nd, drop = TRUE)
+```
 
 This yields a distribution vector `pf` using the infrastructure from the
 `distributions3` package. Probabilities of a heat day can then be

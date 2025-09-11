@@ -135,10 +135,9 @@ window.Quarto = {
 </script>
 
 <meta property="og:title" content="gamlss2">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/figures/gamlss2_plot-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/figures/gamlss2_plot-1">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="1920">
-<meta property="og:image:width" content="1536">
+<meta property="og:image:alt" content="plot1">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -379,37 +378,42 @@ GAMLSS-RS iteration 20: Global Deviance = 64577.8639 eps = 0.000009     </code><
 </div>
 </div>
 <p>This model converges in 18 iterations in about 15 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figures/gamlss2_plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>displays all estimated covariate effects. For residual diagnostics, <code>gamlss2</code> leverages the <code>topmodels</code> package, which provides infrastructures for probabilistic model assessment. E.g., a PIT histogram can be created by</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figures/pithist-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>showing good model calibration. Finally, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from `topmodels predicts the fitted distributions</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">procast</span>(b3, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p align="center">
+<img src="figures/gamlss2_plot-1" alt="plot1">
+</p>
+<pre><code>
+displays all estimated covariate effects. For residual diagnostics, `gamlss2` leverages
+the `topmodels` package, which provides infrastructures for probabilistic model assessment.
+E.g., a PIT histogram can be created by
+
+
+::: {.cell}
+
+```{.r .cell-code}
+if(!("topmodels" %in% installed.packages())) {
+  install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
+}
+library("topmodels")
+
+pithist(b3)</code></pre>
+<p>:::</p>
+<p align="center">
+<img src="figures/pithist-1.png" alt="plot2">
+</p>
+<pre><code>
+showing good model calibration. Finally, we compute the probability of a heat day for 2025.
+First, the `procast()` function from `topmodels predicts the fitted distributions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+nd &lt;- data.frame("year" = 2025, "yday" = 0:365)
+pf &lt;- procast(b3, newdata = nd, drop = TRUE)</code></pre>
+<p>:::</p>
 <p>This yields a distribution vector <code>pf</code> using the infrastructure from the <code>distributions3</code> package. Probabilities of a heat day can then be calculated with the corresponding <code>cdf()</code> method.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"distributions3"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
@@ -425,7 +429,7 @@ GAMLSS-RS iteration 20: Global Deviance = 64577.8639 eps = 0.000009     </code><
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Prob(Tmax &gt; 30)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p align="center">
-  <img src="figures/probs-1.png" alt="probs plot">
+  <img src="figures/probs-1.png" alt="plot3">
 </p>
 <p>Note that a <code>predict()</code> method is available for both <code>gamlss</code> and <code>gamlss2</code>, allowing direct prediction of distribution parameters. However, in <code>gamlss</code>, <code>predict()</code> may not fully support new data in all cases.</p>
 

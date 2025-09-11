@@ -102,7 +102,9 @@ MUC <- subset(WeatherGermany, id == 1262)
 We find that the four-parameter `SEP` family fits the marginal
 distribution of `Tmax` quite well. To estimate a full distributional
 model, we specify the following additive predictor
+
 $\eta = \beta_0 + f_1(year) + f_2(yday) + f_3(year, yday)$
+
 for each parameter. Here, $f_1( \cdot )$ captures the long-term
 trend, $f_2( \cdot )$ models seasonal variation, and
 $f_3( \cdot, \cdot )$ represents a time-varying seasonal effect. The

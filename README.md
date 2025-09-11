@@ -102,7 +102,7 @@ MUC <- subset(WeatherGermany, id == 1262)
 We find that the four-parameter `SEP` family fits the marginal
 distribution of `Tmax` quite well. To estimate a full distributional
 model, we specify the following additive predictor $$
-\eta = \beta_0 + f_1(\texttt{year}) + f_2(\texttt{yday}) + f_3(\texttt{year}, \texttt{yday})
+\eta = \beta_0 + f_1(\mathtt{year}) + f_2(\mathtt{yday}) + f_3(\mathtt{year}, \mathtt{yday})
 $$ for each parameter. Here, $f_1( \cdot )$ captures the long-term
 trend, $f_2( \cdot )$ models seasonal variation, and
 $f_3( \cdot, \cdot )$ represents a time-varying seasonal effect. The
@@ -165,16 +165,17 @@ f2 <- Tmax ~ s(year) + s(yday, bs = "cc") +
 b2 <- gamlss2(f2, family = SEP, data = MUC)
 ```
 
-    GAMLSS-RS iteration  1: Global Deviance = 65102.5733 eps = 0.574320     
-    GAMLSS-RS iteration  2: Global Deviance = 64949.999 eps = 0.002343     
-    GAMLSS-RS iteration  3: Global Deviance = 64891.6543 eps = 0.000898     
-    GAMLSS-RS iteration  4: Global Deviance = 64868.3595 eps = 0.000358     
-    GAMLSS-RS iteration  5: Global Deviance = 64858.5604 eps = 0.000151     
-    GAMLSS-RS iteration  6: Global Deviance = 64854.1832 eps = 0.000067     
-    GAMLSS-RS iteration  7: Global Deviance = 64852.0539 eps = 0.000032     
-    GAMLSS-RS iteration  8: Global Deviance = 64850.8608 eps = 0.000018     
-    GAMLSS-RS iteration  9: Global Deviance = 64850.0759 eps = 0.000012     
-    GAMLSS-RS iteration 10: Global Deviance = 64849.4948 eps = 0.000008     
+    GAMLSS-RS iteration  1: Global Deviance = 65324.7244 eps = 0.572868     
+    GAMLSS-RS iteration  2: Global Deviance = 65122.8496 eps = 0.003090     
+    GAMLSS-RS iteration  3: Global Deviance = 64958.3544 eps = 0.002525     
+    GAMLSS-RS iteration  4: Global Deviance = 64895.5748 eps = 0.000966     
+    GAMLSS-RS iteration  5: Global Deviance = 64870.287 eps = 0.000389     
+    GAMLSS-RS iteration  6: Global Deviance = 64859.484 eps = 0.000166     
+    GAMLSS-RS iteration  7: Global Deviance = 64854.7149 eps = 0.000073     
+    GAMLSS-RS iteration  8: Global Deviance = 64852.3536 eps = 0.000036     
+    GAMLSS-RS iteration  9: Global Deviance = 64851.0278 eps = 0.000020     
+    GAMLSS-RS iteration 10: Global Deviance = 64850.16 eps = 0.000013     
+    GAMLSS-RS iteration 11: Global Deviance = 64849.5251 eps = 0.000009     
 
 This model converges in 10 iterations and requires only about 2 seconds
 of computation time, yielding a similar deviance (small differences
@@ -191,24 +192,26 @@ f3 <- Tmax ~ s(year) + s(yday, bs = "cc") +
 b3 <- gamlss2(f3, family = SEP, data = MUC)
 ```
 
-    GAMLSS-RS iteration  1: Global Deviance = 64940.3003 eps = 0.575381     
-    GAMLSS-RS iteration  2: Global Deviance = 64721.0181 eps = 0.003376     
-    GAMLSS-RS iteration  3: Global Deviance = 64634.6688 eps = 0.001334     
-    GAMLSS-RS iteration  4: Global Deviance = 64597.9348 eps = 0.000568     
-    GAMLSS-RS iteration  5: Global Deviance = 64582.5418 eps = 0.000238     
-    GAMLSS-RS iteration  6: Global Deviance = 64574.6097 eps = 0.000122     
-    GAMLSS-RS iteration  7: Global Deviance = 64570.3663 eps = 0.000065     
-    GAMLSS-RS iteration  8: Global Deviance = 64567.5089 eps = 0.000044     
-    GAMLSS-RS iteration  9: Global Deviance = 64565.4716 eps = 0.000031     
-    GAMLSS-RS iteration 10: Global Deviance = 64563.7761 eps = 0.000026     
-    GAMLSS-RS iteration 11: Global Deviance = 64562.4298 eps = 0.000020     
-    GAMLSS-RS iteration 12: Global Deviance = 64561.2848 eps = 0.000017     
-    GAMLSS-RS iteration 13: Global Deviance = 64560.2679 eps = 0.000015     
-    GAMLSS-RS iteration 14: Global Deviance = 64559.3577 eps = 0.000014     
-    GAMLSS-RS iteration 15: Global Deviance = 64558.5393 eps = 0.000012     
-    GAMLSS-RS iteration 16: Global Deviance = 64557.797 eps = 0.000011     
-    GAMLSS-RS iteration 17: Global Deviance = 64557.1061 eps = 0.000010     
-    GAMLSS-RS iteration 18: Global Deviance = 64556.4892 eps = 0.000009     
+    GAMLSS-RS iteration  1: Global Deviance = 64917.6847 eps = 0.575529     
+    GAMLSS-RS iteration  2: Global Deviance = 64722.0734 eps = 0.003013     
+    GAMLSS-RS iteration  3: Global Deviance = 64648.7666 eps = 0.001132     
+    GAMLSS-RS iteration  4: Global Deviance = 64618.4329 eps = 0.000469     
+    GAMLSS-RS iteration  5: Global Deviance = 64603.983 eps = 0.000223     
+    GAMLSS-RS iteration  6: Global Deviance = 64596.5941 eps = 0.000114     
+    GAMLSS-RS iteration  7: Global Deviance = 64592.4075 eps = 0.000064     
+    GAMLSS-RS iteration  8: Global Deviance = 64589.8333 eps = 0.000039     
+    GAMLSS-RS iteration  9: Global Deviance = 64588.0574 eps = 0.000027     
+    GAMLSS-RS iteration 10: Global Deviance = 64586.5646 eps = 0.000023     
+    GAMLSS-RS iteration 11: Global Deviance = 64585.3395 eps = 0.000018     
+    GAMLSS-RS iteration 12: Global Deviance = 64584.2536 eps = 0.000016     
+    GAMLSS-RS iteration 13: Global Deviance = 64583.2584 eps = 0.000015     
+    GAMLSS-RS iteration 14: Global Deviance = 64582.3412 eps = 0.000014     
+    GAMLSS-RS iteration 15: Global Deviance = 64581.4785 eps = 0.000013     
+    GAMLSS-RS iteration 16: Global Deviance = 64580.668 eps = 0.000012     
+    GAMLSS-RS iteration 17: Global Deviance = 64579.904 eps = 0.000011     
+    GAMLSS-RS iteration 18: Global Deviance = 64579.1834 eps = 0.000011     
+    GAMLSS-RS iteration 19: Global Deviance = 64578.5027 eps = 0.000010     
+    GAMLSS-RS iteration 20: Global Deviance = 64577.8639 eps = 0.000009     
 
 This model converges in 18 iterations in about 15 seconds. After
 estimation, results can be inspected using the `summary()` method for

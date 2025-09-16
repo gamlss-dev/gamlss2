@@ -48,8 +48,7 @@ A data frame containing 1057 observations on 16 variables.
   \describe{
     \item{Data Source:}{Bundesanstalt für Strassenwesen (BASt)}
     \item{Licence:}{CC BY 4.0}
-    \item{URL:}{\url{https://www.bast.de},
-      \url{https://www.bast.de/DE/Verkehrstechnik/Fachthemen/v2-verkehrszaehlung/Verkehrszaehlung.html}}
+    \item{URL:}{\url{https://www.bast.de}}
   }
 }
 

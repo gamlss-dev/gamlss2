@@ -156,9 +156,8 @@ window.Quarto = {
 </script>
 
 <meta property="og:title" content="Overview – gamlss2">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/figures/gamlss2_plot-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/gamlss2_files/figure-html/gamlss2_plot-1.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:alt" content="plot1">
 <meta property="og:image:height" content="1920">
 <meta property="og:image:width" content="1536">
 </head>
@@ -407,24 +406,32 @@ GAMLSS-RS iteration 20: Global Deviance = 64577.8639 eps = 0.000009     </code><
 </div>
 </div>
 <p>This model converges in 20 iterations in about 30 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
-<div class="cell">
+<div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/gamlss2_plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
 </div>
-<p align="center">
-<img src="figures/gamlss2_plot-1.png" alt="plot1">
-</p>
+</div>
+</div>
 <p>displays all estimated covariate effects. For residual diagnostics, <code>gamlss2</code> leverages the <code>topmodels</code> package, which provides infrastructures for probabilistic model assessment. E.g., a PIT histogram can be created by</p>
-<div class="cell">
+<div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(b3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/pithist-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+</figure>
 </div>
-<p align="center">
-<img src="figures/pithist-1.png" alt="plot2">
-</p>
+</div>
+</div>
 <p>showing good model calibration. Finally, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from `topmodels predicts the fitted distributions</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
@@ -439,14 +446,18 @@ GAMLSS-RS iteration 20: Global Deviance = 64577.8639 eps = 0.000009     </code><
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>and visualized, for example, by</p>
-<div class="cell">
+<div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(probs, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Day of Year"</span>,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Prob(Tmax &gt; 30)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gamlss2_files/figure-html/probs-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+</figure>
 </div>
-<p align="center">
-  <img src="figures/probs-1.png" alt="plot3">
-</p>
+</div>
+</div>
 <p>Note that a <code>predict()</code> method is available for both <code>gamlss</code> and <code>gamlss2</code>, allowing direct prediction of distribution parameters. However, in <code>gamlss</code>, <code>predict()</code> may not fully support new data in all cases.</p>
 
 

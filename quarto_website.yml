@@ -55,6 +55,8 @@ website:
               file: man/select_gamlss2.qmd
             - text: stepwise
               file: man/stepwise.qmd
+            - text: cv_gamlss2
+              file: man/cv_gamlss2.qmd
         - section: Model terms
           contents:
             - text: glmnet

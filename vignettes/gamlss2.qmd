@@ -170,6 +170,7 @@ inspected using the `summary()` method for both packages. Using `plot()` in
 #| fig-height: 10
 #| fig-width: 8
 #| fig-align: center
+#| out-width: 80%
 plot(b3)
 ```
 

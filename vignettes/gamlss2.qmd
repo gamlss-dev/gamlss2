@@ -9,7 +9,7 @@ bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
-  %\VignetteIndexEntry{overview}
+  %\VignetteIndexEntry{Overview}
   %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression}
@@ -17,14 +17,6 @@ vignette: >
 ---
 
 <!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
-
-```{r figures}
-#| echo: false
-if(!file.exists("figures")) {
-  dir.create("figures")
-}
-knitr::opts_chunk$set(fig.path = "figures/")
-```
 
 <img src="https://gamlss-dev.github.io/gamlss2/gamlss2.png" align="right" alt="gamlss2 logo" width="120" />
 
@@ -177,13 +169,9 @@ inspected using the `summary()` method for both packages. Using `plot()` in
 ```{r gamlss2_plot}
 #| fig-height: 10
 #| fig-width: 8
-#| fig-show: "hide"
+#| fig-align: center
 plot(b3)
 ```
-
-<p align="center">
-  <img src="figures/gamlss2_plot-1.png" alt="plot1">
-</p>
 
 displays all estimated covariate effects. For residual diagnostics, `gamlss2` leverages
 the `topmodels` package, which provides infrastructures for probabilistic model assessment.
@@ -194,7 +182,7 @@ E.g., a PIT histogram can be created by
 #| results: hide
 #| fig-height: 5
 #| fig-width: 5
-#| fig-show: "hide"
+#| fig-align: center
 if(!("topmodels" %in% installed.packages())) {
   install.packages("topmodels", repos = "https://zeileis.R-universe.dev")
 }
@@ -202,10 +190,6 @@ library("topmodels")
 
 pithist(b3)
 ```
-
-<p align="center">
-  <img src="figures/pithist-1.png" alt="plot2">
-</p>
 
 showing good model calibration. Finally, we compute the probability of a heat day for 2025.
 First, the `procast()` function from `topmodels predicts the fitted distributions
@@ -232,16 +216,10 @@ and visualized, for example, by
 ```{r probs}
 #| fig-height: 4
 #| fig-width: 5
-#| fig-show: "hide"
+#| fig-align: center
 par(mar = c(4, 4, 1, 1))
 plot(probs, type = "l", xlab = "Day of Year",
   ylab = "Prob(Tmax > 30)")
-```
-
-```{=html}
-<p align="center">
-  <img src="figures/probs-1.png" alt="plot3">
-</p>
 ```
 
 Note that a `predict()` method is available for both `gamlss` and `gamlss2`,

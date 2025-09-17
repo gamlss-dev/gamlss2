@@ -46,7 +46,7 @@ package highly flexible and accommodating to a wide range of modeling requiremen
 
 For examples, please visit the manual pages.
 
-```{r help}
+```{r}
 #| eval: false
 help(package = "gamlss2")
 ```
@@ -55,7 +55,7 @@ help(package = "gamlss2")
 
 The development version of `gamlss2` can be installed via
 
-```{r installation, eval = FALSE}
+```{r, eval = FALSE}
 install.packages("gamlss2",
   repos = c("https://gamlss-dev.R-universe.dev",
             "https://cloud.R-project.org"))
@@ -83,7 +83,7 @@ regression model that captures the full conditional distribution of daily temper
 By evaluating this fitted distribution at the $30^\circ\text{C}$ threshold, we obtain
 heat-day probabilities. Required packages can be loaded by
 
-```{r preliminaries}
+```{r}
 #| echo: true
 #| message: false
 #| results: hide
@@ -96,7 +96,7 @@ library("gamlss2")
 
 The data comes from the same R-universe as `gamlss2` and is loaded with
 
-```{r WeatherGermany}
+```{r}
 if(!("WeatherGermany" %in% installed.packages())) {
   install.packages('WeatherGermany',
     repos = c("https://gamlss-dev.r-universe.dev",
@@ -115,14 +115,14 @@ for each parameter. Here, $f_1( \cdot )$ captures the long-term trend, $f_2( \cd
 seasonal variation, and $f_3( \cdot, \cdot )$ represents a time-varying seasonal effect.
 The required variables can be added to the data by
 
-```{r variables}
+```{r}
 MUC$year <- as.POSIXlt(MUC$date)$year + 1900
 MUC$yday <- as.POSIXlt(MUC$date)$yday
 ```
 
 In `gamlss`, model estimation is performed via
 
-```{r gamlss.add, message=FALSE, results="hide"}
+```{r, message=FALSE, results="hide"}
 if(!("gamlss.add" %in% installed.packages())) {
   install.packages("gamlss.add",
     repos = c("https://gamlss-dev.r-universe.dev",
@@ -130,7 +130,7 @@ if(!("gamlss.add" %in% installed.packages())) {
 }
 library("gamlss.add")
 ```
-```{r gamlss}
+```{r}
 f1 <- Tmax ~ ga(~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc")))
 b1 <- gamlss(f1, family = SEP,
@@ -143,7 +143,7 @@ and about 44 seconds on a 64-bit Linux system. Moreover, `gamlss()` requires tha
 input data contains no `NA` values. In `gamlss2` the model can be
 specified directly, following `mgcv` syntax
 
-```{r gamlss2_1}
+```{r}
 f2 <- Tmax ~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc"))
 b2 <- gamlss2(f2, family = SEP, data = MUC)
@@ -156,7 +156,7 @@ structure for all distribution parameters. In `gamlss`, this requires specifying
 identical formulas separately via `sigma.formula`, `nu.formula`, and
 `tau.formula`, which can be tedious. In `gamlss2`, this is simplified using "`.`"
 
-```{r gamlss2_2}
+```{r}
 f3 <- Tmax ~ s(year) + s(yday, bs = "cc") +
   te(year, yday, bs = c("cr", "cc")) | . | . | .
 b3 <- gamlss2(f3, family = SEP, data = MUC)
@@ -166,7 +166,7 @@ This model converges in 20 iterations in about 30 seconds. After estimation, res
 inspected using the `summary()` method for both packages. Using `plot()` in
 `gamlss` produces standard residual diagnostic plots, whereas in `gamlss2`
 
-```{r gamlss2_plot}
+```{r}
 #| fig-height: 10
 #| fig-width: 8
 #| fig-align: center
@@ -177,7 +177,7 @@ displays all estimated covariate effects. For residual diagnostics, `gamlss2` le
 the `topmodels` package, which provides infrastructures for probabilistic model assessment.
 E.g., a PIT histogram can be created by
 
-```{r pithist}
+```{r}
 #| message: false
 #| results: hide
 #| fig-height: 5
@@ -194,7 +194,7 @@ pithist(b3)
 showing good model calibration. Finally, we compute the probability of a heat day for 2025.
 First, the `procast()` function from `topmodels predicts the fitted distributions
 
-```{r procast}
+```{r}
 nd <- data.frame("year" = 2025, "yday" = 0:365)
 pf <- procast(b3, newdata = nd, drop = TRUE)
 ```
@@ -213,7 +213,7 @@ probs <- 1 - cdf(pf, 30)
 
 and visualized, for example, by
 
-```{r probs}
+```{r}
 #| fig-height: 4
 #| fig-width: 5
 #| fig-align: center

@@ -28,6 +28,15 @@ $toc-hl: #00CFC0;
     }
 }
 
+/*-- adjusting max image width --*/
+main {
+    &#quarto-document-content {
+        img {
+            max-width: 100%;
+        }
+    }
+}
+
 /*-- customizing navbar with hex spotlight background --*/
 header {
     nav {

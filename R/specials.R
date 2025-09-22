@@ -300,8 +300,10 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   } else {
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
-      for(j in 1:length(x$S))
-        S <- S + l[j] * x$S[[j]]
+      if(length(x$S)) {
+        for(j in 1:length(x$S))
+          S <- S + l[j] * x$S[[j]]
+      }
 
       P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
       if(inherits(P, "try-error"))
@@ -336,6 +338,14 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         )
 
         return(rval)
+      }
+    }
+
+    ## Check for fx = TRUE.
+    if(isTRUE(x$fx)) {
+      if(is.null(x$sp)) {
+        np <- if(length(x$S)) length(x$S) else 1L
+        x$sp <- rep(1e-10, np)
       }
     }
 

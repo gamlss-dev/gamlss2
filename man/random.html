@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.24">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -73,10 +73,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-aab06c566babba86bbcfa2ffc15fd605.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -564,9 +564,9 @@ For the <code>re()</code> function, the dots argument is used to specify additio
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Orthodont)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 326.6566 eps = 0.392364     
-GAMLSS-RS iteration  2: Global Deviance = 326.0942 eps = 0.001721     
-GAMLSS-RS iteration  3: Global Deviance = 326.0782 eps = 0.000049     
-GAMLSS-RS iteration  4: Global Deviance = 326.0769 eps = 0.000004     </code></pre>
+GAMLSS-RS iteration  2: Global Deviance = 326.0941 eps = 0.001722     
+GAMLSS-RS iteration  3: Global Deviance = 326.0782 eps = 0.000048     
+GAMLSS-RS iteration  4: Global Deviance = 326.0769 eps = 0.000003     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m))</span>
@@ -593,18 +593,18 @@ Random effects:
             StdDev    Corr  
 (Intercept) 2.0910678 (Intr)
 age11       0.2157607 0.518 
-Residual    1.1939543       
+Residual    1.1939544       
 
 Variance function:
  Structure: fixed weights
  Formula: ~weights_w 
 Fixed effects:  x$fixed 
-                    Value Std.Error DF       t-value p-value
-(Intercept) -2.074577e-07  0.404892 81 -5.123779e-07       1
+                   Value Std.Error DF      t-value p-value
+(Intercept) 2.926009e-08  0.404892 81 7.226641e-08       1
 
 Standardized Within-Group Residuals:
         Min          Q1         Med          Q3         Max 
--3.31636025 -0.47633680  0.02042094  0.46926855  3.94312339 
+-3.31636023 -0.47633682  0.02042092  0.46926857  3.94312336 
 
 Number of Observations: 108
 Number of Groups: 27 </code></pre>
@@ -660,9 +660,9 @@ GAMLSS-RS iteration 16: Global Deviance = 315.8023 eps = 0.000009     </code></p
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1177 eps = 0.165409     
-GAMLSS-RS iteration  2: Global Deviance = 1551.2682 eps = 0.005672     
-GAMLSS-RS iteration  3: Global Deviance = 1551.132 eps = 0.000087     
-GAMLSS-RS iteration  4: Global Deviance = 1551.1212 eps = 0.000006     </code></pre>
+GAMLSS-RS iteration  2: Global Deviance = 1551.2751 eps = 0.005667     
+GAMLSS-RS iteration  3: Global Deviance = 1551.139 eps = 0.000087     
+GAMLSS-RS iteration  4: Global Deviance = 1551.1282 eps = 0.000006     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## smooth random effects</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">ti</span>(Time) <span class="sc">+</span> <span class="fu">ti</span>(Mare, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> </span>

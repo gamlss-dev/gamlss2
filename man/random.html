@@ -564,9 +564,9 @@ For the <code>re()</code> function, the dots argument is used to specify additio
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Orthodont)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 326.6566 eps = 0.392364     
-GAMLSS-RS iteration  2: Global Deviance = 326.0941 eps = 0.001722     
-GAMLSS-RS iteration  3: Global Deviance = 326.0782 eps = 0.000048     
-GAMLSS-RS iteration  4: Global Deviance = 326.0769 eps = 0.000003     </code></pre>
+GAMLSS-RS iteration  2: Global Deviance = 326.0942 eps = 0.001721     
+GAMLSS-RS iteration  3: Global Deviance = 326.0781 eps = 0.000049     
+GAMLSS-RS iteration  4: Global Deviance = 326.0768 eps = 0.000004     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare fitted values</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(b, <span class="at">model =</span> <span class="st">"mu"</span>), <span class="fu">fitted</span>(m))</span>
@@ -591,20 +591,20 @@ Random effects:
  Formula: ~age11 | Subject
  Structure: General positive-definite, Log-Cholesky parametrization
             StdDev    Corr  
-(Intercept) 2.0910678 (Intr)
-age11       0.2157607 0.518 
-Residual    1.1939544       
+(Intercept) 2.0910670 (Intr)
+age11       0.2157609 0.518 
+Residual    1.3679245       
 
 Variance function:
  Structure: fixed weights
  Formula: ~weights_w 
 Fixed effects:  x$fixed 
                    Value Std.Error DF      t-value p-value
-(Intercept) 2.926009e-08  0.404892 81 7.226641e-08       1
+(Intercept) 1.219419e-08  0.404892 81 3.011713e-08       1
 
 Standardized Within-Group Residuals:
         Min          Q1         Med          Q3         Max 
--3.31636023 -0.47633682  0.02042092  0.46926857  3.94312336 
+-3.31635752 -0.47633643  0.02042129  0.46926778  3.94312445 
 
 Number of Observations: 108
 Number of Groups: 27 </code></pre>
@@ -659,10 +659,10 @@ GAMLSS-RS iteration 16: Global Deviance = 315.8023 eps = 0.000009     </code></p
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1177 eps = 0.165409     
-GAMLSS-RS iteration  2: Global Deviance = 1551.2751 eps = 0.005667     
-GAMLSS-RS iteration  3: Global Deviance = 1551.139 eps = 0.000087     
-GAMLSS-RS iteration  4: Global Deviance = 1551.1282 eps = 0.000006     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1178 eps = 0.165409     
+GAMLSS-RS iteration  2: Global Deviance = 1551.2752 eps = 0.005667     
+GAMLSS-RS iteration  3: Global Deviance = 1551.1391 eps = 0.000087     
+GAMLSS-RS iteration  4: Global Deviance = 1551.1283 eps = 0.000006     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## smooth random effects</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">ti</span>(Time) <span class="sc">+</span> <span class="fu">ti</span>(Mare, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> </span>

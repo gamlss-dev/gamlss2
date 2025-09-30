@@ -256,7 +256,7 @@ lin <- function(x, ..., ridge = FALSE)
 
 smooth.construct.lin.smooth.spec <- function(object, data, knots)
 {
-  object$X <- model.matrix(object$formula, data = if (is.list(data)) 
+  object$X <- model.matrix(object$formula, data = if(is.list(data)) 
     data[all.vars(reformulate(names(data))) %in% all.vars(object$formula)]
     else data)
   if(any(grepl("(Intercept)", colnames(object$X), fixed = TRUE))) {
@@ -345,7 +345,8 @@ special_fit.re <- function(x, z, w, control, ...)
 {
   ## Assign current working response.
   x$data$response_z <- z
-  x$data$weights_w <- 1 / w
+  w <- pmax(w, .Machine$double.eps)
+  x$data$weights_w <- sqrt(w)
 
   ## Estimate model.
   rem <- parse(text = paste0(
@@ -376,70 +377,82 @@ special_predict.re.fitted <- function(x, data, se.fit = FALSE, alpha = 0.05, ...
   fit <- x$model
   stopifnot(inherits(fit, "lme"))
 
+  ## Empty newdata guard.
   if(nrow(data) == 0) {
     if(!se.fit) return(numeric(0))
     return(data.frame(fit = numeric(0), lower = numeric(0), upper = numeric(0)))
   }
 
+  ## Innermost random-effects level.
   reStruct <- fit$modelStruct$reStruct
   lvl <- length(reStruct)
 
-  ## random-effects contribution per row
-  p <- as.numeric(predict(fit, newdata = data, level = lvl, ...) -
-                  predict(fit, newdata = data, level = 0,   ...))
-  if (!se.fit) return(p)
+  ## Random-effects contribution per row.
+  p <- as.numeric(
+    predict(fit, newdata = data, level = lvl, ...) -
+    predict(fit, newdata = data, level = 0,   ...)
+  )
+  if(!se.fit) return(p)
 
-  ## --- Build Z with the INTERCEPT kept! ---
-  re_form <- formula(reStruct, asList = TRUE)[[lvl]]     # e.g. ~ 1 + slope
-  Z <- model.matrix(re_form, data)                       # keep intercept
-
-  ## Group mapping
+  ## Grouping variable (must be present in newdata).
   grp_name <- names(reStruct)[lvl]
-  if (is.null(grp_name) || !(grp_name %in% names(data))) {
+  if(is.null(grp_name) || !(grp_name %in% names(data))) {
     stop("newdata must contain the grouping variable for the innermost level: ", grp_name)
   }
-  g_new <- as.factor(data[[grp_name]])
-
-  ## Get Vi per group via getVarCov (robust, no postVar needed)
-  g_fit <- levels(nlme::getGroups(fit))
+  g_new   <- factor(data[[grp_name]])
   lev_new <- levels(g_new)
 
-  ## Determine required RE columns order from any fitted group
+  ## Groups seen in the fitted model.
+  g_fit <- levels(nlme::getGroups(fit))
+
+  ## Build Z for the innermost level (keep intercept if present).
+  re_form <- formula(reStruct, asList = TRUE)[[lvl]]
+  Z <- model.matrix(re_form, data)  ## keeps (Intercept) if in re_form
+
+  ## Determine RE column order from the fitted model (probe any existing group).
   probe <- intersect(lev_new, g_fit)
   if(!length(probe)) {
-    z <- qnorm(1 - alpha/2)
+    ## all groups in newdata are unseen -> BLUPs undefined; keep NA bounds
     return(data.frame(fit = p, lower = NA_real_, upper = NA_real_))
   }
   Vi_probe <- as.matrix(nlme::getVarCov(fit, individual = probe[1], type = "random.effects"))
-  re_cols <- colnames(Vi_probe)
+  re_cols  <- colnames(Vi_probe)
 
-  ## Ensure Z has all required columns; add missing ones sensibly
+  ## Ensure Z has all required columns; add sensible defaults if missing.
   miss <- setdiff(re_cols, colnames(Z))
   if(length(miss)) {
     for(nm in miss) {
       if(nm == "(Intercept)") {
-        Z <- cbind(Z, `(Intercept)` = 1)   # add intercept column of 1s
+        Z <- cbind(Z, `(Intercept)` = 1)
       } else {
-        Z <- cbind(Z, tmp = 0)             # add zero column for missing random slope(s)
-        colnames(Z)[ncol(Z)] <- nm
+        Z <- cbind(Z, tmp = 0); colnames(Z)[ncol(Z)] <- nm
       }
     }
   }
-  ## Order Z columns to match re_cols
   Z <- Z[, re_cols, drop = FALSE]
-  q <- ncol(Z)
 
-  ## Row-wise SE via group-wise Vi
+  ## Fast path: random intercept only.
+  intercept_only <- ncol(Z) == 1 && identical(colnames(Z), "(Intercept)")
+
+  ## Row-wise SEs from group-wise Var(b_g | y).
   se <- rep(NA_real_, nrow(data))
-  for(g in lev_new) {
-    idx <- which(g_new == g)
-    if(!length(idx)) next
-    if(!(g %in% g_fit)) next  # new group -> no BLUP/Vi available
-    Zi <- Z[idx, , drop = FALSE]
-    Vi <- as.matrix(nlme::getVarCov(fit, individual = g, type = "random.effects"))
-    if (is.null(dim(Vi))) Vi <- matrix(Vi, nrow = q, ncol = q)
-    M <- Zi %*% Vi %*% t(Zi)
-    se[idx] <- sqrt(pmax(0, diag(M)))
+  if(intercept_only) {
+    for(g in lev_new) {
+      idx <- which(g_new == g)
+      if(!length(idx) || !(g %in% g_fit)) next
+      Vi <- as.matrix(nlme::getVarCov(fit, individual = g, type = "random.effects"))
+      se[idx] <- sqrt(Vi[1, 1])
+    }
+  } else {
+    for(g in lev_new) {
+      idx <- which(g_new == g)
+      if(!length(idx) || !(g %in% g_fit)) next
+      Zi <- Z[idx, , drop = FALSE]
+      Vi <- as.matrix(nlme::getVarCov(fit, individual = g, type = "random.effects"))
+      if(is.null(dim(Vi))) Vi <- matrix(Vi, nrow = ncol(Z), ncol = ncol(Z))
+      M <- Zi %*% Vi %*% t(Zi)
+      se[idx] <- sqrt(pmax(0, diag(M)))
+    }
   }
 
   z <- qnorm(1 - alpha/2)

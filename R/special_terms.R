@@ -355,7 +355,11 @@ special_fit.re <- function(x, z, w, control, ...)
   rval <- list("model" = eval(rem, envir = environment()))
 
   ## Get the fitted.values.
-  rval$fitted.values <- fitted(rval$model)
+  p0 <- predict(rval$model, newdata = x$data, level = 0)
+  p1 <- predict(rval$model, newdata = x$data, level = 1)
+  fit <- as.numeric(p1 - p0)
+  rval$fitted.values <- fit ## fitted(rval$model)
+  rval$coefficients <- ranef(rval$model)
 
   ## Degrees of freedom.
   N <- sum(w != 0)
@@ -368,13 +372,80 @@ special_fit.re <- function(x, z, w, control, ...)
 }
 
 ## The re() predict method.
-special_predict.re.fitted <- function(x, data, se.fit = FALSE, ...)
-{
-  p <- predict(x$model, newdata = data, level = 0)
-  if(se.fit)
-    p <- data.frame("fit" = p)
-  return(p)
+special_predict.re.fitted <- function(x, data, se.fit = FALSE, alpha = 0.05, ...) {
+  fit <- x$model
+  stopifnot(inherits(fit, "lme"))
+
+  if(nrow(data) == 0) {
+    if(!se.fit) return(numeric(0))
+    return(data.frame(fit = numeric(0), lower = numeric(0), upper = numeric(0)))
+  }
+
+  reStruct <- fit$modelStruct$reStruct
+  lvl <- length(reStruct)
+
+  ## random-effects contribution per row
+  p <- as.numeric(predict(fit, newdata = data, level = lvl, ...) -
+                  predict(fit, newdata = data, level = 0,   ...))
+  if (!se.fit) return(p)
+
+  ## --- Build Z with the INTERCEPT kept! ---
+  re_form <- formula(reStruct, asList = TRUE)[[lvl]]     # e.g. ~ 1 + slope
+  Z <- model.matrix(re_form, data)                       # keep intercept
+
+  ## Group mapping
+  grp_name <- names(reStruct)[lvl]
+  if (is.null(grp_name) || !(grp_name %in% names(data))) {
+    stop("newdata must contain the grouping variable for the innermost level: ", grp_name)
+  }
+  g_new <- as.factor(data[[grp_name]])
+
+  ## Get Vi per group via getVarCov (robust, no postVar needed)
+  g_fit <- levels(nlme::getGroups(fit))
+  lev_new <- levels(g_new)
+
+  ## Determine required RE columns order from any fitted group
+  probe <- intersect(lev_new, g_fit)
+  if(!length(probe)) {
+    z <- qnorm(1 - alpha/2)
+    return(data.frame(fit = p, lower = NA_real_, upper = NA_real_))
+  }
+  Vi_probe <- as.matrix(nlme::getVarCov(fit, individual = probe[1], type = "random.effects"))
+  re_cols <- colnames(Vi_probe)
+
+  ## Ensure Z has all required columns; add missing ones sensibly
+  miss <- setdiff(re_cols, colnames(Z))
+  if(length(miss)) {
+    for(nm in miss) {
+      if(nm == "(Intercept)") {
+        Z <- cbind(Z, `(Intercept)` = 1)   # add intercept column of 1s
+      } else {
+        Z <- cbind(Z, tmp = 0)             # add zero column for missing random slope(s)
+        colnames(Z)[ncol(Z)] <- nm
+      }
+    }
+  }
+  ## Order Z columns to match re_cols
+  Z <- Z[, re_cols, drop = FALSE]
+  q <- ncol(Z)
+
+  ## Row-wise SE via group-wise Vi
+  se <- rep(NA_real_, nrow(data))
+  for(g in lev_new) {
+    idx <- which(g_new == g)
+    if(!length(idx)) next
+    if(!(g %in% g_fit)) next  # new group -> no BLUP/Vi available
+    Zi <- Z[idx, , drop = FALSE]
+    Vi <- as.matrix(nlme::getVarCov(fit, individual = g, type = "random.effects"))
+    if (is.null(dim(Vi))) Vi <- matrix(Vi, nrow = q, ncol = q)
+    M <- Zi %*% Vi %*% t(Zi)
+    se[idx] <- sqrt(pmax(0, diag(M)))
+  }
+
+  z <- qnorm(1 - alpha/2)
+  data.frame(fit = p, lower = p - z * se, upper = p + z * se)
 }
+
 
 ## Loess smoother.
 lo <- function(formula, ...) 

@@ -307,13 +307,23 @@ re <- function(random, correlation = NULL, ...)
   ## Update fixed formula for working response z.
   st$fixed <- update(st$fixed, response_z ~ .)
   st$random <- random
-  st$term <- c(all.vars(fixed), all.vars(random))
+
+  vr <- try(stats::formula(random), silent = TRUE)
+  if(!inherits(vr, "try-error")) {
+    vr <- all.vars(formula(as.Formula(random), lhs = 0, collapse = TRUE))
+  } else {
+    vr <- all.vars(call[[2L]])
+  }
+
+  st$term <- c(all.vars(stats::formula(fixed)), vr)
+
   if(!is.null(correlation)) {
     st$correlation <- correlation
     cf <- try(stats::formula(correlation), silent = TRUE)
     if(!inherits(cf, "try-error"))
       st$term <- c(st$term, all.vars(cf))
   }
+
   st$label <- gsub(" ", "", deparse(call))
   st$label <- gsub("re(", "re2(", st$label, fixed = TRUE)
   st$method <- ctr$method
@@ -324,40 +334,21 @@ re <- function(random, correlation = NULL, ...)
     st$control <- nlme::lmeControl()
 
   ## Assign data.
-  rm_v <- function(formula) {
-    env <- environment(formula)
-    formula <- formula(as.Formula(formula), drop = TRUE, collapse = TRUE)
-    environment(formula) <- env
-    return(formula)
-  }
-
-  df <- model.frame(rm_v(fixed))
-  if(inherits(random, "formula"))
-    dr <- model.frame(rm_v(random))
-  else
-    dr <- data.frame()
-
-  if(nrow(df) < 1 && nrow(dr) > 0)
-    st$data <- dr
-  if(nrow(df) > 0 && nrow(dr) < 1)
-    st$data <- df
-  if(nrow(df) > 0 && nrow(dr) > 0)
-    st$data <- cbind(df, dr)
+  env <- environment(random)
+  if(is.null(env))
+    env <- parent.frame()
+  ff <- as.formula(paste("~", paste(st$term, collapse = "+")), env = env)
+  st$data <- model.frame(ff)
 
   if(!all(i <- (st$term %in% names(st$data)))) {
-    fi <- as.formula(paste("~", paste(st$term[!i], collapse = "+")))
-    env <- environment(rm_v(fixed))
+    fi <- as.formula(paste("~", paste(st$term[!i], collapse = "+")), env = env)
     mf <- try(model.frame(fi), silent = TRUE)
     if(inherits(mf, "try-error")) {
       if(inherits(random, "formula")) {
-        env <- environment(rm_v(random))
-        environment(fi) <- env
         mf <- try(model.frame(fi), silent = TRUE)
       }
     } else {
       if(inherits(random, "formula")) {
-        env <- environment(rm_v(random))
-        environment(fi) <- env
         mf2 <- try(model.frame(fi), silent = TRUE)
         if(!inherits(mf2, "try-error"))
           mf <- cbind(mf, mf2)
@@ -379,7 +370,7 @@ special_fit.re <- function(x, z, w, control, ...)
   ## Assign current working response.
   x$data$response_z <- z
   w <- pmax(w, .Machine$double.eps)
-  x$data$weights_w <- sqrt(w)
+  x$data$weights_w <- w
 
   args <- list(
     "fixed" = x$fixed,

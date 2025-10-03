@@ -67,7 +67,7 @@ Orthodont$age11  <- Orthodont$age - 11
 
 ## estimation using the re() constructor,
 ## setup formula first
-f <- distance ~ s(age,k=3) + re(~age11|Subject)
+f <- distance ~ age11 + re(~age11|Subject)
 
 ## estimate model
 b <- gamlss2(f, data = Orthodont)
@@ -102,7 +102,8 @@ Ovary$cos1 <- cos(2 * pi * Ovary$Time)
 
 ## model formula
 f <- follicles ~ sin1 + cos1 +
-  re(~sin1|Mare, correlation = corARMA(q = 2))
+  re(~ 1 | Mare) +
+  re(~ sin1 - 1 | Mare, correlation = corARMA(q = 2))
 
 ## estimate model
 b <- gamlss2(f, data = Ovary)
@@ -130,6 +131,30 @@ for(j in levels(Ovary$Mare)) {
   f <- fitted(m)[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 2, lwd = 2)
 }
+
+## simulated data
+set.seed(1328)
+
+n <- 10000
+k <- 500
+
+## generate random effects
+f <- as.factor(sample(1:k, size = n, replace = TRUE))
+ref <- rnorm(k, sd = 0.6)
+
+## random effects only for sigma
+y <- rBCT(n, mu = 10, sigma = exp(-1 + ref[f]), tau = 10)
+
+## estimate model
+b <- gamlss2(y ~ 1 | re(~ 1 | f), family = BCT)
+
+## extract fitted random effects
+cb <- coef(b, full = TRUE)
+cb <- cb[grepl("re", names(cb), fixed = TRUE)]
+
+## compare
+plot(cb, ref, main = round(mean((cb - ref)^2), 2))
+abline(0, 1, lwd = 2, col = 4)
 }
 
 \keyword{utilities}

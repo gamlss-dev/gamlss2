@@ -5,37 +5,37 @@
 
 \description{
   Random effects can be included in \code{gamlss2} models in two ways.  
-  The first uses \code{s()} with \code{bs = "re"} for simple random effects, i.e., when a single
-  factor is entered into the model as a smoother. This approach relies on the \code{s()} function
-  from the \pkg{mgcv} package. For example, if \code{area} is a factor with several levels,
-  then \code{s(area, bs = "re")} shrinks the level-specific effects of \code{area} towards
-  their overall mean.  
+  The first uses \code{s()} with \code{bs = "re"} for simple random effects,
+  i.e., when a single factor is entered into the model as a smoother.
+  This approach relies on the \code{s()} function from the \pkg{mgcv} package.
+  For example, if \code{area} is a factor with several levels,
+  then \code{s(area, bs = "re")} shrinks the level-specific effects of
+  \code{area} towards their overall mean.  
 
-  The second, more general approach uses the model term constructor \code{re()}, which provides
-  an interface to the specialised random-effects functionality in the \pkg{nlme} package.
-  This allows fitting more complex random-effects structures.  
+  The second, more general approach uses the model term constructor \code{re()},
+  which provides an interface to the specialised random-effects functionality
+  in the \pkg{nlme} package. This allows fitting more complex random-effects structures.  
 
   This documentation focuses on the \code{re()} function, but we also provide examples
   using \code{s(..., bs = "re")}.
 }
 
 \usage{
-re(fixed =~ 1, random = NULL, ...)
+re(random, correlation = NULL, ...)
 }
 
 \arguments{
-  \item{fixed}{A formula that specifies the fixed effects of the \code{\link{nlme}{lme}} model.
-    In most cases, this can also be included in the \code{\link{gamlss2}} formula.}
   \item{random}{A formula specifying the random effect part of the model,
-    as in the \code{\link{nlme}{lme()}} function.}
+    as in the \code{\link[nlme]{lme()}} function.}
+  \item{correlation}{An optional correlation object, see \code{\link[nlme]{lme()}}.}
   \item{\dots}{For the \code{re()} function, the dots argument is used
-    to specify additional control arguments for the \code{\link{nlme}{lme}} function,
+    to specify additional control arguments for the \code{\link[nlme]{lme}} function,
     such as the \code{method} and \code{correlation} arguments.}
 }
 
 \value{
-  Function \code{\link[mgcv]{s}} with \code{bs = "re"} returns a smooth specification
-  object of class \code{"re.smooth.spec"}, see
+  Function \code{\link[mgcv]{s}} with \code{bs = "re"} returns a smooth
+  specification object of class \code{"re.smooth.spec"}, see
   also \code{\link[mgcv]{smooth.construct.re.smooth.spec}}.
 
   The \code{re()} function returns a special model term specification object,
@@ -43,8 +43,8 @@ re(fixed =~ 1, random = NULL, ...)
 }
 
 \details{
-  Both functions set up model terms that can be estimated using a backfitting algorithm, e.g.,
-  the default \code{\link{RS}} algorithm.
+  Both functions set up model terms that can be estimated using a
+  backfitting algorithm, e.g., the default \code{\link{RS}} algorithm.
 }
 
 \seealso{
@@ -67,7 +67,7 @@ Orthodont$age11  <- Orthodont$age - 11
 
 ## estimation using the re() constructor,
 ## setup formula first
-f <- distance ~ s(age,k=3) + re(random =~ age11 | Subject)
+f <- distance ~ s(age,k=3) + re(~age11|Subject)
 
 ## estimate model
 b <- gamlss2(f, data = Orthodont)
@@ -101,8 +101,8 @@ Ovary$sin1 <- sin(2 * pi * Ovary$Time)
 Ovary$cos1 <- cos(2 * pi * Ovary$Time)
 
 ## model formula
-f <- follicles ~ s(Time) + re(random =~ sin1 | Mare,
-  correlation = corARMA(q = 2), control = lmeControl(maxIter = 100))
+f <- follicles ~ sin1 + cos1 +
+  re(~sin1|Mare, correlation = corARMA(q = 2))
 
 ## estimate model
 b <- gamlss2(f, data = Ovary)

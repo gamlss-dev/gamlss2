@@ -75,7 +75,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
                 if(inherits(ef, "formula")) {
                   vf <- attr(terms(eval(ef)), "variables")
                   for(k in 2:length(vf)) {
-                    if(as.character(e[1L]) == "lin") {
+                    if((as.character(e[1L]) == "lin") || (as.character(e[1L]) == "re")) {
                       lv <- all.vars(vf[[k]])
                       for(l in lv)
                         ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))
@@ -91,7 +91,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
                 for(k in 2:length(vf))
                   ff <- c(ff, vf[[k]])
               } else {
-                if(as.character(e[1L]) %in% c("lin")) {
+                if(as.character(e[1L]) %in% c("lin", "re")) {
                   lv <- all.vars(e[[i]])
                   for(l in lv)
                     ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))

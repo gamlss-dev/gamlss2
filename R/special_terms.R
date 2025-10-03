@@ -285,7 +285,7 @@ Predict.matrix.lin.effect <- function(object, data)
 }
 
 ## Random effects.
-re <- function(fixed = ~ 1, random = NULL, ...)
+re <- function(random, correlation = NULL, ...)
 {
   stopifnot(requireNamespace("nlme"))
 
@@ -299,19 +299,29 @@ re <- function(fixed = ~ 1, random = NULL, ...)
   if(is.null(ctr$method))
     ctr$method <- "ML"
 
+  fixed <- if(is.null(ctr$fixed)) ~1 else ctr$fixed
+  ctr$fixed <- NULL
+
   ## Put all information together.
-  st$control <- ctr$control
   st$fixed <- fixed
   ## Update fixed formula for working response z.
   st$fixed <- update(st$fixed, response_z ~ .)
   st$random <- random
   st$term <- c(all.vars(fixed), all.vars(random))
+  if(!is.null(correlation)) {
+    st$correlation <- correlation
+    cf <- try(stats::formula(correlation), silent = TRUE)
+    if(!inherits(cf, "try-error"))
+      st$term <- c(st$term, all.vars(cf))
+  }
   st$label <- gsub(" ", "", deparse(call))
   st$label <- gsub("re(", "re2(", st$label, fixed = TRUE)
   st$method <- ctr$method
   ctr$method <- NULL
-  st$correlation <- ctr$correlation
-  ctr$correlation <- NULL
+  if(!is.null(ctr$control))
+    st$control <- do.call(nlme::lmeControl, ctr$control)
+  else
+    st$control <- nlme::lmeControl()
 
   ## Assign data.
   rm_v <- function(formula) {
@@ -334,6 +344,29 @@ re <- function(fixed = ~ 1, random = NULL, ...)
   if(nrow(df) > 0 && nrow(dr) > 0)
     st$data <- cbind(df, dr)
 
+  if(!all(i <- (st$term %in% names(st$data)))) {
+    fi <- as.formula(paste("~", paste(st$term[!i], collapse = "+")))
+    env <- environment(rm_v(fixed))
+    mf <- try(model.frame(fi), silent = TRUE)
+    if(inherits(mf, "try-error")) {
+      if(inherits(random, "formula")) {
+        env <- environment(rm_v(random))
+        environment(fi) <- env
+        mf <- try(model.frame(fi), silent = TRUE)
+      }
+    } else {
+      if(inherits(random, "formula")) {
+        env <- environment(rm_v(random))
+        environment(fi) <- env
+        mf2 <- try(model.frame(fi), silent = TRUE)
+        if(!inherits(mf2, "try-error"))
+          mf <- cbind(mf, mf2)
+      }
+    }
+    mf <- mf[, unique(names(mf)), drop = FALSE]
+    st$data <- cbind(st$data, mf)
+  }
+
   ## Assign the "special" class and the new class "n".
   class(st) <- c("special", "re")
 
@@ -348,12 +381,20 @@ special_fit.re <- function(x, z, w, control, ...)
   w <- pmax(w, .Machine$double.eps)
   x$data$weights_w <- sqrt(w)
 
-  ## Estimate model.
-  rem <- parse(text = paste0(
-    'nlme::lme(fixed = x$fixed, data = x$data, random = x$random, weights = varFixed(~weights_w),',
-    'method="', x$method, '",control=x$control,correlation=x$correlation,keep.data=FALSE)'))
+  args <- list(
+    "fixed" = x$fixed,
+    "data" = x$data,
+    "random" = x$random,
+    "weights" = nlme::varFixed(~ weights_w),
+    "method" = x$method,
+    "control" = x$control,
+    "keep.data" = FALSE
+  )
+  if(!is.null(x$correlation))
+    args$correlation <- x$correlation
 
-  rval <- list("model" = eval(rem, envir = environment()))
+  ## Estimate model.
+  rval <- list("model" = do.call(nlme::lme, args))
 
   ## Get the fitted.values.
   p0 <- predict(rval$model, newdata = x$data, level = 0)

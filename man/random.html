@@ -493,7 +493,7 @@ The first uses <code>s()</code> with <code>bs = “re”</code> for simple rando
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">re(fixed =~ 1, random = NULL, ...)
+<pre><code class="language-R">re(random, correlation = NULL, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -501,18 +501,18 @@ The first uses <code>s()</code> with <code>bs = “re”</code> for simple rando
 <table role="presentation">
 <tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="fixed">fixed</code>
+<code id="random">random</code>
 </td>
 <td>
-A formula that specifies the fixed effects of the <code>nlme{lme}</code> model. In most cases, this can also be included in the <code>gamlss2</code> formula.
+A formula specifying the random effect part of the model, as in the <code>lme()</code> function.
 </td>
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="random">random</code>
+<code id="correlation">correlation</code>
 </td>
 <td>
-A formula specifying the random effect part of the model, as in the <code>nlme{lme()}</code> function.
+An optional correlation object, see <code>lme()</code>.
 </td>
 </tr>
 <tr>
@@ -520,7 +520,7 @@ A formula specifying the random effect part of the model, as in the <code>nlme{l
 <code id="...">…</code>
 </td>
 <td>
-For the <code>re()</code> function, the dots argument is used to specify additional control arguments for the <code>nlme{lme}</code> function, such as the <code>method</code> and <code>correlation</code> arguments.
+For the <code>re()</code> function, the dots argument is used to specify additional control arguments for the <code>lme</code> function, such as the <code>method</code> and <code>correlation</code> arguments.
 </td>
 </tr>
 </tbody></table>
@@ -558,7 +558,7 @@ For the <code>re()</code> function, the dots argument is used to specify additio
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation using the re() constructor,</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## setup formula first</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> age11 <span class="sc">|</span> Subject)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> distance <span class="sc">~</span> <span class="fu">s</span>(age,<span class="at">k=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">re</span>(<span class="sc">~</span>age11<span class="sc">|</span>Subject)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Orthodont)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -583,7 +583,7 @@ GAMLSS-RS iteration  4: Global Deviance = 326.0768 eps = 0.000004     </code></p
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed-effects model fit by maximum likelihood
-  Data: x$data 
+  Data: structure(list(age11 = c(-3, -1, 1, 3, -3, -1, 1, 3, -3, -1,  1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3,  -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1,  1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3,  -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1,  1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3, -3, -1, 1, 3,  -3, -1, 1, 3, -3, -1, 1, 3), Subject = structure(c(15L, 15L,  15L, 15L, 3L, 3L, 3L, 3L, 7L, 7L, 7L, 7L, 14L, 14L, 14L, 14L,  2L, 2L, 2L, 2L, 13L, 13L, 13L, 13L, 5L, 5L, 5L, 5L, 6L, 6L, 6L,  6L, 11L, 11L, 11L, 11L, 16L, 16L, 16L, 16L, 4L, 4L, 4L, 4L, 8L,  8L, 8L, 8L, 9L, 9L, 9L, 9L, 10L, 10L, 10L, 10L, 12L, 12L, 12L,  12L, 1L, 1L, 1L, 1L, 20L, 20L, 20L, 20L, 23L, 23L, 23L, 23L,  25L, 25L, 25L, 25L, 26L, 26L, 26L, 26L, 21L, 21L, 21L, 21L, 19L,  19L, 19L, 19L, 22L, 22L, 22L, 22L, 24L, 24L, 24L, 24L, 18L, 18L,  18L, 18L, 17L, 17L, 17L, 17L, 27L, 27L, 27L, 27L), levels = c("M16",  "M05", "M02", "M11", "M07", "M08", "M03", "M12", "M13", "M14",  "M09", "M15", "M06", "M04", "M01", "M10", "F10", "F09", "F06",  "F01", "F05", "F07", "F02", "F08", "F03", "F04", "F11"), class = c("ordered",  "factor")), response_z = c(3.94062278491185, 1.65382163146266,  4.33345149116368, 4.97951236401509, -0.559377215087963, -0.846178368537345,  -1.66654850883632, 0.479512364015104, 0.940622784912033, -0.846178368537345,  -0.666548508836321, 1.4795123640151, 3.44062278491204, 4.15382163146266,  1.83345149116366, 0.979512364015104, -2.05937721508796, 0.153821631462652,  -2.16654850883632, -0.0204876359849031, 2.44062278491203, 2.15382163146266,  2.33345149116367, 2.47951236401511, -0.059377215087963, -1.34617836853734,  -0.166548508836321, 0.4795123640151, 1.94062278491203, -1.84617836853734,  -0.166548508836321, -0.520487635984892, 0.940622784912037, -2.84617836853734,  6.33345149116367, -0.0204876359849031, 5.44062278491203, 4.65382163146266,  6.33345149116368, 5.4795123640151, 0.94062278491203, -0.346178368537345,  -1.16654850883632, -1.0204876359849, -0.559377215087963, 0.153821631462659,  -0.666548508836325, 1.97951236401509, -5.05937721508797, 1.15382163146266,  1.33345149116368, 3.4795123640151, 0.440622784912033, 2.15382163146266,  0.833451491163679, -0.020487635984896, 0.940622784912037, 1.15382163146266,  1.33345149116368, 3.9795123640151, -0.059377215087963, -1.84617836853734,  -1.16654850883632, -1.0204876359849, -1.05937721508797, -3.34617836853735,  -3.16654850883632, -3.0204876359849, -1.05937721508797, -1.84617836853734,  -0.666548508836328, -0.5204876359849, -1.55937721508797, 0.653821631462655,  -0.166548508836321, -0.020487635984896, 1.44062278491203, 1.15382163146266,  0.333451491163679, 0.4795123640151, -0.559377215087963, -0.346178368537338,  -2.16654850883632, -2.5204876359849, -2.05937721508797, -2.34617836853733,  -3.66654850883632, -3.52048763598491, -0.559377215087963, -0.846178368537345,  -1.66654850883632, -1.0204876359849, 0.940622784912033, -0.346178368537345,  -1.16654850883632, -2.0204876359849, -2.05937721508796, -2.34617836853734,  -2.66654850883632, -4.52048763598489, -5.55937721508796, -4.34617836853734,  -5.66654850883632, -6.52048763598491, 2.44062278491203, 1.65382163146266,  3.33345149116367, 1.9795123640151), weights_w = c(0.913307652411929,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193, 0.91330765241193,  0.91330765241193, 0.91330765241193, 0.91330765241193)), terms = ~age11 +      Subject, row.names = c(NA, 108L), class = "data.frame") 
        AIC     BIC    logLik
   448.9844 462.395 -219.4922
 
@@ -598,7 +598,7 @@ Residual    1.3679245
 Variance function:
  Structure: fixed weights
  Formula: ~weights_w 
-Fixed effects:  x$fixed 
+Fixed effects:  response_z ~ 1 
                    Value Std.Error DF      t-value p-value
 (Intercept) 1.219419e-08  0.404892 81 3.011713e-08       1
 
@@ -653,16 +653,15 @@ GAMLSS-RS iteration 16: Global Deviance = 315.8023 eps = 0.000009     </code></p
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>Ovary<span class="sc">$</span>cos1 <span class="ot">&lt;-</span> <span class="fu">cos</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> Ovary<span class="sc">$</span>Time)</span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">s</span>(Time) <span class="sc">+</span> <span class="fu">re</span>(<span class="at">random =</span><span class="sc">~</span> sin1 <span class="sc">|</span> Mare,</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">correlation =</span> <span class="fu">corARMA</span>(<span class="at">q =</span> <span class="dv">2</span>), <span class="at">control =</span> <span class="fu">lmeControl</span>(<span class="at">maxIter =</span> <span class="dv">100</span>))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> sin1 <span class="sc">+</span> cos1 <span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">re</span>(<span class="sc">~</span>sin1<span class="sc">|</span>Mare, <span class="at">correlation =</span> <span class="fu">corARMA</span>(<span class="at">q =</span> <span class="dv">2</span>))</span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> Ovary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1560.1178 eps = 0.165409     
-GAMLSS-RS iteration  2: Global Deviance = 1551.2752 eps = 0.005667     
-GAMLSS-RS iteration  3: Global Deviance = 1551.1391 eps = 0.000087     
-GAMLSS-RS iteration  4: Global Deviance = 1551.1283 eps = 0.000006     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 1569.197 eps = 0.160552     
+GAMLSS-RS iteration  2: Global Deviance = 1569.1644 eps = 0.000020     
+GAMLSS-RS iteration  3: Global Deviance = 1569.1562 eps = 0.000005     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## smooth random effects</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> follicles <span class="sc">~</span> <span class="fu">ti</span>(Time) <span class="sc">+</span> <span class="fu">ti</span>(Mare, <span class="at">bs =</span> <span class="st">"re"</span>) <span class="sc">+</span> </span>

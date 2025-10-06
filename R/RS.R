@@ -183,9 +183,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
+    nullmodel_ok <- TRUE
     beta <- ieta <- list()
     for(j in np) {
       beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
+      if(length(beta[[j]]) < 1L)
+        nullmodel_ok <- FALSE
       ieta[[j]] <- rep(beta[[j]], n)
       if(!is.null(offsets)) {
         if(!is.null(offsets[[j]]))
@@ -194,7 +197,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     }
     beta <- unlist(beta)
 
-    if(!any(is.na(beta))) {
+    if(!any(is.na(beta)) && nullmodel_ok) {
       lli <- family$logLik(y, family$map2par(ieta))
 
       fn_ll <- function(par) {

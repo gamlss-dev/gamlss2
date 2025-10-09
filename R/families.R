@@ -758,35 +758,64 @@ complete_family <- function(family)
 }
 
 ## A simple print method.
-print.gamlss2.family <- function(x, full = TRUE, ...)
-{
-  cat("Family:", x$family, if(!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL,  "\n")
-  links <- paste(names(x$links), x$links, sep = " = ")
-  links <- paste(links, collapse = ", ")
-  if(links != "") {
-    cat(if(length(links) > 1) "Link functions:" else "Link function:", links, sep = " ")
-    cat("\n")
-  }
-  if(full) {
-    nfun <- names(x[c("transform", "optimizer", "sampler", "results", "predict")])
-    if(!all(is.na(nfun))) {
-      nfun <- nfun[!is.na(nfun)]
-      cat("---\nFamily specific functions:\n")
-      for(j in nfun)
-        cat(" ..$ ", j, "\n", sep = "")
+print.gamlss2.family <- function(x, full = TRUE, max_links = Inf, width = getOption("width"), ...) {
+  ## header
+  fam_line <- paste0(
+    "Family: ", x$family %||% "",
+    if(!is.null(x$full.name)) paste0(" (", x$full.name, ")") else ""
+  )
+  cat(fam_line, "\n", sep = "")
+
+  # link functions
+  links <- x$links
+  if(!is.null(links) && length(links)) {
+    ## stable ordering
+    pairs <- sprintf("%s = %s", names(links), paste0("'", unname(links), "'"))
+
+    if(is.finite(max_links) && length(pairs) > max_links) {
+      omitted <- length(pairs) - max_links
+      pairs <- c(pairs[seq_len(max_links)], sprintf("… (+%d more)", omitted))
     }
-    nfun <- names(x[c("score", "hess")])
-    if(!all(is.na(nfun))) {
-      nfun <- nfun[!is.na(nfun)]
-      cat("---\nDerivative functions:\n")
-      for(j in nfun) {
-        cat(" ..$ ", j, "\n", sep = "")
-        for(i in names(x[[j]]))
-          cat(" .. ..$ ", i, "\n", sep = "")
-      }
+
+    prefix <- if(length(links) > 1) "Link functions: " else "Link function: "
+    ## wrap nicely to console width with aligned continuation lines
+    wrap_width <- max(10L, width - nchar(prefix, type = "width"))
+    wrapped <- strwrap(paste(pairs, collapse = ", "), width = wrap_width)
+
+    cat(prefix, wrapped[1L], "\n", sep = "")
+    if(length(wrapped) > 1L) {
+      indent <- strrep(" ", nchar(prefix, type = "width"))
+      for(w in wrapped[-1L]) cat(indent, w, "\n", sep = "")
     }
   }
+
+  if(!isTRUE(full)) return(invisible(x))
+
+  ## family specific functions
+  fs_names <- names(x[c("transform", "optimizer", "sampler", "results", "predict")])
+  fs_names <- fs_names[!is.na(fs_names)]
+  if(length(fs_names)) {
+    cat("---\nFamily specific functions:\n", sep = "")
+    for(j in fs_names) cat(" ..$ ", j, "\n", sep = "")
+  }
+
+  ## derivative functions
+  df_names <- names(x[c("score", "hess")])
+  df_names <- df_names[!is.na(df_names)]
+  if(length(df_names)) {
+    cat("---\nDerivative functions:\n", sep = "")
+    for(j in df_names) {
+      cat(" ..$ ", j, "\n", sep = "")
+      nm <- names(x[[j]])
+      if(length(nm)) for(i in nm) cat(" .. ..$ ", i, "\n", sep = "")
+    }
+  }
+
+  invisible(x)
 }
+
+## small helper (like rlang::`%||%`)
+`%||%` <- function(a, b) if(is.null(a)) b else a
 
 ## Some example families.
 Gaussian <- function(...)
@@ -945,9 +974,9 @@ Weibull <- function(...)
 
 ## From VGAM.
 is.Numeric <- function (x, length.arg = Inf, integer.valued = FALSE, positive = FALSE) {
-  if (all(is.numeric(x)) && all(is.finite(x)) && (if (is.finite(length.arg)) length(x) == 
-    length.arg else TRUE) && (if (integer.valued) all(x == round(x)) else TRUE) && 
-    (if (positive) all(x > 0) else TRUE)) TRUE else FALSE
+  if(all(is.numeric(x)) && all(is.finite(x)) && (if(is.finite(length.arg)) length(x) == 
+    length.arg else TRUE) && (if(integer.valued) all(x == round(x)) else TRUE) && 
+    (if(positive) all(x > 0) else TRUE)) TRUE else FALSE
 }
 
 ## Yeo-Johnson transform family. From VGAM.
@@ -1079,7 +1108,7 @@ get_y_bd <- function(Y) {
     }
     bd <- Y[,1] + Y[,2]
     y <-  Y[,1]
-    if (any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
+    if(any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
   } else {
     stop(paste("For the binomial family, Y must be", 
       "a vector of 0 and 1's or a 2 column", "matrix where col 1 is no. successes", 
@@ -1165,8 +1194,8 @@ ologit <- function(k) {
       cuts <- matrix(NA, nrow = n, ncol = k - 1)
       cuts[, 1] <- par$theta1
 
-      if (k > 2) {
-        for (j in 2:(k - 1)) {
+      if(k > 2) {
+        for(j in 2:(k - 1)) {
           cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
         }
       }
@@ -1178,7 +1207,7 @@ ologit <- function(k) {
       ## Compute category probabilities
       probs <- matrix(NA, nrow = n, ncol = k)
       probs[, 1] <- 1 - cum_probs[, 1]
-      for (j in 2:(k - 1)) {
+      for(j in 2:(k - 1)) {
         probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
       }
       probs[, k] <- cum_probs[, k - 1]
@@ -1187,7 +1216,7 @@ ologit <- function(k) {
       p <- probs[cbind(seq_len(n), y)]
       p[p < 1e-8 | is.na(p)] <- 1e-8
 
-      if (log) {
+      if(log) {
         p <- log(p)
         p[is.na(p)] <- -1e10
       }
@@ -1211,14 +1240,14 @@ ologit <- function(k) {
       }
 
       ## Initialize deltas: log of spacing between cutpoints
-      for (j in 2:(k - 1)) {
+      for(j in 2:(k - 1)) {
         init_list[[paste0("delta", j)]] <- local({
           jj <- j
           function(y, ...) {
             probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
             q <- qlogis(probs)
             diffs <- diff(q)
-            val <- if (jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
+            val <- if(jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
             rep(val, length(y))
           }
         })
@@ -1235,8 +1264,8 @@ ologit <- function(k) {
     ## Reconstruct cutpoints.
     cuts <- matrix(NA, nrow = n, ncol = k - 1)
     cuts[, 1] <- par$theta1
-    if (k > 2) {
-      for (j in 2:(k - 1)) {
+    if(k > 2) {
+      for(j in 2:(k - 1)) {
         cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
       }
     }
@@ -1248,7 +1277,7 @@ ologit <- function(k) {
     ## Category probabilities.
     probs <- matrix(NA, nrow = n, ncol = k)
     probs[, 1] <- 1 - cum_probs[, 1]
-    for (j in 2:(k - 1)) {
+    for(j in 2:(k - 1)) {
       probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
     }
     probs[, k] <- cum_probs[, k - 1]

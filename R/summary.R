@@ -98,14 +98,14 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   family <- object$family
   nx <- family$names
 
-  loglik <- function(par) {
+  loglik <- function(par, full) {
     par <- par2list(par)
     eta <- list()
     for(i in nx) {
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
       } else {
-        eta[[i]] <- 0.0
+        eta[[i]] <- rep(0.0, n)
       }
       if(full | TRUE) { ## FIXME: always add?
         if(!is.null(par[[i]]$s)) {
@@ -123,7 +123,7 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
     return(ll)
   }
 
-  gradient <- function(par) {
+  gradient <- function(par, full) {
     npar <- names(par)
     par <- par2list(par)
     eta <- list()
@@ -131,7 +131,7 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
       } else {
-        eta[[i]] <- 0.0
+        eta[[i]] <- rep(0.0, n)
       }
       if(full | TRUE) { ## FIXME: always add?
         if(!is.null(par[[i]]$s)) {
@@ -182,7 +182,12 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   control <- list(...)
   control$fnscale <- -1
 
-  H <- as.matrix(optimHess(par, fn = loglik, gr = gradient, control = control))
+  H <- try(optimHess(par, fn = loglik, gr = gradient, control = control, full = full), silent = TRUE)
+  if(inherits(H, "try-error")) {
+    H <- optimHess(par, fn = loglik, gr = gradient, control = control, full = TRUE)
+  }
+
+  H <- as.matrix(H)
   if(all(is.na(H))) {
     H <- as.matrix(optimHess(par, fn = loglik, control = control))
   }

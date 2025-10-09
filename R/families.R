@@ -766,7 +766,7 @@ print.gamlss2.family <- function(x, full = TRUE, max_links = Inf, width = getOpt
   )
   cat(fam_line, "\n", sep = "")
 
-  # link functions
+  ## link functions
   links <- x$links
   if(!is.null(links) && length(links)) {
     ## stable ordering

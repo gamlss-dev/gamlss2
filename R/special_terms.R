@@ -1153,8 +1153,8 @@ plot_lasso <- function(x, terms = NULL,
             rplab <- diff(range(plab))
             if(length(plab) > 2L) {
               for(i in 1:(length(plab) - 1)) {
-                dp <- abs(plab[i] - plab[i + 1]) / rplab
-                if(dp <= 0.02) {
+                dp <- abs(plab[i] - plab[i + 1]) / (rplab + 1e-08)
+                if((dp <= 0.02) || (rplab <= 0.02)) {
                   labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
                   labs[i] <- ""
                 }

@@ -970,6 +970,12 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
     X <- X %*% x$blockscale
   }
 
+  if(ncol(X) != length(x$coefficients)) {
+    if(!is.null(names(x$coefficients)) && !is.null(colnames(X))) {
+      X <- X[, names(x$coefficients), drop = FALSE]
+    }
+  }
+
   fit <- drop(X %*% x$coefficients)
 
   if(se.fit) {

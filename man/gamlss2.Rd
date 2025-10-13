@@ -19,7 +19,7 @@ gamlss2(formula, \dots)
 
 \method{gamlss2}{formula}(formula, data, family = NO,
   subset, na.action, weights, offset, start = NULL,
-  control = gamlss2_control(\dots), \dots)
+  knots = NULL, control = gamlss2_control(\dots), \dots)
 
 \method{gamlss2}{list}(formula, \dots)
 }
@@ -47,6 +47,7 @@ gamlss2(formula, \dots)
     Each offset is assigned in the same order as the parameters of the distribution
     specified in the family object.}
   \item{start}{Starting values for estimation algorithms.}
+  \item{knots}{An optional list of user specified knots, see \code{\link[mgcv]{smoothCon}}.}
   \item{control}{A list of control arguments, see \code{\link{gamlss2_control}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2_control}}.}
 }

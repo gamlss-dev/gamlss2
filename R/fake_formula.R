@@ -65,6 +65,9 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
         }
         v <- all.vars(p)
         e <- eval(parse(text = paste0("quote(", j, ")")))
+        if("sp" %in% names(e)) {
+          e['sp'] <- NULL
+        }
         for(i in seq_along(e)) {
           av <- all.vars(e[[i]])
           av <- av[!(av %in% c("|", "xt"))]

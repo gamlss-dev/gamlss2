@@ -6,7 +6,7 @@ gamlss2 <- function(formula, ...)
 
 ## Formula method.
 gamlss2.formula <- function(formula, data, family = NO,
-  subset, na.action, weights, offset, start = NULL,
+  subset, na.action, weights, offset, start = NULL, knots = NULL,
   control = gamlss2_control(...), ...)
 {
   ## Save environments.
@@ -162,7 +162,7 @@ gamlss2.formula <- function(formula, data, family = NO,
 
   ## Process special terms.
   Specials <- special_terms(Sterms, mf, binning = control$binning,
-    digits = control$digits, select = control$select)
+    digits = control$digits, select = control$select, knots = knots)
 
   ## Process by variables using mgcv::smoothCon().
   olab <- sapply(Specials, function(x) if(is.list(x)) x$orig.label else "")

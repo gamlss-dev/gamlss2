@@ -26,8 +26,8 @@ re(random, correlation = NULL, ...)
 
 \arguments{
   \item{random}{A formula specifying the random effect part of the model,
-    as in the \code{\link[nlme]{lme()}} function.}
-  \item{correlation}{An optional correlation object, see \code{\link[nlme]{lme()}}.}
+    as in the \code{\link[nlme]{lme}} function.}
+  \item{correlation}{An optional correlation object, see \code{\link[nlme]{lme}}.}
   \item{\dots}{For the \code{re()} function, the dots argument is used
     to specify additional control arguments for the \code{\link[nlme]{lme}} function,
     such as the \code{method} and \code{correlation} arguments.}

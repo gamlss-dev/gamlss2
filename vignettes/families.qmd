@@ -283,6 +283,10 @@ m2 <- gamlss2(f, data = abdom, family = Normal(mu.link = softplus))
 The fitted means are visualized with
 
 ```{r}
+#| fig-height: 4
+#| fig-width: 5
+#| fig-align: center
+par(mar = c(4, 4, 1, 1))
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 lines(abdom$x, mean(m1), col = 2, lwd = 5)

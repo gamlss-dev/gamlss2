@@ -75,5 +75,5 @@ The package is available under the [General Public License version
   provides a concise introduction.
 - Model assessment and calibration using the `topmodels` package are
   discussed in the
-  [Evaluation](https://gamlss-dev.github.io/gamlss2/vignettes/evaluation.html)
+  [Topmodels](https://gamlss-dev.github.io/gamlss2/vignettes/topmodels.html)
   vignette.

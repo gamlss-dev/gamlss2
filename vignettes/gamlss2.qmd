@@ -67,18 +67,3 @@ The package is available under the
 [General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html)
 or [version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
-## Vignettes
-
-* The basic workflow is illustrated in the vignette [First Steps](https://gamlss-dev.github.io/gamlss2/vignettes/firststeps.html).
-* To learn about distribution families in `gamlss2`, see the vignette
-  [Families](https://gamlss-dev.github.io/gamlss2/vignettes/families.html),
-  which provides an overview and examples on how to implement custom families.
-* For information on using and setting up new special model terms
-  (e.g., neural networks), the vignette
-  [Specials](https://gamlss-dev.github.io/gamlss2/vignettes/specials.html)
-  provides a concise introduction.
-* Model assessment and calibration using the `topmodels` package are
-  discussed in the
-  [Topmodels](https://gamlss-dev.github.io/gamlss2/vignettes/topmodels.html) 
-  vignette.
-

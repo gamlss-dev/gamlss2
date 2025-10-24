@@ -311,7 +311,7 @@ grep2 <- function (pattern, x, ...)
 
 ## Extract fitted values.
 fitted.gamlss2 <- function(object, newdata = NULL,
-  type = c("parameter", "link"), model = NULL, ...)
+  type = c("link", "parameter"), model = NULL, ...)
 {
   type <- match.arg(type)
 

@@ -14,10 +14,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   cstart <- NULL
   if(missing(start))
     start <- NULL
+  lp_start <- rep(FALSE, length(np))
+  names(lp_start) <- np
   if(!is.null(start)) {
     if(!inherits(start, "coef.gamlss2")) {
       if(!is.null(start)) {
-        if(inherits(start, "list")) {
+        if(inherits(start, c("gamlss2", "list"))) {
           if("fake_formula" %in% names(start)) {
             start <- fitted(start)
           } else {
@@ -31,6 +33,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             stop("starting values have wrong number of observations!")
           for(j in np) {
             if(!is.null(start[[j]])) {
+              lp_start[j] <- TRUE
               etastart[[j]] <- start[[j]]
             }
           }

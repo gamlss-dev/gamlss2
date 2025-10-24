@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-f878eb18417b98648379e6c340c673e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -669,7 +669,7 @@ edf  4.5505     2.5450  1.0015   1.0004
 *--------
 n = 610 df =  13.1 res.df =  596.9
 Deviance = 4770.1544 Null Dev. Red. = 33.39%
-AIC = 4796.3494 elapsed =  0.86sec</code></pre>
+AIC = 4796.3494 elapsed =  0.84sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -736,20 +736,18 @@ GAMLSS-RS iteration  2: Global Deviance = 5076.3565 eps = 0.000000     </code></
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">fitted</span>(m))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 7749.3698 eps = 0.013476     
-GAMLSS-RS iteration  2: Global Deviance = 4869.5907 eps = 0.371614     
-GAMLSS-RS iteration  3: Global Deviance = 4793.4424 eps = 0.015637     
-GAMLSS-RS iteration  4: Global Deviance = 4792.9818 eps = 0.000096     
-GAMLSS-RS iteration  5: Global Deviance = 4792.9727 eps = 0.000001     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4816.1239 eps = 0.540554     
+GAMLSS-RS iteration  2: Global Deviance = -7383.8761 eps = 2.533157     
+GAMLSS-RS iteration  3: Global Deviance = -19583.8761 eps = 1.652248     
+GAMLSS-RS iteration  4: Global Deviance = -31783.8761 eps = 0.622961     
+GAMLSS-RS iteration  5: Global Deviance = -36347.9794 eps = 0.143598     
+GAMLSS-RS iteration  6: Global Deviance = -36347.9794 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## same with</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4774.5602 eps = 0.534336     
-GAMLSS-RS iteration  2: Global Deviance = 4770.2329 eps = 0.000906     
-GAMLSS-RS iteration  3: Global Deviance = 4770.1693 eps = 0.000013     
-GAMLSS-RS iteration  4: Global Deviance = 4770.1544 eps = 0.000003     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = -36347.9794 eps = 0.000000     </code></pre>
 </div>
 </div>
 

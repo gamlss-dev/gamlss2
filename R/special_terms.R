@@ -750,7 +750,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
   st$formula <- formula
   st$control$const <- const
 
-  lt <- c("normal", "group", "nominal", "ordinal")
+  lt <- c("normal", "group", "ordinal", "nominal")
   if(!is.character(type))
     type <- lt[type[1L]]
   st$lasso_type <- lt[match(type, lt)]
@@ -778,7 +778,21 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   XWz <- crossprod(XW, z)
   n <- length(z)
   logn <- log(n)
-  bml <- drop(solve(XWX + diag(1e-08, k), XWz))
+
+  bml <- try(solve(XWX + diag(1e-08, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-07, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-06, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-05, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-04, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    stop("cannot compute the ML estimator for the lasso term!")
+
+  bml[abs(bml) < 1e-08] <- 1e-08
+
   b0 <- transfer$coefficients
 
   if(is.null(b0))

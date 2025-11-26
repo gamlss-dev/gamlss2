@@ -2,23 +2,21 @@ Package: gamlss2
 Title: GAMLSS Infrastructure for Flexible Distributional Regression
 Version: 0.1-0
 Date: 2025-11-26
-Authors@R: c(
-    person("Nikolaus", "Umlauf", role = c("aut", "cre"),
-           email = "Nikolaus.Umlauf@uibk.ac.at",
-           comment = c(ORCID = "0000-0003-2160-9803")),
-    person("Mikis", "Stasinopoulos", role = c("fnd", "cph"),
-           email = "d.stasinopoulos@gre.ac.uk",
-           comment = c(ORCID = "0000-0003-2407-5704")),
-    person("Robert", "Rigby", role = c("fnd", "cph"),
-           email = "r.rigby@gre.ac.uk",
-           comment = c(ORCID = "0000-0003-3853-1707")),
-    person("Achim", "Zeileis", role = "ctb",
-           email = "Achim.Zeileis@R-project.org",
-           comment = c(ORCID = "0000-0003-0918-3766")),
-    person("Reto", "Stauffer", role = "ctb",
-           email = "Reto.Stauffer@uibk.ac.at",
-           comment = c(ORCID = "0000-0002-3798-5507"))
-)
+Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
+               email = "Nikolaus.Umlauf@uibk.ac.at",
+               comment = c(ORCID = "0000-0003-2160-9803")),
+             person("Mikis", "Stasinopoulos", role = c("fnd", "cph"),
+               email = "d.stasinopoulos@gre.ac.uk",
+               comment = c(ORCID = "0000-0003-2407-5704")),
+             person("Robert", "Rigby", role = c("fnd", "cph"),
+               email = "r.rigby@gre.ac.uk",
+               comment = c(ORCID = "0000-0003-3853-1707")),
+             person("Achim", "Zeileis", role = "ctb",
+               email = "Achim.Zeileis@R-project.org",
+               comment = c(ORCID = "0000-0003-0918-3766")),
+             person("Reto", "Stauffer", role = "ctb",
+               email = "Reto.Stauffer@uibk.ac.at",
+               comment = c(ORCID = "0000-0002-3798-5507")))
 Description: Next generation infrastructure for generalized additive models for location, scale, and shape (GAMLSS)
   and distributional regression more generally. The package provides a fresh reimplementaton of the classic
   'gamlss' package while being more modular and facilitating the creation of advanced terms and models.

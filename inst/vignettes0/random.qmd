@@ -120,6 +120,7 @@ Boxplot of `y` by `cluster`:
 
 ```{r fig.height=3, fig.width=4}
 #| code-fold: true
+#| 
 toydata1 |>
   ggplot(aes(x=cluster,y=y)) +
   geom_boxplot() +
@@ -131,28 +132,23 @@ toydata1 |>
 
 #### Random intercept in $\mu$ model {-}
 
-::: {.callout-note}
-`@Niki`: re() doesn't work in gamlss2 with `random =~1|cluster`. I have used `random =~x1` in the chunk below, when you have fixed re() can you change to `random =~1|cluster` and let me know? Thanks
-:::
 
 We fit  model (@eq-toydata1) with random intercept in the $\mu$ model:
 
-```{r}
+```{r fig.height=3, fig.width=4}
 #| code-fold: false
-m1 <- gamlss2(y ~ x1 + x2 + re(random=~x1|cluster), 
-              sigma.formula = ~ x2,
-              data=toydata1, family=GA)
+#| 
+m1 <- gamlss2(y ~ x1 + x2 + re(random =~ 1|cluster), 
+               sigma.formula = ~ x2,
+               data=toydata1, family=GA)
 
 summary(m1)
 ```
 
-::: {.callout-note}
-`@Niki`: plot doesn't work:
-:::
+
 
 QQ plot:
 ```{r}
-#| eval: false
 plot(m1, which = "qq-resid")
 ```
 
@@ -171,11 +167,11 @@ y_{ij}&\sim\text{GA}(\mu_{ij}, \sigma_{ij})\\
 \end{align*}
 
 ```{r}
-m1 <- gamlss(y ~ x1 + x2 + re(random=~x1|cluster), 
+m2 <- gamlss2(y ~ x1 + x2 + re(random=~x1|cluster), 
               sigma.formula = ~ x2,
               data=toydata1, family=GA)
 
-summary(m1)
+summary(m2)
 ```
 
 ::: {.callout-note}
@@ -232,13 +228,7 @@ Here the number of individuals (or clusters) is significant relative to the tota
 
 
 
-First fit a random intercepts model using `lme()`:
-```{r}
-l1 <- lme(distance ~I(age-11),random =~ 1|Subject, data=Orthodont)
-summary(l1)
-```
-
-The model is
+First fit a random intercepts model using `lme()`. The model is
 
 $$
 \begin{split}
@@ -247,25 +237,30 @@ $$
     \gamma_j \sim &\text{NO}(0, \sigma_a)\ .
 \end{split}
 $$ 
+
+
+```{r}
+l1 <- lme(distance ~I(age-11),random =~ 1|Subject, data=Orthodont)
+summary(l1)
+```
+
+
  
-The fitted model gives estimates $\hat\beta_0 = 24.02$,  $\hat\beta_1 = 0.660$, $\hat\sigma_a = 2.1147$ and
+The fitted model gives estimates $\hat\beta_0 = 24.02$,  $\hat\beta_1 = 0.660$, $\hat\sigma_a = 2.115$ and
 $\hat\sigma = 1.432$.
 
 Now fit the random intercepts model using function `re()` in `gamlss2`. 
-(Note that `gamlss2` has problem in interpreting the `I()` function so we create the variable `age11`.)
 
-::: {.callout-note}
-`@Niki`: re() doesn't work in gamlss2 with `random =~1|Subject`. I have used `random =~age11` in the chunk below, when you have fixed re() can you change to `random =~1|Subject` and let me know? Thanks
-:::
+
+
 
 
 ```{r}
 #| warning: false
-Orthodont <- mutate(Orthodont, age11 = age-11)
-b1 <- gamlss2(distance ~ age11 + re(random =~1+age11 | Subject), data = Orthodont)
+b1 <- gamlss2(distance ~ I(age-11) + re(random =~ 1|Subject), data = Orthodont)
 ```
 
-Extract fitted random intercept special mode term:
+Extract fitted random intercept special model term:
 ```{r}
 re <- specials(b1, term = "random", elements = "model")
 ```
@@ -278,11 +273,9 @@ summary(re)
 Compare estimated coefficients
 ```{r}
 coef(b1)
-summary(l1)
 ```
 
 ```{r}
-#| eval: false
 ## random effect coefficients
 plot(coef(re)[, 1] + coef(b1)["mu.p.(Intercept)"], coef(l1)[, 1],
   xlab = "gamlss2 random intercepts", ylab = "lme() random intercepts",
@@ -290,10 +283,16 @@ plot(coef(re)[, 1] + coef(b1)["mu.p.(Intercept)"], coef(l1)[, 1],
 abline(0, 1, lty = 2, col = 4)
 ```
 
-The fitted model gives estimates $\beta_0 = 24.02$,  $\beta_1 = 0.660$, $\sigma_a = 2.072$ and $\sigma = 1.254$. 
-The estimate of $\sigma$ is seriously negatively biased, because it is *not* a REML estimate.
+The fitted model gives estimates $\hat\beta_0 = 24.02$,  $\hat\beta_1 = 0.660$, $\hat\sigma_a = 2.072$ and $\hat\sigma = 0.486$. 
+The estimate  $\hat\sigma$ is seriously negatively biased, because it is *not* a REML estimate.
 
-For this simple random intercepts model, the estimate of $\sigma$ can be adjusted by multiplying by the local LME residual given by 1.135 giving: adjusted $\sigma = 1.254\times1.135 = 1.42$, which is very close to the `lme` estimate of $\sigma$. 
+For this simple random intercepts model, the estimate of $\sigma$ can be adjusted by multiplying by the local LME residual given by 1.135 giving: 
+
+::: {.callout-warning}
+`Bob` This is wrong. Where does 1.135 come from?
+::: 
+
+adjusted $\hat\sigma = 0.486\times1.135 = 0.552$, which is very close to the `lme` estimate of $\sigma$. 
 
 ::: {.callout-warning}
 However this adjustment does NOT work for more complex random effects models.  
@@ -354,19 +353,16 @@ y = round(rGA(n, mu=mu, sigma=sigma),5)
 toydata2 <- data.frame(cluster=cluster, y=y, x1=x1, x2=x2)
 ```
 
-We fit  model (@eq-toydata2) with random intercept in the $\mu$ and $\sigma$ models:
+We fit  model (@eq-toydata2) with random intercepts in the $\mu$ and $\sigma$ models:
 
-::: {.callout-note}
-`@Niki`: this doesn't work:
-:::
+
 
 ```{r}
-#| eval: false
-m2 <- gamlss2(y ~ x1 + x2 + re(random=~1|cluster), 
+m3 <- gamlss2(y ~ x1 + x2 + re(random=~1|cluster), 
               sigma.formula = ~ x2 + re(random=~1|cluster),
               data=toydata2, family=GA)
 
-summary(m2)
+summary(m3)
 ```
 
 <!-- ### Example 2: Citations data -->

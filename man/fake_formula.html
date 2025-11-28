@@ -463,6 +463,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#note" id="toc-note" class="nav-link" data-scroll-target="#note">Note</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -529,6 +530,12 @@ Logical, should only the special model terms be returned?
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>Depending on the input formula, the function returns a <code>formula</code> or <code>Formula</code>. If <code>onlyspecials = TRUE</code> a vector or list of special model term names is returned.</p>
+</section>
+<section id="note" class="level3">
+<h3 class="anchored" data-anchor-id="note">Note</h3>
+<p>In some versions of the RStudio IDE, printing or inspecting a <code>fake_formula()</code> object may trigger a message of the form</p>
+<p><code>‘length = 2’ in coercion to ‘logical(1)’</code>.</p>
+<p>This is due to the way RStudio internally inspects objects of class <code>Formula</code>, whose <code>length()</code> method returns a two-element vector (reflecting the number of left- and right-hand side components). The message does not indicate a problem with <code>fake_formula()</code>, and the returned object is valid and works correctly with <code>model.frame()</code> and subsequent processing. The message does not appear in a standard R session outside RStudio.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

@@ -4,11 +4,24 @@
 \title{Extended Processing of "Fake" Formulas}
 
 \description{
-  Create a "fake" formula from a \code{\link[stats]{formula}}, a \code{\link[Formula]{Formula}},
-  or a \code{\link[base]{list}} of \code{\link[stats]{formula}}s. The function extracts
-  all necessary variables (transformation of variables), to build a \code{\link[stats]{model.frame}}.
-  The function also extracts all special model terms within the formulas, the information can
-  be used to setup any special model term specification list.
+  Create a simplified or "fake" version of a model formula for internal use in
+  \pkg{gamlss2}. Many model formulas in \pkg{gamlss2} may contain complex terms
+  such as smoothing functions, tensor-product interactions, distributional
+  components, or multiple right-hand sides. These extended formulas cannot be
+  passed directly to \code{\link[stats]{model.frame}}, which expects a
+  traditional \code{\link[stats]{formula}} as used in \code{\link[stats]{lm}} or
+  \code{\link[stats]{glm}}.
+
+  \code{fake_formula()} therefore "fakes" a standard formula by rewriting the
+  original model specification into a form that is acceptable to
+  \code{model.frame}, while preserving all variable transformations
+  (e.g., \code{log()}, \code{exp()}, arithmetic expressions) and extracting any
+  special model terms. These special terms can then be handled separately during
+  model setup and fitting.
+
+  In summary, the function separates the parsing of model terms from the
+  creation of the data frame: it provides a clean, simplified formula that
+  ensures correct extraction and evaluation of variables.
 }
 
 \usage{
@@ -37,12 +50,13 @@ fake_formula(formula, specials = NULL,
 }
 
 \examples{
-## basic formula
+## basic formula, log(x3) should be kept
 f <- y ~ x1 + x2 + log(x3)
 ff <- fake_formula(f)
 print(ff)
 
 ## including special model terms
+## again, keep log(x3)
 f <- y ~ x1 + s(x2) + x3 + te(log(x3), x4)
 ff <- fake_formula(f)
 print(ff)
@@ -82,6 +96,7 @@ f <- list(
   y3 ~ z2 + x1 + exp(x3) + s(x10)
 )
 ff <- fake_formula(f)
+print(ff)
 
 ## extract only without special terms
 ff <- fake_formula(f, nospecials = TRUE)

@@ -479,7 +479,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="extended-processing-of-fake-formulas">Extended Processing of "Fake" Formulas</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Create a "fake" formula from a <code>formula</code>, a <code>Formula</code>, or a <code>list</code> of <code>formula</code>s. The function extracts all necessary variables (transformation of variables), to build a <code>model.frame</code>. The function also extracts all special model terms within the formulas, the information can be used to setup any special model term specification list.</p>
+<p>Create a simplified or "fake" version of a model formula for internal use in <span class="pkg">gamlss2</span>. Many model formulas in <span class="pkg">gamlss2</span> may contain complex terms such as smoothing functions, tensor-product interactions, distributional components, or multiple right-hand sides. These extended formulas cannot be passed directly to <code>model.frame</code>, which expects a traditional <code>formula</code> as used in <code>lm</code> or <code>glm</code>.</p>
+<p><code>fake_formula()</code> therefore "fakes" a standard formula by rewriting the original model specification into a form that is acceptable to <code>model.frame</code>, while preserving all variable transformations (e.g., <code>log()</code>, <code>exp()</code>, arithmetic expressions) and extracting any special model terms. These special terms can then be handled separately during model setup and fitting.</p>
+<p>In summary, the function separates the parsing of model terms from the creation of the data frame: it provides a clean, simplified formula that ensures correct extraction and evaluation of variables.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -537,7 +539,7 @@ Logical, should only the special model terms be returned?
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## basic formula</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## basic formula, log(x3) should be kept</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">log</span>(x3)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -545,9 +547,10 @@ Logical, should only the special model terms be returned?
 <pre><code>y ~ x1 + x2 + log(x3)</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## including special model terms</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## again, keep log(x3)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>~x1 + x3 + x2 + log(x3) + x4</code></pre>
 </div>
@@ -605,16 +608,20 @@ Logical, should only the special model terms be returned?
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  y3 <span class="sc">~</span> z2 <span class="sc">+</span> x1 <span class="sc">+</span> <span class="fu">exp</span>(x3) <span class="sc">+</span> <span class="fu">s</span>(x10)</span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only without special terms</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">nospecials =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>y1 | y2 | y3 ~ x1 + x3 + x2 + log(x3) + x4 | x2 + sqrt(x5) | 
+    z2 + x1 + exp(x3) + x10</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only without special terms</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">nospecials =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>y1 | y2 | y3 ~ x1 + x3 | x2 + sqrt(x5) | z2 + x1 + exp(x3)</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only special terms</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">onlyspecials =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only special terms</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">onlyspecials =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
 [1] "s(x2)"          "te(log(x3),x4)"

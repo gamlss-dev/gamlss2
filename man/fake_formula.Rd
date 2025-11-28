@@ -45,6 +45,21 @@ fake_formula(formula, specials = NULL,
   If \code{onlyspecials = TRUE} a vector or list of special model term names is returned.
 }
 
+\note{
+  In some versions of the RStudio IDE, printing or inspecting a
+  \code{fake_formula()} object may trigger a message of the form
+
+    \code{'length = 2' in coercion to 'logical(1)'}.
+
+  This is due to the way RStudio internally inspects objects of class
+  \code{\link[Formula]{Formula}}, whose \code{length()} method returns a
+  two-element vector (reflecting the number of left- and right-hand side
+  components). The message does not indicate a problem with
+  \code{fake_formula()}, and the returned object is valid and works correctly
+  with \code{model.frame()} and subsequent processing. The message does not
+  appear in a standard R session outside RStudio.
+}
+
 \seealso{
   \code{\link{gamlss2}}
 }

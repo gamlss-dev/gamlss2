@@ -22,7 +22,11 @@ results.gamlss2 <- function(x, ...)
         for(i in x$sterms[[j]]) {
           ## For mgcv smooths.
           if("mgcv.smooth" %in% class(x$specials[[i]])) {
-            dim <- x$specials[[i]]$dim
+            if(inherits(x$specials[[i]], "fs.interaction")) {
+              dim <- length(x$specials[[i]]$term)
+            } else {
+              dim <- x$specials[[i]]$dim
+            }
             by <- x$specials[[i]]$by
             if(dim < 3 & !is.null(x$fitted.specials[[j]][[i]])) {
               if(dim > 1) {

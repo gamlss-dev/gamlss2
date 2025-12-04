@@ -730,7 +730,6 @@ la <- function(x, type = 1, const = 1e-05, ...)
     if(is.factor(x)) {
       if(inherits(x, "ordered")) {
         x <- factor(x, ordered = FALSE)
-        contrasts(x) <- diag(length(levels(x)))
       }
       st$X <- model.matrix(~ x, contrasts.arg = st$control$contrasts.arg,
         xlev = st$control$xlev)

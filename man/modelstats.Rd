@@ -5,7 +5,7 @@
 \title{GAIC and Generalised (Pseudo) R-squared for GAMLSS Models}
 
 \description{
-  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for a GAMLSS models.
+  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.
 }
 
 \usage{
@@ -26,9 +26,9 @@ Rsq(object, ...,
     the classical AIC.}
   \item{corrected}{Logical, whether the corrected AIC should be used?
     Note that it applies only when \code{k = 2}.}
-  \item{type}{which definition of R squared. Can be the \code{"Cox Snell"} or the Nagelkerke, \code{"Cragg Uhler"} or \code{"both"},
-    and \code{"simple"}, which computes the R-squared based on the median. In this case also \code{newdata} may be supplied.}
-  \item{newdata}{Only for \code{type = "simple"} the R-squared can be evaluated using \code{newdata}.}
+  \item{type}{Which definition of R squared. Can be the \code{"Cox Snell"} or the Nagelkerke, \code{"Cragg Uhler"} or \code{"both"},
+    or \code{"simple"}, which computes the R-squared based on the median. In this case also \code{newdata} may be supplied.}
+  \item{newdata}{Only for \code{type = "simple"}, the R-squared can be evaluated using \code{newdata}.}
 }
 
 \details{
@@ -39,7 +39,7 @@ Rsq(object, ...,
   where \eqn{L(0)} is the null model (only a constant is  fitted to all parameters) and 
   \eqn{L(\hat{\theta})}{L(fitted)} is the current fitted model. This definition sometimes is
   referred to as the Cox & Snell R-squared. The Nagelkerke /Cragg & Uhler's definition divides
-  the above with
+  the above by
 
   \deqn{1 - L(0)^{2/n}}{1-L(0)^(2/n)}
 }

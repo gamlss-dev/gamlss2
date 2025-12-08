@@ -42,6 +42,10 @@ Rsq(object, ...,
   the above by
 
   \deqn{1 - L(0)^{2/n}}{1-L(0)^(2/n)}
+
+  Note that \code{GAIC()} function is fully represented by the \code{\link[stats]{AIC}} and
+  \code{\link[stats]{BIC}} functions. We only included \code{GAIC()} because of the previous
+  package so users who relied on this function would still have the option.
 }
 
 \value{
@@ -70,9 +74,6 @@ Rsq(b1, b2)
 GAIC(b1, b2)
 AIC(b1, b2)
 BIC(b1, b2)
-
-## plot estimated effects
-plot(b2)
 }
 
 \keyword{regression}

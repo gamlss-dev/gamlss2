@@ -75,7 +75,9 @@ par <- data.frame(
 d$y <- fam$r(1, par)
 
 ## estimate model using the Kumaraswamy family
-b <- gamlss2(y ~ s(x), data = d, family = fam)
+## with shiftlog and log-link
+b <- gamlss2(y ~ s(x), data = d,
+  family = Kumaraswamy(a.link = shiftlog, b.link = "log"))
 
 ## plot estimated effect
 plot(b)

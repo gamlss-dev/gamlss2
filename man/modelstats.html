@@ -136,10 +136,8 @@ window.Quarto = {
 </script>
 
 <meta property="og:title" content="gamlss2">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/modelstats_files/figure-html/unnamed-chunk-1-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="960">
-<meta property="og:image:width" content="1344">
 </head>
 
 <body class="nav-sidebar floating nav-fixed quarto-light">
@@ -587,6 +585,7 @@ Only for <code>type = “simple”</code>, the R-squared can be evaluated using 
 <p>where <span class="math inline">\(L(0)\)</span> is the null model (only a constant is fitted to all parameters) and <span class="math inline">\(L(\hat{\theta})\)</span> is the current fitted model. This definition sometimes is referred to as the Cox &amp; Snell R-squared. The Nagelkerke /Cragg &amp; Uhler’s definition divides the above by</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(1 - L(0)^{2/n}\)</span></p>
+<p>Note that <code>GAIC()</code> function is fully represented by the <code>AIC</code> and <code>BIC</code> functions. We only included <code>GAIC()</code> because of the previous package so users who relied on this function would still have the option.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -660,15 +659,6 @@ b1 504.6373  6.00000</code></pre>
 <pre><code>        AIC       df
 b2 420.9960 12.32071
 b1 515.4773  6.00000</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="modelstats_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
 </div>
 </div>
 

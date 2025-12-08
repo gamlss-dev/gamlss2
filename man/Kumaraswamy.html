@@ -609,7 +609,9 @@ Not used.
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">r</span>(<span class="dv">1</span>, par)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model using the Kumaraswamy family</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x), <span class="at">data =</span> d, <span class="at">family =</span> fam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## with shiftlog and log-link</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x), <span class="at">data =</span> d,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">Kumaraswamy</span>(<span class="at">a.link =</span> shiftlog, <span class="at">b.link =</span> <span class="st">"log"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = -1503.9979 eps = 0.674665     
 GAMLSS-RS iteration  2: Global Deviance = -1504.1074 eps = 0.000072     

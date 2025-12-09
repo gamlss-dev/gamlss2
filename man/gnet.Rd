@@ -27,9 +27,7 @@ gnet(formula, ...)
   The optimal Lasso shrinkage parameter is selected based on an information
   criterion. Available options for the criterion are
   \code{criterion = c("gcv", "aic", "gaic", "aicc", "bic")}.
-}
 
-\note{
   The \code{gnet()} constructor differs from \code{\link{la}}. While
   \code{la()} implements a general framework for Lasso-type penalties
   (including group, ordinal, and nominal fusion constraints) and estimates

@@ -116,9 +116,9 @@ calibration(..., newdata = NULL,
 ## and compare two models
 set.seed(123)
 n <- 1000
-x1 <- rnorm(n, -3, 3)
-x2 <- rnorm(n, -3, 3)
-eta <- -0.5 + sin(x1) + 0.5 * x2
+x1 <- runif(n, -3, 3)
+x2 <- runif(n, -3, 3)
+eta <- sin(x1) + 0.5 * x2
 p <- plogis(eta)
 y <- rbinom(n, size = 1, prob = p)
 d <- data.frame(y = y, x1 = x1, x2 = x2)

@@ -566,8 +566,8 @@ special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## Lasso.
-lasso <- function(formula, ...)
+## Lasso with glmnet.
+gnet <- function(formula, ...)
 {
   stopifnot(requireNamespace("glmnet"))
 

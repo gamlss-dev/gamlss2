@@ -47,8 +47,9 @@ This is the default, since the mode of the distribution is only defined for \eqn
 }
 
 \references{
-Kumaraswamy P (1980). \dQuote{A Generalized Probability Density Function for Double-Bounded Random Processes.}
-  \emph{Journal of Hydrology}, 46(1), 79--88.
+  Kumaraswamy P (1980).
+  A Generalized Probability Density Function for Double-Bounded Random Processes.
+  \emph{Journal of Hydrology}, 46(1), 79-88.
   \doi{https://doi.org/10.1016/0022-1694(80)90036-0}
 }
 

@@ -1,5 +1,5 @@
-\name{lasso}
-\alias{lasso}
+\name{gnet}
+\alias{gnet}
 
 \title{Lasso with \pkg{glmnet}}
 
@@ -10,7 +10,7 @@
 
 \usage{
 ## Model term constructor function.
-lasso(formula, ...)
+gnet(formula, ...)
 }
 
 \arguments{
@@ -27,16 +27,42 @@ lasso(formula, ...)
   The optimal Lasso shrinkage parameter is selected based on an information
   criterion. Available options for the criterion are
   \code{criterion = c("gcv", "aic", "gaic", "aicc", "bic")}.
+
+  \note{
+    The \code{gnet()} constructor differs from \code{\link{la}}. While
+    \code{la()} implements a general framework for Lasso-type penalties
+    (including group, ordinal, and nominal fusion constraints) and estimates
+    the corresponding penalty matrices internally via iteratively reweighted
+    least squares, \code{gnet()} delegates estimation entirely to
+    \code{\link[glmnet]{glmnet}}. As a consequence, \code{gnet()} provides a
+    standard Lasso model term based on a \code{\link[stats]{model.matrix}}
+    representation, but does not support structured fusion penalties or
+    custom penalty matrices. Instead, it offers a fast and robust interface to
+    the \pkg{glmnet} algorithm and automatic selection of the shrinkage
+    parameter using information criteria.
+  }
+}
+
+\references{
+  Friedman J, Tibshirani R, Hastie T (2010).
+  Regularization Paths for Generalized Linear Models via Coordinate Descent.
+  \emph{Journal of Statistical Software}, \bold{33}(1), 1-22.
+  \doi{10.18637/jss.v033.i01}
+
+  Tay JK, Narasimhan B, Hastie T (2023).
+  Elastic Net Regularization Paths for All Generalized Linear Models.
+  \emph{Journal of Statistical Software}, \bold{106}(1), 1-31.
+  \doi{10.18637/jss.v106.i01}
 }
 
 \value{
-  The \code{lasso()} function is used internally within \code{\link{gamlss2}}
+  The \code{gnet()} function is used internally within \code{\link{gamlss2}}
   and provides the necessary details for estimating Lasso-type model terms using
   function \code{\link[glmnet]{glmnet}}.
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link{specials}}.
+  \code{\link{la}}, \code{\link{gamlss2}}, \code{\link{specials}}.
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
@@ -50,10 +76,10 @@ rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
   include.lowest = TRUE)
 
 ## set up the model formula for a BCT model
-f <- R ~ lasso(~Flc + Ac + loc) |
-  lasso(~Flc + Ac + loc) |
-  lasso(~Flc + Ac + loc) |
-  lasso(~Flc + Ac + loc)
+f <- R ~ gnet(~Flc + Ac + loc) |
+  gnet(~Flc + Ac + loc) |
+  gnet(~Flc + Ac + loc) |
+  gnet(~Flc + Ac + loc)
 
 ## estimation
 b <- gamlss2(f, data = rent, family = BCT)

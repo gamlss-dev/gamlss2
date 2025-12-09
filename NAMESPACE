@@ -61,7 +61,7 @@ export(
   "make.link2",
   "plot_lasso",
   "la",
-  "lasso",
+  "gnet",
   "cv_gamlss2",
   "log_pdf_metric",
   "rqres_metric",

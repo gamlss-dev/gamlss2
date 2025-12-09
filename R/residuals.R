@@ -151,3 +151,38 @@ residuals.gamlss2 <- function(object,
   return(res)
 }
 
+plot.gamlss2.residuals <- function(x, which = NULL, spar = TRUE, ...)
+{
+  ## What should be plotted?
+  if(is.null(which))
+    which <- c("hist-resid", "qq-resid", "wp-resid")
+  which.match <- c("hist-resid", "qq-resid", "wp-resid")
+  if(!is.character(which)) {
+    if(any(which > 3L))
+      which <- which[which <= 3L]
+    which <- which.match[which]
+  } else which <- which.match[grep2(tolower(which), which.match, fixed = TRUE)]
+  if(length(which) > length(which.match) || !any(which %in% which.match))
+    stop("argument which is specified wrong!")
+
+  if(spar) {
+    owd <- par(no.readonly = TRUE)
+    on.exit(par(owd))
+    par(mfrow = c(1, length(which)))
+  }
+
+  if("hist-resid" %in% which) {
+    plot_hist(x, ...)
+  }
+
+  if("qq-resid" %in% which) {
+    plot_qq(x, ...)
+  }
+
+  if("wp-resid" %in% which) {
+    plot_wp(x, ...)
+  }
+
+  invisible(NULL)
+}
+

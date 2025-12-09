@@ -9,7 +9,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(any(which > 5L))
       which <- which[which <= 5L]
     which <- which.match[which]
-  } else which <- which.match[grep(tolower(which), which.match, fixed = TRUE)]
+  } else which <- which.match[grep2(tolower(which), which.match, fixed = TRUE)]
   if(length(which) > length(which.match) || !any(which %in% which.match))
     stop("argument which is specified wrong!")
 
@@ -34,7 +34,6 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(which == "effects" & length(x$results$effects) < 1L)
       which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
-
 
   ask <- list(...)$ask
   if(is.null(ask))

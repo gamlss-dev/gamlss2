@@ -58,7 +58,7 @@ calibration(..., newdata = NULL,
 }
 
 \details{
-  For each fitted model, predicted probabilities for \code{P(Y = 1 | X)}
+  For each fitted model, predicted probabilities for \eqn{P(Y = 1 | X)}
   are obtained via \code{\link{predict}} with
   \code{type = "parameter"} and the requested \code{model} argument, if supplied.
   If the corresponding \code{\link{gamlss2.family}} object provides a

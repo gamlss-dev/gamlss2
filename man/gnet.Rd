@@ -83,7 +83,9 @@ f <- R ~ gnet(~Flc + Ac + loc) |
 b <- gamlss2(f, data = rent, family = BCT)
 
 ## summary, shows the estimated degrees of freedom
-## for each model term
+## for each model term, note that for parameters nu
+## and tau model terms where not included as
+## the deviance would increase
 summary(b)
 
 ## extract fitted special lasso model term

@@ -167,6 +167,17 @@ tF <- function(x, ...)
     return(x)
   }
 
+  if(x$family[1L] %in% .bi.list) {
+    bd <- list(...)$bd
+    if(is.null(bd)) {
+      bd <- get(paste("d", x$family[1], sep = ""))
+      bd <- formals(bd)$bd
+      if(is.null(bd)) {
+        bd <- 1
+      }
+    }
+  }
+
   args <- list(...)
   pr <- args$range
   check_range <- function(par) {

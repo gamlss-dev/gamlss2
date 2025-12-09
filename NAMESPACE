@@ -37,6 +37,7 @@ export(
   "gamlss2_control",
   "RS",
   "CG",
+  "calibration",
   "discretize",
   "ologit",
   "special_fit",

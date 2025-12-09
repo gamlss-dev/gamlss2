@@ -291,3 +291,167 @@ find_gamlss2 <- function(formula, families = NULL, k = 2,
   return(m)
 }
 
+## Calibration plots.
+calibration <- function(..., newdata = NULL,
+  y = NULL, model = NULL, breaks = seq(0, 1, by = 0.1),
+  minn = 20, main = "Calibration plot",
+  xlab = "Predicted probability",
+  ylab = "Observed proportion", plot = TRUE,
+  add_loess = TRUE, smooth_n = 200,
+  col = NULL, lty = NULL, legend = TRUE, pos = "topleft")
+{
+  models <- list(...)
+  if(length(models) == 0L) {
+    stop("Provide at least one fitted model to 'calibration()'.")
+  }
+  n_models <- length(models)
+
+  ## Derive model labels from the call.
+  mc <- match.call(expand.dots = FALSE)
+  model_exprs <- as.list(mc$...)
+  model_labels <- vapply(model_exprs, function(x) paste(deparse(x), collapse = ""),
+    FUN.VALUE = character(1))
+
+  ## Colors & line types.
+  if(is.function(col)) {
+    col <- col(n_models)
+  }
+  if(is.null(col)) {
+    col <- colorspace::qualitative_hcl(n_models)
+  } else if(length(col) < n_models) {
+    col <- rep(col, length.out = n_models)
+  }
+
+  if(is.null(lty)) {
+    lty <- seq_len(n_models)
+  } else if(length(lty) < n_models) {
+    lty <- rep(lty, length.out = n_models)
+  }
+
+  ## Get response y.
+  if(is.null(y)) {
+    ref <- models[[1L]]
+    if(is.null(newdata)) {
+      if(!is.null(ref$y)) {
+        y <- ref$y
+      } else {
+        y <- tryCatch(
+          stats::model.response(stats::model.frame(ref)),
+          error = function(e) NULL
+        )
+      }
+    } else {
+      y <- if(!is.null(newdata)) {
+        model.response(model.frame(models[[1L]], data = newdata, keepresponse = TRUE))
+      } else {
+        model.response(model.frame(models[[1L]], keepresponse = TRUE))
+      }
+    }
+    if(is.null(y)) {
+      stop("Could not extract response 'y'. Please provide 'y' explicitly.")
+    }
+  }
+
+  if(!is.null(dim(y))) {
+    y <- y[, 1L]
+  }
+
+  if(is.factor(y)) {
+    if(nlevels(y) > 2L)
+      stop("Number of levels of response 'y' greater than two!")
+    y <- as.integer(y) - 1L
+  }
+
+  if(!all(y %in% c(0, 1))) {
+    stop("Response 'y' must be 0/1 for 'calibration()'.")
+  }
+
+  ## Sanity for breaks.
+  if(range(breaks)[1] > 0 || range(breaks)[2] < 1) {
+    stop("'breaks' must cover [0, 1].")
+  }
+
+  ## Loop over models, bin, and aggregate.
+  res_list <- vector("list", n_models)
+
+  for(m in seq_len(n_models)) {
+    obj <- models[[m]]
+
+    p_hat <- predict(obj, newdata = newdata, model = model, type = "parameter")
+
+    if(!is.null(family(obj)$probabilities))
+      p_hat <- family(obj)$probabilities(p_hat)
+
+    if(!is.null(dim(p_hat)))
+      p_hat <- p_hat[, 1L]
+
+    if(length(p_hat) != length(y)) {
+      stop("Length of predictions and 'y' differ for model ", m, ".")
+    }
+
+    int <- cut(p_hat, breaks = breaks, include.lowest = TRUE)
+
+    tab_m <- aggregate(list(p_hat = p_hat, y = y), by = list(int = int), FUN = mean)
+    tab_m$n <- as.numeric(table(int))[match(tab_m$int, names(table(int)))]
+
+    ## Keep only bins with enough observations.
+    tab_m <- tab_m[tab_m$n >= minn & !is.na(tab_m$int), , drop = FALSE]
+
+    tab_m$model <- model_labels[m]
+    res_list[[m]] <- tab_m
+  }
+
+  tab <- do.call(rbind, res_list)
+  rownames(tab) <- NULL
+  names(tab) <- c("interval", "probs", "y", "n", "model")
+
+  if(!plot) {
+    if(n_models < 2L)
+      tab$model <- NULL
+    return(tab)
+  }
+
+  ## Plotting.
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op))
+
+  plot(c(0, 1), c(0, 1),
+    type = "n", xlab = xlab, ylab = ylab,
+    main = main)
+
+  abline(0, 1, lty = 2)
+
+  ## Point size based on bin size (global scaling).
+  max_cex <- 2
+  min_cex <- 0.7
+  cex_vals <- min_cex + (max_cex - min_cex) *
+    sqrt(tab$n) / max(sqrt(tab$n))
+
+  for(m in seq_len(n_models)) {
+    tab_m <- tab[tab$model == model_labels[m], , drop = FALSE]
+    if(nrow(tab_m) == 0L) next
+
+    points(tab_m$probs, tab_m$y,
+      pch = 19, cex = cex_vals[tab$model == model_labels[m]],
+      col = col[m])
+
+    if(add_loess && nrow(tab_m) >= 7L) {
+      lo <- stats::loess(y ~ probs, data = tab_m, weights = tab_m$n)
+      xg <- seq(0, 1, length.out = smooth_n)
+      yg <- stats::predict(lo, newdata = data.frame(probs = xg))
+      yg <- pmin(pmax(yg, 0), 1)
+      lines(xg, yg, col = col[m], lty = lty[m], lwd = 2)
+    }
+  }
+
+  if(legend && (length(model_labels) > 1L)) {
+    graphics::legend(pos, legend = model_labels,
+      col = col, lty = lty, pch = 19, bty = "n")
+  }
+
+  if(n_models < 2L)
+    tab$model <- NULL
+
+  invisible(tab)
+}
+

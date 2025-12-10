@@ -729,7 +729,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
   } else {
     if(is.factor(x)) {
       if(inherits(x, "ordered")) {
-        x <- factor(x, ordered = FALSE)
+        x <- factor(as.character(x), levels = levels(x))
       }
       st$X <- model.matrix(~ x, contrasts.arg = st$control$contrasts.arg,
         xlev = st$control$xlev)

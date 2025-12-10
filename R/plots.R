@@ -396,17 +396,17 @@ plot_hist <- function(x, ...)
   x <- na.omit(x)
   h <- hist(x, breaks = "Scott", plot = FALSE)
   d <- density(x)
-  ylim <- list(...)$ylim
-  if(is.null(ylim))
-    ylim <- range(c(h$density, d$y))
-  main <- list(...)$main
-  if(is.null(main))
-    main <- "Histogram and Density"
-  xlab <- list(...)$xlab
-  if(is.null(xlab))
-    xlab <- "Quantile Residuals"
-  hist(x, breaks = "Scott", freq = FALSE, ylim = ylim,
-    xlab = xlab, main = main, ...)
+  args <- list(...)
+  if(is.null(args$ylim))
+    args$ylim <- range(c(h$density, d$y))
+  if(is.null(args$main))
+    args$main <- "Histogram and Density"
+  if(is.null(args$xlab))
+    args$xlab <- "Quantile Residuals"
+  args$x <- x
+  args$breaks <- "Scott"
+  args$freq <- FALSE
+  do.call(graphics::hist, args)
   lines(d, lwd = 2, col = 4)
   rug(x, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 }
@@ -415,13 +415,13 @@ plot_hist <- function(x, ...)
 plot_qq <- function(x, ...)
 {
   z <- qnorm(ppoints(length(x)))
-  pch <- list(...)$pch
-  if(is.null(pch))
-    pch <- 19
-  col <- list(...)$col
-  if(is.null(col))
-    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
-  qqnorm(x, col = col, pch = pch)
+  args <- list(...)
+  if(is.null(args$pch))
+    args$pch <- 19
+  if(is.null(args$col))
+    args$col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
+  args$y <- x
+  do.call(stats::qqnorm, args)
   lines(z, z, lwd = 2, col = 4)
 }
 
@@ -437,41 +437,35 @@ plot_wp <- function(x, ...)
   int <- y3[1L] - slope * x3[1L]
   d$y <- d$y - (int + slope * d$x)
 
-  xlim <- list(...)$xlim
-  if(is.null(xlim)) {
-    xlim <- range(d$x)
-    xlim <- xlim + c(-0.1, 0.1) * diff(xlim)
+  args <- list(...)
+  if(is.null(args$xlim)) {
+    args$xlim <- range(d$x)
+    args$xlim <- args$xlim + c(-0.1, 0.1) * diff(args$xlim)
   }
 
-  ylim <- list(...)$ylim
-  if(is.null(ylim)) {
-    ylim <- range(d$y)
-    ylim <- ylim + c(-0.3, 0.3) * diff(ylim)
+  if(is.null(args$ylim)) {
+    args$ylim <- range(d$y)
+    args$ylim <- args$ylim + c(-0.3, 0.3) * diff(args$ylim)
   }
 
-  main <- list(...)$main
-  if(is.null(main))
-    main <- "Worm Plot"
-  xlab <- list(...)$xlab
-  if(is.null(xlab))
-    xlab <- "Theoretical Quantiles"
-  ylab <- list(...)$ylab
-  if(is.null(ylab))
-    ylab <- "Deviation"
-  pch <- list(...)$pch
-  if(is.null(pch))
-    pch <- 19
-  col <- list(...)$col
-  if(is.null(col))
-    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
+  if(is.null(args$main))
+    args$main <- "Worm Plot"
+  if(is.null(args$xlab))
+    args$xlab <- "Theoretical Quantiles"
+  if(is.null(args$ylab))
+    args$ylab <- "Deviation"
+  if(is.null(args$pch))
+    args$pch <- 19
+  if(is.null(args$col))
+    args$col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
+  args$x <- d$x
+  args$y <- d$y
 
-  plot(d$x, d$y, xlim = xlim, ylim = ylim,
-    xlab = xlab, ylab = ylab, main = main,
-    col = col, pch = pch)
+  do.call(base::plot, args)
   grid(lty = "solid")
 
   dz <- 0.25
-  z <- seq(xlim[1L], xlim[2L], dz)
+  z <- seq(args$xlim[1L], args$xlim[2L], dz)
   p <- pnorm(z)
   se <- (1/dnorm(z)) * (sqrt(p * (1 - p)/length(d$y)))
   low <- qnorm((1 - 0.95)/2) * se

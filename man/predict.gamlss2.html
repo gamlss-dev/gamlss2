@@ -487,7 +487,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code class="language-R">## S3 method for class 'gamlss2'
 predict(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, ...)
+  se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -547,6 +547,14 @@ logical. Should standard errors for the predictions be included? Standard errors
 </td>
 <td>
 logical. Should the predictions be simplified to a vector if possible (<code>TRUE</code>) or always returned as a data.frame (<code>FALSE</code>)?
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="exclude">exclude</code>
+</td>
+<td>
+character. Any terms named in this vector will be set to zero.
 </td>
 </tr>
 <tr>

@@ -971,6 +971,9 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
       contrasts.arg = x$contrasts.arg, xlev = x$xlev)
   } else {
     if(is.factor(data[[x$term]])) {
+      if(inherits(data[[x$term]], "ordered")) {
+        data[[x$term]] <- factor(as.character(data[[x$term]]), levels = levels(data[[x$term]]))
+      }
       X <- model.matrix(~ data[[x$term]], contrasts.arg = x$control$contrasts.arg, xlev = x$control$xlev)
       colnames(X) <- gsub("data[[x$term]]", "", colnames(X), fixed = TRUE)
     } else {

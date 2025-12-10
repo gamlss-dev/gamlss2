@@ -12,7 +12,7 @@ predicted (out-of-sample) parameters, terms, etc.
 \usage{
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, ...)
+  se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
 }
 \arguments{
   \item{object}{model object of class \code{\link{gamlss2}}.}
@@ -35,6 +35,7 @@ predicted (out-of-sample) parameters, terms, etc.
     by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
   \item{drop}{logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data.frame (\code{FALSE})?}
+  \item{exclude}{character. Any terms named in this vector will be set to zero.}
   \item{...}{currently only used for catching \code{what} as an alias for \code{model}.}
 }
 

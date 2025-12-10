@@ -1,7 +1,7 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
   model = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
-  terms = NULL, se.fit = FALSE, drop = TRUE, ...)
+  terms = NULL, se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
 {
   ## FIXME: se.fit, terms ...
   samples <- NULL
@@ -114,6 +114,19 @@ predict.gamlss2 <- function(object,
             xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
           }
         }
+        xn <- unique(xn)
+        if(!is.null(exclude)) {
+          drop_terms <- NULL
+          for(i in exclude) {
+            if(any(grepl(i, xn, fixed = TRUE))) {
+              drop_terms <- c(drop_terms, grep(i, xn, fixed = TRUE))
+            }
+          }
+          if(length(drop_terms)) {
+            drop_terms <- unique(drop_terms)
+            xn <- xn[-drop_terms]
+          }
+        }
         if(length(xn)) {
           xn2 <- list()
           for(i in seq_along(xn)) {
@@ -183,6 +196,18 @@ predict.gamlss2 <- function(object,
           }
         }
         xn <- unique(xn)
+        if(!is.null(exclude)) {
+          drop_terms <- NULL
+          for(i in exclude) {
+            if(any(grepl(i, xn, fixed = TRUE))) {
+              drop_terms <- c(drop_terms, grep(i, xn, fixed = TRUE))
+            }
+          }
+          if(length(drop_terms)) {
+            drop_terms <- unique(drop_terms)
+            xn <- xn[-drop_terms]
+          }
+        }
         if(length(xn)) {
           for(i in xn) {
             fit <- if(is.null(samples)) {

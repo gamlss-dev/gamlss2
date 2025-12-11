@@ -1132,7 +1132,10 @@ plot_lasso <- function(x, terms = NULL,
       lab <- list(...)$label
 
       rind <- rev(1:length(ic))
-      xlim <- rev(range(log(lambdas)))
+      xlim <- list(...)$xlim
+      if(is.null(xlim))
+        xlim <- rev(range(log(lambdas)))
+      ylim <- list(...)$ylim
 
       xlab <- list(...)$xlab
       if(is.null(xlab))
@@ -1145,12 +1148,12 @@ plot_lasso <- function(x, terms = NULL,
       if(which == "criterion") {
         plot(log(lambdas), ic, type = "l", lwd = lwd, col = col,
           xlab = xlab, ylab = ylab,
-          main = "", axes = FALSE, xlim = xlim)
+          main = "", axes = FALSE, xlim = xlim, ylim = ylim)
       } else {
         matplot(log(lambdas), cm,
           type = "l", lty = 1, lwd = lwd, col = col,
           xlab = xlab, ylab = ylab,
-          main = "", axes = FALSE, xlim = xlim)
+          main = "", axes = FALSE, xlim = xlim, ylim = ylim)
 
         names <- list(...)$names
         if(is.null(names))
@@ -1170,24 +1173,22 @@ plot_lasso <- function(x, terms = NULL,
 
           if(!all(names == "")) {
             at <- cm[1, ]
-
             labs <- labs0 <- names
             plab <- at
             o <- order(plab, decreasing = TRUE)
             labs <- labs[o]
             plab <- plab[o]
-            rplab <- diff(range(plab))
-            if(length(plab) > 2L) {
+            rplab <- diff(par()$usr[3:4])
+            if(length(plab) > 1L) {
               for(i in 1:(length(plab) - 1)) {
                 dp <- abs(plab[i] - plab[i + 1]) / (rplab + 1e-08)
-                if((dp <= 0.02) || (rplab <= 0.02)) {
+                if((dp <= 0.04)) {
                   labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
                   labs[i] <- ""
                 }
               }
             }
             labs <- labs[order(o)]
-
             if(!all(labs == "")) {
               axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
             }

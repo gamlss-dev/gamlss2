@@ -419,6 +419,8 @@ calibration <- function(..., newdata = NULL,
     type = "n", xlab = xlab, ylab = ylab,
     main = main)
 
+  abline(v = breaks, lty = 3, lwd = 0.5, col = "lightgray")
+  abline(h = breaks, lty = 3, lwd = 0.5, col = "lightgray")
   abline(0, 1, lty = 2)
 
   ## Point size based on bin size (global scaling).
@@ -435,13 +437,19 @@ calibration <- function(..., newdata = NULL,
       pch = 19, cex = cex_vals[tab$model == model_labels[m]],
       col = col[m])
 
-    if(add_loess && nrow(tab_m) >= 7L) {
+    warn <- getOption("warn")
+    options("warn" = -1)
+    if(add_loess && nrow(tab_m) >= 5L) {
       lo <- stats::loess(y ~ probs, data = tab_m, weights = tab_m$n)
       xg <- seq(0, 1, length.out = smooth_n)
       yg <- stats::predict(lo, newdata = data.frame(probs = xg))
       yg <- pmin(pmax(yg, 0), 1)
       lines(xg, yg, col = col[m], lty = lty[m], lwd = 2)
     }
+    options("warn" = warn)
+
+    points(tab_m$probs, tab_m$y, cex = cex_vals[tab$model == model_labels[m]],
+      col = rgb(0.1, 0.1, 0.1, alpha = 0.7))
   }
 
   if(legend && (length(model_labels) > 1L)) {

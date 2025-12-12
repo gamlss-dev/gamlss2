@@ -956,9 +956,9 @@ Weibull <- function(...)
 
 ## From VGAM.
 is.Numeric <- function (x, length.arg = Inf, integer.valued = FALSE, positive = FALSE) {
-  if (all(is.numeric(x)) && all(is.finite(x)) && (if (is.finite(length.arg)) length(x) == 
-    length.arg else TRUE) && (if (integer.valued) all(x == round(x)) else TRUE) && 
-    (if (positive) all(x > 0) else TRUE)) TRUE else FALSE
+  if(all(is.numeric(x)) && all(is.finite(x)) && (if(is.finite(length.arg)) length(x) == 
+    length.arg else TRUE) && (if(integer.valued) all(x == round(x)) else TRUE) && 
+    (if(positive) all(x > 0) else TRUE)) TRUE else FALSE
 }
 
 ## Yeo-Johnson transform family. From VGAM.
@@ -1090,7 +1090,7 @@ get_y_bd <- function(Y) {
     }
     bd <- Y[,1] + Y[,2]
     y <-  Y[,1]
-    if (any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
+    if(any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
   } else {
     stop(paste("For the binomial family, Y must be", 
       "a vector of 0 and 1's or a 2 column", "matrix where col 1 is no. successes", 
@@ -1117,42 +1117,7 @@ softplus <- function(a = 1) {
   return(link)
 }
 
-ologit4 <- function(...) {
-  fam <- list(
-    "family" = "Ordered Logit",
-    "names" = c("mu", "r1", "r2", "r3"),
-    "links" = c(mu = "identity", r1 = "identity", r2 = "identity", r3 = "identity"),
-    "pdf" = function(y, par, log = FALSE, ...) {
-      e1 <- exp(par$mu - par$r1) / (1 + exp(par$mu - par$r1))
-      e2 <- exp(par$mu - par$r2) / (1 + exp(par$mu - par$r2))
-      e3 <- exp(par$mu - par$r3) / (1 + exp(par$mu - par$r3))
-
-      p1 <- 1 - e1
-      p2 <- e1 - e2
-      p3 <- e2 - e3
-      p4 <- e3
-
-      d <- rep(NA, length(y))
-
-      d[y == 1L] <- p1[y == 1L]
-      d[y == 2L] <- p2[y == 2L]
-      d[y == 3L] <- p3[y == 3L]
-      d[y == 4L] <- p4[y == 4L]
-
-      d[d < 1e-08 | is.na(d)] <- 1e-08
-
-      if(log) {
-        d <- log(d)
-        d[is.na(d)] <- -1e+10
-      }
-
-      return(d)
-    }
-  )
-  class(fam) <- c("gamlss2.family", "family.bamlss")
-  return(fam)
-}
-
+## Ordered logit model.
 ologit <- function(k) {
   stopifnot(k >= 2)
 
@@ -1164,72 +1129,89 @@ ologit <- function(k) {
   links <- rep("identity", length(par_names))
   names(links) <- par_names
 
-  fam <- list(
-    family = paste0("Ordered Logit (", k, " categories)"),
-    names = par_names,
-    links = links,
+  ## Helper to build cutpoints, cumulative and category probabilities.
+  compute_components <- function(par) {
+    n <- length(par$location)
 
-    pdf = function(y, par, log = FALSE, ...) {
-      n <- length(y)
-
-      ## Build increasing cutpoints for all observations
-      cuts <- matrix(NA, nrow = n, ncol = k - 1)
-      cuts[, 1] <- par$theta1
-
-      if (k > 2) {
-        for (j in 2:(k - 1)) {
-          cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
-        }
+    ## Build increasing cutpoints.
+    cuts <- matrix(NA_real_, nrow = n, ncol = k - 1)
+    cuts[, 1] <- par$theta1
+    if(k > 2) {
+      for(j in 2:(k - 1)) {
+        cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
       }
+    }
 
-      ## Compute cumulative probabilities
-      cum_probs <- lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
-      cum_probs <- do.call(cbind, cum_probs)
+    ## Cumulative probabilities: c_j = P(Y > j).
+    cum_probs <- do.call(
+      cbind,
+      lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
+    )
 
-      ## Compute category probabilities
-      probs <- matrix(NA, nrow = n, ncol = k)
-      probs[, 1] <- 1 - cum_probs[, 1]
-      for (j in 2:(k - 1)) {
+    ## Category probabilities.
+    probs <- matrix(NA_real_, nrow = n, ncol = k)
+    probs[, 1] <- 1 - cum_probs[, 1]
+    if(k > 2) {
+      for(j in 2:(k - 1)) {
         probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
       }
-      probs[, k] <- cum_probs[, k - 1]
+    }
+    probs[, k] <- cum_probs[, k - 1]
 
-      ## Select correct category
-      p <- probs[cbind(seq_len(n), y)]
+    list(
+      cuts      = cuts,
+      cum_probs = cum_probs,
+      probs     = probs
+    )
+  }
+
+  fam <- list(
+    family = paste0("Ordered Logit (", k, " categories)"),
+    names  = par_names,
+    links  = links,
+
+    pdf = function(y, par, log = FALSE, ...) {
+      n     <- length(y)
+      y_int <- as.integer(y)
+
+      comps <- compute_components(par)
+      probs <- comps$probs
+
+      p <- probs[cbind(seq_len(n), y_int)]
       p[p < 1e-8 | is.na(p)] <- 1e-8
 
-      if (log) {
+      if(log) {
         p <- log(p)
         p[is.na(p)] <- -1e10
       }
 
-      return(p)
+      p
     },
 
     initialize = {
       init_list <- list()
 
-      ## Start value for location
+      ## Start value for location.
       init_list$location <- function(y, ...) {
         rep(mean(as.numeric(y)), length(y))
       }
 
-      ## Initialize theta1
+      ## Initialize theta1.
       init_list$theta1 <- function(y, ...) {
         probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
         q <- qlogis(probs[1])
         rep(q, length(y))
       }
 
-      ## Initialize deltas: log of spacing between cutpoints
-      for (j in 2:(k - 1)) {
+      ## Initialize deltas: log of spacing between cutpoints.
+      for(j in 2:(k - 1)) {
         init_list[[paste0("delta", j)]] <- local({
           jj <- j
           function(y, ...) {
             probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
             q <- qlogis(probs)
             diffs <- diff(q)
-            val <- if (jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
+            val <- if(jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
             rep(val, length(y))
           }
         })
@@ -1239,68 +1221,179 @@ ologit <- function(k) {
     }
   )
 
+  ## Probabilities on response scale.
   fam$probabilities <- function(par, ...) {
-    n <- length(par$location)
-    k <- length(par) - 1 + 1  ## Infer number of categories from number of deltas.
-
-    ## Reconstruct cutpoints.
-    cuts <- matrix(NA, nrow = n, ncol = k - 1)
-    cuts[, 1] <- par$theta1
-    if (k > 2) {
-      for (j in 2:(k - 1)) {
-        cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
-      }
-    }
-
-    ## Compute cumulative probabilities.
-    cum_probs <- lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
-    cum_probs <- do.call(cbind, cum_probs)
-
-    ## Category probabilities.
-    probs <- matrix(NA, nrow = n, ncol = k)
-    probs[, 1] <- 1 - cum_probs[, 1]
-    for (j in 2:(k - 1)) {
-      probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
-    }
-    probs[, k] <- cum_probs[, k - 1]
-
+    comps <- compute_components(par)
+    probs <- comps$probs
     colnames(probs) <- paste0("Pr(Y=", 1:k, ")")
-    return(probs)
+    probs
   }
 
+  fam$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
+    probs <- fam$probabilities(par)
+    n     <- nrow(probs)
+    K     <- ncol(probs)
+
+    ## Recycle y if scalar.
+    if(length(y) == 1L)
+      y <- rep.int(y, n)
+
+    ## Coerce to integer 1, ..., K.
+    if(is.factor(y)) {
+      y_int <- as.integer(y)
+    } else {
+      y_int <- as.integer(y)
+    }
+
+    if(any(is.na(y_int)))
+      stop("missing values in y are not allowed in cdf().")
+
+    if(any(y_int < 1L | y_int > K)) {
+      bad_vals <- sort(unique(y_int[y_int < 1L | y_int > K]))
+      stop(
+        "y has values outside 1..", K, " implied by ologit(k).\n",
+        "Offending values: ", paste(bad_vals, collapse = ", ")
+      )
+    }
+
+    ## Cumulative probabilities along ordered categories 1, ..., K.
+    cprobs <- t(apply(probs, 1L, cumsum))
+
+    ans <- cprobs[cbind(seq_len(n), y_int)]
+
+    if(!lower.tail) {
+      ans <- 1 - ans
+    }
+
+    if(log.p)
+      ans <- log(ans)
+
+    ans
+  }
+
+  fam$quantile <- function(p, par, ...) {
+    probs <- fam$probabilities(par)
+    n     <- nrow(probs)
+    K     <- ncol(probs)
+
+    ## Recycle p if scalar.
+    if(length(p) == 1L)
+      p <- rep.int(p, n)
+
+    if(length(p) != n)
+      stop("length(p) must be 1 or equal to the number of observations.")
+
+    if(any(is.na(p)))
+      stop("p must not contain NA.")
+    if(any(p < 0 | p > 1))
+      stop("p must be in [0, 1].")
+
+    ## Cumulative probabilities along ordered categories.
+    cprobs <- t(apply(probs, 1L, cumsum))
+
+    q <- integer(n)
+    for(i in seq_len(n)) {
+      idx <- which(cprobs[i, ] >= p[i])[1L]
+      if(is.na(idx))
+        idx <- K
+      q[i] <- idx
+    }
+
+    q
+  }
+
+  fam$logLik <- function(y, par, ...) {
+    sum(fam$pdf(y, par, log = TRUE))
+  }
+
+  fam$valid.response <- function(x) {
+    if(is.factor(x)) {
+      lev <- levels(x)
+      ok  <- all(lev %in% as.character(seq_len(k)))
+      if(!ok)
+        stop("factor response levels must be 1, ..., ", k)
+    } else {
+      if(!is.numeric(x))
+        stop("response must be numeric or factor for ologit().")
+      if(any(is.na(x)))
+        stop("missing values in response are not allowed.")
+      if(!all(x %in% seq_len(k)))
+        stop("numeric response values must be in {1, ..., ", k, "}.")
+    }
+    TRUE
+  }
+
+  fam$residuals <- function(object, ...) {
+    rqres_ologit(object, ...)
+  }
+
+  fam$type <- "discrete"
+
   class(fam) <- c("gamlss2.family", "family.bamlss")
-  return(fam)
+  fam
 }
 
-#if(FALSE) {
-#library("gamlss2")
+rqres_ologit <- function(object, ...) {
+  fam <- family(object)
+  if(!grepl("^Ordered Logit", fam$family))
+    stop("ologit family required.")
 
-### From MASS.
-#library("MASS")
+  mf <- model.frame(object)
+  y  <- stats::model.response(mf)
 
-#options(contrasts = c("contr.treatment", "contr.poly"))
+  ## Coerce to integer 1, ..., K.
+  if(is.factor(y)) {
+    y_int <- as.integer(y)
+  } else {
+    y_int <- as.integer(y)
+  }
 
-#m <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
-#summary(m)
+  par   <- predict(object)
+  probs <- fam$probabilities(par)
 
-### Response needs to be integer.
-#housing$Satint <- as.integer(housing$Sat)
+  n <- length(y_int)
+  K <- ncol(probs)
 
-### Estimate model.
-#b <- gamlss2(Satint ~ Infl + Type + Cont, data = housing, weights = Freq, family = ologitK(k = 3))
+  ## Check support.
+  if(any(y_int < 1L | y_int > K | is.na(y_int))) {
+    bad_vals <- sort(unique(y_int[y_int < 1L | y_int > K]))
+    stop(
+      "response has values outside 1..", K, " implied by ologit(k).\n",
+      "Offending values: ", paste(bad_vals, collapse = ", ")
+    )
+  }
 
-### Compare.
-#coef(m)
-#coef(b)
+  ## Cumulative probabilities along ordered categories 1, ..., K.
+  cprobs <- t(apply(probs, 1L, cumsum))
 
-### Predict probabilities.
-#pm <- predict(m, type = "p")
-#pb <- predict(b)
-#pb <- family(b)$probabilities(pb)
+  ## F_upper for observed category.
+  F_upper <- cprobs[cbind(seq_len(n), y_int)]
 
-#print(head(pm))
-#print(head(pb))
-#}
+  ## F_lower: 0 if category 1, otherwise cumulative up to y-1
+  F_lower <- numeric(n)
+  idx1    <- which(y_int == 1L)
+  if(length(idx1) > 0L)
+    F_lower[idx1] <- 0
+
+  idx_gt1 <- which(y_int > 1L)
+  if(length(idx_gt1) > 0L)
+    F_lower[idx_gt1] <- cprobs[cbind(idx_gt1, y_int[idx_gt1] - 1L)]
+
+  ## Clamp to [0, 1] and fix potential inversions.
+  F_upper <- pmin(pmax(F_upper, 0), 1)
+  F_lower <- pmin(pmax(F_lower, 0), 1)
+
+  bad_bounds <- !is.na(F_lower) & !is.na(F_upper) & (F_lower > F_upper)
+  if(any(bad_bounds)) {
+    tmp <- F_lower[bad_bounds]
+    F_lower[bad_bounds] <- F_upper[bad_bounds]
+    F_upper[bad_bounds] <- tmp
+  }
+
+  ## Randomized quantile residuals.
+  u <- runif(n, F_lower, F_upper)
+  qnorm(u)
+}
 
 ## Shifted log-link.
 shiftlog <- function(shift = 1) {

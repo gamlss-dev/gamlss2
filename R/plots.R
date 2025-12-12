@@ -150,8 +150,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if("scatter-resid" %in% which) {
       p <- predict(x, type = "parameter", drop = FALSE, ...)
-      m <- family(x)$quantile(0.5, p)
       n <- if(is.null(dim(p))) length(p) else nrow(p)
+      m <- NA
+      if(!is.null(family(x)$quantile))
+        m <- family(x)$quantile(0.5, p)
       if(length(m) != n) {
         if(is.null(family(x)$mean)) {
           m <- p[[1L]]

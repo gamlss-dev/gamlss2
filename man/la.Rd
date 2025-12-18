@@ -39,7 +39,9 @@ plot_lasso(x, terms = NULL,
   \item{spar}{Logical, should plotting parameters be automatically set in
     \code{\link[graphics]{par}}?}
   \item{\dots}{For function \code{la()} further control arguments can be passed:
-    The \code{criterion = "bic"} for shrinkage parameter selection, arguments
+    The \code{criterion = "aicc"} (corrected AIC) for shrinkage parameter selection
+    (other options are \code{"bic"}, \code{"gcv"}, \code{"aic"}, \code{"gaic"} with
+    default \code{K = 2}), arguments
     for creating the \code{\link[stats]{model.matrix}} if the model term is specified
     using a formula. For function \code{plot_lasso()} arguments like
     \code{lwd}, \code{col}, \code{main}, etc., that control plotting parameters
@@ -57,7 +59,8 @@ plot_lasso(x, terms = NULL,
   where coefficients are updated through iteratively reweighted least squares (IWLS).
   This is feasible due to the absolute function approximation, which results in
   a quadratic penalty matrix similar to that used in penalized splines. By default,
-  the shrinkage parameters are selected using the Bayesian Information Criterion (BIC).
+  the shrinkage parameters are selected using the corrected Akaike Information
+  Criterion (cAIC).
 
   \code{la()} differs from the model term constructor \code{\link{gnet}}.
   While \code{gnet()} delegates estimation to \code{\link[glmnet]{glmnet}}

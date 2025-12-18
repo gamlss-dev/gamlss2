@@ -584,7 +584,7 @@ gnet <- function(formula, ...)
   st <- list()
   st$control <- list(...)
   if(is.null(st$control$criterion))
-    st$control$criterion <- "bic"
+    st$control$criterion <- "aicc"
   st$term <- all.vars(formula) 
   st$label <- paste0("la(", paste0(gsub(" ", "",
     as.character(formula)), collapse = ""), ")") 
@@ -718,7 +718,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
   st <- list()
   st$control <- list(...)
   if(is.null(st$control$criterion))
-    st$control$criterion <- "bic"
+    st$control$criterion <- "aicc"
   st$term <- xn 
   st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
 
@@ -745,7 +745,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
   }
 
   ## !FIXME
-  if(isTRUE(st$is_factor) & FALSE) {
+  if(isTRUE(st$is_factor)) {
     st$blockscale <- attr(blockstand(st$X, n = nrow(st$X)), "blockscale")
     st$X <- st$X %*% st$blockscale
   }

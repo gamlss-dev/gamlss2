@@ -783,8 +783,6 @@ la <- function(x, type = 1, const = 1e-05, ...)
     is_scaled <- TRUE
   }
 
-print(is_scaled)
-
   colnames(st$X) <- cn
 
   ## Assign the "special" class and the new class "n".

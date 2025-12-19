@@ -284,7 +284,7 @@ Logical, should plotting parameters be automatically set in <code>par</code>?
 <code id="...">…</code>
 </td>
 <td>
-For function <code>la()</code> further control arguments can be passed: The <code>criterion = “aicc”</code> (corrected AIC) for shrinkage parameter selection (other options are <code>“bic”</code>, <code>“gcv”</code>, <code>“aic”</code>, <code>“gaic”</code> with default <code>K = 2</code>), arguments for creating the <code>model.matrix</code> if the model term is specified using a formula. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied. An additional ridge penalty (elastic net) can be added to each <code>la()</code> term be setting <code>add_ridge = TRUE</code> in the <code>gamlss2</code> call.
+For function <code>la()</code> further control arguments can be passed: The <code>criterion = “bic”</code> (BIC, default) for shrinkage parameter selection (other options are <code>“aic”</code>, <code>“aicc”</code>, <code>“gcv”</code> or <code>“gaic”</code> with default <code>K = 2</code>), arguments for creating the <code>model.matrix</code> if the model term is specified using a formula. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied. An additional ridge penalty (elastic net) can be added to each <code>la()</code> term be setting <code>add_ridge = TRUE</code> in the <code>gamlss2</code> call.
 </td>
 </tr>
 </tbody></table>

@@ -686,7 +686,7 @@ special_predict.glmnet.fitted <- function(x, data, se.fit = FALSE, ...)
 ## Matrix block standardization.
 blockscale <- function(X) {
   decomp <- qr(X)
-  if (decomp$rank < ncol(X)) stop("X not full rank")
+  if(decomp$rank < ncol(X)) stop("X not full rank")
   R <- qr.R(decomp)
   return(solve(R) * sqrt(nrow(X)))
 }
@@ -849,35 +849,49 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "nominal") {
     pen <- function(b) {
-      k <- ncol(x$X)
-      Af <- matrix(0, ncol = choose(k, 2), nrow = k)
-      combis <- combn(k, 2)
-      for(ff in 1:ncol(combis)){
-        Af[combis[1, ff], ff] <- 1
-        Af[combis[2, ff], ff] <- -1
+      k0 <- ncol(x$X)
+
+      ## all pairwise differences
+      Af_diff <- matrix(0, ncol = choose(k0, 2), nrow = k0)
+      combis <- combn(k0, 2)
+      for(ff in seq_len(ncol(combis))) {
+        Af_diff[combis[1, ff], ff] <-  1
+        Af_diff[combis[2, ff], ff] <- -1
       }
-      Af <- cbind(diag(k), Af)
-      w <- rep(0, length = ncol(Af))
+
+      ## fuse + shrink-to-zero
+      Af <- cbind(diag(k0), Af_diff)     # k0 x M
+
+      ## weights
+      w <- numeric(ncol(Af))
       df <- colSums(abs(x$X) > 0)
       nref <- n - sum(df)
-      for(k in 1:ncol(Af)) {
+
+      c0 <- 2 / (k0 + 1)  # block-size constant
+
+      for(m in seq_len(ncol(Af))) {
         if(nref < 0) {
-          w[k] <- 1
+          w[m] <- 1
         } else {
-          ok <- which(Af[, k] != 0)
-          w[k] <- if(length(ok) < 2) {
-            2 / (k + 1) * sqrt((df[ok[1]] + nref) / n)
+          ok <- which(Af[, m] != 0)
+          w[m] <- if(length(ok) < 2L) {
+            c0 * sqrt((df[ok[1]] + nref) / n)             # shrink term
           } else {
-            2 / (k + 1) * sqrt((df[ok[1]] + df[ok[2]]) / n)
+            c0 * sqrt((df[ok[1]] + df[ok[2]]) / n)        # fusion term
           }
         }
-        w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
+
+        denom <- abs(drop(crossprod(Af[, m], bml)))
+        if(denom < 1e-12) denom <- 1e-12
+        w[m] <- w[m] / denom
       }
-      A <- 0
-      for(k in 1:ncol(Af)) {
-        tAf <- t(Af[, k])
-        d <- drop(tAf %*% b)
-        A <- A + w[k] / sqrt(d^2 + x$control$const) * Af[, k] %*% tAf
+
+      ## LQA penalty matrix
+      A <- matrix(0, k0, k0)
+      for(m in seq_len(ncol(Af))) {
+        a <- Af[, m]
+        d <- drop(crossprod(a, b))
+        A <- A + w[m] / sqrt(d^2 + x$control$const) * (a %*% t(a))
       }
       A
     }
@@ -885,32 +899,48 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "ordinal") {
     pen <- function(b) {
-      k <- ncol(x$X)
-      Af <- diff(diag(k + 1))
-      Af[1, 1] <- 1
-      Af <- Af[, -ncol(Af), drop = FALSE]
-      w <- rep(0, length = ncol(Af))
-      df <- colSums(abs(x$X) > 0)
+      k0 <- ncol(x$X)
+
+      ## Af: first k0 columns shrink coefficients to 0,
+      ## remaining k0-1 columns fuse adjacent levels
+      D  <- diff(diag(k0))          # (k0-1) x k0
+      Af <- cbind(diag(k0), t(D))   # k0 x (2k0-1)
+
+      ## weights
+      w <- numeric(ncol(Af))
+
+      ## optional frequency weights for factor dummies
+      df   <- colSums(abs(x$X) > 0)
       nref <- n - sum(df)
-      for(k in 1:ncol(Af)) {
+
+      for(m in seq_len(ncol(Af))) {
         if(nref < 0) {
-          w[k] <- 1
+          w[m] <- 1
         } else {
-          ok <- which(Af[, k] != 0)
-          w[k] <- if(length(ok) < 2) {
-            sqrt((df[ok[1]] + nref) / n)
+          ok <- which(Af[, m] != 0)
+          if(length(ok) == 1L) {
+            ## shrink term (b_j)
+            w[m] <- sqrt(df[ok] / n)
           } else {
-            sqrt((df[ok[1]] + df[ok[2]]) / n)
+            ## fuse term (b_{j+1} - b_j): ok has length 2
+            w[m] <- sqrt((df[ok[1]] + df[ok[2]]) / n)
           }
         }
-        w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
+
+        ## same stabilization
+        denom <- abs(drop(crossprod(Af[, m], bml)))
+        if(denom < 1e-12) denom <- 1e-12
+        w[m] <- w[m] / denom
       }
-      A <- 0
-      for(k in 1:ncol(Af)) {
-        tAf <- t(Af[, k])
-        d <- drop(tAf %*% b)
-        A <- A + w[k] / sqrt(d^2 + x$control$const) * Af[, k] %*% tAf
+
+      ## local quadratic approximation
+      A <- matrix(0, k0, k0)
+      for(m in seq_len(ncol(Af))) {
+        a <- Af[, m]
+        d <- drop(crossprod(a, b))
+        A <- A + w[m] / sqrt(d^2 + x$control$const) * (a %*% t(a))
       }
+
       A
     }
   }

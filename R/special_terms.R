@@ -841,9 +841,9 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   if(x$lasso_type == "group") {
     pen <- function(b) {
       df <- ncol(x$X)
-      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
-      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
-      A
+      A <- 1 / rep(sqrt(sum(b^2) + x$control$const), df) *
+           1 / rep(sqrt(sum(bml^2) + x$control$const), df)
+      if(df < 2L) matrix(A, 1, 1) else diag(A)
     }
   }
 

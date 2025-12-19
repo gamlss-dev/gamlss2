@@ -246,7 +246,8 @@ window.Quarto = {
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
   add_loess = TRUE, smooth_n = 200,
-  col = NULL, lty = NULL, legend = TRUE, pos = "topleft")
+  col = NULL, lty = NULL, legend = TRUE, pos = "topleft",
+  xlim = NULL, ylim = NULL)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -378,6 +379,22 @@ Logical, should a legend be added when more than one model is supplied?
 </td>
 <td>
 Character, the position of the legend passed to <code>legend</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="xlim">xlim</code>
+</td>
+<td>
+The x limits of the plot.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="ylim">ylim</code>
+</td>
+<td>
+The y limits of the plot.
 </td>
 </tr>
 </tbody></table>

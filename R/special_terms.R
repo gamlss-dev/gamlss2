@@ -584,9 +584,9 @@ gnet <- function(formula, ...)
   st <- list()
   st$control <- list(...)
   if(is.null(st$control$criterion))
-    st$control$criterion <- "aicc"
+    st$control$criterion <- "bic"
   st$term <- all.vars(formula) 
-  st$label <- paste0("la(", paste0(gsub(" ", "",
+  st$label <- paste0("gnet(", paste0(gsub(" ", "",
     as.character(formula)), collapse = ""), ")") 
   st$X <- model.matrix(formula)
   if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
@@ -718,7 +718,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
   st <- list()
   st$control <- list(...)
   if(is.null(st$control$criterion))
-    st$control$criterion <- "aicc"
+    st$control$criterion <- "bic"
   st$term <- xn 
   st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
 

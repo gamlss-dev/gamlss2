@@ -39,8 +39,8 @@ plot_lasso(x, terms = NULL,
   \item{spar}{Logical, should plotting parameters be automatically set in
     \code{\link[graphics]{par}}?}
   \item{\dots}{For function \code{la()} further control arguments can be passed:
-    The \code{criterion = "aicc"} (corrected AIC) for shrinkage parameter selection
-    (other options are \code{"bic"}, \code{"gcv"}, \code{"aic"}, \code{"gaic"} with
+    The \code{criterion = "bic"} (BIC, default) for shrinkage parameter selection
+    (other options are \code{"aic"}, \code{"aicc"}, \code{"gcv"} or \code{"gaic"} with
     default \code{K = 2}), arguments
     for creating the \code{\link[stats]{model.matrix}} if the model term is specified
     using a formula. For function \code{plot_lasso()} arguments like

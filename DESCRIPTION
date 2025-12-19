@@ -1,7 +1,7 @@
 Package: gamlss2
 Title: GAMLSS Infrastructure for Flexible Distributional Regression
 Version: 0.1-0
-Date: 2025-12-04
+Date: 2025-12-19
 Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
                email = "Nikolaus.Umlauf@uibk.ac.at",
                comment = c(ORCID = "0000-0003-2160-9803")),

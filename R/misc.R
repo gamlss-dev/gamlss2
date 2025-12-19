@@ -298,7 +298,8 @@ calibration <- function(..., newdata = NULL,
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
   add_loess = TRUE, smooth_n = 200,
-  col = NULL, lty = NULL, legend = TRUE, pos = "topleft")
+  col = NULL, lty = NULL, legend = TRUE, pos = "topleft",
+  xlim = NULL, ylim = NULL)
 {
   models <- list(...)
   if(length(models) == 0L) {
@@ -415,7 +416,12 @@ calibration <- function(..., newdata = NULL,
   op <- par(no.readonly = TRUE)
   on.exit(par(op))
 
-  plot(c(0, 1), c(0, 1),
+  if(is.null(xlim))
+    xlim <- c(0, max(tab$probs))
+  if(is.null(ylim))
+    ylim <- c(0, max(tab$y))
+
+  plot(xlim, ylim,
     type = "n", xlab = xlab, ylab = ylab,
     main = main)
 

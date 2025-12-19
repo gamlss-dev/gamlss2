@@ -1129,6 +1129,13 @@ plot_lasso <- function(x, terms = NULL,
         cm <- rbind(cm, b)
       }
 
+      rescale <- list(...)$rescale
+      if(is.null(rescale))
+        rescale <- TRUE
+      if(!is.null(x$blockscale) && rescale) {
+        cm <- cm %*% t(x$blockscale)
+      }
+
       lab <- list(...)$label
 
       rind <- rev(1:length(ic))

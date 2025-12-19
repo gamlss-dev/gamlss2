@@ -71,7 +71,10 @@ plot_lasso(x, terms = NULL,
   fusing levels of categorical covariates, which is not available in
   \code{gnet()}. In addition, an optional ridge component can be added via
   \code{add_ridge = TRUE} in the \code{\link{gamlss2}} call, yielding an
-  elastic-net-type penalty for each \code{la()} term.
+  elastic-net-type penalty for each \code{la()} term. Note that the 0/1
+  design matrix for factors is scaled and \code{plot_lasso()} rescales
+  the coefficient paths by default unless \code{rescale = FALSE}
+  is passed to the dots argument.
 }
 
 \references{

@@ -779,7 +779,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
 
   if(st$control$scale && !is_scaled && st$lasso_type == "normal") {
     st$colscale <- colscale(st$X)
-    st$X <- sweep(X, 2, st$colscale, "*")
+    st$X <- sweep(st$X, 2, st$colscale, "*")
     is_scaled <- TRUE
   }
 
@@ -957,8 +957,13 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       P <- try(chol2inv(chol(XWX + l*S)), silent = TRUE)
     }
 
-    if(inherits(P, "try-error"))
-      P <- solve(XWX + S)
+    if(inherits(P, "try-error")) {
+      if(ridge) {
+        P <- solve(XWX + l[1]*S[[1]] + l[2]*S[[2]])
+      } else {
+        P <- solve(XWX + l*S)
+      }
+    }
 
     b <- drop(P %*% XWz)
 
@@ -1042,18 +1047,18 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
     X <- X[, -j, drop = FALSE]
   }
 
+  if(ncol(X) != length(x$coefficients)) {
+    if(!is.null(names(x$coefficients)) && !is.null(colnames(X))) {
+      X <- X[, names(x$coefficients), drop = FALSE]
+    }
+  }
+
   if(!is.null(x$blockscale)) {
     X <- X %*% x$blockscale
   } else if(!is.null(x$scalar_blockscale)) {
     X <- X * x$scalar_blockscale
   } else if(!is.null(x$colscale)) {
     X <- sweep(X, 2, x$colscale, "*")
-  }
-
-  if(ncol(X) != length(x$coefficients)) {
-    if(!is.null(names(x$coefficients)) && !is.null(colnames(X))) {
-      X <- X[, names(x$coefficients), drop = FALSE]
-    }
   }
 
   fit <- drop(X %*% x$coefficients)
@@ -1165,8 +1170,13 @@ plot_lasso <- function(x, terms = NULL,
           P <- try(chol2inv(chol(x$XWX + l*x$S)), silent = TRUE)
         }
 
-        if(inherits(P, "try-error"))
-          P <- solve(x$XWX + x$S)
+        if(inherits(P, "try-error")) {
+          if(is.list(x$S)) {
+            P <- solve(x$XWX + l[1]*x$S[[1]] + l[2]*x$S[[2]])
+          } else {
+            P <- solve(x$XWX + l*x$S)
+          }
+        }
 
         b <- drop(P %*% x$XWz)
 

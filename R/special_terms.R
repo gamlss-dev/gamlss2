@@ -684,17 +684,11 @@ special_predict.glmnet.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 ## Matrix block standardization.
-blockstand <- function(x, n)
-{
-  cn <- colnames(x)
-  decomp <- qr(x)
-  if(decomp$rank < ncol(x))
-    stop("block standardization cannot be computed, matrix is not of full rank!")
-  scale <- qr.R(decomp) * 1 / sqrt(n)
-  x <- qr.Q(decomp) * sqrt(n)
-  attr(x, "blockscale") <- scale
-  colnames(x) <- cn
-  x
+blockscale <- function(X) {
+  decomp <- qr(X)
+  if (decomp$rank < ncol(X)) stop("X not full rank")
+  R <- qr.R(decomp)
+  return(solve(R) * sqrt(nrow(X)))
 }
 
 ## Special lasso from Groll et al.
@@ -746,7 +740,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
 
   ## !FIXME
   if(isTRUE(st$is_factor)) {
-    st$blockscale <- attr(blockstand(st$X, n = nrow(st$X)), "blockscale")
+    st$blockscale <- blockscale(st$X)
     st$X <- st$X %*% st$blockscale
   }
 

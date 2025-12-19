@@ -16,7 +16,8 @@ calibration(..., newdata = NULL,
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
   add_loess = TRUE, smooth_n = 200,
-  col = NULL, lty = NULL, legend = TRUE, pos = "topleft")
+  col = NULL, lty = NULL, legend = TRUE, pos = "topleft",
+  xlim = NULL, ylim = NULL)
 }
 
 \arguments{
@@ -55,6 +56,8 @@ calibration(..., newdata = NULL,
     model is supplied?}
   \item{pos}{Character, the position of the legend passed to
     \code{\link[graphics]{legend}}.}
+  \item{xlim}{The x limits of the plot.}
+  \item{ylim}{The y limits of the plot.}
 }
 
 \details{

@@ -425,8 +425,8 @@ calibration <- function(..., newdata = NULL,
     type = "n", xlab = xlab, ylab = ylab,
     main = main)
 
-  abline(v = breaks, lty = 3, lwd = 0.5, col = "lightgray")
-  abline(h = breaks, lty = 3, lwd = 0.5, col = "lightgray")
+  grid(lty = 3, lwd = 0.5, col = "lightgray")
+
   abline(0, 1, lty = 2)
 
   ## Point size based on bin size (global scaling).

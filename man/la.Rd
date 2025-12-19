@@ -71,10 +71,47 @@ plot_lasso(x, terms = NULL,
   fusing levels of categorical covariates, which is not available in
   \code{gnet()}. In addition, an optional ridge component can be added via
   \code{add_ridge = TRUE} in the \code{\link{gamlss2}} call, yielding an
-  elastic-net-type penalty for each \code{la()} term. Note that the 0/1
-  design matrix for factors is scaled and \code{plot_lasso()} rescales
-  the coefficient paths by default unless \code{rescale = FALSE}
-  is passed to the dots argument.
+  elastic-net-type penalty for each \code{la()} term.
+
+  For numerical stability and comparability of shrinkage parameters across
+  different Lasso-type penalties, the design matrix of each \code{la()} model
+  term is internally scaled before estimation. The scaling depends on the
+  selected penalty type and is chosen such that it preserves the structural
+  meaning of the penalty.
+
+  \describe{
+    \item{\code{type = "group"}}{
+      For group Lasso penalties, factor-specific design matrices are
+      block-standardized using a QR decomposition. The columns within each
+      factor block are transformed to an orthonormal basis (up to a factor
+      \eqn{\sqrt{n}}), ensuring that the group penalty is invariant to the
+      chosen contrast coding and that groups of different sizes are penalized
+      on a comparable scale. This transformation may mix columns within a
+      block but preserves the column space of the design matrix.
+    }
+
+    \item{\code{type = "ordinal"} and \code{type = "nominal"}}{
+      For ordinal and nominal fusion penalties, no column mixing is applied.
+      Instead, each factor block is multiplied by a single scalar chosen such
+      that the root mean square column norm equals \eqn{\sqrt{n}}. This scalar
+      scaling preserves the interpretation of adjacent or pairwise differences
+      between factor levels, which form the basis of the fusion penalty.
+    }
+
+    \item{\code{type = "normal"}}{
+      For normal Lasso penalties, numeric covariates and matrices are scaled
+      column-wise so that each column has Euclidean norm \eqn{\sqrt{n}}.
+      This corresponds to standard Lasso scaling and ensures that shrinkage
+      is applied uniformly across covariates. If a factor is used with a
+      normal penalty, a single scalar scaling is applied, analogous to the
+      ordinal and nominal cases.
+    }
+  }
+
+  The applied scaling is stored internally and automatically reused during
+  prediction. When \code{plot_lasso()} is called with
+  \code{rescale = TRUE}, coefficient paths are transformed back to the
+  original parameterization to facilitate interpretation.
 }
 
 \references{
@@ -113,7 +150,7 @@ rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
   include.lowest = TRUE)
 
 ## set up the model formula for a BCT model
-f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | . | .
+f <- R ~ la(Flc,type=3) + la(Ac,type=3) + la(loc,type=3) | . | .
 
 ## estimation
 b <- gamlss2(f, data = rent, family = BCT)
@@ -176,7 +213,7 @@ sigma <- exp(-1 + X \%*\% beta$sigma)
 y <- rnorm(n, mean = mu, sd = sigma)
 
 ## model formula with nominal fused lasso
-f <- y ~ la(X,type=3) | la(X,type=3)
+f <- y ~ la(X,type=4) | la(X,type=4)
 
 ## estimate model incl. extra ridge penalty
 ## for all la() model terms
@@ -199,14 +236,17 @@ cb <- coef(b, full = TRUE)
 cb_mu <- cb[grep("mu.", names(cb))][-1]
 cb_sigma <- cb[grep("sigma.", names(cb))][-1]
 
+thres <- 0.01
+
 ## true positive rate
-tp <- mean(c(cb_mu[beta$mu > 0] > 0,
-  cb_sigma[beta$sigma > 0] > 0))
+tp <- mean(c(abs(cb_mu[beta$mu > 0]) > thres,
+  abs(cb_sigma[beta$sigma > 0]) > thres))
+print(tp)
 
 ## false positive rate, needs threshold
-thres <- 0.01
 fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
   abs(cb_sigma[beta$sigma == 0]) > thres))
+print(fp)
 }
 }
 

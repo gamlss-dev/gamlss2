@@ -691,6 +691,19 @@ blockscale <- function(X) {
   return(solve(R) * sqrt(nrow(X)))
 }
 
+scalar_blockscale <- function(X) {
+  n <- nrow(X)
+  cn2 <- colSums(X^2)
+  s <- sqrt(n) / sqrt(mean(cn2))
+  as.numeric(s)
+}
+
+colscale <- function(X) {
+  n <- nrow(X)
+  s <- sqrt(n) / sqrt(colSums(X^2))
+  s
+}
+
 ## Special lasso from Groll et al.
 la <- function(x, type = 1, const = 1e-05, ...)
 {
@@ -713,6 +726,8 @@ la <- function(x, type = 1, const = 1e-05, ...)
   st$control <- list(...)
   if(is.null(st$control$criterion))
     st$control$criterion <- "bic"
+  if(is.null(st$control$scale))
+    st$control$scale <- TRUE
   st$term <- xn 
   st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
 
@@ -734,14 +749,10 @@ la <- function(x, type = 1, const = 1e-05, ...)
     }
   }
 
-  if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
+  cn <- colnames(st$X)
+  if(!is.null(cn) && length(j <- grep("(Intercept)", cn, fixed = TRUE))) {
     st$X <- st$X[, -j, drop = FALSE]
-  }
-
-  ## !FIXME
-  if(isTRUE(st$is_factor)) {
-    st$blockscale <- blockscale(st$X)
-    st$X <- st$X %*% st$blockscale
+    cn <- cn[-j]
   }
 
   st$formula <- formula
@@ -751,6 +762,30 @@ la <- function(x, type = 1, const = 1e-05, ...)
   if(!is.character(type))
     type <- lt[type[1L]]
   st$lasso_type <- lt[match(type, lt)]
+
+  is_scaled <- FALSE
+
+  if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type == "group")) {
+    st$blockscale <- blockscale(st$X)
+    st$X <- st$X %*% st$blockscale
+    is_scaled <- TRUE
+  }
+
+  if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type %in% c("ordinal", "nominal"))) {
+    st$scalar_blockscale <- scalar_blockscale(st$X)
+    st$X <- st$X * st$scalar_blockscale
+    is_scaled <- TRUE
+  }
+
+  if(st$control$scale && !is_scaled && st$lasso_type == "normal") {
+    st$colscale <- colscale(st$X)
+    st$X <- sweep(X, 2, st$colscale, "*")
+    is_scaled <- TRUE
+  }
+
+print(is_scaled)
+
+  colnames(st$X) <- cn
 
   ## Assign the "special" class and the new class "n".
   class(st) <- c("special", "lasso")
@@ -940,7 +975,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
 
   ## Arguments needed for prediction and path plots.
-  keep <- c("formula", "term", "blockscale", "X")
+  keep <- c("formula", "term", "blockscale", "scalar_blockscale", "colscale", "X")
   rval[keep] <- x[keep]
   rval$z <- z
   rval$w <- w
@@ -979,9 +1014,12 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
     X <- X[, -j, drop = FALSE]
   }
 
-  ## !FIXME
   if(!is.null(x$blockscale)) {
     X <- X %*% x$blockscale
+  } else if(!is.null(x$scalar_blockscale)) {
+    X <- X * x$scalar_blockscale
+  } else if(!is.null(x$colscale)) {
+    X <- sweep(X, 2, x$colscale, "*")
   }
 
   if(ncol(X) != length(x$coefficients)) {
@@ -1125,9 +1163,16 @@ plot_lasso <- function(x, terms = NULL,
 
       rescale <- list(...)$rescale
       if(is.null(rescale))
-        rescale <- TRUE
-      if(!is.null(x$blockscale) && rescale) {
-        cm <- cm %*% t(x$blockscale)
+        rescale <- FALSE
+
+      if(rescale) {
+        if(!is.null(x$blockscale)) {
+          cm <- cm %*% t(x$blockscale)
+        } else if(!is.null(x$scalar_blockscale)) {
+          cm <- cm * x$scalar_blockscale
+        } else if(!is.null(x$colscale)) {
+          cm <- sweep(cm, 2, x$colscale, "*")
+        }
       }
 
       lab <- list(...)$label

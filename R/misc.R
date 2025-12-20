@@ -98,19 +98,17 @@ find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
       cat("..", j, "family\n")
     }
 
-    warning_occurred <- FALSE
+    flag <- new.env(parent = emptyenv())
+    flag$warning <- FALSE
 
     b <- try({
       withCallingHandlers(
         gamlss2(y ~ 1, family = families[[j]], trace = FALSE, ...),
-        warning = function(w) {
-          warning_occurred <<- TRUE
-          invokeRestart("muffleWarning")
-        }
+        warning = function(w) { flag$warning <- TRUE; invokeRestart("muffleWarning") }
       )
     }, silent = TRUE)
 
-    if(!inherits(b, "try-error") && !warning_occurred) {
+    if(!inherits(b, "try-error") && !flag$warning) {
       ic[j] <- GAIC(b, k = k)
       cat(".. .. IC =", round(ic[j], 4), "\n")
     } else {

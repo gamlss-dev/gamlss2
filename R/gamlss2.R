@@ -66,12 +66,12 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
 
   ## Check for "." in formula.
-  for(i in 1:length(formula)[2L]) {
+  for(i in seq_len(length(formula)[2L])) {
     rhs <- formula(formula, rhs = i)
     if(as.character(rhs[3]) == ".") {
       if(!inherits(data, "environment")) {
         yn <- NULL
-        for(j in 1:length(formula)[1L])
+        for(j in seq_len(length(formula)[1L]))
           yn <- c(yn, as.character(formula(formula, lhs = j))[2L])
         if(i < 2) {
           vn <- names(data)

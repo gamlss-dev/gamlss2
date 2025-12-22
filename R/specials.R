@@ -215,7 +215,6 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     XWX <- crossprod(XW, x$X)
     XWz <- crossprod(XW, z)
   }
-  S <- diag(1e-05, ncol(x$X))
 
   if(!is.null(x$control)) {
     control[names(x$control)] <- x$control
@@ -298,32 +297,42 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
   } else {
     ## Function to search for smoothing parameters using GCV etc.
+    S0 <- diag(1e-05, ncol(x$X))
+
     fl <- function(l, rf = FALSE) {
+      ## Build penalty S = S0 + sum_j l[j] S_j
+      S <- S0
       if(length(x$S)) {
-        for(j in 1:length(x$S))
-          S <- S + l[j] * x$S[[j]]
+        for(jj in 1:length(x$S))
+          S <- S + l[jj] * x$S[[jj]]
       }
 
-      P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
-      if(inherits(P, "try-error"))
-        P <- solve(XWX + S)
+      ## Precision matrix Q = X'WX + S
+      Q <- XWX + S
+      Q <- Q + diag(1e-08, ncol(Q))
+      cholQ <- chol(Q)
 
-      b <- drop(P %*% XWz)
+      ## b = Q^{-1} X'Wz
+      b <- backsolve(cholQ, forwardsolve(t(cholQ), XWz))
+      b <- drop(b)
 
       fit <- drop(x$X %*% b)
 
       if(control$binning)
         fit <- fit[x$binning$match.index]
 
-      edf <- sum(diag(XWX %*% P))
+      ## EDF = tr(X'WX Q^{-1})
+      Tmat <- backsolve(cholQ, forwardsolve(t(cholQ), XWX))
+      edf <- sum(diag(Tmat))
 
       if(rf) {
         return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-          "lambdas" = l, "vcov" = P, "df" = n - edf))
+          "lambdas" = l, "vcov" = chol2inv(cholQ), "df" = n - edf))
       } else {
         if(isTRUE(control$logLik)) {
-          eta[[j]] <- eta[[j]] + fit
-          rss <- family$logLik(y, family$map2par(eta))
+          eta2 <- eta
+          eta2[[j]] <- eta2[[j]] + fit
+          rss <- family$logLik(y, family$map2par(eta2))
         } else {
           rss <- sum(w * (z - fit)^2)
         }

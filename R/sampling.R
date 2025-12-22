@@ -629,6 +629,47 @@ propose <- function(x, y, family, eta, fitted, parameter, weights = NULL, contro
 propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   parameter, weights = NULL, control = NULL)
 {
+  ## Helper to build chol(Q), mean M, and edf using (optional) binning.
+  build_QM_edf <- function(wj, e, tau) {
+    if(isTRUE(control$binning) && !is.null(x$binning)) {
+      rw <- numeric(length(x$binning$nodups))
+      rz <- numeric(length(x$binning$nodups))
+
+      ## Reduce weights and response to unique rows.
+      calc_Xe(x$binning$sorted.index, wj, e, rw, rz, x$binning$order)
+
+      ## X'WX and X'We using reduced weights/response.
+      XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
+      XWz <- crossprod(x$X, rz)
+
+      ## For edf we need W^{1/2}X on unique rows.
+      XW <- x$X * sqrt(rw)
+    } else {
+      ## Full data.
+      XWX <- crossprod(x$X * sqrt(wj))
+      XWz <- crossprod(x$X, wj * e)
+      XW  <- x$X * sqrt(wj)
+    }
+
+    ## Add penalties.
+    for(jj in seq_along(tau)) {
+      XWX <- XWX + 1/tau[jj] * x$S[[jj]]
+    }
+
+    ## Stabilize and factorize.
+    XWX <- XWX + diag(1e-08, ncol(XWX))
+    cholQ <- chol(XWX)
+
+    ## Mean: M = Q^{-1}X'We (no explicit inverse).
+    M <- backsolve(cholQ, forwardsolve(t(cholQ), XWz))
+    M <- drop(M)
+
+    ## EDF: tr( XW Q^{-1} XW' ).
+    edf <- edf_from_cholQ_XP(XW, cholQ)
+
+    list("cholQ" = cholQ, "M" = M, "edf" = edf)
+  }
+
   ## Get parameters.
   peta <- family$map2par(eta)
 
@@ -643,7 +684,7 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   p1 <- x$prior(c(b0, tau))
 
   ## New shrinkage variance(s).
-  if(!x$fixed) {
+  if(!isTRUE(x$fixed)) {
     if(length(tau) > 1L) {
       theta <- c(b0, tau)
       tau_idx <- grep(".tau", names(theta), fixed = TRUE)
@@ -685,19 +726,11 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   ## Weights.
   wj <- if(is.null(weights)) hess else hess * weights
 
-  ## Compute mean and precision.
-  XW <- x$X * sqrt(wj)
-  XWX <- crossprod(XW)
-  for(jj in seq_along(tau)) {
-    XWX <- XWX + 1/tau[jj] * x$S[[jj]]
-  }
-  XWX <- XWX + diag(1e-08, ncol(XWX))
-  cholQ <- chol(XWX)
-  M <- backsolve(cholQ, forwardsolve(t(cholQ), crossprod(x$X, wj * e)))
-  M <- drop(M)
-
-  ## Degrees of freedom.
-  edf <- edf_from_cholQ_XP(x$X, cholQ)
+  ## Build proposal precision + mean (+ edf) using binning-aware code.
+  tmp <- build_QM_edf(wj, e, tau)
+  cholQ <- tmp$cholQ
+  M <- tmp$M
+  edf <- tmp$edf
 
   ## Sample new parameters.
   b1 <- rmvnorm_cholQ(M, cholQ)
@@ -706,8 +739,9 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   p2 <- x$prior(c(b1, tau))
   qbetaprop <- dmvnorm_cholQ(b1, M, cholQ)
 
-  ## New fitted values.        
-  fj <- drop(x$X %*% b1)
+  ## New fitted values.
+  fj0 <- drop(x$X %*% b1)
+  fj <- if(isTRUE(control$binning) && !is.null(x$binning)) fj0[x$binning$match.index] else fj0
 
   ## Set up new predictor.
   eta[[parameter]] <- eta[[parameter]] + fj
@@ -737,16 +771,10 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   ## New residuals.
   e <- z - eta2
 
-  ## Compute mean and precision.
-  XW <- x$X * sqrt(wj)
-  XWX <- crossprod(XW)
-  for(jj in seq_along(tau)) {
-    XWX <- XWX + 1/tau[jj] * x$S[[jj]]
-  }
-  XWX <- XWX + diag(1e-08, ncol(XWX))
-  cholQ <- chol(XWX)
-  M <- backsolve(cholQ, forwardsolve(t(cholQ), crossprod(x$X, wj * e)))
-  M <- drop(M)
+  ## Reverse density: rebuild Q,M at the new state.
+  tmp <- build_QM_edf(wj, e, tau)
+  cholQ <- tmp$cholQ
+  M <- tmp$M
 
   ## Log-priors.
   qbeta <- dmvnorm_cholQ(b0, M, cholQ)
@@ -766,7 +794,6 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
 
   return(fitted)
 }
-
 
 ## Function to compute proportional log-posterior.
 log_posterior <- function(coefficients, x, family, y,
@@ -798,9 +825,9 @@ dmvnorm_cholQ <- function(x, mean, cholQ) {
   0.5 * logdetQ - 0.5 * quad - 0.5 * p * log(2 * pi)
 }
 
-edf_from_cholQ_XP <- function(X, cholQ) {
-  B <- backsolve(cholQ, forwardsolve(t(cholQ), t(X)))
-  sum(X * t(B))
+edf_from_cholQ_XP <- function(XW, cholQ) {
+  B <- backsolve(cholQ, forwardsolve(t(cholQ), t(XW)))
+  sum(XW * t(B))
 }
 
 ## Univariate slice sampler.
@@ -808,75 +835,69 @@ uni.slice <- function(g, x, family, response, eta, id, j, ...,
   w = 1, m = 30, lower = -Inf, upper = +Inf, logPost)
 {
   x0 <- g[j]
-  gL <- gR <- g
-
   gx0 <- logPost(g, x, family, response, eta, id, ...)
 
-  ## Determine the slice level, in log terms.
+  ## Determine slice level (log).
   logy <- gx0 - rexp(1)
 
-  ## Find the initial interval to sample from.
+  ## Initial interval [L, R] of width w.
   u <- runif(1, 0, w)
-  gL[j] <- g[j] - u
-  gR[j] <- g[j] + (w - u)  ## should guarantee that g[j] is in [L, R], even with roundoff
+  L <- x0 - u
+  R <- x0 + (w - u)
 
-  ## Expand the interval until its ends are outside the slice, or until
-  ## the limit on steps is reached.
+  ## Step out.
+  eval_at <- function(val) {
+    old <- g[j]
+    g[j] <- val
+    out <- logPost(g, x, family, response, eta, id, ...)
+    g[j] <- old
+    out
+  }
+
   if(is.infinite(m)) {
     repeat {
-      if(gL[j] <= lower) break
-      if(logPost(gL, x, family, response, eta, id, ...) <= logy) break
-      gL[j] <- gL[j] - w
+      if(L <= lower) break
+      if(eval_at(L) <= logy) break
+      L <- L - w
     }
     repeat {
-      if(gR[j] >= upper) break
-      if(logPost(gR, x, family, response, eta, id, ...) <= logy) break
-      gR[j] <- gR[j] + w
+      if(R >= upper) break
+      if(eval_at(R) <= logy) break
+      R <- R + w
     }
-  } else {
-    if(m > 1) {
-      J <- floor(runif(1, 0, m))
-      K <- (m - 1) - J
-      while(J > 0) {
-        if(gL[j] <= lower) break
-        if(logPost(gL, x, family, response, eta, id, ...) <= logy) break
-        gL[j] <- gL[j] - w
-        J <- J - 1
-      }
-      while(K > 0) {
-        if(gR[j] >= upper) break
-        if(logPost(gR, x, family, response, eta, id, ...) <= logy) break
-        gR[j] <- gR[j] + w
-        K <- K - 1
-      }
+  } else if(m > 1) {
+    J <- floor(runif(1, 0, m))
+    K <- (m - 1) - J
+    while(J > 0) {
+      if(L <= lower) break
+      if(eval_at(L) <= logy) break
+      L <- L - w
+      J <- J - 1
+    }
+    while(K > 0) {
+      if(R >= upper) break
+      if(eval_at(R) <= logy) break
+      R <- R + w
+      K <- K - 1
     }
   }
 
-  ## Shrink interval to lower and upper bounds.
-  if(gL[j] < lower) {
-    gL[j] <- lower
-  }
-  if(gR[j] > upper) {
-    gR[j] <- upper
-  }
+  ## Clamp to bounds.
+  if(L < lower) L <- lower
+  if(R > upper) R <- upper
 
-  ## Sample from the interval, shrinking it on each rejection.
+  ## Shrinkage sampling.
   repeat {
-    g[j] <- runif(1, gL[j], gR[j])
-
-    gx1 <- logPost(g, x, family, response, eta, id, ...)
-
-    if(gx1 >= logy) break
-
-    if(g[j] > x0) {
-      gR[j] <- g[j]
-    } else {
-      gL[j] <- g[j]
+    x1 <- runif(1, L, R)
+    gx1 <- eval_at(x1)
+    if(gx1 >= logy) {
+      g[j] <- x1
+      break
     }
+    if(x1 > x0) R <- x1 else L <- x1
   }
 
-  ## Return the point sampled
-  return(g)
+  g
 }
 
 ## Internal MCMC sampling function.
@@ -927,7 +948,8 @@ if(FALSE) {
   d <- data.frame("x" = seq(-pi, pi, length = n))
   d$y <- 1.2 + sin(d$x) + rnorm(n, sd = exp(-1 + cos(d$x)))
 
-  b <- bamlss2(y ~ x + s(x) | x + s(x), data = d)
+  b <- gamlss2(y ~ x + s(x) | x + s(x), data = d)
+  a <- mcmc(b)
 
   p <- predict(b)
 

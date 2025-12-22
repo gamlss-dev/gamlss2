@@ -182,7 +182,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Null deviance.
-  dev0 <- -2 * family$logLik(y, family$map2par(eta))
+  dev0 <- -2 * family$logLik(y, family$map2par(etastart))
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
@@ -371,12 +371,15 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ## Weights.
             wj <- if(is.null(weights)) zw$weights else zw$weights * weights
 
+            ## Design matrix.
+            Xj <- x[, xterms[[j]], drop = FALSE]
+
             ## Estimate weighted linear model.
             if(ridge) {
-              m <- ridge.lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, penalty = penalty[j], control)
+              m <- ridge.lm.wfit(Xj, e, wj, penalty = penalty[j], control)
               penalty[j] <- m$penalty
             } else {
-              m <- lm.wfit(x[, xterms[[j]], drop = FALSE], e, wj, method = "qr")
+              m <- lm.wfit(Xj, e, wj, method = "qr")
             }
 
             ## If linear model does not improve the fit, use ML.
@@ -386,8 +389,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
             if(ll1 < ll02 && isTRUE(control$backup)) {
               ll <- function(par) {
-                eta[[j]] <- eta[[j]] + drop(x[, xterms[[j]], drop = FALSE] %*% par)
-                -family$logLik(y, family$map2par(eta)) + lambda * sum(par^2)
+                etai <- eta
+                etai[[j]] <- etai[[j]] + drop(Xj %*% par)
+                -family$logLik(y, family$map2par(etai)) + lambda * sum(par^2)
               }
               warn <- getOption("warn")
               options("warn" = -1)
@@ -405,7 +409,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               }
               if(!inherits(opt, "try-error")) {
                 m$coefficients <- opt$par
-                m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% opt$par)
+                m$fitted.values <- drop(Xj %*% opt$par)
                 etai[[j]] <- etai[[j]] + m$fitted.values
                 ll1 <- family$logLik(y, family$map2par(etai))
               }
@@ -417,7 +421,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 if(control$autostep) {
                   stepfun <- function(nu) {
                     b <- nu * m$coefficients + (1 - nu) * fit[[j]]$coefficients
-                    f <- drop(x[, xterms[[j]], drop = FALSE] %*% b)
+                    f <- drop(Xj %*% b)
                     eta[[j]] <- eta[[j]] + f
                     -family$logLik(y, family$map2par(eta))
                   }
@@ -428,7 +432,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 }
                 m$coefficients <- step[[j]]$xterms * m$coefficients +
                   (1- step[[j]]$xterms) * fit[[j]]$coefficients
-                m$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% m$coefficients)
+                m$fitted.values <- drop(Xj %*% m$coefficients)
               }
             }
 
@@ -515,7 +519,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           }
 
           ## Stopping criterion.
-          eps[2L] <- abs((ll1 - ll0) / ll0)
+          eps[2L] <- abs(ll1 - ll0) / (abs(ll0) + 1e-08)
 
           ## Update working response.
           if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
@@ -724,9 +728,11 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
   if(is.null(K))
     K <- 2.0
 
-  XW <- x * w
-  XWX <- crossprod(XW, x)
-  XWy <- crossprod(XW, y)
+  ## Precompute weighted crossproducts using sqrt(w) once.
+  sw <- sqrt(w)
+  XW <- x * sw
+  XWX <- crossprod(XW)
+  XWy <- crossprod(XW, y * sw)
 
   nc <- ncol(x)
   i <- which(colnames(x) == "(Intercept)")
@@ -740,33 +746,52 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
 
   ## Function to find optimum ridge penalty.
   fp <- function(pen, rf = FALSE) {
+
+    ## Penalty matrix.
     S <- diag(I * pen)
     if(!length(S))
       S <- 0.0
 
-    P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
-    if(inherits(P, "try-error"))
-      P <- solve(XWX + S)
+    ## Precision matrix Q = X'WX + S.
+    Q <- XWX + S
+    Q <- Q + diag(1e-08, ncol(Q))
 
-    b <- drop(P %*% XWy)
+    ## Cholesky factorization.
+    cholQ <- try(chol(Q), silent = TRUE)
+    if(inherits(cholQ, "try-error")) {
+      Q <- Q + diag(1e-05, ncol(Q))
+      cholQ <- chol(Q)
+    }
+
+    ## b = Q^{-1} X'Wy.
+    b <- backsolve(cholQ, forwardsolve(t(cholQ), XWy))
+    b <- drop(b)
 
     fit <- drop(x %*% b)
 
-    edf <- sum(diag(XWX %*% P))
+    ## EDF = tr(X'WX Q^{-1}).
+    Tmat <- backsolve(cholQ, forwardsolve(t(cholQ), XWX))
+    edf <- sum(diag(Tmat))
+
+    ## Guard: edf can get numerically >= n in extreme cases.
+    if(!is.finite(edf))
+      edf <- nc
+    if(edf > (n - 1e-08))
+      edf <- n - 1e-08
 
     if(rf) {
       names(b) <- colnames(x)
       return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-        "penalty" = pen, "vcov" = P, "df" = n - edf))
+        "penalty" = pen, "vcov" = chol2inv(cholQ), "df" = n - edf))
     } else {
       rss <- sum(w * (y - fit)^2)
 
       rval <- switch(tolower(control$criterion),
-        "gcv" = rss * n / (n - edf)^2,
-        "aic" = rss + 2 * edf,
+        "gcv"  = rss * n / (n - edf)^2,
+        "aic"  = rss + 2 * edf,
         "gaic" = rss + K * edf,
         "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
-        "bic" = rss + log(n) * edf
+        "bic"  = rss + log(n) * edf
       )
 
       return(rval)
@@ -774,6 +799,7 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
   }
 
   if(!only_itcpt) {
+    ## Optimize ridge penalty over a modest bracket.
     opt <- nlminb(penalty, objective = fp, lower = penalty / 10, upper = penalty * 10)
   } else {
     opt <- list(par = 0.0)

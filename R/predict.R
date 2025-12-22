@@ -5,7 +5,7 @@ predict.gamlss2 <- function(object,
 {
   ## FIXME: se.fit, terms ...
   samples <- NULL
-  if(se.fit || !is.null(list(...)$FUN)) {
+  if(se.fit || !is.null(list(...)$FUN) || inherits(object, "bamlss2")) {
     if(is.null(object$samples)) {
       R <- list(...)$R
       if(is.null(R))
@@ -21,6 +21,14 @@ predict.gamlss2 <- function(object,
       samples <- sampling(object, R = R, full = TRUE)
     } else {
       samples <- object$samples
+    }
+  }
+
+  if(!is.null(samples)) {
+    burnin <- list(...)$burnin
+    if(!is.null(burnin)) {
+      burnin <- as.integer(burnin)
+      samples <- samples[-seq.int(burnin), , drop = FALSE]
     }
   }
 
@@ -220,7 +228,7 @@ predict.gamlss2 <- function(object,
               matrix(0.0, nrow = nrow(mf), ncol = nrow(samples))
             }
             if(inherits(object$specials[[i]], "mgcv.smooth")) {
-              if(!is.null(object$fitted.specials[[j]][[i]]$selected)) {
+              if(!is.null(object$fitted.specials[[j]][[i]]$selected) || !is.null(samples)) {
                 Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
                 if(is.null(samples)) {
                   co <- object$fitted.specials[[j]][[i]]$coefficients

@@ -41,17 +41,45 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     burnin <- 200L
 
   ## Thinning samples.
-  thinning <- control$thinning
-  if(is.null(thinning))
-    thinning <- 1L
+  thin <- control$thin
+  if(is.null(thin))
+    thin <- 1L
 
   ## Type conversion.
-  n.iter <- as.integer(n.iter)
-  burnin <- as.integer(burnin)
-  thinning <- as.integer(thinning)
+  n.iter   <- as.integer(n.iter)
+  burnin   <- as.integer(burnin)
+  thin <- as.integer(thin)
+
+  ## Basic sanity checks.
+  if(is.na(n.iter) || n.iter <= 0L)
+    stop("n.iter must be a positive integer.")
+
+  if(is.na(burnin) || burnin < 0L)
+    stop("burnin must be a non-negative integer.")
+
+  if(is.na(thin) || thin <= 0L)
+    stop("thin must be a positive integer.")
+
+  ## Logical consistency (adaptive).
+  if(burnin >= n.iter)
+    burnin <- 0L
+
+  ## Number of saved iterations (adaptive).
+  nsave <- (n.iter - burnin) %/% thin
+
+  if(nsave <= 0L) {
+    thin <- 1L
+    nsave <- n.iter - burnin
+  }
+
+  if(nsave <= 0L) {
+    burnin <- 0L
+    thin <- 1L
+    nsave <- n.iter
+  }
 
   ## Numbers of samples to save.
-  iterthin <- seq.int(burnin, n.iter, by = thinning)
+  iterthin <- seq.int(burnin + 1L, n.iter, by = thin)
   nsave <- length(iterthin)
 
   ## Starting values [same in RS()].
@@ -123,8 +151,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eta[[j]] <- rep(0.0, n)
     nes[[j]] <- FALSE
     if(length(xterms[[j]])) {
-      samples[[j]]$p <- matrix(NA, nrow = nsave, ncol = length(xterms[[j]]))
-      colnames(samples[[j]]$p) <- xterms[[j]]
+      samples[[j]]$p <- matrix(NA, nrow = nsave, ncol = length(xterms[[j]]) + 1L)
+      colnames(samples[[j]]$p) <- c(xterms[[j]], "alpha")
       if("(Intercept)" %in% xterms[[j]]) {
         fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
         names(fit[[j]]$coefficients) <- xterms[[j]]
@@ -156,9 +184,9 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             "fitted.values" = rep(0.0, n),
             "edf" = 0.0,
             "coefficients" = setNames(rep(0.0, ncol(specials[[i]]$X)),
-              colnames(specials[[i]]$X)),
+              paste0(j, ".s.", i, ".", seq_along(ncol(specials[[i]]$X)))),
             "tau" = setNames(rep(0.001, length(specials[[i]]$S)),
-              paste0(".tau", seq_along(specials[[i]]$S)))
+              paste0(j, ".s.", i, ".tau", seq_along(specials[[i]]$S)))
           )
           samples[[j]]$s[[i]] <- matrix(NA, nrow = nsave,
             ncol = ncol(specials[[i]]$X) + length(specials[[i]]$S) + 2L)
@@ -199,7 +227,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Null deviance.
-  dev0 <- -2 * family$logLik(y, family$map2par(eta))
+  dev0 <- -2 * family$logLik(y, family$map2par(etastart))
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(xterms)) {
@@ -234,6 +262,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             }
           }
         }
+        ## Null deviance.
+        dev0 <- -2 * family$logLik(y, family$map2par(eta))
       }
     }
   }
@@ -253,6 +283,15 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     priors$p <- function(parameters) {
       sum(dnorm(parameters, sd = 1000, log = TRUE))
     }
+  }
+
+  ## Tracking.
+  track <- list()
+  track$logLik <- rep(NA_real_, nsave)
+  track$deviance <- rep(NA_real_, nsave)
+  track$eta <- list()
+  for(j in np) {
+    track$eta[[j]] <- rep(0.0, n)
   }
 
   ## Start time etc.
@@ -353,7 +392,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         alpha <- (pibetaprop + qbeta + p2) - (pibeta + qbetaprop + p1)
 
         ## Accept or reject?
-        if(runif(1L) <= exp(alpha)) {
+        if(runif(1L) <= min(1, exp(alpha))) {
           fit[[j]]$coefficients <- b1
           fit[[j]]$fitted.values <- fj
         } else {
@@ -362,7 +401,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## Save.
         if(do_save) {
-          samples[[j]]$p[isave, ] <- fit[[j]]$coefficients
+          samples[[j]]$p[isave, ] <- c(fit[[j]]$coefficients, min(1, exp(alpha)))
         }
       }
 
@@ -394,9 +433,18 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           }
         }
       }
+
+      ## Save eta.
+      if(do_save) {
+        track$eta[[j]] <- track$eta[[j]] + eta[[j]]
+      }
     }
 
+    ## Save global logLik / deviance once per saved iteration.
     if(do_save) {
+      ll_iter <- family$logLik(y, family$map2par(eta))
+      track$logLik[isave] <- ll_iter
+      track$deviance[isave] <- -2 * ll_iter
       isave <- isave + 1L
     }
 
@@ -409,15 +457,13 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     cat("\n")
 
   ## Get mean coefficients.
-  coef_lin <- eta <- list()
+  coef_lin <- list()
   for(j in np) {
-    eta[[j]] <- rep(0, n)
+    track$eta[[j]] <- track$eta[[j]] / nsave
 
     if(!is.null(samples[[j]]$p)) {
       coef_lin[[j]] <- apply(samples[[j]]$p, 2, mean, na.rm = TRUE)
       colnames(samples[[j]]$p) <- paste0(j, ".p.", colnames(samples[[j]]$p))
-      fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% coef_lin[[j]])
-      eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
     }
 
     if(!is.null(samples[[j]]$s)) {
@@ -431,8 +477,11 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           paste0(j, ".s.", k, ".alpha")
         )
 
-        cm <- apply(samples[[j]]$s[[k]][, 1:nc, drop = FALSE], 2, mean)
-        sfit[[j]][[k]]$fitted.values <- drop(specials[[k]]$X %*% cm)
+        kfit <- apply(samples[[j]]$s[[k]][, 1:nc, drop = FALSE], 1, function(b) {
+          specials[[k]]$X %*% b
+        })
+        kfit <- apply(kfit, 1, mean)
+        sfit[[j]][[k]]$fitted.values <- drop(kfit)
         lj <- grep(".lambda", colnames(samples[[j]]$s[[k]]))
         sfit[[j]][[k]]$lambda <- apply(samples[[j]]$s[[k]][, lj, drop = FALSE], 2, mean)
         lj <- grep(".edf", colnames(samples[[j]]$s[[k]]))
@@ -440,8 +489,6 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         lj <- grep(".alpha", colnames(samples[[j]]$s[[k]]))
         sfit[[j]][[k]]$alpha <- mean(samples[[j]]$s[[k]][, lj])
         sfit[[j]][[k]]$vcov <- cov(samples[[j]]$s[[k]][, 1:nc, drop = FALSE])
-
-        eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
       }
 
       samples[[j]] <- cbind(samples[[j]]$p, do.call("cbind", samples[[j]]$s))
@@ -452,24 +499,32 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   samples <- do.call("cbind", samples)
 
-  ll <- family$logLik(y, family$map2par(eta))
+  ll <- family$logLik(y, family$map2par(track$eta))
+
+  Dbar <- mean(track$deviance, na.rm = TRUE)
+  Dhat <- -2 * ll
+  pD <- Dbar - Dhat
+  DIC <- Dhat + 2 * pD
+
+  dic <- list("Dbar" = Dbar, "Dhat" = Dhat, "pD" = pD, "DIC" = DIC)
 
   rval <- list(
-    "fitted.values" = as.data.frame(eta),
+    "fitted.values" = as.data.frame(track$eta),
     "fitted.specials" = sfit,
     "fitted.linear" = fit,
     "coefficients" = coef_lin,
     "iterations" = iter,
     "logLik" = ll, "control" = control,
-    "nobs" = length(eta[[1L]]),
+    "nobs" = n,
     "deviance" = -2 * ll,
     "null.deviance" = dev0,
     "dev.reduction" = abs((dev0 - (-2 * ll)) / dev0),
+    "dic" = dic,
     "nullmodel" = control$nullmodel,
     "samples" = samples
   )
 
-  class(rval) <- c("gamlss2.mcmc", "gamlss2")
+  class(rval) <- c("bamlss2", "gamlss2")
 
   return(rval)
 }
@@ -519,7 +574,14 @@ prior <- function(x, ...) {
 prior.mgcv.smooth <- function(x, ...)
 {
   function(parameters) {
-    i <- grep(".tau", names(parameters), fixed = TRUE)
+    nms <- names(parameters)
+    i <- integer(0)
+    if(!is.null(nms))
+      i <- grep(".tau", nms, fixed = TRUE)
+    if(length(i) == 0L) {
+      m <- length(x$S)
+      i <- (length(parameters) - m + 1L):length(parameters)
+    }
 
     tau <- parameters[i]
     gamma <- parameters[-i]
@@ -817,6 +879,45 @@ uni.slice <- function(g, x, family, response, eta, id, j, ...,
   return(g)
 }
 
+## Internal MCMC sampling function.
+.MCMC <- function(x, y, specials, family, offsets, weights,
+  start, xterms, sterms, control)
+{
+  if(is.null(control$trace))
+    control$trace <- TRUE
+
+  if(control$maxit[1] > 0) {
+    if(control$trace[1L])
+      cat(".. backfitting step\n")
+    m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
+    start <- coef(m, full = TRUE, lambdas = TRUE)
+  } else {
+    stop("argument maxit must be > 1 for finding appropriate starting values!")
+  }
+
+  if(control$trace[1L])
+    cat(".. MCMC step\n")
+
+  m <- BS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
+
+  return(m)
+}
+
+bamlss2 <- function(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, ...)
+{
+  call <- match.call()
+  m <- call
+  m[[1L]] <- as.name("gamlss2")
+  m[["n.iter"]] <- n.iter
+  m[["burnin"]] <- burnin
+  m[["thin"]] <- thin
+  m[["maxit"]] <- maxit
+  m[["optimizer"]] <- quote(.MCMC)
+  model <- eval(m, parent.frame())
+  model$call <- call
+  return(model)
+}
+
 ## Testing.
 if(FALSE) {
   set.seed(123)
@@ -826,13 +927,9 @@ if(FALSE) {
   d <- data.frame("x" = seq(-pi, pi, length = n))
   d$y <- 1.2 + sin(d$x) + rnorm(n, sd = exp(-1 + cos(d$x)))
 
-  m <- gamlss2(y ~ s(x,k=40) | s(x,k=40), data = d, optimizer = RS, maxit = 1)
+  b <- bamlss2(y ~ x + s(x) | x + s(x), data = d)
 
-  cm <- coef(m, full = TRUE, lambdas = TRUE)
-
-  b <- gamlss2(y ~ s(x,k=40) | s(x,k=40), data = d, optimizer = BS, start = cm)
-
-  p <- predict(b, FUN = median)
+  p <- predict(b)
 
   fit <- NULL
   for(j in c(0.025, 0.5, 0.975))

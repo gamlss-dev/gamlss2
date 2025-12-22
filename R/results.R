@@ -64,11 +64,23 @@ results.gamlss2 <- function(x, ...)
                 }
               }
               X <- PredictMat(x$specials[[i]], nd, n = nrow(nd))
-              se <- rowSums((X %*% x$fitted.specials[[j]][[i]]$vcov) * X)
-              se <- 2 * sqrt(se)
-              nd$fit <- drop(X %*% coef(x$fitted.specials[[j]][[i]]))
-              nd$lower <- nd$fit - se
-              nd$upper <- nd$fit + se
+
+              if(inherits(x, "bamlss2")) {
+                cni <- paste0(j, ".s.", i, ".", seq.int(ncol(X)))
+                fiti <- apply(x$samples[, cni, drop = FALSE], 1, function(b) {
+                  drop(X %*% b)
+                })
+                nd$fit <- apply(fiti, 1, mean)
+                nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
+                nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
+              } else {
+                se <- rowSums((X %*% x$fitted.specials[[j]][[i]]$vcov) * X)
+                se <- 2 * sqrt(se)
+                nd$fit <- drop(X %*% coef(x$fitted.specials[[j]][[i]]))
+                nd$lower <- nd$fit - se
+                nd$upper <- nd$fit + se
+             }
+
               if(by == "NA") {
                 lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
                 lab <- paste0(lab[-length(lab)], collapse = "")

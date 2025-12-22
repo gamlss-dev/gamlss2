@@ -290,7 +290,7 @@ summary.gamlss2 <- function(object, ...)
 }
 
 ## For MCMC samples.
-summary.gamlss2.mcmc <- function(object, thres = 0.01, ...)
+summary.bamlss2 <- function(object, thres = 0.01, ...)
 {
   df.res <- object$nobs - object$df
   par <- coef(object, full = FALSE, dropall = FALSE)
@@ -305,17 +305,20 @@ summary.gamlss2.mcmc <- function(object, thres = 0.01, ...)
     ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
     rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
   }
-  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "iterations", "elapsed")]
-  sg$call[[1L]] <- as.name("gamlss2")
+  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "dic", "iterations", "elapsed")]
   sg$coefficients <- ctl
   if(!is.null(object$fitted.specials)) {
-    sg$specials <- list()
+    sg$specials <- sg$alpha <- list()
     for(i in names(object$fitted.specials)) {
       for(j in names(object$fitted.specials[[i]])) {
         sg$specials[[i]] <- rbind(sg$specials[[i]], object$fitted.specials[[i]][[j]]$edf)
+        sg$alpha[[i]] <- rbind(sg$alpha[[i]], object$fitted.specials[[i]][[j]]$alpha)
       }
       rownames(sg$specials[[i]]) <- names(object$fitted.specials[[i]])
       colnames(sg$specials[[i]]) <- "edf"
+
+      rownames(sg$alpha[[i]]) <- names(object$fitted.specials[[i]])
+      colnames(sg$alpha[[i]]) <- "alpha"
     }
   }
   sg$elapsed <- object$elapsed
@@ -334,7 +337,7 @@ print.summary.gamlss2 <- function(x,
   print(x$family, full = FALSE)
 
   ## Collect linear coefficients and specials.
-  lin_coef <- specials <- list()
+  lin_coef <- specials <- alpha <- list()
   pn <- x$family$names
   for(i in seq_along(pn)) {
     if(length(x$coefficients[[pn[i]]])) {
@@ -344,6 +347,10 @@ print.summary.gamlss2 <- function(x,
     if(length(x$specials[[pn[i]]])) {
       specials[[i]] <- x$specials[[pn[i]]]
       rownames(specials[[i]]) <- paste0(pn[i], ".", rownames(specials[[i]]))
+    }
+    if(length(x$alpha[[pn[i]]])) {
+      alpha[[i]] <- x$alpha[[pn[i]]]
+      rownames(alpha[[i]]) <- paste0(pn[i], ".", rownames(alpha[[i]]))
     }
   }
 
@@ -360,6 +367,11 @@ print.summary.gamlss2 <- function(x,
     specials <- do.call("rbind", specials)
     cat("---\nSmooth terms:\n")
     printCoefmat(t(specials))
+  }
+
+  if(length(alpha)) {
+    alpha <- do.call("rbind", alpha)
+    printCoefmat(t(alpha))
   }
 
   cat("*--------\n")
@@ -382,12 +394,26 @@ print.summary.gamlss2 <- function(x,
     paste("AIC =", round(-2 * x$logLik + 2*x$df, digits = 4)),
     paste("elapsed =", rt)
   )
+
+  info4 <- NULL
+  if(!is.null(x$dic)) {
+    info4 <- c(
+      paste("DIC =", round(x$dic$DIC, digits = 4)),
+      paste("pd =", round(x$dic$pD, digits = 2))
+    )
+  }
+
   cat(info1)
   cat("\n")
   cat(info2)
   cat("\n")
   cat(info3)
   cat("\n")
+
+  if(!is.null(info4)) {
+    cat(info4)
+    cat("\n")
+  }
 }
 
 ## Confint method.

@@ -241,7 +241,7 @@ window.Quarto = {
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">calibration(..., newdata = NULL,
-  y = NULL, what = "mu", breaks = seq(0, 1, by = 0.1),
+  y = NULL, model = NULL, breaks = seq(0, 1, by = 0.1),
   minn = 20, main = "Calibration plot",
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
@@ -279,7 +279,7 @@ Optional numeric or factor vector with the binary response (coded as 0/1 or a tw
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="what">what</code>
+<code id="model">model</code>
 </td>
 <td>
 Character, which parameter should be used for prediction. Typically <code>“mu”</code> for binary models.
@@ -410,19 +410,19 @@ The y limits of the plot.
 <p>Invisibly returns a data frame with the following columns:</p>
 <ul>
 <li>
-<p><code>interval</code>Factor with the probability intervals.</p>
+<p><code>interval</code>: Factor with the probability intervals.</p>
 </li>
 <li>
-<p><code>probs</code>Mean predicted probability in each bin.</p>
+<p><code>probs</code>: Mean predicted probability in each bin.</p>
 </li>
 <li>
-<p><code>y</code>Observed proportion of 1s in each bin.</p>
+<p><code>y</code>: Observed proportion of 1s in each bin.</p>
 </li>
 <li>
-<p><code>n</code>Number of observations in each bin.</p>
+<p><code>n</code>: Number of observations in each bin.</p>
 </li>
 <li>
-<p><code>model</code>Character, model label. For a single model this column is dropped from the returned data frame.</p>
+<p><code>model</code>: Character, model label. For a single model this column is dropped from the returned data frame.</p>
 </li>
 </ul>
 <p>If <code>plot = FALSE</code>, the same data frame is returned without producing a plot.</p>

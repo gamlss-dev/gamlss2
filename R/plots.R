@@ -5,11 +5,15 @@ plot.gamlss2 <- function(x, parameter = NULL,
 {
   ## What should be plotted?
   which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection", "samples")
+
   if(!is.character(which)) {
-    if(any(which > 5L))
-      which <- which[which <= 5L]
+    k <- length(which.match)
+    which <- which[which >= 1L & which <= k]
     which <- which.match[which]
-  } else which <- which.match[grep2(tolower(which), which.match, fixed = TRUE)]
+  } else {
+    which <- which.match[grep2(tolower(which), which.match, fixed = TRUE)]
+  }
+
   if(length(which) > length(which.match) || !any(which %in% which.match))
     stop("argument which is specified wrong!")
 
@@ -213,18 +217,25 @@ plot.gamlss2 <- function(x, parameter = NULL,
     }
   }
 
-  if(which == "samples" && !is.null(x$samples)) {
-    np <- ncol(x$samples)
-    if(spar)
-      par(mfrow = if(np <= 4) c(np, 2) else c(4, 2))
-    devAskNewPage(ask)
+  if(("samples" %in% which) && !is.null(x$samples)) {
+    if(spar) {
+      opar <- par(no.readonly = TRUE)
+      on.exit(par(opar), add = TRUE)
+      par(mfrow = c(1, 2))
+    }
+
     cn <- colnames(x$samples)
+
     for(j in cn) {
+      if(isTRUE(ask)) devAskNewPage(TRUE)
+
       xsamps <- x$samples[, j]
       traceplot2(xsamps, ylab = "Samples", main = "")
       mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
+
       nu <- length(unique(xsamps))
-      acf(if(nu < 2) jitter(xsamps) else xsamps, main = "", ..., na.action = na.pass)
+      acf(if(nu < 2) jitter(xsamps) else xsamps,
+          main = "", ..., na.action = na.pass)
       mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
     }
   }

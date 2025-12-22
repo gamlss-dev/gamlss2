@@ -55,7 +55,7 @@ BS(x, y, specials, family, offsets,
     \item \code{nullmodel}: Logical, should an intercept-only null model be evaluated to
       compute a null deviance and deviance reduction?
     \item \code{binning}: Logical, should binning be used for smooth terms if available
-      (unique observations for building \eqn{X^\topWX} and related quantities)?
+      (unique observations for building \eqn{X^{\top}WX} and related quantities)?
   }
 
   The returned object contains posterior samples for all model components. In addition,

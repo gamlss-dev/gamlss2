@@ -117,7 +117,7 @@ plot_lasso(x, terms = NULL,
 \references{
   Groll A, Hambuckers J, Kneib T, Umlauf N (2019).
   Lasso-Type Penalization in the Framework of Generalized Additive Models for Location, Scale and Shape.
-  \emph{Computational Statistics \& Data Analysis}, \bold{140}(12), 59-73.
+  \emph{Computational Statistics & Data Analysis}, \bold{140}(12), 59-73.
   \doi{10.1016/j.csda.2019.06.005}
 
   Oelker MR, Tutz G (2017).

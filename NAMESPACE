@@ -10,13 +10,13 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "optimize", "median", "pchisq",
   "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess",
-  "deviance", "drop1", "plogis", "qlogis", "setNames")
+  "deviance", "drop1", "plogis", "qlogis", "setNames", "acf", "lowess", "aggregate")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace",
   "capture.output", "combn")
 
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d",
-  "dev.off", "png")
+  "dev.off", "png", "devAskNewPage")
 
 importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
@@ -104,6 +104,7 @@ S3method(vcov, gamlss2)
 S3method(confint, gamlss2)
 S3method(coef, gamlss2)
 S3method(summary, gamlss2)
+S3method(summary, bamlss2)
 S3method(print, gamlss2)
 S3method(print, summary.gamlss2)
 S3method(print, coef.gamlss2)

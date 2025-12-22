@@ -392,7 +392,7 @@ special_fit.re <- function(x, z, w, control, ...)
   p1 <- predict(rval$model, newdata = x$data, level = 1)
   fit <- as.numeric(p1 - p0)
   rval$fitted.values <- fit ## fitted(rval$model)
-  rval$coefficients <- ranef(rval$model)
+  rval$coefficients <- nlme::ranef(rval$model)
 
   ## Degrees of freedom.
   N <- sum(w != 0)

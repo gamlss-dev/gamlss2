@@ -11,7 +11,7 @@
 
 \usage{
 calibration(..., newdata = NULL,
-  y = NULL, what = "mu", breaks = seq(0, 1, by = 0.1),
+  y = NULL, model = NULL, breaks = seq(0, 1, by = 0.1),
   minn = 20, main = "Calibration plot",
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
@@ -29,7 +29,7 @@ calibration(..., newdata = NULL,
   \item{y}{Optional numeric or factor vector with the binary response
     (coded as 0/1 or a two-level factor). If omitted, the response is
     extracted from the first model.}
-  \item{what}{Character, which parameter should be used for prediction.
+  \item{model}{Character, which parameter should be used for prediction.
     Typically \code{"mu"} for binary models.}
   \item{breaks}{Numeric vector of break points used to construct bins
     for the predicted probabilities. The range of \code{breaks} must
@@ -89,12 +89,12 @@ calibration(..., newdata = NULL,
 \value{
   Invisibly returns a data frame with the following columns:
   \itemize{
-    \item{\code{interval}}{Factor with the probability intervals.}
-    \item{\code{probs}}{Mean predicted probability in each bin.}
-    \item{\code{y}}{Observed proportion of 1s in each bin.}
-    \item{\code{n}}{Number of observations in each bin.}
-    \item{\code{model}}{Character, model label. For a single model this
-      column is dropped from the returned data frame.}
+    \item \code{interval}: Factor with the probability intervals.
+    \item \code{probs}: Mean predicted probability in each bin.
+    \item \code{y}: Observed proportion of 1s in each bin.
+    \item \code{n}: Number of observations in each bin.
+    \item \code{model}: Character, model label. For a single model this
+      column is dropped from the returned data frame.
   }
   If \code{plot = FALSE}, the same data frame is returned without
   producing a plot.

@@ -935,7 +935,7 @@ bamlss2 <- function(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, .
   m[["burnin"]] <- burnin
   m[["thin"]] <- thin
   m[["maxit"]] <- maxit
-  m[["optimizer"]] <- quote(.mcmc)
+  m[["optimizer"]] <- getFromNamespace(".mcmc", "gamlss2")
   model <- eval(m, parent.frame())
   model$call <- call
   return(model)

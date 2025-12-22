@@ -74,13 +74,52 @@ results.gamlss2 <- function(x, ...)
                 nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
                 nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
               } else {
-                se <- rowSums((X %*% x$fitted.specials[[j]][[i]]$vcov) * X)
-                se <- 2 * sqrt(se)
-                nd$fit <- drop(X %*% coef(x$fitted.specials[[j]][[i]]))
-                nd$lower <- nd$fit - se
-                nd$upper <- nd$fit + se
-             }
+                dots <- list(...)
+                interval <- dots$interval %||% "wald"
+                level <- dots$level %||% 0.95
+                nsim <- dots$nsim %||% 2000L
 
+                bhat <- as.numeric(coef(x$fitted.specials[[j]][[i]]))
+                V <- x$fitted.specials[[j]][[i]]$vcov
+
+                nd$fit <- drop(X %*% bhat)
+
+                if(interval == "none") {
+                  nd$lower <- NA_real_
+                  nd$upper <- NA_real_
+
+                } else if(interval == "wald") {
+                  ## Pointwise Wald band.
+                  v <- rowSums((X %*% V) * X)
+                  se <- sqrt(pmax(v, 0))
+                  z <- qnorm(1 - (1 - level) / 2)
+                  nd$lower <- nd$fit - z * se
+                  nd$upper <- nd$fit + z * se
+
+                } else if(interval %in% c("bayes", "simultaneous")) {
+                  ## Simulation from approx posterior beta | y ~ N(bhat, V).
+                  B <- MASS::mvrnorm(n = nsim, mu = bhat, Sigma = V)
+                  f_draw <- X %*% t(B)
+
+                  if(interval == "bayes") {
+                    alpha <- (1 - level) / 2
+                    nd$lower <- apply(f_draw, 1, quantile, probs = alpha)
+                    nd$upper <- apply(f_draw, 1, quantile, probs = 1 - alpha)
+                  } else {
+                    ## Simultaneous band over the grid via max-|t|.
+                    se <- apply(f_draw, 1, sd)
+                    se_safe <- pmax(se, 1e-12)
+                    t_sup <- apply(abs((f_draw - nd$fit) / se_safe), 2, max)
+                    cval <- unname(quantile(t_sup, probs = level))
+
+                    nd$lower <- nd$fit - cval * se
+                    nd$upper <- nd$fit + cval * se
+                  }
+
+                } else {
+                  stop("Unknown interval type: ", interval)
+                }
+              }
               if(by == "NA") {
                 lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
                 lab <- paste0(lab[-length(lab)], collapse = "")
@@ -201,4 +240,6 @@ results.gamlss2 <- function(x, ...)
 
   return(res)
 }
+
+'%||%' <- function(a, b) if (!is.null(a)) a else b
 

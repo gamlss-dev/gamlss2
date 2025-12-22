@@ -342,6 +342,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
               k <- parts[2L]
               hess_l <- family$hess[[h[l]]](y, peta)
+              if(!is.null(weights))
+                hess_l <- hess_l * weights
               adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
             }
           }
@@ -422,8 +424,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                   stepfun <- function(nu) {
                     b <- nu * m$coefficients + (1 - nu) * fit[[j]]$coefficients
                     f <- drop(Xj %*% b)
-                    eta[[j]] <- eta[[j]] + f
-                    -family$logLik(y, family$map2par(eta))
+                    etai <- eta
+                    etai[[j]] <- etai[[j]] + f
+                    -family$logLik(y, family$map2par(etai))
                   }
                   s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
                   if(-s$objective > ll02) {
@@ -637,7 +640,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     "nobs" = length(eta[[1L]]),
     "deviance" = -2 * llo1,
     "null.deviance" = dev0,
-    "dev.reduction" = abs((dev0 - (-2 * llo1)) / dev0),
+    "dev.reduction" = (dev0 - (-2 * llo1)) / dev0,
     "nullmodel" = control$nullmodel,
     "stepsize" = step
   )

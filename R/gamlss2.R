@@ -301,6 +301,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     attr(rval$xterms, "terms") <- mt
   }
   rval$df <- get_df(rval)
+  rval$weights <- weights
   rval$elapsed <- elapsed
 
   ## Return model.frame, X and y.
@@ -317,6 +318,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     rval$results <- results(rval)
   } else {
     rval$fitted.values <- NULL
+    rval$weights <- NULL
     if(!is.null(rval$fitted.linear)) {
       for(j in names(rval$fitted.linear))
         rval$fitted.linear[[j]]$fitted.values <- NULL

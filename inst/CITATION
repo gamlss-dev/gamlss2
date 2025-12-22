@@ -1,4 +1,4 @@
-citHeader("To cite GAMLSS in publications use:")
+citHeader("To cite this package in publications use:")
 
 bibentry("Article",
   title = "Generalized Additive Models for Location, Scale and Shape (with Discussion)",
@@ -7,8 +7,36 @@ bibentry("Article",
   pages = "507--554",
   year = "2005",
   doi = "10.1111/j.1467-9876.2005.00510.x",
-  author = c(person("R.A. Rigby"), person("D.M. Stasinopoulos")),
-  textVersion = "Rigby R.A. and Stasinopoulos D.M. (2005). Generalized Additive Models for Location, Scale and Shape, (with Discussion), Journal of the Royal Statistical Society, Series C (Applied Statistics), 54, pp 507-554.")
+  author = c(person("R.A.", "Rigby"), person("D.M.", "Stasinopoulos")),
+  textVersion = paste(
+    "To cite GAMLSS in publications use:",
+    "Rigby R.A. and Stasinopoulos D.M. (2005). Generalized Additive Models for Location, Scale and Shape (with Discussion),",
+    "Journal of the Royal Statistical Society, Series C (Applied Statistics), 54, 507--554.",
+    sep = "\n"
+  )
+)
+
+bibentry("Article",
+  title = "{BAMLSS}: {B}ayesian Additive Models for Location, Scale and Shape (and Beyond)",
+  author = c(
+    person("Nikolaus", "Umlauf"),
+    person("Nadja", "Klein"),
+    person("Achim", "Zeileis")
+  ),
+  journal = "Journal of Computational and Graphical Statistics",
+  year = "2018",
+  volume = "27",
+  number = "3",
+  pages = "612--627",
+  doi = "10.1080/10618600.2017.1407325",
+  textVersion = paste(
+    "To cite Bayesian GAMLSS in publications use:",
+    "Umlauf N., Klein N. and Zeileis A. (2018). BAMLSS: Bayesian Additive Models for Location, Scale and Shape (and Beyond),",
+    "Journal of Computational and Graphical Statistics, 27(3), 612--627.",
+    sep = "\n"
+  )
+)
 
 citFooter("We have invested a lot of time and effort in creating GAMLSS,",
   "please cite it when using it for data analysis.")
+

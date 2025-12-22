@@ -367,7 +367,7 @@ print.summary.gamlss2 <- function(x,
     specials <- do.call("rbind", specials)
     cat("---\nSmooth terms:\n")
     if(length(alpha)) {
-      specials <- cbind(specials, do.call("cbind", alpha))
+      specials <- cbind(specials, do.call("rbind", alpha))
     }
     printCoefmat(t(specials))
   }

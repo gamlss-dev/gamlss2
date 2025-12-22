@@ -472,7 +472,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         colnames(samples[[j]]$s[[k]]) <- c(
           paste0(j, ".s.", k, ".", 1:nc),
-          paste0(j, ".s.", k, ".lambda", 1:length(specials[[k]]$S)),
+          paste0(j, ".s.", k, ".lambdas", 1:length(specials[[k]]$S)),
           paste0(j, ".s.", k, ".edf"),
           paste0(j, ".s.", k, ".alpha")
         )
@@ -482,8 +482,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         })
         kfit <- apply(kfit, 1, mean)
         sfit[[j]][[k]]$fitted.values <- drop(kfit)
-        lj <- grep(".lambda", colnames(samples[[j]]$s[[k]]))
-        sfit[[j]][[k]]$lambda <- apply(samples[[j]]$s[[k]][, lj, drop = FALSE], 2, mean)
+        lj <- grep(".lambdas", colnames(samples[[j]]$s[[k]]))
+        sfit[[j]][[k]]$lambdas <- apply(samples[[j]]$s[[k]][, lj, drop = FALSE], 2, mean)
         lj <- grep(".edf", colnames(samples[[j]]$s[[k]]))
         sfit[[j]][[k]]$edf <- mean(samples[[j]]$s[[k]][, lj])
         lj <- grep(".alpha", colnames(samples[[j]]$s[[k]]))
@@ -576,8 +576,10 @@ prior.mgcv.smooth <- function(x, ...)
   function(parameters) {
     nms <- names(parameters)
     i <- integer(0)
-    if(!is.null(nms))
+    if(!is.null(nms)) {
+      nms <- sapply(strsplit(nms, ".s."), function(x) x[length(x)])
       i <- grep(".tau", nms, fixed = TRUE)
+    }
     if(length(i) == 0L) {
       m <- length(x$S)
       i <- (length(parameters) - m + 1L):length(parameters)
@@ -901,7 +903,7 @@ uni.slice <- function(g, x, family, response, eta, id, j, ...,
 }
 
 ## Internal MCMC sampling function.
-.MCMC <- function(x, y, specials, family, offsets, weights,
+.mcmc <- function(x, y, specials, family, offsets, weights,
   start, xterms, sterms, control)
 {
   if(is.null(control$trace))
@@ -933,10 +935,108 @@ bamlss2 <- function(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, .
   m[["burnin"]] <- burnin
   m[["thin"]] <- thin
   m[["maxit"]] <- maxit
-  m[["optimizer"]] <- quote(.MCMC)
+  m[["optimizer"]] <- quote(.mcmc)
   model <- eval(m, parent.frame())
   model$call <- call
   return(model)
+}
+
+mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1)
+{
+  if(!inherits(object, "gamlss2") && !inherits(object, "bamlss2")) {
+    stop("wrong object supplied!")
+  }
+
+  ## Update control.
+  object$control$n.iter <- n.iter
+  object$control$burnin <- burnin
+  object$control$thin <- thin
+
+  ## Starting values (incl. lambdas).
+  object$start <- coef(object, full = TRUE, lambdas = TRUE)
+
+  ## Keep old samples (if any).
+  samples0 <- object$samples
+
+  ## Ensure x/y exist (works if model stored; like gamlss()).
+  ## NOTE: if the object was fitted with control$light = TRUE and no model stored,
+  ## you cannot reconstruct specials$X for MCMC. In that case, stop with message.
+  if(is.null(object$y) || is.null(object$x)) {
+    mf <- model.frame(object, keepresponse = TRUE)
+
+    if(is.null(object$y)) {
+      object$y <- model.response(mf)
+      if(is.null(object$y)) {
+        rn <- response_name(object$formula)
+        object$y <- mf[, rn]
+      }
+    }
+
+    if(is.null(object$x)) {
+      object$x <- model.matrix(object, data = mf)
+    }
+
+    if(is.null(object$weights)) {
+      object$weights <- model.weights(mf)
+      if(!is.null(object$weights)) {
+        if(length(object$weights) == 1L)
+          object$weights <- rep.int(object$weights, nrow(mf))
+        object$weights <- as.vector(object$weights)
+        names(object$weights) <- rownames(mf)
+      }
+    }
+
+    if(is.null(object$offsets)) {
+      object$offsets <- model.offset(mf)
+    }
+  }
+
+  ## If specials design matrices were dropped, BS can't run.
+  if(!is.null(object$specials)) {
+    for(k in seq_along(object$specials)) {
+      if(is.null(object$specials[[k]][["X"]])) {
+        stop("MCMC needs specials[[k]]$X, but it is NULL (probably fitted with control$light = TRUE). Refit with control$light = FALSE (and control$x=TRUE, control$y=TRUE).")
+      }
+    }
+  }
+
+  ## Build BS arguments explicitly (never drop weights/offsets).
+  args <- list(
+    x        = object$x,
+    y        = object$y,
+    specials = object$specials,
+    family   = object$family,
+    offsets  = object$offsets,
+    weights  = object$weights,
+    start    = object$start,
+    xterms   = object$xterms,
+    sterms   = object$sterms,
+    control  = object$control
+  )
+
+  tstart <- proc.time()
+  bs <- do.call(BS, args)
+  elapsed <- as.numeric((proc.time() - tstart)["elapsed"])
+
+  ## Merge BS output back into original object so terms/call/formula stay intact.
+  for(nm in names(bs)) {
+    object[[nm]] <- bs[[nm]]
+  }
+
+  ## Combine samples.
+  if(!is.null(samples0) && nrow(samples0) > 0L) {
+    object$samples <- rbind(samples0, object$samples)
+  }
+
+  ## Update derived summaries (these rely on terms being present).
+  object$results <- results(object)
+  object$df <- get_df(object)
+  object$elapsed <- elapsed
+  object$call <- match.call()
+
+  class(object) <- unique(c("bamlss2", class(object)))
+
+  return(object)
 }
 
 ## Testing.
@@ -948,8 +1048,8 @@ if(FALSE) {
   d <- data.frame("x" = seq(-pi, pi, length = n))
   d$y <- 1.2 + sin(d$x) + rnorm(n, sd = exp(-1 + cos(d$x)))
 
-  b <- gamlss2(y ~ x + s(x) | x + s(x), data = d)
-  a <- mcmc(b)
+  a <- gamlss2(y ~ s(x) | s(x), data = d)
+  b <- mcmc(a)
 
   p <- predict(b)
 

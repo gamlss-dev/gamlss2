@@ -32,7 +32,9 @@
     \code{"hist-resid"} shows a histogram of residuals, \code{"qq-resid"} shows
     a quantile-quantile plot of residuals, \code{"scatter-resid"} shows a scatter plot of
     residuals with fitted values for the distribution mean
-    (or median, if available in the family object).}
+    (or median, if available in the family object). If MCMC samples are available from
+    \code{\link{mcmc}}, \code{\link{bamlss2}} or \code{\link{BS}} \code{which = "samples"}
+    shows traceplots and autocorrelation plots of parameter samples.}
   \item{terms}{Character or integer. For which model term should the plot(s) be created?}
   \item{scale}{If set to \code{1}, effect plots all have the same scale on the y-axis. If set to
     \code{0} each effect plot has its own scale for the y-axis.}

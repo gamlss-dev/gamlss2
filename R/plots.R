@@ -4,7 +4,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
   scale = TRUE, spar = TRUE, ...)
 {
   ## What should be plotted?
-  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection")
+  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection", "samples")
   if(!is.character(which)) {
     if(any(which > 5L))
       which <- which[which <= 5L]
@@ -212,6 +212,39 @@ plot.gamlss2 <- function(x, parameter = NULL,
       }
     }
   }
+
+  if(which == "samples" && !is.null(x$samples)) {
+    np <- ncol(x$samples)
+    if(spar)
+      par(mfrow = if(np <= 4) c(np, 2) else c(4, 2))
+    devAskNewPage(ask)
+    cn <- colnames(x$samples)
+    for(j in cn) {
+      xsamps <- x$samples[, j]
+      traceplot2(xsamps, ylab = "Samples", main = "")
+      mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
+      nu <- length(unique(xsamps))
+      acf(if(nu < 2) jitter(xsamps) else xsamps, main = "", ..., na.action = na.pass)
+      mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
+    }
+  }
+
+  return(invisible(NULL))
+}
+
+traceplot2 <- function(theta, n.plot = 100, ylab = "", ...) {
+  cuq <- Vectorize(function(n, x) {
+    as.numeric(quantile(x[1:n], c(.025, .5, .975), na.rm = TRUE))
+  }, vectorize.args = "n")
+  n.rep <- length(theta)
+  plot(seq.int(n.rep), theta, col = "lightgrey", xlab = "Iteration",
+    ylab = ylab, type = "l", ...)
+  iter <- round(seq(1, n.rep, length = n.plot + 1)[-1])
+  tq <- cuq(iter, theta)
+  lines(iter, tq[2,])
+  lines(iter, tq[1,], lty = 2)
+  lines(iter, tq[3,], lty = 2)
+  lines(lowess(seq.int(n.rep), theta), col = 2)
 }
 
 ## Plot univariate smooth effects.

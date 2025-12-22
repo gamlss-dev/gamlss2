@@ -62,6 +62,8 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         knots <- list(...)$knots
 
         absorb.cons <- if(is.null(sj$xt$absorb.cons)) TRUE else isTRUE(sj$xt$absorb.cons)
+        if(!is.null(sj$xt$constraint))
+          absorb.cons <- FALSE
         scale.penalty <- if(is.null(sj$xt$scale.penalty)) TRUE else isTRUE(sj$xt$scale.penalty)
 
         select <- isTRUE(list(...)$select)
@@ -197,6 +199,10 @@ calc_XWX <- function(x, w, index = NULL)
 ## Fitting function for mgcv smooth terms.
 smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
+  if(!is.null(x$xt$constraint)) {
+    return(smooth.construct_wfit_shape(x, z, w, y, eta, j, family, control, transfer, iter))
+  }
+
   ## Number of observations.
   n <- length(z)
 
@@ -477,5 +483,10 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
     rval <- rval[[1L]]
 
   return(rval)
+}
+
+smooth.construct_wfit_shape <- function(x, z, w, y, eta, j, family, control, transfer, iter)
+{
+  stop("not working yet!")
 }
 

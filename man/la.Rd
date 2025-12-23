@@ -247,6 +247,31 @@ print(tp)
 fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
   abs(cb_sigma[beta$sigma == 0]) > thres))
 print(fp)
+
+## fused ordinal Lasso P-spline example with
+## seasonal variation of motorcycle counts at Sonnenberg/Harz
+data("HarzTraffic", package = "gamlss2")
+plot(bikes ~ yday, data = HarzTraffic)
+
+## P-spline design matrix
+X <- smooth.construct(s(yday,bs="ps",k=20), data = HarzTraffic, NULL)$X
+i <- order(HarzTraffic$yday)
+with(HarzTraffic, matplot(yday[i], X[i, ], type = "l", lty = 1))
+
+## estimate model
+f <- bikes ~ la(X,type=3,ridge=TRUE) | . | .
+b <- gamlss2(f, data = HarzTraffic, family = SICHEL)
+summary(b)
+plot(b, which = "resid")
+
+## coefficient paths
+plot_lasso(b, which = "coefficients", zoom = 15)
+
+## plot estimated qauntiles
+qu <- quantile(b, probs = c(0.05, 0.5, 0.95))
+plot(bikes ~ yday, data = HarzTraffic, col = adjustcolor(1, alpha = 0.3))
+with(HarzTraffic, matplot(yday[i], qu[i, ],
+  type = "l", col = c(3, 1, 2), lty = 1, lwd = 2, add = TRUE))
 }
 }
 

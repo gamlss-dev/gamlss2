@@ -791,7 +791,7 @@ la <- function(x, type = 1, const = 1e-05, ...)
   return(st) 
 }
 
-special_fit.lasso <- function(x, z, w, control, transfer, ...)
+special_fit.lasso0 <- function(x, z, w, control, transfer, ...)
 {
   if(is.null(control$criterion))
     control$criterion <- x$control$criterion
@@ -806,6 +806,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   XW <- x$X * w
   XWX <- crossprod(XW, x$X)
   XWz <- crossprod(XW, z)
+  zWz <- drop(crossprod(z * w, z))
   n <- length(z)
   logn <- log(n)
 
@@ -967,16 +968,18 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
     b <- drop(P %*% XWz)
 
-    fit <- drop(x$X %*% b)
-
     edf <- sum(diag(XWX %*% P))
 
     if(rf) {
+      fit <- drop(x$X %*% b)
+
       names(b) <- colnames(x$X)
       return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
         "lambda" = l, "vcov" = P, "df" = n - edf))
     } else {
-      rss <- sum(w * (z - fit)^2)
+      rss <- zWz -
+        2 * drop(crossprod(b, XWz)) +
+        drop(crossprod(b, XWX %*% b))
 
       rval <- switch(tolower(control$criterion),
         "gcv" = rss * n / (n - edf)^2,
@@ -1024,6 +1027,249 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   return(rval)
 }
+
+special_fit.lasso <- function(x, z, w, control, transfer, ...)
+{
+  if(is.null(control$criterion))
+    control$criterion <- x$control$criterion
+
+  ridge <- isTRUE(control$add_ridge)
+
+  K <- control$K
+  if(is.null(K))
+    K <- 2
+
+  k <- ncol(x$X)
+  XW <- x$X * w
+  XWX <- crossprod(XW, x$X)
+  XWz <- crossprod(XW, z)
+  zWz <- drop(crossprod(z * w, z))
+  n <- length(z)
+  logn <- log(n)
+
+  ## Stable ML start using Cholesky + increasing jitter.
+  bml <- NULL
+  jit <- c(1e-08, 1e-07, 1e-06, 1e-05, 1e-04)
+  for(j in jit) {
+    A0 <- XWX + diag(j, k)
+    R0 <- try(chol(A0), silent = TRUE)
+    if(!inherits(R0, "try-error")) {
+      bml <- backsolve(R0, forwardsolve(t(R0), XWz))
+      break
+    }
+  }
+  if(is.null(bml))
+    stop("cannot compute the ML estimator for the lasso term!")
+
+  bml[abs(bml) < 1e-08] <- 1e-08
+
+  b0 <- transfer$coefficients
+  if(is.null(b0))
+    b0 <- bml
+
+  ## Precompute structures for ordinal/nominal once (speed).
+  Af <- combis <- NULL
+  dfX <- nref <- NULL
+  k0 <- NULL
+
+  if(x$lasso_type %in% c("ordinal", "nominal")) {
+    k0 <- ncol(x$X)
+    dfX <- colSums(abs(x$X) > 0)
+    nref <- n - sum(dfX)
+
+    if(x$lasso_type == "ordinal") {
+      D  <- diff(diag(k0))
+      Af <- cbind(diag(k0), t(D))
+    } else {
+      combis <- combn(k0, 2)
+      Af_diff <- matrix(0, ncol = ncol(combis), nrow = k0)
+      for(ff in seq_len(ncol(combis))) {
+        Af_diff[combis[1, ff], ff] <-  1
+        Af_diff[combis[2, ff], ff] <- -1
+      }
+      Af <- cbind(diag(k0), Af_diff)
+    }
+  }
+
+  ## Penalty function.
+  if(x$lasso_type == "normal") {
+    pen <- function(b) {
+      A <- 1 / sqrt(b^2 + x$control$const)
+      A <- A * 1 / abs(bml)
+      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+      A
+    }
+  }
+
+  if(x$lasso_type == "group") {
+    pen <- function(b) {
+      df <- ncol(x$X)
+      A <- 1 / rep(sqrt(sum(b^2) + x$control$const), df) *
+           1 / rep(sqrt(sum(bml^2) + x$control$const), df)
+      if(df < 2L) matrix(A, 1, 1) else diag(A)
+    }
+  }
+
+  if(x$lasso_type == "nominal") {
+    pen <- function(b) {
+      ## weights
+      wpen <- numeric(ncol(Af))
+
+      c0 <- 2 / (k0 + 1)
+
+      for(m in seq_len(ncol(Af))) {
+        if(nref < 0) {
+          wpen[m] <- 1
+        } else {
+          ok <- which(Af[, m] != 0)
+          wpen[m] <- if(length(ok) < 2L) {
+            c0 * sqrt((dfX[ok[1]] + nref) / n)
+          } else {
+            c0 * sqrt((dfX[ok[1]] + dfX[ok[2]]) / n)
+          }
+        }
+
+        denom <- abs(drop(crossprod(Af[, m], bml)))
+        if(denom < 1e-12) denom <- 1e-12
+        wpen[m] <- wpen[m] / denom
+      }
+
+      ## LQA penalty matrix
+      A <- matrix(0, k0, k0)
+      for(m in seq_len(ncol(Af))) {
+        a <- Af[, m]
+        d <- drop(crossprod(a, b))
+        A <- A + wpen[m] / sqrt(d^2 + x$control$const) * (a %*% t(a))
+      }
+      A
+    }
+  }
+
+  if(x$lasso_type == "ordinal") {
+    pen <- function(b) {
+      ## weights
+      wpen <- numeric(ncol(Af))
+
+      for(m in seq_len(ncol(Af))) {
+        if(nref < 0) {
+          wpen[m] <- 1
+        } else {
+          ok <- which(Af[, m] != 0)
+          if(length(ok) == 1L) {
+            wpen[m] <- sqrt(dfX[ok] / n)
+          } else {
+            wpen[m] <- sqrt((dfX[ok[1]] + dfX[ok[2]]) / n)
+          }
+        }
+
+        denom <- abs(drop(crossprod(Af[, m], bml)))
+        if(denom < 1e-12) denom <- 1e-12
+        wpen[m] <- wpen[m] / denom
+      }
+
+      ## local quadratic approximation
+      A <- matrix(0, k0, k0)
+      for(m in seq_len(ncol(Af))) {
+        a <- Af[, m]
+        d <- drop(crossprod(a, b))
+        A <- A + wpen[m] / sqrt(d^2 + x$control$const) * (a %*% t(a))
+      }
+
+      A
+    }
+  }
+
+  S <- pen(b0)
+
+  if(ridge)
+    S <- list(S, diag(ncol(S)))
+
+  fl <- function(l, rf = FALSE, coef = FALSE) {
+    if(ridge) {
+      A <- XWX + l[1]*S[[1]] + l[2]*S[[2]]
+    } else {
+      A <- XWX + l*S
+    }
+
+    R <- try(chol(A), silent = TRUE)
+
+    if(inherits(R, "try-error")) {
+      dj <- max(1e-10, 1e-12 * mean(diag(A)))
+      R <- try(chol(A + diag(dj, nrow(A))), silent = TRUE)
+      if(inherits(R, "try-error"))
+        return(Inf)
+    }
+
+    b <- backsolve(R, forwardsolve(t(R), XWz))
+
+    tmp <- backsolve(R, XWX, transpose = FALSE)
+    C <- forwardsolve(t(R), tmp, transpose = FALSE)
+    edf <- sum(diag(C))
+
+    if(rf) {
+      fit <- drop(x$X %*% b)
+
+      Ri <- backsolve(R, diag(1, nrow(A)))
+      P <- tcrossprod(Ri)
+
+      names(b) <- colnames(x$X)
+      return(list("coefficients" = drop(b), "fitted.values" = fit, "edf" = edf,
+        "lambda" = l, "vcov" = P, "df" = n - edf))
+    } else {
+      rss <- zWz -
+        2 * drop(crossprod(b, XWz)) +
+        drop(crossprod(b, XWX %*% b))
+
+      if(!is.finite(edf) || edf >= n - 1)
+        return(Inf)
+
+      rval <- switch(tolower(control$criterion),
+        "gcv" = rss * n / (n - edf)^2,
+        "aic" = rss + 2 * edf,
+        "gaic" = rss + K * edf,
+        "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+        "bic" = rss + logn * edf
+      )
+
+      if(coef) {
+        rval <- list("ic" = rval, "coefficients" = drop(b))
+        names(rval$coefficients) <- colnames(x$X)
+      }
+
+      return(rval)
+    }
+  }
+
+  ## Set up smoothing parameters.
+  lambda <- if(is.null(transfer$lambda)) 10 else transfer$lambda
+  if(ridge)
+    lambda <- rep(lambda, length.out = 2L)
+
+  opt <- nlminb(lambda, objective = fl, lower = lambda / 100, upper = lambda * 100)
+
+  rval <- fl(opt$par, rf = TRUE)
+
+  ## Tranfer arguments.
+  rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
+
+  ## Arguments needed for prediction and path plots.
+  keep <- c("formula", "term", "blockscale", "scalar_blockscale", "colscale", "X")
+  rval[keep] <- x[keep]
+  rval$z <- z
+  rval$w <- w
+  rval$XWX <- XWX
+  rval$XWz <- XWz
+  rval$S <- S
+  rval$K <- K
+  rval$criterion <- control$criterion
+  rval$label <- x$label
+
+  ## Assign class for predict method. 
+  class(rval) <- "lasso.fitted"
+
+  return(rval)
+}
+
 
 ## Lasso predict method.
 special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...) 

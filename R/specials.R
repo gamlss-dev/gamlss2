@@ -367,13 +367,13 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       eps <- 1
       lambdas0 <- lambdas
       lk <- 0
-       while((eps > 0.000001) & (lk < 1000L)) {
-         opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
-         eps <- mean(abs((opt$par - lambdas0) / lambdas0))
-         lambdas0 <- lambdas
-         lambdas <- opt$par
-         lk <- lk + 1L
-       }
+      while((eps > 0.000001) & (lk < 1000L)) {
+        opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
+        eps <- mean(abs((opt$par - lambdas0) / lambdas0))
+        lambdas0 <- lambdas
+        lambdas <- opt$par
+        lk <- lk + 1L
+      }
     } else {
       opt <- list(par = x$sp)
     }

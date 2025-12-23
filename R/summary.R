@@ -581,6 +581,9 @@ AIC.gamlss2 <- function(object, ..., k = 2, corrected = FALSE)
 
 BIC.gamlss2 <- function(object, ...)
 {
-  GAIC(object, ..., k = log(object$nobs), corrected = FALSE)
+  ic <- GAIC(object, ..., k = log(object$nobs), corrected = FALSE)
+  if(!is.null(dim(ic)))
+    names(ic) <- c("BIC", "df")
+  return(ic)
 }
 

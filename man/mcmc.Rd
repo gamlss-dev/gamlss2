@@ -83,6 +83,13 @@ plot(a)
 
 ## plot samples
 plot(a, which = "samples")
+plot(a, which = "samples", ask = TRUE)
+plot(a, which = "samples", ask = TRUE,
+  model = "mu", lag.max = 120, term = "s(x)", )
+
+## samples can be extracted for
+## furher inspection
+print(head(a$samples))
 
 ## compare estimated mean effects
 plot(c(b, a))

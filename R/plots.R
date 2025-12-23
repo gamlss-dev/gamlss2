@@ -225,18 +225,31 @@ plot.gamlss2 <- function(x, parameter = NULL,
     }
 
     cn <- colnames(x$samples)
+    cn <- grep2(parameter, cn, fixed = TRUE, value = TRUE)
 
-    for(j in cn) {
-      if(isTRUE(ask)) devAskNewPage(TRUE)
+    if(!is.null(terms)) {
+      if(is.character(terms)) {
+        cn <- grep2(terms, cn, fixed = TRUE, value = TRUE)
+      } else {
+        if(max(terms) > length(cn))
+          stop("argument terms is specified wrong!")
+        cn <- cn[terms]
+      }
+    }
 
-      xsamps <- x$samples[, j]
-      traceplot2(xsamps, ylab = "Samples", main = "")
-      mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
+    if(length(cn)) {
+      for(j in cn) {
+        if(isTRUE(ask)) devAskNewPage(TRUE)
 
-      nu <- length(unique(xsamps))
-      acf(if(nu < 2) jitter(xsamps) else xsamps,
-          main = "", ..., na.action = na.pass)
-      mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
+        xsamps <- x$samples[, j]
+        traceplot2(xsamps, ylab = "Samples", main = "")
+        mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
+
+        nu <- length(unique(xsamps))
+        acf(if(nu < 2) jitter(xsamps) else xsamps,
+          main = "", lag.max = list(...)$lag.max, na.action = na.pass)
+        mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
+      }
     }
   }
 

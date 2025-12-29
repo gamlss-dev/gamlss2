@@ -65,10 +65,10 @@ website:
               file: man/BS.qmd
         - section: Model terms
           contents:
-            - text: glmnet
-              file: man/glmnet.qmd
-            - text: lasso
-              file: man/lasso.qmd
+            - text: gnet
+              file: man/gnet.qmd
+            - text: la
+              file: man/la.qmd
             - text: pb
               file: man/pb.qmd
             - text: random
@@ -87,6 +87,8 @@ website:
               file: man/prodist.gamlss2.qmd
             - text: quantiles
               file: man/quantiles.qmd
+            - text: calibration
+              file: man/calibration.qmd
         - section: Families and links
           contents:
             - text: discretize

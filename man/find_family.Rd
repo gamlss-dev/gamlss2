@@ -4,10 +4,10 @@
 \alias{available_families}
 \alias{find_gamlss2}
 
-\title{Find and Fit GAMLSS Families}
+\title{Find suitable GAMLSS Families}
 
 \description{
-  These functions provide useful infrastructures for finding suitable GAMLSS
+  These functions provide useful infrastructure for finding suitable GAMLSS
   families for a response variable.
 }
 
@@ -33,7 +33,7 @@ find_gamlss2(formula, families = NULL, k = 2,
   \item{y}{The response vector or matrix.}
   \item{k}{Numeric, the penalty factor that should be used for the \code{\link{GAIC}}.}
   \item{verbose}{Logical, should runtime information be printed?}
-  \item{family}{A famnily object that should be used for estimation,
+  \item{family}{A family object that should be used for estimation,
     see also \code{\link{gamlss2.family}}.}
   \item{plot}{Logical, should a plot of the fitted density be provided?}
   \item{formula}{A model formula, see \code{\link{gamlss2}}.}
@@ -74,25 +74,27 @@ find_gamlss2(formula, families = NULL, k = 2,
 \dontrun{## load data
 data("rent", package = "gamlss.data")
 
-## find a suitable response to the response
+## find a suitable family to the response using intercept-only models
 ic <- find_family(rent$R)
 print(ic)
+which.min(ic)
 
-## fit parameters using the BCCG family
+## fit parameters using the resulting BCCG family and plot the density
 fit_family(rent$R, family = BCCG)
 
-## count data
+## another example using count data
 data("polio", package = "gamlss.data")
 
-## search best count model
+## search a suitable discrete distribution / family
 ic <- find_family(polio, k = 0,
   families = available_families(type = "discrete"))
 print(ic)
+which.min(ic)
 
-## fit parameters using the ZASICHEL family
-fit_family(polio, family = ZASICHEL)
+## fit parameters using the ZAPIG family
+fit_family(polio, family = ZAPIG)
 
-## search complete model
+## search complete model for continuous response
 ## b <- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,
 ##   select = TRUE, mu.link = "log")
 }

@@ -834,6 +834,12 @@ la <- function(x, type = 1, const = 1e-05, ...)
     st$X <- st$scale_fun(st$X)
   }
 
+  if(st$lasso_type %in% c("ordinal", "nominal")) {
+    if(is.null(st$control$ridge)) {
+      st$control$ridge <- TRUE
+    }
+  }
+
   ## Assign the "special" class and the new class "n".
   class(st) <- c("special", "lasso", "X %*% b")
 
@@ -1266,20 +1272,6 @@ plot_lasso <- function(x, terms = NULL,
         cm <- rbind(cm, b)
       }
 
-      rescale <- list(...)$rescale
-      if(is.null(rescale))
-        rescale <- FALSE
-
-      if(rescale) {
-        if(!is.null(x$group_scale)) {
-          cm <- cm %*% t(x$group_scale)
-        } else if(!is.null(x$fused_scale)) {
-          cm <- cm * x$fused_scale
-        } else if(!is.null(x$normal_scale)) {
-          cm <- sweep(cm, 2, x$normal_scale, "*")
-        }
-      }
-
       lab <- list(...)$label
 
       rind <- rev(1:length(ic))
@@ -1317,7 +1309,6 @@ plot_lasso <- function(x, terms = NULL,
             if(is.null(names))
               names <- paste0("x", 1:ncol(x$X))
           }
-
           if(length(names) < ncol(x$X))
             names <- rep(names, length.out = ncol(x$X))
           names <- names[1:ncol(x$X)]

@@ -103,8 +103,8 @@ website:
               file: man/Kumaraswamy.qmd
             - text: make.link2
               file: man/make.link2.qmd
-            - text: ologit
-              file: man/ologit.qmd
+            - text: OL
+              file: man/OL.qmd
             - text: softplus
               file: man/softplus.qmd
         - section: Data

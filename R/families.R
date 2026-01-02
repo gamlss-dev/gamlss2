@@ -1118,7 +1118,7 @@ softplus <- function(a = 1) {
 }
 
 ## Ordered logit model.
-ologit <- function(k) {
+OL <- function(k) {
   stopifnot(k >= 2)
 
   ## Parameter names: location and delta-encoded cutpoints.

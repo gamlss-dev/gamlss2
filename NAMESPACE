@@ -39,7 +39,7 @@ export(
   "CG",
   "calibration",
   "discretize",
-  "ologit",
+  "OL",
   "special_fit",
   "special_predict",
   "specials",

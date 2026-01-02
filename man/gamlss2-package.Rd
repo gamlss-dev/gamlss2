@@ -7,19 +7,19 @@
 
 \description{
   Next generation infrastructure for generalized additive models for
-  location, scale, and shape (GAMLSS) and distributional regression
-  more generally. The package provides a fresh reimplementaton of
+  location, scale, and shape (GAMLSS) and general distributional regression
+  models. The package provides a fresh reimplementaton of
   the classic 'gamlss' package while being more modular and
   facilitating the creation of advanced terms and models.
 }
 
 \details{
-  The primary purpose of this package is to facilitate the creation of advanced infrastructures
+  The primary purpose of this package is to facilitate the creation of advanced infrastructure
   designed to enhance the Generalized Additive Models for Location Scale and Shape (GAMLSS,
   Rigby and Stasinopoulos 2005) modeling framework. Notably, the \pkg{gamlss2} package represents a
   significant overhaul of its predecessor, \pkg{gamlss}, with a key emphasis on improving estimation
   speed and incorporating more adaptable infrastructures. These enhancements enable the seamless
-  integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
+  integration of various estimation algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
   regression trees, and forests, fostering a more versatile and powerful modeling environment.
 
   Moreover, the package expands its compatibility by supporting all model terms from the base

@@ -683,25 +683,79 @@ special_predict.glmnet.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## Matrix block standardization.
-blockscale <- function(X) {
-  decomp <- qr(X)
-  if(decomp$rank < ncol(X)) stop("X not full rank")
-  R <- qr.R(decomp)
-  return(solve(R) * sqrt(nrow(X)))
+
+## Normal Lasso scaling (center + per-column RMS scaling).
+normal_scale <- function(X) {
+  X <- as.matrix(X)
+  n <- nrow(X)
+  cn <- colnames(X)
+  if(is.null(cn)) stop("normal_scale: X must have colnames")
+  
+  mu <- setNames(colMeans(X), cn)
+  Xc <- sweep(X, 2, mu[cn], "-")
+  cn2 <- setNames(colSums(Xc^2), cn)
+  s <- setNames(sqrt(n / pmax(cn2, 1e-12)), cn)
+  
+  function(X) {
+    X <- as.matrix(X)
+    if(is.null(colnames(X))) stop("normal_scale: X must have colnames")
+    X <- X[, cn, drop = FALSE]
+    Xc <- sweep(X, 2, mu[cn], "-")
+    Xs <- sweep(Xc, 2, s[cn], "*")
+    colnames(Xs) <- cn
+    rownames(Xs) <- rownames(X)
+    Xs
+  }
 }
 
-scalar_blockscale <- function(X) {
+## Fused scaling (scale only, no centering).
+fused_scale <- function(X) {
+  X <- as.matrix(X)
   n <- nrow(X)
+  cn <- colnames(X)
+  if(is.null(cn)) stop("fused_scale: X must have colnames")
+  
   cn2 <- colSums(X^2)
-  s <- sqrt(n) / sqrt(mean(cn2))
-  as.numeric(s)
+  s <- sqrt(n / pmax(mean(cn2), 1e-12))
+  s <- as.numeric(s)
+  
+  function(X) {
+    X <- as.matrix(X)
+    if(is.null(colnames(X))) stop("fused_scale: X must have colnames")
+    X <- X[, cn, drop = FALSE]
+    Xs <- X * s
+    colnames(Xs) <- cn
+    rownames(Xs) <- rownames(X)
+    Xs
+  }
 }
 
-colscale <- function(X) {
+## Group scaling (center + QR-based orthonormalization).
+group_scale <- function(X) {
+  X <- as.matrix(X)
   n <- nrow(X)
-  s <- sqrt(n) / sqrt(colSums(X^2))
-  s
+  cn <- colnames(X)
+  if(is.null(cn)) stop("group_scale: X must have colnames")
+  
+  mu <- setNames(colMeans(X), cn)
+  Xc <- sweep(X, 2, mu[cn], "-")
+  
+  decomp <- qr(Xc)
+  if(decomp$rank < ncol(Xc)) stop("group_scale: X not full rank after centering")
+  
+  R <- qr.R(decomp)
+  Tmat <- solve(R) * sqrt(n)
+  
+  function(X) {
+    X <- as.matrix(X)
+    if(is.null(colnames(X))) stop("group_scale: X must have colnames")
+    X <- X[, cn, drop = FALSE]
+    Xc <- sweep(X, 2, mu[cn], "-")
+    Xs <- Xc %*% Tmat
+    colnames(Xs) <- cn
+    rownames(Xs) <- rownames(X)
+    Xs
+  }
 }
 
 ## Special lasso from Groll et al.
@@ -732,18 +786,19 @@ la <- function(x, type = 1, const = 1e-05, ...)
   st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
 
   if(!is.null(formula)) {
-    st$X <- model.matrix(formula,
-      contrasts.arg = st$control$contrasts.arg,
-      xlev = st$control$xlev)
+    st$X <- model.matrix(formula, na.action = na.pass)
   } else {
     if(is.factor(x)) {
-      if(inherits(x, "ordered")) {
-        x <- factor(as.character(x), levels = levels(x))
-      }
-      st$X <- model.matrix(~ x, contrasts.arg = st$control$contrasts.arg,
-        xlev = st$control$xlev)
-      colnames(st$X) <- gsub("x", "", colnames(st$X))
       st$is_factor <- TRUE
+      st$lev <- levels(x)
+      st$is_ordered <- inherits(x, "ordered")
+      if(st$is_ordered) {
+        x <- ordered(as.character(x), levels = st$lev)
+      } else {
+        x <- factor(as.character(x), levels = st$lev)
+      }
+      st$X <- model.matrix(~x, na.action = na.pass)
+      colnames(st$X) <- gsub("x", "", colnames(st$X))
     } else {
       st$X <- x
     }
@@ -752,9 +807,9 @@ la <- function(x, type = 1, const = 1e-05, ...)
   cn <- colnames(st$X)
   if(!is.null(cn) && length(j <- grep("(Intercept)", cn, fixed = TRUE))) {
     st$X <- st$X[, -j, drop = FALSE]
-    cn <- cn[-j]
   }
 
+  st$colnames <- colnames(st$X)
   st$formula <- formula
   st$control$const <- const
 
@@ -763,30 +818,24 @@ la <- function(x, type = 1, const = 1e-05, ...)
     type <- lt[type[1L]]
   st$lasso_type <- lt[match(type, lt)]
 
-  is_scaled <- FALSE
-
   if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type == "group")) {
-    st$blockscale <- blockscale(st$X)
-    st$X <- st$X %*% st$blockscale
-    is_scaled <- TRUE
+    st$scale_fun <- group_scale(st$X)
   }
 
   if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type %in% c("ordinal", "nominal"))) {
-    st$scalar_blockscale <- scalar_blockscale(st$X)
-    st$X <- st$X * st$scalar_blockscale
-    is_scaled <- TRUE
+    st$scale_fun <- fused_scale(st$X)
   }
 
-  if(st$control$scale && !is_scaled && st$lasso_type == "normal") {
-    st$colscale <- colscale(st$X)
-    st$X <- sweep(st$X, 2, st$colscale, "*")
-    is_scaled <- TRUE
+  if(st$control$scale && is.null(st$scale_fun) && st$lasso_type == "normal") {
+    st$scale_fun <- normal_scale(st$X)
   }
 
-  colnames(st$X) <- cn
+  if(!is.null(st$scale_fun)) {
+    st$X <- st$scale_fun(st$X)
+  }
 
   ## Assign the "special" class and the new class "n".
-  class(st) <- c("special", "lasso")
+  class(st) <- c("special", "lasso", "X %*% b")
 
   return(st) 
 }
@@ -1016,7 +1065,8 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
 
   ## Arguments needed for prediction and path plots.
-  keep <- c("formula", "term", "blockscale", "scalar_blockscale", "colscale", "X")
+  keep <- c("formula", "term", "X", "scale_fun", "control",
+    "is_factor", "lev", "is_ordered", "colnames")
   rval[keep] <- x[keep]
   rval$z <- z
   rval$w <- w
@@ -1026,6 +1076,8 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$K <- K
   rval$criterion <- control$criterion
   rval$label <- x$label
+
+  names(rval$coefficients) <- colnames(rval$X)
 
   ## Assign class for predict method. 
   class(rval) <- "lasso.fitted"
@@ -1037,15 +1089,26 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 ## Lasso predict method.
 special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...) 
 {
+  ## Build design matrix.
   if(!is.null(x$formula)) {
-    X <- model.matrix(x$formula, data = data,
-      contrasts.arg = x$contrasts.arg, xlev = x$xlev)
+    X <- model.matrix(x$formula, data = data, na.action = na.pass)
   } else {
-    if(is.factor(data[[x$term]])) {
-      if(inherits(data[[x$term]], "ordered")) {
-        data[[x$term]] <- factor(as.character(data[[x$term]]), levels = levels(data[[x$term]]))
+    if(isTRUE(x$is_factor)) {
+      vals <- as.character(data[[x$term]])
+      bad <- which(!is.na(vals) & !(vals %in% x$lev))
+      if(length(bad)) {
+        print(head(unique(vals[bad]), 20))
+        stop("Found values not in training levels")
       }
-      X <- model.matrix(~ data[[x$term]], contrasts.arg = x$control$contrasts.arg, xlev = x$control$xlev)
+      lev <- x$lev
+      if(is.null(lev))
+        lev <- levels(data[[x$term]])
+      if(isTRUE(x$is_ordered)) {
+        data[[x$term]] <- ordered(as.character(data[[x$term]]), levels = lev)
+      } else {
+        data[[x$term]] <- factor(as.character(data[[x$term]]), levels = lev)
+      }
+      X <- model.matrix(~data[[x$term]], na.action = na.pass)
       colnames(X) <- gsub("data[[x$term]]", "", colnames(X), fixed = TRUE)
     } else {
       X <- data[[x$term]]
@@ -1056,18 +1119,13 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
     X <- X[, -j, drop = FALSE]
   }
 
-  if(ncol(X) != length(x$coefficients)) {
-    if(!is.null(names(x$coefficients)) && !is.null(colnames(X))) {
-      X <- X[, names(x$coefficients), drop = FALSE]
-    }
+  if(!is.null(x$colnames)) {
+    X <- X[, x$colnames, drop = FALSE]
   }
 
-  if(!is.null(x$blockscale)) {
-    X <- X %*% x$blockscale
-  } else if(!is.null(x$scalar_blockscale)) {
-    X <- X * x$scalar_blockscale
-  } else if(!is.null(x$colscale)) {
-    X <- sweep(X, 2, x$colscale, "*")
+  ## Scale.
+  if(!is.null(x$scale_fun)) {
+    X <- x$scale_fun(X)
   }
 
   fit <- drop(X %*% x$coefficients)
@@ -1213,12 +1271,12 @@ plot_lasso <- function(x, terms = NULL,
         rescale <- FALSE
 
       if(rescale) {
-        if(!is.null(x$blockscale)) {
-          cm <- cm %*% t(x$blockscale)
-        } else if(!is.null(x$scalar_blockscale)) {
-          cm <- cm * x$scalar_blockscale
-        } else if(!is.null(x$colscale)) {
-          cm <- sweep(cm, 2, x$colscale, "*")
+        if(!is.null(x$group_scale)) {
+          cm <- cm %*% t(x$group_scale)
+        } else if(!is.null(x$fused_scale)) {
+          cm <- cm * x$fused_scale
+        } else if(!is.null(x$normal_scale)) {
+          cm <- sweep(cm, 2, x$normal_scale, "*")
         }
       }
 

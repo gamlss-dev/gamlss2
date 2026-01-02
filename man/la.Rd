@@ -109,9 +109,7 @@ plot_lasso(x, terms = NULL,
   }
 
   The applied scaling is stored internally and automatically reused during
-  prediction. When \code{plot_lasso()} is called with
-  \code{rescale = TRUE}, coefficient paths are transformed back to the
-  original parameterization to facilitate interpretation.
+  prediction.
 }
 
 \references{
@@ -144,16 +142,16 @@ plot_lasso(x, terms = NULL,
 data("rent", package = "gamlss.data")
 
 ## transform numeric to factor variables
-rent$Flc <- cut(rent$Fl, breaks = seq(20, 160, by = 10),
+rent$Flc <- cut(rent$Fl, breaks = seq(20, 120, by = 10),
   include.lowest = TRUE)
 rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
   include.lowest = TRUE)
 
-## set up the model formula for a BCT model
-f <- R ~ la(Flc,type=3) + la(Ac,type=3) + la(loc,type=3) | . | .
+## set up the model formula for a NO model
+f <- R ~ la(Flc,type=3) + la(Ac,type=3) + la(loc,type=3) | .
 
 ## estimation
-b <- gamlss2(f, data = rent, family = BCT)
+b <- gamlss2(f, data = rent, family = NO)
 
 ## summary, shows the estimated degrees of freedom
 ## for each model term
@@ -170,22 +168,23 @@ plot_lasso(b)
 plot_lasso(b, which = "coefficients")
 
 ## plot a single model term.
-plot_lasso(b, which = "coefficients", term = 5)
+plot_lasso(b, which = "coefficients", term = 1)
 
 ## same with
-plot_lasso(b, which = "coefficients", term = "sigma.la(Ac")
+plot_lasso(b, which = "coefficients", term = "mu.la(Flc")
 
 ## zoom out
-plot_lasso(b, which = "coefficients", term = 5,
+plot_lasso(b, which = "coefficients", term = 1,
   zoom = c(8, 7))
 
 ## set names
-plot_lasso(b, which = "coefficients", term = 5,
-  zoom = c(8, 7), names = c("A", "B", "C"))
+plot_lasso(b, which = "coefficients", term = 1,
+  zoom = 10, names = c("A", "B", "C"))
 
 ## set title
-plot_lasso(b, which = "coefficients", term = 5,
-  zoom = c(8, 7), main = "Fused Lasso")
+plot_lasso(b, which = "coefficients", term = 1,
+  zoom = 10, main = "Fused Lasso",
+  info = TRUE, cex.info = 0.9)
 
 ## simulated example using the normal lasso
 ## and a matrix as argument for la()
@@ -226,8 +225,7 @@ plot_lasso(b)
 plot_lasso(b, which = "coefficients")
 
 ## zoom out
-plot_lasso(b, which = "coefficients",
-  zoom = c(8, 9))
+plot_lasso(b, which = "coefficients", zoom = 10)
 
 ## extract coefficients
 cb <- coef(b, full = TRUE)
@@ -267,7 +265,7 @@ plot(b, which = "resid")
 ## coefficient paths
 plot_lasso(b, which = "coefficients", zoom = 15)
 
-## plot estimated qauntiles
+## plot estimated quantiles
 qu <- quantile(b, probs = c(0.05, 0.5, 0.95))
 plot(bikes ~ yday, data = HarzTraffic, col = adjustcolor(1, alpha = 0.3))
 with(HarzTraffic, matplot(yday[i], qu[i, ],

@@ -478,7 +478,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               ## Step length control.
               if(step[[j]]$sterms[k] < 1) {
                 if(iter[1L] > 0 | iter[2L] > 0) {
-                  if(inherits(specials[[k]], "mgcv.smooth")) {
+                  if(inherits(specials[[k]], c("mgcv.smooth", "X %*% b"))) {
                     fs$coefficients <- step[[j]]$sterms[k] * fs$coefficients +
                       (1 - step[[j]]$sterms[k]) * if(is.null(sfit[[j]][[k]]$coefficients)) 0 else sfit[[j]][[k]]$coefficients
                     fs$fitted.values <- drop(specials[[k]]$X %*% fs$coefficients)

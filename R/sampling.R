@@ -1039,6 +1039,10 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1)
   return(object)
 }
 
+## Propose and prior functions.
+propose.elm <- propose.mgcv.smooth
+prior.elm <- prior.mgcv.smooth
+
 ## Testing.
 if(FALSE) {
   set.seed(123)

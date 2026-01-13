@@ -333,7 +333,3 @@ special_predict.elm.fitted <- function(x, data, se.fit = FALSE, samples = NULL, 
   return(fit)
 }
 
-## Propose and prior functions.
-propose.elm <- propose.mgcv.smooth
-prior.elm <- prior.mgcv.smooth
-

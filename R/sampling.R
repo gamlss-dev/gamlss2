@@ -177,8 +177,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         samples[[j]]$s <- list()
         sfit[[j]] <- list()
         for(i in sterms[[j]]) {
-          if(!inherits(specials[[i]], "mgcv.smooth")) {
-            stop("only mgcv smooth terms are allowed!")
+          if(!inherits(specials[[i]], c("mgcv.smooth", "mcmc"))) {
+            stop("only mgcv and mcmc smooth terms are allowed!")
           }
           sfit[[j]][[i]] <- list(
             "fitted.values" = rep(0.0, n),

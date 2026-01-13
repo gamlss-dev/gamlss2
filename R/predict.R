@@ -243,7 +243,19 @@ predict.gamlss2 <- function(object,
             } else {
               if(inherits(object$specials[[i]], "special")) {
                 if(!is.null(object$fitted.specials[[j]][[i]])) {
-                  fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf)
+                  if(!is.null(object$specials[[i]]$pred_class))
+                    class(object$fitted.specials[[j]][[i]]) <- object$specials[[i]]$pred_class
+                  if(is.null(samples)) {
+                    fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf, exclude = exclude)
+                  } else {
+                    nc <- object$specials[[i]]$ncol
+                    if(is.null(nc))
+                      stop("need ncol in special term!")
+                    ij <- paste0(paste0(j, ".s.", i), ".", 1:nc)
+                    object$fitted.specials[[j]][[i]][object$specials[[i]]$keep] <- object$specials[[i]][object$specials[[i]]$keep]
+                    fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf,
+                      samples = samples[, ij, drop = FALSE], exclude = exclude)
+                  }
                 }
               } else {
                 cs <- object$fitted.specials[[j]][[i]]$coefficients

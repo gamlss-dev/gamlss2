@@ -192,14 +192,30 @@ results.gamlss2 <- function(x, ...)
               }
             }
 
-            p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
+            if(!is.null(x$samples)) {
+              if(!is.null(x$specials[[i]]$pred_class))
+                class(x$fitted.specials[[j]][[i]]) <- x$specials[[i]]$pred_class
+              x$fitted.specials[[j]][[i]][x$specials[[i]]$keep] <- x$specials[[i]][x$specials[[i]]$keep]
 
+              nc <- x$specials[[i]]$ncol
+              if(is.null(nc))
+                stop("need ncol in special term!")
+              cni <- paste0(j, ".s.", i, ".", 1:nc)
+              fiti <- special_predict(x$fitted.specials[[j]][[i]], data = nd,
+                samples = x$samples[, cni, drop = FALSE])
+              nd$fit <- apply(fiti, 1, mean)
+              nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
+              nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
+            } else {
+              p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
+            }
             if(is.null(dim(p))) {
               nd$fit <- as.numeric(p)
             } else {
               if(is.matrix(p))
                 p <- as.data.frame(p)
-              nd <- cbind(nd, p)
+              if(is.null(x$samples))
+                nd <- cbind(nd, p)
             }
             lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
             lab <- paste0(lab[-length(lab)], collapse = "")

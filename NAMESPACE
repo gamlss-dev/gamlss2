@@ -69,7 +69,8 @@ export(
   "mse_metric",
   "BS",
   "bamlss2",
-  "mcmc"
+  "mcmc",
+  "elm"
 )
 
 S3method(gamlss2, formula)
@@ -99,6 +100,8 @@ S3method(special_fit, re)
 S3method(special_predict, re.fitted)
 S3method(special_fit, tree)
 S3method(special_predict, tree.fitted)
+S3method(special_fit, elm)
+S3method(special_predict, elm.fitted)
 S3method(special_predict, default)
 S3method(vcov, gamlss2)
 S3method(confint, gamlss2)

@@ -93,6 +93,7 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
       } else {
         if(binj) {
           sj$binning <- bn
+          sj$sparse_index <- calc_sparse_index(sj$X)
         }
         if(inherits(sj, "matrix")) {
           sj <- list("X" = sj, "S" = list(diag(1, ncol(sj))),
@@ -407,7 +408,7 @@ special_predict.default <- function(x, data, ...)
     if(is.null(x$model)) {
       return(predict(x, newdata = data))
     } else {
-      return(predict(x$model, newdata = data))
+      return(predict(x$model, newdata = data, ...))
     }
   }
 }

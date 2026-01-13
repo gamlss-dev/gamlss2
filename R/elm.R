@@ -188,7 +188,7 @@ elm <- function(x, k = 100, a = "tanh", ...)
   st <- list()
   st$control <- list(...)
   if(is.null(st$control$criterion))
-    st$control$criterion <- "aic"
+    st$control$criterion <- "bic"
   if(is.null(st$control$scale))
     st$control$scale <- TRUE
   st$term <- xn 

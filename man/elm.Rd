@@ -80,7 +80,7 @@ d <- subset(SpirometryUS, gender == "Female")
 set.seed(1328)
 
 ## formula for all 4 parameters
-f <- fev1 ~ elm(age) | . | . | .
+f <- fev1 ~ elm(age,k=100,a="tanh") | . | . | .
 
 ## estimate model
 m <- gamlss2(f, data = d, family = BCT)
@@ -102,7 +102,7 @@ matplot(d$age[i], fit[i, ],
 
 ## main effects and interactions
 f <- fev1 ~ s(age) + s(height) + s(weight) +
-  elm(~ age + height + weight, k = 200) | . | . | .
+  elm(~age+height+weight,k=200) | . | . | .
 
 m <- gamlss2(f, data = d, family = BCT)
 

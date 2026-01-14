@@ -60,7 +60,7 @@ elm(x, k = 50, a = "tanh", ...)
   Huang GB, Zhu QY, Siew CK (2004).
   Extreme Learning Machine: A New Learning Scheme of Feedforward Neural Networks.
   In: \emph{Proceedings of IJCNN 2004}, \bold{2}, 985--990.
-  \doi{{10.1109/IJCNN.2004.1380068}
+  \doi{10.1109/IJCNN.2004.1380068}
 }
 
 \seealso{

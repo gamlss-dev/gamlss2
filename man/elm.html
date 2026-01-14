@@ -288,7 +288,7 @@ Further control arguments can be passed: <code>criterion = “bic”</code> (def
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## formula for all 4 parameters</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> fev1 <span class="sc">~</span> <span class="fu">elm</span>(age) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> fev1 <span class="sc">~</span> <span class="fu">elm</span>(age,<span class="at">k=</span><span class="dv">100</span>,<span class="at">a=</span><span class="st">"tanh"</span>) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> BCT)</span>
@@ -310,7 +310,7 @@ Further control arguments can be passed: <code>criterion = “bic”</code> (def
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="do">## main effects and interactions</span></span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> fev1 <span class="sc">~</span> <span class="fu">s</span>(age) <span class="sc">+</span> <span class="fu">s</span>(height) <span class="sc">+</span> <span class="fu">s</span>(weight) <span class="sc">+</span></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">elm</span>(<span class="sc">~</span> age <span class="sc">+</span> height <span class="sc">+</span> weight, <span class="at">k =</span> <span class="dv">200</span>) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">elm</span>(<span class="sc">~</span>age<span class="sc">+</span>height<span class="sc">+</span>weight,<span class="at">k=</span><span class="dv">200</span>) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> BCT)</span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>

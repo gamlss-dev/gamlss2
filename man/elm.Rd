@@ -55,10 +55,12 @@ elm(x, k = 50, a = "tanh", ...)
   Huang GB, Zhu QY, Siew CK (2006).
   Extreme Learning Machine: Theory and Applications.
   \emph{Neurocomputing}, \bold{70}(1--3), 489--501.
+  \doi{10.1016/j.neucom.2005.12.126}
 
   Huang GB, Zhu QY, Siew CK (2004).
   Extreme Learning Machine: A New Learning Scheme of Feedforward Neural Networks.
-  In: \emph{Proceedings of IJCNN 2004}, 985--990.
+  In: \emph{Proceedings of IJCNN 2004}, \bold{2}, 985--990.
+  \doi{{10.1109/IJCNN.2004.1380068}
 }
 
 \seealso{

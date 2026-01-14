@@ -1,8 +1,11 @@
 is_constant_col <- function(x, tol = 1e-8) {
-  is.numeric(x) && max(x) - min(x) < tol
+  if(!is.numeric(x)) return(FALSE)
+  x <- x[is.finite(x)]
+  if(length(x) == 0L) return(TRUE)
+  (max(x) - min(x)) < tol
 }
 
-## Normal Lasso scaling (center + per-column RMS scaling), keeping (Intercept) unscaled.
+## Normal scaling (center + per-column scaling), keeping (Intercept) unscaled.
 elm_normal_scale <- function(X) {
   X <- as.matrix(X)
 
@@ -68,7 +71,7 @@ elm_group_scale <- function(X) {
     decomp <- qr(Xc)
 
     R <- qr.R(decomp)
-    Tmat <- solve(R) * sqrt(n)
+    Tmat <- qr.solve(R, diag(ncol(R))) * sqrt(n)
 
     function(X) {
       X <- as.matrix(X)
@@ -161,14 +164,15 @@ elm_sample_weights <- function(Z, k, a = "tanh",
       w[1L] <- b
       w[-1L] <- w_in
       w
-    })
+    }, simplify = "matrix")
+    dim(W) <- c(n_weights, k)
   }
 
   ## keep weights as matrix n_weights x k
   W
 }
 
-elm <- function(x, k = 100, a = "tanh", ...)
+elm <- function(x, k = 50, a = "tanh", ...)
 {
   call <- match.call()
 
@@ -180,7 +184,7 @@ elm <- function(x, k = 100, a = "tanh", ...)
     xn <- all.vars(formula)
     environment(formula) <- environment(x)
   } else {
-    xn <- as.character(xn)
+    xn <- all.vars(xn)
     formula <- NULL
   }
 
@@ -192,7 +196,7 @@ elm <- function(x, k = 100, a = "tanh", ...)
   if(is.null(st$control$scale))
     st$control$scale <- TRUE
   st$term <- xn 
-  st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
+  st$label <- gsub(" ", "", paste0("elm(", as.character(deparse(call[[2]])), ")"))
 
   if(!is.null(formula)) {
     st$Z <- model.matrix(formula, na.action = na.pass)
@@ -233,19 +237,18 @@ elm <- function(x, k = 100, a = "tanh", ...)
     "logistic" = function(x) plogis(pmax(pmin(x, 35), -35)),
     "tanh"     = function(x) tanh(pmax(pmin(x, 35), -35)),
     "relu"     = function(x) pmax(x, 0),
-    "identity" = function(x) x
+    "identity" = function(x) x,
+    stop("Unknown activation '", a, "'. Use one of: logistic, tanh, relu, identity.")
   )
 
   st$n_weights <- ncol(st$Z)
-  p_in <- st$n_weights - 1L
-  k_eff <- k * p_in
 
-  st$weights <- elm_sample_weights(st$Z, k = k_eff, a = a)
-  st$X <- apply(st$weights, 2, function(w) st$activation(st$Z %*% w))
+  st$weights <- elm_sample_weights(st$Z, k = k, a = a)
+  st$X <- st$activation(st$Z %*% st$weights)
 
-  st$X <- apply(st$weights, 2, FUN = function(w) {
-    st$activation(st$Z %*% w)
-  })
+#  st$X <- apply(st$weights, 2, FUN = function(w) {
+#    st$activation(st$Z %*% w)
+#  })
 
   ## Center hidden-layer design matrix (columns)
   st$X_center <- colMeans(st$X, na.rm = TRUE)
@@ -279,7 +282,9 @@ special_predict.elm.fitted <- function(x, data, se.fit = FALSE, samples = NULL, 
 {
   ## Build design matrix.
   if(!is.null(x$formula)) {
-    Z <- model.matrix(x$formula, data = data, na.action = na.pass)
+    tt <- terms(x$formula)
+    mf <- model.frame(tt, data = data, na.action = na.pass)
+    Z  <- model.matrix(tt, mf)
   } else {
     if(isTRUE(x$is_factor)) {
       vals <- as.character(data[[x$term]])

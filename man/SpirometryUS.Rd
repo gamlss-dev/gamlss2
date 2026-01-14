@@ -40,7 +40,7 @@ A data frame containing 16596 observations on 13 variables.
   \item{ethnicity}{Factor. Self-reported race and ethnicity information
     with levels \code{white}, \code{black}, \code{mexican} American,
     other \code{hispanic}, and \code{other} (including multi-racial).}
-  \item{surveyweights}{Numeric. Full sample two-year exam survey weight.}
+  \item{surveyweight}{Numeric. Full sample two-year exam survey weight.}
 }
 }
 

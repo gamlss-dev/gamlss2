@@ -592,11 +592,10 @@ numeric, matrix, list or data frame, see the examples.
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> ., <span class="at">data =</span> abdom, <span class="at">family =</span> GA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4937.7817 eps = 0.369951     
-GAMLSS-RS iteration  2: Global Deviance = 4789.2637 eps = 0.030077     
-GAMLSS-RS iteration  3: Global Deviance = 4781.6786 eps = 0.001583     
-GAMLSS-RS iteration  4: Global Deviance = 4781.3298 eps = 0.000072     
-GAMLSS-RS iteration  5: Global Deviance = 4781.3279 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5039.2922 eps = 0.356998     
+GAMLSS-RS iteration  2: Global Deviance = 4802.238 eps = 0.047041     
+GAMLSS-RS iteration  3: Global Deviance = 4800.5126 eps = 0.000359     
+GAMLSS-RS iteration  4: Global Deviance = 4800.4943 eps = 0.000003     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract, also works with newdata</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -610,12 +609,12 @@ GAMLSS-RS iteration  5: Global Deviance = 4781.3279 eps = 0.000000     </code></
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      mean   median      q95 variance        pdf        cdf
-1 63.88365 63.68775 74.28810 37.56522 0.05039650 0.21597227
-2 63.88365 63.68775 74.28810 37.56522 0.06491059 0.52031921
-3 63.88365 63.68775 74.28810 37.56522 0.03009676 0.09492411
-4 65.19952 65.00336 75.71423 38.38753 0.05409279 0.25428282
-5 67.91225 67.71560 78.65099 40.08579 0.03735092 0.83274464
-6 67.91225 67.71560 78.65099 40.08579 0.03054142 0.10196647</code></pre>
+1 63.03104 62.92909 70.42364 19.28276 0.06246974 0.18010635
+2 63.03104 62.92909 70.42364 19.28276 0.08730887 0.59589436
+3 63.03104 62.92909 70.42364 19.28276 0.02556281 0.05035205
+4 64.38740 64.28355 71.92811 20.06443 0.06986751 0.22764748
+5 67.18717 67.07943 75.03293 21.72338 0.02854450 0.92478019
+6 67.18717 67.07943 75.03293 21.72338 0.02660748 0.05735297</code></pre>
 </div>
 </div>
 

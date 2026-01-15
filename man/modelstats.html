@@ -647,13 +647,11 @@ GAMLSS-RS iteration  3: Global Deviance = 492.6373 eps = 0.000000     </code></p
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">+</span> <span class="fu">s</span>(qrt, <span class="at">bs =</span> <span class="st">"re"</span>), <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 408.2411 eps = 0.294515     
-GAMLSS-RS iteration  2: Global Deviance = 379.8718 eps = 0.069491     
-GAMLSS-RS iteration  3: Global Deviance = 375.4344 eps = 0.011681     
-GAMLSS-RS iteration  4: Global Deviance = 374.4315 eps = 0.002671     
-GAMLSS-RS iteration  5: Global Deviance = 374.1784 eps = 0.000676     
-GAMLSS-RS iteration  6: Global Deviance = 374.1352 eps = 0.000115     
-GAMLSS-RS iteration  7: Global Deviance = 374.1317 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 408.2379 eps = 0.294520     
+GAMLSS-RS iteration  2: Global Deviance = 377.3934 eps = 0.075555     
+GAMLSS-RS iteration  3: Global Deviance = 374.3484 eps = 0.008068     
+GAMLSS-RS iteration  4: Global Deviance = 374.1042 eps = 0.000652     
+GAMLSS-RS iteration  5: Global Deviance = 374.1005 eps = 0.000009     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare models</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -671,25 +669,25 @@ $CraggUhler
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       b1        b2 
-0.8095853 0.9863226 </code></pre>
+0.8095853 0.9863321 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        AIC      df
-b2 398.7665 12.3174
-b1 504.6373  6.0000</code></pre>
+<pre><code>        AIC       df
+b2 398.7415 12.32052
+b1 504.6373  6.00000</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        AIC      df
-b2 398.7665 12.3174
-b1 504.6373  6.0000</code></pre>
+<pre><code>        AIC       df
+b2 398.7415 12.32052
+b1 504.6373  6.00000</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        BIC      df
-b2 421.0199 12.3174
-b1 515.4773  6.0000</code></pre>
+<pre><code>        BIC       df
+b2 421.0005 12.32052
+b1 515.4773  6.00000</code></pre>
 </div>
 </div>
 

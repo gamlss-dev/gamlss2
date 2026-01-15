@@ -218,9 +218,15 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     XWz <- crossprod(x$X, rz)
     XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
   } else {
-    XW <- x$X * w
-    XWX <- crossprod(XW, x$X)
-    XWz <- crossprod(XW, z)
+#    XW <- x$X * w
+#    XWX <- crossprod(XW, x$X)
+#    XWz <- crossprod(XW, z)
+
+    sw <- sqrt(w)
+    XWs <- x$X * sw
+    zs  <- z * sw
+    XWX <- crossprod(XWs)
+    XWz <- crossprod(XWs, zs)
   }
 
   if(!is.null(x$control)) {
@@ -234,12 +240,31 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   ## Extra penalty for selection.
   if(isTRUE(control$termselect)) {
     df <- ncol(x$X)
-    bml <- drop(solve(XWX + diag(1e-08, df), XWz))
+    lam <- 1e-6
+    bml <- NULL
+    for(tt in 1:10) {
+      out <- try(drop(qr.solve(XWX + diag(lam, df), XWz, tol = 1e-12)), silent = TRUE)
+      if(!inherits(out, "try-error") && all(is.finite(out))) { bml <- out; break }
+      lam <- lam * 10
+    }
+#    pen <- function(b) {
+#      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
+#      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+#      A
+#    }
 
-    pen <- function(b) {
-      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
-      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
-      A
+    pen <- function(b, eps = 1e-12, cap = 1e+12) {
+      nb  <- sqrt(sum(b^2))
+      nbm <- sqrt(sum(bml^2))
+
+      if(!is.finite(nb)  || nb  < eps) nb  <- eps
+      if(!is.finite(nbm) || nbm < eps) nbm <- eps
+
+      c0 <- 1 / (nb * nbm)
+      if(!is.finite(c0)) c0 <- cap
+      c0 <- min(c0, cap)
+
+      diag(c0, df)
     }
 
     b0 <- if(is.null(transfer$coefficients)) bml else  transfer$coefficients

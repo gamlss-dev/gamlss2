@@ -96,7 +96,7 @@ elm_group_scale <- function(X) {
 
 elm_sample_weights <- function(Z, k, a = "tanh",
   target_sd = 1.0, slope_sd_1d = 1.0, q_range = c(0.05, 0.95),
-  min_sd = 1e-12)
+  min_sd = 1e-12, orthogonalize = NULL)
 {
   Z <- as.matrix(Z)
   n_weights <- ncol(Z)
@@ -105,70 +105,146 @@ elm_sample_weights <- function(Z, k, a = "tanh",
   p_in <- n_weights - 1L
   fan_in <- max(1L, p_in)
 
+  orthogonalize <- if(is.null(orthogonalize)) {
+    (p_in > 1L && k >= fan_in)
+  } else {
+    isTRUE(orthogonalize)
+  }
+
+  ## map activations to sensible defaults
+  target_sd0 <- switch(a,
+    "logistic"   = 0.8,
+    "tanh"       = 1.2,
+    "atan"       = 1.2,
+    "softsign"   = 1.2,
+    "relu"       = 1.6,
+    "leaky_relu" = 1.6,
+    "elu"        = 1.6,
+    "softplus"   = 1.6,
+    "gaussian"   = 0.6,
+    "laplace"    = 0.8,
+    "sine"       = 1.0,
+    "identity"   = 1.0,
+    1.0
+  )
+
+  if(isTRUE(all.equal(target_sd, 1.0))) {
+    target_sd <- target_sd0
+  }
+
   ## activation-aware base scale
   base_sd <- switch(a,
-    "relu"      = sqrt(2 / fan_in),         # He
-    "logistic"  = sqrt(2 / (fan_in + 1)),   # Xavier-like
-    "tanh"      = sqrt(2 / (fan_in + 1)),   # Xavier-like
-    "identity"  = 1 / sqrt(fan_in),
+    "relu"       = sqrt(2 / fan_in),
+    "leaky_relu" = sqrt(2 / fan_in),
+    "elu"        = sqrt(2 / fan_in),
+    "softplus"   = sqrt(2 / fan_in),
+    "logistic"   = sqrt(2 / (fan_in + 1)),
+    "tanh"       = sqrt(2 / (fan_in + 1)),
+    "atan"       = sqrt(2 / (fan_in + 1)),
+    "softsign"   = sqrt(2 / (fan_in + 1)),
+    "sine"       = 1 / sqrt(fan_in),
+    "gaussian"   = 1 / sqrt(fan_in),
+    "laplace"    = 1 / sqrt(fan_in),
+    "identity"   = 1 / sqrt(fan_in),
     sqrt(2 / (fan_in + 1))
   )
 
-  Zin <- Z[, -1L, drop = FALSE]  # non-intercept inputs
+  Zin <- Z[, -1L, drop = FALSE]
+
+  bias_from_u <- function(u) {
+    qq <- stats::runif(1, min = 0.2, max = 0.8)
+    -stats::quantile(u, probs = qq, na.rm = TRUE,
+                     names = FALSE, type = 7)
+  }
 
   if(p_in == 1L) {
-    ## 1D: place transitions across the observed x-range
+    ## 1D
     x1 <- drop(Zin)
     x1 <- x1[is.finite(x1)]
     if(length(x1) < 5L) stop("not enough finite data for 1D init")
 
-    q <- stats::quantile(x1, probs = q_range, na.rm = TRUE, names = FALSE)
-    if(!is.finite(q[1]) || !is.finite(q[2]) || abs(q[2] - q[1]) < min_sd) {
+    q <- stats::quantile(x1, probs = q_range,
+                          na.rm = TRUE, names = FALSE)
+    if(!is.finite(q[1]) || !is.finite(q[2]) ||
+       abs(q[2] - q[1]) < min_sd) {
       q <- range(x1)
     }
-    r <- q[2] - q[1]
-    if(!is.finite(r) || r < min_sd) r <- 1
 
-    ## slope scale adapted to data
-    sx <- stats::sd(x1, na.rm = TRUE)
+    sx_sd <- stats::sd(x1, na.rm = TRUE)
+    sx_mad <- stats::mad(x1, constant = 1, na.rm = TRUE)
+    sx <- sx_sd
+    if(is.finite(sx_mad) && sx_mad > min_sd)
+      sx <- 0.5 * sx_sd + 0.5 * sx_mad
     if(!is.finite(sx) || sx < min_sd) sx <- 1
-    slope_sd <- slope_sd_1d / sx
 
+    slope_sd <- slope_sd_1d / sx
     thr <- stats::runif(k, min = q[1], max = q[2])
 
     W <- sapply(seq_len(k), function(jj) {
       w <- numeric(n_weights)
 
-      a1 <- stats::rnorm(1, mean = 0, sd = slope_sd)
-      if(!is.finite(a1) || abs(a1) < 1e-6) a1 <- sign(a1 + 1e-12) * 1e-6
+      if(a %in% c("gaussian", "laplace")) {
+        a1 <- abs(stats::rnorm(1, 0, slope_sd))
+        a1 <- max(a1, 0.05)
+        if(!is.finite(a1) || a1 < 1e-6) a1 <- 1e-6
+        b <- -a1 * thr[jj]
+      } else {
+        a1 <- stats::rnorm(1, 0, slope_sd)
+        if(!is.finite(a1) || abs(a1) < 1e-6)
+          a1 <- sign(a1 + 1e-12) * 1e-6
+        b <- -a1 * thr[jj]
+      }
 
-      b <- -a1 * thr[jj]  # put transition at thr
       w[1L] <- b
       w[2L] <- a1
       w
     })
 
   } else {
-    ## multivariate: sample -> rescale to target_sd -> bias via median centering
-    W <- sapply(seq_len(k), function(jj) {
-      w_in <- stats::rnorm(fan_in, mean = 0, sd = base_sd)
+    ## multivariate
+    W <- matrix(NA_real_, nrow = n_weights, ncol = k)
+    jj <- 1L
 
-      u <- drop(Zin %*% w_in)
-      su <- stats::sd(u, na.rm = TRUE)
-      if(!is.finite(su) || su < min_sd) su <- 1
-      w_in <- w_in * (target_sd / su)
+    while(jj <= k) {
 
-      b <- -stats::median(drop(Zin %*% w_in), na.rm = TRUE)
+      m <- min(fan_in, k - jj + 1L)
 
-      w <- numeric(n_weights)
-      w[1L] <- b
-      w[-1L] <- w_in
-      w
-    }, simplify = "matrix")
-    dim(W) <- c(n_weights, k)
+      if(orthogonalize) {
+        V <- matrix(stats::rnorm(fan_in * m), fan_in, m)
+        decomp <- qr(V)
+        Q <- qr.Q(decomp, complete = FALSE)
+        V <- Q[, seq_len(m), drop = FALSE]
+      } else {
+        V <- matrix(stats::rnorm(fan_in * m), fan_in, m)
+        nv <- sqrt(colSums(V^2))
+        nv[!is.finite(nv) | nv < min_sd] <- 1
+        V <- sweep(V, 2, nv, "/")
+      }
+
+      V <- V * (base_sd * sqrt(fan_in))
+
+      for(ii in seq_len(m)) {
+
+        w_in <- V[, ii]
+
+        u <- drop(Zin %*% w_in)
+        su <- stats::sd(u, na.rm = TRUE)
+        if(!is.finite(su) || su < min_sd) su <- 1
+        w_in <- w_in * (target_sd / su)
+
+        u2 <- drop(Zin %*% w_in)
+        b <- bias_from_u(u2)
+
+        w <- numeric(n_weights)
+        w[1L] <- b
+        w[-1L] <- w_in
+
+        W[, jj] <- w
+        jj <- jj + 1L
+      }
+    }
   }
 
-  ## keep weights as matrix n_weights x k
   W
 }
 
@@ -195,6 +271,7 @@ elm <- function(x, k = 50, a = "tanh", ...)
     st$control$criterion <- "bic"
   if(is.null(st$control$scale))
     st$control$scale <- TRUE
+  st$control$termselect <- isTRUE(st$control$elastic)
   st$term <- xn 
   st$label <- gsub(" ", "", paste0("elm(", as.character(deparse(call[[2]])), ")"))
 
@@ -234,11 +311,22 @@ elm <- function(x, k = 50, a = "tanh", ...)
   }
 
   st$activation <- switch(a,
-    "logistic" = function(x) plogis(pmax(pmin(x, 35), -35)),
-    "tanh"     = function(x) tanh(pmax(pmin(x, 35), -35)),
-    "relu"     = function(x) pmax(x, 0),
-    "identity" = function(x) x,
-    stop("Unknown activation '", a, "'. Use one of: logistic, tanh, relu, identity.")
+    "logistic"   = function(x) plogis(pmax(pmin(x, 35), -35)),
+    "tanh"       = function(x) tanh(pmax(pmin(x, 35), -35)),
+    "relu"       = function(x) pmax(x, 0),
+    "leaky_relu" = function(x) ifelse(x > 0, x, 0.01 * x),
+    "elu" = function(x) {
+      x0 <- pmax(pmin(x, 35), -35)
+      ifelse(x0 > 0, x0, exp(x0) - 1)
+    },
+    "softplus"   = function(x) log1p(exp(pmax(pmin(x, 35), -35))),
+    "atan"       = function(x) atan(x),
+    "softsign"   = function(x) x / (1 + abs(x)),
+    "gaussian"   = function(x) exp(-x^2),
+    "laplace"    = function(x) exp(-abs(x)),
+    "sine"       = function(x) sin(x),
+    "identity"   = function(x) x,
+    stop("Unknown activation '", a, "'.")
   )
 
   st$n_weights <- ncol(st$Z)
@@ -313,9 +401,7 @@ special_predict.elm.fitted <- function(x, data, se.fit = FALSE, samples = NULL, 
     Z <- x$scale_fun(Z)
   }
 
-  X <- apply(x$weights, 2, FUN = function(w) {
-    x$activation(Z %*% w)
-  })
+  X <- x$activation(Z %*% x$weights)
 
   if(!is.null(x$X_center)) {
     X <- sweep(X, 2, x$X_center, "-")

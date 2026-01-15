@@ -117,6 +117,9 @@ summary(m)
 ## plot main effects
 plot(m)
 
+## quantile residuals
+plot(m, which = "resid")
+
 ## prediction is handled automatically via
 ## the special term interface
 n <- 50

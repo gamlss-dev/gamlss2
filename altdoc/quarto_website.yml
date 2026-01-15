@@ -65,7 +65,7 @@ website:
               file: man/BS.qmd
         - section: Model terms
           contents:
-           - text: elm
+            - text: elm
               file: man/elm.qmd
             - text: gnet
               file: man/gnet.qmd

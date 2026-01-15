@@ -18,9 +18,10 @@ elm(x, k = 50, a = "tanh", ...)
     \code{\link[stats]{model.matrix}}. See the examples.}
   \item{k}{Integer, number of hidden units (random features) used to build the
     ELM design matrix.}
-  \item{a}{Character, activation function used for the hidden units.
-    Supported options are \code{"logistic"}, \code{"tanh"} (default),
-    \code{"relu"} and \code{"identity"}.}
+  \item{a}{ Character, activation function for the hidden units. Supported options are
+    \code{"logistic"}, \code{"tanh"} (default), \code{"relu"}, \code{"leaky_relu"},
+    \code{"elu"}, \code{"softplus"}, \code{"atan"}, \code{"softsign"},
+    \code{"gaussian"}, \code{"laplace"}, \code{"sine"}, and \code{"identity"}.}
   \item{\dots}{Further control arguments can be passed:
     \code{criterion = "bic"} (default) for shrinkage parameter selection and
     \code{scale = TRUE} (default) for internal scaling of the design matrix.
@@ -29,26 +30,29 @@ elm(x, k = 50, a = "tanh", ...)
 }
 
 \details{
-  The ELM model term constructs a randomized single-hidden-layer representation
-  of the covariate(s) in \code{x}. Internally, a design matrix \code{Z} is built
-  from \code{x} (including an intercept column). Random weights are sampled and
-  transformed through an activation function to obtain the hidden-layer design
-  matrix \code{X}. The columns of \code{X} are centered before estimation.
+  The ELM term constructs a randomized single-hidden-layer representation of the covariate(s) in
+  \code{x}. Internally, a design matrix \code{Z} is built (including an intercept column), random
+  weights are sampled, and the linear predictors \code{Z \%*\% W} are transformed through the
+  activation function \code{a} to obtain the hidden-layer design matrix \code{X}. Columns of
+  \code{X} are centered before estimation.
 
-  For numerical stability and comparability across terms, the design matrix
-  \code{Z} can be scaled internally (\code{scale = TRUE}). If \code{x} is a factor,
-  a QR-based group scaling is applied; otherwise, a column-wise normal scaling is
-  used. The applied scaling is stored internally and automatically reused during
-  prediction.
+  \strong{Internal scaling}. For numerical stability and comparability across terms,
+  \code{Z} can be scaled internally (\code{scale = TRUE}). Intercept columns are left unchanged.
+  If \code{x} is a factor, a QR-based group scaling is applied; otherwise, a column-wise
+  center-and-scale normalization is used. The scaling transformation is stored and is reused
+  automatically during prediction.
 
-  The returned object is a special model term used within \code{\link{gamlss2}},
-  following the interface described in \code{\link{specials}}.
+  \strong{Activation functions}. The activation is applied element-wise to \code{Z \%*\% W}.
+  For numerical stability, bounded activations are evaluated on clipped inputs
+  (currently \eqn{[-35, 35]}).
+
+  \strong{Reproducibility}. Weights are sampled randomly. Use \code{\link[base]{set.seed}}
+  before calling \code{elm()} if you need reproducible results
 }
 
 \value{
-  The \code{elm()} function is used internally within \code{\link{gamlss2}} and
-  provides the necessary details for estimating an ELM model term. Essentially,
-  it serves as a special model term, as outlined in \code{\link{specials}}.
+  An object representing a \code{\link{specials}} model term, used internally by
+  \code{\link{gamlss2}} during model fitting and prediction.
 }
 
 \references{

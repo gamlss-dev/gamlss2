@@ -105,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <meta property="og:title" content="gamlss2">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
@@ -543,7 +572,7 @@ Integer, number of hidden units (random features) used to build the ELM design m
 <code id="a">a</code>
 </td>
 <td>
-Character, activation function used for the hidden units. Supported options are <code>“logistic”</code>, <code>“tanh”</code> (default), <code>“relu”</code> and <code>“identity”</code>.
+Character, activation function for the hidden units. Supported options are <code>“logistic”</code>, <code>“tanh”</code> (default), <code>“relu”</code>, <code>“leaky_relu”</code>, <code>“elu”</code>, <code>“softplus”</code>, <code>“atan”</code>, <code>“softsign”</code>, <code>“gaussian”</code>, <code>“laplace”</code>, <code>“sine”</code>, and <code>“identity”</code>.
 </td>
 </tr>
 <tr>
@@ -558,13 +587,14 @@ Further control arguments can be passed: <code>criterion = “bic”</code> (def
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The ELM model term constructs a randomized single-hidden-layer representation of the covariate(s) in <code>x</code>. Internally, a design matrix <code>Z</code> is built from <code>x</code> (including an intercept column). Random weights are sampled and transformed through an activation function to obtain the hidden-layer design matrix <code>X</code>. The columns of <code>X</code> are centered before estimation.</p>
-<p>For numerical stability and comparability across terms, the design matrix <code>Z</code> can be scaled internally (<code>scale = TRUE</code>). If <code>x</code> is a factor, a QR-based group scaling is applied; otherwise, a column-wise normal scaling is used. The applied scaling is stored internally and automatically reused during prediction.</p>
-<p>The returned object is a special model term used within <code>gamlss2</code>, following the interface described in <code>specials</code>.</p>
+<p>The ELM term constructs a randomized single-hidden-layer representation of the covariate(s) in <code>x</code>. Internally, a design matrix <code>Z</code> is built (including an intercept column), random weights are sampled, and the linear predictors <code>Z %*% W</code> are transformed through the activation function <code>a</code> to obtain the hidden-layer design matrix <code>X</code>. Columns of <code>X</code> are centered before estimation.</p>
+<p><strong>Internal scaling</strong>. For numerical stability and comparability across terms, <code>Z</code> can be scaled internally (<code>scale = TRUE</code>). Intercept columns are left unchanged. If <code>x</code> is a factor, a QR-based group scaling is applied; otherwise, a column-wise center-and-scale normalization is used. The scaling transformation is stored and is reused automatically during prediction.</p>
+<p><strong>Activation functions</strong>. The activation is applied element-wise to <code>Z %*% W</code>. For numerical stability, bounded activations are evaluated on clipped inputs (currently <span class="math inline">\([-35, 35]\)</span>).</p>
+<p><strong>Reproducibility</strong>. Weights are sampled randomly. Use <code>set.seed</code> before calling <code>elm()</code> if you need reproducible results</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>The <code>elm()</code> function is used internally within <code>gamlss2</code> and provides the necessary details for estimating an ELM model term. Essentially, it serves as a special model term, as outlined in <code>specials</code>.</p>
+<p>An object representing a <code>specials</code> model term, used internally by <code>gamlss2</code> during model fitting and prediction.</p>
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>

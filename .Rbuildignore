@@ -25,7 +25,6 @@ README.qmd
 ^vignettes/supplement_families\.qmd$
 ^vignettes/mixture\.qmd$
 ^vignettes/spatial\.qmd$
-^vignettes/survival\.qmd$
 ^vignettes/quantiles\.qmd$
 ^vignettes/s_pb\.qmd$
 ^vignettes/topmodels\.qmd$

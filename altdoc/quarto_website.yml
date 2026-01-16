@@ -27,6 +27,8 @@ website:
           file: vignettes/specials.qmd
         - text: "Evaluation"
           file: vignettes/topmodels.qmd
+        - text: "Survival models"
+          file: vignettes/survival.qmd
       - text: News
         file: $ALTDOC_NEWS
       - text: Citation

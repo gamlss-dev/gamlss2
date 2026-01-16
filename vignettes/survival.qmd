@@ -95,12 +95,11 @@ Additionally, `sf` and `stars` will facilitate spatial data processing and visua
 #| message: false
 #| results: hide
 #| echo: true
-##| <hide>
+## install required packages
 pkg <- c("spBayesSurv", "gamlss.cens", "sf", "stars")
 for(p in pkg) {
   if(!(p %in% installed.packages())) install.packages(p)
 }
-##| </hide>
 ## load required packages
 library("gamlss2")
 library("gamlss.cens")

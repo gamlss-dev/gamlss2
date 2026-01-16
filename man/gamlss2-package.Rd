@@ -32,9 +32,22 @@
 }
 
 \author{
-  \packageAuthor{gamlss2}
-
-  Maintainer: \packageMaintainer{gamlss2}
+  Nikolaus Umlauf [aut, cre] \email{Nikolaus.Umlauf@uibk.ac.at}
+  (\href{https://orcid.org/0000-0003-2160-9803}{ORCID: 0000-0003-2160-9803}) \cr
+  Mikis Stasinopoulos [fnd, cph] \email{d.stasinopoulos@gre.ac.uk}
+  (\href{https://orcid.org/0000-0003-2407-5704}{ORCID: 0000-0003-2407-5704}) \cr
+  Robert Rigby [fnd, cph] \email{r.rigby@gre.ac.uk}
+  (\href{https://orcid.org/0000-0003-3853-1707}{ORCID: 0000-0003-3853-1707}) \cr
+  Achim Zeileis [ctb] \email{Achim.Zeileis@R-project.org}
+  (\href{https://orcid.org/0000-0003-0918-3766}{ORCID: 0000-0003-0918-3766}) \cr
+  Reto Stauffer [ctb] \email{Reto.Stauffer@uibk.ac.at}
+  (\href{https://orcid.org/0000-0002-3798-5507}{ORCID: 0000-0002-3798-5507}) \cr
+  Gillian Heller [ctb] \email{Gillian.Heller@sydney.edu.au}
+  (\href{https://orcid.org/0000-0003-1270-1499}{ORCID: 0000-0003-1270-1499}) \cr
+  Fernanda de Bastiani [ctb] \email{fernandadebastiani@gmail.com}
+  (\href{https://orcid.org/0000-0001-8532-639X}{ORCID: 0000-0001-8532-639X}) \cr
+  Andreas Mayr [ctb] \email{Andreas.Mayr@uni-marburg.de}
+  (\href{https://orcid.org/0000-0001-7106-9732}{ORCID: 0000-0001-7106-9732})
 }
 
 \keyword{package}
@@ -59,6 +72,6 @@
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link{fake_formula}}
+  \code{\link{gamlss2}}
 }
 

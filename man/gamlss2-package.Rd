@@ -27,8 +27,6 @@
   accommodate more than four parameter families. Essentially, this means that users can now
   specify any type of model using these new infrastructures, making the package highly
   flexible and accommodating to a wide range of modeling requirements.
-
-  \packageIndices{gamlss2}
 }
 
 \author{

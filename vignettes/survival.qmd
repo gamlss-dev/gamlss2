@@ -72,7 +72,6 @@ where $\delta_i$ is the censoring indicator for the $i$-th observation, taking t
 naturally accommodates both observed and censored survival times and enables efficient estimation
 of the model parameters.
 
-
 ## LeukSurv data example
 
 In this example, we analyze the `LeukSurv` data provided in the `spBayesSurv` package.

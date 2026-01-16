@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.26">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -93,7 +93,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -260,25 +260,28 @@ window.Quarto = {
 </header>
 
 
-<p>In survival analysis, we aim to model the time until an event occurs, which is typically represented as a random variable <span class="math inline">\(T\)</span>. The survival function <span class="math inline">\(S(t)\)</span> indicates the probability that the event has not occurred by time <span class="math inline">\(t\)</span>, mathematically defined as <span class="math display">\[
+<p>In survival analysis, we aim to model the time until an event occurs, which is typically represented as a random variable <span class="math inline">\(T\)</span>. The survival function <span class="math inline">\(S(t)\)</span> indicates the probability that the event has not occurred by time <span class="math inline">\(t\)</span> and is defined as <span class="math display">\[
 S(t) = P(T &gt; t) = 1 - F(t),
-\]</span> where <span class="math inline">\(F(t)\)</span> is the cumulative distribution function (CDF) of the random variable <span class="math inline">\(T\)</span>.</p>
+\]</span> where <span class="math inline">\(F(t)\)</span> is the cumulative distribution function (CDF) of <span class="math inline">\(T\)</span>.</p>
 <p>The hazard function <span class="math inline">\(\lambda(t)\)</span>, which describes the instantaneous risk of the event occurring at time <span class="math inline">\(t\)</span>, is defined as <span class="math display">\[
-\lambda(t) = \frac{d(t)}{S(t)},
-\]</span> where <span class="math inline">\(d(t)\)</span> is the probability density function (PDF) of <span class="math inline">\(T\)</span>.</p>
+\lambda(t) = \frac{f(t)}{S(t)},
+\]</span> where <span class="math inline">\(f(t)\)</span> denotes the probability density function of <span class="math inline">\(T\)</span>.</p>
 <section id="survival-models-in-the-gamlss-framework" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="survival-models-in-the-gamlss-framework"><span class="header-section-number">1</span> Survival models in the GAMLSS framework</h2>
-<p>Within the GAMLSS framework, we can specify a parametric form for the hazard function by selecting an appropriate distribution that fits the survival data, denoted as <span class="math display">\[
-d(t \mid \boldsymbol{\theta}),
-\]</span> where <span class="math inline">\(d( \cdot )\)</span> represents a parametric density suitable for modeling survival times and <span class="math inline">\(\boldsymbol{\theta} = (\theta_1, \ldots, \theta_K)^\top\)</span> are the parameters that need to be estimated.</p>
-<p>To incorporate covariates into this model, we can express the parameters as functions of explanatory variables <span class="math inline">\(\theta_k(\mathbf{x})\)</span>, <span class="math inline">\(k = 1, \ldots, K\)</span>. We utilize GAM-type predictors represented by <span class="math display">\[
-\eta_{k}(\mathbf{x}) = f_{1k}(\mathbf{x}) + \dots + f_{J_{k}k}(\mathbf{x})
-\]</span> which are linked to the parameters through suitable link functions <span class="math display">\[
-h_{k}(\theta_{k}(\mathbf{x})) = \eta_{k}(\mathbf{x}).
-\]</span> The functions <span class="math inline">\(f_{jk}(\cdot)\)</span> for <span class="math inline">\(j = 1, \ldots, J_{k}\)</span> and <span class="math inline">\(k = 1, \ldots, K\)</span>, can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others. This flexible modeling approach allows for a richer representation of the relationship between covariates and the distribution parameters compared to simple linear effects.</p>
-<p>In GAMLSS, model estimation is generally performed using (penalized) maximum likelihood estimation (MLE). The likelihood function for a survival model with right-censored data for <span class="math inline">\(i = 1, \ldots, n\)</span> observations can be expressed as <span class="math display">\[
-L(\boldsymbol{\beta}, \boldsymbol{\theta}) = \prod_{i=1}^{n} \left[ d(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i} \left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
-\]</span> where <span class="math inline">\(\delta_i\)</span> is the censoring indicator for the <span class="math inline">\(i\)</span>-th observation. It takes the value of 1 if the event is observed (i.e., not censored) and 0 if it is censored. This likelihood function effectively accounts for both observed and censored data, facilitating the estimation of model parameters.</p>
+<p>Within the GAMLSS framework, survival models are specified by selecting a parametric distribution for the survival time <span class="math inline">\(T\)</span>, characterized by a density <span class="math display">\[
+f(t \mid \boldsymbol{\theta}),
+\]</span> where <span class="math inline">\(f(\cdot)\ represents a parametric density suitable for modeling survival times and\)</span> = (_1, , _K)^$ is the vector of distributional parameters. The choice of distribution implicitly determines the associated survival and hazard functions.</p>
+<p>To incorporate covariates, the distributional parameters are modeled as functions of explanatory variables <span class="math inline">\(\theta_k(\mathbf{x})\)</span>, <span class="math inline">\(k = 1, \ldots, K\)</span>. Specifically, we use GAM-type predictors of the form <span class="math display">\[
+\eta_k(\mathbf{x}) = f_{1k}(\mathbf{x}) + \dots + f_{J_k k}(\mathbf{x}),
+\]</span> which are linked to the parameters through suitable link functions, <span class="math display">\[
+h_k\!\left(\theta_k(\mathbf{x})\right) = \eta_k(\mathbf{x}).
+\]</span> The functions <span class="math inline">\(f_{jk}(\cdot)\)</span>, <span class="math inline">\(j = 1, \ldots, J_k\)</span>, may represent nonlinear smooth effects (typically estimated using regression splines), linear effects, random effects, or other structured components. This formulation allows for a flexible and interpretable modeling of how covariates influence the full distribution of survival times.</p>
+<p>Model estimation in GAMLSS is typically carried out using (penalized) maximum likelihood estimation. For right-censored survival data with observations <span class="math inline">\(i = 1, \ldots, n\)</span>, the likelihood function is given by <span class="math display">\[
+L(\boldsymbol{\beta}, \boldsymbol{\theta}) =
+\prod_{i=1}^{n}
+\left[ f(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i}
+\left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
+\]</span> where <span class="math inline">\(\delta_i\)</span> is the censoring indicator for the <span class="math inline">\(i\)</span>-th observation, taking the value 1 if the event is observed and 0 if the observation is right-censored. This likelihood formulation naturally accommodates both observed and censored survival times and enables efficient estimation of the model parameters.</p>
 </section>
 <section id="leuksurv-data-example" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="leuksurv-data-example"><span class="header-section-number">2</span> LeukSurv data example</h2>
@@ -412,10 +415,11 @@ GAMLSS-RS iteration  3: Global Deviance = 11858.0844 eps = 0.000005     </code><
 </div>
 </div>
 </div>
-<p>The plot suggests that the Weibull distribution is a reasonable choice for modeling the survival data. However, it is always advisable to explore alternative distributions to ensure the best possible model fit. In the GAMLSS framework, various other parametric distributions-such as the log-normal, gamma, or generalized gamma-can be easily tested to assess whether they provide a better fit to the data, especially if there are signs of deviations in the residuals or misspecification of the hazard function.</p>
+<p>The plot indicates that the Weibull distribution provides a reasonable starting point for modeling the survival data. However, the wormplot reveals some departures from the assumed distribution, suggesting that alternative specifications should be considered to achieve a better overall fit. Within the GAMLSS framework, a wide range of parametric distributions such as the log-normal, gamma, or generalized gamma, can be readily evaluated. Exploring these alternatives is particularly advisable when residual diagnostics indicate systematic deviations or potential misspecification of the underlying hazard function.</p>
 </section>
 <section id="visualize-the-spatial-effect." class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="visualize-the-spatial-effect."><span class="header-section-number">9</span> Visualize the spatial effect.</h2>
+<p>To visualize the estimated spatial effect, we construct a map of the New England region using polygon boundary data from the <code>spBayesSurv</code> package.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">## read the map of new west england.</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">"otherdata/nwengland.bnd"</span>, <span class="at">package =</span> <span class="st">"spBayesSurv"</span>)</span>
@@ -457,6 +461,8 @@ GAMLSS-RS iteration  3: Global Deviance = 11858.0844 eps = 0.000005     </code><
 </div>
 </div>
 </div>
+<p>A regular grid of locations is then sampled within the study area, and model predictions are obtained at these locations while holding all non-spatial covariates fixed at representative values.</p>
+<p>Based on the predicted distributional parameters, survival probabilities at 365 days are computed and displayed as a raster map overlaid with the district boundaries. This visualization highlights spatial variation in survival that is captured by the model, facilitating an intuitive assessment of geographical heterogeneity.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## sample coordinates for plotting</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>co <span class="ot">&lt;-</span> <span class="fu">st_sample</span>(map, <span class="at">size =</span> <span class="dv">10000</span>, <span class="at">type =</span> <span class="st">"regular"</span>)</span>

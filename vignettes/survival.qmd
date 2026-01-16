@@ -18,54 +18,60 @@ vignette: >
 
 In survival analysis, we aim to model the time until an event occurs, which is typically
 represented as a random variable $T$. The survival function $S(t)$ indicates the probability
-that the event has not occurred by time $t$, mathematically defined as
+that the event has not occurred by time $t$ and is defined as
 $$
 S(t) = P(T > t) = 1 - F(t),
 $$
-where $F(t)$ is the cumulative distribution function (CDF) of the random variable $T$.
+where $F(t)$ is the cumulative distribution function (CDF) of $T$.
 
 The hazard function $\lambda(t)$, which describes the instantaneous risk of the event occurring
 at time $t$, is defined as
 $$
-\lambda(t) = \frac{d(t)}{S(t)},
+\lambda(t) = \frac{f(t)}{S(t)},
 $$
-where $d(t)$ is the probability density function (PDF) of $T$.
+where $f(t)$ denotes the probability density function of $T$.
 
 ## Survival models in the GAMLSS framework
 
-Within the GAMLSS framework, we can specify a parametric form for the hazard function by
-selecting an appropriate distribution that fits the survival data, denoted as
+Within the GAMLSS framework, survival models are specified by selecting a parametric distribution
+for the survival time $T$, characterized by a density
 $$
-d(t \mid \boldsymbol{\theta}),
+f(t \mid \boldsymbol{\theta}),
 $$
-where $d( \cdot )$ represents a parametric density suitable for modeling survival times and
-$\boldsymbol{\theta} = (\theta_1, \ldots, \theta_K)^\top$ are the parameters that need
-to be estimated.
+where $f(\cdot)\ represents a parametric density suitable for modeling survival times and
+$\boldsymbol{\theta} = (\theta_1, \ldots, \theta_K)^\top$ is the vector of distributional
+parameters. The choice of distribution implicitly determines the associated survival and hazard
+functions.
 
-To incorporate covariates into this model, we can express the parameters as functions of
-explanatory variables $\theta_k(\mathbf{x})$, $k = 1, \ldots, K$. We utilize GAM-type predictors
-represented by
+To incorporate covariates, the distributional parameters are modeled as functions of explanatory
+variables $\theta_k(\mathbf{x})$, $k = 1, \ldots, K$. Specifically, we use GAM-type predictors
+of the form
 $$
-\eta_{k}(\mathbf{x}) = f_{1k}(\mathbf{x}) + \dots + f_{J_{k}k}(\mathbf{x})
+\eta_k(\mathbf{x}) = f_{1k}(\mathbf{x}) + \dots + f_{J_k k}(\mathbf{x}),
 $$
-which are linked to the parameters through suitable link functions
+which are linked to the parameters through suitable link functions,
 $$
-h_{k}(\theta_{k}(\mathbf{x})) = \eta_{k}(\mathbf{x}).
+h_k\!\left(\theta_k(\mathbf{x})\right) = \eta_k(\mathbf{x}).
 $$
-The functions $f_{jk}(\cdot)$ for $j = 1, \ldots, J_{k}$ and $k = 1, \ldots, K$, can be nonlinear smooth functions
-(typically estimated using regression splines), linear effects, or random effects, among others.
-This flexible modeling approach allows for a richer representation of the relationship between
-covariates and the distribution parameters compared to simple linear effects.
+The functions $f_{jk}(\cdot)$, $j = 1, \ldots, J_k$, may represent nonlinear smooth effects
+(typically estimated using regression splines), linear effects, random effects, or other structured
+components. This formulation allows for a flexible and interpretable modeling of how covariates
+influence the full distribution of survival times.
 
-In GAMLSS, model estimation is generally performed using (penalized) maximum likelihood
-estimation (MLE). The likelihood function for a survival model with right-censored data
-for $i = 1, \ldots, n$ observations can be expressed as
+Model estimation in GAMLSS is typically carried out using (penalized) maximum likelihood
+estimation. For right-censored survival data with observations $i = 1, \ldots, n$, the
+likelihood function is given by
 $$
-L(\boldsymbol{\beta}, \boldsymbol{\theta}) = \prod_{i=1}^{n} \left[ d(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i} \left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
+L(\boldsymbol{\beta}, \boldsymbol{\theta}) =
+\prod_{i=1}^{n}
+\left[ f(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i}
+\left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
 $$
-where $\delta_i$ is the censoring indicator for the $i$-th observation. It takes the value of
-1 if the event is observed (i.e., not censored) and 0 if it is censored. This likelihood
-function effectively accounts for both observed and censored data, facilitating the estimation of model parameters.
+where $\delta_i$ is the censoring indicator for the $i$-th observation, taking the value
+1 if the event is observed and 0 if the observation is right-censored. This likelihood formulation
+naturally accommodates both observed and censored survival times and enables efficient estimation
+of the model parameters.
+
 
 ## LeukSurv data example
 
@@ -240,14 +246,18 @@ These plots allow us to evaluate the adequacy of the model and check for any pot
 plot(b2, which = "resid")
 ```
 
-The plot suggests that the Weibull distribution is a reasonable choice for modeling the survival
-data. However, it is always advisable to explore alternative distributions to ensure the best
-possible model fit. In the GAMLSS framework, various other parametric distributions-such as
-the log-normal, gamma, or generalized gamma-can be easily tested to assess whether they
-provide a better fit to the data, especially if there are signs of deviations in the
-residuals or misspecification of the hazard function.
+The plot indicates that the Weibull distribution provides a reasonable starting point for modeling
+the survival data. However, the wormplot reveals some departures from the assumed distribution,
+suggesting that alternative specifications should be considered to achieve a better overall fit.
+Within the GAMLSS framework, a wide range of parametric distributions such as the log-normal,
+gamma, or generalized gamma, can be readily evaluated. Exploring these alternatives is
+particularly advisable when residual diagnostics indicate systematic deviations or potential
+misspecification of the underlying hazard function.
 
 ## Visualize the spatial effect.
+
+To visualize the estimated spatial effect, we construct a map of the New England region using
+polygon boundary data from the `spBayesSurv` package.
 
 ```{r}
 #| fig-align: center
@@ -284,6 +294,14 @@ map$district <- 1:nrow(map)
 par(mar = rep(0, 4))
 plot(st_geometry(map))
 ```
+
+A regular grid of locations is then sampled within the study area, and model predictions are
+obtained at these locations while holding all non-spatial covariates fixed at representative values.
+
+Based on the predicted distributional parameters, survival probabilities at 365 days are
+computed and displayed as a raster map overlaid with the district boundaries. This visualization
+highlights spatial variation in survival that is captured by the model, facilitating an intuitive
+assessment of geographical heterogeneity.
 
 ```{r}
 #| fig-align: center

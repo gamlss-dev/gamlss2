@@ -22,7 +22,7 @@ Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
                comment = c(ORCID = "0000-0003-1270-1499")),
              person("Fernanda", "de Bastiani", role = "ctb",
                email = "fernandadebastiani@gmail.com",
-               comment = c(ORCID = "0000-0001-8532-639X"))
+               comment = c(ORCID = "0000-0001-8532-639X")),
              person("Andreas", "Mayr", role = "ctb",
                email = "Andreas.Mayr@uni-marburg.de",
                comment = c(ORCID = "0000-0001-7106-9732")))

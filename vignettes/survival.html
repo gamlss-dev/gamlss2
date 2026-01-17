@@ -260,28 +260,25 @@ window.Quarto = {
 </header>
 
 
-<p>In survival analysis, we aim to model the time until an event occurs, which is typically represented as a random variable <span class="math inline">\(T\)</span>. The survival function <span class="math inline">\(S(t)\)</span> indicates the probability that the event has not occurred by time <span class="math inline">\(t\)</span> and is defined as <span class="math display">\[
+<p>In survival analysis, we aim to model the time until an event occurs, which is typically represented as a random variable <span class="math inline">\(T\)</span>. The survival function <span class="math inline">\(S(t)\)</span> indicates the probability that the event has not occurred by time <span class="math inline">\(t\)</span>, mathematically defined as <span class="math display">\[
 S(t) = P(T &gt; t) = 1 - F(t),
-\]</span> where <span class="math inline">\(F(t)\)</span> is the cumulative distribution function (CDF) of <span class="math inline">\(T\)</span>.</p>
+\]</span> where <span class="math inline">\(F(t)\)</span> is the cumulative distribution function (CDF) of the random variable <span class="math inline">\(T\)</span>.</p>
 <p>The hazard function <span class="math inline">\(\lambda(t)\)</span>, which describes the instantaneous risk of the event occurring at time <span class="math inline">\(t\)</span>, is defined as <span class="math display">\[
-\lambda(t) = \frac{f(t)}{S(t)},
-\]</span> where <span class="math inline">\(f(t)\)</span> denotes the probability density function of <span class="math inline">\(T\)</span>.</p>
+\lambda(t) = \frac{d(t)}{S(t)},
+\]</span> where <span class="math inline">\(d(t)\)</span> is the probability density function (PDF) of <span class="math inline">\(T\)</span>.</p>
 <section id="survival-models-in-the-gamlss-framework" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="survival-models-in-the-gamlss-framework"><span class="header-section-number">1</span> Survival models in the GAMLSS framework</h2>
-<p>Within the GAMLSS framework, survival models are specified by selecting a parametric distribution for the survival time <span class="math inline">\(T\)</span>, characterized by a density <span class="math display">\[
-f(t \mid \boldsymbol{\theta}),
-\]</span> where <span class="math inline">\(f(\cdot)\ represents a parametric density suitable for modeling survival times and\)</span> = (_1, , _K)^$ is the vector of distributional parameters. The choice of distribution implicitly determines the associated survival and hazard functions.</p>
-<p>To incorporate covariates, the distributional parameters are modeled as functions of explanatory variables <span class="math inline">\(\theta_k(\mathbf{x})\)</span>, <span class="math inline">\(k = 1, \ldots, K\)</span>. Specifically, we use GAM-type predictors of the form <span class="math display">\[
-\eta_k(\mathbf{x}) = f_{1k}(\mathbf{x}) + \dots + f_{J_k k}(\mathbf{x}),
-\]</span> which are linked to the parameters through suitable link functions, <span class="math display">\[
-h_k\!\left(\theta_k(\mathbf{x})\right) = \eta_k(\mathbf{x}).
-\]</span> The functions <span class="math inline">\(f_{jk}(\cdot)\)</span>, <span class="math inline">\(j = 1, \ldots, J_k\)</span>, may represent nonlinear smooth effects (typically estimated using regression splines), linear effects, random effects, or other structured components. This formulation allows for a flexible and interpretable modeling of how covariates influence the full distribution of survival times.</p>
-<p>Model estimation in GAMLSS is typically carried out using (penalized) maximum likelihood estimation. For right-censored survival data with observations <span class="math inline">\(i = 1, \ldots, n\)</span>, the likelihood function is given by <span class="math display">\[
-L(\boldsymbol{\beta}, \boldsymbol{\theta}) =
-\prod_{i=1}^{n}
-\left[ f(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i}
-\left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
-\]</span> where <span class="math inline">\(\delta_i\)</span> is the censoring indicator for the <span class="math inline">\(i\)</span>-th observation, taking the value 1 if the event is observed and 0 if the observation is right-censored. This likelihood formulation naturally accommodates both observed and censored survival times and enables efficient estimation of the model parameters.</p>
+<p>Within the GAMLSS framework, we can specify a parametric form for the hazard function by selecting an appropriate distribution that fits the survival data, denoted as <span class="math display">\[
+d(t \mid \boldsymbol{\theta}),
+\]</span> where <span class="math inline">\(d( \cdot )\)</span> represents a parametric density suitable for modeling survival times and <span class="math inline">\(\boldsymbol{\theta} = (\theta_1, \ldots, \theta_K)^\top\)</span> are the parameters that need to be estimated.</p>
+<p>To incorporate covariates into this model, we can express the parameters as functions of explanatory variables <span class="math inline">\(\theta_k(\mathbf{x})\)</span>, <span class="math inline">\(k = 1, \ldots, K\)</span>. We utilize GAM-type predictors represented by <span class="math display">\[
+\eta_{k}(\mathbf{x}) = f_{1k}(\mathbf{x}) + \dots + f_{J_{k}k}(\mathbf{x})
+\]</span> which are linked to the parameters through suitable link functions <span class="math display">\[
+h_{k}(\theta_{k}(\mathbf{x})) = \eta_{k}(\mathbf{x}).
+\]</span> The functions <span class="math inline">\(f_{jk}(\cdot)\)</span> for <span class="math inline">\(j = 1, \ldots, J_{k}\)</span> and <span class="math inline">\(k = 1, \ldots, K\)</span>, can be nonlinear smooth functions (typically estimated using regression splines), linear effects, or random effects, among others. This flexible modeling approach allows for a richer representation of the relationship between covariates and the distribution parameters compared to simple linear effects.</p>
+<p>In GAMLSS, model estimation is generally performed using (penalized) maximum likelihood estimation (MLE). The likelihood function for a survival model with right-censored data for <span class="math inline">\(i = 1, \ldots, n\)</span> observations can be expressed as <span class="math display">\[
+L(\boldsymbol{\beta}, \boldsymbol{\theta}) = \prod_{i=1}^{n} \left[ d(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{\delta_i} \left[ S(t_i \mid \boldsymbol{\theta}(\mathbf{x}_i)) \right]^{1 - \delta_i},
+\]</span> where <span class="math inline">\(\delta_i\)</span> is the censoring indicator for the <span class="math inline">\(i\)</span>-th observation. It takes the value of 1 if the event is observed (i.e., not censored) and 0 if it is censored. This likelihood function effectively accounts for both observed and censored data, facilitating the estimation of model parameters.</p>
 </section>
 <section id="leuksurv-data-example" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="leuksurv-data-example"><span class="header-section-number">2</span> LeukSurv data example</h2>

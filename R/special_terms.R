@@ -880,6 +880,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
     stop("cannot compute the ML estimator for the lasso term!")
 
   bml[abs(bml) < 1e-08] <- 1e-08
+  bml <- drop(bml)
 
   b0 <- transfer$coefficients
   if(is.null(b0))
@@ -912,6 +913,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   ## Penalty function.
   if(x$lasso_type == "normal") {
     pen <- function(b) {
+      b <- as.numeric(b)
       A <- 1 / sqrt(b^2 + x$control$const)
       A <- A * 1 / abs(bml)
       A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
@@ -921,6 +923,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "group") {
     pen <- function(b) {
+      b <- as.numeric(b)
       df <- ncol(x$X)
       A <- 1 / rep(sqrt(sum(b^2) + x$control$const), df) *
            1 / rep(sqrt(sum(bml^2) + x$control$const), df)
@@ -930,6 +933,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "nominal") {
     pen <- function(b) {
+      b <- as.numeric(b)
       ## weights
       wpen <- numeric(ncol(Af))
 
@@ -965,6 +969,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "ordinal") {
     pen <- function(b) {
+      b <- as.numeric(b)
       ## weights
       wpen <- numeric(ncol(Af))
 

@@ -673,19 +673,36 @@ complete_family <- function(family)
   if(is.null(family$score) & !is.null(family$pdf))
     family$score <- list()
   for(i in family$names) {
-    if(is.null(family$score[[i]]) & !is.null(family$pdf)) {
-      fun <- c(
-        "function(y, par, ...) {",
-        paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
-        paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
-        "  d1 <- family$pdf(y, par, log = TRUE);",
-        paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
-        "  d2 <- family$pdf(y, par, log = TRUE);",
-        "  return((d1 - d2) / err02)",
-        "}"
-      )
-      family$score[[i]] <- eval(parse(text = paste(fun, collapse = "")))
-      attr(family$score[[i]], "dnum") <- TRUE
+    if(!is.null(family$custom_pdf)) {
+      if(is.null(family$score[[i]]) & !is.null(family$custom_pdf)) {
+        fun <- c(
+          "function(y, par, ...) {",
+          paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
+          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
+          "  d1 <- family$custom_pdf(y, par, log = TRUE);",
+          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
+          "  d2 <- family$custom_pdf(y, par, log = TRUE);",
+          "  return((d1 - d2) / err02)",
+          "}"
+        )
+        family$score[[i]] <- eval(parse(text = paste(fun, collapse = "")))
+        attr(family$score[[i]], "dnum") <- TRUE
+      }
+    } else {
+      if(is.null(family$score[[i]]) & !is.null(family$pdf)) {
+        fun <- c(
+          "function(y, par, ...) {",
+          paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
+          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
+          "  d1 <- family$pdf(y, par, log = TRUE);",
+          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
+          "  d2 <- family$pdf(y, par, log = TRUE);",
+          "  return((d1 - d2) / err02)",
+          "}"
+        )
+        family$score[[i]] <- eval(parse(text = paste(fun, collapse = "")))
+        attr(family$score[[i]], "dnum") <- TRUE
+      }
     }
   }
 

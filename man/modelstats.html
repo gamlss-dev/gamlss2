@@ -613,6 +613,7 @@ Only for <code>type = “simple”</code>, the R-squared can be evaluated using 
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>Note that if <span class="pkg">gamlss</span> is loaded before <span class="pkg">gamlss2</span>, the function <code>Rsq()</code> from <span class="pkg">gamlss2</span> is masked. However, the new <code>Rsq()</code> method supports fitted objects from both <span class="pkg">gamlss</span> and <span class="pkg">gamlss2</span>.</p>
 <p>The <code>Rsq()</code> function uses the definition for R-squared:</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}\)</span></p>

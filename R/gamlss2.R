@@ -95,6 +95,9 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Response and model.matrix.
   ff <- fake_formula(formula, nospecials = TRUE)
   ## mt <- terms(ff, data = data)
+  if(any(grepl("-1 ", deparse(ff)))) {
+    warning("intercept(s) removed in formula!, note that this is not fully supported yet!")
+  }
   ff0 <- formula(ff, lhs = 0, collapse = TRUE, update = TRUE)
   mt <- terms(ff0, data = data)
   Y <- model.response(mf)

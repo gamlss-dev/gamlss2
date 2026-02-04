@@ -32,6 +32,10 @@ Rsq(object, ...,
 }
 
 \details{
+  Note that if \pkg{gamlss} is loaded before \pkg{gamlss2}, the function \code{Rsq()}
+  from \pkg{gamlss2} is masked. However, the new \code{Rsq()} method supports fitted
+  objects from both \pkg{gamlss} and \pkg{gamlss2}.
+
   The \code{Rsq()} function uses the definition for R-squared:
 
   \deqn{R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}}{R-squared =1-(L(0)/L(fitted))^(2/n)}

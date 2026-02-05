@@ -102,6 +102,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     mt[[j]] <- terms(ffj, data = data)
     X[[j]] <- model.matrix(mt[[j]], mf)
   }
+  mt <- mt[seq_along(family$names)]
   names(mt) <- family$names
 
   X <- do.call("cbind", X)

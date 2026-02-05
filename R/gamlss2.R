@@ -414,9 +414,12 @@ model.frame.gamlss2 <- function(formula, ...)
     xlev <- xlev[unique(names(xlev))]
     fcall$xlev <- xlev
     fcall$formula <- formula$fake_formula
-    if(!dots$keepresponse)
-     fcall$formula <- update(fcall$formula, NULL ~ .)
-    fcall[names(nargs)] <- nargs
+    if(!dots$keepresponse) {
+      fcall$formula <- update(fcall$formula, NULL ~ .)
+      fcall$formula <- formula(as.Formula(fcall$formula), lhs = 0)
+    }
+    fcall$formula <- formula(as.Formula(fcall$formula), collapse = TRUE, update = TRUE)
+    fcall[names(nargs)] <- nargs[names(nargs)]
     env <- if(is.null(environment(formula$terms))) {
       parent.frame()
     } else {

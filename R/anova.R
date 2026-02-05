@@ -62,7 +62,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
   xterms <- xterms0 <- object$xterms
   sterms <- sterms0 <- object$sterms
 
-  terms <- object$terms
+  ##terms <- object$terms
   xl <- object$xlevels
 
   if(!is.null(scope)) {

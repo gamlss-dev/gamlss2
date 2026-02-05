@@ -95,24 +95,30 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Response and model.matrix.
   ff <- fake_formula(formula, nospecials = TRUE)
   ## mt <- terms(ff, data = data)
-  if(any(grepl("-1 ", deparse(ff)))) {
-    warning("intercept(s) removed in formula!, note that this is not fully supported yet!")
+
+  mt <- X <- list()
+  for(j in 1:length(ff)[2]) {
+    ffj <- formula(ff, lhs = 0, rhs = j)
+    mt[[j]] <- terms(ffj, data = data)
+    X[[j]] <- model.matrix(mt[[j]], mf)
   }
-  ff0 <- formula(ff, lhs = 0, collapse = TRUE, update = TRUE)
-  mt <- terms(ff0, data = data)
+  names(mt) <- family$names
+
+  X <- do.call("cbind", X)
+  X <- X[, sort(unique(colnames(X))), drop = FALSE]
+
+  if(!("(Intercept)" %in% colnames(X)))
+    X <- cbind("(Intercept)" = 1.0, X)
+  if(any(is.na(X)))
+    stop("detected 'NA' values in data!")
+  if(any(!is.finite(X)))
+    stop("detected 'Inf' values in data!")
+
   Y <- model.response(mf)
   if(is.null(Y)) {
     rn <- response_name(formula)
     Y <- mf[, rn]
   }
-  X <- model.matrix(mt, mf)
-  if(!("(Intercept)" %in% colnames(X)))
-    X <- cbind("(Intercept)" = 1.0, X)
-
-  if(any(is.na(X)))
-    stop("detected 'NA' values in data!")
-  if(any(!is.finite(X)))
-    stop("detected 'Inf' values in data!")
 
   ## Process weights and offsets.
   weights <- model.weights(mf)
@@ -210,13 +216,17 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
 
   ## Process factors and other linear model terms.
-  xlev <- .getXlevels(mt, mf)
+  xlev <- lapply(mt, function(x) .getXlevels(x, mf))
+
   for(i in names(Xterms)) {
     ## Factors.
-    for(j in names(xlev)) {
+    for(j in names(xlev[[i]])) {
       if(j %in% Xterms[[i]]) {
-        xl <- paste0(j, xlev[[j]])
+        xl <- paste0(j, xlev[[i]][[j]])
         xl <- xl[xl %in% colnames(X)]
+        if(attr(mt[[i]], "intercept") > 0L && all(xl %in% colnames(X))) {
+          xl <- xl[-1L]
+        }
         if(length(xl)) {
           Xterms[[i]][Xterms[[i]] == j] <- NA
           Xterms[[i]] <- Xterms[[i]][!is.na(Xterms[[i]])]
@@ -289,7 +299,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$call <- call
   rval$formula <- formula
   rval$fake_formula <- fake_formula(formula)
-  rval$terms <- terms(merge_formula(formula(rval$fake_formula, collapse = TRUE), as.formula(mt)))
+  rval$terms <- mt ## terms(merge_formula(formula(rval$fake_formula, collapse = TRUE), as.formula(mt)))
   environment(rval$terms) <- menv
   rval$family <- family
   rval$xlevels <- xlev
@@ -396,8 +406,14 @@ model.frame.gamlss2 <- function(formula, ...)
       drop.unused.levels <- FALSE
     fcall$drop.unused.levels <- drop.unused.levels
     fcall[[1L]] <- quote(model.frame)
-    fcall$xlev <- formula$xlevels
-    fcall$formula <- terms(formula)
+    xlev <- list()
+    for(j in seq_along(formula$xlevels)) {
+      for(i in names(formula$xlevels[[j]]))
+        xlev[[i]] <- formula$xlevels[[j]][[i]]
+    }
+    xlev <- xlev[unique(names(xlev))]
+    fcall$xlev <- xlev
+    fcall$formula <- formula$fake_formula
     if(!dots$keepresponse)
      fcall$formula <- update(fcall$formula, NULL ~ .)
     fcall[names(nargs)] <- nargs
@@ -425,9 +441,14 @@ model.matrix.gamlss2 <- function(object, data = NULL, ...)
     }
     dots <- list(...)
     dots$data <- dots$contrasts.arg <- NULL
-    mt <- terms(update(terms(object), NULL ~ .))
-    X <- do.call(stats::model.matrix.default, c(list(object = list("terms" = mt), 
-      data = data, contrasts.arg = object$contrasts), dots))
+    mt <- object$terms
+    X <- list()
+    for(j in names(mt)) {
+      X[[j]] <- do.call(stats::model.matrix.default, c(list(object = list("terms" = mt[[j]]), 
+        data = data, contrasts.arg = object$contrasts), dots))
+    }
+    X <- do.call("cbind", X)
+    X <- X[, sort(unique(colnames(X))), drop = FALSE]
     if(!("(Intercept)" %in% colnames(X)))
       X <- cbind("(Intercept)" = 1.0, X)
     return(X)
@@ -467,9 +488,9 @@ is_formula <- function(x) inherits(x, "formula")
 merge_formula <- function(x, y, ...)
 {
   if(!is_formula(x) || length(x) != 3)
-    stop("First argument is invalid")
-  if(!is_formula(y)) stop("Second argument is invalid")
-  if(length(list(...))) warning("extraneous arguments discarded")
+    stop("first argument is invalid!")
+  if(!is_formula(y)) stop("second argument is invalid!")
+  if(length(list(...))) warning("extraneous arguments discarded!")
   is.gEnv <- function(e) identical(e, .GlobalEnv)
 
   str <- paste(c(deparse(x[[2]]), "~",
@@ -481,7 +502,7 @@ merge_formula <- function(x, y, ...)
   if(!is.gEnv(ex)) {
       environment(f) <- ex
       if(!is.gEnv(ey) && !identical(ex,ey)) {
-          warning("`x' and `y' have different environments; x's is used")
+          warning("`x' and `y' have different environments; x's is used!")
       }
   } else if(!is.gEnv(ey))
       environment(f) <- ey

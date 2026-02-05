@@ -549,7 +549,7 @@ window.Quarto = {
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">calibration(..., newdata = NULL,
-  y = NULL, model = NULL, breaks = seq(0, 1, by = 0.1),
+  y = NULL, parameter = NULL, breaks = seq(0, 1, by = 0.1),
   minn = 20, main = "Calibration plot",
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
@@ -587,7 +587,7 @@ Optional numeric or factor vector with the binary response (coded as 0/1 or a tw
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="model">model</code>
+<code id="parameter">parameter</code>
 </td>
 <td>
 Character, which parameter should be used for prediction. Typically <code>“mu”</code> for binary models.

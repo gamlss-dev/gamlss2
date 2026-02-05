@@ -519,7 +519,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'gamlss2'
-predict(object, model = NULL, newdata = NULL,
+predict(object, parameter = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
 </code></pre>
@@ -537,10 +537,10 @@ model object of class <code>gamlss2</code>.
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="model">model</code>
+<code id="parameter">parameter</code>
 </td>
 <td>
-character. Which model part(s) should be predicted? Can be one or more of <code>“mu”</code>, <code>“sigma”</code>, etc. By default all model parts are included.
+character. Which parameters should be predicted? E.g., can be one or more of <code>“mu”</code>, <code>“sigma”</code> using the <code>NO</code> family. By default all parameters are included.
 </td>
 </tr>
 <tr>
@@ -596,7 +596,7 @@ character. Any terms named in this vector will be set to zero.
 <code id="...">…</code>
 </td>
 <td>
-currently only used for catching <code>what</code> as an alias for <code>model</code>.
+currently only used for catching <code>what</code> or <code>model</code> as an alias for <code>parameter</code>.
 </td>
 </tr>
 </tbody></table>
@@ -633,7 +633,7 @@ GAMLSS-RS iteration  5: Global Deviance = 405.7908 eps = 0.000000     </code></p
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## new data for predictions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: additive predictors (on link scale) for all model parameters</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: additive predictors (on link scale) for all parameters</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
@@ -647,7 +647,7 @@ GAMLSS-RS iteration  5: Global Deviance = 405.7908 eps = 0.000000     </code></p
 <pre><code>       1        2        3 
 23.11757 58.82097 95.57069 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict parameter(s)</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
@@ -655,12 +655,12 @@ GAMLSS-RS iteration  5: Global Deviance = 405.7908 eps = 0.000000     </code></p
 2 58.82097 18.56457
 3 95.57069 34.28308</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
 10.05004 18.56457 34.28308 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     sigma
 1 10.05004
@@ -668,14 +668,14 @@ GAMLSS-RS iteration  5: Global Deviance = 405.7908 eps = 0.000000     </code></p
 3 34.28308</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  (Intercept)   s(speed)
 1     2.63897 -0.3313934
 2     2.63897  0.2822851
 3     2.63897  0.8956823</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    s(speed)
 1 -0.3313934

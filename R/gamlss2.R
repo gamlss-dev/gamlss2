@@ -222,9 +222,9 @@ gamlss2.formula <- function(formula, data, family = NO,
     ## Factors.
     for(j in names(xlev[[i]])) {
       if(j %in% Xterms[[i]]) {
-        xl <- paste0(j, xlev[[i]][[j]])
+        xl <- xl0 <- paste0(j, xlev[[i]][[j]])
         xl <- xl[xl %in% colnames(X)]
-        if(attr(mt[[i]], "intercept") > 0L && all(xl %in% colnames(X))) {
+        if(attr(mt[[i]], "intercept") > 0L && all(xl %in% colnames(X)) && length(xl0) == length(xl)) {
           xl <- xl[-1L]
         }
         if(length(xl)) {

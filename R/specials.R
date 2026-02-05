@@ -439,7 +439,7 @@ special_predict.default <- function(x, data, ...)
 }
 
 ## Specials extractor function after fitting the model.
-specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
+specials <- function(object, parameter = NULL, terms = NULL, elements = NULL, ...)
 {
   if(is.null(object$fitted.specials)) {
     return(NULL)
@@ -448,21 +448,24 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
   ## Extract response name, sometimes needed.
   rn <- response_name(object)
 
-  ## Which parameter model to predict?
-  if(is.null(model)) {
-    model <- list(...)$what
-    if(is.null(model))
-      model <- list(...)$parameter
-    if(is.null(model))
-      model <- object$family$names
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter))
+    parameter <- list(...)$model
+    if(is.null(parameter))
+      parameter <- object$family$names
   }
-  if(!is.character(model))
-    model <- object$family$names[model]
-  model <- object$family$names[pmatch(model, object$family$names)]
+  if(!is.character(parameter))
+    parameter <- object$family$names[parameter]
+  parameter <- object$family$names[pmatch(parameter, object$family$names)]
+
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L || all(is.na(parameter)))
+    stop("Argument parameter is specified wrong!")
 
   rval <- NULL
 
-  for(i in model) {
+  for(i in parameter) {
     if(!is.null(object$fitted.specials[[i]])) {
       it <- if(is.null(terms)) {
         names(object$fitted.specials[[i]])

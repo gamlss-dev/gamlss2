@@ -10,15 +10,16 @@ predicted (out-of-sample) parameters, terms, etc.
 }
 
 \usage{
-\method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
+\method{predict}{gamlss2}(object, parameter = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
 }
 \arguments{
   \item{object}{model object of class \code{\link{gamlss2}}.}
-  \item{model}{character. Which model part(s) should be predicted?
-    Can be one or more of \code{"mu"}, \code{"sigma"}, etc. By default
-    all model parts are included.}
+  \item{parameter}{character. Which parameters should be predicted?
+    E.g., can be one or more of \code{"mu"}, \code{"sigma"}
+    using the \code{\link[gamlss.dist]{NO}} family. By default
+    all parameters are included.}
   \item{newdata}{data.frame. Optionally, a new data frame in which to
     look for variables with which to predict. If omitted, the original
     observations are used.}
@@ -36,7 +37,8 @@ predicted (out-of-sample) parameters, terms, etc.
   \item{drop}{logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data.frame (\code{FALSE})?}
   \item{exclude}{character. Any terms named in this vector will be set to zero.}
-  \item{...}{currently only used for catching \code{what} as an alias for \code{model}.}
+  \item{...}{currently only used for catching \code{what} or \code{model}
+    as an alias for \code{parameter}.}
 }
 
 \details{
@@ -71,20 +73,20 @@ m <- gamlss2(dist ~ s(speed) | s(speed), data = cars, family = NO)
 ## new data for predictions
 nd <- data.frame(speed = c(10, 20, 30))
 
-## default: additive predictors (on link scale) for all model parameters
+## default: additive predictors (on link scale) for all parameters
 predict(m, newdata = nd)
 
 ## mean of the response distribution
 predict(m, newdata = nd, type = "response")
 
-## model parameter(s)
+## predict parameter(s)
 predict(m, newdata = nd)
-predict(m, newdata = nd, model = "sigma")
-predict(m, newdata = nd, model = "sigma", drop = FALSE)
+predict(m, newdata = nd, parameter = "sigma")
+predict(m, newdata = nd, parameter = "sigma", drop = FALSE)
 
 ## individual terms in additive predictor(s)
-predict(m, newdata = nd, type = "terms", model = "sigma")
-predict(m, newdata = nd, type = "terms", model = "sigma", terms = "s(speed)")
+predict(m, newdata = nd, type = "terms", parameter = "sigma")
+predict(m, newdata = nd, type = "terms", parameter = "sigma", terms = "s(speed)")
 
 ## standard errors
 predict(m, newdata = nd, se.fit = TRUE, R = 200)

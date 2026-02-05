@@ -291,7 +291,7 @@ find_gamlss2 <- function(formula, families = NULL, k = 2,
 
 ## Calibration plots.
 calibration <- function(..., newdata = NULL,
-  y = NULL, model = NULL, breaks = seq(0, 1, by = 0.1),
+  y = NULL, parameter = NULL, breaks = seq(0, 1, by = 0.1),
   minn = 20, main = "Calibration plot",
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
@@ -376,7 +376,7 @@ calibration <- function(..., newdata = NULL,
   for(m in seq_len(n_models)) {
     obj <- models[[m]]
 
-    p_hat <- predict(obj, newdata = newdata, model = model, type = "parameter")
+    p_hat <- predict(obj, newdata = newdata, parameter = parameter, type = "parameter")
 
     if(!is.null(family(obj)$probabilities))
       p_hat <- family(obj)$probabilities(p_hat)

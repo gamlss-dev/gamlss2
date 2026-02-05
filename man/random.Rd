@@ -53,8 +53,7 @@ re(random, correlation = NULL, ...)
 }
 
 \examples{\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-
-## orthdontic measurement data
+\dontrun{## orthdontic measurement data
 data("Orthodont", package = "nlme")
 
 ## model using lme()
@@ -155,7 +154,7 @@ cb <- cb[grepl("re", names(cb), fixed = TRUE)]
 ## compare
 plot(cb, ref, main = round(mean((cb - ref)^2), 2))
 abline(0, 1, lwd = 2, col = 4)
-}
+}}
 
 \keyword{utilities}
 \keyword{regression}

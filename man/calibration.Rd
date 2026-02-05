@@ -11,7 +11,7 @@
 
 \usage{
 calibration(..., newdata = NULL,
-  y = NULL, model = NULL, breaks = seq(0, 1, by = 0.1),
+  y = NULL, parameter = NULL, breaks = seq(0, 1, by = 0.1),
   minn = 20, main = "Calibration plot",
   xlab = "Predicted probability",
   ylab = "Observed proportion", plot = TRUE,
@@ -29,7 +29,7 @@ calibration(..., newdata = NULL,
   \item{y}{Optional numeric or factor vector with the binary response
     (coded as 0/1 or a two-level factor). If omitted, the response is
     extracted from the first model.}
-  \item{model}{Character, which parameter should be used for prediction.
+  \item{parameter}{Character, which parameter should be used for prediction.
     Typically \code{"mu"} for binary models.}
   \item{breaks}{Numeric vector of break points used to construct bins
     for the predicted probabilities. The range of \code{breaks} must

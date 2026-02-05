@@ -21,13 +21,14 @@ special_fit(x, \dots)
 special_predict(x, \dots)
 
 ## Extractor function for fitted special terms.
-specials(object, model = NULL, terms = NULL, elements = NULL, ...)
+specials(object, parameter = NULL, terms = NULL, elements = NULL, ...)
 }
 
 \arguments{
   \item{x}{A model term object as supplied in the formula in the \code{\link{gamlss2}} call.}
   \item{object}{A fitted \code{\link{gamlss2}} object.}
-  \item{model}{Character or integer, specifies the model for which fitted special terms should be extracted.}
+  \item{parameter}{Character or integer, specifies the model parameter
+    for which fitted special terms should be extracted.}
   \item{terms}{Character or integer, specifies the special model terms that should be extracted.}
   \item{elements}{Character, specifies which elements of a fitted special term should be
     extracted. If \code{elements = "names"}, the corresponding element names are extracted.}

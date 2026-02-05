@@ -1,6 +1,6 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
-  model = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
+  parameter = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
   terms = NULL, se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
 {
   ## FIXME: se.fit, terms ...
@@ -70,29 +70,31 @@ predict.gamlss2 <- function(object,
   family <- object$family
 
   ## Which parameter model to predict?
-  if(is.null(model)) {
-    model <- list(...)$what
-    if(is.null(model))
-      model <- family$names
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter))
+    parameter <- list(...)$model
+    if(is.null(parameter))
+      parameter <- object$family$names
   }
-  if(!is.character(model))
-    model <- family$names[model]
-  model <- family$names[pmatch(model, family$names)]
+  if(!is.character(parameter))
+    parameter <- object$family$names[parameter]
+  parameter <- object$family$names[pmatch(parameter, object$family$names)]
 
-  if(all(is.na(model))) {
-    stop('Argument model is specified wrong!')
-  }
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L || all(is.na(parameter)))
+    stop("Argument parameter is specified wrong!")
 
   if((type == "response") && (length(family$names) > 1L)) {
-    if(length(model) != length(family$names))
-      stop('Predictions on the response scale require all distributional parameters. Please omit the "model" argument or specify all parameters.')
+    if(length(parameter) != length(family$names))
+      stop('Predictions on the response scale require all distributional parameters. Please omit the "parameter" argument or specify all parameters.')
   }
 
   tt <- type == "terms"
 
   ## Predict all specified parameters.
   p <- list()
-  for(j in model) {
+  for(j in parameter) {
     p[[j]] <- if(tt) {
       NULL
     } else {
@@ -360,7 +362,7 @@ grep2 <- function (pattern, x, ...)
 
 ## Extract fitted values.
 fitted.gamlss2 <- function(object, newdata = NULL,
-  type = c("link", "parameter"), model = NULL, ...)
+  type = c("link", "parameter"), parameter = NULL, ...)
 {
   type <- match.arg(type)
 
@@ -373,15 +375,21 @@ fitted.gamlss2 <- function(object, newdata = NULL,
   if(type == "parameter")
     fit <- family(object)$map2par(fit)
 
-  if(is.null(model)) {
-    model <- list(...)$what
-    if(is.null(model))
-      model <- object$family$names
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter))
+    parameter <- list(...)$model
+    if(is.null(parameter))
+      parameter <- object$family$names
   }
-  if(!is.character(model))
-    model <- object$family$names[model]
-  model <- object$family$names[pmatch(model, object$family$names)]
+  if(!is.character(parameter))
+    parameter <- object$family$names[parameter]
+  parameter <- object$family$names[pmatch(parameter, object$family$names)]
 
-  return(fit[, model])
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L || all(is.na(parameter)))
+    stop("Argument parameter is specified wrong!")
+
+  return(fit[, parameter])
 }
 

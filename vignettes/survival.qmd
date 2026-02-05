@@ -11,6 +11,7 @@ nocite: |
 vignette: >
   %\VignetteIndexEntry{Survival Models}
   %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, inference, forecasting}
   %\VignettePackage{gamlss2}

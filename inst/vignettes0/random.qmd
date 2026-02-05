@@ -19,8 +19,8 @@ vignette: >
 ---
 
 ```{r preliminaries,  message=FALSE, warning=FALSE, results="hide"}
-library("gamlss2")
 library(gamlss)
+library("gamlss2")
 library(ggplot2)
 library(gtreg)
 library(gt)
@@ -139,7 +139,7 @@ We fit  model (@eq-toydata1) with random intercept in the $\mu$ model:
 
 ```{r}
 #| code-fold: false
-m1 <- gamlss2(y ~ x1 + x2 + re(random=~x1|cluster), 
+m1 <- gamlss2(y ~ x1 + x2 + re(random=~1|cluster), 
               sigma.formula = ~ x2,
               data=toydata1, family=GA)
 

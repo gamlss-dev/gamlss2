@@ -107,7 +107,7 @@ ps <- pb <- function(x, k = 20, ...)
 {
   sx <- s(x, bs = "ps", k = k, ...)
   sx$term <- deparse(substitute(x))
-  sx$label <- paste0("pb2(", sx$term, ")")
+  sx$label <- paste0("pb(", sx$term, ")")
   sx$control <- list("criterion" = "ml")
   sx$localML <- TRUE
   return(sx)

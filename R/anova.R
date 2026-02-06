@@ -104,6 +104,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
   if(length(xterms)) {
     for(i in names(xterms)) {
       xi <- xterms[[i]][xterms[[i]] != "(Intercept)"]
+
       if(length(xi)) {
         j <- xi
         names(j) <- xi
@@ -116,9 +117,25 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
             }
           }
         }
+        rn <- NULL
         for(l in unique(names(j))) {
           xtl <- xterms0
           xtl[[i]] <- xtl[[i]][!(xtl[[i]] %in% j[names(j) == l])]
+
+          xlab <- l
+          if(!is.null(object$xlev)) {
+            if(length(object$xlev)) {
+              xlev <- sapply(names(object$xlev[[i]]), function(ii) {
+                l %in% paste0(ii, object$xlev[[i]][[ii]]) }
+              )
+              if(any(xlev)) {
+                xx <- names(xlev)[xlev]
+                xlab <- xx
+                xx <- paste0(xx, object$xlev[[i]][[xx]])
+                xtl[[i]] <- xtl[[i]][!(xtl[[i]] %in% xx)]
+              }
+            }
+          }
 
           m <- RS(x = object$x, y = object$y, specials = object$specials,
             family = object$family,
@@ -138,11 +155,14 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
             "AIC" = -2 * ll1 + 2 * df1,
             "LRT" = dev,
             "Pr(>Chi)" = pval,
-            row.names = l, check.names = FALSE
+            row.names = xlab, check.names = FALSE
           )
+
+          rn <- c(rn, xlab)
 
           res[[i]] <- rbind(res[[i]], aod)
         }
+        res[[i]] <- res[[i]][!duplicated(rn), , drop = FALSE]
       }
     }
   }

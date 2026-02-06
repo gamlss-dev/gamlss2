@@ -46,7 +46,8 @@ anova.gamlss2 <- function(object, ..., test = "Chisq") {
   return(res)
 }
 
-drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
+drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
+  parameter = NULL, ...)
 {
   ## Allow logical FALSE or "none" for no test.
   if(is.logical(test) && identical(test, FALSE)) {
@@ -100,9 +101,24 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
   dev0 <- deviance(object)
   df0 <- attr(ll0, "df")
 
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter))
+    parameter <- list(...)$model
+    if(is.null(parameter))
+      parameter <- object$family$names
+  }
+  if(!is.character(parameter))
+    parameter <- object$family$names[parameter]
+  parameter <- object$family$names[pmatch(parameter, object$family$names)]
+
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L || all(is.na(parameter)))
+    stop("Argument parameter is specified wrong!")
+
   res <- list()
   if(length(xterms)) {
-    for(i in names(xterms)) {
+    for(i in parameter) {
       xi <- xterms[[i]][xterms[[i]] != "(Intercept)"]
 
       if(length(xi)) {
@@ -168,7 +184,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
   }
 
   if(length(sterms)) {
-    for(i in names(sterms)) {
+    for(i in parameter) {
       si <- sterms[[i]]
       if(length(si)) {
         j <- sterms0

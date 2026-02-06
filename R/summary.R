@@ -44,6 +44,11 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
     if(!is.null(what))
       model <- what
   }
+  if(is.null(model)) {
+    parameter <- list(...)$parameter
+    if(!is.null(parameter))
+      model <- parameter
+  }
   if(!is.null(model)) {
     if(!is.character(model))
       model <- family$names[model]

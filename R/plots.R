@@ -733,3 +733,49 @@ plot.gamlss2.list <- function(x, parameter = NULL, which = "effects", terms = NU
   return(invisible(NULL))
 }
 
+termplot_extract <- function(x, parameter = NULL, level = 0.95, ...)
+{
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter)) parameter <- list(...)$model
+    if(is.null(parameter)) parameter <- x$family$names
+  }
+  if(!is.character(parameter))
+    parameter <- x$family$names[parameter]
+  parameter <- x$family$names[pmatch(parameter, x$family$names)]
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L)
+    stop("argument parameter is specified wrong!")
+
+  mf <- model.frame(x)
+  ff <- fake_formula(formula(x), nospecials = TRUE)
+  vn <- all.vars(ff)
+
+  alpha <- (1 - level) / 2
+
+  p <- list()
+  for(j in seq_along(parameter)) {
+    for(i in vn) {
+      if(i %in% all.vars(formula(ff, lhs = 0, rhs = j))) {
+        nd <- mf[!duplicated(mf[[i]]), , drop = FALSE]
+        draw <- predict(x, newdata = nd, parameter = parameter[j],
+                        type = "link", terms = i, FUN = identity)
+        draw <- sweep(draw, 2, colMeans(draw), "-")
+        fit <- predict(x, newdata = nd, parameter = parameter[j], type = "link", terms = i)
+        fit <- fit - mean(fit)
+        lower <- apply(draw, 1, quantile, probs = alpha,     names = FALSE)
+        upper <- apply(draw, 1, quantile, probs = 1 - alpha, names = FALSE)
+        ji <- paste0(parameter[j], ".", i)
+        p[[ji]] <- data.frame(nd[[i]], "fit" = fit, "lower" = lower, "upper" = upper)
+        colnames(p[[ji]])[1L] <- i
+        p[[ji]] <- p[[ji]][!duplicated(p[[ji]][[i]]), , drop = FALSE]
+        p[[ji]] <- p[[ji]][order(p[[ji]][[i]]), , drop = FALSE]
+        rownames(p[[ji]]) <- NULL
+        attr(p[[ji]], "label") <- paste("Effect of", ji)
+      }
+    }
+  }
+
+  p
+}
+

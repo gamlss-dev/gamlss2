@@ -450,7 +450,7 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
         stop("R-squared only for continuous responses!")
     }
 
-    par <- fitted(object, newdata = newdata, type = "parameter")
+    par <- predict(object, newdata = newdata, type = "parameter")
 
     if(is.null(family(object)$mean)) {
       fit <- family(object)$quantile(0.5, par)

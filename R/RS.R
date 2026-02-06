@@ -232,6 +232,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               }
             }
           }
+        } else {
+          dev0 <- -2 * lli
         }
       }
     }

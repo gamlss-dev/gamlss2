@@ -122,7 +122,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
 
           m <- RS(x = object$x, y = object$y, specials = object$specials,
             family = object$family,
-            offsets = offsets, weights = weights, start = coef(object),
+            offsets = offsets, weights = weights, ## start = coef(object),
             xterms = xtl, sterms = object$sterms, control = control)
 
           ll1 <- m$logLik
@@ -157,7 +157,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
 
           m <- RS(x = object$x, y = object$y, specials = object$specials,
             family = object$family,
-            offsets = offsets, weights = weights, start = coef(object),
+            offsets = offsets, weights = weights, ## start = coef(object),
             xterms = object$xterms, sterms = j, control = control)
 
           ll1 <- m$logLik

@@ -550,9 +550,16 @@ GAIC <- function(object, ..., k = 2, corrected = FALSE)
       gaic <- c(gaic, deviance + df * k + Cor)
       edf <- c(edf, df)
     } else {
-      drop <- c(drop, j)
-      gaic <- c(gaic, NA)
-      edf <- c(edf, NA)
+      oj <- objs[[j]]
+      gaicj <- try(AIC(objs[[j]], oj, k = k), silent = TRUE)
+      if(!inherits(gaicj, "try-error")) {
+        gaic <- c(gaic, gaicj[1, "AIC"])
+        edf <- c(edf, gaicj[1, "df"])
+      } else {
+        drop <- c(drop, j)
+        gaic <- c(gaic, NA)
+        edf <- c(edf, NA)
+      }
     }
   }
 

@@ -420,6 +420,10 @@ model.frame.gamlss2 <- function(formula, ...)
       fcall$formula <- formula(as.Formula(fcall$formula), lhs = 0)
     }
     fcall$formula <- formula(as.Formula(fcall$formula), collapse = TRUE, update = TRUE)
+    no_weights <- list(...)$no_weights
+    if(isTRUE(no_weights)) {
+      fcall["weights"] <- NULL
+    }
     fcall[names(nargs)] <- nargs[names(nargs)]
     env <- if(is.null(environment(formula$terms))) {
       parent.frame()

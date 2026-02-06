@@ -751,8 +751,6 @@ termplot_extract <- function(x, parameter = NULL, level = 0.95, ...)
   ff <- fake_formula(formula(x), nospecials = TRUE)
   vn <- all.vars(ff)
 
-  alpha <- (1 - level) / 2
-
   p <- list()
   for(j in seq_along(parameter)) {
     for(i in vn) {
@@ -761,10 +759,13 @@ termplot_extract <- function(x, parameter = NULL, level = 0.95, ...)
         draw <- predict(x, newdata = nd, parameter = parameter[j],
                         type = "link", terms = i, FUN = identity)
         draw <- sweep(draw, 2, colMeans(draw), "-")
-        fit <- predict(x, newdata = nd, parameter = parameter[j], type = "link", terms = i)
+        fit <- predict(x, newdata = mf, parameter = parameter[j], type = "link", terms = i)
         fit <- fit - mean(fit)
-        lower <- apply(draw, 1, quantile, probs = alpha,     names = FALSE)
-        upper <- apply(draw, 1, quantile, probs = 1 - alpha, names = FALSE)
+        fit <- fit[!duplicated(mf[[i]])]
+        se <- apply(draw, 1, sd)
+        z <- qnorm(1 - (1 - level) / 2)
+        lower <- fit - z * se
+        upper <- fit + z * se
         ji <- paste0(parameter[j], ".", i)
         p[[ji]] <- data.frame(nd[[i]], "fit" = fit, "lower" = lower, "upper" = upper)
         colnames(p[[ji]])[1L] <- i

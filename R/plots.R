@@ -1,7 +1,7 @@
 ## A plotting method.
 plot.gamlss2 <- function(x, parameter = NULL,
   which = "effects", terms = NULL,
-  scale = TRUE, spar = TRUE, effects = c("linear", "special"), ...)
+  scale = TRUE, spar = TRUE, effects = "smooth", ...)
 {
   ## What should be plotted?
   which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection", "samples")

@@ -14,7 +14,8 @@
 \usage{
 \method{plot}{gamlss2}(x, parameter = NULL,
   which = "effects", terms = NULL,
-  scale = TRUE, spar = TRUE, ...)
+  scale = TRUE, spar = TRUE,
+  effects = c("linear", "special"), ...)
 
 \method{plot}{gamlss2.list}(x, parameter = NULL, which = "effects",
   terms = NULL, spar = TRUE, legend = TRUE, ...)
@@ -39,6 +40,7 @@
   \item{scale}{If set to \code{1}, effect plots all have the same scale on the y-axis. If set to
     \code{0} each effect plot has its own scale for the y-axis.}
   \item{spar}{Should graphical parameters be set?}
+  \item{effects}{Character, which type of effects should be plotted?}
   \item{legend}{Should a legend be added using multiple model plots?}
   \item{\dots}{Arguments such as
     \code{lwd}, \code{lty}, \code{col}, \code{legend = TRUE} (for multiple model plots),

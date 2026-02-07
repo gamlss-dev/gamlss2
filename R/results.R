@@ -229,7 +229,7 @@ results.gamlss2 <- function(x, ...)
     }
   }
   if(length(x$xterms)) {
-    xe <- termplot_extract(x)
+    xe <- results_linear(x)
     res$effects[names(xe)] <- xe
   }
 
@@ -237,4 +237,74 @@ results.gamlss2 <- function(x, ...)
 }
 
 '%||%' <- function(a, b) if (!is.null(a)) a else b
+
+results_linear <- function(x, parameter = NULL, ...)
+{
+  if(is.null(parameter)) {
+    parameter <- list(...)$what
+    if(is.null(parameter)) parameter <- list(...)$model
+    if(is.null(parameter)) parameter <- x$family$names
+  }
+  if(!is.character(parameter))
+    parameter <- x$family$names[parameter]
+  parameter <- x$family$names[pmatch(parameter, x$family$names)]
+  parameter <- parameter[!is.na(parameter)]
+  if(length(parameter) < 1L)
+    stop("argument parameter is specified wrong!")
+
+  mf <- model.frame(x)
+  nd <- list()
+  for(j in names(mf)) {
+    if(is.numeric(mf[[j]])) {
+      nd[[j]] <- seq(min(mf[[j]]), max(mf[[j]]), length = 300L)
+    } else {
+      nd[[j]] <- factor(rep(levels(mf[[j]]), length.out = 300L))
+    }
+  }
+  rm(mf)
+  X <- model.matrix(x, data = nd)
+
+  ff <- fake_formula(formula(x), nospecials = TRUE)
+  vn <- all.vars(ff)
+
+  p <- list()
+  for(j in seq_along(parameter)) {
+    V <- x$fitted.linear[[j]]$vcov
+    cj <- x$fitted.linear[[j]]$coefficients
+    for(i in vn) {
+      if(i %in% all.vars(formula(ff, lhs = 0, rhs = j))) {
+        ii <- grep(paste0("^", i), colnames(X), value = TRUE)
+        if(attr(terms(formula(ff, lhs = 0, rhs = j)), "intercept") > 0L)
+          ii <- c("(Intercept)", ii)
+        Xj   <- X[, ii, drop = FALSE]
+        Vsub <- V[ii, ii, drop = FALSE]
+        bsub <- cj[ii]
+        if(is.factor(nd[[i]])) {
+          Xjc <- Xj - matrix(colMeans(Xj), nrow(Xj), ncol(Xj), byrow = TRUE)
+          fit <- as.vector(Xjc %*% bsub)
+          vj  <- rowSums((Xjc %*% Vsub) * Xjc)
+          sj  <- sqrt(pmax(vj, 0))
+        } else {
+          Xjc <- sweep(Xj, 2, colMeans(Xj), FUN = "-")
+          fit <- as.vector(Xjc %*% bsub)
+          vj  <- rowSums((Xjc %*% Vsub) * Xjc)
+          sj  <- sqrt(pmax(vj, 0))
+        }
+        z <- qnorm(0.975)
+        upper <- fit + z * sj
+        lower <- fit - z * sj
+        ji <- paste0(parameter[j], ".", i)
+        p[[ji]] <- data.frame(nd[[i]], "fit" = fit, "lower" = lower, "upper" = upper)
+        colnames(p[[ji]])[1L] <- i
+        p[[ji]] <- p[[ji]][!duplicated(p[[ji]][[i]]), , drop = FALSE]
+        p[[ji]] <- p[[ji]][order(p[[ji]][[i]]), , drop = FALSE]
+        rownames(p[[ji]]) <- NULL
+        attr(p[[ji]], "label") <- paste(ji, "effect")
+        attr(p[[ji]], "linear") <- TRUE
+      }
+    }
+  }
+
+  p
+}
 

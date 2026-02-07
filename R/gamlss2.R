@@ -447,6 +447,8 @@ model.matrix.gamlss2 <- function(object, data = NULL, ...)
     if(is.null(data)) {
       data <- model.frame(object, xlev = object$xlevels, ...)
     }
+    if(is.list(data))
+      data <- as.data.frame(data)
     dots <- list(...)
     dots$data <- dots$contrasts.arg <- NULL
     mt <- object$terms

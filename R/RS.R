@@ -451,6 +451,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               fit[[j]]$coefficients <- m$coefficients
               if(!is.null(m$edf))
                 fit[[j]]$edf <- m$edf
+              XWX <- crossprod(Xj * sqrt(wj)) + diag(1e-6, ncol(Xj))
+              fit[[j]]$vcov <- chol2inv(chol(XWX))
+              colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
               ll02 <- ll1
             ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
             }

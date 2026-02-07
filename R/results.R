@@ -252,7 +252,16 @@ results_linear <- function(x, parameter = NULL, ...)
   if(length(parameter) < 1L)
     stop("argument parameter is specified wrong!")
 
-  mf <- model.frame(x)
+  ff <- fake_formula(formula(x), nospecials = TRUE)
+  vn <- all.vars(ff)
+
+  mf <- model.frame(x, keepresponse = FALSE)
+  yn <- deparse(formula(as.Formula(formula(x)), rhs = 0)[[2L]])
+  mf <- mf[, names(mf) != yn, drop = FALSE]
+  if(ncol(mf) < 1L) {
+    return(NULL)
+  }
+
   nd <- list()
   for(j in names(mf)) {
     if(is.numeric(mf[[j]])) {
@@ -263,9 +272,6 @@ results_linear <- function(x, parameter = NULL, ...)
   }
   rm(mf)
   X <- model.matrix(x, data = nd)
-
-  ff <- fake_formula(formula(x), nospecials = TRUE)
-  vn <- all.vars(ff)
 
   p <- list()
   for(j in seq_along(parameter)) {

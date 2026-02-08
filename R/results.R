@@ -267,10 +267,12 @@ results_linear <- function(x, parameter = NULL, ...)
     if(is.numeric(mf[[j]])) {
       nd[[j]] <- seq(min(mf[[j]]), max(mf[[j]]), length = 300L)
     } else {
-      nd[[j]] <- factor(rep(levels(mf[[j]]), length.out = 300L))
+      nd[[j]] <- factor(rep(levels(mf[[j]]), length.out = 300L),
+        levels = levels(mf[[j]]))
     }
   }
   rm(mf)
+
   X <- model.matrix(x, data = nd)
 
   p <- list()

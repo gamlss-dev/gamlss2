@@ -44,6 +44,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
     ask <- FALSE
   spare <- spar
 
+  any_plots <- FALSE
+
   ## Effect plots.
   if("effects" %in% which) {
     if(is.null(x$results))
@@ -85,7 +87,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
       }
     }
 
-    if(length(x$results$effects)) {
+    if(length(x$results$effects) && length(en)) {
       if(spare) {
         if(isTRUE(ask)) {
           par(ask = TRUE)
@@ -113,6 +115,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
         }
       }
 
+      any_plots <- TRUE
+
       for(j in en) {
         p <- strsplit(j, ".", fixed = TRUE)[[1L]][1L]
         if(!is.factor(x$results$effects[[j]][[1L]])) {
@@ -137,10 +141,15 @@ plot.gamlss2 <- function(x, parameter = NULL,
           plot_factor_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
         }
       }
-    }
 
-    ## No further plotting.
-    return(invisible(NULL))
+      ## No further plotting.
+      return(invisible(NULL))
+    }
+  }
+
+  if(!any_plots && !any(grepl("resid", which))) {
+    if(!("selection" %in% which) && !("samples" %in% which))
+      which <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
 
   spare <- spar

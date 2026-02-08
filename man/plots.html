@@ -519,7 +519,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code class="language-R">## S3 method for class 'gamlss2'
 plot(x, parameter = NULL,
   which = "effects", terms = NULL,
-  scale = TRUE, spar = TRUE, ...)
+  scale = TRUE, spar = TRUE,
+  effects = "smooth", ...)
 
 ## S3 method for class 'gamlss2.list'
 plot(x, parameter = NULL, which = "effects",
@@ -575,6 +576,14 @@ If set to <code>1</code>, effect plots all have the same scale on the y-axis. If
 </td>
 <td>
 Should graphical parameters be set?
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="effects">effects</code>
+</td>
+<td>
+Character, which type of effects should be plotted? Options are <code>“smooth”</code>, <code>“special”</code> and <code>“linear”</code>.
 </td>
 </tr>
 <tr>

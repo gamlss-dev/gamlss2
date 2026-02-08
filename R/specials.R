@@ -311,7 +311,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
     N <- sum(w != 0)
 
-    for(it in 1:100) {
+    for(it in 1:50) {
       P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
       if(inherits(P, "try-error"))
         P <- solve(XWX + lambdas * x$S[[1L]])

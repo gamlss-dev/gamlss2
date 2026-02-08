@@ -234,8 +234,6 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     if(!is.null(control$method))
       control$criterion <- tolower(control$method)
   }
-  if(is.null(control$criterion))
-    control$criterion <- "aicc"
 
   ## Extra penalty for selection.
   if(isTRUE(control$termselect)) {
@@ -272,6 +270,14 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     x$S[[length(x$S) + 1L]] <- pen(b0)
   }
 
+  if(is.null(control$criterion)) {
+    if(length(x$S) < 2L) {
+      control$criterion <- "ml"
+    } else {
+      control$criterion <- "aicc"
+    }
+  }
+
   ## Set up smoothing parameters.
   if(iter[1L] > -1) {
     lambdas <- transfer$lambdas
@@ -281,7 +287,6 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(is.null(lambdas)) {
     lambdas <- if(is.null(control$start)) 10 else control$start
   }
-  lambdas <- rep(lambdas, length.out = length(x$S))
 
   ## Penalty for AIC.
   K <- if(is.null(control$K)) 2 else control$K
@@ -289,8 +294,13 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   ## Local ML check.
   localML <- isTRUE(x$localML)
   if(!localML) {
-    if(control$criterion == "ml")
-      control$criterion <- "aicc"
+    if(control$criterion == "ml") {
+      if(length(x$S) < 2L) {
+        localML <- TRUE
+      } else {
+        control$criterion <- "aicc"
+      }
+    }
   }
 
   if(control$criterion == "ml" & (length(x$S) < 2L) & localML) {
@@ -301,7 +311,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
     N <- sum(w != 0)
 
-    for(it in 1:50) {
+    for(it in 1:100) {
       P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
       if(inherits(P, "try-error"))
         P <- solve(XWX + lambdas * x$S[[1L]])

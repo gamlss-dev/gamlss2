@@ -655,8 +655,7 @@ GAMLSS-RS iteration  3: Global Deviance = 404.9646 eps = 0.000007     </code></p
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       1        2        3 
-10.20157 18.04890 31.74768 </code></pre>
+<pre><code>[1] 10.20157 18.04890 31.74768</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -668,17 +667,11 @@ GAMLSS-RS iteration  3: Global Deviance = 404.9646 eps = 0.000007     </code></p
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  (Intercept)   s(speed)
-1    2.630739 -0.3081976
-2    2.630739  0.2623455
-3    2.630739  0.8270805</code></pre>
+<pre><code>[1]  2.6307392  2.6307392  2.6307392 -0.3081976  0.2623455  0.8270805</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>    s(speed)
-1 -0.3081976
-2  0.2623455
-3  0.8270805</code></pre>
+<pre><code>[1] -0.3081976  0.2623455  0.8270805</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

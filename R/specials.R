@@ -287,6 +287,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(is.null(lambdas)) {
     lambdas <- if(is.null(control$start)) 10 else control$start
   }
+  lambdas <- rep(lambdas, length.out = length(x$S))
 
   ## Penalty for AIC.
   K <- if(is.null(control$K)) 2 else control$K
@@ -348,7 +349,6 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         for(jj in 1:length(x$S))
           S <- S + l[jj] * x$S[[jj]]
       }
-
       ## Precision matrix Q = X'WX + S
       Q <- XWX + S
       Q <- Q + diag(1e-08, ncol(Q))

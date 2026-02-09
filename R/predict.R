@@ -341,7 +341,7 @@ predict.gamlss2 <- function(object,
   ## Drop dimension if only one parameter is predicted.
   if(is.list(p)) {
     if((length(p) < 2 & drop)) {
-      p <- p[[1L]]
+      p <- as.numeric(p[[1L]])
     } else {
       if(!tt)
         p <- as.data.frame(p)

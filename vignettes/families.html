@@ -423,14 +423,15 @@ div.csl-indent {
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate models</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4785.931 eps = 0.999867     
-GAMLSS-RS iteration  2: Global Deviance = 4785.931 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4787.0789 eps = 0.999867     
+GAMLSS-RS iteration  2: Global Deviance = 4785.9818 eps = 0.000229     
+GAMLSS-RS iteration  3: Global Deviance = 4785.9705 eps = 0.000002     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> softplus))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4787.4409 eps = 0.999866     
-GAMLSS-RS iteration  2: Global Deviance = 4785.3442 eps = 0.000437     
-GAMLSS-RS iteration  3: Global Deviance = 4785.3442 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4789.1746 eps = 0.999866     
+GAMLSS-RS iteration  2: Global Deviance = 4786.0255 eps = 0.000657     
+GAMLSS-RS iteration  3: Global Deviance = 4786.0016 eps = 0.000005     </code></pre>
 </div>
 </div>
 <p>The fitted means are visualized with</p>

@@ -596,10 +596,8 @@ numeric, matrix, list or data frame, see the examples.
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> ., <span class="at">data =</span> abdom, <span class="at">family =</span> GA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5039.2922 eps = 0.356998     
-GAMLSS-RS iteration  2: Global Deviance = 4802.238 eps = 0.047041     
-GAMLSS-RS iteration  3: Global Deviance = 4800.5126 eps = 0.000359     
-GAMLSS-RS iteration  4: Global Deviance = 4800.4943 eps = 0.000003     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4780.365 eps = 0.390036     
+GAMLSS-RS iteration  2: Global Deviance = 4780.3649 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract, also works with newdata</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -612,13 +610,13 @@ GAMLSS-RS iteration  4: Global Deviance = 4800.4943 eps = 0.000003     </code></
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      mean   median      q95 variance        pdf        cdf
-1 63.03104 62.92909 70.42364 19.28276 0.06246974 0.18010635
-2 63.03104 62.92909 70.42364 19.28276 0.08730887 0.59589436
-3 63.03104 62.92909 70.42364 19.28276 0.02556281 0.05035205
-4 64.38740 64.28355 71.92811 20.06443 0.06986751 0.22764748
-5 67.18717 67.07943 75.03293 21.72338 0.02854450 0.92478019
-6 67.18717 67.07943 75.03293 21.72338 0.02660748 0.05735297</code></pre>
+<pre><code>      mean   median      q95 variance        pdf       cdf
+1 62.62538 62.46218 72.00524 30.67491 0.06114173 0.2617289
+2 62.62538 62.46218 72.00524 30.67491 0.06833166 0.6086617
+3 62.62538 62.46218 72.00524 30.67491 0.03726016 0.1128548
+4 64.00907 63.84458 73.52767 31.60124 0.06418761 0.3034481
+5 66.86750 66.70039 76.66957 33.53724 0.03063122 0.8885773
+6 66.86750 66.70039 76.66957 33.53724 0.03605014 0.1150788</code></pre>
 </div>
 </div>
 

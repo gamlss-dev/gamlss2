@@ -304,40 +304,72 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     }
   }
 
-  if(control$criterion == "ml" & (length(x$S) < 2L) & localML) {
+  if((control$criterion == "ml") && (length(x$S) < 2L) && localML) {
     ## Local ML method, only for pb2() yet!
     order <- x$m[1L]
-    if(is.null(order))
-      order <- 1
+    if(is.null(order)) {
+      order <- x$null.space.dim
+    }
+    if(is.null(order)) {
+      if(!is.null(x$rank)) {
+        order <- ncol(x$X) - x$rank
+      } else {
+        order <- ncol(x$S[[1L]]) - qr(x$S[[1]], tol = 1e-12)$rank
+      }
+    }
+    order <- max(0, min(order, ncol(x$S[[1L]]) - 1))
 
     N <- sum(w != 0)
 
-    for(it in 1:50) {
-      P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
-      if(inherits(P, "try-error"))
-        P <- solve(XWX + lambdas * x$S[[1L]])
+    if(!is.finite(lambdas) || lambdas <= 0) {
+      lambdas <- 1e-07
+    }
 
-      b <- drop(P %*% XWz)
+    for(it in 1:50) {
+      Q <- XWX + lambdas * x$S[[1L]]
+      diag(Q) <- diag(Q) + 1e-08
+
+      cholQ <- try(chol(Q), silent = TRUE)
+      if(inherits(cholQ, "try-error")) break
+
+      b <- backsolve(cholQ, forwardsolve(t(cholQ), XWz))
+      b <- drop(b)
+
       fit <- drop(x$X %*% b)
 
       if(control$binning)
         fit <- fit[x$binning$match.index]
 
-      edf <- sum(diag(XWX %*% P))
+      Tmat <- backsolve(cholQ, forwardsolve(t(cholQ), XWX))
+      edf <- sum(diag(Tmat))
 
-      sig2 <- sum(w * (z - fit)^2) / (N - edf)
-      tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / (edf - order)
+      den_sig <- N - edf
+      if(den_sig <= 1e-8) break
+
+      den_tau2 <- edf - order
+      if(den_tau2 <= 1e-8) break
+
+      sig2 <- sum(w * (z - fit)^2) / den_sig
+      if(!is.finite(sig2) || sig2 <= 0) break
+
+      tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / den_tau2
 
       if(tau2 < 1e-07) tau2 <- 1e-07
       lambdas.old <- lambdas
-      lambdas <- sig2/tau2
+      ##lambdas <- sig2/tau2
+
+      lnew <- sig2/tau2
+      if(!is.finite(lnew) || lnew <= 0) break
+
+      lambdas <- exp( (1 - 0.7) * log(lambdas) + 0.7 * log(lnew) )
+
       if(lambdas < 1e-07) lambdas <- 1e-07
       if(lambdas > 1e+07) lambdas <- 1e+07
-      if(abs(lambdas - lambdas.old) < 1e-07 || lambdas > 1e+10) break
+      if((abs(log(lambdas) - log(lambdas.old)) < 1e-6) || (lambdas > 1e+10)) break
     }
 
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-      "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
+      "lambdas" = lambdas, "vcov" = chol2inv(cholQ), "df" = n - edf))
   } else {
     ## Function to search for smoothing parameters using GCV etc.
     S0 <- diag(1e-05, ncol(x$X))
@@ -351,7 +383,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       }
       ## Precision matrix Q = X'WX + S
       Q <- XWX + S
-      Q <- Q + diag(1e-08, ncol(Q))
+      diag(Q) <- diag(Q) + 1e-08
       cholQ <- chol(Q)
 
       ## b = Q^{-1} X'Wz

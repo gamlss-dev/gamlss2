@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>find_family – gamlss2</title>
+<title>ol – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -182,7 +182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/find_family.html">find_family</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/OL.html">OL</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/find_family.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/find_family.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">find_family</span></a>
   </div>
 </li>
@@ -411,7 +411,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/OL.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/OL.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">OL</span></a>
   </div>
 </li>
@@ -497,7 +497,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#find-suitable-gamlss-families" id="toc-find-suitable-gamlss-families" class="nav-link active" data-scroll-target="#find-suitable-gamlss-families">Find suitable GAMLSS Families</a>
+  <li><a href="#ordered-logistic-family-for-ordinal-regression" id="toc-ordered-logistic-family-for-ordinal-regression" class="nav-link active" data-scroll-target="#ordered-logistic-family-for-ordinal-regression">Ordered Logistic Family for Ordinal Regression</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
@@ -511,31 +511,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/find_family.html">find_family</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/OL.html">OL</a></li></ol></nav></header>
 
 
 
 
-<section id="find-suitable-gamlss-families" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="find-suitable-gamlss-families">Find suitable GAMLSS Families</h2>
+<section id="ordered-logistic-family-for-ordinal-regression" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="ordered-logistic-family-for-ordinal-regression">Ordered Logistic Family for Ordinal Regression</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>These functions provide useful infrastructure for finding suitable GAMLSS families for a response variable.</p>
+<p>Defines the ordered logistic (cumulative logit) family for modeling ordinal response variables within the <code>gamlss2</code> framework. This implementation supports flexible modeling of the location and threshold (cutpoint) parameters, including effects of covariates.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## List of available families from gamlss.dist package.
-available_families(type = c("continuous", "discrete"), families = NULL, ...)
-
-## Find suitable response distribution.
-find_family(y, families = NULL, k = 2, verbose = TRUE, ...)
-
-## Fit distribution parameters.
-fit_family(y, family = NO, plot = TRUE, ...)
-
-## Find gamlss2 model.
-find_gamlss2(formula, families = NULL, k = 2,
-  select = FALSE, verbose = TRUE, ...)
+<pre><code class="language-R">OL(k)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -543,130 +532,148 @@ find_gamlss2(formula, families = NULL, k = 2,
 <table role="presentation">
 <tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="type">type</code>
-</td>
-<td>
-Character, is the reponse continuous or discrete?
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="families">families</code>
-</td>
-<td>
-Character, the names of the family objects of the <span class="pkg">gamlss.dist</span> package that should be returned.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="y">y</code>
-</td>
-<td>
-The response vector or matrix.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="k">k</code>
 </td>
 <td>
-Numeric, the penalty factor that should be used for the <code>GAIC</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="verbose">verbose</code>
-</td>
-<td>
-Logical, should runtime information be printed?
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="family">family</code>
-</td>
-<td>
-A family object that should be used for estimation, see also <code>gamlss2.family</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="plot">plot</code>
-</td>
-<td>
-Logical, should a plot of the fitted density be provided?
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="formula">formula</code>
-</td>
-<td>
-A model formula, see <code>gamlss2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="select">select</code>
-</td>
-<td>
-Logical, if set to <code>select = TRUE</code>, model term selection is enforced using model fitting function <code>select_gamlss2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="...">…</code>
-</td>
-<td>
-For function <code>available_families()</code>, arguments passed to the family objects, e.g., for setting link functions <code>mu.link = “log”</code>. Further arguments to be passed to <code>gamlss2</code> when using <code>find_family()</code>, or arguments <code>legend = TRUE/FALSE</code>, <code>pos = “topright”</code> (see also function <code>legend</code>), <code>main</code>, <code>xlab</code> and <code>ylab</code> when argument <code>plot = TRUE</code> using function <code>fit_family()</code>. For function <code>find_gamlss()</code>, arguments are passed to <code>available_families()</code> and <code>gamlss2</code>.
+An integer specifying the number of response categories. Must be <code>k &gt;= 2</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The function <code>find_family()</code> employs <code>gamlss2</code> to estimate intercept-only models for each specified family object in the <code>families</code> argument. Note that model estimation occurs within a <code>try</code> block with warnings suppressed. Additionally, the function calculates the <code>GAIC</code> for each family whenever feasible and returns the sorted values in descending order.</p>
-<p>Function <code>fit_family()</code> fits a single intercept-only model using the specified family and creates a plot of the fitted density.</p>
+<p>This family implements a cumulative logit model for ordinal responses with <code>k</code> ordered categories. The linear predictor models a latent location parameter, and the cutpoints between response categories are parameterized via a monotonic transformation:</p>
+<ul>
+<li>
+<p>The first cutpoint is modeled directly (<code>theta1</code>).</p>
+</li>
+<li>
+<p>The remaining cutpoints are expressed as <code>theta1 + exp(delta_j)</code> for <code>j = 2, …, k - 1</code>, ensuring that the thresholds remain ordered.</p>
+</li>
+</ul>
+<p>The <code>OL()</code> family supports modeling the location and threshold differences (<code>delta_j</code>) as functions of covariates using additive predictors in <code>gamlss2</code> via the <code>“|”</code> formula interface.</p>
+<p>The family returns an object of class <code>“gamlss2.family”</code>, which includes methods for evaluating the log-likelihood, simulating from the model, and computing predicted probabilities.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Function <code>find_family()</code> returns a vector of <code>GAIC</code> values for the different fitted families. Function <code>fit_family()</code> returns the fitted intercept-only model.</p>
+<p>A <code>“gamlss2.family”</code> object to be used with <code>gamlss2</code>.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code>.</p>
+<p><code>gamlss2</code>, <code>gamlss2.family</code>, <code>polr</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Example using the housing data from the MASS package:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"MASS"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## find a suitable family to the response using intercept-only models</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>ic <span class="ot">&lt;-</span> <span class="fu">find_family</span>(rent<span class="sc">$</span>R)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ic)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">which.min</span>(ic)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## fit parameters using the resulting BCCG family and plot the density</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(rent<span class="sc">$</span>R, <span class="at">family =</span> BCCG)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## another example using count data</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"polio"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## search a suitable discrete distribution / family</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>ic <span class="ot">&lt;-</span> <span class="fu">find_family</span>(polio, <span class="at">k =</span> <span class="dv">0</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">families =</span> <span class="fu">available_families</span>(<span class="at">type =</span> <span class="st">"discrete"</span>))</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ic)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">which.min</span>(ic)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="do">## fit parameters using the ZAPIG family</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">fit_family</span>(polio, <span class="at">family =</span> ZAPIG)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="do">## search complete model for continuous response</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="do">## b &lt;- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">##   select = TRUE, mu.link = "log")</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Fit standard cumulative logit model using polr().</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">polr</span>(Sat <span class="sc">~</span> Infl <span class="sc">+</span> Type <span class="sc">+</span> Cont, <span class="at">weights =</span> Freq, <span class="at">data =</span> housing)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+polr(formula = Sat ~ Infl + Type + Cont, data = housing, weights = Freq)
+
+Coefficients:
+                Value Std. Error t value
+InflMedium     0.5664    0.10465   5.412
+InflHigh       1.2888    0.12716  10.136
+TypeApartment -0.5724    0.11924  -4.800
+TypeAtrium    -0.3662    0.15517  -2.360
+TypeTerrace   -1.0910    0.15149  -7.202
+ContHigh       0.3603    0.09554   3.771
+
+Intercepts:
+            Value   Std. Error t value
+Low|Medium  -0.4961  0.1248    -3.9739
+Medium|High  0.6907  0.1255     5.5049
+
+Residual Deviance: 3479.149 
+AIC: 3495.149 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Convert response to integer for use with gamlss2.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>housing<span class="sc">$</span>Satint <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(housing<span class="sc">$</span>Sat)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Fit equivalent model using gamlss2.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(Satint <span class="sc">~</span> Infl <span class="sc">+</span> Type <span class="sc">+</span> Cont,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> housing, <span class="at">weights =</span> Freq,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">OL</span>(<span class="at">k =</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 3479.1765 eps = 0.323474     
+GAMLSS-RS iteration  2: Global Deviance = 3479.1493 eps = 0.000007     </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+gamlss2(formula = Satint ~ Infl + Type + Cont, data = housing, 
+    family = OL(k = 3), weights = Freq)
+---
+Family: Ordered Logit (3 categories) 
+Link functions: location = identity, theta1 = identity, delta2 = identity
+*--------
+Coefficients:
+                        Estimate Std. Error t value Pr(&gt;|t|)  
+location.(Intercept)     -0.1968  4923.5470   0.000   1.0000  
+location.InflMedium       0.5665     0.5366   1.056   0.2952  
+location.InflHigh         1.2889     0.5570   2.314   0.0239 *
+location.TypeApartment   -0.5724     0.6343  -0.902   0.3703  
+location.TypeAtrium      -0.3662     0.6362  -0.576   0.5669  
+location.TypeTerrace     -1.0911     0.6400  -1.705   0.0931 .
+location.ContHigh         0.3603     0.4461   0.808   0.4223  
+theta1.(Intercept)       -0.6932  4923.5470   0.000   0.9999  
+delta2.(Intercept)        0.1714     0.2191   0.782   0.4371  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+*--------
+n = 72 df =  9 res.df =  63
+Deviance = 3479.1493 Null Dev. Red. = -2099.21%
+AIC = 3497.1493 elapsed =  0.04sec</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Compare coefficients.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   InflMedium      InflHigh TypeApartment    TypeAtrium   TypeTerrace 
+    0.5663937     1.2888191    -0.5723501    -0.3661866    -1.0910149 
+     ContHigh 
+    0.3602841 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  location.p.(Intercept)    location.p.InflMedium      location.p.InflHigh 
+              -0.1968484                0.5664539                1.2889495 
+location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace 
+              -0.5724084               -0.3662225               -1.0911265 
+     location.p.ContHigh     theta1.p.(Intercept)     delta2.p.(Intercept) 
+               0.3603203               -0.6931505                0.1713817 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Predict class probabilities.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">type =</span> <span class="st">"p"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">predict</span>(b)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">family</span>(b)<span class="sc">$</span><span class="fu">probabilities</span>(pb)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        Low    Medium      High
+1 0.3784493 0.2876752 0.3338755
+2 0.3784493 0.2876752 0.3338755
+3 0.3784493 0.2876752 0.3338755
+4 0.2568264 0.2742122 0.4689613
+5 0.2568264 0.2742122 0.4689613
+6 0.2568264 0.2742122 0.4689613</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Pr(Y=1)   Pr(Y=2)   Pr(Y=3)
+[1,] 0.3784101 0.2876996 0.3338904
+[2,] 0.3784101 0.2876996 0.3338904
+[3,] 0.3784101 0.2876996 0.3338904
+[4,] 0.2567831 0.2742240 0.4689929
+[5,] 0.2567831 0.2742240 0.4689929
+[6,] 0.2567831 0.2742240 0.4689929</code></pre>
+</div>
 </div>
 
 

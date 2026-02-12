@@ -256,9 +256,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eta_old <- eta
   if(length(maxit) < 3L) {
     if(is.finite(CGk))
-      maxit <- c(maxit, 100)
+      maxit <- c(maxit, 30)
     else
-      maxit <- c(maxit, 1)
+      maxit <- c(maxit, 3)
   }
 
   ## Track iterations

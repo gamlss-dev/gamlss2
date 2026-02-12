@@ -1625,3 +1625,114 @@ discretize <- function(family = NO) {
   return(fam)
 }
 
+## Multinomial logit.
+MN <- function(k)
+{
+  stopifnot(k >= 2)
+
+  pn <- paste0("pi", 2:k)
+  links <- rep("log", k - 1)
+  names(links) <- pn
+
+  rval <- list(
+    family = "Multinomial Logit",
+    names  = pn,
+    links  = links,
+
+    valid.response = function(x) {
+      if(!is.factor(x))
+        stop("the response must be a factor!")
+      if(nlevels(x) != k)
+        stop("the response must have exactly ", k, " levels!")
+      TRUE
+    },
+
+    pdf = function(y, par, log = FALSE) {
+      y_int <- as.integer(y)
+      w <- do.call("cbind", par)
+      denom <- 1 + rowSums(w)
+
+      logp <- numeric(length(y_int))
+      is_ref <- (y_int == 1L)
+      logp[is_ref] <- -log(denom[is_ref])
+
+      if(any(!is_ref)) {
+        jj <- y_int[!is_ref] - 1L
+        wsub <- w[!is_ref, , drop = FALSE]
+        logp[!is_ref] <- log(wsub[cbind(seq_len(nrow(wsub)), jj)]) - log(denom[!is_ref])
+      }
+
+      if(!log) exp(logp) else logp
+    },
+
+    logLik = function(y, par, ...) sum(rval$pdf(y, par, log = TRUE), na.rm = TRUE),
+
+    type = "discrete"
+  )
+
+  ## predictor-scale scores
+  rval$score <- setNames(vector("list", k - 1), pn)
+  for(j in seq_len(k - 1)) {
+    id <- pn[j]
+    rval$score[[id]] <- local({
+      jj <- j
+      idd <- id
+      function(y, par, ...) {
+        y_int <- as.integer(y)
+        w <- do.call("cbind", par)
+        denom <- 1 + rowSums(w)
+        p_j <- par[[idd]] / denom
+        as.numeric(y_int == (jj + 1L)) - p_j
+      }
+    })
+  }
+
+  ## predictor-scale (negative) Hessian
+  ## diagonal + cross
+  rval$hess <- list()
+  for(j in seq_len(k - 1)) {
+    idj <- pn[j]
+
+    ## diagonal
+    rval$hess[[idj]] <- local({
+      jj <- j
+      idd <- idj
+      function(y, par, ...) {
+        w <- do.call("cbind", par)
+        denom <- 1 + rowSums(w)
+        p_j <- par[[idd]] / denom
+        p_j * (1 - p_j)
+      }
+    })
+
+    ## cross terms
+    for(m in seq_len(k - 1)) if(m != j) {
+      idm <- pn[m]
+      nm  <- paste0(idj, ".", idm)
+
+      rval$hess[[nm]] <- local({
+        idd_j <- idj
+        idd_m <- idm
+        function(y, par, ...) {
+          w <- do.call("cbind", par)
+          denom <- 1 + rowSums(w)
+          p_j <- par[[idd_j]] / denom
+          p_m <- par[[idd_m]] / denom
+          -1 * p_j * p_m
+        }
+      })
+    }
+  }
+
+  rval$probabilities <- function(par, numeric = TRUE, ...) {
+    w <- do.call("cbind", par)
+    denom <- 1 + rowSums(w)
+    p <- cbind(reference = 1/denom, w/denom)
+    colnames(p) <- c("pi1", names(par))
+    as.data.frame(p)
+  }
+
+  class(rval) <- "gamlss2.family"
+  rval
+}
+

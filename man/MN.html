@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>modelstats – gamlss2</title>
+<title>mn – gamlss2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -211,7 +211,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/modelstats.html">Predictions and model statistics</a></li><li class="breadcrumb-item"><a href="../man/modelstats.html">modelstats</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/MN.html">MN</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -348,16 +348,16 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
  <span class="menu-text">Predictions and model statistics</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">modelstats</span></a>
   </div>
 </li>
@@ -395,13 +395,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
  <span class="menu-text">Families and links</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/discretize.html" class="sidebar-item-text sidebar-link">
@@ -446,7 +446,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/MN.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/MN.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">MN</span></a>
   </div>
 </li>
@@ -526,14 +526,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#gaic-and-generalised-pseudo-r-squared-for-gamlss-models" id="toc-gaic-and-generalised-pseudo-r-squared-for-gamlss-models" class="nav-link active" data-scroll-target="#gaic-and-generalised-pseudo-r-squared-for-gamlss-models">GAIC and Generalised (Pseudo) R-squared for GAMLSS Models</a>
+  <li><a href="#multinomial-logit-family" id="toc-multinomial-logit-family" class="nav-link active" data-scroll-target="#multinomial-logit-family">Multinomial Logit Family</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -541,27 +540,20 @@ window.Quarto = {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/modelstats.html">Predictions and model statistics</a></li><li class="breadcrumb-item"><a href="../man/modelstats.html">modelstats</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/MN.html">MN</a></li></ol></nav></header>
 
 
 
 
-<section id="gaic-and-generalised-pseudo-r-squared-for-gamlss-models" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="gaic-and-generalised-pseudo-r-squared-for-gamlss-models">GAIC and Generalised (Pseudo) R-squared for GAMLSS Models</h2>
+<section id="multinomial-logit-family" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="multinomial-logit-family">Multinomial Logit Family</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.</p>
+<p>The <code>MN()</code> family implements a multinomial logit model for categorical responses with <span class="math inline">\(k \ge 2\)</span> unordered categories. It can be used within <code>gamlss2</code> to model category probabilities via separate additive predictors for each non-reference category (first level per default).</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## Information criteria.
-GAIC(object, ...,
-  k = 2, corrected = FALSE)
-
-## R-squared.
-Rsq(object, ...,
-  type = c("Cox Snell", "Cragg Uhler", "both", "simple"),
-  newdata = NULL)
+<pre><code class="language-R">MN(k)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -569,76 +561,45 @@ Rsq(object, ...,
 <table role="presentation">
 <tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="object">object</code>
-</td>
-<td>
-A fitted model object
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="...">…</code>
-</td>
-<td>
-Optionally more fitted model objects.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="k">k</code>
 </td>
 <td>
-Numeric, the <em>penalty</em> to be used. The default <code>k = 2</code> corresponds to the classical AIC.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="corrected">corrected</code>
-</td>
-<td>
-Logical, whether the corrected AIC should be used? Note that it applies only when <code>k = 2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="type">type</code>
-</td>
-<td>
-Which definition of R squared. Can be the <code>“Cox Snell”</code> or the Nagelkerke, <code>“Cragg Uhler”</code> or <code>“both”</code>, or <code>“simple”</code>, which computes the R-squared based on the median. In this case also <code>newdata</code> may be supplied.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="newdata">newdata</code>
-</td>
-<td>
-Only for <code>type = “simple”</code>, the R-squared can be evaluated using <code>newdata</code>.
+An integer specifying the number of response categories.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Note that if <span class="pkg">gamlss</span> is loaded before <span class="pkg">gamlss2</span>, the function <code>Rsq()</code> from <span class="pkg">gamlss2</span> is masked. However, the new <code>Rsq()</code> method supports fitted objects from both <span class="pkg">gamlss</span> and <span class="pkg">gamlss2</span>.</p>
-<p>The <code>Rsq()</code> function uses the definition for R-squared:</p>
+<p>The response must be a factor with exactly <code>k</code> levels. The first level is treated as the reference category.</p>
+<p>Let <span class="math inline">\(Y \in \{1, \ldots, k\}\)</span> denote the response and let <span class="math inline">\(\eta_j\)</span> be the additive predictor for category <span class="math inline">\(j\)</span> (<span class="math inline">\(j = 2, \ldots, k\)</span>). The model is defined as</p>
 <p style="text-align: center;">
-</p><p><span class="math inline">\(R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}\)</span></p>
-<p>where <span class="math inline">\(L(0)\)</span> is the null model (only a constant is fitted to all parameters) and <span class="math inline">\(L(\hat{\theta})\)</span> is the current fitted model. This definition sometimes is referred to as the Cox &amp; Snell R-squared. The Nagelkerke /Cragg &amp; Uhler’s definition divides the above by</p>
+</p><p><code class="reqn"> (Y = 1) = , </code></p>
 <p style="text-align: center;">
-</p><p><span class="math inline">\(1 - L(0)^{2/n}\)</span></p>
-<p>Note that <code>GAIC()</code> function is fully represented by the <code>AIC</code> and <code>BIC</code> functions. We only included <code>GAIC()</code> because of the previous package so users who relied on this function would still have the option.</p>
+</p><p><code class="reqn"> (Y = j) = , j = 2, , k. </code></p>
+<p>Thus, each predictor models the log-odds relative to the reference category:</p>
+<p style="text-align: center;">
+</p><p><code class="reqn"> = _j. </code></p>
+<p>The link function for all non-reference categories is the log link, i.e., the internal parameterization uses positive weights <span class="math inline">\(\exp(\eta_j)\)</span>.</p>
+<p>The family provides analytical first and second derivatives of the log-likelihood with respect to the predictors. The Hessian entries correspond to the negative second derivatives, which are required by the Rigby-Stasinopoulos (<code>RS</code>) backfitting algorithm. In particular,</p>
+<ul>
+<li>
+<p>Diagonal elements: <span class="math inline">\(-\partial^2 \ell / \partial \eta_j^2 = p_j (1 - p_j)\)</span></p>
+</li>
+<li>
+<p>Off-diagonal elements: <span class="math inline">\(-\partial^2 \ell / \partial \eta_j \partial \eta_m = - p_j p_m\)</span></p>
+</li>
+</ul>
+<p>where <span class="math inline">\(p_j = \Pr(Y = j)\)</span>.</p>
+<p>The family object provides a <code>probabilities()</code> method returning the estimated category probabilities for all observations, see the example below.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Numeric vector or data frame, depending on the number of fitted model objects.</p>
-</section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Nagelkerke NJD (1991). “A Note on a General Definition of the Coefficient of Determination.” <em>Biometrika</em>, <b>78</b>(3), 691–692. <a href="https://doi.org/10.1093/biomet/78.3.691">doi:10.1093/biomet/78.3.691</a></p>
+<p>A <code>“gamlss2.family”</code> object to be used with <code>gamlss2</code>.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code></p>
+<p><code>gamlss2</code>, <code>gamlss2.family</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
@@ -646,56 +607,26 @@ Only for <code>type = “simple”</code>, the R-squared can be evaluated using 
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## load the aids data set</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"aids"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate negative binomial count models</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> x <span class="sc">+</span> qrt, <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 492.6373 eps = 0.148669     
-GAMLSS-RS iteration  2: Global Deviance = 492.6373 eps = 0.000000     </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">+</span> <span class="fu">s</span>(qrt, <span class="at">bs =</span> <span class="st">"re"</span>), <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 364.5253 eps = 0.370061     
-GAMLSS-RS iteration  2: Global Deviance = 364.5253 eps = 0.000000     </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare models</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8095853</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, <span class="at">type =</span> <span class="st">"both"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$CoxSnell
-[1] 0.8095853
-
-$CraggUhler
-[1] 0.809588</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       b1        b2 
-0.8095853 0.9889518 </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        AIC      df
-b2 390.1455 12.8101
-b1 504.6373  6.0000</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        AIC      df
-b2 390.1455 12.8101
-b1 504.6373  6.0000</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        BIC      df
-b2 413.2890 12.8101
-b1 515.4773  6.0000</code></pre>
-</div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model, same predictor</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## for each category using | .</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(mstatus <span class="sc">~</span> <span class="fu">s</span>(age) <span class="sc">|</span> . <span class="sc">|</span> ., <span class="at">data =</span> marital.nz, <span class="at">family =</span> <span class="fu">MN</span>(<span class="dv">4</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## predict probabilities</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(m)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">family</span>(m)<span class="sc">$</span><span class="fu">probabilities</span>(par)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(probs) <span class="ot">&lt;-</span> <span class="fu">levels</span>(marital.nz<span class="sc">$</span>mstatus)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## plot fitted probabilities</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="fu">order</span>(marital.nz<span class="sc">$</span>age)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(marital.nz<span class="sc">$</span>age[i], probs[i, ], <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Age"</span>, <span class="at">ylab =</span> <span class="st">"Probabilities"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"center"</span>, <span class="fu">names</span>(probs), <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantile residuals</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="fu">c</span>(<span class="st">"hist-resid"</span>, <span class="st">"qq-resid"</span>, <span class="st">"wp-resid"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

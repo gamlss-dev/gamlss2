@@ -27,20 +27,14 @@ MN(k)
   \eqn{\eta_j} be the additive predictor for category \eqn{j}
   (\eqn{j = 2, \ldots, k}). The model is defined as
 
-  \deqn{
-  \Pr(Y = 1) = \frac{1}{1 + \sum_{j=2}^k \exp(\eta_j)},
-  }
-  \deqn{
-  \Pr(Y = j) = \frac{\exp(\eta_j)}{1 + \sum_{m=2}^k \exp(\eta_m)},
-  \qquad j = 2, \ldots, k.
-  }
+  \eqn{\Pr(Y = 1) = \frac{1}{1 + \sum_{j=2}^k \exp(\eta_j)}},
+
+  \eqn{\Pr(Y = j) = \frac{\exp(\eta_j)}{1 + \sum_{m=2}^k \exp(\eta_m)}, \qquad j = 2, \ldots, k}.
 
   Thus, each predictor models the log-odds relative to the
   reference category:
 
-  \deqn{
-  \log \frac{\Pr(Y = j)}{\Pr(Y = 1)} = \eta_j.
-  }
+  \eqn{\log \frac{\Pr(Y = j)}{\Pr(Y = 1)} = \eta_j}.
 
   The link function for all non-reference categories is the log link,
   i.e., the internal parameterization uses positive weights

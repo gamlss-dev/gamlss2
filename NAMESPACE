@@ -40,6 +40,7 @@ export(
   "calibration",
   "discretize",
   "OL",
+  "MN",
   "special_fit",
   "special_predict",
   "specials",

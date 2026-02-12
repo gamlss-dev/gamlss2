@@ -1643,7 +1643,7 @@ MN <- function(k)
       if(!is.factor(x))
         stop("the response must be a factor!")
       if(nlevels(x) != k)
-        stop("the response must have exactly ", k, " levels!")
+        stop("number of levels of the response and argument k differ in MN()!")
       TRUE
     },
 
@@ -1727,12 +1727,131 @@ MN <- function(k)
   rval$probabilities <- function(par, numeric = TRUE, ...) {
     w <- do.call("cbind", par)
     denom <- 1 + rowSums(w)
-    p <- cbind(reference = 1/denom, w/denom)
+    p <- cbind(1/denom, w/denom)
     colnames(p) <- c("pi1", names(par))
     as.data.frame(p)
   }
 
+  rval$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
+    probs <- rval$probabilities(par)
+    P <- as.matrix(probs)
+    n <- nrow(P)
+    K <- ncol(P)
+
+    ## recycle y if scalar
+    if(length(y) == 1L) y <- rep.int(y, n)
+
+    ## accept factor (same levels) or numeric/integer
+    y_int <- if(is.factor(y)) as.integer(y) else as.integer(y)
+
+    if(anyNA(y_int))
+      stop("missing values in y are not allowed in cdf().", call. = FALSE)
+    if(any(y_int < 1L | y_int > K)) {
+      bad <- sort(unique(y_int[y_int < 1L | y_int > K]))
+      stop("y has values outside 1..", K, ". Offending values: ",
+           paste(bad, collapse = ", "), call. = FALSE)
+    }
+
+    cP <- P
+    cP[] <- t(apply(P, 1L, cumsum))
+
+    ans <- cP[cbind(seq_len(n), y_int)]
+    if(!lower.tail) ans <- 1 - ans
+    if(log.p) ans <- log(ans)
+    ans
+  }
+
+  rval$quantile <- function(p, par, ...) {
+    probs <- rval$probabilities(par)
+    P <- as.matrix(probs)
+    n <- nrow(P)
+    K <- ncol(P)
+
+    ## recycle p if scalar
+    if(length(p) == 1L) p <- rep.int(p, n)
+    if(length(p) != n)
+      stop("length(p) must be 1 or equal to the number of observations.", call. = FALSE)
+
+    if(anyNA(p)) stop("p must not contain NA.", call. = FALSE)
+    if(any(p < 0 | p > 1)) stop("p must be in [0, 1].", call. = FALSE)
+
+    cP <- P
+    cP[] <- t(apply(P, 1L, cumsum))
+
+    q <- integer(n)
+    for(i in seq_len(n)) {
+      q[i] <- which(cP[i, ] >= p[i])[1L]
+      if(is.na(q[i])) q[i] <- K
+    }
+    q
+  }
+
+  rval$residuals <- function(object, ...) {
+    rqres_mn(object, ...)
+  }
+
   class(rval) <- "gamlss2.family"
   rval
+}
+
+rqres_mn <- function(object, ...) {
+  fam <- family(object)
+  if(!identical(fam$family, "Multinomial Logit"))
+    stop("MN() family required.", call. = FALSE)
+
+  mf <- model.frame(object)
+  y  <- stats::model.response(mf)
+
+  if(!is.factor(y))
+    stop("response must be a factor for MN().", call. = FALSE)
+
+  y_int <- as.integer(y)
+
+  par   <- predict(object)
+  probs <- fam$probabilities(par)
+  P     <- as.matrix(probs)
+
+  n <- length(y_int)
+  K <- ncol(P)
+
+  if(nrow(P) != n)
+    stop("probabilities() returned a wrong number of rows.", call. = FALSE)
+
+  ## check support
+  if(anyNA(y_int) || any(y_int < 1L | y_int > K)) {
+    bad <- sort(unique(y_int[is.na(y_int) | y_int < 1L | y_int > K]))
+    stop("response has values outside 1..", K, ": ",
+         paste(bad, collapse = ", "), call. = FALSE)
+  }
+
+  ## cumulative along factor level order
+  cP <- P
+  cP[] <- t(apply(P, 1L, cumsum))
+
+  ## F_upper = P(Y <= y)
+  F_upper <- cP[cbind(seq_len(n), y_int)]
+
+  ## F_lower = P(Y <= y-1)
+  F_lower <- numeric(n)
+  idx1 <- (y_int == 1L)
+  F_lower[idx1] <- 0
+  if(any(!idx1)) {
+    ii <- which(!idx1)
+    F_lower[ii] <- cP[cbind(ii, y_int[ii] - 1L)]
+  }
+
+  ## numeric safety
+  F_lower <- pmin(pmax(F_lower, 0), 1)
+  F_upper <- pmin(pmax(F_upper, 0), 1)
+
+  bad_bounds <- (F_lower > F_upper) & is.finite(F_lower) & is.finite(F_upper)
+  if(any(bad_bounds)) {
+    tmp <- F_lower[bad_bounds]
+    F_lower[bad_bounds] <- F_upper[bad_bounds]
+    F_upper[bad_bounds] <- tmp
+  }
+
+  u <- stats::runif(n, F_lower, F_upper)
+  stats::qnorm(u)
 }
 

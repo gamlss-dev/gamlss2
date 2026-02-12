@@ -66,7 +66,8 @@ MN(k)
   \code{\link{gamlss2}}, \code{\link{gamlss2.family}}
 }
 
-\examples{\dontrun{data("marital.nz", package = "VGAM")
+\examples{\dontrun{## marital status data
+data("marital.nz", package = "VGAM")
 
 ## estimate model, same predictor
 ## for each category using | .

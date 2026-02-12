@@ -322,17 +322,20 @@ GAMLSS-RS iteration 20: Global Deviance = 64845.48 </code></pre>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>))</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 65324.7384 eps = 0.572867     
-GAMLSS-RS iteration  2: Global Deviance = 65123.5052 eps = 0.003080     
-GAMLSS-RS iteration  3: Global Deviance = 64958.3935 eps = 0.002535     
-GAMLSS-RS iteration  4: Global Deviance = 64895.5652 eps = 0.000967     
-GAMLSS-RS iteration  5: Global Deviance = 64870.451 eps = 0.000386     
-GAMLSS-RS iteration  6: Global Deviance = 64859.882 eps = 0.000162     
-GAMLSS-RS iteration  7: Global Deviance = 64855.119 eps = 0.000073     
-GAMLSS-RS iteration  8: Global Deviance = 64852.7612 eps = 0.000036     
-GAMLSS-RS iteration  9: Global Deviance = 64851.4502 eps = 0.000020     
-GAMLSS-RS iteration 10: Global Deviance = 64850.6059 eps = 0.000013     
-GAMLSS-RS iteration 11: Global Deviance = 64849.9925 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 65323.8658 eps = 0.572873     
+GAMLSS-RS iteration  2: Global Deviance = 64896.6891 eps = 0.006539     
+GAMLSS-RS iteration  3: Global Deviance = 64856.0798 eps = 0.000625     
+GAMLSS-RS iteration  4: Global Deviance = 64851.2769 eps = 0.000074     
+GAMLSS-RS iteration  5: Global Deviance = 64849.4903 eps = 0.000027     
+GAMLSS-RS iteration  6: Global Deviance = 64848.161 eps = 0.000020     
+GAMLSS-RS iteration  7: Global Deviance = 64847.0031 eps = 0.000017     
+GAMLSS-RS iteration  8: Global Deviance = 64845.959 eps = 0.000016     
+GAMLSS-RS iteration  9: Global Deviance = 64845.007 eps = 0.000014     
+GAMLSS-RS iteration 10: Global Deviance = 64844.1336 eps = 0.000013     
+GAMLSS-RS iteration 11: Global Deviance = 64843.3305 eps = 0.000012     
+GAMLSS-RS iteration 12: Global Deviance = 64842.5898 eps = 0.000011     
+GAMLSS-RS iteration 13: Global Deviance = 64841.9063 eps = 0.000010     
+GAMLSS-RS iteration 14: Global Deviance = 64841.2775 eps = 0.000009     </code></pre>
 </div>
 </div>
 <p>This model converges in 11 iterations and requires only about 2 seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
@@ -341,22 +344,18 @@ GAMLSS-RS iteration 11: Global Deviance = 64849.9925 eps = 0.000009     </code><
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">te</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>)) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 64910.0053 eps = 0.575579     
-GAMLSS-RS iteration  2: Global Deviance = 64713.9993 eps = 0.003019     
-GAMLSS-RS iteration  3: Global Deviance = 64643.0265 eps = 0.001096     
-GAMLSS-RS iteration  4: Global Deviance = 64612.3237 eps = 0.000474     
-GAMLSS-RS iteration  5: Global Deviance = 64598.0758 eps = 0.000220     
-GAMLSS-RS iteration  6: Global Deviance = 64591.2022 eps = 0.000106     
-GAMLSS-RS iteration  7: Global Deviance = 64587.545 eps = 0.000056     
-GAMLSS-RS iteration  8: Global Deviance = 64585.2307 eps = 0.000035     
-GAMLSS-RS iteration  9: Global Deviance = 64583.7455 eps = 0.000023     
-GAMLSS-RS iteration 10: Global Deviance = 64582.5489 eps = 0.000018     
-GAMLSS-RS iteration 11: Global Deviance = 64581.6112 eps = 0.000014     
-GAMLSS-RS iteration 12: Global Deviance = 64580.7955 eps = 0.000012     
-GAMLSS-RS iteration 13: Global Deviance = 64580.0544 eps = 0.000011     
-GAMLSS-RS iteration 14: Global Deviance = 64579.3601 eps = 0.000010     
-GAMLSS-RS iteration 15: Global Deviance = 64578.7003 eps = 0.000010     
-GAMLSS-RS iteration 16: Global Deviance = 64578.0686 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 64636.58 eps = 0.577367     
+GAMLSS-RS iteration  2: Global Deviance = 64581.1812 eps = 0.000857     
+GAMLSS-RS iteration  3: Global Deviance = 64574.7991 eps = 0.000098     
+GAMLSS-RS iteration  4: Global Deviance = 64572.5201 eps = 0.000035     
+GAMLSS-RS iteration  5: Global Deviance = 64570.8909 eps = 0.000025     
+GAMLSS-RS iteration  6: Global Deviance = 64569.5034 eps = 0.000021     
+GAMLSS-RS iteration  7: Global Deviance = 64568.3024 eps = 0.000018     
+GAMLSS-RS iteration  8: Global Deviance = 64567.2616 eps = 0.000016     
+GAMLSS-RS iteration  9: Global Deviance = 64566.3589 eps = 0.000013     
+GAMLSS-RS iteration 10: Global Deviance = 64565.577 eps = 0.000012     
+GAMLSS-RS iteration 11: Global Deviance = 64564.9022 eps = 0.000010     
+GAMLSS-RS iteration 12: Global Deviance = 64564.3241 eps = 0.000008     </code></pre>
 </div>
 </div>
 <p>This model converges in 20 iterations in about 30 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>

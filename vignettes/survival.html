@@ -324,9 +324,8 @@ The type of censoring is right  </code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## using gamlss2</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(<span class="fu">Surv</span>(time, cens) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">family =</span> fam, <span class="at">data =</span> LeukSurv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 12285.6083 eps = 0.008487     
-GAMLSS-RS iteration  2: Global Deviance = 12267.7238 eps = 0.001455     
-GAMLSS-RS iteration  3: Global Deviance = 12267.692 eps = 0.000002     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 12267.692 eps = 0.009933     
+GAMLSS-RS iteration  2: Global Deviance = 12267.6898 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## and now with survfit</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time, cens) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> LeukSurv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -381,9 +380,8 @@ GAMLSS-RS iteration  3: Global Deviance = 12267.692 eps = 0.000002     </code></
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate the spatial survival model</span></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">family =</span> fam, <span class="at">data =</span> LeukSurv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11872.4572 eps = 0.041830     
-GAMLSS-RS iteration  2: Global Deviance = 11868.3377 eps = 0.000346     
-GAMLSS-RS iteration  3: Global Deviance = 11868.2288 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 11868.0552 eps = 0.042186     
+GAMLSS-RS iteration  2: Global Deviance = 11868.0182 eps = 0.000003     </code></pre>
 </div>
 </div>
 </section>

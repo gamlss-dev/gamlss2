@@ -109,6 +109,8 @@ website:
               file: man/make.link2.qmd
             - text: OL
               file: man/OL.qmd
+            - text: MN
+              file: man/MN.qmd
             - text: softplus
               file: man/softplus.qmd
         - section: Data

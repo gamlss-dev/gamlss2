@@ -419,6 +419,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/MN.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MN</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/softplus.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">softplus</span></a>
   </div>
@@ -670,10 +676,8 @@ Arguments passed to <code>gamlss2_control</code>.
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4771.2731 eps = 0.534657     
-GAMLSS-RS iteration  2: Global Deviance = 4769.4582 eps = 0.000380     
-GAMLSS-RS iteration  3: Global Deviance = 4769.3173 eps = 0.000029     
-GAMLSS-RS iteration  4: Global Deviance = 4769.2914 eps = 0.000005     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4769.3128 eps = 0.534848     
+GAMLSS-RS iteration  2: Global Deviance = 4769.2773 eps = 0.000007     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model summary</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -685,21 +689,21 @@ Family: BCT
 Link functions: mu = identity, sigma = log, nu = identity, tau = log
 *--------
 Coefficients:
-                   Estimate Std. Error  t value Pr(&gt;|t|)    
-mu.(Intercept)    226.32468    1.27366  177.697  &lt; 2e-16 ***
-sigma.(Intercept)  -2.92576    0.01132 -258.523  &lt; 2e-16 ***
-nu.(Intercept)     -0.16480    0.04698   -3.508 0.000486 ***
-tau.(Intercept)     2.61745    0.01441  181.609  &lt; 2e-16 ***
+                   Estimate Std. Error t value Pr(&gt;|t|)    
+mu.(Intercept)    226.32545    1.25207  180.76  &lt; 2e-16 ***
+sigma.(Intercept)  -2.92172    0.01093 -267.35  &lt; 2e-16 ***
+nu.(Intercept)     -0.17565    0.04574   -3.84 0.000136 ***
+tau.(Intercept)     2.66701    0.01440  185.24  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
     mu.s(x) sigma.s(x) nu.s(x) tau.s(x)
-edf  4.7408     2.8719  1.0000        1
+edf  4.7408     2.8698  1.0000        1
 *--------
 n = 610 df =  13.61 res.df =  596.39
-Deviance = 4769.2914 Null Dev. Red. = 33.41%
-AIC = 4796.5167 elapsed =  0.79sec</code></pre>
+Deviance = 4769.2773 Null Dev. Red. = 33.41%
+AIC = 4796.4984 elapsed =  0.89sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -741,35 +745,30 @@ AIC = 4796.5167 elapsed =  0.79sec</code></pre>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">c</span>(<span class="at">mu =</span> <span class="dv">200</span>, <span class="at">sigma =</span> <span class="fl">0.1</span>, <span class="at">nu =</span> <span class="dv">0</span>, <span class="at">tau =</span> <span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5036.9972 eps = 0.533096     
-GAMLSS-RS iteration  2: Global Deviance = 4776.0041 eps = 0.051815     
-GAMLSS-RS iteration  3: Global Deviance = 4775.6316 eps = 0.000078     
-GAMLSS-RS iteration  4: Global Deviance = 4775.5921 eps = 0.000008     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4775.3759 eps = 0.557347     
+GAMLSS-RS iteration  2: Global Deviance = 4775.3668 eps = 0.000001     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fix some parameters</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">c</span>(<span class="at">mu =</span> <span class="dv">200</span>, <span class="at">sigma =</span> <span class="fl">0.1</span>, <span class="at">nu =</span> <span class="dv">0</span>, <span class="at">tau =</span> <span class="dv">10</span>),</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed =</span> <span class="fu">c</span>(<span class="at">nu =</span> <span class="cn">TRUE</span>, <span class="at">tau =</span> <span class="cn">TRUE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5075.0521 eps = 0.529569     
-GAMLSS-RS iteration  2: Global Deviance = 5075.0492 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5075.0488 eps = 0.529569     
+GAMLSS-RS iteration  2: Global Deviance = 5075.0486 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## estimated coefficients (intercepts)</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   mu.p.(Intercept) sigma.p.(Intercept)    nu.p.(Intercept)   tau.p.(Intercept) 
-         226.335857           -2.302585            0.000000            2.302585 </code></pre>
+         226.354132           -2.302585            0.000000            2.302585 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## starting values using full predictors</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">fitted</span>(m))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4816.1239 eps = 0.540559     
-GAMLSS-RS iteration  2: Global Deviance = -7383.8761 eps = 2.533157     
-GAMLSS-RS iteration  3: Global Deviance = -19583.8761 eps = 1.652248     
-GAMLSS-RS iteration  4: Global Deviance = -31783.8761 eps = 0.622961     
-GAMLSS-RS iteration  5: Global Deviance = -36347.9794 eps = 0.143598     
-GAMLSS-RS iteration  6: Global Deviance = -36347.9794 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = -19583.8762 eps = 2.868245     
+GAMLSS-RS iteration  2: Global Deviance = -36347.9794 eps = 0.856015     
+GAMLSS-RS iteration  3: Global Deviance = -36347.9794 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## same with</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT,</span>

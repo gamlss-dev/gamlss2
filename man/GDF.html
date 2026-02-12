@@ -417,6 +417,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/MN.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MN</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/softplus.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">softplus</span></a>
   </div>
@@ -596,7 +602,7 @@ numeric, matrix, list or data frame, see the examples.
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> ., <span class="at">data =</span> abdom, <span class="at">family =</span> GA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4780.365 eps = 0.390036     
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4780.3649 eps = 0.390037     
 GAMLSS-RS iteration  2: Global Deviance = 4780.3649 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract, also works with newdata</span></span>

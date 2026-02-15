@@ -111,7 +111,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta property="og:site_name" content="gamlss2">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar floating nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -130,7 +130,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../man/gamlss2-package.html"> 
+    <a class="nav-link active" href="../man/gamlss2-package.html" aria-current="page"> 
 <span class="menu-text">Documentation</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -149,10 +149,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="../vignettes/topmodels.html">
  <span class="dropdown-text">Evaluation</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/survival.html">
- <span class="dropdown-text">Survival models</span></a>
   </li>  
     </ul>
   </li>
@@ -177,10 +173,284 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/ologit.html">ologit</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Package overview</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/gamlss2-package.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">gamlss2-package</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Regression models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/gamlss2_control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">gamlss2_control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/select_gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">select_gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/stepwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">stepwise</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/cv_gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">cv_gamlss2</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Model terms</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">lasso</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/pb.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">pb</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/random.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">random</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/special_terms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">special_terms</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Predictions and model statistics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">modelstats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/plots.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">plots</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/predict.gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">predict.gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/prodist.gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">prodist.gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/quantiles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">quantiles</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Families and links</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/discretize.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">discretize</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/find_family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">find_family</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/gamlss2.family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">gamlss2.family</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/GDF.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GDF</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/Kumaraswamy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kumaraswamy</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/make.link2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">make.link2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/ologit.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">ologit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/softplus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">softplus</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">HarzTraffic</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/SpirometryUS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SpirometryUS</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Misc functionality</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/fake_formula.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">fake_formula</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/misc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">misc</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/new_formula.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">new_formula</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RS_CG</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -201,7 +471,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/discretize.html">Families and links</a></li><li class="breadcrumb-item"><a href="../man/ologit.html">ologit</a></li></ol></nav></header>
 
 
 
@@ -214,7 +484,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">OL(k)
+<pre><code class="language-R">ologit(k)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -241,7 +511,7 @@ An integer specifying the number of response categories. Must be <code>k &gt;= 2
 <p>The remaining cutpoints are expressed as <code>theta1 + exp(delta_j)</code> for <code>j = 2, …, k - 1</code>, ensuring that the thresholds remain ordered.</p>
 </li>
 </ul>
-<p>The <code>OL()</code> family supports modeling the location and threshold differences (<code>delta_j</code>) as functions of covariates using additive predictors in <code>gamlss2</code> via the <code>“|”</code> formula interface.</p>
+<p>The <code>ologit()</code> family supports modeling the location and threshold differences (<code>delta_j</code>) as functions of covariates using additive predictors in <code>gamlss2</code> via the <code>“|”</code> formula interface.</p>
 <p>The family returns an object of class <code>“gamlss2.family”</code>, which includes methods for evaluating the log-likelihood, simulating from the model, and computing predicted probabilities.</p>
 </section>
 <section id="value" class="level3">
@@ -290,37 +560,39 @@ AIC: 3495.149 </code></pre>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Fit equivalent model using gamlss2.</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(Satint <span class="sc">~</span> Infl <span class="sc">+</span> Type <span class="sc">+</span> Cont,</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> housing, <span class="at">weights =</span> Freq,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">OL</span>(<span class="at">k =</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">ologit</span>(<span class="at">k =</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 3479.1765 eps = 0.323474     
-GAMLSS-RS iteration  2: Global Deviance = 3479.1493 eps = 0.000007     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 3483.3719 eps = 0.322658     
+GAMLSS-RS iteration  2: Global Deviance = 3479.4958 eps = 0.001112     
+GAMLSS-RS iteration  3: Global Deviance = 3479.1765 eps = 0.000091     
+GAMLSS-RS iteration  4: Global Deviance = 3479.1514 eps = 0.000007     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = Satint ~ Infl + Type + Cont, data = housing, 
-    family = OL(k = 3), weights = Freq)
+    family = ologit(k = 3), weights = Freq)
 ---
 Family: Ordered Logit (3 categories) 
 Link functions: location = identity, theta1 = identity, delta2 = identity
 *--------
 Coefficients:
                         Estimate Std. Error t value Pr(&gt;|t|)  
-location.(Intercept)     -0.1968  4923.5470   0.000   1.0000  
-location.InflMedium       0.5665     0.5366   1.056   0.2952  
-location.InflHigh         1.2889     0.5570   2.314   0.0239 *
-location.TypeApartment   -0.5724     0.6343  -0.902   0.3703  
-location.TypeAtrium      -0.3662     0.6362  -0.576   0.5669  
-location.TypeTerrace     -1.0911     0.6400  -1.705   0.0931 .
-location.ContHigh         0.3603     0.4461   0.808   0.4223  
-theta1.(Intercept)       -0.6932  4923.5470   0.000   0.9999  
-delta2.(Intercept)        0.1714     0.2191   0.782   0.4371  
+location.(Intercept)     -0.1949  3481.4686   0.000   1.0000  
+location.InflMedium       0.5671     0.5367   1.057   0.2947  
+location.InflHigh         1.2904     0.5572   2.316   0.0238 *
+location.TypeApartment   -0.5731     0.6345  -0.903   0.3698  
+location.TypeAtrium      -0.3666     0.6364  -0.576   0.5666  
+location.TypeTerrace     -1.0924     0.6401  -1.707   0.0928 .
+location.ContHigh         0.3607     0.4462   0.808   0.4219  
+theta1.(Intercept)       -0.6932  3481.4687   0.000   0.9998  
+delta2.(Intercept)        0.1724     0.2191   0.787   0.4344  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 72 df =  9 res.df =  63
-Deviance = 3479.1493 Null Dev. Red. = -2099.21%
-AIC = 3497.1493 elapsed =  0.04sec</code></pre>
+Deviance = 3479.1514 Null Dev. Red. = 2099.21%
+AIC = 3497.1514 elapsed =  0.03sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Compare coefficients.</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -333,11 +605,11 @@ AIC = 3497.1493 elapsed =  0.04sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  location.p.(Intercept)    location.p.InflMedium      location.p.InflHigh 
-              -0.1968484                0.5664539                1.2889495 
+              -0.1949313                0.5671416                1.2904361 
 location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace 
-              -0.5724084               -0.3662225               -1.0911265 
+              -0.5730733               -0.3666344               -1.0924039 
      location.p.ContHigh     theta1.p.(Intercept)     delta2.p.(Intercept) 
-               0.3603203               -0.6931505                0.1713817 </code></pre>
+               0.3607349               -0.6931503                0.1723565 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Predict class probabilities.</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">type =</span> <span class="st">"p"</span>)</span>
@@ -357,12 +629,12 @@ location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       Pr(Y=1)   Pr(Y=2)   Pr(Y=3)
-[1,] 0.3784101 0.2876996 0.3338904
-[2,] 0.3784101 0.2876996 0.3338904
-[3,] 0.3784101 0.2876996 0.3338904
-[4,] 0.2567831 0.2742240 0.4689929
-[5,] 0.2567831 0.2742240 0.4689929
-[6,] 0.2567831 0.2742240 0.4689929</code></pre>
+[1,] 0.3779593 0.2879814 0.3340593
+[2,] 0.3779593 0.2879814 0.3340593
+[3,] 0.3779593 0.2879814 0.3340593
+[4,] 0.2562864 0.2743603 0.4693533
+[5,] 0.2562864 0.2743603 0.4693533
+[6,] 0.2562864 0.2743603 0.4693533</code></pre>
 </div>
 </div>
 

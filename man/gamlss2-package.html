@@ -41,7 +41,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -114,10 +114,6 @@ ul.task-list li input[type="checkbox"] {
         <li>
     <a class="dropdown-item" href="../vignettes/topmodels.html">
  <span class="dropdown-text">Evaluation</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/survival.html">
- <span class="dropdown-text">Survival models</span></a>
   </li>  
     </ul>
   </li>
@@ -215,24 +211,6 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">cv_gamlss2</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">mcmc</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/BS.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BS</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -246,20 +224,14 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/elm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">elm</span></a>
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/gnet.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gnet</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/la.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">la</span></a>
+  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">lasso</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -321,12 +293,6 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">quantiles</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/calibration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">calibration</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -376,14 +342,8 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/OL.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">OL</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/MN.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MN</span></a>
+  <a href="../man/ologit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ologit</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -483,16 +443,16 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="unnumbered anchored" data-anchor-id="gamlss-modeling-with-advanced-flexible-infrastructures">GAMLSS Modeling with Advanced Flexible Infrastructures</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Next generation infrastructure for generalized additive models for location, scale, and shape (GAMLSS) and general distributional regression models. The package provides a fresh reimplementaton of the classic ‘gamlss’ package while being more modular and facilitating the creation of advanced terms and models.</p>
+<p>Next generation infrastructure for generalized additive models for location, scale, and shape (GAMLSS) and distributional regression more generally. The package provides a fresh reimplementaton of the classic ‘gamlss’ package while being more modular and facilitating the creation of advanced terms and models.</p>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The primary purpose of this package is to facilitate the creation of advanced infrastructure designed to enhance the Generalized Additive Models for Location Scale and Shape (GAMLSS, Rigby and Stasinopoulos 2005) modeling framework. Notably, the <span class="pkg">gamlss2</span> package represents a significant overhaul of its predecessor, <span class="pkg">gamlss</span>, with a key emphasis on improving estimation speed and incorporating more adaptable infrastructures. These enhancements enable the seamless integration of various estimation algorithms into GAMLSS, including gradient boosting, Bayesian estimation, regression trees, and forests, fostering a more versatile and powerful modeling environment.</p>
+<p>The primary purpose of this package is to facilitate the creation of advanced infrastructures designed to enhance the Generalized Additive Models for Location Scale and Shape (GAMLSS, Rigby and Stasinopoulos 2005) modeling framework. Notably, the <span class="pkg">gamlss2</span> package represents a significant overhaul of its predecessor, <span class="pkg">gamlss</span>, with a key emphasis on improving estimation speed and incorporating more adaptable infrastructures. These enhancements enable the seamless integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation, regression trees, and forests, fostering a more versatile and powerful modeling environment.</p>
 <p>Moreover, the package expands its compatibility by supporting all model terms from the base R <span class="pkg">mgcv</span> package. Additionally, the <span class="pkg">gamlss2</span> package introduces the capability to accommodate more than four parameter families. Essentially, this means that users can now specify any type of model using these new infrastructures, making the package highly flexible and accommodating to a wide range of modeling requirements.</p>
 </section>
 <section id="authors" class="level3">
 <h3 class="anchored" data-anchor-id="authors">Author(s)</h3>
-<p>Nikolaus Umlauf [aut, cre] <a href="mailto:Nikolaus.Umlauf@uibk.ac.at">Nikolaus.Umlauf@uibk.ac.at</a> (<a href="https://orcid.org/0000-0003-2160-9803">ORCID: 0000-0003-2160-9803</a>) <br> Mikis Stasinopoulos [fnd, cph] <a href="mailto:d.stasinopoulos@gre.ac.uk">d.stasinopoulos@gre.ac.uk</a> (<a href="https://orcid.org/0000-0003-2407-5704">ORCID: 0000-0003-2407-5704</a>) <br> Robert Rigby [fnd, cph] <a href="mailto:r.rigby@gre.ac.uk">r.rigby@gre.ac.uk</a> (<a href="https://orcid.org/0000-0003-3853-1707">ORCID: 0000-0003-3853-1707</a>) <br> Achim Zeileis [ctb] <a href="mailto:Achim.Zeileis@R-project.org">Achim.Zeileis@R-project.org</a> (<a href="https://orcid.org/0000-0003-0918-3766">ORCID: 0000-0003-0918-3766</a>) <br> Reto Stauffer [ctb] <a href="mailto:Reto.Stauffer@uibk.ac.at">Reto.Stauffer@uibk.ac.at</a> (<a href="https://orcid.org/0000-0002-3798-5507">ORCID: 0000-0002-3798-5507</a>) <br> Gillian Heller [ctb] <a href="mailto:Gillian.Heller@sydney.edu.au">Gillian.Heller@sydney.edu.au</a> (<a href="https://orcid.org/0000-0003-1270-1499">ORCID: 0000-0003-1270-1499</a>) <br> Fernanda de Bastiani [ctb] <a href="mailto:fernandadebastiani@gmail.com">fernandadebastiani@gmail.com</a> (<a href="https://orcid.org/0000-0001-8532-639X">ORCID: 0000-0001-8532-639X</a>) <br> Andreas Mayr [ctb] <a href="mailto:Andreas.Mayr@uni-marburg.de">Andreas.Mayr@uni-marburg.de</a> (<a href="https://orcid.org/0000-0001-7106-9732">ORCID: 0000-0001-7106-9732</a>)</p>
+<p>Maintainer: </p>
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
@@ -503,7 +463,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code></p>
+<p><code>gamlss2</code>, <code>fake_formula</code></p>
 
 
 </section>

@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -149,10 +149,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="../vignettes/topmodels.html">
  <span class="dropdown-text">Evaluation</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/survival.html">
- <span class="dropdown-text">Survival models</span></a>
   </li>  
     </ul>
   </li>
@@ -250,24 +246,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">cv_gamlss2</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">mcmc</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/BS.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BS</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -281,20 +259,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/elm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">elm</span></a>
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/gnet.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gnet</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/la.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">la</span></a>
+  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">lasso</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -356,12 +328,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">quantiles</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/calibration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">calibration</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -411,14 +377,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/OL.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">OL</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/MN.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MN</span></a>
+  <a href="../man/ologit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ologit</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -503,7 +463,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#note" id="toc-note" class="nav-link" data-scroll-target="#note">Note</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -520,9 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="extended-processing-of-fake-formulas">Extended Processing of "Fake" Formulas</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Create a simplified or "fake" version of a model formula for internal use in <span class="pkg">gamlss2</span>. Many model formulas in <span class="pkg">gamlss2</span> may contain complex terms such as smoothing functions, tensor-product interactions, distributional components, or multiple right-hand sides. These extended formulas cannot be passed directly to <code>model.frame</code>, which expects a traditional <code>formula</code> as used in <code>lm</code> or <code>glm</code>.</p>
-<p><code>fake_formula()</code> therefore "fakes" a standard formula by rewriting the original model specification into a form that is acceptable to <code>model.frame</code>, while preserving all variable transformations (e.g., <code>log()</code>, <code>exp()</code>, arithmetic expressions) and extracting any special model terms. These special terms can then be handled separately during model setup and fitting.</p>
-<p>In summary, the function separates the parsing of model terms from the creation of the data frame: it provides a clean, simplified formula that ensures correct extraction and evaluation of variables.</p>
+<p>Create a "fake" formula from a <code>formula</code>, a <code>Formula</code>, or a <code>list</code> of <code>formula</code>s. The function extracts all necessary variables (transformation of variables), to build a <code>model.frame</code>. The function also extracts all special model terms within the formulas, the information can be used to setup any special model term specification list.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -571,12 +528,6 @@ Logical, should only the special model terms be returned?
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>Depending on the input formula, the function returns a <code>formula</code> or <code>Formula</code>. If <code>onlyspecials = TRUE</code> a vector or list of special model term names is returned.</p>
 </section>
-<section id="note" class="level3">
-<h3 class="anchored" data-anchor-id="note">Note</h3>
-<p>In some versions of the RStudio IDE, printing or inspecting a <code>fake_formula()</code> object may trigger a message of the form</p>
-<p><code>‘length = 2’ in coercion to ‘logical(1)’</code>.</p>
-<p>This is due to the way RStudio internally inspects objects of class <code>Formula</code>, whose <code>length()</code> method returns a two-element vector (reflecting the number of left- and right-hand side components). The message does not indicate a problem with <code>fake_formula()</code>, and the returned object is valid and works correctly with <code>model.frame()</code> and subsequent processing. The message does not appear in a standard R session outside RStudio.</p>
-</section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
 <p><code>gamlss2</code></p>
@@ -586,7 +537,7 @@ Logical, should only the special model terms be returned?
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## basic formula, log(x3) should be kept</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## basic formula</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">log</span>(x3)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -594,10 +545,9 @@ Logical, should only the special model terms be returned?
 <pre><code>y ~ x1 + x2 + log(x3)</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## including special model terms</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## again, keep log(x3)</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> x1 <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> x3 <span class="sc">+</span> <span class="fu">te</span>(<span class="fu">log</span>(x3), x4)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>~x1 + x3 + x2 + log(x3) + x4</code></pre>
 </div>
@@ -655,20 +605,16 @@ Logical, should only the special model terms be returned?
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  y3 <span class="sc">~</span> z2 <span class="sc">+</span> x1 <span class="sc">+</span> <span class="fu">exp</span>(x3) <span class="sc">+</span> <span class="fu">s</span>(x10)</span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>y1 | y2 | y3 ~ x1 + x3 + x2 + log(x3) + x4 | x2 + sqrt(x5) | 
-    z2 + x1 + exp(x3) + x10</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only without special terms</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">nospecials =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only without special terms</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">nospecials =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>y1 | y2 | y3 ~ x1 + x3 | x2 + sqrt(x5) | z2 + x1 + exp(x3)</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only special terms</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">onlyspecials =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract only special terms</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">fake_formula</span>(f, <span class="at">onlyspecials =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
 [1] "s(x2)"          "te(log(x3),x4)"

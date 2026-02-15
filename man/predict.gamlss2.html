@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -149,10 +149,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="../vignettes/topmodels.html">
  <span class="dropdown-text">Evaluation</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/survival.html">
- <span class="dropdown-text">Survival models</span></a>
   </li>  
     </ul>
   </li>
@@ -250,24 +246,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">cv_gamlss2</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">mcmc</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/BS.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BS</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -281,20 +259,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/elm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">elm</span></a>
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/gnet.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gnet</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/la.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">la</span></a>
+  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">lasso</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -356,12 +328,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">quantiles</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/calibration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">calibration</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -411,14 +377,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/OL.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">OL</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/MN.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MN</span></a>
+  <a href="../man/ologit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ologit</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -525,9 +485,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'gamlss2'
-predict(object, parameter = NULL, newdata = NULL,
+predict(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
+  se.fit = FALSE, drop = TRUE, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -543,10 +503,10 @@ model object of class <code>gamlss2</code>.
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="parameter">parameter</code>
+<code id="model">model</code>
 </td>
 <td>
-character. Which parameters should be predicted? E.g., can be one or more of <code>“mu”</code>, <code>“sigma”</code> using the <code>NO</code> family. By default all parameters are included.
+character. Which model part(s) should be predicted? Can be one or more of <code>“mu”</code>, <code>“sigma”</code>, etc. By default all model parts are included.
 </td>
 </tr>
 <tr>
@@ -591,18 +551,10 @@ logical. Should the predictions be simplified to a vector if possible (<code>TRU
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="exclude">exclude</code>
-</td>
-<td>
-character. Any terms named in this vector will be set to zero.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
-currently only used for catching <code>what</code> or <code>model</code> as an alias for <code>parameter</code>.
+currently only used for catching <code>what</code> as an alias for <code>model</code>.
 </td>
 </tr>
 </tbody></table>
@@ -630,61 +582,70 @@ currently only used for catching <code>what</code> or <code>model</code> as an a
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"cars"</span>, <span class="at">package =</span> <span class="st">"datasets"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 404.9289 eps = 0.130704     
-GAMLSS-RS iteration  2: Global Deviance = 404.9281 eps = 0.000001     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 407.3647 eps = 0.125474     
+GAMLSS-RS iteration  2: Global Deviance = 405.766 eps = 0.003924     
+GAMLSS-RS iteration  3: Global Deviance = 405.7473 eps = 0.000045     
+GAMLSS-RS iteration  4: Global Deviance = 405.7473 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## new data for predictions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: additive predictors (on link scale) for all parameters</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: additive predictors (on link scale) for all model parameters</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>         mu    sigma
-1  22.28619 10.19358
-2  60.96591 18.04444
-3 108.89748 31.58621</code></pre>
+<pre><code>        mu    sigma
+1 23.02058 10.08716
+2 59.13735 18.49146
+3 96.53656 33.88827</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        1         2         3 
- 22.28619  60.96591 108.89748 </code></pre>
+<pre><code>       1        2        3 
+23.02058 59.13735 96.53656 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict parameter(s)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>         mu    sigma
-1  22.28619 10.19358
-2  60.96591 18.04444
-3 108.89748 31.58621</code></pre>
+<pre><code>        mu    sigma
+1 23.02058 10.08716
+2 59.13735 18.49146
+3 96.53656 33.88827</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 10.19358 18.04444 31.58621</code></pre>
+<pre><code>       1        2        3 
+10.08716 18.49146 33.88827 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     sigma
-1 10.19358
-2 18.04444
-3 31.58621</code></pre>
+1 10.08716
+2 18.49146
+3 33.88827</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1]  2.6303432  2.6303432  2.6303432 -0.3085851  0.2624947  0.8223773</code></pre>
+<pre><code>  (Intercept)   s(speed)
+1    2.638535 -0.3272719
+2    2.638535  0.2787743
+3    2.638535  0.8845340</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -0.3085851  0.2624947  0.8223773</code></pre>
+<pre><code>    s(speed)
+1 -0.3272719
+2  0.2787743
+3  0.8845340</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>     mu.fit     mu.se    sigma.fit     sigma.se
-1  22.28619  4.897972 1.126081e+01 5.055175e+00
-2  60.96591 24.725803 4.016844e+01 6.645366e+01
-3 108.89748 69.294711 1.062658e+22 1.417358e+23</code></pre>
+<pre><code>    mu.fit      mu.se    sigma.fit     sigma.se
+1 23.02058   4.954498 1.102496e+01 4.878271e+00
+2 59.13735  13.160966 2.409469e+01 1.890208e+01
+3 96.53656 104.926124 1.163849e+09 1.645647e+10</code></pre>
 </div>
 </div>
 

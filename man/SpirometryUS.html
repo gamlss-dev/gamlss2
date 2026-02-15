@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -149,10 +149,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="../vignettes/topmodels.html">
  <span class="dropdown-text">Evaluation</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/survival.html">
- <span class="dropdown-text">Survival models</span></a>
   </li>  
     </ul>
   </li>
@@ -250,24 +246,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">cv_gamlss2</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">mcmc</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/BS.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BS</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -281,20 +259,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/elm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">elm</span></a>
+  <a href="../man/glmnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">glmnet</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/gnet.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gnet</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/la.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">la</span></a>
+  <a href="../man/lasso.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">lasso</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -356,12 +328,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">quantiles</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/calibration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">calibration</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -411,14 +377,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/OL.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">OL</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/MN.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MN</span></a>
+  <a href="../man/ologit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ologit</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -608,19 +568,13 @@ ethnicity
 <dd>
 Factor. Self-reported race and ethnicity information with levels <code>white</code>, <code>black</code>, <code>mexican</code> American, other <code>hispanic</code>, and <code>other</code> (including multi-racial).
 </dd>
-<dt>
-surveyweight
-</dt>
-<dd>
-Numeric. Full sample two-year exam survey weight.
-</dd>
 </dl>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>In order to establish lung function reference equations, Zavorsky (2025) studies the dependence of three spirometry measurements (FVC, FEV1, and the FEV1/FVC ratio) on age, adjusted for height and weight and separately for females and males. He intends to show that a simple normally-distributed model with (piecewise) linear mean equation and (piecewise) constant variance suffices for obtaining an adequate distributional fit from which the 5% quantile can be obtained as the so-called lower limit of normal (LLN). Actually, his comparison with GAMLSS – using flexible predictors for both mean and variance along with a Box-Cox-transformed normal distribution – shows that GAMLSS leads to a similar fit for the mean but a much better fit for the LLN.</p>
 <p>Zavorsky’s (2025) analyses are based on a data set that he derived from the National Health and Nutrition Examination Survey (NHANES) in the United States 2007–2012. From the entire available data from <a href="https://wwwn.cdc.gov/nchs/nhanes/">https://wwwn.cdc.gov/nchs/nhanes/</a> he included those observations which met or exceeded the technical acceptability of the measurements for forced expiratory volume in 1 second (FEV1) and forced vital capacity (FVC). The data are described in a short communication published in the <em>Data in Brief</em> journal and the accompanying spreadsheet in CSV format (comma-separated values) is available from <em>Mendeley Data</em>.</p>
-<p>The data comprises observations from NHANES’ “Examination Data”, in particular in “Spirometry – Pre and Post-Bronchodilator” and “Body Measures”, plus accompanying “Demographics Data”. Respondent sequence numbers are stored as row names. See the variable descriptions above for more details. Basic information about spirometry can be found for example in the Wikipedia at <a href="https://en.wikipedia.org/wiki/Spirometry">https://en.wikipedia.org/wiki/Spirometry</a>.</p>
+<p>The data comprises observations from NHANES’ “Examination Data”, in particular in “Spirometry – Pre and Post-Bronchodilator” and “Body Measures”, plus accompanying “Demographics Data”. See the variable descriptions above for more details. Basic information about spirometry can be found for example in the Wikipedia at <a href="https://en.wikipedia.org/wiki/Spirometry">https://en.wikipedia.org/wiki/Spirometry</a>.</p>
 </section>
 <section id="source" class="level3">
 <h3 class="anchored" data-anchor-id="source">Source</h3>
@@ -647,26 +601,26 @@ Numeric. Full sample two-year exam survey weight.
  3rd Qu.:4.480   3rd Qu.:3.598   3rd Qu.:0.8620   3rd Qu.: 9.150  
  Max.   :9.361   Max.   :6.923   Max.   :1.0000   Max.   :19.024  
       fef            volume            fet            gender    
- Min.   :0.010   Min.   :  0.00   Min.   : 1.200   Male  :8293  
- 1st Qu.:1.986   1st Qu.: 52.00   1st Qu.: 7.700   Female:8303  
+ Min.   :0.010   Min.   :  0.00   Min.   : 1.200   female:8303  
+ 1st Qu.:1.986   1st Qu.: 52.00   1st Qu.: 7.700   male  :8293  
  Median :2.832   Median : 69.00   Median : 9.000                
  Mean   :2.942   Mean   : 76.18   Mean   : 9.693                
  3rd Qu.:3.774   3rd Qu.: 93.00   3rd Qu.:11.500                
  Max.   :9.280   Max.   :321.00   Max.   :32.800                
-      age            weight           height         ethnicity   
- Min.   : 6.00   Min.   : 16.40   Min.   :104.6   white   :6607  
- 1st Qu.:17.00   1st Qu.: 57.20   1st Qu.:155.9   black   :3598  
- Median :34.00   Median : 72.30   Median :164.8   mexican :3068  
- Mean   :35.89   Mean   : 72.97   Mean   :162.9   hispanic:1825  
- 3rd Qu.:53.00   3rd Qu.: 88.20   3rd Qu.:173.2   other   :1498  
- Max.   :80.00   Max.   :218.20   Max.   :203.8                  
-      bmi         surveyweight   
- Min.   :12.50   Min.   :  3723  
- 1st Qu.:21.67   1st Qu.: 14356  
- Median :26.06   Median : 23317  
- Mean   :26.82   Mean   : 36368  
- 3rd Qu.:30.90   3rd Qu.: 48387  
- Max.   :84.87   Max.   :222580  </code></pre>
+      age            weight           height           bmi       
+ Min.   : 6.00   Min.   : 16.40   Min.   :104.6   Min.   :12.50  
+ 1st Qu.:17.00   1st Qu.: 57.20   1st Qu.:155.9   1st Qu.:21.67  
+ Median :34.00   Median : 72.30   Median :164.8   Median :26.06  
+ Mean   :35.89   Mean   : 72.97   Mean   :162.9   Mean   :26.82  
+ 3rd Qu.:53.00   3rd Qu.: 88.20   3rd Qu.:173.2   3rd Qu.:30.90  
+ Max.   :80.00   Max.   :218.20   Max.   :203.8   Max.   :84.87  
+    ethnicity   
+ white   :6607  
+ black   :3598  
+ mexican :3068  
+ hispanic:1825  
+ other   :1498  
+                </code></pre>
 </div>
 </div>
 

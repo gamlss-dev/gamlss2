@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -612,18 +612,31 @@ Only for <code>type = “simple”</code> the R-squared can be evaluated using <
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate negative binomial count models</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> x <span class="sc">+</span> qrt, <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 492.7033 eps = 0.148555     
-GAMLSS-RS iteration  2: Global Deviance = 492.6374 eps = 0.000133     
-GAMLSS-RS iteration  3: Global Deviance = 492.6373 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 492.6373 eps = 0.148669     
+GAMLSS-RS iteration  2: Global Deviance = 492.6373 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">+</span> <span class="fu">s</span>(qrt, <span class="at">bs =</span> <span class="st">"re"</span>), <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 408.2379 eps = 0.294520     
-GAMLSS-RS iteration  2: Global Deviance = 377.4947 eps = 0.075306     
-GAMLSS-RS iteration  3: Global Deviance = 374.3566 eps = 0.008313     
-GAMLSS-RS iteration  4: Global Deviance = 374.1054 eps = 0.000671     
-GAMLSS-RS iteration  5: Global Deviance = 374.0982 eps = 0.000019     
-GAMLSS-RS iteration  6: Global Deviance = 374.0952 eps = 0.000007     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 365.9324 eps = 0.367629     
+GAMLSS-RS iteration  2: Global Deviance = 365.6841 eps = 0.000678     
+GAMLSS-RS iteration  3: Global Deviance = 365.6735 eps = 0.000029     
+GAMLSS-RS iteration  4: Global Deviance = 365.6634 eps = 0.000027     
+GAMLSS-RS iteration  5: Global Deviance = 365.6538 eps = 0.000026     
+GAMLSS-RS iteration  6: Global Deviance = 365.6447 eps = 0.000024     
+GAMLSS-RS iteration  7: Global Deviance = 365.636 eps = 0.000023     
+GAMLSS-RS iteration  8: Global Deviance = 365.6278 eps = 0.000022     
+GAMLSS-RS iteration  9: Global Deviance = 365.6199 eps = 0.000021     
+GAMLSS-RS iteration 10: Global Deviance = 365.6124 eps = 0.000020     
+GAMLSS-RS iteration 11: Global Deviance = 365.6053 eps = 0.000019     
+GAMLSS-RS iteration 12: Global Deviance = 365.5986 eps = 0.000018     
+GAMLSS-RS iteration 13: Global Deviance = 365.5921 eps = 0.000017     
+GAMLSS-RS iteration 14: Global Deviance = 365.586 eps = 0.000016     
+GAMLSS-RS iteration 15: Global Deviance = 365.5802 eps = 0.000015     
+GAMLSS-RS iteration 16: Global Deviance = 365.5746 eps = 0.000015     
+GAMLSS-RS iteration 17: Global Deviance = 365.5693 eps = 0.000014     
+GAMLSS-RS iteration 18: Global Deviance = 365.5643 eps = 0.000013     
+GAMLSS-RS iteration 19: Global Deviance = 365.5595 eps = 0.000013     
+GAMLSS-RS iteration 20: Global Deviance = 365.5549 eps = 0.000012     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare models</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -641,24 +654,24 @@ $CraggUhler
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       b1        b2 
-0.8095853 0.9863337 </code></pre>
+0.8095853 0.9886961 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 398.7366 12.32071
+b2 391.0332 12.73917
 b1 504.6373  6.00000</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 398.7366 12.32071
+b2 391.0332 12.73917
 b1 504.6373  6.00000</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 420.9960 12.32071
+b2 414.0486 12.73917
 b1 515.4773  6.00000</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>

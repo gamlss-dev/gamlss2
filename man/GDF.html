@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -562,10 +562,8 @@ numeric, matrix, list or data frame, see the examples.
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> ., <span class="at">data =</span> abdom, <span class="at">family =</span> GA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 5039.2922 eps = 0.356998     
-GAMLSS-RS iteration  2: Global Deviance = 4802.238 eps = 0.047041     
-GAMLSS-RS iteration  3: Global Deviance = 4800.5126 eps = 0.000359     
-GAMLSS-RS iteration  4: Global Deviance = 4800.4943 eps = 0.000003     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4800.5126 eps = 0.387466     
+GAMLSS-RS iteration  2: Global Deviance = 4800.4943 eps = 0.000003     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## extract, also works with newdata</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -579,12 +577,12 @@ GAMLSS-RS iteration  4: Global Deviance = 4800.4943 eps = 0.000003     </code></
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      mean   median      q95 variance        pdf        cdf
-1 63.03104 62.92909 70.42364 19.28276 0.06246974 0.18010635
-2 63.03104 62.92909 70.42364 19.28276 0.08730887 0.59589436
-3 63.03104 62.92909 70.42364 19.28276 0.02556281 0.05035205
-4 64.38740 64.28355 71.92811 20.06443 0.06986751 0.22764748
-5 67.18717 67.07943 75.03293 21.72338 0.02854450 0.92478019
-6 67.18717 67.07943 75.03293 21.72338 0.02660748 0.05735297</code></pre>
+1 63.03101 62.92911 70.42168 19.27293 0.06247206 0.18004390
+2 63.03101 62.92911 70.42168 19.27293 0.08732991 0.59591648
+3 63.03101 62.92911 70.42168 19.27293 0.02555157 0.05030819
+4 64.38737 64.28358 71.92613 20.05429 0.06987507 0.22758918
+5 67.18714 67.07945 75.03091 21.71261 0.02853713 0.92483010
+6 67.18714 67.07945 75.03091 21.71261 0.02659749 0.05730756</code></pre>
 </div>
 </div>
 

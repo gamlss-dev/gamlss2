@@ -8,7 +8,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   np <- family$names
 
   ## Initialize predictors.
-  etastart <- initialize_eta(y, family, n, TRUE)
+  etastart <- if(is.null(control$etastart)) TRUE else isTRUE(control$etastart)
+print(etastart)
+  etastart <- initialize_eta(y, family, n, etastart)
 
   ## Starting values.
   cstart <- NULL

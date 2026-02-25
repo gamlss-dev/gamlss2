@@ -285,6 +285,9 @@ results_linear <- function(x, parameter = NULL, data, ...)
   p <- list()
   for(j in seq_along(parameter)) {
     V <- x$fitted.linear[[j]]$vcov
+    if(is.null(V)) {
+      next
+    }
     cj <- x$fitted.linear[[j]]$coefficients
     for(i in vn) {
       if(i %in% all.vars(formula(ff, lhs = 0, rhs = j))) {

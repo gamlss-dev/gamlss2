@@ -9,7 +9,6 @@ bibliography: gamlss2.bib
 vignette: >
   %\VignetteIndexEntry{Top Models}
   %\VignetteEngine{quarto::html}
-  %\VignetteEncoding{UTF-8}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, inference, forecasting}
   %\VignettePackage{gamlss2}

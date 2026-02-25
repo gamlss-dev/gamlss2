@@ -35,27 +35,17 @@ discretize(family = NO)
   \code{\link{gamlss2}}, \code{\link{gamlss2.family}}
 }
 
-\examples{\dontrun{## simulate count data using the Poisson distribution
+\examples{
+## Simulate count data using the Poisson distribution.
 set.seed(111)
-n <- 1000
-y <- rpois(n, lambda = 10)
+y <- rpois(1000, lambda = 10)
 
-## create a discretized family using the
-## BCT distribution (with log link for mu).
+## Create a discretized family using the BCT distribution (with log link for mu).
 fam <- discretize(family = BCT(mu.link = "log"))
 
-## Fit a count regression model
-## using the discretized family.
+## Fit a count regression model using the discretized family.
 fit_family(y, family = fam)
-
-## now with covariates
-x <- runif(n, -3, 3)
-y <- rpois(n, lambda = exp(1 + sin(x)))
-
-b <- gamlss2(y ~ s(x) | s(x) | s(x) | s(x), family = fam)
-plot(b)
-plot(b, which = "resid")
-}}
+}
 
 \keyword{utilities}
 \keyword{count data}

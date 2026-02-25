@@ -1,5 +1,5 @@
-\name{OL}
-\alias{OL}
+\name{ologit}
+\alias{ologit}
 
 \title{Ordered Logistic Family for Ordinal Regression}
 
@@ -10,7 +10,7 @@
 }
 
 \usage{
-OL(k)
+ologit(k)
 }
 
 \arguments{
@@ -27,7 +27,7 @@ OL(k)
       ensuring that the thresholds remain ordered.
   }
 
-  The \code{OL()} family supports modeling the location and threshold differences (\code{delta_j}) 
+  The \code{ologit()} family supports modeling the location and threshold differences (\code{delta_j}) 
   as functions of covariates using additive predictors in \code{\link{gamlss2}} via the \code{"|"} formula interface.
 
   The family returns an object of class \code{"gamlss2.family"}, which includes methods for evaluating 
@@ -56,7 +56,7 @@ housing$Satint <- as.integer(housing$Sat)
 ## Fit equivalent model using gamlss2.
 b <- gamlss2(Satint ~ Infl + Type + Cont,
   data = housing, weights = Freq,
-  family = OL(k = 3))
+  family = ologit(k = 3))
 summary(b)
 
 ## Compare coefficients.

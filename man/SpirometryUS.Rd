@@ -1,5 +1,4 @@
 \name{SpirometryUS}
-
 \alias{SpirometryUS}
 
 \title{Spirometry Measurements from NHANES 2007--2012}
@@ -40,7 +39,6 @@ A data frame containing 16596 observations on 13 variables.
   \item{ethnicity}{Factor. Self-reported race and ethnicity information
     with levels \code{white}, \code{black}, \code{mexican} American,
     other \code{hispanic}, and \code{other} (including multi-racial).}
-  \item{surveyweight}{Numeric. Full sample two-year exam survey weight.}
 }
 }
 
@@ -70,7 +68,6 @@ A data frame containing 16596 observations on 13 variables.
   The data comprises observations from NHANES' \dQuote{Examination Data},
   in particular in \dQuote{Spirometry -- Pre and Post-Bronchodilator} and
   \dQuote{Body Measures}, plus accompanying \dQuote{Demographics Data}.
-  Respondent sequence numbers are stored as row names.
   See the variable descriptions above for more details. Basic information
   about spirometry can be found for example in the Wikipedia at
   \url{https://en.wikipedia.org/wiki/Spirometry}.

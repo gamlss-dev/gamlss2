@@ -5,7 +5,7 @@
 \title{GAIC and Generalised (Pseudo) R-squared for GAMLSS Models}
 
 \description{
-  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.
+  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for a GAMLSS models.
 }
 
 \usage{
@@ -26,16 +26,12 @@ Rsq(object, ...,
     the classical AIC.}
   \item{corrected}{Logical, whether the corrected AIC should be used?
     Note that it applies only when \code{k = 2}.}
-  \item{type}{Which definition of R squared. Can be the \code{"Cox Snell"} or the Nagelkerke, \code{"Cragg Uhler"} or \code{"both"},
-    or \code{"simple"}, which computes the R-squared based on the median. In this case also \code{newdata} may be supplied.}
-  \item{newdata}{Only for \code{type = "simple"}, the R-squared can be evaluated using \code{newdata}.}
+  \item{type}{which definition of R squared. Can be the \code{"Cox Snell"} or the Nagelkerke, \code{"Cragg Uhler"} or \code{"both"},
+    and \code{"simple"}, which computes the R-squared based on the median. In this case also \code{newdata} may be supplied.}
+  \item{newdata}{Only for \code{type = "simple"} the R-squared can be evaluated using \code{newdata}.}
 }
 
 \details{
-  Note that if \pkg{gamlss} is loaded before \pkg{gamlss2}, the function \code{Rsq()}
-  from \pkg{gamlss2} is masked. However, the new \code{Rsq()} method supports fitted
-  objects from both \pkg{gamlss} and \pkg{gamlss2}.
-
   The \code{Rsq()} function uses the definition for R-squared:
 
   \deqn{R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}}{R-squared =1-(L(0)/L(fitted))^(2/n)}
@@ -43,13 +39,9 @@ Rsq(object, ...,
   where \eqn{L(0)} is the null model (only a constant is  fitted to all parameters) and 
   \eqn{L(\hat{\theta})}{L(fitted)} is the current fitted model. This definition sometimes is
   referred to as the Cox & Snell R-squared. The Nagelkerke /Cragg & Uhler's definition divides
-  the above by
+  the above with
 
   \deqn{1 - L(0)^{2/n}}{1-L(0)^(2/n)}
-
-  Note that \code{GAIC()} function is fully represented by the \code{\link[stats]{AIC}} and
-  \code{\link[stats]{BIC}} functions. We only included \code{GAIC()} because of the previous
-  package so users who relied on this function would still have the option.
 }
 
 \value{
@@ -78,6 +70,9 @@ Rsq(b1, b2)
 GAIC(b1, b2)
 AIC(b1, b2)
 BIC(b1, b2)
+
+## plot estimated effects
+plot(b2)
 }
 
 \keyword{regression}

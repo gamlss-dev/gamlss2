@@ -11,7 +11,6 @@ nocite: |
 vignette: >
   %\VignetteIndexEntry{Specials}
   %\VignetteEngine{quarto::html}
-  %\VignetteEncoding{UTF-8}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, loess}
   %\VignettePackage{gamlss2}

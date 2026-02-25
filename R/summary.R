@@ -44,11 +44,6 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
     if(!is.null(what))
       model <- what
   }
-  if(is.null(model)) {
-    parameter <- list(...)$parameter
-    if(!is.null(parameter))
-      model <- parameter
-  }
   if(!is.null(model)) {
     if(!is.character(model))
       model <- family$names[model]
@@ -295,7 +290,7 @@ summary.gamlss2 <- function(object, ...)
 }
 
 ## For MCMC samples.
-summary.bamlss2 <- function(object, thres = 0.01, ...)
+summary.gamlss2.mcmc <- function(object, thres = 0.01, ...)
 {
   df.res <- object$nobs - object$df
   par <- coef(object, full = FALSE, dropall = FALSE)
@@ -310,20 +305,17 @@ summary.bamlss2 <- function(object, thres = 0.01, ...)
     ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
     rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
   }
-  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "dic", "iterations", "elapsed")]
+  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "iterations", "elapsed")]
+  sg$call[[1L]] <- as.name("gamlss2")
   sg$coefficients <- ctl
   if(!is.null(object$fitted.specials)) {
-    sg$specials <- sg$alpha <- list()
+    sg$specials <- list()
     for(i in names(object$fitted.specials)) {
       for(j in names(object$fitted.specials[[i]])) {
         sg$specials[[i]] <- rbind(sg$specials[[i]], object$fitted.specials[[i]][[j]]$edf)
-        sg$alpha[[i]] <- rbind(sg$alpha[[i]], object$fitted.specials[[i]][[j]]$alpha)
       }
       rownames(sg$specials[[i]]) <- names(object$fitted.specials[[i]])
       colnames(sg$specials[[i]]) <- "edf"
-
-      rownames(sg$alpha[[i]]) <- names(object$fitted.specials[[i]])
-      colnames(sg$alpha[[i]]) <- "alpha"
     }
   }
   sg$elapsed <- object$elapsed
@@ -342,7 +334,7 @@ print.summary.gamlss2 <- function(x,
   print(x$family, full = FALSE)
 
   ## Collect linear coefficients and specials.
-  lin_coef <- specials <- alpha <- list()
+  lin_coef <- specials <- list()
   pn <- x$family$names
   for(i in seq_along(pn)) {
     if(length(x$coefficients[[pn[i]]])) {
@@ -352,10 +344,6 @@ print.summary.gamlss2 <- function(x,
     if(length(x$specials[[pn[i]]])) {
       specials[[i]] <- x$specials[[pn[i]]]
       rownames(specials[[i]]) <- paste0(pn[i], ".", rownames(specials[[i]]))
-    }
-    if(length(x$alpha[[pn[i]]])) {
-      alpha[[i]] <- x$alpha[[pn[i]]]
-      rownames(alpha[[i]]) <- paste0(pn[i], ".", rownames(alpha[[i]]))
     }
   }
 
@@ -371,9 +359,6 @@ print.summary.gamlss2 <- function(x,
   if(length(specials)) {
     specials <- do.call("rbind", specials)
     cat("---\nSmooth terms:\n")
-    if(length(alpha)) {
-      specials <- cbind(specials, do.call("rbind", alpha))
-    }
     printCoefmat(t(specials))
   }
 
@@ -397,26 +382,12 @@ print.summary.gamlss2 <- function(x,
     paste("AIC =", round(-2 * x$logLik + 2*x$df, digits = 4)),
     paste("elapsed =", rt)
   )
-
-  info4 <- NULL
-  if(!is.null(x$dic)) {
-    info4 <- c(
-      paste("DIC =", round(x$dic$DIC, digits = 4)),
-      paste("pd =", round(x$dic$pD, digits = 2))
-    )
-  }
-
   cat(info1)
   cat("\n")
   cat(info2)
   cat("\n")
   cat(info3)
   cat("\n")
-
-  if(!is.null(info4)) {
-    cat(info4)
-    cat("\n")
-  }
 }
 
 ## Confint method.
@@ -455,7 +426,7 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
         stop("R-squared only for continuous responses!")
     }
 
-    par <- predict(object, newdata = newdata, type = "parameter")
+    par <- fitted(object, newdata = newdata, type = "parameter")
 
     if(is.null(family(object)$mean)) {
       fit <- family(object)$quantile(0.5, par)
@@ -550,16 +521,9 @@ GAIC <- function(object, ..., k = 2, corrected = FALSE)
       gaic <- c(gaic, deviance + df * k + Cor)
       edf <- c(edf, df)
     } else {
-      oj <- objs[[j]]
-      gaicj <- try(AIC(objs[[j]], oj, k = k), silent = TRUE)
-      if(!inherits(gaicj, "try-error")) {
-        gaic <- c(gaic, gaicj[1, "AIC"])
-        edf <- c(edf, gaicj[1, "df"])
-      } else {
-        drop <- c(drop, j)
-        gaic <- c(gaic, NA)
-        edf <- c(edf, NA)
-      }
+      drop <- c(drop, j)
+      gaic <- c(gaic, NA)
+      edf <- c(edf, NA)
     }
   }
 
@@ -593,9 +557,6 @@ AIC.gamlss2 <- function(object, ..., k = 2, corrected = FALSE)
 
 BIC.gamlss2 <- function(object, ...)
 {
-  ic <- GAIC(object, ..., k = log(object$nobs), corrected = FALSE)
-  if(!is.null(dim(ic)))
-    names(ic) <- c("BIC", "df")
-  return(ic)
+  GAIC(object, ..., k = log(object$nobs), corrected = FALSE)
 }
 

@@ -27,8 +27,6 @@ website:
           file: vignettes/specials.qmd
         - text: "Evaluation"
           file: vignettes/topmodels.qmd
-        - text: "Survival models"
-          file: vignettes/survival.qmd
       - text: News
         file: $ALTDOC_NEWS
       - text: Citation
@@ -59,20 +57,12 @@ website:
               file: man/stepwise.qmd
             - text: cv_gamlss2
               file: man/cv_gamlss2.qmd
-            - text: bamlss2
-              file: man/bamlss2.qmd
-            - text: mcmc
-              file: man/mcmc.qmd
-            - text: BS
-              file: man/BS.qmd
         - section: Model terms
           contents:
-            - text: elm
-              file: man/elm.qmd
-            - text: gnet
-              file: man/gnet.qmd
-            - text: la
-              file: man/la.qmd
+            - text: glmnet
+              file: man/glmnet.qmd
+            - text: lasso
+              file: man/lasso.qmd
             - text: pb
               file: man/pb.qmd
             - text: random
@@ -91,8 +81,6 @@ website:
               file: man/prodist.gamlss2.qmd
             - text: quantiles
               file: man/quantiles.qmd
-            - text: calibration
-              file: man/calibration.qmd
         - section: Families and links
           contents:
             - text: discretize
@@ -107,10 +95,8 @@ website:
               file: man/Kumaraswamy.qmd
             - text: make.link2
               file: man/make.link2.qmd
-            - text: OL
-              file: man/OL.qmd
-            - text: MN
-              file: man/MN.qmd
+            - text: ologit
+              file: man/ologit.qmd
             - text: softplus
               file: man/softplus.qmd
         - section: Data

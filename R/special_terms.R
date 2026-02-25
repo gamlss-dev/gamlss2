@@ -107,7 +107,7 @@ ps <- pb <- function(x, k = 20, ...)
 {
   sx <- s(x, bs = "ps", k = k, ...)
   sx$term <- deparse(substitute(x))
-  sx$label <- paste0("pb(", sx$term, ")")
+  sx$label <- paste0("pb2(", sx$term, ")")
   sx$control <- list("criterion" = "ml")
   sx$localML <- TRUE
   return(sx)
@@ -392,7 +392,7 @@ special_fit.re <- function(x, z, w, control, ...)
   p1 <- predict(rval$model, newdata = x$data, level = 1)
   fit <- as.numeric(p1 - p0)
   rval$fitted.values <- fit ## fitted(rval$model)
-  rval$coefficients <- nlme::ranef(rval$model)
+  rval$coefficients <- ranef(rval$model)
 
   ## Degrees of freedom.
   N <- sum(w != 0)
@@ -566,8 +566,8 @@ special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## Lasso with glmnet.
-gnet <- function(formula, ...)
+## Lasso.
+lasso <- function(formula, ...)
 {
   stopifnot(requireNamespace("glmnet"))
 
@@ -586,7 +586,7 @@ gnet <- function(formula, ...)
   if(is.null(st$control$criterion))
     st$control$criterion <- "bic"
   st$term <- all.vars(formula) 
-  st$label <- paste0("gnet(", paste0(gsub(" ", "",
+  st$label <- paste0("la(", paste0(gsub(" ", "",
     as.character(formula)), collapse = ""), ")") 
   st$X <- model.matrix(formula)
   if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
@@ -683,79 +683,18 @@ special_predict.glmnet.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-
-## Normal Lasso scaling (center + per-column RMS scaling).
-normal_scale <- function(X) {
-  X <- as.matrix(X)
-  n <- nrow(X)
-  cn <- colnames(X)
-  if(is.null(cn)) stop("normal_scale: X must have colnames")
-  
-  mu <- setNames(colMeans(X), cn)
-  Xc <- sweep(X, 2, mu[cn], "-")
-  cn2 <- setNames(colSums(Xc^2), cn)
-  s <- setNames(sqrt(n / pmax(cn2, 1e-12)), cn)
-  
-  function(X) {
-    X <- as.matrix(X)
-    if(is.null(colnames(X))) stop("normal_scale: X must have colnames")
-    X <- X[, cn, drop = FALSE]
-    Xc <- sweep(X, 2, mu[cn], "-")
-    Xs <- sweep(Xc, 2, s[cn], "*")
-    colnames(Xs) <- cn
-    rownames(Xs) <- rownames(X)
-    Xs
-  }
-}
-
-## Fused scaling (scale only, no centering).
-fused_scale <- function(X) {
-  X <- as.matrix(X)
-  n <- nrow(X)
-  cn <- colnames(X)
-  if(is.null(cn)) stop("fused_scale: X must have colnames")
-  
-  cn2 <- colSums(X^2)
-  s <- sqrt(n / pmax(mean(cn2), 1e-12))
-  s <- as.numeric(s)
-  
-  function(X) {
-    X <- as.matrix(X)
-    if(is.null(colnames(X))) stop("fused_scale: X must have colnames")
-    X <- X[, cn, drop = FALSE]
-    Xs <- X * s
-    colnames(Xs) <- cn
-    rownames(Xs) <- rownames(X)
-    Xs
-  }
-}
-
-## Group scaling (center + QR-based orthonormalization).
-group_scale <- function(X) {
-  X <- as.matrix(X)
-  n <- nrow(X)
-  cn <- colnames(X)
-  if(is.null(cn)) stop("group_scale: X must have colnames")
-  
-  mu <- setNames(colMeans(X), cn)
-  Xc <- sweep(X, 2, mu[cn], "-")
-  
-  decomp <- qr(Xc)
-  if(decomp$rank < ncol(Xc)) stop("group_scale: X not full rank after centering")
-  
-  R <- qr.R(decomp)
-  Tmat <- solve(R) * sqrt(n)
-  
-  function(X) {
-    X <- as.matrix(X)
-    if(is.null(colnames(X))) stop("group_scale: X must have colnames")
-    X <- X[, cn, drop = FALSE]
-    Xc <- sweep(X, 2, mu[cn], "-")
-    Xs <- Xc %*% Tmat
-    colnames(Xs) <- cn
-    rownames(Xs) <- rownames(X)
-    Xs
-  }
+## Matrix block standardization.
+blockstand <- function(x, n)
+{
+  cn <- colnames(x)
+  decomp <- qr(x)
+  if(decomp$rank < ncol(x))
+    stop("block standardization cannot be computed, matrix is not of full rank!")
+  scale <- qr.R(decomp) * 1 / sqrt(n)
+  x <- qr.Q(decomp) * sqrt(n)
+  attr(x, "blockscale") <- scale
+  colnames(x) <- cn
+  x
 }
 
 ## Special lasso from Groll et al.
@@ -780,36 +719,34 @@ la <- function(x, type = 1, const = 1e-05, ...)
   st$control <- list(...)
   if(is.null(st$control$criterion))
     st$control$criterion <- "bic"
-  if(is.null(st$control$scale))
-    st$control$scale <- TRUE
   st$term <- xn 
   st$label <- gsub(" ", "", paste0("la(", as.character(deparse(call[[2]])), ")"))
 
   if(!is.null(formula)) {
-    st$X <- model.matrix(formula, na.action = na.pass)
+    st$X <- model.matrix(formula,
+      contrasts.arg = st$control$contrasts.arg,
+      xlev = st$control$xlev)
   } else {
     if(is.factor(x)) {
-      st$is_factor <- TRUE
-      st$lev <- levels(x)
-      st$is_ordered <- inherits(x, "ordered")
-      if(st$is_ordered) {
-        x <- ordered(as.character(x), levels = st$lev)
-      } else {
-        x <- factor(as.character(x), levels = st$lev)
-      }
-      st$X <- model.matrix(~x, na.action = na.pass)
+      st$X <- model.matrix(~ x, contrasts.arg = st$control$contrasts.arg,
+        xlev = st$control$xlev)
       colnames(st$X) <- gsub("x", "", colnames(st$X))
+      st$is_factor <- TRUE
     } else {
       st$X <- x
     }
   }
 
-  cn <- colnames(st$X)
-  if(!is.null(cn) && length(j <- grep("(Intercept)", cn, fixed = TRUE))) {
+  if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
     st$X <- st$X[, -j, drop = FALSE]
   }
 
-  st$colnames <- colnames(st$X)
+  ## !FIXME
+  if(isTRUE(st$is_factor) & FALSE) {
+    st$blockscale <- attr(blockstand(st$X, n = nrow(st$X)), "blockscale")
+    st$X <- st$X %*% st$blockscale
+  }
+
   st$formula <- formula
   st$control$const <- const
 
@@ -818,30 +755,8 @@ la <- function(x, type = 1, const = 1e-05, ...)
     type <- lt[type[1L]]
   st$lasso_type <- lt[match(type, lt)]
 
-  if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type == "group")) {
-    st$scale_fun <- group_scale(st$X)
-  }
-
-  if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type %in% c("ordinal", "nominal"))) {
-    st$scale_fun <- fused_scale(st$X)
-  }
-
-  if(st$control$scale && is.null(st$scale_fun) && st$lasso_type == "normal") {
-    st$scale_fun <- normal_scale(st$X)
-  }
-
-  if(!is.null(st$scale_fun)) {
-    st$X <- st$scale_fun(st$X)
-  }
-
-  if(st$lasso_type %in% c("ordinal", "nominal")) {
-    if(is.null(st$control$ridge)) {
-      st$control$ridge <- TRUE
-    }
-  }
-
   ## Assign the "special" class and the new class "n".
-  class(st) <- c("special", "lasso", "X %*% b")
+  class(st) <- c("special", "lasso")
 
   return(st) 
 }
@@ -851,7 +766,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   if(is.null(control$criterion))
     control$criterion <- x$control$criterion
 
-  ridge <- isTRUE(control$add_ridge) || isTRUE(x$control$ridge)
+  ridge <- isTRUE(control$add_ridge)
 
   K <- control$K
   if(is.null(K))
@@ -861,59 +776,31 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   XW <- x$X * w
   XWX <- crossprod(XW, x$X)
   XWz <- crossprod(XW, z)
-  zWz <- drop(crossprod(z * w, z))
   n <- length(z)
   logn <- log(n)
 
-  ## Stable ML start using Cholesky + increasing jitter.
-  bml <- NULL
-  jit <- c(1e-08, 1e-07, 1e-06, 1e-05, 1e-04)
-  for(j in jit) {
-    A0 <- XWX + diag(j, k)
-    R0 <- try(chol(A0), silent = TRUE)
-    if(!inherits(R0, "try-error")) {
-      bml <- backsolve(R0, forwardsolve(t(R0), XWz))
-      break
-    }
-  }
-  if(is.null(bml))
+  bml <- try(solve(XWX + diag(1e-08, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-07, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-06, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-05, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
+    bml <- try(solve(XWX + diag(1e-04, k), XWz), silent = TRUE)
+  if(inherits(bml, "try-error"))
     stop("cannot compute the ML estimator for the lasso term!")
 
   bml[abs(bml) < 1e-08] <- 1e-08
-  bml <- drop(bml)
 
   b0 <- transfer$coefficients
+
   if(is.null(b0))
     b0 <- bml
-
-  ## Precompute structures for ordinal/nominal once (speed).
-  Af <- combis <- NULL
-  dfX <- nref <- NULL
-  k0 <- NULL
-
-  if(x$lasso_type %in% c("ordinal", "nominal")) {
-    k0 <- ncol(x$X)
-    dfX <- colSums(abs(x$X) > 0)
-    nref <- n - sum(dfX)
-
-    if(x$lasso_type == "ordinal") {
-      D  <- diff(diag(k0))
-      Af <- cbind(diag(k0), t(D))
-    } else {
-      combis <- combn(k0, 2)
-      Af_diff <- matrix(0, ncol = ncol(combis), nrow = k0)
-      for(ff in seq_len(ncol(combis))) {
-        Af_diff[combis[1, ff], ff] <-  1
-        Af_diff[combis[2, ff], ff] <- -1
-      }
-      Af <- cbind(diag(k0), Af_diff)
-    }
-  }
 
   ## Penalty function.
   if(x$lasso_type == "normal") {
     pen <- function(b) {
-      b <- as.numeric(b)
       A <- 1 / sqrt(b^2 + x$control$const)
       A <- A * 1 / abs(bml)
       A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
@@ -923,45 +810,44 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "group") {
     pen <- function(b) {
-      b <- as.numeric(b)
       df <- ncol(x$X)
-      A <- 1 / rep(sqrt(sum(b^2) + x$control$const), df) *
-           1 / rep(sqrt(sum(bml^2) + x$control$const), df)
-      if(df < 2L) matrix(A, 1, 1) else diag(A)
+      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
+      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+      A
     }
   }
 
   if(x$lasso_type == "nominal") {
     pen <- function(b) {
-      b <- as.numeric(b)
-      ## weights
-      wpen <- numeric(ncol(Af))
-
-      c0 <- 2 / (k0 + 1)
-
-      for(m in seq_len(ncol(Af))) {
+      k <- ncol(x$X)
+      Af <- matrix(0, ncol = choose(k, 2), nrow = k)
+      combis <- combn(k, 2)
+      for(ff in 1:ncol(combis)){
+        Af[combis[1, ff], ff] <- 1
+        Af[combis[2, ff], ff] <- -1
+      }
+      Af <- cbind(diag(k), Af)
+      w <- rep(0, length = ncol(Af))
+      df <- colSums(abs(x$X) > 0)
+      nref <- n - sum(df)
+      for(k in 1:ncol(Af)) {
         if(nref < 0) {
-          wpen[m] <- 1
+          w[k] <- 1
         } else {
-          ok <- which(Af[, m] != 0)
-          wpen[m] <- if(length(ok) < 2L) {
-            c0 * sqrt((dfX[ok[1]] + nref) / n)
+          ok <- which(Af[, k] != 0)
+          w[k] <- if(length(ok) < 2) {
+            2 / (k + 1) * sqrt((df[ok[1]] + nref) / n)
           } else {
-            c0 * sqrt((dfX[ok[1]] + dfX[ok[2]]) / n)
+            2 / (k + 1) * sqrt((df[ok[1]] + df[ok[2]]) / n)
           }
         }
-
-        denom <- abs(drop(crossprod(Af[, m], bml)))
-        if(denom < 1e-12) denom <- 1e-12
-        wpen[m] <- wpen[m] / denom
+        w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
       }
-
-      ## LQA penalty matrix
-      A <- matrix(0, k0, k0)
-      for(m in seq_len(ncol(Af))) {
-        a <- Af[, m]
-        d <- drop(crossprod(a, b))
-        A <- A + wpen[m] / sqrt(d^2 + x$control$const) * (a %*% t(a))
+      A <- 0
+      for(k in 1:ncol(Af)) {
+        tAf <- t(Af[, k])
+        d <- drop(tAf %*% b)
+        A <- A + w[k] / sqrt(d^2 + x$control$const) * Af[, k] %*% tAf
       }
       A
     }
@@ -969,35 +855,32 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   if(x$lasso_type == "ordinal") {
     pen <- function(b) {
-      b <- as.numeric(b)
-      ## weights
-      wpen <- numeric(ncol(Af))
-
-      for(m in seq_len(ncol(Af))) {
+      k <- ncol(x$X)
+      Af <- diff(diag(k + 1))
+      Af[1, 1] <- 1
+      Af <- Af[, -ncol(Af), drop = FALSE]
+      w <- rep(0, length = ncol(Af))
+      df <- colSums(abs(x$X) > 0)
+      nref <- n - sum(df)
+      for(k in 1:ncol(Af)) {
         if(nref < 0) {
-          wpen[m] <- 1
+          w[k] <- 1
         } else {
-          ok <- which(Af[, m] != 0)
-          if(length(ok) == 1L) {
-            wpen[m] <- sqrt(dfX[ok] / n)
+          ok <- which(Af[, k] != 0)
+          w[k] <- if(length(ok) < 2) {
+            sqrt((df[ok[1]] + nref) / n)
           } else {
-            wpen[m] <- sqrt((dfX[ok[1]] + dfX[ok[2]]) / n)
+            sqrt((df[ok[1]] + df[ok[2]]) / n)
           }
         }
-
-        denom <- abs(drop(crossprod(Af[, m], bml)))
-        if(denom < 1e-12) denom <- 1e-12
-        wpen[m] <- wpen[m] / denom
+        w[k] <- w[k] * 1 / abs(t(Af[, k]) %*% bml)
       }
-
-      ## local quadratic approximation
-      A <- matrix(0, k0, k0)
-      for(m in seq_len(ncol(Af))) {
-        a <- Af[, m]
-        d <- drop(crossprod(a, b))
-        A <- A + wpen[m] / sqrt(d^2 + x$control$const) * (a %*% t(a))
+      A <- 0
+      for(k in 1:ncol(Af)) {
+        tAf <- t(Af[, k])
+        d <- drop(tAf %*% b)
+        A <- A + w[k] / sqrt(d^2 + x$control$const) * Af[, k] %*% tAf
       }
-
       A
     }
   }
@@ -1009,42 +892,26 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
 
   fl <- function(l, rf = FALSE, coef = FALSE) {
     if(ridge) {
-      A <- XWX + l[1]*S[[1]] + l[2]*S[[2]]
+      P <- try(chol2inv(chol(XWX + l[1]*S[[1]] + l[2]*S[[2]])), silent = TRUE)
     } else {
-      A <- XWX + l*S
+      P <- try(chol2inv(chol(XWX + l*S)), silent = TRUE)
     }
 
-    R <- try(chol(A), silent = TRUE)
+    if(inherits(P, "try-error"))
+      P <- solve(XWX + S)
 
-    if(inherits(R, "try-error")) {
-      dj <- max(1e-10, 1e-12 * mean(diag(A)))
-      R <- try(chol(A + diag(dj, nrow(A))), silent = TRUE)
-      if(inherits(R, "try-error"))
-        return(Inf)
-    }
+    b <- drop(P %*% XWz)
 
-    b <- backsolve(R, forwardsolve(t(R), XWz))
+    fit <- drop(x$X %*% b)
 
-    tmp <- backsolve(R, XWX, transpose = FALSE)
-    C <- forwardsolve(t(R), tmp, transpose = FALSE)
-    edf <- sum(diag(C))
+    edf <- sum(diag(XWX %*% P))
 
     if(rf) {
-      fit <- drop(x$X %*% b)
-
-      Ri <- backsolve(R, diag(1, nrow(A)))
-      P <- tcrossprod(Ri)
-
       names(b) <- colnames(x$X)
-      return(list("coefficients" = drop(b), "fitted.values" = fit, "edf" = edf,
+      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
         "lambda" = l, "vcov" = P, "df" = n - edf))
     } else {
-      rss <- zWz -
-        2 * drop(crossprod(b, XWz)) +
-        drop(crossprod(b, XWX %*% b))
-
-      if(!is.finite(edf) || edf >= n - 1)
-        return(Inf)
+      rss <- sum(w * (z - fit)^2)
 
       rval <- switch(tolower(control$criterion),
         "gcv" = rss * n / (n - edf)^2,
@@ -1055,7 +922,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
       )
 
       if(coef) {
-        rval <- list("ic" = rval, "coefficients" = drop(b))
+        rval <- list("ic" = rval, "coefficients" = b)
         names(rval$coefficients) <- colnames(x$X)
       }
 
@@ -1076,8 +943,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$transfer <- list("lambda" = rval$lambda, "coefficients" = rval$coefficients)
 
   ## Arguments needed for prediction and path plots.
-  keep <- c("formula", "term", "X", "scale_fun", "control",
-    "is_factor", "lev", "is_ordered", "colnames")
+  keep <- c("formula", "term", "blockscale", "X")
   rval[keep] <- x[keep]
   rval$z <- z
   rval$w <- w
@@ -1088,38 +954,21 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   rval$criterion <- control$criterion
   rval$label <- x$label
 
-  names(rval$coefficients) <- colnames(rval$X)
-
   ## Assign class for predict method. 
   class(rval) <- "lasso.fitted"
 
   return(rval)
 }
 
-
 ## Lasso predict method.
 special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...) 
 {
-  ## Build design matrix.
   if(!is.null(x$formula)) {
-    X <- model.matrix(x$formula, data = data, na.action = na.pass)
+    X <- model.matrix(x$formula, data = data,
+      contrasts.arg = x$contrasts.arg, xlev = x$xlev)
   } else {
-    if(isTRUE(x$is_factor)) {
-      vals <- as.character(data[[x$term]])
-      bad <- which(!is.na(vals) & !(vals %in% x$lev))
-      if(length(bad)) {
-        print(head(unique(vals[bad]), 20))
-        stop("Found values not in training levels")
-      }
-      lev <- x$lev
-      if(is.null(lev))
-        lev <- levels(data[[x$term]])
-      if(isTRUE(x$is_ordered)) {
-        data[[x$term]] <- ordered(as.character(data[[x$term]]), levels = lev)
-      } else {
-        data[[x$term]] <- factor(as.character(data[[x$term]]), levels = lev)
-      }
-      X <- model.matrix(~data[[x$term]], na.action = na.pass)
+    if(is.factor(data[[x$term]])) {
+      X <- model.matrix(~ data[[x$term]], contrasts.arg = x$control$contrasts.arg, xlev = x$control$xlev)
       colnames(X) <- gsub("data[[x$term]]", "", colnames(X), fixed = TRUE)
     } else {
       X <- data[[x$term]]
@@ -1130,13 +979,15 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
     X <- X[, -j, drop = FALSE]
   }
 
-  if(!is.null(x$colnames)) {
-    X <- X[, x$colnames, drop = FALSE]
+  ## !FIXME
+  if(!is.null(x$blockscale)) {
+    X <- X %*% x$blockscale
   }
 
-  ## Scale.
-  if(!is.null(x$scale_fun)) {
-    X <- x$scale_fun(X)
+  if(ncol(X) != length(x$coefficients)) {
+    if(!is.null(names(x$coefficients)) && !is.null(colnames(X))) {
+      X <- X[, names(x$coefficients), drop = FALSE]
+    }
   }
 
   fit <- drop(X %*% x$coefficients)
@@ -1248,13 +1099,8 @@ plot_lasso <- function(x, terms = NULL,
           P <- try(chol2inv(chol(x$XWX + l*x$S)), silent = TRUE)
         }
 
-        if(inherits(P, "try-error")) {
-          if(is.list(x$S)) {
-            P <- solve(x$XWX + l[1]*x$S[[1]] + l[2]*x$S[[2]])
-          } else {
-            P <- solve(x$XWX + l*x$S)
-          }
-        }
+        if(inherits(P, "try-error"))
+          P <- solve(x$XWX + x$S)
 
         b <- drop(P %*% x$XWz)
 
@@ -1280,10 +1126,7 @@ plot_lasso <- function(x, terms = NULL,
       lab <- list(...)$label
 
       rind <- rev(1:length(ic))
-      xlim <- list(...)$xlim
-      if(is.null(xlim))
-        xlim <- rev(range(log(lambdas)))
-      ylim <- list(...)$ylim
+      xlim <- rev(range(log(lambdas)))
 
       xlab <- list(...)$xlab
       if(is.null(xlab))
@@ -1296,12 +1139,12 @@ plot_lasso <- function(x, terms = NULL,
       if(which == "criterion") {
         plot(log(lambdas), ic, type = "l", lwd = lwd, col = col,
           xlab = xlab, ylab = ylab,
-          main = "", axes = FALSE, xlim = xlim, ylim = ylim)
+          main = "", axes = FALSE, xlim = xlim)
       } else {
         matplot(log(lambdas), cm,
           type = "l", lty = 1, lwd = lwd, col = col,
           xlab = xlab, ylab = ylab,
-          main = "", axes = FALSE, xlim = xlim, ylim = ylim)
+          main = "", axes = FALSE, xlim = xlim)
 
         names <- list(...)$names
         if(is.null(names))
@@ -1314,28 +1157,31 @@ plot_lasso <- function(x, terms = NULL,
             if(is.null(names))
               names <- paste0("x", 1:ncol(x$X))
           }
+
           if(length(names) < ncol(x$X))
             names <- rep(names, length.out = ncol(x$X))
           names <- names[1:ncol(x$X)]
 
           if(!all(names == "")) {
             at <- cm[1, ]
+
             labs <- labs0 <- names
             plab <- at
             o <- order(plab, decreasing = TRUE)
             labs <- labs[o]
             plab <- plab[o]
-            rplab <- diff(par()$usr[3:4])
-            if(length(plab) > 1L) {
+            rplab <- diff(range(plab))
+            if(length(plab) > 2L) {
               for(i in 1:(length(plab) - 1)) {
                 dp <- abs(plab[i] - plab[i + 1]) / (rplab + 1e-08)
-                if((dp <= 0.04)) {
+                if((dp <= 0.02) || (rplab <= 0.02)) {
                   labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
                   labs[i] <- ""
                 }
               }
             }
             labs <- labs[order(o)]
+
             if(!all(labs == "")) {
               axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
             }

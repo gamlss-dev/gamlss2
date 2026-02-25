@@ -46,8 +46,7 @@ anova.gamlss2 <- function(object, ..., test = "Chisq") {
   return(res)
 }
 
-drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
-  parameter = NULL, ...)
+drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"), ...)
 {
   ## Allow logical FALSE or "none" for no test.
   if(is.logical(test) && identical(test, FALSE)) {
@@ -63,7 +62,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
   xterms <- xterms0 <- object$xterms
   sterms <- sterms0 <- object$sterms
 
-  ##terms <- object$terms
+  terms <- object$terms
   xl <- object$xlevels
 
   if(!is.null(scope)) {
@@ -101,26 +100,10 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
   dev0 <- deviance(object)
   df0 <- attr(ll0, "df")
 
-  if(is.null(parameter)) {
-    parameter <- list(...)$what
-    if(is.null(parameter))
-    parameter <- list(...)$model
-    if(is.null(parameter))
-      parameter <- object$family$names
-  }
-  if(!is.character(parameter))
-    parameter <- object$family$names[parameter]
-  parameter <- object$family$names[pmatch(parameter, object$family$names)]
-
-  parameter <- parameter[!is.na(parameter)]
-  if(length(parameter) < 1L || all(is.na(parameter)))
-    stop("Argument parameter is specified wrong!")
-
   res <- list()
   if(length(xterms)) {
-    for(i in parameter) {
+    for(i in names(xterms)) {
       xi <- xterms[[i]][xterms[[i]] != "(Intercept)"]
-
       if(length(xi)) {
         j <- xi
         names(j) <- xi
@@ -133,29 +116,13 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
             }
           }
         }
-        rn <- NULL
         for(l in unique(names(j))) {
           xtl <- xterms0
           xtl[[i]] <- xtl[[i]][!(xtl[[i]] %in% j[names(j) == l])]
 
-          xlab <- l
-          if(!is.null(object$xlev)) {
-            if(length(object$xlev)) {
-              xlev <- sapply(names(object$xlev[[i]]), function(ii) {
-                l %in% paste0(ii, object$xlev[[i]][[ii]]) }
-              )
-              if(any(xlev)) {
-                xx <- names(xlev)[xlev]
-                xlab <- xx
-                xx <- paste0(xx, object$xlev[[i]][[xx]])
-                xtl[[i]] <- xtl[[i]][!(xtl[[i]] %in% xx)]
-              }
-            }
-          }
-
           m <- RS(x = object$x, y = object$y, specials = object$specials,
             family = object$family,
-            offsets = offsets, weights = weights, ## start = coef(object),
+            offsets = offsets, weights = weights, start = coef(object),
             xterms = xtl, sterms = object$sterms, control = control)
 
           ll1 <- m$logLik
@@ -171,20 +138,17 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
             "AIC" = -2 * ll1 + 2 * df1,
             "LRT" = dev,
             "Pr(>Chi)" = pval,
-            row.names = xlab, check.names = FALSE
+            row.names = l, check.names = FALSE
           )
-
-          rn <- c(rn, xlab)
 
           res[[i]] <- rbind(res[[i]], aod)
         }
-        res[[i]] <- res[[i]][!duplicated(rn), , drop = FALSE]
       }
     }
   }
 
   if(length(sterms)) {
-    for(i in parameter) {
+    for(i in names(sterms)) {
       si <- sterms[[i]]
       if(length(si)) {
         j <- sterms0
@@ -193,7 +157,7 @@ drop1.gamlss2 <- function(object, scope = NULL, test = c("Chisq", "none"),
 
           m <- RS(x = object$x, y = object$y, specials = object$specials,
             family = object$family,
-            offsets = offsets, weights = weights, ## start = coef(object),
+            offsets = offsets, weights = weights, start = coef(object),
             xterms = object$xterms, sterms = j, control = control)
 
           ll1 <- m$logLik

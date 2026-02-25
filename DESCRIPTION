@@ -1,7 +1,7 @@
 Package: gamlss2
 Title: GAMLSS Infrastructure for Flexible Distributional Regression
 Version: 0.1-0
-Date: 2026-02-12
+Date: 2025-11-26
 Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
                email = "Nikolaus.Umlauf@uibk.ac.at",
                comment = c(ORCID = "0000-0003-2160-9803")),
@@ -16,16 +16,7 @@ Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
                comment = c(ORCID = "0000-0003-0918-3766")),
              person("Reto", "Stauffer", role = "ctb",
                email = "Reto.Stauffer@uibk.ac.at",
-               comment = c(ORCID = "0000-0002-3798-5507")),
-             person("Gillian", "Heller", role = "ctb",
-               email = "Gillian.Heller@sydney.edu.au",
-               comment = c(ORCID = "0000-0003-1270-1499")),
-             person("Fernanda", "de Bastiani", role = "ctb",
-               email = "fernandadebastiani@gmail.com",
-               comment = c(ORCID = "0000-0001-8532-639X")),
-             person("Andreas", "Mayr", role = "ctb",
-               email = "Andreas.Mayr@uni-marburg.de",
-               comment = c(ORCID = "0000-0001-7106-9732")))
+               comment = c(ORCID = "0000-0002-3798-5507")))
 Description: Next generation infrastructure for generalized additive models for location, scale, and shape (GAMLSS)
   and distributional regression more generally. The package provides a fresh reimplementaton of the classic
   'gamlss' package while being more modular and facilitating the creation of advanced terms and models.
@@ -34,6 +25,6 @@ URL: https://gamlss-dev.github.io/gamlss2/
 BugReports: https://github.com/gamlss-dev/gamlss2/issues
 Depends: R (>= 4.1.0), gamlss.dist, mgcv
 Imports: parallel, Formula, mvtnorm, distributions3
-Suggests: colorspace, future.apply, gamlss, gamlss.data, glmnet, lattice, Matrix, MASS, nlme, nnet, partykit, quarto, rpart, scoringRules, sf, VGAM
+Suggests: colorspace, future.apply, gamlss, gamlss.data, glmnet, lattice, Matrix, MASS, nlme, nnet, partykit, quarto, rpart, scoringRules, sf
 LazyLoad: yes
 VignetteBuilder: quarto

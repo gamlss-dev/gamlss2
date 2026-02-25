@@ -1,16 +1,18 @@
 ## Compute results for linear effects
 ## and smooth terms for plotting and
 ## summary statistics.
-results <- function(x, data, ...)
+results <- function(x, ...)
 {
   UseMethod("results")
 }
 
 ## Extract linear and special term information.
-results.gamlss2 <- function(x, data, ...)
+results.gamlss2 <- function(x, ...)
 {
   res <- list()
   np <- x$family$names
+  if(is.null(x$model))
+    x$model <- model.frame(x)
 
   if(length(x$sterms)) {
     res$effects <- list()
@@ -20,104 +22,49 @@ results.gamlss2 <- function(x, data, ...)
         for(i in x$sterms[[j]]) {
           ## For mgcv smooths.
           if("mgcv.smooth" %in% class(x$specials[[i]])) {
-            if(inherits(x$specials[[i]], "fs.interaction")) {
-              dim <- length(x$specials[[i]]$term)
-            } else {
-              dim <- x$specials[[i]]$dim
-            }
+            dim <- x$specials[[i]]$dim
             by <- x$specials[[i]]$by
             if(dim < 3 & !is.null(x$fitted.specials[[j]][[i]])) {
               if(dim > 1) {
-                xc <- unlist(lapply(data[, x$specials[[i]]$term, drop = FALSE], function(x) {
+                xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], function(x) {
                   if(inherits(x, "matrix"))
                     return("numeric")
                   else
                     return(class(x))
                 }))
                 if(all(xc %in% c("numeric", "integer"))) {
-                  nd <- expand.grid(seq(min(data[[x$specials[[i]]$term[1L]]]),
-                    max(data[[x$specials[[i]]$term[1L]]]), length = 50),
-                    seq(min(data[[x$specials[[i]]$term[2L]]]),
-                    max(data[[x$specials[[i]]$term[2L]]]), length = 50))
+                  nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
+                    max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
+                    seq(min(x$model[[x$specials[[i]]$term[2L]]]),
+                    max(x$model[[x$specials[[i]]$term[2L]]]), length = 50))
                 } else {
                   next
                 }
               } else {
-                if(!is.factor(data[[x$specials[[i]]$term]])) {
-                  xr <- range(data[[x$specials[[i]]$term]])
+                if(!is.factor(x$model[[x$specials[[i]]$term]])) {
+                  xr <- range(x$model[[x$specials[[i]]$term]])
                   nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
                 } else {
-                  xf <- sort(unique(data[[x$specials[[i]]$term]]))
+                  xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
                   nd <- data.frame(xf)
                 }
               }
               names(nd) <- x$specials[[i]]$term
               if(by != "NA") {
-                if(is.factor(data[[x$specials[[i]]$by]])) {
+                if(is.factor(x$model[[x$specials[[i]]$by]])) {
                   by.level <- x$specials[[i]]$by.level
-                  xlevels <- levels(data[[x$specials[[i]]$by]])
+                  xlevels <- levels(x$model[[x$specials[[i]]$by]])
                   nd[[by]] <- factor(by.level, levels = xlevels)
                 } else {
                   nd[[by]] <- 1.0
                 }
               }
               X <- PredictMat(x$specials[[i]], nd, n = nrow(nd))
-
-              if(inherits(x, "bamlss2")) {
-                cni <- paste0(j, ".s.", i, ".", seq.int(ncol(X)))
-                fiti <- apply(x$samples[, cni, drop = FALSE], 1, function(b) {
-                  drop(X %*% b)
-                })
-                nd$fit <- apply(fiti, 1, mean)
-                nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
-                nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
-              } else {
-                dots <- list(...)
-                interval <- dots$interval %||% "wald"
-                level <- dots$level %||% 0.95
-                nsim <- dots$nsim %||% 2000L
-
-                bhat <- as.numeric(coef(x$fitted.specials[[j]][[i]]))
-                V <- x$fitted.specials[[j]][[i]]$vcov
-
-                nd$fit <- drop(X %*% bhat)
-
-                if(interval == "none") {
-                  nd$lower <- NA_real_
-                  nd$upper <- NA_real_
-
-                } else if(interval == "wald") {
-                  ## Pointwise Wald band.
-                  v <- rowSums((X %*% V) * X)
-                  se <- sqrt(pmax(v, 0))
-                  z <- qnorm(1 - (1 - level) / 2)
-                  nd$lower <- nd$fit - z * se
-                  nd$upper <- nd$fit + z * se
-
-                } else if(interval %in% c("bayes", "simultaneous")) {
-                  ## Simulation from approx posterior beta | y ~ N(bhat, V).
-                  B <- MASS::mvrnorm(n = nsim, mu = bhat, Sigma = V)
-                  f_draw <- X %*% t(B)
-
-                  if(interval == "bayes") {
-                    alpha <- (1 - level) / 2
-                    nd$lower <- apply(f_draw, 1, quantile, probs = alpha)
-                    nd$upper <- apply(f_draw, 1, quantile, probs = 1 - alpha)
-                  } else {
-                    ## Simultaneous band over the grid via max-|t|.
-                    se <- apply(f_draw, 1, sd)
-                    se_safe <- pmax(se, 1e-12)
-                    t_sup <- apply(abs((f_draw - nd$fit) / se_safe), 2, max)
-                    cval <- unname(quantile(t_sup, probs = level))
-
-                    nd$lower <- nd$fit - cval * se
-                    nd$upper <- nd$fit + cval * se
-                  }
-
-                } else {
-                  stop("Unknown interval type: ", interval)
-                }
-              }
+              se <- rowSums((X %*% x$fitted.specials[[j]][[i]]$vcov) * X)
+              se <- 2 * sqrt(se)
+              nd$fit <- drop(X %*% coef(x$fitted.specials[[j]][[i]]))
+              nd$lower <- nd$fit - se
+              nd$upper <- nd$fit + se
               if(by == "NA") {
                 lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
                 lab <- paste0(lab[-length(lab)], collapse = "")
@@ -139,7 +86,7 @@ results.gamlss2 <- function(x, data, ...)
 
             if(inherits(x$fitted.specials[[j]][[i]]$coefficients, "pb")) {
               xn <- attr(x$specials[[i]], "Name")
-              xr <- range(data[[xn]])
+              xr <- range(x$model[[xn]])
               nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
               names(nd) <- xn
               nd$fit <- x$fitted.specials[[j]][[i]]$coefficients$fun(nd[[xn]])
@@ -158,62 +105,46 @@ results.gamlss2 <- function(x, data, ...)
             nd <- list()
 
             if(dim > 1) {
-              xc <- unlist(lapply(data[, x$specials[[i]]$term, drop = FALSE], class))
+              xc <- unlist(lapply(x$model[, x$specials[[i]]$term, drop = FALSE], class))
               if(all(xc %in% c("numeric", "matrix", "array"))) {
-                nd <- expand.grid(seq(min(data[[x$specials[[i]]$term[1L]]]),
-                  max(data[[x$specials[[i]]$term[1L]]]), length = 50),
-                  seq(min(data[[x$specials[[i]]$term[2L]]]),
-                  max(data[[x$specials[[i]]$term[2L]]]), length = 50))
+                nd <- expand.grid(seq(min(x$model[[x$specials[[i]]$term[1L]]]),
+                  max(x$model[[x$specials[[i]]$term[1L]]]), length = 50),
+                  seq(min(x$model[[x$specials[[i]]$term[2L]]]),
+                  max(x$model[[x$specials[[i]]$term[2L]]]), length = 50))
               } else {
                 next
               }
               nd <- as.data.frame(nd)
               names(nd) <- x$specials[[i]]$term
             } else {
-              if(!is.null(dim(data[[x$specials[[i]]$term]]))) {
-                if(ncol(data[[x$specials[[i]]$term]]) < 2L)
-                  data[[x$specials[[i]]$term]] <- as.numeric(data[[x$specials[[i]]$term]])
+              if(!is.null(dim(x$model[[x$specials[[i]]$term]]))) {
+                if(ncol(x$model[[x$specials[[i]]$term]]) < 2L)
+                  x$model[[x$specials[[i]]$term]] <- as.numeric(x$model[[x$specials[[i]]$term]])
               }
-              if(!is.matrix(data[[x$specials[[i]]$term]])) {
-                if(!is.factor(data[[x$specials[[i]]$term]])) {
-                  xr <- range(data[[x$specials[[i]]$term]])
+              if(!is.matrix(x$model[[x$specials[[i]]$term]])) {
+                if(!is.factor(x$model[[x$specials[[i]]$term]])) {
+                  xr <- range(x$model[[x$specials[[i]]$term]])
                   nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
                 } else {
-                  xf <- sort(unique(data[[x$specials[[i]]$term]]))
+                  xf <- sort(unique(x$model[[x$specials[[i]]$term]]))
                   nd <- data.frame(xf)
                 }
                 nd <- as.data.frame(nd)
                 names(nd) <- x$specials[[i]]$term
               } else {
                  nd <- list()
-                 nd[[x$specials[[i]]$term]] <- data[[x$specials[[i]]$term]]
+                 nd[[x$specials[[i]]$term]] <- x$model[[x$specials[[i]]$term]]
               }
             }
 
-            if(!is.null(x$samples)) {
-              if(!is.null(x$specials[[i]]$pred_class))
-                class(x$fitted.specials[[j]][[i]]) <- x$specials[[i]]$pred_class
-              x$fitted.specials[[j]][[i]][x$specials[[i]]$keep] <- x$specials[[i]][x$specials[[i]]$keep]
+            p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
 
-              nc <- x$specials[[i]]$ncol
-              if(is.null(nc))
-                stop("need ncol in special term!")
-              cni <- paste0(j, ".s.", i, ".", 1:nc)
-              fiti <- special_predict(x$fitted.specials[[j]][[i]], data = nd,
-                samples = x$samples[, cni, drop = FALSE])
-              nd$fit <- apply(fiti, 1, mean)
-              nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
-              nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
-            } else {
-              p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
-            }
             if(is.null(dim(p))) {
               nd$fit <- as.numeric(p)
             } else {
               if(is.matrix(p))
                 p <- as.data.frame(p)
-              if(is.null(x$samples))
-                nd <- cbind(nd, p)
+              nd <- cbind(nd, p)
             }
             lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
             lab <- paste0(lab[-length(lab)], collapse = "")
@@ -226,9 +157,30 @@ results.gamlss2 <- function(x, data, ...)
       }
     }
   }
-  if(length(x$xterms)) {
-    xe <- results_linear(x, data = data)
-    res$effects[names(xe)] <- xe
+  if(length(x$xterms) & FALSE) {
+    tl <- attr(attr(x$xterms, "terms"), "term.labels")
+    if(length(res$effects) < 1L)
+      res$effects <- list()
+    if(is.null(x$x))
+      x$x <- model.matrix(x)
+    for(i in names(x$xterms)) {
+      for(j in tl) {
+        ii <- grep(j, x$xterms[[i]], fixed = TRUE, value = TRUE)
+        if(length(ii)) {
+          nd <- list()
+          v <- all.vars(parse(text = j))
+          nd[[v]] <- seq(min(x$model[[v]]), max(x$model[[v]]), length = 300L)
+          X <- eval(parse(text = j), envir = nd)
+          if(!is.matrix(X))
+            X <- matrix(X, ncol = 1L)
+          nd$fit <- drop(X %*% x$fitted.linear[[i]]$coefficients[ii])
+          nd <- as.data.frame(nd)
+          lab <- paste0(i, ".", j)
+          attr(nd, "label") <- lab
+          res$effects[[lab]] <- nd
+        }
+      }
+    }
   }
 
   return(res)

@@ -1,19 +1,15 @@
 ## A plotting method.
 plot.gamlss2 <- function(x, parameter = NULL,
   which = "effects", terms = NULL,
-  scale = TRUE, spar = TRUE, effects = "smooth", ...)
+  scale = TRUE, spar = TRUE, ...)
 {
   ## What should be plotted?
-  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection", "samples")
-
+  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection")
   if(!is.character(which)) {
-    k <- length(which.match)
-    which <- which[which >= 1L & which <= k]
+    if(any(which > 5L))
+      which <- which[which <= 5L]
     which <- which.match[which]
-  } else {
-    which <- which.match[grep2(tolower(which), which.match, fixed = TRUE)]
-  }
-
+  } else which <- which.match[grep(tolower(which), which.match, fixed = TRUE)]
   if(length(which) > length(which.match) || !any(which %in% which.match))
     stop("argument which is specified wrong!")
 
@@ -39,35 +35,18 @@ plot.gamlss2 <- function(x, parameter = NULL,
       which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
 
+
   ask <- list(...)$ask
   if(is.null(ask))
     ask <- FALSE
   spare <- spar
-
-  any_plots <- FALSE
 
   ## Effect plots.
   if("effects" %in% which) {
     if(is.null(x$results))
       x$results <- results(x)
 
-    if(!is.null(effects)) {
-      if(is.character(effects)) {
-        effects <- pmatch(effects, c("linear", "special", "smooth"))
-      }
-      effects <- c("linear", "special", "smooth")[effects]
-    }
-
     en <- grep2(parameter, names(x$results$effects), fixed = TRUE, value = TRUE)
-
-    is_lin <- sapply(x$results$effects, function(x) { isTRUE(attr(x, "linear")) })
-
-    if(!("linear" %in% effects)) {
-      en <- en[!(en %in% names(is_lin)[is_lin])]
-    }
-    if(!any(c("special", "smooth") %in% effects)) {
-      en <- en[(en %in% names(is_lin)[is_lin])]
-    }
 
     if(length(en) < 2L)
       spare <- FALSE
@@ -87,7 +66,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
       }
     }
 
-    if(length(x$results$effects) && length(en)) {
+    if(length(x$results$effects)) {
       if(spare) {
         if(isTRUE(ask)) {
           par(ask = TRUE)
@@ -115,24 +94,16 @@ plot.gamlss2 <- function(x, parameter = NULL,
         }
       }
 
-      any_plots <- TRUE
-
       for(j in en) {
         p <- strsplit(j, ".", fixed = TRUE)[[1L]][1L]
         if(!is.factor(x$results$effects[[j]][[1L]])) {
           xn <- colnames(x$results$effects[[j]])
           xn <- xn[!(xn %in% c("lower", "upper", "fit"))]
           if(length(xn) < 2) {
-            args <- list(...)
-            args$ylim <- if(scale > 0) ylim[[p]] else ylim
-            args$x <- x$results$effects[[j]]
-            do.call("plot_smooth_effect", args)
+            plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
           } else {
             if(any(sapply(x$results$effects[[j]], is.factor))) {
-              args <- list(...)
-              args$ylim <- if(scale > 0) ylim[[p]] else ylim
-              args$x <- x$results$effects[[j]]
-              do.call("plot_smooth_effect", args)
+              plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
             } else {
               plot_smooth_effect_2d(x$results$effects[[j]], ylim = ylim[[p]], ...)
             }
@@ -141,15 +112,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
           plot_factor_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
         }
       }
-
-      ## No further plotting.
-      return(invisible(NULL))
     }
-  }
 
-  if(!any_plots && !any(grepl("resid", which))) {
-    if(!("selection" %in% which) && !("samples" %in% which))
-      which <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
+    ## No further plotting.
+    return(invisible(NULL))
   }
 
   spare <- spar
@@ -185,10 +151,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if("scatter-resid" %in% which) {
       p <- predict(x, type = "parameter", drop = FALSE, ...)
+      m <- family(x)$quantile(0.5, p)
       n <- if(is.null(dim(p))) length(p) else nrow(p)
-      m <- NA
-      if(!is.null(family(x)$quantile))
-        m <- family(x)$quantile(0.5, p)
       if(length(m) != n) {
         if(is.null(family(x)$mean)) {
           m <- p[[1L]]
@@ -247,59 +211,6 @@ plot.gamlss2 <- function(x, parameter = NULL,
       }
     }
   }
-
-  if(("samples" %in% which) && !is.null(x$samples)) {
-    if(spar) {
-      opar <- par(no.readonly = TRUE)
-      on.exit(par(opar), add = TRUE)
-      par(mfrow = c(1, 2))
-    }
-
-    cn <- colnames(x$samples)
-    cn <- grep2(parameter, cn, fixed = TRUE, value = TRUE)
-
-    if(!is.null(terms)) {
-      if(is.character(terms)) {
-        cn <- grep2(terms, cn, fixed = TRUE, value = TRUE)
-      } else {
-        if(max(terms) > length(cn))
-          stop("argument terms is specified wrong!")
-        cn <- cn[terms]
-      }
-    }
-
-    if(length(cn)) {
-      for(j in cn) {
-        if(isTRUE(ask)) devAskNewPage(TRUE)
-
-        xsamps <- x$samples[, j]
-        traceplot2(xsamps, ylab = "Samples", main = "")
-        mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
-
-        nu <- length(unique(xsamps))
-        acf(if(nu < 2) jitter(xsamps) else xsamps,
-          main = "", lag.max = list(...)$lag.max, na.action = na.pass)
-        mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
-      }
-    }
-  }
-
-  return(invisible(NULL))
-}
-
-traceplot2 <- function(theta, n.plot = 100, ylab = "", ...) {
-  cuq <- Vectorize(function(n, x) {
-    as.numeric(quantile(x[1:n], c(.025, .5, .975), na.rm = TRUE))
-  }, vectorize.args = "n")
-  n.rep <- length(theta)
-  plot(seq.int(n.rep), theta, col = "lightgrey", xlab = "Iteration",
-    ylab = ylab, type = "l", ...)
-  iter <- round(seq(1, n.rep, length = n.plot + 1)[-1])
-  tq <- cuq(iter, theta)
-  lines(iter, tq[2,])
-  lines(iter, tq[1,], lty = 2)
-  lines(iter, tq[3,], lty = 2)
-  lines(lowess(seq.int(n.rep), theta), col = 2)
 }
 
 ## Plot univariate smooth effects.
@@ -486,17 +397,17 @@ plot_hist <- function(x, ...)
   x <- na.omit(x)
   h <- hist(x, breaks = "Scott", plot = FALSE)
   d <- density(x)
-  args <- list(...)
-  if(is.null(args$ylim))
-    args$ylim <- range(c(h$density, d$y))
-  if(is.null(args$main))
-    args$main <- "Histogram and Density"
-  if(is.null(args$xlab))
-    args$xlab <- "Quantile Residuals"
-  args$x <- x
-  args$breaks <- "Scott"
-  args$freq <- FALSE
-  do.call(graphics::hist, args)
+  ylim <- list(...)$ylim
+  if(is.null(ylim))
+    ylim <- range(c(h$density, d$y))
+  main <- list(...)$main
+  if(is.null(main))
+    main <- "Histogram and Density"
+  xlab <- list(...)$xlab
+  if(is.null(xlab))
+    xlab <- "Quantile Residuals"
+  hist(x, breaks = "Scott", freq = FALSE, ylim = ylim,
+    xlab = xlab, main = main, ...)
   lines(d, lwd = 2, col = 4)
   rug(x, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 }
@@ -505,13 +416,13 @@ plot_hist <- function(x, ...)
 plot_qq <- function(x, ...)
 {
   z <- qnorm(ppoints(length(x)))
-  args <- list(...)
-  if(is.null(args$pch))
-    args$pch <- 19
-  if(is.null(args$col))
-    args$col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
-  args$y <- x
-  do.call(stats::qqnorm, args)
+  pch <- list(...)$pch
+  if(is.null(pch))
+    pch <- 19
+  col <- list(...)$col
+  if(is.null(col))
+    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
+  qqnorm(x, col = col, pch = pch)
   lines(z, z, lwd = 2, col = 4)
 }
 
@@ -527,35 +438,41 @@ plot_wp <- function(x, ...)
   int <- y3[1L] - slope * x3[1L]
   d$y <- d$y - (int + slope * d$x)
 
-  args <- list(...)
-  if(is.null(args$xlim)) {
-    args$xlim <- range(d$x)
-    args$xlim <- args$xlim + c(-0.1, 0.1) * diff(args$xlim)
+  xlim <- list(...)$xlim
+  if(is.null(xlim)) {
+    xlim <- range(d$x)
+    xlim <- xlim + c(-0.1, 0.1) * diff(xlim)
   }
 
-  if(is.null(args$ylim)) {
-    args$ylim <- range(d$y)
-    args$ylim <- args$ylim + c(-0.3, 0.3) * diff(args$ylim)
+  ylim <- list(...)$ylim
+  if(is.null(ylim)) {
+    ylim <- range(d$y)
+    ylim <- ylim + c(-0.3, 0.3) * diff(ylim)
   }
 
-  if(is.null(args$main))
-    args$main <- "Worm Plot"
-  if(is.null(args$xlab))
-    args$xlab <- "Theoretical Quantiles"
-  if(is.null(args$ylab))
-    args$ylab <- "Deviation"
-  if(is.null(args$pch))
-    args$pch <- 19
-  if(is.null(args$col))
-    args$col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
-  args$x <- d$x
-  args$y <- d$y
+  main <- list(...)$main
+  if(is.null(main))
+    main <- "Worm Plot"
+  xlab <- list(...)$xlab
+  if(is.null(xlab))
+    xlab <- "Theoretical Quantiles"
+  ylab <- list(...)$ylab
+  if(is.null(ylab))
+    ylab <- "Deviation"
+  pch <- list(...)$pch
+  if(is.null(pch))
+    pch <- 19
+  col <- list(...)$col
+  if(is.null(col))
+    col <- rgb(0.1, 0.1, 0.1, alpha = 0.3)
 
-  do.call(base::plot, args)
+  plot(d$x, d$y, xlim = xlim, ylim = ylim,
+    xlab = xlab, ylab = ylab, main = main,
+    col = col, pch = pch)
   grid(lty = "solid")
 
   dz <- 0.25
-  z <- seq(args$xlim[1L], args$xlim[2L], dz)
+  z <- seq(xlim[1L], xlim[2L], dz)
   p <- pnorm(z)
   se <- (1/dnorm(z)) * (sqrt(p * (1 - p)/length(d$y)))
   low <- qnorm((1 - 0.95)/2) * se

@@ -10,13 +10,13 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "optimize", "median", "pchisq",
   "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess",
-  "deviance", "drop1", "plogis", "qlogis", "setNames", "acf", "lowess", "aggregate")
+  "deviance", "drop1", "plogis", "qlogis", "setNames")
 
-importFrom("utils", "flush.console", "head", "tail", "getFromNamespace",
+importFrom("utils", "flush.console", "tail", "getFromNamespace",
   "capture.output", "combn")
 
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d",
-  "dev.off", "png", "devAskNewPage")
+  "dev.off", "png")
 
 importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
@@ -37,10 +37,8 @@ export(
   "gamlss2_control",
   "RS",
   "CG",
-  "calibration",
   "discretize",
-  "OL",
-  "MN",
+  "ologit",
   "special_fit",
   "special_predict",
   "specials",
@@ -63,22 +61,17 @@ export(
   "make.link2",
   "plot_lasso",
   "la",
-  "gnet",
+  "lasso",
   "cv_gamlss2",
   "log_pdf_metric",
   "rqres_metric",
-  "mse_metric",
-  "BS",
-  "bamlss2",
-  "mcmc",
-  "elm"
+  "mse_metric"
 )
 
 S3method(gamlss2, formula)
 S3method(gamlss2, list)
 S3method(plot, gamlss2)
 S3method(plot, gamlss2.list)
-S3method(plot, gamlss2.residuals)
 S3method(predict, gamlss2)
 S3method(fitted, gamlss2)
 S3method(residuals, gamlss2)
@@ -101,14 +94,11 @@ S3method(special_fit, re)
 S3method(special_predict, re.fitted)
 S3method(special_fit, tree)
 S3method(special_predict, tree.fitted)
-S3method(special_fit, elm)
-S3method(special_predict, elm.fitted)
 S3method(special_predict, default)
 S3method(vcov, gamlss2)
 S3method(confint, gamlss2)
 S3method(coef, gamlss2)
 S3method(summary, gamlss2)
-S3method(summary, bamlss2)
 S3method(print, gamlss2)
 S3method(print, summary.gamlss2)
 S3method(print, coef.gamlss2)

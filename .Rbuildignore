@@ -5,7 +5,6 @@
 ^inst/OpenTopics\.qmd$
 inst/README_files
 inst/vignettes0
-inst/random.R
 token
 figures
 logo
@@ -23,11 +22,10 @@ README.qmd
 ^vignettes/families\.qmd$
 ^vignettes/families2\.qmd$
 ^vignettes/selection\.qmd$
-^vignettes/survival\.qmd$
-^vignettes/firststeps\.qmd$
 ^vignettes/supplement_families\.qmd$
 ^vignettes/mixture\.qmd$
 ^vignettes/spatial\.qmd$
+^vignettes/survival\.qmd$
 ^vignettes/quantiles\.qmd$
 ^vignettes/s_pb\.qmd$
 ^vignettes/topmodels\.qmd$

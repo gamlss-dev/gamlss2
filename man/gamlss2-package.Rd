@@ -7,19 +7,19 @@
 
 \description{
   Next generation infrastructure for generalized additive models for
-  location, scale, and shape (GAMLSS) and general distributional regression
-  models. The package provides a fresh reimplementaton of
+  location, scale, and shape (GAMLSS) and distributional regression
+  more generally. The package provides a fresh reimplementaton of
   the classic 'gamlss' package while being more modular and
   facilitating the creation of advanced terms and models.
 }
 
 \details{
-  The primary purpose of this package is to facilitate the creation of advanced infrastructure
+  The primary purpose of this package is to facilitate the creation of advanced infrastructures
   designed to enhance the Generalized Additive Models for Location Scale and Shape (GAMLSS,
   Rigby and Stasinopoulos 2005) modeling framework. Notably, the \pkg{gamlss2} package represents a
   significant overhaul of its predecessor, \pkg{gamlss}, with a key emphasis on improving estimation
   speed and incorporating more adaptable infrastructures. These enhancements enable the seamless
-  integration of various estimation algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
+  integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
   regression trees, and forests, fostering a more versatile and powerful modeling environment.
 
   Moreover, the package expands its compatibility by supporting all model terms from the base
@@ -27,25 +27,14 @@
   accommodate more than four parameter families. Essentially, this means that users can now
   specify any type of model using these new infrastructures, making the package highly
   flexible and accommodating to a wide range of modeling requirements.
+
+  \packageIndices{gamlss2}
 }
 
 \author{
-  Nikolaus Umlauf [aut, cre] \email{Nikolaus.Umlauf@uibk.ac.at}
-  (\href{https://orcid.org/0000-0003-2160-9803}{ORCID: 0000-0003-2160-9803}) \cr
-  Mikis Stasinopoulos [fnd, cph] \email{d.stasinopoulos@gre.ac.uk}
-  (\href{https://orcid.org/0000-0003-2407-5704}{ORCID: 0000-0003-2407-5704}) \cr
-  Robert Rigby [fnd, cph] \email{r.rigby@gre.ac.uk}
-  (\href{https://orcid.org/0000-0003-3853-1707}{ORCID: 0000-0003-3853-1707}) \cr
-  Achim Zeileis [ctb] \email{Achim.Zeileis@R-project.org}
-  (\href{https://orcid.org/0000-0003-0918-3766}{ORCID: 0000-0003-0918-3766}) \cr
-  Reto Stauffer [ctb] \email{Reto.Stauffer@uibk.ac.at}
-  (\href{https://orcid.org/0000-0002-3798-5507}{ORCID: 0000-0002-3798-5507}) \cr
-  Gillian Heller [ctb] \email{Gillian.Heller@sydney.edu.au}
-  (\href{https://orcid.org/0000-0003-1270-1499}{ORCID: 0000-0003-1270-1499}) \cr
-  Fernanda de Bastiani [ctb] \email{fernandadebastiani@gmail.com}
-  (\href{https://orcid.org/0000-0001-8532-639X}{ORCID: 0000-0001-8532-639X}) \cr
-  Andreas Mayr [ctb] \email{Andreas.Mayr@uni-marburg.de}
-  (\href{https://orcid.org/0000-0001-7106-9732}{ORCID: 0000-0001-7106-9732})
+  \packageAuthor{gamlss2}
+
+  Maintainer: \packageMaintainer{gamlss2}
 }
 
 \keyword{package}
@@ -70,6 +59,6 @@
 }
 
 \seealso{
-  \code{\link{gamlss2}}
+  \code{\link{gamlss2}}, \code{\link{fake_formula}}
 }
 

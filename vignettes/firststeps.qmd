@@ -9,9 +9,8 @@ bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
 vignette: >
-  %\VignetteIndexEntry{First Steps}
+  %\VignetteIndexEntry{Overview}
   %\VignetteEngine{quarto::html}
-  %\VignetteEncoding{UTF-8}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression}
   %\VignettePackage{gamlss2}

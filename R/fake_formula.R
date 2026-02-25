@@ -42,10 +42,10 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
     }
   } else {
     stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
-      "tx", "tx2", "tx3", "tx4", "la", "lasso", "gnet", "n", "lin",
+      "tx", "tx2", "tx3", "tx4", "la", "lasso", "n", "lin",
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
       "random", "ra", "lo", "tr", "tree", "cf", "NN", "pb2", "ct",
-      "st", "ps2", "pdDiag", "user", "elm")
+      "st", "ps2", "pdDiag", "user")
     stn <- unique(c(stn, specials))
     if(!nospecials) ## still experimental
       formula <- ff_replace(formula)
@@ -60,7 +60,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       ff <- NULL
       for(j in tls) {
         p <- parse(text = j)
-        if(as.character(p[[1]][[1]]) %in% c("la", "lasso", "gnet", "elm")) {
+        if(as.character(p[[1]][[1]]) %in% c("la", "lasso")) {
           p <- p[[1]][1:2]
         }
         v <- all.vars(p)
@@ -78,7 +78,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
                 if(inherits(ef, "formula")) {
                   vf <- attr(terms(eval(ef)), "variables")
                   for(k in 2:length(vf)) {
-                    if((as.character(e[1L]) == "lin") || (as.character(e[1L]) == "re") || (as.character(e[1L]) == "elm")) {
+                    if((as.character(e[1L]) == "lin") || (as.character(e[1L]) == "re")) {
                       lv <- all.vars(vf[[k]])
                       for(l in lv)
                         ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))
@@ -94,7 +94,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
                 for(k in 2:length(vf))
                   ff <- c(ff, vf[[k]])
               } else {
-                if(as.character(e[1L]) %in% c("lin", "re", "elm")) {
+                if(as.character(e[1L]) %in% c("lin", "re")) {
                   lv <- all.vars(e[[i]])
                   for(l in lv)
                     ff <- c(ff, eval(parse(text = paste0("quote(", l, ")"))))

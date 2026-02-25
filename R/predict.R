@@ -1,11 +1,11 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
-  parameter = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
-  terms = NULL, se.fit = FALSE, drop = TRUE, exclude = NULL, ...)
+  model = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
+  terms = NULL, se.fit = FALSE, drop = TRUE, ...)
 {
   ## FIXME: se.fit, terms ...
   samples <- NULL
-  if(se.fit || !is.null(list(...)$FUN) || inherits(object, "bamlss2")) {
+  if(se.fit || !is.null(list(...)$FUN)) {
     if(is.null(object$samples)) {
       R <- list(...)$R
       if(is.null(R))
@@ -24,14 +24,6 @@ predict.gamlss2 <- function(object,
     }
   }
 
-  if(!is.null(samples)) {
-    burnin <- list(...)$burnin
-    if(!is.null(burnin)) {
-      burnin <- as.integer(burnin)
-      samples <- samples[-seq.int(burnin), , drop = FALSE]
-    }
-  }
-
   FUN <- list(...)$FUN
   if(is.null(FUN))
     FUN <- mean
@@ -46,9 +38,9 @@ predict.gamlss2 <- function(object,
   ## Extract the model frame.
   if(!is.null(newdata)) {
     mf <- try(model.frame(object, data = newdata,
-      keepresponse = object$family$family %in% .bi.list, no_weights = TRUE, ...), silent = TRUE)
+      keepresponse = object$family$family %in% .bi.list, ...), silent = TRUE)
     if(inherits(mf, "try-error")) {
-      mf <- model.frame(object, data = newdata, no_weights = TRUE, ...)
+      mf <- model.frame(object, data = newdata, ...)
     }
   } else {
     mf <- if(is.null(object$model)) {
@@ -70,31 +62,25 @@ predict.gamlss2 <- function(object,
   family <- object$family
 
   ## Which parameter model to predict?
-  if(is.null(parameter)) {
-    parameter <- list(...)$what
-    if(is.null(parameter))
-    parameter <- list(...)$model
-    if(is.null(parameter))
-      parameter <- object$family$names
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- family$names
   }
-  if(!is.character(parameter))
-    parameter <- object$family$names[parameter]
-  parameter <- object$family$names[pmatch(parameter, object$family$names)]
-
-  parameter <- parameter[!is.na(parameter)]
-  if(length(parameter) < 1L || all(is.na(parameter)))
-    stop("Argument parameter is specified wrong!")
+  if(!is.character(model))
+    model <- family$names[model]
+  model <- family$names[pmatch(model, family$names)]
 
   if((type == "response") && (length(family$names) > 1L)) {
-    if(length(parameter) != length(family$names))
-      stop('Predictions on the response scale require all distributional parameters. Please omit the "parameter" argument or specify all parameters.')
+    if(length(model) != length(family$names))
+      stop('Predictions on the response scale require all distributional parameters. Please omit the "model" argument or specify all parameters.')
   }
 
   tt <- type == "terms"
 
   ## Predict all specified parameters.
   p <- list()
-  for(j in parameter) {
+  for(j in model) {
     p[[j]] <- if(tt) {
       NULL
     } else {
@@ -126,19 +112,6 @@ predict.gamlss2 <- function(object,
         } else {
           for(i in tj) {
             xn <- c(xn, grep(i, object$xterms[[j]], fixed = TRUE, value = TRUE))      
-          }
-        }
-        xn <- unique(xn)
-        if(!is.null(exclude)) {
-          drop_terms <- NULL
-          for(i in exclude) {
-            if(any(grepl(i, xn, fixed = TRUE))) {
-              drop_terms <- c(drop_terms, grep(i, xn, fixed = TRUE))
-            }
-          }
-          if(length(drop_terms)) {
-            drop_terms <- unique(drop_terms)
-            xn <- xn[-drop_terms]
           }
         }
         if(length(xn)) {
@@ -210,18 +183,6 @@ predict.gamlss2 <- function(object,
           }
         }
         xn <- unique(xn)
-        if(!is.null(exclude)) {
-          drop_terms <- NULL
-          for(i in exclude) {
-            if(any(grepl(i, xn, fixed = TRUE))) {
-              drop_terms <- c(drop_terms, grep(i, xn, fixed = TRUE))
-            }
-          }
-          if(length(drop_terms)) {
-            drop_terms <- unique(drop_terms)
-            xn <- xn[-drop_terms]
-          }
-        }
         if(length(xn)) {
           for(i in xn) {
             fit <- if(is.null(samples)) {
@@ -230,7 +191,7 @@ predict.gamlss2 <- function(object,
               matrix(0.0, nrow = nrow(mf), ncol = nrow(samples))
             }
             if(inherits(object$specials[[i]], "mgcv.smooth")) {
-              if(!is.null(object$fitted.specials[[j]][[i]]$selected) || !is.null(samples)) {
+              if(!is.null(object$fitted.specials[[j]][[i]]$selected)) {
                 Xs <- PredictMat(object$specials[[i]], data = mf, n = nrow(mf))
                 if(is.null(samples)) {
                   co <- object$fitted.specials[[j]][[i]]$coefficients
@@ -245,19 +206,7 @@ predict.gamlss2 <- function(object,
             } else {
               if(inherits(object$specials[[i]], "special")) {
                 if(!is.null(object$fitted.specials[[j]][[i]])) {
-                  if(!is.null(object$specials[[i]]$pred_class))
-                    class(object$fitted.specials[[j]][[i]]) <- object$specials[[i]]$pred_class
-                  if(is.null(samples)) {
-                    fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf, exclude = exclude)
-                  } else {
-                    nc <- object$specials[[i]]$ncol
-                    if(is.null(nc))
-                      stop("need ncol in special term!")
-                    ij <- paste0(paste0(j, ".s.", i), ".", 1:nc)
-                    object$fitted.specials[[j]][[i]][object$specials[[i]]$keep] <- object$specials[[i]][object$specials[[i]]$keep]
-                    fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf,
-                      samples = samples[, ij, drop = FALSE], exclude = exclude)
-                  }
+                  fit <- special_predict(object$fitted.specials[[j]][[i]], data = mf)
                 }
               } else {
                 cs <- object$fitted.specials[[j]][[i]]$coefficients
@@ -341,7 +290,7 @@ predict.gamlss2 <- function(object,
   ## Drop dimension if only one parameter is predicted.
   if(is.list(p)) {
     if((length(p) < 2 & drop)) {
-      p <- as.numeric(p[[1L]])
+      p <- p[[1L]]
     } else {
       if(!tt)
         p <- as.data.frame(p)
@@ -362,7 +311,7 @@ grep2 <- function (pattern, x, ...)
 
 ## Extract fitted values.
 fitted.gamlss2 <- function(object, newdata = NULL,
-  type = c("link", "parameter"), parameter = NULL, ...)
+  type = c("link", "parameter"), model = NULL, ...)
 {
   type <- match.arg(type)
 
@@ -375,21 +324,15 @@ fitted.gamlss2 <- function(object, newdata = NULL,
   if(type == "parameter")
     fit <- family(object)$map2par(fit)
 
-  if(is.null(parameter)) {
-    parameter <- list(...)$what
-    if(is.null(parameter))
-    parameter <- list(...)$model
-    if(is.null(parameter))
-      parameter <- object$family$names
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- object$family$names
   }
-  if(!is.character(parameter))
-    parameter <- object$family$names[parameter]
-  parameter <- object$family$names[pmatch(parameter, object$family$names)]
+  if(!is.character(model))
+    model <- object$family$names[model]
+  model <- object$family$names[pmatch(model, object$family$names)]
 
-  parameter <- parameter[!is.na(parameter)]
-  if(length(parameter) < 1L || all(is.na(parameter)))
-    stop("Argument parameter is specified wrong!")
-
-  return(fit[, parameter])
+  return(fit[, model])
 }
 

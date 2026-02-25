@@ -62,8 +62,6 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         knots <- list(...)$knots
 
         absorb.cons <- if(is.null(sj$xt$absorb.cons)) TRUE else isTRUE(sj$xt$absorb.cons)
-        if(!is.null(sj$xt$constraint))
-          absorb.cons <- FALSE
         scale.penalty <- if(is.null(sj$xt$scale.penalty)) TRUE else isTRUE(sj$xt$scale.penalty)
 
         select <- isTRUE(list(...)$select)
@@ -93,7 +91,6 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
       } else {
         if(binj) {
           sj$binning <- bn
-          sj$sparse_index <- calc_sparse_index(sj$X)
         }
         if(inherits(sj, "matrix")) {
           sj <- list("X" = sj, "S" = list(diag(1, ncol(sj))),
@@ -200,10 +197,6 @@ calc_XWX <- function(x, w, index = NULL)
 ## Fitting function for mgcv smooth terms.
 smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
-  if(!is.null(x$xt$constraint)) {
-    return(smooth.construct_wfit_shape(x, z, w, y, eta, j, family, control, transfer, iter))
-  }
-
   ## Number of observations.
   n <- length(z)
 
@@ -218,64 +211,34 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     XWz <- crossprod(x$X, rz)
     XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
   } else {
-#    XW <- x$X * w
-#    XWX <- crossprod(XW, x$X)
-#    XWz <- crossprod(XW, z)
-
-    sw <- sqrt(w)
-    XWs <- x$X * sw
-    zs  <- z * sw
-    XWX <- crossprod(XWs)
-    XWz <- crossprod(XWs, zs)
+    XW <- x$X * w
+    XWX <- crossprod(XW, x$X)
+    XWz <- crossprod(XW, z)
   }
+  S <- diag(1e-05, ncol(x$X))
 
   if(!is.null(x$control)) {
     control[names(x$control)] <- x$control
     if(!is.null(control$method))
       control$criterion <- tolower(control$method)
   }
+  if(is.null(control$criterion))
+    control$criterion <- "aicc"
 
   ## Extra penalty for selection.
   if(isTRUE(control$termselect)) {
     df <- ncol(x$X)
-    lam <- 1e-6
-    bml <- NULL
-    for(tt in 1:10) {
-      out <- try(drop(qr.solve(XWX + diag(lam, df), XWz, tol = 1e-12)), silent = TRUE)
-      if(!inherits(out, "try-error") && all(is.finite(out))) { bml <- out; break }
-      lam <- lam * 10
-    }
-#    pen <- function(b) {
-#      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
-#      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
-#      A
-#    }
+    bml <- drop(solve(XWX + diag(1e-08, df), XWz))
 
-    pen <- function(b, eps = 1e-12, cap = 1e+12) {
-      nb  <- sqrt(sum(b^2))
-      nbm <- sqrt(sum(bml^2))
-
-      if(!is.finite(nb)  || nb  < eps) nb  <- eps
-      if(!is.finite(nbm) || nbm < eps) nbm <- eps
-
-      c0 <- 1 / (nb * nbm)
-      if(!is.finite(c0)) c0 <- cap
-      c0 <- min(c0, cap)
-
-      diag(c0, df)
+    pen <- function(b) {
+      A <- 1 / rep(sqrt(sum(b^2)), df) * 1 / rep(sqrt(sum(bml^2)), df)
+      A <- if(length(A) < 2L) matrix(A, 1, 1) else diag(A)
+      A
     }
 
     b0 <- if(is.null(transfer$coefficients)) bml else  transfer$coefficients
 
     x$S[[length(x$S) + 1L]] <- pen(b0)
-  }
-
-  if(is.null(control$criterion)) {
-    if(length(x$S) < 2L) {
-      control$criterion <- "ml"
-    } else {
-      control$criterion <- "aicc"
-    }
   }
 
   ## Set up smoothing parameters.
@@ -295,118 +258,72 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   ## Local ML check.
   localML <- isTRUE(x$localML)
   if(!localML) {
-    if(control$criterion == "ml") {
-      if(length(x$S) < 2L) {
-        localML <- TRUE
-      } else {
-        control$criterion <- "aicc"
-      }
-    }
+    if(control$criterion == "ml")
+      control$criterion <- "aicc"
   }
 
-  if((control$criterion == "ml") && (length(x$S) < 2L) && localML) {
+  if(control$criterion == "ml" & (length(x$S) < 2L) & localML) {
     ## Local ML method, only for pb2() yet!
     order <- x$m[1L]
-    if(is.null(order)) {
-      order <- x$null.space.dim
-    }
-    if(is.null(order)) {
-      if(!is.null(x$rank)) {
-        order <- ncol(x$X) - x$rank
-      } else {
-        order <- ncol(x$S[[1L]]) - qr(x$S[[1]], tol = 1e-12)$rank
-      }
-    }
-    order <- max(0, min(order, ncol(x$S[[1L]]) - 1))
+    if(is.null(order))
+      order <- 1
 
     N <- sum(w != 0)
 
-    if(!is.finite(lambdas) || lambdas <= 0) {
-      lambdas <- 1e-07
-    }
-
     for(it in 1:50) {
-      Q <- XWX + lambdas * x$S[[1L]]
-      diag(Q) <- diag(Q) + 1e-08
+      P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
+      if(inherits(P, "try-error"))
+        P <- solve(XWX + lambdas * x$S[[1L]])
 
-      cholQ <- try(chol(Q), silent = TRUE)
-      if(inherits(cholQ, "try-error")) break
-
-      b <- backsolve(cholQ, forwardsolve(t(cholQ), XWz))
-      b <- drop(b)
-
+      b <- drop(P %*% XWz)
       fit <- drop(x$X %*% b)
 
       if(control$binning)
         fit <- fit[x$binning$match.index]
 
-      Tmat <- backsolve(cholQ, forwardsolve(t(cholQ), XWX))
-      edf <- sum(diag(Tmat))
+      edf <- sum(diag(XWX %*% P))
 
-      den_sig <- N - edf
-      if(den_sig <= 1e-8) break
-
-      den_tau2 <- edf - order
-      if(den_tau2 <= 1e-8) break
-
-      sig2 <- sum(w * (z - fit)^2) / den_sig
-      if(!is.finite(sig2) || sig2 <= 0) break
-
-      tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / den_tau2
+      sig2 <- sum(w * (z - fit)^2) / (N - edf)
+      tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / (edf - order)
 
       if(tau2 < 1e-07) tau2 <- 1e-07
       lambdas.old <- lambdas
-      ##lambdas <- sig2/tau2
-
-      lnew <- sig2/tau2
-      if(!is.finite(lnew) || lnew <= 0) break
-
-      lambdas <- exp( (1 - 0.7) * log(lambdas) + 0.7 * log(lnew) )
-
+      lambdas <- sig2/tau2
       if(lambdas < 1e-07) lambdas <- 1e-07
       if(lambdas > 1e+07) lambdas <- 1e+07
-      if((abs(log(lambdas) - log(lambdas.old)) < 1e-6) || (lambdas > 1e+10)) break
+      if(abs(lambdas - lambdas.old) < 1e-07 || lambdas > 1e+10) break
     }
 
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-      "lambdas" = lambdas, "vcov" = chol2inv(cholQ), "df" = n - edf))
+      "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
   } else {
     ## Function to search for smoothing parameters using GCV etc.
-    S0 <- diag(1e-05, ncol(x$X))
-
     fl <- function(l, rf = FALSE) {
-      ## Build penalty S = S0 + sum_j l[j] S_j
-      S <- S0
       if(length(x$S)) {
-        for(jj in 1:length(x$S))
-          S <- S + l[jj] * x$S[[jj]]
+        for(j in 1:length(x$S))
+          S <- S + l[j] * x$S[[j]]
       }
-      ## Precision matrix Q = X'WX + S
-      Q <- XWX + S
-      diag(Q) <- diag(Q) + 1e-08
-      cholQ <- chol(Q)
 
-      ## b = Q^{-1} X'Wz
-      b <- backsolve(cholQ, forwardsolve(t(cholQ), XWz))
-      b <- drop(b)
+      P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
+      if(inherits(P, "try-error"))
+        P <- solve(XWX + S)
+
+      b <- drop(P %*% XWz)
 
       fit <- drop(x$X %*% b)
 
       if(control$binning)
         fit <- fit[x$binning$match.index]
 
-      ## EDF = tr(X'WX Q^{-1})
-      Tmat <- backsolve(cholQ, forwardsolve(t(cholQ), XWX))
-      edf <- sum(diag(Tmat))
+      edf <- sum(diag(XWX %*% P))
 
       if(rf) {
         return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-          "lambdas" = l, "vcov" = chol2inv(cholQ), "df" = n - edf))
+          "lambdas" = l, "vcov" = P, "df" = n - edf))
       } else {
         if(isTRUE(control$logLik)) {
-          eta2 <- eta
-          eta2[[j]] <- eta2[[j]] + fit
-          rss <- family$logLik(y, family$map2par(eta2))
+          eta[[j]] <- eta[[j]] + fit
+          rss <- family$logLik(y, family$map2par(eta))
         } else {
           rss <- sum(w * (z - fit)^2)
         }
@@ -435,13 +352,13 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       eps <- 1
       lambdas0 <- lambdas
       lk <- 0
-      while((eps > 0.000001) & (lk < 1000L)) {
-        opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
-        eps <- mean(abs((opt$par - lambdas0) / lambdas0))
-        lambdas0 <- lambdas
-        lambdas <- opt$par
-        lk <- lk + 1L
-      }
+       while((eps > 0.000001) & (lk < 1000L)) {
+         opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
+         eps <- mean(abs((opt$par - lambdas0) / lambdas0))
+         lambdas0 <- lambdas
+         lambdas <- opt$par
+         lk <- lk + 1L
+       }
     } else {
       opt <- list(par = x$sp)
     }
@@ -475,13 +392,13 @@ special_predict.default <- function(x, data, ...)
     if(is.null(x$model)) {
       return(predict(x, newdata = data))
     } else {
-      return(predict(x$model, newdata = data, ...))
+      return(predict(x$model, newdata = data))
     }
   }
 }
 
 ## Specials extractor function after fitting the model.
-specials <- function(object, parameter = NULL, terms = NULL, elements = NULL, ...)
+specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
 {
   if(is.null(object$fitted.specials)) {
     return(NULL)
@@ -490,24 +407,21 @@ specials <- function(object, parameter = NULL, terms = NULL, elements = NULL, ..
   ## Extract response name, sometimes needed.
   rn <- response_name(object)
 
-  if(is.null(parameter)) {
-    parameter <- list(...)$what
-    if(is.null(parameter))
-    parameter <- list(...)$model
-    if(is.null(parameter))
-      parameter <- object$family$names
+  ## Which parameter model to predict?
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- list(...)$parameter
+    if(is.null(model))
+      model <- object$family$names
   }
-  if(!is.character(parameter))
-    parameter <- object$family$names[parameter]
-  parameter <- object$family$names[pmatch(parameter, object$family$names)]
-
-  parameter <- parameter[!is.na(parameter)]
-  if(length(parameter) < 1L || all(is.na(parameter)))
-    stop("Argument parameter is specified wrong!")
+  if(!is.character(model))
+    model <- object$family$names[model]
+  model <- object$family$names[pmatch(model, object$family$names)]
 
   rval <- NULL
 
-  for(i in parameter) {
+  for(i in model) {
     if(!is.null(object$fitted.specials[[i]])) {
       it <- if(is.null(terms)) {
         names(object$fitted.specials[[i]])
@@ -554,10 +468,5 @@ specials <- function(object, parameter = NULL, terms = NULL, elements = NULL, ..
     rval <- rval[[1L]]
 
   return(rval)
-}
-
-smooth.construct_wfit_shape <- function(x, z, w, y, eta, j, family, control, transfer, iter)
-{
-  stop("not working yet!")
 }
 

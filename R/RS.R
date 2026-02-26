@@ -390,7 +390,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ## If linear model does not improve the fit, use ML.
             etai <- eta
             etai[[j]] <- etai[[j]] + m$fitted.values
-            ll1 <- family$logLik(y, family$map2par(etai))
+
+            if(is.null(weights)) {
+              ll1 <- family$logLik(y, family$map2par(etai))
+            } else {
+              ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+            }
 
             if(ll1 < ll02 && isTRUE(control$backup)) {
               ll <- function(par) {
@@ -416,7 +421,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 m$coefficients <- opt$par
                 m$fitted.values <- drop(Xj %*% opt$par)
                 etai[[j]] <- etai[[j]] + m$fitted.values
-                ll1 <- family$logLik(y, family$map2par(etai))
+                if(is.null(weights)) {
+                  ll1 <- family$logLik(y, family$map2par(etai))
+                } else {
+                  ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+                }
               }
             }
           
@@ -444,7 +453,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
             etai <- eta
             etai[[j]] <- etai[[j]] + m$fitted.values
-            ll1 <- family$logLik(y, family$map2par(etai))
+
+            if(is.null(weights)) {
+              ll1 <- family$logLik(y, family$map2par(etai))
+            } else {
+              ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+            }
 
             if(ll1 > ll02) {
               ## Update predictor.
@@ -499,7 +513,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
               etai <- eta
               etai[[j]] <- etai[[j]] + fs$fitted.values
-              ll1 <- family$logLik(y, family$map2par(etai))
+
+              if(is.null(weights)) {
+                ll1 <- family$logLik(y, family$map2par(etai))
+              } else {
+                ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+              }
 
               if(ll1 > ll02) {
                 ## Update predictor.

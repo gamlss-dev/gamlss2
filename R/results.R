@@ -273,8 +273,12 @@ results_linear <- function(x, parameter = NULL, data, ...)
       if(is.character(data[[j]])) {
         nd[[j]] <- factor(rep(unique(data[[j]]), length.out = 300L))
       } else {
-        nd[[j]] <- factor(rep(levels(data[[j]]), length.out = 300L),
-          levels = levels(data[[j]]))
+        if(is.factor(data[[j]])) {
+          nd[[j]] <- factor(rep(levels(data[[j]]), length.out = 300L),
+            levels = levels(data[[j]]))
+        } else {
+          nd[[j]] <- rep(unique(data[[j]]), length.out = 300L)
+        }
       }
     }
   }

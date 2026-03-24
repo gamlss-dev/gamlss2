@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Special Model Terms – gamlss2</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -59,7 +62,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
-  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -88,15 +90,14 @@ div.csl-indent {
 <link href="../gamlss2.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-ea6315b4ef51f34f58b61eb60ce07a48.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5936855bebf658489611c9875c6d9cbc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -229,7 +230,7 @@ div.csl-indent {
 <li>a fitting function to estimate the term from data, and</li>
 <li>a prediction function for use in model evaluation or forecasting.</li>
 </ul>
-<p>As a demonstration, we show how to incorporate local polynomial regression () via <code>loess()</code> <span class="citation" data-cites="Clevelandetal93">(<a href="#ref-Clevelandetal93" role="doc-biblioref">Cleveland, Grosse, and Shyu 1993</a>)</span>. Since <code>loess()</code> supports a <code>weights</code> argument, it integrates naturally into the <code>gamlss2</code> framework, like many other fitting functions that accept weights.</p>
+<p>As a demonstration, we show how to incorporate local polynomial regression () via <code>loess()</code> <span class="citation" data-cites="Clevelandetal93">(<a href="#ref-Clevelandetal93" role="doc-biblioref">Cleveland et al. 1993</a>)</span>. Since <code>loess()</code> supports a <code>weights</code> argument, it integrates naturally into the <code>gamlss2</code> framework, like many other fitting functions that accept weights.</p>
 <section id="the-special-model-term-constructor" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="the-special-model-term-constructor"><span class="header-section-number">1</span> The special model term constructor</h2>
 <p>Any special model term constructor <strong>must</strong> be registered in the <code>fake_formula()</code> function, which is called internally by <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.html"><code>gamlss2()</code></a>. If a constructor is not yet registered, the user can either:</p>
@@ -452,9 +453,9 @@ b1 27670.58 65.04604</code></pre>
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-Clevelandetal93" class="csl-entry" role="listitem">
-Cleveland, W. S., E. Grosse, and M. Shyu. 1993. <span>“Local Regression Models.”</span> In <em>Statistical Modelling in s</em>, edited by J. M Chambers and T. J Hastie, 309–76. Chapman &amp; Hall: New York. <a href="https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie">https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie</a>.
+Cleveland, W. S., E. Grosse, and M. Shyu. 1993. <span>“Local Regression Models.”</span> In <em>Statistical Modelling in s</em>, edited by J. M Chambers and T. J Hastie. Chapman &amp; Hall: New York. <a href="https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie">https://www.taylorfrancis.com/chapters/edit/10.1201/9780203738535-2/statistical-models-john-chambers-trevor-hastie</a>.
 </div>
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
 Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.

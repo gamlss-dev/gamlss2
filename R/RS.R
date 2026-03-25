@@ -475,7 +475,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               if(!is.null(m$vcov)) {
                 fit[[j]]$vcov <- m$vcov
               } else {
-                Xw <- Xj * sqrt(w)
+                Xw <- Xj * sqrt(pmax(wj, 0))
                 XWX <- crossprod(Xw)
 
                 eps <- 1e-8 * mean(diag(XWX))

@@ -389,6 +389,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               penalty[j] <- m$penalty
             } else {
               m <- lm.wfit(Xj, e, wj, method = "qr")
+              m$vcov <- vcov_lm_wfit_safe(m)
             }
 
             ## If linear model does not improve the fit, use ML.
@@ -875,5 +876,60 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
   rval <- fp(opt$par, rf = TRUE)
 
   return(rval)
+}
+
+## Safe vcov.
+vcov_lm_wfit_safe <- function(m, ridge = 1e-8, maxit = 6,
+  ginv_fallback = TRUE, warn_negative_weights = TRUE)
+{
+  if(!is.null(m$weights)) {
+    if(any(m$weights < 0, na.rm = TRUE)) {
+      msg <- "Negative weights encountered."
+      if(warn_negative_weights) warning(msg) else stop(msg)
+    }
+  }
+
+  r <- m$rank
+  p <- length(m$coefficients)
+  piv <- m$qr$pivot
+
+  if(r == 0L) {
+    V <- matrix(NA_real_, p, p)
+    return(V)
+  }
+
+  R <- qr.R(m$qr)[1:r, 1:r, drop = FALSE]
+
+  ## Form crossprod(R) = X'WX on the estimable subspace.
+  XtWX <- crossprod(R)
+
+  eps <- ridge * mean(diag(XtWX))
+  if(!is.finite(eps) || eps <= 0) eps <- ridge
+  diag(XtWX) <- diag(XtWX) + eps
+
+  Rc <- tryCatch(chol(XtWX), error = function(e) NULL)
+
+  if(is.null(Rc)) {
+    lambda <- eps
+    for(k in seq_len(maxit)) {
+      Xt <- XtWX + diag(lambda, ncol(XtWX))
+      Rc <- tryCatch(chol(Xt), error = function(e) NULL)
+      if(!is.null(Rc)) {
+        XtWX <- Xt
+        break
+      }
+      lambda <- lambda * 10
+    }
+  }
+
+  Vinv <- if(is.null(Rc)) {
+    if(ginv_fallback) MASS::ginv(XtWX) else stop("Cannot invert weighted crossproduct.")
+  } else {
+    chol2inv(Rc)
+  }
+
+  V <- matrix(NA_real_, p, p)
+  V[piv[1:r], piv[1:r]] <- Vinv
+  V
 }
 

@@ -65,6 +65,8 @@ predict.gamlss2 <- function(object,
   if(is.null(model)) {
     model <- list(...)$what
     if(is.null(model))
+      model <- list(...)$parameter
+    if(is.null(model))
       model <- family$names
   }
   if(!is.character(model))
@@ -326,6 +328,8 @@ fitted.gamlss2 <- function(object, newdata = NULL,
 
   if(is.null(model)) {
     model <- list(...)$what
+    if(is.null(model))
+      model <- list(...)$parameter
     if(is.null(model))
       model <- object$family$names
   }

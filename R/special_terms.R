@@ -223,7 +223,7 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 ## Linear model terms wrapper.
-lin <- function(x, ..., ridge = FALSE)
+lin <- function(x, ..., ridge = FALSE, scale = FALSE)
 {
   x <- lab <- deparse(substitute(x), backtick = TRUE, width.cutoff = 500)
   f <- try(as.formula(x), silent = TRUE)
@@ -246,11 +246,19 @@ lin <- function(x, ..., ridge = FALSE)
   v <- all.vars(f)
   sx <- list("formula" = f, "term" = v,
     "label" = paste0("lin(", lab, ")"),
-    "by" = "NA", "dim" = length(v))
+    "by" = "NA", "dim" = length(v), "scale" = scale)
   if(!ridge) {
     sx$sp <- 1e-10
   }
   class(sx) <- "lin.smooth.spec"
+  return(sx)
+}
+
+ridge <- function(...)
+{
+  sx <- lin(..., ridge = TRUE, scale = TRUE)
+  sx$label <- gsub("lin(", "ridge(", sx$label, fixed = TRUE)
+  sx$label <- paste0(strsplit(sx$label, ",ridge=", fixed = TRUE)[[1]][1], ")")
   return(sx)
 }
 
@@ -261,6 +269,16 @@ smooth.construct.lin.smooth.spec <- function(object, data, knots)
     else data)
   if(any(grepl("(Intercept)", colnames(object$X), fixed = TRUE))) {
     object$X <- object$X[, -1L, drop = FALSE]
+  }
+  if(object$scale) {
+    sx <- list()
+    for(j in 1:ncol(object$X)) {
+      if(length(unique(object$X[, j])) > 2L) {
+        sx[[as.character(j)]] <- list("mean" = mean(object$X[, j]), "sd" = sd(object$X[, j]))
+        object$X[, j] <- (object$X[, j] - sx[[j]]$mean) / sx[[j]]$sd
+      }
+    }
+    object$scalex <- sx
   }
   object$bs.dim <- ncol(object$X)
   object$S <- list(diag(object$bs.dim))
@@ -279,6 +297,12 @@ Predict.matrix.lin.effect <- function(object, data)
   X <- model.matrix(object$formula, model.frame(object$formula, data, na.action = na.pass))
   if(any(grepl("(Intercept)", colnames(X), fixed = TRUE))) {
     X <- X[, -1L, drop = FALSE]
+  }
+  if(!is.null(object$scalex)) {
+    for(j in as.integer(names(object$scalex))) {
+      jc <- as.character(j)
+      X[, j] <- (X[, j] - object$scalex[[jc]]$mean) / object$scalex[[jc]]$sd
+    }
   }
   X[!is.finite(X)] <- 0
   return(X)

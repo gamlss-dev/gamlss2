@@ -796,13 +796,15 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
   if(is.null(K))
     K <- 2.0
 
-  ## Precompute weighted crossproducts using sqrt(w) once.
-  sw <- sqrt(w)
-  XW <- x * sw
-  XWX <- crossprod(XW)
-  XWy <- crossprod(XW, y * sw)
+  if(!is.finite(penalty) || penalty < 0)
+    penalty <- 1
+
+  w[!is.finite(w)] <- 0
+  w[w < 0] <- 0
 
   nc <- ncol(x)
+  n <- length(w)
+
   i <- which(colnames(x) == "(Intercept)")
   I <- rep(1, nc)
   if(length(i))
@@ -810,72 +812,90 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
 
   only_itcpt <- all(colnames(x) == "(Intercept)")
 
-  n <- length(w)
+  sw <- sqrt(w)
+  XW <- x * sw
+  XWX <- crossprod(XW)
+  XWy <- crossprod(XW, y * sw)
 
-  ## Function to find optimum ridge penalty.
   fp <- function(pen, rf = FALSE) {
+    pen <- max(pen, 0)
 
-    ## Penalty matrix.
-    S <- diag(I * pen)
-    if(!length(S))
-      S <- 0.0
-
-    ## Precision matrix Q = X'WX + S.
+    S <- diag(I * pen, nc)
     Q <- XWX + S
-    Q <- Q + diag(1e-08, ncol(Q))
+    Q <- 0.5 * (Q + t(Q))
 
-    ## Cholesky factorization.
-    cholQ <- try(chol(Q), silent = TRUE)
-    if(inherits(cholQ, "try-error")) {
-      Q <- Q + diag(1e-05, ncol(Q))
+    eps <- 1e-8 * mean(diag(Q))
+    if(!is.finite(eps) || eps <= 0)
+      eps <- 1e-8
+    diag(Q) <- diag(Q) + eps
+
+    cholQ <- tryCatch(chol(Q), error = function(e) NULL)
+
+    if(is.null(cholQ)) {
+      lam <- eps
+      for(k in 1:10) {
+        Qt <- Q + diag(lam, nc)
+        cholQ <- tryCatch(chol(Qt), error = function(e) NULL)
+        if(!is.null(cholQ)) {
+          Q <- Qt
+          break
+        }
+        lam <- lam * 10
+      }
+    }
+
+    if(is.null(cholQ)) {
+      ev <- eigen(Q, symmetric = TRUE, only.values = TRUE)$values
+      shift <- max(1e-8, -min(ev) + 1e-6)
+      Q <- Q + diag(shift, nc)
       cholQ <- chol(Q)
     }
 
-    ## b = Q^{-1} X'Wy.
     b <- backsolve(cholQ, forwardsolve(t(cholQ), XWy))
     b <- drop(b)
 
     fit <- drop(x %*% b)
 
-    ## EDF = tr(X'WX Q^{-1}).
     Tmat <- backsolve(cholQ, forwardsolve(t(cholQ), XWX))
     edf <- sum(diag(Tmat))
 
-    ## Guard: edf can get numerically >= n in extreme cases.
     if(!is.finite(edf))
       edf <- nc
-    if(edf > (n - 1e-08))
-      edf <- n - 1e-08
+    if(edf > (n - 1e-8))
+      edf <- n - 1e-8
 
     if(rf) {
       names(b) <- colnames(x)
-      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-        "penalty" = pen, "vcov" = chol2inv(cholQ), "df" = n - edf))
-    } else {
-      rss <- sum(w * (y - fit)^2)
-
-      rval <- switch(tolower(control$criterion),
-        "gcv"  = rss * n / (n - edf)^2,
-        "aic"  = rss + 2 * edf,
-        "gaic" = rss + K * edf,
-        "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
-        "bic"  = rss + log(n) * edf
-      )
-
-      return(rval)
+      return(list(
+        coefficients = b,
+        fitted.values = fit,
+        edf = edf,
+        penalty = pen,
+        vcov = chol2inv(cholQ),
+        df = n - edf
+      ))
     }
+
+    rss <- sum(w * (y - fit)^2)
+
+    switch(tolower(control$criterion),
+      "gcv"  = rss * n / (n - edf)^2,
+      "aic"  = rss + 2 * edf,
+      "gaic" = rss + K * edf,
+      "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+      "bic"  = rss + log(n) * edf
+    )
   }
 
   if(!only_itcpt) {
-    ## Optimize ridge penalty over a modest bracket.
-    opt <- nlminb(penalty, objective = fp, lower = penalty / 10, upper = penalty * 10)
+    lower <- max(1e-8, penalty / 10)
+    upper <- max(lower * 10, penalty * 10, 1e-6)
+    opt <- nlminb(penalty, objective = fp, lower = lower, upper = upper)
   } else {
     opt <- list(par = 0.0)
   }
 
-  rval <- fp(opt$par, rf = TRUE)
-
-  return(rval)
+  fp(opt$par, rf = TRUE)
 }
 
 ## Safe vcov.

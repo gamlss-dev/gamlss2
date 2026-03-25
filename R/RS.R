@@ -352,6 +352,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           }
           zw <- zw_CG[[j]]
           wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+          wj[!is.finite(wj)] <- 0
+          wj[wj < 0] <- 0
           zw$z <- zw$z - adj / wj
         } else {
           zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
@@ -375,6 +377,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
             ## Weights.
             wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+            wj[!is.finite(wj)] <- 0
+            wj[wj < 0] <- 0
 
             ## Design matrix.
             Xj <- x[, xterms[[j]], drop = FALSE]
@@ -464,13 +468,43 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               ## Update predictor.
               fit[[j]]$fitted.values <- m$fitted.values
               fit[[j]]$coefficients <- m$coefficients
+
               if(!is.null(m$edf))
                 fit[[j]]$edf <- m$edf
-              XWX <- crossprod(Xj * sqrt(wj)) + diag(1e-6, ncol(Xj))
-              fit[[j]]$vcov <- chol2inv(chol(XWX))
+
+              if(!is.null(m$vcov)) {
+                fit[[j]]$vcov <- m$vcov
+              } else {
+                Xw <- Xj * sqrt(w)
+                XWX <- crossprod(Xw)
+
+                eps <- 1e-8 * mean(diag(XWX))
+                if(!is.finite(eps) || eps <= 0) eps <- 1e-8
+                diag(XWX) <- diag(XWX) + eps
+
+                R <- tryCatch(chol(XWX), error = function(e) NULL)
+
+                if(is.null(R)) {
+                  lambda <- eps
+                  for(k in 1:6) {
+                    Xt <- XWX + diag(lambda, ncol(XWX))
+                    R <- tryCatch(chol(Xt), error = function(e) NULL)
+                    if(!is.null(R)) {
+                      XWX <- Xt
+                      break
+                    }
+                    lambda <- lambda * 10
+                  }
+                }
+                if(is.null(R)) {
+                  fit[[j]]$vcov <- MASS::ginv(XWX)
+                } else {
+                  fit[[j]]$vcov <- chol2inv(R)
+                }
+              }
+
               colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
               ll02 <- ll1
-            ## fit[[j]]$residuals <- z - etai[[j]] + m$fitted.values ## FIXME: do we need this?
             }
 
             eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values

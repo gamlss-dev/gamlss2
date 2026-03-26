@@ -225,41 +225,53 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 ## Linear model terms wrapper.
 lin <- function(x, ..., ridge = FALSE, scale = FALSE)
 {
-  x <- lab <- deparse(substitute(x), backtick = TRUE, width.cutoff = 500)
-  f <- try(as.formula(x), silent = TRUE)
-  is_f <- TRUE
-  if(inherits(f, "try-error")) {
-    v <- as.list(substitute(list(...)))[-1]
-    if(length(v)) {
-      lab <- paste0(x, ",", as.character(unlist(v)))
-      v <- c(x, as.character(unlist(v)))
-    } else {
-      v <- x
-    }
-    f <- as.formula(paste("~", paste(v, collapse = "+")))
-    is_f <- FALSE
+  x_expr <- substitute(x)
+  x_txt  <- deparse1(x_expr, backtick = TRUE)
+
+  f <- try(as.formula(x_txt), silent = TRUE)
+  is_f <- !inherits(f, "try-error")
+
+  if(!is_f) {
+    vdot <- as.list(substitute(list(...)))[-1]
+    vars <- c(x_txt, vapply(vdot, deparse1, character(1), backtick = TRUE))
+    f <- as.formula(paste("~", paste(vars, collapse = "+")))
   }
-  if(ridge) {
-    lab <- paste0(lab,",ridge=", ridge)
-  }
-  lab <- gsub(" ", "", lab)
+
   v <- all.vars(f)
-  sx <- list("formula" = f, "term" = v,
-    "label" = paste0("lin(", lab, ")"),
-    "by" = "NA", "dim" = length(v), "scale" = scale)
+
+  make_label <- function(v, prefix = "lin", max_terms = 3) {
+    n <- length(v)
+    if(n <= max_terms) {
+      inside <- paste(v, collapse = "+")
+    } else {
+      inside <- paste0(
+        paste0(v[1:(max_terms - 1)], collapse = "+"),
+        "+... [", n, "]"
+      )
+    }
+    paste0(prefix, "(", inside, ")")
+  }
+
+  sx <- list(
+    formula = f,
+    term    = v,
+    label   = make_label(v, if(ridge) "ridge" else "lin"),
+    by      = "NA",
+    dim     = length(v),
+    scale   = scale
+  )
+
   if(!ridge) {
     sx$sp <- 1e-10
   }
+
   class(sx) <- "lin.smooth.spec"
-  return(sx)
+  sx
 }
 
 ridge <- function(...)
 {
-  sx <- lin(..., ridge = TRUE, scale = TRUE)
-  sx$label <- gsub("lin(", "ridge(", sx$label, fixed = TRUE)
-  sx$label <- paste0(strsplit(sx$label, ",ridge=", fixed = TRUE)[[1]][1], ")")
-  return(sx)
+  lin(..., ridge = TRUE, scale = TRUE)
 }
 
 smooth.construct.lin.smooth.spec <- function(object, data, knots)

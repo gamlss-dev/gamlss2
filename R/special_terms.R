@@ -284,10 +284,14 @@ smooth.construct.lin.smooth.spec <- function(object, data, knots)
   }
   if(object$scale) {
     sx <- list()
-    for(j in 1:ncol(object$X)) {
-      if(length(unique(object$X[, j])) > 2L) {
-        sx[[as.character(j)]] <- list("mean" = mean(object$X[, j]), "sd" = sd(object$X[, j]))
-        object$X[, j] <- (object$X[, j] - sx[[j]]$mean) / sx[[j]]$sd
+    for(j in seq_len(ncol(object$X))) {
+      xj <- object$X[, j]
+      sdj <- sd(xj)
+      if(is.finite(sdj) && sdj > 0) {
+        nm <- colnames(object$X)[j]
+        muj <- mean(xj)
+        sx[[nm]] <- list("mean" = muj, "sd" = sdj)
+        object$X[, j] <- (xj - muj) / sdj
       }
     }
     object$scalex <- sx

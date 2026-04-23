@@ -290,7 +290,7 @@ smooth.construct.lin.smooth.spec <- function(object, data, knots)
       if(is.finite(sdj) && sdj > 0) {
         nm <- colnames(object$X)[j]
         muj <- mean(xj)
-        sx[[nm]] <- list("mean" = muj, "sd" = sdj)
+        sx[[as.character(j)]] <- list("mean" = muj, "sd" = sdj)
         object$X[, j] <- (xj - muj) / sdj
       }
     }

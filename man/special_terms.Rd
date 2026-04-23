@@ -216,16 +216,16 @@ f <- y ~ n(~x) | n(~x) | n(~x) | n(~x)
 ## set the seed for reproducibility
 ## note, data should be scaled!
 set.seed(123)
-b <- gamlss2(f, data = abdom, family = BCT)
+m1 <- gamlss2(f, data = abdom, family = BCT)
 
 ## visualize estimated effects
-plot(b, which = "effects")
+plot(m1, which = "effects")
 
 ## plot diagnostics
-plot(b, which = "resid")
+plot(m1, which = "resid")
 
 ## predict quantiles
-pq <- quantile(b, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
 
 ## plot
 plot(y ~ x, data = abdom, pch = 19,
@@ -241,13 +241,13 @@ f <- R ~ n(~Fl+A,size=10,decay=0.7) | n(~Fl+A,size=10,decay=0.7)
 
 ## estimate model
 set.seed(456)
-b <- gamlss2(f, data = rent, family = GA)
+m2 <- gamlss2(f, data = rent, family = GA)
 
 ## plot estimated effects
-plot(b, which = "effects", persp = FALSE)
+plot(m2, which = "effects", persp = FALSE)
 
 ## diagnostics
-plot(b, which = "resid")
+plot(m2, which = "resid")
 
 ## predict using new data
 n <- 50
@@ -257,7 +257,7 @@ nd <- with(rent, expand.grid(
 ))
 
 ## compute median rent R estimate
-nd$fit <- quantile(b, newdata = nd, probs = 0.5)
+nd$fit <- quantile(m2, newdata = nd, probs = 0.5)
 
 ## visualize
 library("lattice")
@@ -278,13 +278,13 @@ print(p2, split = c(2, 1, 2, 1), more = FALSE)
 
 ## extract fitted special terms,
 ## fitted NN for parameter mu
-specials(b, model = "mu", elements = "model")
+specials(m2, model = "mu", elements = "model")
 
 ## same for sigma
-specials(b, model = "sigma", elements = "model")
+specials(m2, model = "sigma", elements = "model")
 
 ## return element names of fitted special term list
-specials(b, model = "sigma", elements = "names")
+specials(m2, model = "sigma", elements = "names")
 }}
 
 \keyword{models}

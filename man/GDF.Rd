@@ -96,16 +96,16 @@ X
 data("abdom", package = "gamlss.data")
 
 ## estimate model
-b <- gamlss2(y ~ s(x) | . | . | ., data = abdom, family = GA)
+m <- gamlss2(y ~ s(x) | . | . | ., data = abdom, family = GA)
 
 ## extract, also works with newdata
 d <- data.frame(
-  "mean" = mean(b),
-  "median" = median(b),
-  "q95" = quantile(b, probs = 0.95),
-  "variance" = variance(b),
-  "pdf" = pdf(b),
-  "cdf" = cdf(b)
+  "mean" = mean(m),
+  "median" = median(m),
+  "q95" = quantile(m, probs = 0.95),
+  "variance" = variance(m),
+  "pdf" = pdf(m),
+  "cdf" = cdf(m)
 )
 print(head(d))
 }

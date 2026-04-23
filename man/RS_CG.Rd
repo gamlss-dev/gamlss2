@@ -114,13 +114,13 @@ data("abdom", package = "gamlss.data")
 f <- y ~ s(x) | s(x) | s(x) | s(x)
 
 ## estimate model using RS (default)
-b <- gamlss2(f, data = abdom, family = BCT, optimizer = RS)
+m1 <- gamlss2(f, data = abdom, family = BCT, optimizer = RS)
 
 ## now with CG
-b <- gamlss2(f, data = abdom, family = BCT, optimizer = CG)
+m2 <- gamlss2(f, data = abdom, family = BCT, optimizer = CG)
 
 ## first 2 RS iterations and afterwards switch to CG
-b <- gamlss2(f, data = abdom, family = BCT, CG = 2)
+m3 <- gamlss2(f, data = abdom, family = BCT, CG = 2)
 }}
 
 \keyword{models}

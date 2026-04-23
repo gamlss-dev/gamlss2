@@ -29,7 +29,7 @@ gamlss2_control(optimizer = RS, trace = TRUE,
     as component of the returned object.}
   \item{y}{Logical, should the response be included as component of the returned object.}
   \item{fixed}{Named logical vector indicating which parameters should be fixed during estimation.
-    See the examples for \code{\link{gamlss2}}.}
+    See \code{\link{gamlss2_start}} for examples.}
   \item{\dots}{Further control parameters to be part of the return value, e.g.,
     used within optimizer function \code{\link{RS}}.}
 }
@@ -45,7 +45,7 @@ gamlss2_control(optimizer = RS, trace = TRUE,
 }
 
 \seealso{
-  \code{\link{RS}}, \code{\link{gamlss2}}
+  \code{\link{RS}}, \code{\link{gamlss2}}, \code{\link{gamlss2_start}}
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}

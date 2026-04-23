@@ -136,19 +136,19 @@ data("abdom", package = "gamlss.data")
 f <- y ~ s(x) | s(x)
 
 ## estimate model
-b <- gamlss2(f, data = abdom, family = Normal)
+m1 <- gamlss2(f, data = abdom, family = Normal)
 
 ## plot estimated effects
-plot(b, which = "effects")
+plot(m1, which = "effects")
 
 ## plot diagnostics
-plot(b, which = "resid")
+plot(m1, which = "resid")
 
 ## predict parameters
-par <- predict(b)
+par <- predict(m1)
 
 ## predict quantiles
-pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(b)$quantile(q, par))
+pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(m1)$quantile(q, par))
 
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,
@@ -196,13 +196,13 @@ f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") |
   ti(Fl) + ti(A) + ti(Fl, A, bs = "ps")
 
 ## estimate model
-b <- gamlss2(f, data = rent, family = Gamma)
+m2 <- gamlss2(f, data = rent, family = Gamma)
 
 ## visualize estimated effects
-plot(b, which = "effects")
+plot(m2, which = "effects")
 
 ## diagnostics, needs the $cdf() and $quantile() function!
-plot(b, which = "resid")
+plot(m2, which = "resid")
 }}
 
 \keyword{regression}

@@ -54,7 +54,7 @@ re(random, correlation = NULL, ...)
 
 \examples{\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 
-## orthdontic measurement data
+\dontrun{## orthdontic measurement data
 data("Orthodont", package = "nlme")
 
 ## model using lme()
@@ -70,14 +70,14 @@ Orthodont$age11  <- Orthodont$age - 11
 f <- distance ~ age11 + re(~age11|Subject)
 
 ## estimate model
-b <- gamlss2(f, data = Orthodont)
+m1 <- gamlss2(f, data = Orthodont)
 
 ## compare fitted values
-plot(fitted(b, model = "mu"), fitted(m))
+plot(fitted(m1, model = "mu"), fitted(m))
 abline(0, 1, col = 4)
 
 ## extract summary for re() model term
-st <- specials(b, model = "mu", term = "age11", elements = "model")
+st <- specials(m1, model = "mu", term = "age11", elements = "model")
 summary(st)
 
 ## random intercepts and slopes with s() using AIC
@@ -85,7 +85,7 @@ a <- gamlss2(distance ~ s(age,k=3) + s(Subject, bs = "re") + s(Subject, age11, b
   data = Orthodont)
 
 ## compare fitted values
-plot(fitted(b, model = "mu"), fitted(m))
+plot(fitted(m1, model = "mu"), fitted(m))
 points(fitted(a, model = "mu"), fitted(m), col = 2)
 abline(0, 1, col = 4)
 
@@ -106,7 +106,7 @@ f <- follicles ~ sin1 + cos1 +
   re(~ sin1 - 1 | Mare, correlation = corARMA(q = 2))
 
 ## estimate model
-b <- gamlss2(f, data = Ovary)
+m2 <- gamlss2(f, data = Ovary)
 
 ## smooth random effects
 f <- follicles ~ ti(Time) + ti(Mare, bs = "re") + 
@@ -122,7 +122,7 @@ for(j in levels(Ovary$Mare)) {
 
   plot(follicles ~ Time, data = ds)
 
-  f <- fitted(b, model = "mu")[Ovary$Mare == j]
+  f <- fitted(m2, model = "mu")[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 4, lwd = 2)
 
   f <- fitted(g, model = "mu")[Ovary$Mare == j]
@@ -146,16 +146,16 @@ ref <- rnorm(k, sd = 0.6)
 y <- rBCT(n, mu = 10, sigma = exp(-1 + ref[f]), tau = 10)
 
 ## estimate model
-b <- gamlss2(y ~ 1 | re(~ 1 | f), family = BCT)
+m3 <- gamlss2(y ~ 1 | re(~ 1 | f), family = BCT)
 
 ## extract fitted random effects
-cb <- coef(b, full = TRUE)
+cb <- coef(m3, full = TRUE)
 cb <- cb[grepl("re", names(cb), fixed = TRUE)]
 
 ## compare
 plot(cb, ref, main = round(mean((cb - ref)^2), 2))
 abline(0, 1, lwd = 2, col = 4)
-}
+}}
 
 \keyword{utilities}
 \keyword{regression}

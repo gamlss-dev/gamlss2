@@ -75,13 +75,13 @@ par <- data.frame(
 d$y <- fam$r(1, par)
 
 ## estimate model using the Kumaraswamy family
-b <- gamlss2(y ~ s(x), data = d, family = fam)
+m <- gamlss2(y ~ s(x), data = d, family = fam)
 
 ## plot estimated effect
-plot(b)
+plot(m)
 
 ## plot residual diagnostics
-plot(b, which = "resid")
+plot(m, which = "resid")
 }
 
 \keyword{regression}

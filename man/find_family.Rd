@@ -94,7 +94,7 @@ print(ic)
 fit_family(polio, family = ZAPIG)
 
 ## search complete model
-## b <- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,
+## m <- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,
 ##   select = TRUE, mu.link = "log")
 }
 }

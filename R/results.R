@@ -251,6 +251,13 @@ results_linear <- function(x, parameter = NULL, data, ...)
     stop("argument parameter is specified wrong!")
 
   ff <- fake_formula(formula(x), nospecials = TRUE)
+
+  if(!is.null(x$selection)) {
+    ff <- x$selection$formula
+    names(ff) <- NULL
+    ff <- fake_formula(ff, nospecials = TRUE)
+  }
+
   vn <- all.vars(ff)
 
   if(!length(vn)) {
@@ -292,9 +299,13 @@ results_linear <- function(x, parameter = NULL, data, ...)
     cj <- x$fitted.linear[[j]]$coefficients
     for(i in vn) {
       if(i %in% all.vars(formula(ff, lhs = 0, rhs = j))) {
+        if(!(i %in% names(nd)))
+          next
         ii <- grep(i, colnames(X), value = TRUE)
         if(attr(terms(formula(ff, lhs = 0, rhs = j)), "intercept") > 0L)
           ii <- c("(Intercept)", ii)
+        if(!all(ii %in% colnames(V)))
+          next
         Xj   <- X[, ii, drop = FALSE]
         Vsub <- V[ii, ii, drop = FALSE]
         bsub <- cj[ii]

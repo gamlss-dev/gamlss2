@@ -121,27 +121,27 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## estimate a Gamma model using the stepwise algorithm
-b <- step_gamlss2(f, data = rent, family = GA, K = 2)
+m1 <- step_gamlss2(f, data = rent, family = GA, K = 2)
 
 ## same with
-## b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+## m <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
 ## show the new formula of selected model terms
-new_formula(b)
+new_formula(m1)
 
 ## final model summary
-summary(b)
+summary(m1)
 
 ## effect plots
-plot(b)
+plot(m1)
 
 ## diagnostic plots
-plot(b, which = "resid")
+plot(m1, which = "resid")
 
 ## plot GAIC
-plot(b, which = "selection")
+plot(m1, which = "selection")
 
 ## use forward linear, replace and backward strategy
-b <- step_gamlss2(f, data = rent, family = GA, K = 2,
+m2 <- step_gamlss2(f, data = rent, family = GA, K = 2,
   strategy = c("forward.linear", "replace", "backward"))
 
 ## more complex model
@@ -153,12 +153,12 @@ f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
 ## model using the BCT family
-b <- step_gamlss2(f, data = rent, family = BCT,
+m3 <- step_gamlss2(f, data = rent, family = BCT,
   K = 2, strategy = c("forward.linear", "both"),
   keeporder = TRUE)
 
 ## plot GAIC
-plot(b, which = "selection")
+plot(m3, which = "selection")
 }}
 
 \keyword{models}

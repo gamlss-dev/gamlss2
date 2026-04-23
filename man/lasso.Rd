@@ -98,38 +98,38 @@ rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
 f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | . | .
 
 ## estimation
-b <- gamlss2(f, data = rent, family = BCT)
+m1 <- gamlss2(f, data = rent, family = BCT)
 
 ## summary, shows the estimated degrees of freedom
 ## for each model term
-summary(b)
+summary(m1)
 
 ## plot estimated coefficients
-plot(b)
+plot(m1)
 
 ## plot information criteria curves
 ## for each model term
-plot_lasso(b)
+plot_lasso(m1)
 
 ## plot parameter paths
-plot_lasso(b, which = "coefficients")
+plot_lasso(m1, which = "coefficients")
 
 ## plot a single model term
-plot_lasso(b, which = "coefficients", term = 5)
+plot_lasso(m1, which = "coefficients", term = 5)
 
 ## same with
-plot_lasso(b, which = "coefficients", term = "sigma.la(Ac")
+plot_lasso(m1, which = "coefficients", term = "sigma.la(Ac")
 
 ## zoom out
-plot_lasso(b, which = "coefficients", term = 5,
+plot_lasso(m1, which = "coefficients", term = 5,
   zoom = c(8, 7))
 
 ## set names
-plot_lasso(b, which = "coefficients", term = 5,
+plot_lasso(m1, which = "coefficients", term = 5,
   zoom = c(8, 7), names = c("A", "B", "C"))
 
 ## set title
-plot_lasso(b, which = "coefficients", term = 5,
+plot_lasso(m1, which = "coefficients", term = 5,
   zoom = c(8, 7), main = "Fused Lasso")
 
 ## simulated example using the normal lasso
@@ -162,20 +162,20 @@ f <- y ~ la(X,type=3) | la(X,type=3)
 
 ## estimate model incl. extra ridge penalty
 ## for all la() model terms
-b <- gamlss2(f, add_ridge = TRUE)
+m2 <- gamlss2(f, add_ridge = TRUE)
 
 ## plot information criteria curves
-plot_lasso(b)
+plot_lasso(m2)
 
 ## coefficient paths
-plot_lasso(b, which = "coefficients")
+plot_lasso(m2, which = "coefficients")
 
 ## zoom out
-plot_lasso(b, which = "coefficients",
+plot_lasso(m2, which = "coefficients",
   zoom = c(8, 9))
 
 ## extract coefficients
-cb <- coef(b, full = TRUE)
+cb <- coef(m2, full = TRUE)
 
 ## compare (without intercept)
 cb_mu <- cb[grep("mu.", names(cb))][-1]
@@ -186,7 +186,7 @@ tp <- mean(c(cb_mu[beta$mu > 0] > 0,
   cb_sigma[beta$sigma > 0] > 0))
 
 ## false positive rate, needs threshold
-thres <- 0.01
+thres <- 0.02
 fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
   abs(cb_sigma[beta$sigma == 0]) > thres))
 }

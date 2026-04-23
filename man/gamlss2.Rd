@@ -48,7 +48,8 @@ gamlss2(formula, \dots)
     parameter of the distribution. If offsets are needed for several parameters,
     supply a data frame or list in the same order as the parameter names in the
     family object.}
-  \item{start}{Optional starting values for the estimation algorithm.}
+  \item{start}{Optional starting values for the estimation algorithm, see
+    \code{\link{gamlss2_start}}.}
   \item{knots}{An optional list of user specified knots, see \code{\link[mgcv]{smoothCon}}.}
   \item{control}{A list of control arguments, see \code{\link{gamlss2_control}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2_control}}.}
@@ -95,33 +96,36 @@ gamlss2(formula, \dots)
 }
 
 \seealso{
-  \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
+  \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}},
+  \code{\link{gamlss2_start}}
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 ## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## specify the model formula
-f <- y ~ s(x) | s(x) | s(x) | s(x)
+## specify a distributional model:
+## location and scale vary with x,
+## shape parameters remain constant
+f <- y ~ s(x) | s(x) | 1 | 1
 
 ## estimate model
-b <- gamlss2(f, data = abdom, family = BCT)
+m <- gamlss2(f, data = abdom, family = BCT)
 
 ## model summary
-summary(b)
+summary(m)
 
-## plot estimated effects
-plot(b, which = "effects")
+## plot parameter-specific effects
+plot(m, which = "effects")
 
 ## plot diagnostics
-plot(b, which = "resid")
+plot(m, which = "resid")
 
-## predict parameters
-par <- predict(b)
+## predict selected distribution parameters
+par <- predict(m, model = c("mu", "sigma"))
 
-## predict quantiles
-pq <- quantile(b, probs = c(0.05, 0.5, 0.95))
+## fitted centile curves
+pq <- quantile(m, probs = c(0.05, 0.5, 0.95))
 
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,
@@ -129,25 +133,34 @@ plot(y ~ x, data = abdom, pch = 19,
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
 
-## use of starting values
-m <- gamlss2(f, data = abdom, family = BCT,
-  start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10))
+## count response example using HarzTraffic data
+data("HarzTraffic", package = "gamlss2")
 
-## fix some parameters
-m <- gamlss2(f, data = abdom, family = BCT,
-  start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10),
-  fixed = c(nu = TRUE, tau = TRUE))
+## seasonal count model for motorcycles
+m <- gamlss2(
+  bikes ~ s(yday, bs = "cc") | s(yday, bs = "cc"),
+  data = HarzTraffic,
+  family = NBI
+)
 
-## estimated coefficients (intercepts)
-coef(m)
+## summary
+summary(m)
 
-## starting values using full predictors
-m <- gamlss2(f, data = abdom, family = BCT,
-  start = fitted(m))
+## effect plots
+plot(m)
 
-## same with
-m <- gamlss2(f, data = abdom, family = BCT,
-  start = m)
+## residual diagnostics
+plot(m, which = "resid")
+
+## quantiles over the day of the year
+nd <- data.frame(yday = 1:365)
+pq <- quantile(m, newdata = nd, probs = c(0.05, 0.5, 0.95))
+
+## visualize fitted quantiles
+plot(bikes ~ yday, data = HarzTraffic, pch = 19,
+  col = gray(0.1, alpha = 0.3))
+matplot(nd$yday, pq, type = "l", lty = c(2, 1, 2),
+  lwd = 2, col = 4, add = TRUE)
 }
 
 \keyword{models}

@@ -118,13 +118,13 @@ f <- list(f, f)
 f[[1]] <- update(f[[1]], y ~ .)
 
 ## estimate model
-b <- select_gamlss2(f, data = d, family = NO)
+m <- select_gamlss2(f, data = d, family = NO)
 
 ## plot selected estimated effects
-plot(b)
+plot(m)
 
 ## final model
-new_formula(b)
+new_formula(m)
 
 ## example taken from ?gam.selection
 library("mgcv")

@@ -52,20 +52,20 @@ f <- rep(list(f), 4)
 f[[1]] <- update(f[[1]], lborev1 ~ .)
 
 ## estimate model
-b <- gamlss2(f, data = film90, family = BCPE)
+m <- gamlss2(f, data = film90, family = BCPE)
 
 ## compute quantiles using "newdata"
 nd <- film90[1:10, ]
-print(quantile(b, newdata = nd))
+print(quantile(m, newdata = nd))
 
 ## plot sorted quantiles
-quantile(b, plot = TRUE)
+quantile(m, plot = TRUE)
 
 ## quantile plot using covariate data
-quantile(b, plot = TRUE, variable = TRUE)
+quantile(m, plot = TRUE, variable = TRUE)
 
 ## plot without raw data
-quantile(b, plot = TRUE, variable = TRUE, data = FALSE)
+quantile(m, plot = TRUE, variable = TRUE, data = FALSE)
 }
 }
 

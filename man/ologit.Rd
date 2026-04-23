@@ -54,19 +54,19 @@ summary(m)
 housing$Satint <- as.integer(housing$Sat)
 
 ## fit equivalent model using gamlss2
-b <- gamlss2(Satint ~ Infl + Type + Cont,
+m <- gamlss2(Satint ~ Infl + Type + Cont,
   data = housing, weights = Freq,
   family = ologit(k = 3))
-summary(b)
+summary(m)
 
 ## compare coefficients
 coef(m)
-coef(b)
+coef(m)
 
 ## predict class probabilities
 pm <- predict(m, type = "p")
-pb <- predict(b)
-pb <- family(b)$probabilities(pb)
+pb <- predict(m)
+pb <- family(m)$probabilities(pb)
 
 print(head(pm))
 print(head(pb))

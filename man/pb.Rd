@@ -47,31 +47,30 @@ pb(x, k = 20, ...)
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## load head circumference data
+\dontrun{## load head circumference data
 data("dbhh", package = "gamlss.data")
 
 ## specify the model formula
 f <- head ~ pb(age) | pb(age) | pb(age) | pb(age)
 
 ## estimate model
-b <- gamlss2(f, data = dbhh, family = BCT)
+m <- gamlss2(f, data = dbhh, family = BCT)
 
 ## visualize estimated effects
-plot(b, which = "effects")
+plot(m, which = "effects")
 
 ## plot diagnostics
-plot(b, which = "resid")
+plot(m, which = "resid")
 
 ## predict quantiles
-pq <- quantile(b, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(m, probs = c(0.05, 0.5, 0.95))
 
 ## plot
 plot(head ~ age, data = dbhh, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matplot(dbhh$age, pq, type = "l",
   lty = 1, col = 4, add = TRUE)
-}
+}}
 
 \keyword{utilities}
 \keyword{regression}
-

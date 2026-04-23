@@ -56,20 +56,20 @@ f <- R ~ lasso(~Flc + Ac + loc) |
   lasso(~Flc + Ac + loc)
 
 ## estimation
-b <- gamlss2(f, data = rent, family = BCT)
+m <- gamlss2(f, data = rent, family = BCT)
 
 ## summary, shows the estimated degrees of freedom
 ## for each model term
-summary(b)
+summary(m)
 
 ## extract fitted special lasso model term
-st <- specials(b, model = "mu")
+st <- specials(m, model = "mu")
 
 ## plot coefficient paths
 plot(st$model)
 
 ## same for sigma
-plot(specials(b, model = "sigma", elements = "model"))
+plot(specials(m, model = "sigma", elements = "model"))
 }}
 
 \keyword{regression}

@@ -7,20 +7,21 @@
 \title{Special Model Terms for GAMLSS}
 
 \description{
-  The \pkg{gamlss2} package provides infrastructure to include special model terms
-  for the optimizer functions \code{\link{RS}} and \code{\link{CG}},
-  e.g., such as neural networks, trees and forests. The infrastructure assumes
-  that such special model terms provide their own fitting and predict method.
+  The \pkg{gamlss2} package provides an interface for special model terms whose
+  fitting is not handled by the standard linear or smooth-term machinery.
+  Examples include neural networks, trees, or forests. A special term is expected
+  to provide its own fitting and prediction methods so that it can be updated
+  within the \code{\link{RS}} or \code{\link{CG}} backfitting algorithms.
 }
 
 \usage{
-## Generic fitting method.
+## generic fitting method
 special_fit(x, \dots)
 
-## Generic predict method.
+## generic predict method
 special_predict(x, \dots)
 
-## Extractor function for fitted special terms.
+## extractor function for fitted special terms
 specials(object, model = NULL, terms = NULL, elements = NULL, ...)
 }
 
@@ -37,18 +38,21 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
 }
 
 \details{
-  To implement a new special term, the first step is to write a formula constructor function for
-  the new model term. For example, consider the implementation below, which demonstrates how to
-  create a neural network model term. Additionally, the name of the new model term constructor
-  must be passed to the \code{specials} argument of the function \code{\link{fake_formula}}.
-  Please note that in the provided example, no new special name is passed because \code{"n"}
-  is already registered in \code{\link{fake_formula}}.
+  To implement a new special term, define:
+  \enumerate{
+    \item a constructor function that is used inside the model formula,
+    \item a corresponding \code{special_fit()} method,
+    \item and a corresponding \code{special_predict()} method.
+  }
 
-  Afterwards, a fitting and a predict method for the new special model term needs to be implemented.
-  Please also refer to the example below, implementing these functions for a neural network
-  model term.
+  The constructor function should collect the information needed for fitting,
+  such as the model formula, the variables, and any control arguments. If the
+  constructor has a new special name, this name must be registered via the
+  \code{specials} argument of \code{\link{fake_formula}}. In the example below,
+  this is not necessary because \code{"n"} is already registered.
 
-  The following describes the detailed arguments and return values.
+  The following paragraphs describe the expected arguments and return values of
+  the fitting and prediction methods.
 
   A method for \code{special_fit()} has the following arguments:
   \itemize{
@@ -61,9 +65,18 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
     \item \code{family}: The family object of the model, see \code{\link{gamlss2.family}}.
     \item \code{control}: A named list of control arguments, see \code{\link{gamlss2_control}}.
   }
-  Note that for setting up a special model term only the first three arguments a mandatory,
-  all other arguments are optional. The function must at least return a named list containing
-  the \code{"fitted.values"} to work with \code{\link{RS}} and \code{\link{CG}}.
+  Only the first three arguments are required to set up a special model term;
+  all remaining arguments are optional. The function must at least return a
+  named list containing the component \code{"fitted.values"} in order to work
+  with \code{\link{RS}} and \code{\link{CG}}.
+  In practice, useful return components are:
+  \itemize{
+    \item \code{"fitted.values"}: Required. Numeric vector of fitted contributions of the special term.
+    \item Additional fitted objects: Optional. For example, the fitted model object itself,
+      degrees of freedom, or quantities needed for prediction.
+    \item \code{"transfer"}: Optional. Information that should be passed from one backfitting
+      iteration to the next.
+  }
 
   A method for \code{special_predict()} has the following arguments:
   \itemize{
@@ -72,9 +85,10 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
     \item{data}: The data for which predictions should be computed.
     \item{se.fit}: Logical, should standard errors of the predictions be computed.
   }
-  Note that function \code{special_predict()} should return a data frame with named
-  colums \code{"fit"}, \code{"lower"} and \code{"upper"}, \code{"lower"} and \code{"upper"}
-  are optional.
+  The function \code{special_predict()} should return a data frame with a column
+  named \code{"fit"}. Optional columns such as \code{"lower"} and \code{"upper"}
+  can be added if interval information is available. Thus, the minimal valid
+  return value is a data frame with a \code{"fit"} column.
 }
 
 \seealso{
@@ -195,7 +209,7 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 \dontrun{## example with data
 data("abdom", package = "gamlss.data")
 
-## specify the model Formula
+## specify the model formula
 f <- y ~ n(~x) | n(~x) | n(~x) | n(~x)
 
 ## estimate model,
@@ -222,7 +236,7 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 ## another example using the Munich rent data
 data("rent", package = "gamlss.data")
 
-## model Formula
+## model formula
 f <- R ~ n(~Fl+A,size=10,decay=0.7) | n(~Fl+A,size=10,decay=0.7)
 
 ## estimate model
@@ -275,4 +289,3 @@ specials(b, model = "sigma", elements = "names")
 
 \keyword{models}
 \keyword{regression}
-

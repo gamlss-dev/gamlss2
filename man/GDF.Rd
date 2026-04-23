@@ -92,7 +92,6 @@ X <- GDF("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
 X
 
 ## see ?gamlss.dist::GAMLSS for the remainder of this example
-
 ## example using gamlss2
 data("abdom", package = "gamlss.data")
 
@@ -110,4 +109,3 @@ d <- data.frame(
 )
 print(head(d))
 }
-

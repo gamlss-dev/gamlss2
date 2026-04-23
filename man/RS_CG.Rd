@@ -11,11 +11,11 @@
 }
 
 \usage{
-## Rigby and Stasinopoulos algorithm.
+## rigby and stasinopoulos algorithm
 RS(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 
-## Cole and Green algorithm.
+## cole and green algorithm
 CG(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 }
@@ -110,7 +110,7 @@ CG(x, y, specials, family, offsets,
 \dontrun{## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## specify the model Formula
+## specify the model formula
 f <- y ~ s(x) | s(x) | s(x) | s(x)
 
 ## estimate model using RS (default)
@@ -125,4 +125,3 @@ b <- gamlss2(f, data = abdom, family = BCT, CG = 2)
 
 \keyword{models}
 \keyword{regression}
-

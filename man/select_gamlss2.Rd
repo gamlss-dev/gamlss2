@@ -16,10 +16,10 @@
 }
 
 \usage{
-## Wrapper function.
+## wrapper function
 select_gamlss2(formula, ..., criterion = "BIC", thres = c(0.9, 0.2))
 
-## Modified RS optimizer function.
+## modified RS optimizer function
 sRS(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 }
@@ -159,4 +159,3 @@ new_formula(b2)
 
 \keyword{regression}
 \keyword{models}
-

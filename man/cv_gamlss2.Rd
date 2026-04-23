@@ -14,7 +14,7 @@
 }
 
 \usage{
-## K-fold cross-validation
+## k-fold cross-validation
 cv_gamlss2(..., data, folds = 5,
   metric = log_pdf_metric, parallel = FALSE, simplify = TRUE)
 
@@ -90,4 +90,3 @@ cv2 <- cv_gamlss2(y ~ s(x) | s(x), data = abdom, family = BCT)
 sum(cv1$score)
 sum(cv2$score)
 }}
-

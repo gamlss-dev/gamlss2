@@ -50,7 +50,7 @@ pb(x, k = 20, ...)
 ## load head circumference data
 data("dbhh", package = "gamlss.data")
 
-## specify the model Formula
+## specify the model formula
 f <- head ~ pb(age) | pb(age) | pb(age) | pb(age)
 
 ## estimate model

@@ -9,10 +9,10 @@
 }
 
 \usage{
-## Model term constructor function.
+## model term constructor function
 la(x, type = 1, const = 1e-05, ...)
 
-## Plotting function.
+## plotting function
 plot_lasso(x, terms = NULL,
   which = c("criterion", "coefficients"),
   zoom = c(3, 4), spar = TRUE, ...)
@@ -108,13 +108,13 @@ summary(b)
 plot(b)
 
 ## plot information criteria curves
-## for each model term.
+## for each model term
 plot_lasso(b)
 
-## plot parameter paths.
+## plot parameter paths
 plot_lasso(b, which = "coefficients")
 
-## plot a single model term.
+## plot a single model term
 plot_lasso(b, which = "coefficients", term = 5)
 
 ## same with
@@ -195,4 +195,3 @@ fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
-

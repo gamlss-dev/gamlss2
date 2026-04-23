@@ -43,27 +43,27 @@ ologit(k)
 }
 
 \examples{
-## Example using the housing data from the MASS package:
+## example using the housing data from the MASS package:
 library("MASS")
 
-## Fit standard cumulative logit model using polr().
+## fit standard cumulative logit model using polr()
 m <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
 summary(m)
 
-## Convert response to integer for use with gamlss2.
+## convert response to integer for use with gamlss2
 housing$Satint <- as.integer(housing$Sat)
 
-## Fit equivalent model using gamlss2.
+## fit equivalent model using gamlss2
 b <- gamlss2(Satint ~ Infl + Type + Cont,
   data = housing, weights = Freq,
   family = ologit(k = 3))
 summary(b)
 
-## Compare coefficients.
+## compare coefficients
 coef(m)
 coef(b)
 
-## Predict class probabilities.
+## predict class probabilities
 pm <- predict(m, type = "p")
 pb <- predict(b)
 pb <- family(b)$probabilities(pb)
@@ -76,4 +76,3 @@ print(head(pb))
 \keyword{ordinal}
 \keyword{models}
 \keyword{distribution}
-

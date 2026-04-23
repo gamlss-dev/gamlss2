@@ -6,12 +6,15 @@
 \title{Generalized Additive Models for Location Scale and Shape}
 
 \description{
-  Estimation of generalized additive models for location scale and shape (GAMLSS).
-  The model fitting function \code{gamlss2()} provides flexible infrastructures
-  to estimate the parameters of a response distribution. The number of distributional
-  parameters is not fixed, see \code{\link{gamlss2.family}}. Moreover, \code{gamlss2()}
-  supports all smooth term constructors from the \pkg{mgcv} package in addition to the
-  classical model terms as provided by \pkg{gamlss} and \code{gamlss.add}.
+  The function \code{gamlss2()} fits generalized additive models for location,
+  scale, and shape (GAMLSS). It estimates one additive predictor for each
+  parameter of the chosen response distribution, such as \code{mu},
+  \code{sigma}, \code{nu}, or \code{tau}. The number and meaning of these
+  parameters are determined by the selected family object, see
+  \code{\link{gamlss2.family}}.
+
+  In addition to ordinary linear terms, \code{gamlss2()} supports smooth terms
+  from \pkg{mgcv} as well as the model-term infrastructure from \pkg{gamlss}.
 }
 
 \usage{
@@ -26,55 +29,50 @@ gamlss2(formula, \dots)
 
 \arguments{
   \item{formula}{A GAM-type \code{\link[stats]{formula}} or
-    \code{\link[Formula]{Formula}}. All smooth terms of the \pkg{mgcv} package
-    are supported, see also \code{\link[mgcv]{formula.gam}}.
-    For \code{gamlss.list()} \code{formula} is a list of
-    \code{\link[stats]{formula}}s.}
+    \code{\link[Formula]{Formula}} describing the additive predictors for the
+    distribution parameters. All smooth terms from \pkg{mgcv} are supported,
+    see also \code{\link[mgcv]{formula.gam}}. For \code{gamlss.list()},
+    \code{formula} is a list of \code{\link[stats]{formula}}s.}
   \item{data}{A data frame or list or environment containing the variables in the model.
     If not found in \code{data}, the variables are taken from \code{environment(formula)},
     typically the environment from which \code{gamlss2} is called.}
-  \item{family}{A \code{gamlss.family} or \code{gamlss2.family} object used to define
-    distribution and the link functions of the parameters.}
+  \item{family}{A \code{gamlss.family} or \code{gamlss2.family} object defining
+    the response distribution and the link functions of its parameters.}
   \item{subset}{An optional vector specifying a subset of observations to be used
     in the fitting process.}
   \item{na.action}{\code{NA} processing for setting up the \code{\link[stats]{model.frame}}.}
   \item{weights}{An optional vector of prior \code{weights} to be used in the fitting process.
     Should be \code{NULL} or a numeric vector.}
-  \item{offset}{This can be used to specify an \emph{a priori} known components to be
-    included in the linear predictors during fitting. Please note that if only a single
-    numeric vector is provided, the offset will be assigned to the first specified parameter
-    of the distribution. In the case of multiple offsets, a data frame or list must be supplied.
-    Each offset is assigned in the same order as the parameters of the distribution
-    specified in the family object.}
-  \item{start}{Starting values for estimation algorithms.}
+  \item{offset}{Optional offset terms to be included in the linear predictors during
+    fitting. If a single numeric vector is supplied, it is assigned to the first
+    parameter of the distribution. If offsets are needed for several parameters,
+    supply a data frame or list in the same order as the parameter names in the
+    family object.}
+  \item{start}{Optional starting values for the estimation algorithm.}
   \item{knots}{An optional list of user specified knots, see \code{\link[mgcv]{smoothCon}}.}
   \item{control}{A list of control arguments, see \code{\link{gamlss2_control}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2_control}}.}
 }
 
 \details{
-  The model fitting function \code{gamlss2()} provides flexible infrastructures for the
-  estimation of GAMLSS.
+  The function \code{gamlss2()} is the main entry point for fitting distributional
+  regression models in \pkg{gamlss2}.
   \itemize{
-    \item Distributional models are specified using family objects, either from the
-      \pkg{gamlss.dist} package or using \code{\link{gamlss2.family}} objects.
-    \item Estimation is carried out through a Newton-Raphson/Fisher scoring algorithm,
-      see function \code{\link{RS}}. The estimation algorithms can also be exchanged using 
-      \code{\link{gamlss2_control}}. Additionally, if an \code{optimizer} is specified by the
-      family object, this optimizer function will be employed for estimation.
-    \item The return value is determined by the object returned from the optimizer function,
-      typically an object of class \code{"gamlss2"}. Default methods and extractor functions
-      are available for this class. Nevertheless, users have the flexibility to supply
-      their own optimizer function, along with user-specific methods tailored for the
-      returned object.
+    \item The response distribution is specified through a family object, either
+      from \pkg{gamlss.dist} or created as a \code{\link{gamlss2.family}} object.
+    \item By default, estimation is carried out with the \code{\link{RS}} algorithm.
+      The optimizer can be changed through \code{\link{gamlss2_control}}. A family
+      object may also provide its own optimizer.
+    \item The returned object depends on the chosen optimizer. In the standard case,
+      this is an object of class \code{"gamlss2"}, for which summary, plotting,
+      prediction, and extractor methods are available.
   }
 } 
 
 \value{
-  The return value is determined by the object returned from the optimizer function.
-  By default, the optimization is performed using the \code{\link{RS}} optimizer function
-  (see \code{\link{gamlss2_control}}), yielding an object of class \code{"gamlss2"}.
-  Default methods and extractor functions are available for this class.
+  The object returned by the selected optimizer. By default, this is an object
+  of class \code{"gamlss2"} produced by \code{\link{RS}}. Standard methods and
+  extractor functions are available for this class.
 }
 
 \references{
@@ -104,7 +102,7 @@ gamlss2(formula, \dots)
 ## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## specify the model Formula
+## specify the model formula
 f <- y ~ s(x) | s(x) | s(x) | s(x)
 
 ## estimate model
@@ -154,4 +152,3 @@ m <- gamlss2(f, data = abdom, family = BCT,
 
 \keyword{models}
 \keyword{regression}
-

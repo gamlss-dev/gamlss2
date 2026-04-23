@@ -8,7 +8,7 @@
 \description{
   Next generation infrastructure for generalized additive models for
   location, scale, and shape (GAMLSS) and distributional regression
-  more generally. The package provides a fresh reimplementaton of
+  more generally. The package provides a fresh reimplementation of
   the classic 'gamlss' package while being more modular and
   facilitating the creation of advanced terms and models.
 }
@@ -61,4 +61,3 @@
 \seealso{
   \code{\link{gamlss2}}, \code{\link{fake_formula}}
 }
-

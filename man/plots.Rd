@@ -5,10 +5,11 @@
 \title{Plotting GAMLSS}
 
 \description{
-  Plotting methods for objects of class \code{"gamlss2"} and \code{"gamlss2.list"}, which can be
-  used for effect plots of model terms or residual plots.
-  Note that effect plots of model terms with more than two covariates are not supported, for this
-  purpose use the \code{\link[stats]{predict}} method.
+  Plotting methods for objects of class \code{"gamlss2"} and
+  \code{"gamlss2.list"}. These methods can be used for effect plots of model
+  terms and for residual diagnostics. Effect plots for model terms with more
+  than two covariates are not supported; in that case, use
+  \code{\link[stats]{predict}} and plot the results manually.
 }
 
 \usage{
@@ -23,21 +24,21 @@
 \arguments{
   \item{x}{An object of class \code{"gamlss2"} or \code{"gamlss2.list"}, which can be
     created by using the \code{c()} method combining \code{"gamlss2"} objects.
-    See th examples.}
-  \item{parameter}{Character or integer. For which parameter/model/what should the plots be created?
-    Note that instead of argument \code{parameter} plots can also be specified passing
-    argument \code{model} and \code{what} to \dots.}
-  \item{which}{Character or integer, selects the type of plot: \code{"effects"} produces
-    effect plots of (special) model terms,
-    \code{"hist-resid"} shows a histogram of residuals, \code{"qq-resid"} shows
-    a quantile-quantile plot of residuals, \code{"scatter-resid"} shows a scatter plot of
-    residuals with fitted values for the distribution mean
-    (or median, if available in the family object).}
-  \item{terms}{Character or integer. For which model term should the plot(s) be created?}
-  \item{scale}{If set to \code{1}, effect plots all have the same scale on the y-axis. If set to
-    \code{0} each effect plot has its own scale for the y-axis.}
-  \item{spar}{Should graphical parameters be set?}
-  \item{legend}{Should a legend be added using multiple model plots?}
+    See the examples.}
+  \item{parameter}{Character or integer. For which distribution parameter should the plots be created?
+    The arguments \code{model} and \code{what}, if supplied through \code{\dots}, are treated as
+    aliases for \code{parameter} to support alternative calling styles.}
+  \item{which}{Character or integer selecting the type of plot.
+    \code{"effects"} produces effect plots of model terms,
+    \code{"hist-resid"} a histogram of residuals,
+    \code{"qq-resid"} a quantile-quantile plot of residuals, and
+    \code{"scatter-resid"} a scatter plot of residuals against fitted values
+    for the distribution mean (or median, if available in the family object).}
+  \item{terms}{Character or integer. Which model term(s) should be plotted?}
+  \item{scale}{Logical. If \code{TRUE}, effect plots all have the same scale on the y-axis.
+    If \code{FALSE}, each effect plot has its own y-axis scale.}
+  \item{spar}{Logical. Should graphical parameters be set automatically?}
+  \item{legend}{Logical. Should a legend be added for plots with multiple models?}
   \item{\dots}{Arguments such as
     \code{lwd}, \code{lty}, \code{col}, \code{legend = TRUE} (for multiple model plots),
     a.o., depending on the type of plot. See the examples.}

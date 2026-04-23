@@ -22,13 +22,13 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   \item{light}{Logical, if set to \code{light = TRUE}, no model frame, response,
     model matrix and other design matrices will be part of the return value.}
   \item{expand}{Logical, if fewer formulas are supplied than there are parameters
-    of the distribution, should formulas with intercept only formulas be added?}
+    of the distribution, should intercept-only formulas be added automatically?}
   \item{model}{Logical, should the \emph{model frame} be included as component of the
     returned object.}
   \item{x}{Logical, indicating whether the model matrix should be included
     as component of the returned object.}
   \item{y}{Logical, should the response be included as component of the returned object.}
-  \item{fixed}{Logical, a named vector of parameters that should be fixed during estimation.
+  \item{fixed}{Named logical vector indicating which parameters should be fixed during estimation.
     See the examples for \code{\link{gamlss2}}.}
   \item{\dots}{Further control parameters to be part of the return value, e.g.,
     used within optimizer function \code{\link{RS}}.}
@@ -52,7 +52,7 @@ gamlss2_control(optimizer = RS, trace = TRUE,
 \dontrun{## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## specify the model Formula
+## specify the model formula
 f <- y ~ s(x) | s(x)
 
 ## estimate model with different step length
@@ -63,4 +63,3 @@ b2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
 
 \keyword{models}
 \keyword{regression}
-

@@ -5,19 +5,19 @@
 \title{Family Objects in \pkg{gamlss2}}
 
 \description{
-  Family objects within the package \pkg{gamlss2} are used to specify the
-  information required to use a model fitting function. This includes details
-  such as parameter names, corresponding link functions, the density function,
-  log-likelihood function and derivatives of the log-likelihood with respect to
-  the predictors. In addition, family objects are used in the calculation of
-  post-modeling statistics, such as residual diagnostics and random number generation.
-  An overview can be found in the accompanying details and examples.
+  A \code{"gamlss2.family"} object describes a response distribution for use with
+  \code{\link{gamlss2}}. It tells the fitting algorithm which distributional
+  parameters exist, which link functions they use, and which distributional
+  functions are available, such as densities, quantiles, random-number generators,
+  or score functions.
 }
 
 \details{
-  A \pkg{gamlss2} family object must be a \code{list} of class \code{"gamlss2.family"}, containing
-  the necessary elements to define the response distribution and how it is handled during model
-  fitting. The minimum requirements are as follows:
+  A \pkg{gamlss2} family object is a \code{list} of class \code{"gamlss2.family"}.
+  It defines the response distribution and the functions needed to fit and use
+  that distribution in a model.
+
+  The minimum required elements are:
 
   \itemize{
     \item \code{family}: the name of the distribution (character string).
@@ -28,11 +28,12 @@
     \item \code{pdf(y, par, log = FALSE, ...)}: a function to evaluate the (log-)density.
   }
 
-  The \code{pdf()} function must accept the response \code{y}, a named list \code{par} of evaluated
-  parameter values (e.g., \code{par$mu}, \code{par$sigma}), a logical \code{log}, and optional
-  additional arguments.
+  The \code{pdf()} function must accept the response \code{y}, a named list
+  \code{par} of evaluated parameter values (e.g., \code{par$mu}, \code{par$sigma}),
+  a logical \code{log}, and optional additional arguments.
 
-  Optionally, the family object may include:
+  Further elements can be added depending on how fully the family should support
+  fitting, prediction, diagnostics, and simulation. Common optional elements are:
 
   \itemize{
     \item \code{score}: a named list of functions (one per parameter), each computing the
@@ -53,13 +54,13 @@
       \code{initialize$mu(y, ...)}), used to generate starting values.
     \item \code{valid.response(x)}: a function that checks whether the response is valid (e.g.,
       numeric, non-factor).
-    \item \code{optimizer()}: an optional function to define a custom optimization method for
-      use with \code{\link{gamlss2}}, see also \code{link{RS}}.
+    \item \code{optimizer()}: an optional function defining a custom optimization
+      method for use with \code{\link{gamlss2}}, see also \code{\link{RS}}.
   }
 
-  If the analytical score or Hessian functions are not provided, they will be approximated
-  numerically. If quantile residuals are to be computed, a \code{cdf()} function
-  must be provided.
+  If analytical score or Hessian functions are not provided, they are approximated
+  numerically. If quantile residuals are required, a \code{cdf()} function must
+  be available.
 }
 
 \seealso{
@@ -131,7 +132,7 @@ Normal <- function(...) {
 ## load the abdominal circumference data
 data("abdom", package = "gamlss.data")
 
-## specify the model Formula
+## specify the model formula
 f <- y ~ s(x) | s(x)
 
 ## estimate model
@@ -158,7 +159,7 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 ## another example using only the density
 ## function, all derivatives are approximated
 ## in this case; for residual diagnostics,
-## the $cdf() and $quantile() function is needed, too.
+## the $cdf() and $quantile() function is needed, too
 Gamma <- function(...) {
   fam <- list(
     "names" = c("mu", "sigma"),
@@ -207,4 +208,3 @@ plot(b, which = "resid")
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
-

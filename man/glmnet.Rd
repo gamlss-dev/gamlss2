@@ -9,7 +9,7 @@
 }
 
 \usage{
-## Model term constructor function.
+## model term constructor function
 lasso(formula, ...)
 }
 
@@ -74,4 +74,3 @@ plot(specials(b, model = "sigma", elements = "model"))
 
 \keyword{regression}
 \keyword{models}
-

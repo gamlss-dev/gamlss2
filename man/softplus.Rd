@@ -49,7 +49,7 @@ Wiemann PFV, Kneib T, Hambuckers J (2023). \dQuote{Using the Softplus Function t
 }
 
 \examples{\dontshow{ if(!requireNamespace("distributions3")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## visualization of softmax function from Wiemann et al. (2003, Figure 1)
+## visualization of the softplus function from Wiemann et al. (2023, Figure 1)
 x <- -200:200/50
 plot(x, softplus(1)$linkinv(x), ylab = expression(softplus[a](x)),
   type = "l", col = 2, lwd = 2)
@@ -60,7 +60,7 @@ lines(x, pmax(0, x), lty = 3, lwd = 2)
 legend("topleft", c("a = 1", "a = 5", "a = 10", "linear spline"),
   col = c(2, 3, 4, 1), lty = c(1, 1, 1, 3), lwd = 2, bty = "n")
 
-## Poisson regression example with different links
+## poisson regression example with different links
 data("FIFA2018", package = "distributions3")
 m_exp <- glm(goals ~ difference, data = FIFA2018, family = poisson(link = "log"))
 m_splus <- glm(goals ~ difference, data = FIFA2018, family = poisson(link = softplus(1)))

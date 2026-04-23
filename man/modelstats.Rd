@@ -5,29 +5,32 @@
 \title{GAIC and Generalised (Pseudo) R-squared for GAMLSS Models}
 
 \description{
-  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for a GAMLSS models.
+  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.
 }
 
 \usage{
-## Information criteria.
+## information criteria
 GAIC(object, ...,
   k = 2, corrected = FALSE)
 
-## R-squared.
+## r-squared
 Rsq(object, ...,
   type = c("Cox Snell", "Cragg Uhler", "both", "simple"),
   newdata = NULL)
 }
 
 \arguments{
-  \item{object}{A fitted model object}
+  \item{object}{A fitted model object.}
   \item{\dots}{Optionally more fitted model objects.}
   \item{k}{Numeric, the \emph{penalty} to be used. The default \code{k = 2} corresponds to
     the classical AIC.}
   \item{corrected}{Logical, whether the corrected AIC should be used?
     Note that it applies only when \code{k = 2}.}
-  \item{type}{which definition of R squared. Can be the \code{"Cox Snell"} or the Nagelkerke, \code{"Cragg Uhler"} or \code{"both"},
-    and \code{"simple"}, which computes the R-squared based on the median. In this case also \code{newdata} may be supplied.}
+  \item{type}{Which definition of R-squared should be used?
+    Possible values are \code{"Cox Snell"}, \code{"Cragg Uhler"},
+    \code{"both"}, and \code{"simple"}. The option \code{"simple"}
+    computes an R-squared based on the median; in this case \code{newdata}
+    may also be supplied.}
   \item{newdata}{Only for \code{type = "simple"} the R-squared can be evaluated using \code{newdata}.}
 }
 
@@ -76,4 +79,3 @@ plot(b2)
 }
 
 \keyword{regression}
-

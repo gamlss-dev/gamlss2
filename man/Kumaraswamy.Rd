@@ -10,11 +10,11 @@
 }
 
 \usage{
-## The Kumaraswamy family.
+## the Kumaraswamy family
 Kumaraswamy(a.link = shiftlog, b.link = shiftlog, ...)
 KS(a.link = shiftlog, b.link = shiftlog, ...)
 
-## The exp(x) + shift link specification.
+## the exp(x) + shift link specification
 shiftlog(shift = 1)
 }
 

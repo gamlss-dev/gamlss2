@@ -12,12 +12,12 @@
 }
 
 \usage{
-## Wrapper function for stepwise GAMLSS estimation.
+## wrapper function for stepwise GAMLSS estimation
 step_gamlss2(formula, ..., K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
 
-## Stepwise optimizer function.
+## stepwise optimizer function
 stepwise(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 }
@@ -29,7 +29,8 @@ stepwise(x, y, specials, family, offsets,
   \item{strategy}{Character, the strategy that should be applied for the stepwise algorithm.
     Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
     \code{"backward.linear"}, \code{"replace"}, \code{"replace.linear"},
-    \code{"both"}, \code{"both.linear"}. See the details.}
+    \code{"both"}, \code{"both.linear"}, \code{"all"} and
+    \code{"all.linear"}. See the details.}
   \item{keeporder}{Logical, For the different strategies of the stepwise algorithm,
     should the updates be performed sequentially according to the order of the parameters
     of the response distribution as specified in the family (see \code{\link{gamlss2.family}}),
@@ -77,13 +78,15 @@ stepwise(x, y, specials, family, offsets,
 
   The selected strategies are iterated until no further improvement is achieved.
 
-  The different strategies can be selected using argument \code{strategy}. Please see 
-  the examples. Possible values are \code{strategy = c("both", "forward", "backward", "replace", "all")}.
-  Here, \code{strategy = "all"} combines the forward, backward and replace selection step.
+  The different strategies can be selected using argument \code{strategy}. Please see
+  the examples. Possible values are \code{"both"}, \code{"forward"},
+  \code{"backward"}, \code{"replace"}, and \code{"all"}.
+  Here, \code{strategy = "all"} combines the forward, backward, and replace selection steps.
 
   In addition, each of the steps 2-4 can be applied to linear model terms only,
   prior to performing the steps for all model terms. This can be done by additionally
-  setting \code{strategy = c("both.linear", "forward.linear", "backward.linear", "replace.linear", "all.linear")}.
+  setting \code{strategy} to \code{"both.linear"}, \code{"forward.linear"},
+  \code{"backward.linear"}, \code{"replace.linear"}, or \code{"all.linear"}.
 
   The default is \code{strategy = c("both.linear", "both")} and \code{keeporder = FALSE}.
 
@@ -113,7 +116,7 @@ data("rent", package = "gamlss.data")
 rent$Fl <- scale(rent$Fl)
 rent$A <- scale(rent$A)
 
-## the Formula defines the searching scope
+## the formula defines the searching scope
 f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
   Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
 
@@ -122,7 +125,6 @@ b <- step_gamlss2(f, data = rent, family = GA, K = 2)
 
 ## same with
 ## b <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
-
 ## show the new formula of selected model terms
 new_formula(b)
 
@@ -161,4 +163,3 @@ plot(b, which = "selection")
 
 \keyword{models}
 \keyword{regression}
-

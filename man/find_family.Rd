@@ -12,28 +12,28 @@
 }
 
 \usage{
-## List of available families from gamlss.dist package.
+## list of available families from gamlss.dist package
 available_families(type = c("continuous", "discrete"), families = NULL, ...)
 
-## Find suitable response distribution.
+## find suitable response distribution
 find_family(y, families = NULL, k = 2, verbose = TRUE, ...)
 
-## Fit distribution parameters.
+## fit distribution parameters
 fit_family(y, family = NO, plot = TRUE, ...)
 
-## Find gamlss2 model.
+## find gamlss2 model
 find_gamlss2(formula, families = NULL, k = 2,
   select = FALSE, verbose = TRUE, ...)
 }
 
 \arguments{
-  \item{type}{Character, is the reponse continuous or discrete?}
+  \item{type}{Character, is the response continuous or discrete?}
   \item{families}{Character, the names of the family objects of the \pkg{gamlss.dist}
     package that should be returned.}
   \item{y}{The response vector or matrix.}
   \item{k}{Numeric, the penalty factor that should be used for the \code{\link{GAIC}}.}
   \item{verbose}{Logical, should runtime information be printed?}
-  \item{family}{A famnily object that should be used for estimation,
+  \item{family}{A family object that should be used for estimation,
     see also \code{\link{gamlss2.family}}.}
   \item{plot}{Logical, should a plot of the fitted density be provided?}
   \item{formula}{A model formula, see \code{\link{gamlss2}}.}
@@ -45,7 +45,7 @@ find_gamlss2(formula, families = NULL, k = 2,
     \code{find_family()}, or arguments \code{legend = TRUE/FALSE}, \code{pos = "topright"} (see also
     function \code{\link[graphics]{legend}}),
     \code{main}, \code{xlab} and \code{ylab} when argument \code{plot = TRUE} using
-    function \code{fit_family()}. For function \code{find_gamlss()}, arguments
+    function \code{fit_family()}. For function \code{find_gamlss2()}, arguments
     are passed to \code{available_families()} and \code{\link{gamlss2}}.}
 }
 
@@ -54,7 +54,8 @@ find_gamlss2(formula, families = NULL, k = 2,
   models for each specified family object in the \code{families} argument. Note that model
   estimation occurs within a \code{\link[base]{try}} block with warnings suppressed.
   Additionally, the function calculates the \code{\link{GAIC}} for each family whenever
-  feasible and returns the sorted values in descending order.
+  feasible and returns the values sorted in ascending order of the selected fit criterion,
+  so smaller values indicate a better fit.
 
   Function \code{fit_family()} fits a single intercept-only model using the
   specified family and creates a plot of the fitted density.
@@ -89,8 +90,8 @@ ic <- find_family(polio, k = 0,
   families = available_families(type = "discrete"))
 print(ic)
 
-## fit parameters using the ZASICHEL family
-fit_family(polio, family = ZASICHEL)
+## fit parameters using the ZAPIG family
+fit_family(polio, family = ZAPIG)
 
 ## search complete model
 ## b <- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,
@@ -101,4 +102,3 @@ fit_family(polio, family = ZASICHEL)
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
-

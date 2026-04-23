@@ -36,14 +36,14 @@ discretize(family = NO)
 }
 
 \examples{
-## Simulate count data using the Poisson distribution.
+## simulate count data using the Poisson distribution
 set.seed(111)
 y <- rpois(1000, lambda = 10)
 
-## Create a discretized family using the BCT distribution (with log link for mu).
+## create a discretized family using the BCT distribution (with log link for mu)
 fam <- discretize(family = BCT(mu.link = "log"))
 
-## Fit a count regression model using the discretized family.
+## fit a count regression model using the discretized family
 fit_family(y, family = fam)
 }
 
@@ -51,4 +51,3 @@ fit_family(y, family = fam)
 \keyword{count data}
 \keyword{regression}
 \keyword{discretization}
-

@@ -33,9 +33,9 @@ gamlss2(formula, \dots)
     distribution parameters. All smooth terms from \pkg{mgcv} are supported,
     see also \code{\link[mgcv]{formula.gam}}. For \code{gamlss.list()},
     \code{formula} is a list of \code{\link[stats]{formula}}s.}
-  \item{data}{A data frame or list or environment containing the variables in the model.
+  \item{data}{A data frame, list, or environment containing the variables in the model.
     If not found in \code{data}, the variables are taken from \code{environment(formula)},
-    typically the environment from which \code{gamlss2} is called.}
+    typically the environment from which \code{gamlss2()} is called.}
   \item{family}{A \code{gamlss.family} or \code{gamlss2.family} object defining
     the response distribution and the link functions of its parameters.}
   \item{subset}{An optional vector specifying a subset of observations to be used
@@ -46,11 +46,11 @@ gamlss2(formula, \dots)
   \item{offset}{Optional offset terms to be included in the linear predictors during
     fitting. If a single numeric vector is supplied, it is assigned to the first
     parameter of the distribution. If offsets are needed for several parameters,
-    supply a data frame or list in the same order as the parameter names in the
+    provide a data frame or list in the same order as the parameter names in the
     family object.}
   \item{start}{Optional starting values for the estimation algorithm, see
     \code{\link{gamlss2_start}}.}
-  \item{knots}{An optional list of user specified knots, see \code{\link[mgcv]{smoothCon}}.}
+  \item{knots}{An optional list of user-specified knots, see \code{\link[mgcv]{smoothCon}}.}
   \item{control}{A list of control arguments, see \code{\link{gamlss2_control}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2_control}}.}
 }
@@ -110,22 +110,22 @@ data("abdom", package = "gamlss.data")
 f <- y ~ s(x) | s(x) | 1 | 1
 
 ## estimate model
-m <- gamlss2(f, data = abdom, family = BCT)
+m1 <- gamlss2(f, data = abdom, family = BCT)
 
 ## model summary
-summary(m)
+summary(m1)
 
 ## plot parameter-specific effects
-plot(m, which = "effects")
+plot(m1, which = "effects")
 
 ## plot diagnostics
-plot(m, which = "resid")
+plot(m1, which = "resid")
 
 ## predict selected distribution parameters
-par <- predict(m, model = c("mu", "sigma"))
+par <- predict(m1, model = c("mu", "sigma"))
 
 ## fitted centile curves
-pq <- quantile(m, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
 
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,
@@ -137,24 +137,24 @@ matplot(abdom$x, pq, type = "l", lwd = 2,
 data("HarzTraffic", package = "gamlss2")
 
 ## seasonal count model for motorcycles
-m <- gamlss2(
+m2 <- gamlss2(
   bikes ~ s(yday, bs = "cc") | s(yday, bs = "cc"),
   data = HarzTraffic,
   family = NBI
 )
 
 ## summary
-summary(m)
+summary(m2)
 
 ## effect plots
-plot(m)
+plot(m2)
 
 ## residual diagnostics
-plot(m, which = "resid")
+plot(m2, which = "resid")
 
 ## quantiles over the day of the year
 nd <- data.frame(yday = 1:365)
-pq <- quantile(m, newdata = nd, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(m2, newdata = nd, probs = c(0.05, 0.5, 0.95))
 
 ## visualize fitted quantiles
 plot(bikes ~ yday, data = HarzTraffic, pch = 19,

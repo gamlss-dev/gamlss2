@@ -12,8 +12,17 @@
   or score functions.
 }
 
+\usage{
+\method{family}{gamlss2}(object, ...)
+}
+
+\arguments{
+  \item{object}{A fitted \code{"gamlss2"} model object.}
+  \item{\dots}{Not used currently.}
+}
+
 \details{
-  A \pkg{gamlss2} family object is a \code{list} of class \code{"gamlss2.family"}.
+  A \pkg{gamlss2} family object is a list of class \code{"gamlss2.family"}.
   It defines the response distribution and the functions needed to fit and use
   that distribution in a model.
 
@@ -23,7 +32,7 @@
     \item \code{family}: the name of the distribution (character string).
     \item \code{names}: a character vector of parameter names (e.g., \code{c("mu", "sigma")}).
     \item \code{links}: a named character vector specifying the link function for each parameter
-          (e.g., \code{c(mu = "identity", sigma = "log")}), or a list of link functions, e.g., see
+          (e.g., \code{c(mu = "identity", sigma = "log")}), or a list of link functions, see
           \code{\link{softplus}}.
     \item \code{pdf(y, par, log = FALSE, ...)}: a function to evaluate the (log-)density.
   }
@@ -39,7 +48,7 @@
     \item \code{score}: a named list of functions (one per parameter), each computing the
       first derivative of the log-likelihood with respect to the linear predictor:
       \code{score[[param]](y, par, ...)}.
-    \item \code{hess}: a named list of functions computing second derivatives (negative Hessian).
+    \item \code{hess}: a named list of functions computing second derivatives (the negative Hessian).
       For parameters \code{mu} and \code{sigma}, this includes:
       \code{hess[["mu"]]()}, \code{hess[["sigma"]]()}, and optionally
       cross derivatives like \code{hess[["mu.sigma"]]()}.
@@ -50,7 +59,7 @@
     \item \code{mean(par, ...)}: mean function.
     \item \code{variance(par, ...)}: variance function.
     \item \code{skewness(par, ...)}, \code{kurtosis(par, ...)}: optional higher-order moment functions.
-    \item \code{initialize}: a named list of initialization functions, one per parameter (e.g.,
+    \item \code{initialize}: a named list of initialization functions, one for each parameter (e.g.,
       \code{initialize$mu(y, ...)}), used to generate starting values.
     \item \code{valid.response(x)}: a function that checks whether the response is valid (e.g.,
       numeric, non-factor).
@@ -61,6 +70,14 @@
   If analytical score or Hessian functions are not provided, they are approximated
   numerically. If quantile residuals are required, a \code{cdf()} function must
   be available.
+}
+
+\value{
+  For \code{family.gamlss2()}, the family object stored in a fitted
+  \code{"gamlss2"} model is returned. A \code{"gamlss2.family"} object itself is
+  a list describing the response distribution, its parameters, their link
+  functions, and the distribution-specific methods used during fitting,
+  prediction, diagnostics, and simulation.
 }
 
 \seealso{
@@ -156,10 +173,10 @@ plot(y ~ x, data = abdom, pch = 19,
 matplot(abdom$x, pq, type = "l", lwd = 2,
   lty = 1, col = 4, add = TRUE)
 
-## another example using only the density
-## function, all derivatives are approximated
-## in this case; for residual diagnostics,
-## the $cdf() and $quantile() function is needed, too
+## another example that defines only the density
+## function; in this case all derivatives are
+## approximated numerically. For residual diagnostics,
+## the $cdf() and $quantile() functions are needed as well
 Gamma <- function(...) {
   fam <- list(
     "names" = c("mu", "sigma"),

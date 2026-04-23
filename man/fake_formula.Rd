@@ -4,11 +4,12 @@
 \title{Extended Processing of "Fake" Formulas}
 
 \description{
-  Create a "fake" formula from a \code{\link[stats]{formula}}, a \code{\link[Formula]{Formula}},
-  or a \code{\link[base]{list}} of \code{\link[stats]{formula}}s. The function extracts
-  all necessary variables (transformation of variables), to build a \code{\link[stats]{model.frame}}.
-  The function also extracts all special model terms within the formulas, the information can
-  be used to setup any special model term specification list.
+  Create a simplified formula from a \code{\link[stats]{formula}}, a
+  \code{\link[Formula]{Formula}}, or a \code{\link[base]{list}} of
+  \code{\link[stats]{formula}}s. The result retains the variables and
+  transformations needed to build a \code{\link[stats]{model.frame}} while
+  separating out special model terms. This is mainly used internally when
+  \pkg{gamlss2} prepares formulas for fitting.
 }
 
 \usage{
@@ -26,10 +27,33 @@ fake_formula(formula, specials = NULL,
   \item{onlyspecials}{Logical, should only the special model terms be returned?}
 }
 
+\details{
+  The function is primarily an internal helper for formula preprocessing in
+  \pkg{gamlss2}, but it can also be useful for inspecting how complex formulas
+  are decomposed before fitting.
+
+  Special model terms such as \code{s()}, \code{te()}, \code{ti()}, \code{re()},
+  or package-specific specials are identified and handled separately from
+  ordinary variables. Depending on the control arguments:
+  \itemize{
+    \item if \code{nospecials = FALSE}, variables used inside registered special
+      terms are reintroduced into the returned formula so they remain available
+      in the model frame;
+    \item if \code{nospecials = TRUE}, the returned formula excludes the special
+      terms and their variables;
+    \item if \code{onlyspecials = TRUE}, the function returns the names of the
+      detected special terms instead of a formula object.
+  }
+
+  For multi-part or multi-parameter formulas, the output preserves the overall
+  formula structure.
+}
+
 \value{
-  Depending on the input formula,
-  the function returns a \code{\link[stats]{formula}} or \code{\link[Formula]{Formula}}.
-  If \code{onlyspecials = TRUE} a vector or list of special model term names is returned.
+  Depending on the input, the function returns a
+  \code{\link[stats]{formula}} or \code{\link[Formula]{Formula}}. If
+  \code{onlyspecials = TRUE}, a character vector or list of special model term
+  names is returned.
 }
 
 \seealso{
@@ -94,4 +118,3 @@ print(ff)
 
 \keyword{utilities}
 \keyword{regression}
-

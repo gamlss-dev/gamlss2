@@ -5,7 +5,8 @@
 \title{GAIC and Generalised (Pseudo) R-squared for GAMLSS Models}
 
 \description{
-  Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.
+  Functions to compute the GAIC and the generalized R-squared of Nagelkerke (1991)
+  for GAMLSS models.
 }
 
 \usage{
@@ -31,18 +32,19 @@ Rsq(object, ...,
     \code{"both"}, and \code{"simple"}. The option \code{"simple"}
     computes an R-squared based on the median; in this case \code{newdata}
     may also be supplied.}
-  \item{newdata}{Only for \code{type = "simple"} the R-squared can be evaluated using \code{newdata}.}
+  \item{newdata}{For \code{type = "simple"}, the R-squared can also be evaluated on
+    \code{newdata}.}
 }
 
 \details{
-  The \code{Rsq()} function uses the definition for R-squared:
+  The \code{Rsq()} function uses the following definition of R-squared:
 
   \deqn{R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}}{R-squared =1-(L(0)/L(fitted))^(2/n)}
 
-  where \eqn{L(0)} is the null model (only a constant is  fitted to all parameters) and 
-  \eqn{L(\hat{\theta})}{L(fitted)} is the current fitted model. This definition sometimes is
-  referred to as the Cox & Snell R-squared. The Nagelkerke /Cragg & Uhler's definition divides
-  the above with
+  where \eqn{L(0)} is the null model (only a constant is fitted to all parameters) and
+  \eqn{L(\hat{\theta})}{L(fitted)} is the fitted model under consideration. This definition is
+  sometimes referred to as the Cox and Snell R-squared. The Nagelkerke or Cragg and Uhler
+  definition divides the above by
 
   \deqn{1 - L(0)^{2/n}}{1-L(0)^(2/n)}
 }
@@ -63,19 +65,19 @@ Rsq(object, ...,
 data("aids", package = "gamlss.data")
 
 ## estimate negative binomial count models
-b1 <- gamlss2(y ~ x + qrt, data = aids, family = NBI)
-b2 <- gamlss2(y ~ s(x) + s(qrt, bs = "re"), data = aids, family = NBI)
+m1 <- gamlss2(y ~ x + qrt, data = aids, family = NBI)
+m2 <- gamlss2(y ~ s(x) + s(qrt, bs = "re"), data = aids, family = NBI)
 
 ## compare models
-Rsq(b1)
-Rsq(b1, type = "both")
-Rsq(b1, b2)
-GAIC(b1, b2)
-AIC(b1, b2)
-BIC(b1, b2)
+Rsq(m1)
+Rsq(m1, type = "both")
+Rsq(m1, m2)
+GAIC(m1, m2)
+AIC(m1, m2)
+BIC(m1, m2)
 
 ## plot estimated effects
-plot(b2)
+plot(m2)
 }
 
 \keyword{regression}

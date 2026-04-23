@@ -4,7 +4,7 @@
 \title{Control Parameters}
 
 \description{
-  Various parameters that control fitting of GAMLSS using \code{\link{gamlss2}}.
+  Control parameters for fitting GAMLSS models with \code{\link{gamlss2}}.
 }
 
 \usage{
@@ -15,29 +15,29 @@ gamlss2_control(optimizer = RS, trace = TRUE,
 }
 
 \arguments{
-  \item{optimizer}{Function, the optimizer function that should be used for fitting.}
+  \item{optimizer}{Function, the optimizer to be used for fitting.}
   \item{trace}{Logical, should information be printed while the algorithm is running?}
-  \item{flush}{Logical, use \code{\link[utils]{flush.console}} for displaying the
+  \item{flush}{Logical, whether to use \code{\link[utils]{flush.console}} to display
     current output in the console.}
   \item{light}{Logical, if set to \code{light = TRUE}, no model frame, response,
     model matrix and other design matrices will be part of the return value.}
   \item{expand}{Logical, if fewer formulas are supplied than there are parameters
     of the distribution, should intercept-only formulas be added automatically?}
-  \item{model}{Logical, should the \emph{model frame} be included as component of the
+  \item{model}{Logical, should the \emph{model frame} be included as a component of the
     returned object.}
   \item{x}{Logical, indicating whether the model matrix should be included
-    as component of the returned object.}
-  \item{y}{Logical, should the response be included as component of the returned object.}
+    as a component of the returned object.}
+  \item{y}{Logical, should the response be included as a component of the returned object.}
   \item{fixed}{Named logical vector indicating which parameters should be fixed during estimation.
     See \code{\link{gamlss2_start}} for examples.}
-  \item{\dots}{Further control parameters to be part of the return value, e.g.,
-    used within optimizer function \code{\link{RS}}.}
+  \item{\dots}{Further control parameters to be included in the return value, for example
+    parameters used by the optimizer function \code{\link{RS}}.}
 }
 
 \details{
-  The control parameters in \code{gamlss2_control} can also be extended, e.g., if another
-  optimization function is used, newly specified control parameters are automatically
-  passed on to this function.
+  The set of control parameters can be extended. For example, if a different
+  optimizer is used, newly specified control parameters are passed on to that
+  optimizer automatically.
 } 
 
 \value{
@@ -57,8 +57,8 @@ f <- y ~ s(x) | s(x)
 
 ## estimate model with different step length
 ## control in the RS algorithm
-b1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
-b2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
+m1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
+m2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
 }}
 
 \keyword{models}

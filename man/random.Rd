@@ -54,7 +54,7 @@ re(random, correlation = NULL, ...)
 
 \examples{\dontshow{ if(!requireNamespace("nlme")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 
-\dontrun{## orthdontic measurement data
+\dontrun{## orthodontic measurement data
 data("Orthodont", package = "nlme")
 
 ## model using lme()

@@ -6,8 +6,11 @@
 \title{Traffic Counts at Sonnenberg in the Harz Region}
 
 \description{
-  This dataset contains daily traffic counts close to Sonnenberg, located in the Harz region
-  in Germany. It covers a period of nearly three years, from 2021-01-01 to 2023-11-30.
+  This dataset contains daily traffic counts near Sonnenberg in the Harz region
+  of Germany. It covers nearly three years, from 2021-01-01 to 2023-11-30, and
+  combines traffic counts with weather covariates. The data are useful for
+  illustrating seasonal count regression models, for example with cyclic
+  smoothers over the day of the year.
 }
 
 \usage{data("HarzTraffic", package = "gamlss2")}
@@ -16,7 +19,8 @@
 A data frame containing 1057 observations on 16 variables.
 \describe{
   \item{date}{Date, the date of the record.}
-  \item{yday}{Integer, the day of the year.}
+  \item{yday}{Integer, the day of the year extracted from \code{date}. This is
+    convenient for modeling within-year seasonality.}
   \item{bikes}{Integer, the number of motorcycles on that day.}
   \item{cars}{Integer, the number of cars on that day.}
   \item{trucks}{Integer, the number of trucks on that day.}
@@ -32,6 +36,14 @@ A data frame containing 1057 observations on 16 variables.
   \item{wind}{Numeric, mean wind speed in m/s.}
   \item{windmax}{Numeric, maximum wind speed in m/s.}
 }
+}
+
+\details{
+  The traffic variables record daily counts by vehicle type. The weather
+  variables summarize daily conditions measured at a nearby station. In package
+  examples, \code{bikes} is often modeled as a seasonal response because
+  motorcycle traffic shows a pronounced annual cycle and substantial variation
+  across weather conditions.
 }
 
 \source{

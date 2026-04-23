@@ -7,7 +7,7 @@
 \description{
   The optimizer function \code{stepwise()} performs stepwise model term selection
   using a Generalized Akaike Information Criterion (GAIC). Estimation is based on the
-  Rigby and Stasinopoulos (RS) & Cole and Green (CG) algorithm as implemented in
+  Rigby and Stasinopoulos (RS) and Cole and Green (CG) algorithms, as implemented in
   function \code{\link{RS}}.
 }
 
@@ -26,23 +26,23 @@ stepwise(x, y, specials, family, offsets,
   \item{formula}{A model formula for \code{\link{gamlss2}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2}}.}
   \item{K}{Numeric, the penalty for the \code{\link{GAIC}}.}
-  \item{strategy}{Character, the strategy that should be applied for the stepwise algorithm.
+  \item{strategy}{Character, the strategy to be used by the stepwise algorithm.
     Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
     \code{"backward.linear"}, \code{"replace"}, \code{"replace.linear"},
     \code{"both"}, \code{"both.linear"}, \code{"all"} and
     \code{"all.linear"}. See the details.}
-  \item{keeporder}{Logical, For the different strategies of the stepwise algorithm,
+  \item{keeporder}{Logical. For the different stepwise strategies,
     should the updates be performed sequentially according to the order of the parameters
     of the response distribution as specified in the family (see \code{\link{gamlss2.family}}),
     or should the selection search be performed across all parameters?}
-  \item{cores}{Integer, if \code{cores > 1L}, function \code{\link[parallel]{mclapply}}
-    function is used to speed up computations using multiple cores within the selection steps.}
+  \item{cores}{Integer. If \code{cores > 1L}, \code{\link[parallel]{mclapply}} is used
+    to speed up computations within the selection steps.}
   \item{x}{The full model matrix to be used for fitting.}
   \item{y}{The response vector or matrix.}
   \item{specials}{A named list of special model terms, e.g., including design and
     penalty matrices for fitting smooth terms using \code{\link[mgcv]{smooth.construct}}.}
   \item{family}{A family object, see \code{\link{gamlss2.family}}.}
-  \item{offsets}{If supplied, a list or data frame of possible model offset.}
+  \item{offsets}{If supplied, a list or data frame of model offsets.}
   \item{weights}{If supplied, a numeric vector of weights.}
   \item{start}{Starting values, either for the parameters of the response distribution or,
     if specified as a named list in which each element of length one is named with
@@ -69,16 +69,15 @@ stepwise(x, y, specials, family, offsets,
     \item In a forward selection step, model terms with the highest improvement
       on the GAIC are selected.
     \item In a replacement step, each model term is tested to see if an exchange with
-      a model term not yet selected will improve the GAIC.
-    \item In a backward step, model terms are deselected,
-      if the GAIC can be further improved.
+      a term not yet selected improves the GAIC.
+    \item In a backward step, model terms are removed if this further improves the GAIC.
     \item In a bidirectional step, model terms can be either added or removed.
     \item In addition, the forward, backward and replace selection step can be combined.
   }
 
   The selected strategies are iterated until no further improvement is achieved.
 
-  The different strategies can be selected using argument \code{strategy}. Please see
+  The different strategies can be selected using argument \code{strategy}; see
   the examples. Possible values are \code{"both"}, \code{"forward"},
   \code{"backward"}, \code{"replace"}, and \code{"all"}.
   Here, \code{strategy = "all"} combines the forward, backward, and replace selection steps.
@@ -90,7 +89,7 @@ stepwise(x, y, specials, family, offsets,
 
   The default is \code{strategy = c("both.linear", "both")} and \code{keeporder = FALSE}.
 
-  Note that each of the steps 2-4 can be performed while maintaining the order of the 
+  Note that each of the steps 2--4 can be performed while maintaining the order of the
   parameters of the response distribution, i.e., if the \code{keeporder = TRUE}
   argument is set, then the parameters will be updated in the order specified in the
   \code{\link{gamlss2.family}}. Using backward elimination, the model terms are
@@ -98,7 +97,7 @@ stepwise(x, y, specials, family, offsets,
 }
 
 \value{
-  The optimizer function \code{stepwise()} returns the final model as named list
+  The optimizer function \code{stepwise()} returns the final model as a named list
   of class \code{"gamlss2"}. See the return value of function \code{\link{RS}}.
   The wrapper function \code{step_gamlss2()} also returns the final model.
 }

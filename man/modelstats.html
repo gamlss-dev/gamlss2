@@ -514,15 +514,15 @@ window.Quarto = {
 <h2 class="unnumbered anchored" data-anchor-id="gaic-and-generalised-pseudo-r-squared-for-gamlss-models">GAIC and Generalised (Pseudo) R-squared for GAMLSS Models</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for a GAMLSS models.</p>
+<p>Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## Information criteria.
+<pre><code class="language-R">## information criteria
 GAIC(object, ...,
   k = 2, corrected = FALSE)
 
-## R-squared.
+## r-squared
 Rsq(object, ...,
   type = c("Cox Snell", "Cragg Uhler", "both", "simple"),
   newdata = NULL)
@@ -536,7 +536,7 @@ Rsq(object, ...,
 <code id="object">object</code>
 </td>
 <td>
-A fitted model object
+A fitted model object.
 </td>
 </tr>
 <tr>
@@ -568,7 +568,7 @@ Logical, whether the corrected AIC should be used? Note that it applies only whe
 <code id="type">type</code>
 </td>
 <td>
-which definition of R squared. Can be the <code>“Cox Snell”</code> or the Nagelkerke, <code>“Cragg Uhler”</code> or <code>“both”</code>, and <code>“simple”</code>, which computes the R-squared based on the median. In this case also <code>newdata</code> may be supplied.
+Which definition of R-squared should be used? Possible values are <code>“Cox Snell”</code>, <code>“Cragg Uhler”</code>, <code>“both”</code>, and <code>“simple”</code>. The option <code>“simple”</code> computes an R-squared based on the median; in this case <code>newdata</code> may also be supplied.
 </td>
 </tr>
 <tr>

@@ -487,11 +487,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## Rigby and Stasinopoulos algorithm.
+<pre><code class="language-R">## rigby and stasinopoulos algorithm
 RS(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 
-## Cole and Green algorithm.
+## cole and green algorithm
 CG(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 </code></pre>
@@ -696,7 +696,7 @@ All control arguments used as supplied from function <code>gamlss2_control</code
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model formula</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model using RS (default)</span></span>

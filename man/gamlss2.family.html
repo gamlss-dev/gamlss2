@@ -479,11 +479,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="family-objects-in-gamlss2">Family Objects in <span class="pkg">gamlss2</span></h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Family objects within the package <span class="pkg">gamlss2</span> are used to specify the information required to use a model fitting function. This includes details such as parameter names, corresponding link functions, the density function, log-likelihood function and derivatives of the log-likelihood with respect to the predictors. In addition, family objects are used in the calculation of post-modeling statistics, such as residual diagnostics and random number generation. An overview can be found in the accompanying details and examples.</p>
+<p>A <code>“gamlss2.family”</code> object describes a response distribution for use with <code>gamlss2</code>. It tells the fitting algorithm which distributional parameters exist, which link functions they use, and which distributional functions are available, such as densities, quantiles, random-number generators, or score functions.</p>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>A <span class="pkg">gamlss2</span> family object must be a <code>list</code> of class <code>“gamlss2.family”</code>, containing the necessary elements to define the response distribution and how it is handled during model fitting. The minimum requirements are as follows:</p>
+<p>A <span class="pkg">gamlss2</span> family object is a <code>list</code> of class <code>“gamlss2.family”</code>. It defines the response distribution and the functions needed to fit and use that distribution in a model.</p>
+<p>The minimum required elements are:</p>
 <ul>
 <li>
 <p><code>family</code>: the name of the distribution (character string).</p>
@@ -499,7 +500,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
 </ul>
 <p>The <code>pdf()</code> function must accept the response <code>y</code>, a named list <code>par</code> of evaluated parameter values (e.g., <code>par$mu</code>, <code>par$sigma</code>), a logical <code>log</code>, and optional additional arguments.</p>
-<p>Optionally, the family object may include:</p>
+<p>Further elements can be added depending on how fully the family should support fitting, prediction, diagnostics, and simulation. Common optional elements are:</p>
 <ul>
 <li>
 <p><code>score</code>: a named list of functions (one per parameter), each computing the first derivative of the log-likelihood with respect to the linear predictor: <code>score<a href="y, par, ...">[param]</a></code>.</p>
@@ -535,10 +536,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>valid.response(x)</code>: a function that checks whether the response is valid (e.g., numeric, non-factor).</p>
 </li>
 <li>
-<p><code>optimizer()</code>: an optional function to define a custom optimization method for use with <code>gamlss2</code>, see also <code>link{RS}</code>.</p>
+<p><code>optimizer()</code>: an optional function defining a custom optimization method for use with <code>gamlss2</code>, see also <code>RS</code>.</p>
 </li>
 </ul>
-<p>If the analytical score or Hessian functions are not provided, they will be approximated numerically. If quantile residuals are to be computed, a <code>cdf()</code> function must be provided.</p>
+<p>If analytical score or Hessian functions are not provided, they are approximated numerically. If quantile residuals are required, a <code>cdf()</code> function must be available.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -613,7 +614,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="do">## load the abdominal circumference data</span></span>
 <span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model formula</span></span>
 <span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
 <span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
@@ -640,7 +641,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="do">## another example using only the density</span></span>
 <span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="do">## function, all derivatives are approximated</span></span>
 <span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="do">## in this case; for residual diagnostics,</span></span>
-<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="do">## the $cdf() and $quantile() function is needed, too.</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="do">## the $cdf() and $quantile() function is needed, too</span></span>
 <span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>Gamma <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
 <span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
 <span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>    <span class="st">"names"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>),</span>

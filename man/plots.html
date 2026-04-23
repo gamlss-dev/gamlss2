@@ -480,7 +480,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="plotting-gamlss">Plotting GAMLSS</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Plotting methods for objects of class <code>“gamlss2”</code> and <code>“gamlss2.list”</code>, which can be used for effect plots of model terms or residual plots. Note that effect plots of model terms with more than two covariates are not supported, for this purpose use the <code>predict</code> method.</p>
+<p>Plotting methods for objects of class <code>“gamlss2”</code> and <code>“gamlss2.list”</code>. These methods can be used for effect plots of model terms and for residual diagnostics. Effect plots for model terms with more than two covariates are not supported; in that case, use <code>predict</code> and plot the results manually.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -502,7 +502,7 @@ plot(x, parameter = NULL, which = "effects",
 <code id="x">x</code>
 </td>
 <td>
-An object of class <code>“gamlss2”</code> or <code>“gamlss2.list”</code>, which can be created by using the <code>c()</code> method combining <code>“gamlss2”</code> objects. See th examples.
+An object of class <code>“gamlss2”</code> or <code>“gamlss2.list”</code>, which can be created by using the <code>c()</code> method combining <code>“gamlss2”</code> objects. See the examples.
 </td>
 </tr>
 <tr>
@@ -510,7 +510,7 @@ An object of class <code>“gamlss2”</code> or <code>“gamlss2.list”</code>
 <code id="parameter">parameter</code>
 </td>
 <td>
-Character or integer. For which parameter/model/what should the plots be created? Note that instead of argument <code>parameter</code> plots can also be specified passing argument <code>model</code> and <code>what</code> to ….
+Character or integer. For which distribution parameter should the plots be created? The arguments <code>model</code> and <code>what</code>, if supplied through <code>…</code>, are treated as aliases for <code>parameter</code> to support alternative calling styles.
 </td>
 </tr>
 <tr>
@@ -518,7 +518,7 @@ Character or integer. For which parameter/model/what should the plots be created
 <code id="which">which</code>
 </td>
 <td>
-Character or integer, selects the type of plot: <code>“effects”</code> produces effect plots of (special) model terms, <code>“hist-resid”</code> shows a histogram of residuals, <code>“qq-resid”</code> shows a quantile-quantile plot of residuals, <code>“scatter-resid”</code> shows a scatter plot of residuals with fitted values for the distribution mean (or median, if available in the family object).
+Character or integer selecting the type of plot. <code>“effects”</code> produces effect plots of model terms, <code>“hist-resid”</code> a histogram of residuals, <code>“qq-resid”</code> a quantile-quantile plot of residuals, and <code>“scatter-resid”</code> a scatter plot of residuals against fitted values for the distribution mean (or median, if available in the family object).
 </td>
 </tr>
 <tr>
@@ -526,7 +526,7 @@ Character or integer, selects the type of plot: <code>“effects”</code> produ
 <code id="terms">terms</code>
 </td>
 <td>
-Character or integer. For which model term should the plot(s) be created?
+Character or integer. Which model term(s) should be plotted?
 </td>
 </tr>
 <tr>
@@ -534,7 +534,7 @@ Character or integer. For which model term should the plot(s) be created?
 <code id="scale">scale</code>
 </td>
 <td>
-If set to <code>1</code>, effect plots all have the same scale on the y-axis. If set to <code>0</code> each effect plot has its own scale for the y-axis.
+Logical. If <code>TRUE</code>, effect plots all have the same scale on the y-axis. If <code>FALSE</code>, each effect plot has its own y-axis scale.
 </td>
 </tr>
 <tr>
@@ -542,7 +542,7 @@ If set to <code>1</code>, effect plots all have the same scale on the y-axis. If
 <code id="spar">spar</code>
 </td>
 <td>
-Should graphical parameters be set?
+Logical. Should graphical parameters be set automatically?
 </td>
 </tr>
 <tr>
@@ -550,7 +550,7 @@ Should graphical parameters be set?
 <code id="legend">legend</code>
 </td>
 <td>
-Should a legend be added using multiple model plots?
+Logical. Should a legend be added for plots with multiple models?
 </td>
 </tr>
 <tr>

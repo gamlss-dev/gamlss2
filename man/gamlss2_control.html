@@ -532,7 +532,7 @@ Logical, if set to <code>light = TRUE</code>, no model frame, response, model ma
 <code id="expand">expand</code>
 </td>
 <td>
-Logical, if fewer formulas are supplied than there are parameters of the distribution, should formulas with intercept only formulas be added?
+Logical, if fewer formulas are supplied than there are parameters of the distribution, should intercept-only formulas be added automatically?
 </td>
 </tr>
 <tr>
@@ -564,7 +564,7 @@ Logical, should the response be included as component of the returned object.
 <code id="fixed">fixed</code>
 </td>
 <td>
-Logical, a named vector of parameters that should be fixed during estimation. See the examples for <code>gamlss2</code>.
+Named logical vector indicating which parameters should be fixed during estimation. See the examples for <code>gamlss2</code>.
 </td>
 </tr>
 <tr>
@@ -597,7 +597,7 @@ Further control parameters to be part of the return value, e.g., used within opt
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model formula</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model with different step length</span></span>

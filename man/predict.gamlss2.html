@@ -482,7 +482,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="extracting-fitted-or-predicted-parameters-or-terms-from-gamlss2-models">Extracting Fitted or Predicted Parameters or Terms from gamlss2 Models</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Methods for <span class="pkg">gamlss2</span> model objects for extracting fitted (in-sample) or predicted (out-of-sample) parameters, terms, etc.</p>
+<p>Methods for <span class="pkg">gamlss2</span> model objects that extract fitted values or predictions for distribution parameters, additive predictors, individual terms, or the mean of the response distribution.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -500,7 +500,7 @@ predict(object, model = NULL, newdata = NULL,
 <code id="object">object</code>
 </td>
 <td>
-model object of class <code>gamlss2</code>.
+A model object of class <code>gamlss2</code>.
 </td>
 </tr>
 <tr>
@@ -508,7 +508,7 @@ model object of class <code>gamlss2</code>.
 <code id="model">model</code>
 </td>
 <td>
-character. Which model part(s) should be predicted? Can be one or more of <code>“mu”</code>, <code>“sigma”</code>, etc. By default all model parts are included.
+Character. Which distribution parameter(s) should be predicted? This can be one or more of <code>“mu”</code>, <code>“sigma”</code>, etc. By default, predictions are returned for all model parts.
 </td>
 </tr>
 <tr>
@@ -516,7 +516,7 @@ character. Which model part(s) should be predicted? Can be one or more of <code>
 <code id="newdata">newdata</code>
 </td>
 <td>
-data.frame. Optionally, a new data frame in which to look for variables with which to predict. If omitted, the original observations are used.
+Data frame. Optionally, a new data frame in which to look for variables with which to predict. If omitted, the original observations are used.
 </td>
 </tr>
 <tr>
@@ -524,7 +524,7 @@ data.frame. Optionally, a new data frame in which to look for variables with whi
 <code id="type">type</code>
 </td>
 <td>
-character. Which type of prediction should be computed? Can be the full additive predictor(s) (<code>“link”</code>, before applying the link function(s)), the corresponding parameter (<code>“parameter”</code>, after applying the link function(s)), the individual terms of the additive predictor(s) (<code>“terms”</code>), or the corresponding mean of the response distribution (<code>“response”</code>).
+Character. Which type of prediction should be computed? Use <code>“link”</code> for additive predictors on the link scale, <code>“parameter”</code> for distribution parameters on their natural scale, <code>“terms”</code> for individual additive terms, and <code>“response”</code> for the mean of the fitted response distribution.
 </td>
 </tr>
 <tr>
@@ -532,7 +532,7 @@ character. Which type of prediction should be computed? Can be the full additive
 <code id="terms">terms</code>
 </td>
 <td>
-character. Which of the terms in the additive predictor(s) should be included? By default all terms are included.
+Character. Which of the terms in the additive predictor(s) should be included? By default all terms are included.
 </td>
 </tr>
 <tr>
@@ -540,7 +540,7 @@ character. Which of the terms in the additive predictor(s) should be included? B
 <code id="se.fit">se.fit</code>
 </td>
 <td>
-logical. Should standard errors for the predictions be included? Standard errors are computed by simulating from the approximate multivariate normal distribution of the maximum likelihood estimates. The number of simulations is controlled by the argument <code>R</code>, which defaults to <code>R = 200</code>, and can be passed via <code>…</code>.
+Logical. Should standard errors for the predictions be included? Standard errors are computed by simulating from the approximate multivariate normal distribution of the maximum likelihood estimates. The number of simulations is controlled by the argument <code>R</code>, which defaults to <code>R = 200</code>, and can be passed via <code>…</code>.
 </td>
 </tr>
 <tr>
@@ -548,7 +548,7 @@ logical. Should standard errors for the predictions be included? Standard errors
 <code id="drop">drop</code>
 </td>
 <td>
-logical. Should the predictions be simplified to a vector if possible (<code>TRUE</code>) or always returned as a data.frame (<code>FALSE</code>)?
+Logical. Should the predictions be simplified to a vector if possible (<code>TRUE</code>) or always returned as a data frame (<code>FALSE</code>)?
 </td>
 </tr>
 <tr>
@@ -556,19 +556,19 @@ logical. Should the predictions be simplified to a vector if possible (<code>TRU
 <code id="...">…</code>
 </td>
 <td>
-currently only used for catching <code>what</code> as an alias for <code>model</code>.
+Currently only used for catching <code>what</code> as an alias for <code>model</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Predictions for <code>gamlss2</code> model objects are obtained in the following steps: First, the original data is extracted or some <code>newdata</code> is set up. Second, all of the terms in the additive predictors of all model parameters (<code>“mu”</code>, <code>“sigma”</code>, …) are computed. Third, the full additive predictor(s) are obtained by adding up all individual terms. Fourth, the parameter(s) are obtained from the additive predictor(s) by applying the inverse link function(s). In a final step, the mean of the associated probability distribution can be computed.</p>
+<p>Prediction for a <code>gamlss2</code> object proceeds in stages. First, the required model terms are evaluated for the original data or for <code>newdata</code>. These terms are then added to form the full additive predictor for each distribution parameter. Applying the inverse link function yields the predicted distribution parameters. If requested, the mean of the corresponding response distribution is computed in a final step.</p>
 <p>See also <code>prodist.gamlss2</code> for setting up a full <span class="pkg">distributions3</span> object from which moments, probabilities, quantiles, or random numbers can be obtained.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>If <code>drop = FALSE</code> a data.frame. If <code>drop = TRUE</code> (the default), the data.frame might be simplified to a numeric vector, if possible.</p>
+<p>If <code>drop = FALSE</code>, a data frame is returned. If <code>drop = TRUE</code> (the default), the result may be simplified to a numeric vector when possible.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -590,7 +590,7 @@ GAMLSS-RS iteration  2: Global Deviance = 405.7368 eps = 0.000000     </code></p
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## new data for predictions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: additive predictors (on link scale) for all model parameters</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: model parameter(s) for all model parts</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
@@ -598,21 +598,22 @@ GAMLSS-RS iteration  2: Global Deviance = 405.7368 eps = 0.000000     </code></p
 2 58.98303 18.52920
 3 96.14450 34.11606</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        mu    sigma
+1 23.05774 2.308642
+2 58.98303 2.919348
+3 96.14450 3.529768</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
 23.05774 58.98303 96.14450 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        mu    sigma
-1 23.05774 10.06075
-2 58.98303 18.52920
-3 96.14450 34.11606</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
 10.06075 18.52920 34.11606 </code></pre>

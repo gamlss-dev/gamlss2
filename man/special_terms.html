@@ -481,17 +481,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="special-model-terms-for-gamlss">Special Model Terms for GAMLSS</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The <span class="pkg">gamlss2</span> package provides infrastructure to include special model terms for the optimizer functions <code>RS</code> and <code>CG</code>, e.g., such as neural networks, trees and forests. The infrastructure assumes that such special model terms provide their own fitting and predict method.</p>
+<p>The <span class="pkg">gamlss2</span> package provides an interface for special model terms whose fitting is not handled by the standard linear or smooth-term machinery. Examples include neural networks, trees, or forests. A special term is expected to provide its own fitting and prediction methods so that it can be updated within the <code>RS</code> or <code>CG</code> backfitting algorithms.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## Generic fitting method.
+<pre><code class="language-R">## generic fitting method
 special_fit(x, ...)
 
-## Generic predict method.
+## generic predict method
 special_predict(x, ...)
 
-## Extractor function for fitted special terms.
+## extractor function for fitted special terms
 specials(object, model = NULL, terms = NULL, elements = NULL, ...)
 </code></pre>
 </section>
@@ -550,9 +550,20 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>To implement a new special term, the first step is to write a formula constructor function for the new model term. For example, consider the implementation below, which demonstrates how to create a neural network model term. Additionally, the name of the new model term constructor must be passed to the <code>specials</code> argument of the function <code>fake_formula</code>. Please note that in the provided example, no new special name is passed because <code>“n”</code> is already registered in <code>fake_formula</code>.</p>
-<p>Afterwards, a fitting and a predict method for the new special model term needs to be implemented. Please also refer to the example below, implementing these functions for a neural network model term.</p>
-<p>The following describes the detailed arguments and return values.</p>
+<p>To implement a new special term, define:</p>
+<ol>
+<li>
+<p>a constructor function that is used inside the model formula,</p>
+</li>
+<li>
+<p>a corresponding <code>special_fit()</code> method,</p>
+</li>
+<li>
+<p>and a corresponding <code>special_predict()</code> method.</p>
+</li>
+</ol>
+<p>The constructor function should collect the information needed for fitting, such as the model formula, the variables, and any control arguments. If the constructor has a new special name, this name must be registered via the <code>specials</code> argument of <code>fake_formula</code>. In the example below, this is not necessary because <code>“n”</code> is already registered.</p>
+<p>The following paragraphs describe the expected arguments and return values of the fitting and prediction methods.</p>
 <p>A method for <code>special_fit()</code> has the following arguments:</p>
 <ul>
 <li>
@@ -580,7 +591,18 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <p><code>control</code>: A named list of control arguments, see <code>gamlss2_control</code>.</p>
 </li>
 </ul>
-<p>Note that for setting up a special model term only the first three arguments a mandatory, all other arguments are optional. The function must at least return a named list containing the <code>“fitted.values”</code> to work with <code>RS</code> and <code>CG</code>.</p>
+<p>Only the first three arguments are required to set up a special model term; all remaining arguments are optional. The function must at least return a named list containing the component <code>“fitted.values”</code> in order to work with <code>RS</code> and <code>CG</code>. In practice, useful return components are:</p>
+<ul>
+<li>
+<p><code>“fitted.values”</code>: Required. Numeric vector of fitted contributions of the special term.</p>
+</li>
+<li>
+<p>Additional fitted objects: Optional. For example, the fitted model object itself, degrees of freedom, or quantities needed for prediction.</p>
+</li>
+<li>
+<p><code>“transfer”</code>: Optional. Information that should be passed from one backfitting iteration to the next.</p>
+</li>
+</ul>
 <p>A method for <code>special_predict()</code> has the following arguments:</p>
 <ul>
 <li>
@@ -593,7 +615,7 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <p>se.fit: Logical, should standard errors of the predictions be computed.</p>
 </li>
 </ul>
-<p>Note that function <code>special_predict()</code> should return a data frame with named colums <code>“fit”</code>, <code>“lower”</code> and <code>“upper”</code>, <code>“lower”</code> and <code>“upper”</code> are optional.</p>
+<p>The function <code>special_predict()</code> should return a data frame with a column named <code>“fit”</code>. Optional columns such as <code>“lower”</code> and <code>“upper”</code> can be added if interval information is available. Thus, the minimal valid return value is a data frame with a <code>“fit”</code> column.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -717,7 +739,7 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model formula</span></span>
 <span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>x) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>x) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>x) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>x)</span>
 <span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model,</span></span>
@@ -744,7 +766,7 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="do">## another example using the Munich rent data</span></span>
 <span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="do">## model Formula</span></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
 <span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>Fl<span class="sc">+</span>A,<span class="at">size=</span><span class="dv">10</span>,<span class="at">decay=</span><span class="fl">0.7</span>) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>Fl<span class="sc">+</span>A,<span class="at">size=</span><span class="dv">10</span>,<span class="at">decay=</span><span class="fl">0.7</span>)</span>
 <span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>

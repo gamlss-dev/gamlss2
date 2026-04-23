@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6f25ffb521979dcde2a7e78af0ebb2dc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ab82ced70ff0941f0d00279a91dd7d49.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -560,14 +560,14 @@ AIC: 3495.149 </code></pre>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>housing<span class="sc">$</span>Satint <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(housing<span class="sc">$</span>Sat)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## fit equivalent model using gamlss2</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(Satint <span class="sc">~</span> Infl <span class="sc">+</span> Type <span class="sc">+</span> Cont,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(Satint <span class="sc">~</span> Infl <span class="sc">+</span> Type <span class="sc">+</span> Cont,</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> housing, <span class="at">weights =</span> Freq,</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">ologit</span>(<span class="at">k =</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 3479.1765 eps = 0.323474     
 GAMLSS-RS iteration  2: Global Deviance = 3479.1493 eps = 0.000007     </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = Satint ~ Infl + Type + Cont, data = housing, 
@@ -592,17 +592,19 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 72 df =  9 res.df =  63
 Deviance = 3479.1493 Null Dev. Red. = -2099.21%
-AIC = 3497.1493 elapsed =  0.02sec</code></pre>
+AIC = 3497.1493 elapsed =  0.03sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare coefficients</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   InflMedium      InflHigh TypeApartment    TypeAtrium   TypeTerrace 
-    0.5663937     1.2888191    -0.5723501    -0.3661866    -1.0910149 
-     ContHigh 
-    0.3602841 </code></pre>
+<pre><code>  location.p.(Intercept)    location.p.InflMedium      location.p.InflHigh 
+              -0.1968484                0.5664539                1.2889495 
+location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace 
+              -0.5724084               -0.3662225               -1.0911265 
+     location.p.ContHigh     theta1.p.(Intercept)     delta2.p.(Intercept) 
+               0.3603203               -0.6931505                0.1713817 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  location.p.(Intercept)    location.p.InflMedium      location.p.InflHigh 
               -0.1968484                0.5664539                1.2889495 
@@ -613,18 +615,18 @@ location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict class probabilities</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">type =</span> <span class="st">"p"</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">predict</span>(b)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">family</span>(b)<span class="sc">$</span><span class="fu">probabilities</span>(pb)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">predict</span>(m)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">family</span>(m)<span class="sc">$</span><span class="fu">probabilities</span>(pb)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        Low    Medium      High
-1 0.3784493 0.2876752 0.3338755
-2 0.3784493 0.2876752 0.3338755
-3 0.3784493 0.2876752 0.3338755
-4 0.2568264 0.2742122 0.4689613
-5 0.2568264 0.2742122 0.4689613
-6 0.2568264 0.2742122 0.4689613</code></pre>
+<pre><code>    location     theta1    delta2
+1 -0.1968484 -0.6931505 0.1713817
+2 -0.1968484 -0.6931505 0.1713817
+3 -0.1968484 -0.6931505 0.1713817
+4  0.3696055 -0.6931505 0.1713817
+5  0.3696055 -0.6931505 0.1713817
+6  0.3696055 -0.6931505 0.1713817</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">

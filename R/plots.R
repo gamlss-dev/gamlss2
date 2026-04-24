@@ -241,7 +241,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
         mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
 
         nu <- length(unique(xsamps))
-        stats::acf(if(nu < 2) stats::jitter(xsamps) else xsamps,
+        stats::acf(if(nu < 2) jitter(xsamps) else xsamps,
           main = "", lag.max = list(...)$lag.max, na.action = stats::na.pass)
         mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
       }

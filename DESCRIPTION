@@ -1,7 +1,7 @@
 Package: gamlss2
 Title: GAMLSS Infrastructure for Flexible Distributional Regression
 Version: 0.1-0
-Date: 2025-11-26
+Date: 2026-04-24
 Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
                email = "Nikolaus.Umlauf@uibk.ac.at",
                comment = c(ORCID = "0000-0003-2160-9803")),
@@ -18,7 +18,7 @@ Authors@R: c(person("Nikolaus", "Umlauf", role = c("aut", "cre"),
                email = "Reto.Stauffer@uibk.ac.at",
                comment = c(ORCID = "0000-0002-3798-5507")))
 Description: Next generation infrastructure for generalized additive models for location, scale, and shape (GAMLSS)
-  and distributional regression more generally. The package provides a fresh reimplementaton of the classic
+  and distributional regression more generally. The package provides a fresh reimplementation of the classic
   'gamlss' package while being more modular and facilitating the creation of advanced terms and models.
 License: GPL-2 | GPL-3
 URL: https://gamlss-dev.github.io/gamlss2/

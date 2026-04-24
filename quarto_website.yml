@@ -51,28 +51,44 @@ website:
               file: man/gamlss2.qmd
             - text: gamlss2_control
               file: man/gamlss2_control.qmd
+            - text: gamlss2_start
+              file: man/gamlss2_start.qmd
             - text: select_gamlss2
               file: man/select_gamlss2.qmd
             - text: stepwise
               file: man/stepwise.qmd
             - text: cv_gamlss2
               file: man/cv_gamlss2.qmd
-        - section: Model terms
+        - section: Optimization and sampling
           contents:
-            - text: glmnet
-              file: man/glmnet.qmd
-            - text: lasso
-              file: man/lasso.qmd
+            - text: RS / CG
+              file: man/RS_CG.qmd
+            - text: BS
+              file: man/BS.qmd
+            - text: bamlss2
+              file: man/bamlss2.qmd
+            - text: mcmc
+              file: man/mcmc.qmd
+        - section: Special model terms
+          contents:
+            - text: special_terms
+              file: man/special_terms.qmd
+            - text: gnet
+              file: man/gnet.qmd
+            - text: la / plot_lasso
+              file: man/la.qmd
+            - text: elm
+              file: man/elm.qmd
             - text: pb
               file: man/pb.qmd
             - text: random
               file: man/random.qmd
-            - text: special_terms
-              file: man/special_terms.qmd
         - section: Predictions and model statistics
           contents:
             - text: modelstats
               file: man/modelstats.qmd
+            - text: calibration
+              file: man/calibration.qmd
             - text: plots
               file: man/plots.qmd
             - text: predict.gamlss2
@@ -81,7 +97,7 @@ website:
               file: man/prodist.gamlss2.qmd
             - text: quantiles
               file: man/quantiles.qmd
-        - section: Families and links
+        - section: Families and distributions
           contents:
             - text: discretize
               file: man/discretize.qmd
@@ -93,10 +109,14 @@ website:
               file: man/GDF.qmd
             - text: Kumaraswamy
               file: man/Kumaraswamy.qmd
+            - text: MN
+              file: man/MN.qmd
+            - text: OL / ologit
+              file: man/OL.qmd
+        - section: Link functions
+          contents:
             - text: make.link2
               file: man/make.link2.qmd
-            - text: ologit
-              file: man/ologit.qmd
             - text: softplus
               file: man/softplus.qmd
         - section: Data
@@ -113,8 +133,6 @@ website:
               file: man/misc.qmd
             - text: new_formula
               file: man/new_formula.qmd
-            - text: RS_CG
-              file: man/RS_CG.qmd
 
 format:
   html:

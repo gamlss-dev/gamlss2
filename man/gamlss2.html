@@ -517,7 +517,7 @@ A GAM-type <code>formula</code> or <code>Formula</code> describing the additive 
 <code id="data">data</code>
 </td>
 <td>
-A data frame or list or environment containing the variables in the model. If not found in <code>data</code>, the variables are taken from <code>environment(formula)</code>, typically the environment from which <code>gamlss2</code> is called.
+A data frame, list, or environment containing the variables in the model. If not found in <code>data</code>, the variables are taken from <code>environment(formula)</code>, typically the environment from which <code>gamlss2()</code> is called.
 </td>
 </tr>
 <tr>
@@ -557,7 +557,7 @@ An optional vector of prior <code>weights</code> to be used in the fitting proce
 <code id="offset">offset</code>
 </td>
 <td>
-Optional offset terms to be included in the linear predictors during fitting. If a single numeric vector is supplied, it is assigned to the first parameter of the distribution. If offsets are needed for several parameters, supply a data frame or list in the same order as the parameter names in the family object.
+Optional offset terms to be included in the linear predictors during fitting. If a single numeric vector is supplied, it is assigned to the first parameter of the distribution. If offsets are needed for several parameters, provide a data frame or list in the same order as the parameter names in the family object.
 </td>
 </tr>
 <tr>
@@ -573,7 +573,7 @@ Optional starting values for the estimation algorithm, see <code>gamlss2_start</
 <code id="knots">knots</code>
 </td>
 <td>
-An optional list of user specified knots, see <code>smoothCon</code>.
+An optional list of user-specified knots, see <code>smoothCon</code>.
 </td>
 </tr>
 <tr>
@@ -639,13 +639,13 @@ Arguments passed to <code>gamlss2_control</code>.
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="dv">1</span> <span class="sc">|</span> <span class="dv">1</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 4772.1542 eps = 0.534571     
 GAMLSS-RS iteration  2: Global Deviance = 4772.1489 eps = 0.000001     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model summary</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = f, data = abdom, family = BCT)
@@ -668,10 +668,10 @@ edf  4.5885     2.6274
 *--------
 n = 610 df =  11.22 res.df =  598.78
 Deviance = 4772.1489 Null Dev. Red. = 33.37%
-AIC = 4794.5805 elapsed =  0.85sec</code></pre>
+AIC = 4794.5805 elapsed =  0.88sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot parameter-specific effects</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -680,7 +680,7 @@ AIC = 4794.5805 elapsed =  0.85sec</code></pre>
 </div>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot diagnostics</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -689,10 +689,10 @@ AIC = 4794.5805 elapsed =  0.85sec</code></pre>
 </div>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict selected distribution parameters</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">predict</span>(m1, <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>))</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## fitted centile curves</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m1, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## visualize</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y <span class="sc">~</span> x, <span class="at">data =</span> abdom, <span class="at">pch =</span> <span class="dv">19</span>,</span>
@@ -710,7 +710,7 @@ AIC = 4794.5805 elapsed =  0.85sec</code></pre>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">## seasonal count model for motorcycles</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>),</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI</span>
@@ -721,7 +721,7 @@ GAMLSS-RS iteration  2: Global Deviance = 10150.8948 eps = 0.000024
 GAMLSS-RS iteration  3: Global Deviance = 10150.8818 eps = 0.000001     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## summary</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = bikes ~ s(yday, bs = "cc") | s(yday, bs = "cc"), 
@@ -743,10 +743,10 @@ edf     6.3823        6.2095
 *--------
 n = 1057 df =  14.59 res.df =  1042.41
 Deviance = 10150.8818 Null Dev. Red. = 12.62%
-AIC = 10180.0654 elapsed =  0.26sec</code></pre>
+AIC = 10180.0654 elapsed =  0.28sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## effect plots</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -755,7 +755,7 @@ AIC = 10180.0654 elapsed =  0.26sec</code></pre>
 </div>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## residual diagnostics</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -765,7 +765,7 @@ AIC = 10180.0654 elapsed =  0.26sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## quantiles over the day of the year</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">365</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m2, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="do">## visualize fitted quantiles</span></span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic, <span class="at">pch =</span> <span class="dv">19</span>,</span>

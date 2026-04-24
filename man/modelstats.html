@@ -514,7 +514,7 @@ window.Quarto = {
 <h2 class="unnumbered anchored" data-anchor-id="gaic-and-generalised-pseudo-r-squared-for-gamlss-models">GAIC and Generalised (Pseudo) R-squared for GAMLSS Models</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Functions to compute the GAIC and the generalised R-squared of Nagelkerke (1991) for GAMLSS models.</p>
+<p>Functions to compute the GAIC and the generalized R-squared of Nagelkerke (1991) for GAMLSS models.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -576,17 +576,17 @@ Which definition of R-squared should be used? Possible values are <code>“Cox S
 <code id="newdata">newdata</code>
 </td>
 <td>
-Only for <code>type = “simple”</code> the R-squared can be evaluated using <code>newdata</code>.
+For <code>type = “simple”</code>, the R-squared can also be evaluated on <code>newdata</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The <code>Rsq()</code> function uses the definition for R-squared:</p>
+<p>The <code>Rsq()</code> function uses the following definition of R-squared:</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}\)</span></p>
-<p>where <span class="math inline">\(L(0)\)</span> is the null model (only a constant is fitted to all parameters) and <span class="math inline">\(L(\hat{\theta})\)</span> is the current fitted model. This definition sometimes is referred to as the Cox &amp; Snell R-squared. The Nagelkerke /Cragg &amp; Uhler’s definition divides the above with</p>
+<p>where <span class="math inline">\(L(0)\)</span> is the null model (only a constant is fitted to all parameters) and <span class="math inline">\(L(\hat{\theta})\)</span> is the fitted model under consideration. This definition is sometimes referred to as the Cox and Snell R-squared. The Nagelkerke or Cragg and Uhler definition divides the above by</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(1 - L(0)^{2/n}\)</span></p>
 </section>
@@ -612,12 +612,12 @@ Only for <code>type = “simple”</code> the R-squared can be evaluated using <
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"aids"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate negative binomial count models</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> x <span class="sc">+</span> qrt, <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> x <span class="sc">+</span> qrt, <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 492.6373 eps = 0.148669     
 GAMLSS-RS iteration  2: Global Deviance = 492.6373 eps = 0.000000     </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">+</span> <span class="fu">s</span>(qrt, <span class="at">bs =</span> <span class="st">"re"</span>), <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">+</span> <span class="fu">s</span>(qrt, <span class="at">bs =</span> <span class="st">"re"</span>), <span class="at">data =</span> aids, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 365.9324 eps = 0.367629     
 GAMLSS-RS iteration  2: Global Deviance = 365.6841 eps = 0.000678     
@@ -641,11 +641,11 @@ GAMLSS-RS iteration 19: Global Deviance = 365.5595 eps = 0.000013
 GAMLSS-RS iteration 20: Global Deviance = 365.5549 eps = 0.000012     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare models</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8095853</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, <span class="at">type =</span> <span class="st">"both"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(m1, <span class="at">type =</span> <span class="st">"both"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$CoxSnell
 [1] 0.8095853
@@ -653,31 +653,31 @@ GAMLSS-RS iteration 20: Global Deviance = 365.5549 eps = 0.000012     </code></p
 $CraggUhler
 [1] 0.809588</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(m1, m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       b1        b2 
+<pre><code>       m1        m2 
 0.8095853 0.9886961 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(m1, m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 391.0332 12.73917
-b1 504.6373  6.00000</code></pre>
+m2 391.0332 12.73917
+m1 504.6373  6.00000</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m1, m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 391.0332 12.73917
-b1 504.6373  6.00000</code></pre>
+m2 391.0332 12.73917
+m1 504.6373  6.00000</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(b1, b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(m1, m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        AIC       df
-b2 414.0486 12.73917
-b1 515.4773  6.00000</code></pre>
+m2 414.0486 12.73917
+m1 515.4773  6.00000</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

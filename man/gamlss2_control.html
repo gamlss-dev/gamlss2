@@ -482,7 +482,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="control-parameters">Control Parameters</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Various parameters that control fitting of GAMLSS using <code>gamlss2</code>.</p>
+<p>Control parameters for fitting GAMLSS models with <code>gamlss2</code>.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -500,7 +500,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="optimizer">optimizer</code>
 </td>
 <td>
-Function, the optimizer function that should be used for fitting.
+Function, the optimizer to be used for fitting.
 </td>
 </tr>
 <tr>
@@ -516,7 +516,7 @@ Logical, should information be printed while the algorithm is running?
 <code id="flush">flush</code>
 </td>
 <td>
-Logical, use <code>flush.console</code> for displaying the current output in the console.
+Logical, whether to use <code>flush.console</code> to display current output in the console.
 </td>
 </tr>
 <tr>
@@ -540,7 +540,7 @@ Logical, if fewer formulas are supplied than there are parameters of the distrib
 <code id="model">model</code>
 </td>
 <td>
-Logical, should the <em>model frame</em> be included as component of the returned object.
+Logical, should the <em>model frame</em> be included as a component of the returned object.
 </td>
 </tr>
 <tr>
@@ -548,7 +548,7 @@ Logical, should the <em>model frame</em> be included as component of the returne
 <code id="x">x</code>
 </td>
 <td>
-Logical, indicating whether the model matrix should be included as component of the returned object.
+Logical, indicating whether the model matrix should be included as a component of the returned object.
 </td>
 </tr>
 <tr>
@@ -556,7 +556,7 @@ Logical, indicating whether the model matrix should be included as component of 
 <code id="y">y</code>
 </td>
 <td>
-Logical, should the response be included as component of the returned object.
+Logical, should the response be included as a component of the returned object.
 </td>
 </tr>
 <tr>
@@ -572,14 +572,14 @@ Named logical vector indicating which parameters should be fixed during estimati
 <code id="...">…</code>
 </td>
 <td>
-Further control parameters to be part of the return value, e.g., used within optimizer function <code>RS</code>.
+Further control parameters to be included in the return value, for example parameters used by the optimizer function <code>RS</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The control parameters in <code>gamlss2_control</code> can also be extended, e.g., if another optimization function is used, newly specified control parameters are automatically passed on to this function.</p>
+<p>The set of control parameters can be extended. For example, if a different optimizer is used, newly specified control parameters are passed on to that optimizer automatically.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -602,8 +602,8 @@ Further control parameters to be part of the return value, e.g., used within opt
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model with different step length</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## control in the RS algorithm</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">step =</span> <span class="dv">1</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">step =</span> <span class="fl">0.9</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">step =</span> <span class="dv">1</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> BCT, <span class="at">step =</span> <span class="fl">0.9</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

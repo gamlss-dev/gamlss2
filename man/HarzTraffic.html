@@ -495,6 +495,7 @@ window.Quarto = {
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#format" id="toc-format" class="nav-link" data-scroll-target="#format">Format</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#source" id="toc-source" class="nav-link" data-scroll-target="#source">Source</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -511,7 +512,7 @@ window.Quarto = {
 <h2 class="unnumbered anchored" data-anchor-id="traffic-counts-at-sonnenberg-in-the-harz-region">Traffic Counts at Sonnenberg in the Harz Region</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>This dataset contains daily traffic counts close to Sonnenberg, located in the Harz region in Germany. It covers a period of nearly three years, from 2021-01-01 to 2023-11-30.</p>
+<p>This dataset contains daily traffic counts near Sonnenberg in the Harz region of Germany. It covers nearly three years, from 2021-01-01 to 2023-11-30, and combines traffic counts with weather covariates. The data are useful for illustrating seasonal count regression models, for example with cyclic smoothers over the day of the year.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -531,7 +532,7 @@ Date, the date of the record.
 yday
 </dt>
 <dd>
-Integer, the day of the year.
+Integer, the day of the year extracted from <code>date</code>. This is convenient for modeling within-year seasonality.
 </dd>
 <dt>
 bikes
@@ -618,6 +619,10 @@ windmax
 Numeric, maximum wind speed in m/s.
 </dd>
 </dl>
+</section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>The traffic variables record daily counts by vehicle type. The weather variables summarize daily conditions measured at a nearby station. In package examples, <code>bikes</code> is often modeled as a seasonal response because motorcycle traffic shows a pronounced annual cycle and substantial variation across weather conditions.</p>
 </section>
 <section id="source" class="level3">
 <h3 class="anchored" data-anchor-id="source">Source</h3>

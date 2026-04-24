@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>calibration – gamlss2</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -68,15 +71,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../gamlss2.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7e0df91317c5353507628273f96dfd55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ab82ced70ff0941f0d00279a91dd7d49.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -105,42 +107,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <meta property="og:title" content="gamlss2">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
 <meta property="og:site_name" content="gamlss2">
 </head>
 
-<body class="nav-sidebar floating nav-fixed quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -159,7 +132,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="../man/gamlss2-package.html" aria-current="page"> 
+    <a class="nav-link" href="../man/gamlss2-package.html"> 
 <span class="menu-text">Documentation</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -178,10 +151,6 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="../vignettes/topmodels.html">
  <span class="dropdown-text">Evaluation</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/survival.html">
- <span class="dropdown-text">Survival models</span></a>
   </li>  
     </ul>
   </li>
@@ -206,320 +175,10 @@ window.Quarto = {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/modelstats.html">Predictions and model statistics</a></li><li class="breadcrumb-item"><a href="../man/calibration.html">calibration</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
- <span class="menu-text">Package overview</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/gamlss2-package.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gamlss2-package</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
- <span class="menu-text">Regression models</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/gamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/gamlss2_control.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gamlss2_control</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/select_gamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">select_gamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/stepwise.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">stepwise</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/cv_gamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">cv_gamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">mcmc</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/BS.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">BS</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
- <span class="menu-text">Model terms</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/elm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">elm</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/gnet.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gnet</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/la.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">la</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/pb.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">pb</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/random.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">random</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/special_terms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">special_terms</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Predictions and model statistics</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">modelstats</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/plots.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">plots</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/predict.gamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">predict.gamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/prodist.gamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">prodist.gamlss2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/quantiles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">quantiles</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/calibration.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">calibration</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
- <span class="menu-text">Families and links</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/discretize.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">discretize</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/find_family.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">find_family</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/gamlss2.family.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">gamlss2.family</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/GDF.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">GDF</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/Kumaraswamy.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Kumaraswamy</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/make.link2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">make.link2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/OL.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">OL</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/MN.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">MN</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/softplus.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">softplus</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Data</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">HarzTraffic</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/SpirometryUS.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">SpirometryUS</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
- <span class="menu-text">Misc functionality</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/fake_formula.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">fake_formula</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/misc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">misc</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/new_formula.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">new_formula</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/RS_CG.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">RS_CG</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -541,7 +200,7 @@ window.Quarto = {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/modelstats.html">Predictions and model statistics</a></li><li class="breadcrumb-item"><a href="../man/calibration.html">calibration</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
@@ -580,7 +239,7 @@ One or several fitted <code>gamlss2</code> model objects to be assessed.
 <code id="newdata">newdata</code>
 </td>
 <td>
-Optional data frame for out-of-sample calibration. If supplied, predictions and (optionally) the response <code>y</code> are evaluated on <code>newdata</code>.
+Optional data frame for out-of-sample calibration.
 </td>
 </tr>
 <tr>
@@ -588,7 +247,7 @@ Optional data frame for out-of-sample calibration. If supplied, predictions and 
 <code id="y">y</code>
 </td>
 <td>
-Optional numeric or factor vector with the binary response (coded as 0/1 or a two-level factor). If omitted, the response is extracted from the first model.
+Optional numeric or factor vector with the binary response.
 </td>
 </tr>
 <tr>
@@ -596,7 +255,7 @@ Optional numeric or factor vector with the binary response (coded as 0/1 or a tw
 <code id="parameter">parameter</code>
 </td>
 <td>
-Character, which parameter should be used for prediction. Typically <code>“mu”</code> for binary models.
+Character, which parameter should be used for prediction.
 </td>
 </tr>
 <tr>
@@ -604,7 +263,7 @@ Character, which parameter should be used for prediction. Typically <code>“mu�
 <code id="breaks">breaks</code>
 </td>
 <td>
-Numeric vector of break points used to construct bins for the predicted probabilities. The range of <code>breaks</code> must cover the interval <code>[0, 1]</code>.
+Numeric vector of break points used to construct bins for the predicted probabilities.
 </td>
 </tr>
 <tr>
@@ -612,7 +271,7 @@ Numeric vector of break points used to construct bins for the predicted probabil
 <code id="minn">minn</code>
 </td>
 <td>
-Integer, the minimum number of observations required in each bin. Bins with fewer observations are dropped from the calibration curve.
+Integer, the minimum number of observations required in each bin.
 </td>
 </tr>
 <tr>
@@ -628,7 +287,7 @@ Character, main title for the plot.
 <code id="xlab">xlab</code>
 </td>
 <td>
-Character, label for the x-axis (predicted probabilities).
+Character, label for the x-axis.
 </td>
 </tr>
 <tr>
@@ -636,7 +295,7 @@ Character, label for the x-axis (predicted probabilities).
 <code id="ylab">ylab</code>
 </td>
 <td>
-Character, label for the y-axis (observed proportions).
+Character, label for the y-axis.
 </td>
 </tr>
 <tr>
@@ -644,7 +303,7 @@ Character, label for the y-axis (observed proportions).
 <code id="plot">plot</code>
 </td>
 <td>
-Logical, should a calibration plot be produced? If <code>FALSE</code>, only the aggregated calibration data are returned.
+Logical, should a calibration plot be produced?
 </td>
 </tr>
 <tr>
@@ -668,7 +327,7 @@ Integer, number of evaluation points for the loess curve.
 <code id="col">col</code>
 </td>
 <td>
-Either <code>NULL</code>, a function, or a vector of colors. If <code>NULL</code>, distinct colors are generated via <code>colorspace::qualitative_hcl()</code>. If a function, it is called with the number of models to generate colors. Otherwise, a vector of colors is recycled to the number of models.
+Colors used for the models.
 </td>
 </tr>
 <tr>
@@ -676,7 +335,7 @@ Either <code>NULL</code>, a function, or a vector of colors. If <code>NULL</code
 <code id="lty">lty</code>
 </td>
 <td>
-Integer vector of line types used for the loess curves. If <code>NULL</code>, different line types are used for each model and recycled if necessary.
+Line types used for the loess curves.
 </td>
 </tr>
 <tr>
@@ -692,7 +351,7 @@ Logical, should a legend be added when more than one model is supplied?
 <code id="pos">pos</code>
 </td>
 <td>
-Character, the position of the legend passed to <code>legend</code>.
+Character, legend position passed to <code>legend</code>.
 </td>
 </tr>
 <tr>
@@ -715,67 +374,40 @@ The y limits of the plot.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>For each fitted model, predicted probabilities for <span class="math inline">\(P(Y = 1 | X)\)</span> are obtained via <code>predict</code> with <code>type = “parameter”</code> and the requested <code>model</code> argument, if supplied. If the corresponding <code>gamlss2.family</code> object provides a <code>probabilities</code> method, this is used to transform the parameter vector into class probabilities. For families with more than two outcome categories, the first column is taken as the probability of the event.</p>
-<p>The predicted probabilities are then grouped into bins defined by <code>breaks</code>. Within each bin, the mean predicted probability and the observed proportion of 1s are computed, together with the number of observations in the bin. Bins with fewer than <code>minn</code> observations are dropped. The resulting points are plotted with size proportional to the square root of the bin size, and a reference line with slope 1 and intercept 0 is added for perfect calibration. Optionally, a loess smooth is fitted to the binned data for each model and added as a calibration curve.</p>
-<p>If multiple models are supplied, the binned calibration points and loess curves of all models are shown in the same plot, with different colors and line types. This allows a direct visual comparison of calibration across competing <code>gamlss2</code> specifications.</p>
+<p>For each fitted model, predicted probabilities are obtained via <code>predict</code> using <code>type = “parameter”</code> and the selected <code>parameter</code>. If the corresponding <code>gamlss2.family</code> object provides a <code>probabilities()</code> method, this is used to transform the parameter vector into probabilities. For multi-column outputs, the first column is used.</p>
+<p>Predicted probabilities are grouped into bins defined by <code>breaks</code>. Within each bin, the mean predicted probability, the observed proportion of 1s, and the number of observations are computed. Bins with fewer than <code>minn</code> observations are dropped.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Invisibly returns a data frame with the following columns:</p>
-<ul>
-<li>
-<p><code>interval</code>: Factor with the probability intervals.</p>
-</li>
-<li>
-<p><code>probs</code>: Mean predicted probability in each bin.</p>
-</li>
-<li>
-<p><code>y</code>: Observed proportion of 1s in each bin.</p>
-</li>
-<li>
-<p><code>n</code>: Number of observations in each bin.</p>
-</li>
-<li>
-<p><code>model</code>: Character, model label. For a single model this column is dropped from the returned data frame.</p>
-</li>
-</ul>
-<p>If <code>plot = FALSE</code>, the same data frame is returned without producing a plot.</p>
+<p>Invisibly returns a data frame with the columns <code>interval</code>, <code>probs</code>, <code>y</code>, <code>n</code>, and <code>model</code>. For a single model, the <code>model</code> column is dropped.</p>
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
 <p>Van Calster B, McLernon DJ, van Smeden M, Wynants L, Steyerberg EW (2019). Calibration: the Achilles heel of predictive analytics. <em>BMC Medicine</em>, <b>17</b>, 230. <a href="https://doi.org/10.1186/s12916-019-1466-7">doi:10.1186/s12916-019-1466-7</a></p>
-<p>Steyerberg EW (2019). <em>Clinical Prediction Models: A Practical Approach to Development, Validation, and Updating</em>. 2nd edition. Springer, New York.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code>, <code>predict</code>, <code>legend</code>.</p>
+<p><code>gamlss2</code>, <code>predict</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## and compare two models</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="fu">sin</span>(x1) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> x2</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(eta)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## fit three competing models</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> x1, <span class="at">family =</span> BI, <span class="at">data =</span> d)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1), <span class="at">family =</span> BI, <span class="at">data =</span> d)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2, <span class="at">family =</span> BI, <span class="at">data =</span> d)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## calibration on the training data</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">calibration</span>(m1, m2, m3)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## extract calibration data without plotting</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>cal_tab <span class="ot">&lt;-</span> <span class="fu">calibration</span>(m1, m2, m3, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cal_tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">400</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="fu">sin</span>(x1) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> x2</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(eta)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> x1, <span class="at">family =</span> BI, <span class="at">data =</span> d)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1), <span class="at">family =</span> BI, <span class="at">data =</span> d)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2, <span class="at">family =</span> BI, <span class="at">data =</span> d)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">calibration</span>(m1, m2, m3)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">calibration</span>(m1, m2, m3, <span class="at">plot =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

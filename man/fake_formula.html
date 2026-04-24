@@ -464,6 +464,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
@@ -481,7 +482,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="extended-processing-of-fake-formulas">Extended Processing of "Fake" Formulas</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Create a "fake" formula from a <code>formula</code>, a <code>Formula</code>, or a <code>list</code> of <code>formula</code>s. The function extracts all necessary variables (transformation of variables), to build a <code>model.frame</code>. The function also extracts all special model terms within the formulas, the information can be used to setup any special model term specification list.</p>
+<p>Create a simplified formula from a <code>formula</code>, a <code>Formula</code>, or a <code>list</code> of <code>formula</code>s. The result retains the variables and transformations needed to build a <code>model.frame</code> while separating out special model terms. This is mainly used internally when <span class="pkg">gamlss2</span> prepares formulas for fitting.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -526,9 +527,26 @@ Logical, should only the special model terms be returned?
 </tr>
 </tbody></table>
 </section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>The function is primarily an internal helper for formula preprocessing in <span class="pkg">gamlss2</span>, but it can also be useful for inspecting how complex formulas are decomposed before fitting.</p>
+<p>Special model terms such as <code>s()</code>, <code>te()</code>, <code>ti()</code>, <code>re()</code>, or package-specific specials are identified and handled separately from ordinary variables. Depending on the control arguments:</p>
+<ul>
+<li>
+<p>if <code>nospecials = FALSE</code>, variables used inside registered special terms are reintroduced into the returned formula so they remain available in the model frame;</p>
+</li>
+<li>
+<p>if <code>nospecials = TRUE</code>, the returned formula excludes the special terms and their variables;</p>
+</li>
+<li>
+<p>if <code>onlyspecials = TRUE</code>, the function returns the names of the detected special terms instead of a formula object.</p>
+</li>
+</ul>
+<p>For multi-part or multi-parameter formulas, the output preserves the overall formula structure.</p>
+</section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Depending on the input formula, the function returns a <code>formula</code> or <code>Formula</code>. If <code>onlyspecials = TRUE</code> a vector or list of special model term names is returned.</p>
+<p>Depending on the input, the function returns a <code>formula</code> or <code>Formula</code>. If <code>onlyspecials = TRUE</code>, a character vector or list of special model term names is returned.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

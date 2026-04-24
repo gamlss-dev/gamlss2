@@ -482,7 +482,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="smooth-model-term-selection-with-additional-penalties">Smooth Model Term Selection with Additional Penalties</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The function <code>select_gamlss2()</code> allows for penalizing all <span class="pkg">mgcv</span> model terms with an additional shrinkage penalty, which can shrink some terms to zero, effectively selecting them out of the model. In addition to this penalty, model terms are selected based on two criteria: the estimated degrees of freedom of the term and the percentage of the predictor range covered by the model term. These two thresholds aim to mimic a natural selection process, similar to what one might do by inspecting summaries and effect plots, ensuring that only relevant terms are retained in the final model.</p>
+<p>The function <code>select_gamlss2()</code> applies an additional shrinkage penalty to all <span class="pkg">mgcv</span> model terms. This can shrink some terms to zero and thereby remove them from the model. In addition to this penalty, model terms are selected based on two criteria: the estimated degrees of freedom of the term and the percentage of the predictor range covered by the model term. These two thresholds aim to mimic a natural selection process, similar to what one might do by inspecting summaries and effect plots, so that only relevant terms are retained in the final model.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -510,7 +510,7 @@ A GAM-type <code>formula</code> or <code>Formula</code>. All smooth terms of the
 <code id="...">…</code>
 </td>
 <td>
-Arguments passed to argument <code>control</code> in function <code>sRS()</code>.
+Arguments passed to <code>gamlss2</code> and to argument <code>control</code> in function <code>sRS()</code>. For <code>criterion = “GAIC”</code>, the penalty can be supplied via <code>K</code>.
 </td>
 </tr>
 <tr>
@@ -518,7 +518,7 @@ Arguments passed to argument <code>control</code> in function <code>sRS()</code>
 <code id="criterion">criterion</code>
 </td>
 <td>
-The information criterion to be used for estimating the shrinkage parameters. This can also be a vector of length 2, where the first element specifies the criterion to be used during the selection step, and the second element specifies the criterion to be used during the refitting step. Possible options are <code>“BIC”</code>, <code>“GCV”</code>, <code>“AIC”</code>, <code>“AICc”</code> and <code>“GAIC”</code> with user defined penalty <code>K</code>, default is <code>K = 2</code>.
+The information criterion used to estimate the shrinkage parameters. This can also be a vector of length 2, where the first element specifies the criterion to be used during the selection step, and the second element specifies the criterion to be used during the refitting step. Possible options are <code>“BIC”</code>, <code>“GCV”</code>, <code>“AIC”</code>, <code>“AICc”</code> and <code>“GAIC”</code> with user-defined penalty <code>K</code>; the default is <code>K = 2</code>.
 </td>
 </tr>
 <tr>
@@ -566,7 +566,7 @@ A family object, see <code>gamlss2.family</code>.
 <code id="offsets">offsets</code>
 </td>
 <td>
-If supplied, a list or data frame of possible model offset.
+If supplied, a list or data frame of model offsets.
 </td>
 </tr>
 <tr>
@@ -613,7 +613,7 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The function <code>select_gamlss2</code> selects model terms by identifying those with estimated degrees of freedom greater than a pre-specified threshold (e.g., <code>thres = 0.9</code>). In addition, model term selection can also be based on the percentage of the total predictor range covered by the model term to ensure that the term represents a substantial portion of the total effect. After the selection step, the model is refitted using only the selected terms, excluding the additional penalty applied during the initial fitting process. The additional penalty for automatic term selection is described in <code>?gam.selection</code>. Please note that this is experimental, and careful consideration should always be given to the modeling process.</p>
+<p>The function <code>select_gamlss2()</code> selects model terms by identifying those with estimated degrees of freedom greater than a pre-specified threshold (e.g., <code>thres = 0.9</code>). In addition, model term selection can also be based on the percentage of the total predictor range covered by the model term to ensure that the term represents a substantial portion of the total effect. After the selection step, the model is refitted using only the selected terms, excluding the additional penalty applied during the initial fitting process. The additional penalty for automatic term selection is described in <code>gam.selection</code>. This approach is experimental, so model selection should still be assessed carefully.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -684,19 +684,19 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x0) <span class="sc">+</span> <span class="fu">s</span>(x1) <span class="sc">+</span> <span class="fu">s</span>(x2) <span class="sc">+</span> <span class="fu">s</span>(x3) <span class="sc">+</span> <span class="fu">s</span>(x4) <span class="sc">+</span> <span class="fu">s</span>(x5)</span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gam</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> poisson,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gam</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> poisson,</span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">select =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"REML"</span>)</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b1)</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1, <span class="at">pages =</span> <span class="dv">1</span>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">pages =</span> <span class="dv">1</span>)</span>
 <span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="do">## same with gamlss2</span></span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">select_gamlss2</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> PO)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">select_gamlss2</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> PO)</span>
 <span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="do">## plot selected effects</span></span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b2)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span>
 <span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="do">## final model</span></span>
-<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(b2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

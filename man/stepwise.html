@@ -482,7 +482,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="stepwise-model-term-selection-using-gaic">Stepwise Model Term Selection Using GAIC</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The optimizer function <code>stepwise()</code> performs stepwise model term selection using a Generalized Akaike Information Criterion (GAIC). Estimation is based on the Rigby and Stasinopoulos (RS) &amp; Cole and Green (CG) algorithm as implemented in function <code>RS</code>.</p>
+<p>The optimizer function <code>stepwise()</code> performs stepwise model term selection using a Generalized Akaike Information Criterion (GAIC). Estimation is based on the Rigby and Stasinopoulos (RS) and Cole and Green (CG) algorithms, as implemented in function <code>RS</code>.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -528,7 +528,7 @@ Numeric, the penalty for the <code>GAIC</code>.
 <code id="strategy">strategy</code>
 </td>
 <td>
-Character, the strategy that should be applied for the stepwise algorithm. Possible options are <code>“forward.linear”</code>, <code>“forward”</code>, <code>“backward”</code>, <code>“backward.linear”</code>, <code>“replace”</code>, <code>“replace.linear”</code>, <code>“both”</code>, <code>“both.linear”</code>, <code>“all”</code> and <code>“all.linear”</code>. See the details.
+Character, the strategy to be used by the stepwise algorithm. Possible options are <code>“forward.linear”</code>, <code>“forward”</code>, <code>“backward”</code>, <code>“backward.linear”</code>, <code>“replace”</code>, <code>“replace.linear”</code>, <code>“both”</code>, <code>“both.linear”</code>, <code>“all”</code> and <code>“all.linear”</code>. See the details.
 </td>
 </tr>
 <tr>
@@ -536,7 +536,7 @@ Character, the strategy that should be applied for the stepwise algorithm. Possi
 <code id="keeporder">keeporder</code>
 </td>
 <td>
-Logical, For the different strategies of the stepwise algorithm, should the updates be performed sequentially according to the order of the parameters of the response distribution as specified in the family (see <code>gamlss2.family</code>), or should the selection search be performed across all parameters?
+Logical. For the different stepwise strategies, should the updates be performed sequentially according to the order of the parameters of the response distribution as specified in the family (see <code>gamlss2.family</code>), or should the selection search be performed across all parameters?
 </td>
 </tr>
 <tr>
@@ -544,7 +544,7 @@ Logical, For the different strategies of the stepwise algorithm, should the upda
 <code id="cores">cores</code>
 </td>
 <td>
-Integer, if <code>cores &gt; 1L</code>, function <code>mclapply</code> function is used to speed up computations using multiple cores within the selection steps.
+Integer. If <code>cores &gt; 1L</code>, <code>mclapply</code> is used to speed up computations within the selection steps.
 </td>
 </tr>
 <tr>
@@ -584,7 +584,7 @@ A family object, see <code>gamlss2.family</code>.
 <code id="offsets">offsets</code>
 </td>
 <td>
-If supplied, a list or data frame of possible model offset.
+If supplied, a list or data frame of model offsets.
 </td>
 </tr>
 <tr>
@@ -641,10 +641,10 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 <p>In a forward selection step, model terms with the highest improvement on the GAIC are selected.</p>
 </li>
 <li>
-<p>In a replacement step, each model term is tested to see if an exchange with a model term not yet selected will improve the GAIC.</p>
+<p>In a replacement step, each model term is tested to see if an exchange with a term not yet selected improves the GAIC.</p>
 </li>
 <li>
-<p>In a backward step, model terms are deselected, if the GAIC can be further improved.</p>
+<p>In a backward step, model terms are removed if this further improves the GAIC.</p>
 </li>
 <li>
 <p>In a bidirectional step, model terms can be either added or removed.</p>
@@ -654,14 +654,14 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 </li>
 </ol>
 <p>The selected strategies are iterated until no further improvement is achieved.</p>
-<p>The different strategies can be selected using argument <code>strategy</code>. Please see the examples. Possible values are <code>“both”</code>, <code>“forward”</code>, <code>“backward”</code>, <code>“replace”</code>, and <code>“all”</code>. Here, <code>strategy = “all”</code> combines the forward, backward, and replace selection steps.</p>
+<p>The different strategies can be selected using argument <code>strategy</code>; see the examples. Possible values are <code>“both”</code>, <code>“forward”</code>, <code>“backward”</code>, <code>“replace”</code>, and <code>“all”</code>. Here, <code>strategy = “all”</code> combines the forward, backward, and replace selection steps.</p>
 <p>In addition, each of the steps 2-4 can be applied to linear model terms only, prior to performing the steps for all model terms. This can be done by additionally setting <code>strategy</code> to <code>“both.linear”</code>, <code>“forward.linear”</code>, <code>“backward.linear”</code>, <code>“replace.linear”</code>, or <code>“all.linear”</code>.</p>
 <p>The default is <code>strategy = c(“both.linear”, “both”)</code> and <code>keeporder = FALSE</code>.</p>
-<p>Note that each of the steps 2-4 can be performed while maintaining the order of the parameters of the response distribution, i.e., if the <code>keeporder = TRUE</code> argument is set, then the parameters will be updated in the order specified in the <code>gamlss2.family</code>. Using backward elimination, the model terms are deselected in reverse order.</p>
+<p>Note that each of the steps 2–4 can be performed while maintaining the order of the parameters of the response distribution, i.e., if the <code>keeporder = TRUE</code> argument is set, then the parameters will be updated in the order specified in the <code>gamlss2.family</code>. Using backward elimination, the model terms are deselected in reverse order.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>The optimizer function <code>stepwise()</code> returns the final model as named list of class <code>“gamlss2”</code>. See the return value of function <code>RS</code>. The wrapper function <code>step_gamlss2()</code> also returns the final model.</p>
+<p>The optimizer function <code>stepwise()</code> returns the final model as a named list of class <code>“gamlss2”</code>. See the return value of function <code>RS</code>. The wrapper function <code>step_gamlss2()</code> also returns the final model.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

@@ -95,13 +95,77 @@ elm_group_scale <- function(X) {
   }
 }
 
+elm_primes <- function(n) {
+  if(n <= 0L) return(integer())
+  primes <- integer()
+  candidate <- 2L
+  while(length(primes) < n) {
+    is_prime <- TRUE
+    limit <- floor(sqrt(candidate))
+    if(length(primes)) {
+      for(p in primes) {
+        if(p > limit) break
+        if(candidate %% p == 0L) {
+          is_prime <- FALSE
+          break
+        }
+      }
+    }
+    if(is_prime) {
+      primes <- c(primes, candidate)
+    }
+    candidate <- candidate + 1L
+  }
+  primes
+}
+
+elm_halton <- function(n, dim, start = 0L) {
+  if(n <= 0L || dim <= 0L) {
+    return(matrix(numeric(), nrow = max(0L, n), ncol = max(0L, dim)))
+  }
+
+  radical_inverse <- function(i, base) {
+    f <- 1 / base
+    r <- 0
+    while(i > 0L) {
+      r <- r + f * (i %% base)
+      i <- i %/% base
+      f <- f / base
+    }
+    r
+  }
+
+  bases <- elm_primes(dim)
+  idx <- seq_len(n) + as.integer(start)
+  H <- matrix(0, nrow = n, ncol = dim)
+  for(j in seq_len(dim)) {
+    H[, j] <- vapply(idx, radical_inverse, numeric(1L), base = bases[j])
+  }
+  H
+}
+
+elm_bias_probs <- function(k, sampler = c("halton", "random"), start = 0L,
+  q_range = c(0.2, 0.8))
+{
+  sampler <- match.arg(sampler)
+  q0 <- sort(q_range)
+  q0[1L] <- max(1e-6, q0[1L])
+  q0[2L] <- min(1 - 1e-6, q0[2L])
+  if(sampler == "random") {
+    return(stats::runif(k, min = q0[1L], max = q0[2L]))
+  }
+  q0[1L] + (q0[2L] - q0[1L]) * elm_halton(k, 1L, start = start)[, 1L]
+}
+
 elm_sample_weights <- function(Z, k, a = "tanh",
   target_sd = 1.0, slope_sd_1d = 1.0, q_range = c(0.05, 0.95),
-  min_sd = 1e-12, orthogonalize = NULL)
+  min_sd = 1e-12, orthogonalize = NULL, whiten = TRUE,
+  sampler = c("halton", "pca", "random"))
 {
   Z <- as.matrix(Z)
   n_weights <- ncol(Z)
   if(n_weights < 2L) stop("Z must have at least intercept + 1 column")
+  sampler <- match.arg(sampler)
 
   p_in <- n_weights - 1L
   fan_in <- max(1L, p_in)
@@ -150,12 +214,6 @@ elm_sample_weights <- function(Z, k, a = "tanh",
 
   Zin <- Z[, -1L, drop = FALSE]
 
-  bias_from_u <- function(u) {
-    qq <- stats::runif(1, min = 0.2, max = 0.8)
-    -stats::quantile(u, probs = qq, na.rm = TRUE,
-      names = FALSE, type = 7)
-  }
-
   if(p_in == 1L) {
     x1 <- drop(Zin)
     x1 <- x1[is.finite(x1)]
@@ -176,18 +234,28 @@ elm_sample_weights <- function(Z, k, a = "tanh",
     if(!is.finite(sx) || sx < min_sd) sx <- 1
 
     slope_sd <- slope_sd_1d / sx
-    thr <- stats::runif(k, min = q[1], max = q[2])
+    if(sampler == "random") {
+      thr <- stats::runif(k, min = q[1], max = q[2])
+      zlev <- stats::rnorm(k)
+    } else {
+      probs <- q_range[1L] + diff(q_range) *
+        elm_halton(k, 1L, start = 3L)[, 1L]
+      thr <- as.numeric(stats::quantile(x1, probs = probs,
+        na.rm = TRUE, names = FALSE, type = 7))
+      zlev <- stats::qnorm(pmin(pmax(
+        elm_halton(k, 1L, start = k + 11L)[, 1L], 1e-6), 1 - 1e-6))
+    }
 
     W <- sapply(seq_len(k), function(jj) {
       w <- numeric(n_weights)
 
       if(a %in% c("gaussian", "laplace")) {
-        a1 <- abs(stats::rnorm(1, 0, slope_sd))
+        a1 <- abs(zlev[jj] * slope_sd)
         a1 <- max(a1, 0.05)
         if(!is.finite(a1) || a1 < 1e-6) a1 <- 1e-6
         b <- -a1 * thr[jj]
       } else {
-        a1 <- stats::rnorm(1, 0, slope_sd)
+        a1 <- zlev[jj] * slope_sd
         if(!is.finite(a1) || abs(a1) < 1e-6)
           a1 <- sign(a1 + 1e-12) * 1e-6
         b <- -a1 * thr[jj]
@@ -202,22 +270,74 @@ elm_sample_weights <- function(Z, k, a = "tanh",
     W <- matrix(NA_real_, nrow = n_weights, ncol = k)
     jj <- 1L
 
+    ## Build a whitening transform for the non-intercept columns. This makes
+    ## random directions less redundant when predictors are correlated.
+    T_in <- diag(fan_in)
+    if(isTRUE(whiten)) {
+      Xc <- scale(Zin, center = TRUE, scale = FALSE)
+      Sigma <- crossprod(Xc) / max(1, nrow(Xc) - 1L)
+      Sigma <- 0.5 * (Sigma + t(Sigma))
+      eig <- eigen(Sigma, symmetric = TRUE)
+      vals <- pmax(eig$values, min_sd^2)
+      T_in <- eig$vectors %*% (diag(1 / sqrt(vals), nrow = length(vals))) %*% t(eig$vectors)
+    } else {
+      eig <- eigen(diag(fan_in), symmetric = TRUE)
+      vals <- rep(1, fan_in)
+    }
+
     while(jj <= k) {
       m <- min(fan_in, k - jj + 1L)
 
-      if(orthogonalize) {
-        V <- matrix(stats::rnorm(fan_in * m), fan_in, m)
-        decomp <- qr(V)
-        Q <- qr.Q(decomp, complete = FALSE)
-        V <- Q[, seq_len(m), drop = FALSE]
+      if(sampler == "random") {
+        if(orthogonalize) {
+          V <- matrix(stats::rnorm(fan_in * m), fan_in, m)
+          decomp <- qr(V)
+          Q <- qr.Q(decomp, complete = FALSE)
+          V <- Q[, seq_len(m), drop = FALSE]
+        } else {
+          V <- matrix(stats::rnorm(fan_in * m), fan_in, m)
+          nv <- sqrt(colSums(V^2))
+          nv[!is.finite(nv) | nv < min_sd] <- 1
+          V <- sweep(V, 2, nv, "/")
+        }
+      } else if(sampler == "halton") {
+        H <- elm_halton(m, fan_in, start = jj + 5L)
+        H <- pmin(pmax(H, 1e-6), 1 - 1e-6)
+        V <- matrix(stats::qnorm(H), nrow = fan_in, ncol = m)
+        if(orthogonalize) {
+          decomp <- qr(V)
+          Q <- qr.Q(decomp, complete = FALSE)
+          V <- Q[, seq_len(m), drop = FALSE]
+        } else {
+          nv <- sqrt(colSums(V^2))
+          nv[!is.finite(nv) | nv < min_sd] <- 1
+          V <- sweep(V, 2, nv, "/")
+        }
       } else {
-        V <- matrix(stats::rnorm(fan_in * m), fan_in, m)
+        H <- elm_halton(m, fan_in, start = jj + 17L)
+        H <- pmin(pmax(H, 1e-6), 1 - 1e-6)
+        coef <- 0.15 * matrix(stats::qnorm(H), nrow = fan_in, ncol = m)
+        idx <- ((jj - 1L) + seq_len(m) - 1L) %% fan_in + 1L
+        coef[cbind(idx, seq_len(m))] <- coef[cbind(idx, seq_len(m))] + 1
+        nv <- sqrt(colSums(coef^2))
+        nv[!is.finite(nv) | nv < min_sd] <- 1
+        coef <- sweep(coef, 2, nv, "/")
+        V <- eig$vectors %*% (diag(sqrt(vals), nrow = fan_in) %*% coef)
         nv <- sqrt(colSums(V^2))
         nv[!is.finite(nv) | nv < min_sd] <- 1
         V <- sweep(V, 2, nv, "/")
       }
 
+      ## Sample directions in whitened coordinates and map them back.
+      V <- T_in %*% V
+      nv <- sqrt(colSums(V^2))
+      nv[!is.finite(nv) | nv < min_sd] <- 1
+      V <- sweep(V, 2, nv, "/")
       V <- V * (base_sd * sqrt(fan_in))
+
+      qq <- elm_bias_probs(m,
+        sampler = if(sampler == "random") "random" else "halton",
+        start = jj + 31L)
 
       for(ii in seq_len(m)) {
         w_in <- V[, ii]
@@ -228,7 +348,8 @@ elm_sample_weights <- function(Z, k, a = "tanh",
         w_in <- w_in * (target_sd / su)
 
         u2 <- drop(Zin %*% w_in)
-        b <- bias_from_u(u2)
+        b <- -stats::quantile(u2, probs = qq[ii], na.rm = TRUE,
+          names = FALSE, type = 7)
 
         w <- numeric(n_weights)
         w[1L] <- b
@@ -344,8 +465,19 @@ elm <- function(x, k = 50, a = "tanh", ...)
   )
 
   st$n_weights <- ncol(st$Z)
-
-  st$weights <- elm_sample_weights(st$Z, k = k, a = a)
+  sampler_args <- list(
+    "Z" = st$Z,
+    "k" = k,
+    "a" = a,
+    "sampler" = if(is.null(st$control$sampler)) "halton" else st$control$sampler
+  )
+  for(nm in c("target_sd", "slope_sd_1d", "q_range", "min_sd",
+    "orthogonalize", "whiten")) {
+    if(!is.null(st$control[[nm]])) {
+      sampler_args[[nm]] <- st$control[[nm]]
+    }
+  }
+  st$weights <- do.call(elm_sample_weights, sampler_args)
   st$X <- st$activation(st$Z %*% st$weights)
 
   st$X_center <- colMeans(st$X, na.rm = TRUE)

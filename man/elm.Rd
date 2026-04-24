@@ -25,6 +25,10 @@ elm(x, k = 50, a = "tanh", ...)
   \item{\dots}{Further control arguments can be passed:
     \code{criterion = "bic"} (default) for shrinkage parameter selection and
     \code{scale = TRUE} (default) for internal scaling of the design matrix.
+    The hidden-layer initialization can be controlled via
+    \code{sampler = "halton"} (default), \code{"pca"}, or \code{"random"},
+    and via further tuning arguments such as \code{whiten}, \code{target_sd},
+    \code{slope_sd_1d}, \code{q_range}, and \code{orthogonalize}.
     Further arguments are passed to \code{\link[stats]{model.matrix}} if
     \code{x} is specified using a formula.}
 }
@@ -46,8 +50,16 @@ elm(x, k = 50, a = "tanh", ...)
   For numerical stability, bounded activations are evaluated on clipped inputs
   (currently \eqn{[-35, 35]}).
 
-  \strong{Reproducibility}. Weights are sampled randomly. Use \code{\link[base]{set.seed}}
-  before calling \code{elm()} if you need reproducible results
+  \strong{Weight sampling}. By default, hidden-unit weights are generated using a
+  low-discrepancy Halton design in a whitened input space. This tends to produce
+  more stable and less redundant features than purely random draws in many practical
+  applications. With \code{sampler = "pca"}, directions are additionally aligned
+  with principal component directions of the scaled design. The historical
+  stochastic behavior can be recovered with \code{sampler = "random"}.
+
+  \strong{Reproducibility}. The default \code{sampler = "halton"} is deterministic
+  given the input data. Use \code{\link[base]{set.seed}} only if you explicitly
+  request \code{sampler = "random"}.
 }
 
 \value{
@@ -79,8 +91,8 @@ data("SpirometryUS")
 ## subset for female
 d <- subset(SpirometryUS, gender == "female")
 
-## note, inner weight are sampled, set
-## the seed for reproducibility
+## the default sampler is deterministic; set
+## a seed only for sampler = "random"
 set.seed(1328)
 
 ## formula for all 4 parameters

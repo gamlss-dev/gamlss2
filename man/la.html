@@ -324,7 +324,7 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## set up the model formula for a BCT model</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">la</span>(Flc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(Ac,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">+</span> <span class="fu">la</span>(loc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">la</span>(Flc,<span class="at">type=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">la</span>(Ac,<span class="at">type=</span><span class="dv">3</span>) <span class="sc">+</span> <span class="fu">la</span>(loc,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">|</span> . <span class="sc">|</span> .</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="do">## estimation</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> rent, <span class="at">family =</span> BCT)</span>
@@ -363,7 +363,7 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 <span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="do">## simulated example using the normal lasso</span></span>
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="do">## and a matrix as argument for la()</span></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="do">## number of observations and covariates</span></span>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
@@ -387,7 +387,7 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 <span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma)</span>
 <span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula with nominal fused lasso</span></span>
-<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">la</span>(X,<span class="at">type=</span><span class="dv">3</span>) <span class="sc">|</span> <span class="fu">la</span>(X,<span class="at">type=</span><span class="dv">3</span>)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">la</span>(X,<span class="at">type=</span><span class="dv">4</span>) <span class="sc">|</span> <span class="fu">la</span>(X,<span class="at">type=</span><span class="dv">4</span>)</span>
 <span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model incl. extra ridge penalty</span></span>
 <span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a><span class="do">## for all la() model terms</span></span>
@@ -415,7 +415,7 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 <span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>  cb_sigma[beta<span class="sc">$</span>sigma <span class="sc">&gt;</span> <span class="dv">0</span>] <span class="sc">&gt;</span> <span class="dv">0</span>))</span>
 <span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a><span class="do">## false positive rate, needs threshold</span></span>
-<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>thres <span class="ot">&lt;-</span> <span class="fl">0.02</span></span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>thres <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
 <span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">c</span>(<span class="fu">abs</span>(cb_mu[beta<span class="sc">$</span>mu <span class="sc">==</span> <span class="dv">0</span>]) <span class="sc">&gt;</span> thres,</span>
 <span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abs</span>(cb_sigma[beta<span class="sc">$</span>sigma <span class="sc">==</span> <span class="dv">0</span>]) <span class="sc">&gt;</span> thres))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>

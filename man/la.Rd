@@ -95,7 +95,7 @@ rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
   include.lowest = TRUE)
 
 ## set up the model formula for a BCT model
-f <- R ~ la(Flc,type=4) + la(Ac,type=4) + la(loc,type=4) | . | .
+f <- R ~ la(Flc,type=3) + la(Ac,type=3) + la(loc,type=4) | . | .
 
 ## estimation
 m1 <- gamlss2(f, data = rent, family = BCT)
@@ -134,7 +134,7 @@ plot_lasso(m1, which = "coefficients", term = 5,
 
 ## simulated example using the normal lasso
 ## and a matrix as argument for la()
-set.seed(123)
+set.seed(1328)
 
 ## number of observations and covariates
 n <- 500
@@ -158,7 +158,7 @@ sigma <- exp(-1 + X \%*\% beta$sigma)
 y <- rnorm(n, mean = mu, sd = sigma)
 
 ## model formula with nominal fused lasso
-f <- y ~ la(X,type=3) | la(X,type=3)
+f <- y ~ la(X,type=4) | la(X,type=4)
 
 ## estimate model incl. extra ridge penalty
 ## for all la() model terms
@@ -186,7 +186,7 @@ tp <- mean(c(cb_mu[beta$mu > 0] > 0,
   cb_sigma[beta$sigma > 0] > 0))
 
 ## false positive rate, needs threshold
-thres <- 0.02
+thres <- 0.01
 fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
   abs(cb_sigma[beta$sigma == 0]) > thres))
 }

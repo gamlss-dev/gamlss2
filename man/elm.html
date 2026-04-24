@@ -278,7 +278,7 @@ Character, activation function for the hidden units. Supported options are <code
 <code id="...">…</code>
 </td>
 <td>
-Further control arguments can be passed: <code>criterion = “bic”</code> (default) for shrinkage parameter selection and <code>scale = TRUE</code> (default) for internal scaling of the design matrix. Further arguments are passed to <code>model.matrix</code> if <code>x</code> is specified using a formula.
+Further control arguments can be passed: <code>criterion = “bic”</code> (default) for shrinkage parameter selection and <code>scale = TRUE</code> (default) for internal scaling of the design matrix. The hidden-layer initialization can be controlled via <code>sampler = “halton”</code> (default), <code>“pca”</code>, or <code>“random”</code>, and via further tuning arguments such as <code>whiten</code>, <code>target_sd</code>, <code>slope_sd_1d</code>, <code>q_range</code>, and <code>orthogonalize</code>. Further arguments are passed to <code>model.matrix</code> if <code>x</code> is specified using a formula.
 </td>
 </tr>
 </tbody></table>
@@ -288,7 +288,8 @@ Further control arguments can be passed: <code>criterion = “bic”</code> (def
 <p>The ELM term constructs a randomized single-hidden-layer representation of the covariate(s) in <code>x</code>. Internally, a design matrix <code>Z</code> is built (including an intercept column), random weights are sampled, and the linear predictors <code>Z %*% W</code> are transformed through the activation function <code>a</code> to obtain the hidden-layer design matrix <code>X</code>. Columns of <code>X</code> are centered before estimation.</p>
 <p><strong>Internal scaling</strong>. For numerical stability and comparability across terms, <code>Z</code> can be scaled internally (<code>scale = TRUE</code>). Intercept columns are left unchanged. If <code>x</code> is a factor, a QR-based group scaling is applied; otherwise, a column-wise center-and-scale normalization is used. The scaling transformation is stored and is reused automatically during prediction.</p>
 <p><strong>Activation functions</strong>. The activation is applied element-wise to <code>Z %*% W</code>. For numerical stability, bounded activations are evaluated on clipped inputs (currently <span class="math inline">\([-35, 35]\)</span>).</p>
-<p><strong>Reproducibility</strong>. Weights are sampled randomly. Use <code>set.seed</code> before calling <code>elm()</code> if you need reproducible results</p>
+<p><strong>Weight sampling</strong>. By default, hidden-unit weights are generated using a low-discrepancy Halton design in a whitened input space. This tends to produce more stable and less redundant features than purely random draws in many practical applications. With <code>sampler = “pca”</code>, directions are additionally aligned with principal component directions of the scaled design. The historical stochastic behavior can be recovered with <code>sampler = “random”</code>.</p>
+<p><strong>Reproducibility</strong>. The default <code>sampler = “halton”</code> is deterministic given the input data. Use <code>set.seed</code> only if you explicitly request <code>sampler = “random”</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -315,8 +316,8 @@ Further control arguments can be passed: <code>criterion = “bic”</code> (def
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## subset for female</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">subset</span>(SpirometryUS, gender <span class="sc">==</span> <span class="st">"female"</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## note, inner weight are sampled, set</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## the seed for reproducibility</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## the default sampler is deterministic; set</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## a seed only for sampler = "random"</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## formula for all 4 parameters</span></span>

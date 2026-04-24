@@ -889,11 +889,11 @@ la <- function(x, type = 1, const = 1e-05, ...)
     type <- lt[type[1L]]
   st$lasso_type <- lt[match(type, lt)]
 
-  if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type == "group")) {
+  if(st$control$scale && (st$lasso_type == "group")) {
     st$scale_fun <- group_scale(st$X)
   }
 
-  if(isTRUE(st$is_factor) && st$control$scale && (st$lasso_type %in% c("ordinal", "nominal"))) {
+  if(st$control$scale && (st$lasso_type %in% c("ordinal", "nominal"))) {
     st$scale_fun <- fused_scale(st$X)
   }
 
@@ -922,7 +922,7 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
   if(is.null(control$criterion))
     control$criterion <- x$control$criterion
 
-  ridge <- isTRUE(control$add_ridge)
+  ridge <- isTRUE(control$add_ridge) || isTRUE(x$control$ridge)
 
   K <- control$K
   if(is.null(K))
@@ -1047,14 +1047,20 @@ special_fit.lasso <- function(x, z, w, control, transfer, ...)
     S <- list(S, diag(ncol(S)))
 
   fl <- function(l, rf = FALSE, coef = FALSE) {
-    if(ridge) {
-      P <- try(chol2inv(chol(XWX + l[1]*S[[1]] + l[2]*S[[2]])), silent = TRUE)
+    A <- if(ridge) {
+      XWX + l[1] * S[[1]] + l[2] * S[[2]]
     } else {
-      P <- try(chol2inv(chol(XWX + l*S)), silent = TRUE)
+      XWX + l * S
     }
 
-    if(inherits(P, "try-error"))
-      P <- solve(XWX + S)
+    P <- try(chol2inv(chol(A)), silent = TRUE)
+
+    if(inherits(P, "try-error")) {
+      dj <- max(1e-10, 1e-12 * mean(diag(A)))
+      P <- try(solve(A + diag(dj, nrow(A))), silent = TRUE)
+      if(inherits(P, "try-error"))
+        return(Inf)
+    }
 
     b <- drop(P %*% XWz)
 
@@ -1124,7 +1130,9 @@ special_predict.lasso.fitted <- function(x, data, se.fit = FALSE, ...)
 {
   ## Build design matrix.
   if(!is.null(x$formula)) {
-    X <- model.matrix(x$formula, data = data, na.action = na.pass)
+    X <- model.matrix(x$formula, data = data, na.action = na.pass,
+      contrasts.arg = x$control$contrasts.arg,
+      xlev = x$control$xlev)
   } else {
     if(isTRUE(x$is_factor)) {
       vals <- as.character(data[[x$term]])

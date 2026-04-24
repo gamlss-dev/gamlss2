@@ -36,7 +36,10 @@
     \code{"qq-resid"} a quantile-quantile plot of residuals,
     \code{"wp-resid"} a worm plot of residuals, and
     \code{"scatter-resid"} a scatter plot of residuals against fitted values
-    for the distribution mean (or median, if available in the family object).}
+    for the distribution mean (or median, if available in the family object).
+    In addition, \code{"selection"} plots the GAIC path stored for a fitted
+    stepwise or selection object, and \code{"samples"} visualizes posterior or
+    simulation draws for objects that contain \code{samples}.}
   \item{terms}{Character or integer. Which model term(s) should be plotted?}
   \item{scale}{Logical. If \code{TRUE}, effect plots all have the same scale on the y-axis.
     If \code{FALSE}, each effect plot has its own y-axis scale.}
@@ -44,7 +47,18 @@
   \item{legend}{Logical. Should a legend be added for plots with multiple models?}
   \item{\dots}{Additional graphical arguments such as
     \code{lwd}, \code{lty}, \code{col}, \code{legend = TRUE} (for multiple model plots),
-    among others, depending on the type of plot. See the examples.}
+    among others, depending on the type of plot. Arguments \code{model} and
+    \code{what} are treated as aliases for \code{parameter}.}
+}
+
+\details{
+  For objects of class \code{"gamlss2"}, \code{which = "effects"} is the default
+  and plots the partial effects stored in \code{results(object)}. If no effect
+  information is available, residual diagnostics are shown instead.
+
+  For objects of class \code{"gamlss2.list"}, plots compare effect estimates
+  across several fitted models. Residual diagnostics are only available for
+  single-model objects.
 }
 
 \seealso{
@@ -82,6 +96,9 @@ plot(m1, which = "hist-resid")
 plot(m1, which = "qq-resid")
 plot(m1, which = "wp-resid")
 plot(m1, which = "scatter-resid")
+
+## if available, plot stored stepwise-selection path
+## plot(m1, which = "selection")
 
 ## estimate another model
 m2 <- gamlss2(f, data = film90, family = BCPE)

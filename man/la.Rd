@@ -41,7 +41,8 @@ plot_lasso(x, terms = NULL,
   \item{\dots}{For function \code{la()} further control arguments can be passed:
     The \code{criterion = "bic"} for shrinkage parameter selection, arguments
     for creating the \code{\link[stats]{model.matrix}} if the model term is specified
-    using a formula. For function \code{plot_lasso()} arguments like
+    using a formula, and \code{scale = TRUE}/\code{FALSE} to control the internal
+    scaling of the design matrix. For function \code{plot_lasso()} arguments like
     \code{lwd}, \code{col}, \code{main}, etc., that control plotting parameters
     can be supplied. An additional ridge penalty (elastic net) can be added to
     each \code{la()} term be setting \code{add_ridge = TRUE}
@@ -58,6 +59,23 @@ plot_lasso(x, terms = NULL,
   This is feasible due to the absolute function approximation, which results in
   a quadratic penalty matrix similar to that used in penalized splines. By default,
   the shrinkage parameters are selected using the Bayesian Information Criterion (BIC).
+
+  The choice of \code{type} determines the structure that is penalized:
+  \itemize{
+    \item \code{"normal"} penalizes individual coefficients and is suitable for
+      numeric covariates or general design matrices.
+    \item \code{"group"} penalizes one complete block of coefficients jointly and
+      is mainly useful for factor effects or other grouped design matrices.
+    \item \code{"ordinal"} uses an adjacent-differences fusion penalty and is intended
+      for ordered factor effects or matrices whose columns represent ordered levels.
+    \item \code{"nominal"} uses a pairwise-differences fusion penalty and is intended
+      for unordered factor effects or matrices whose columns represent unordered levels.
+  }
+
+  For numerical stability and comparable shrinkage across terms, \code{la()} can
+  scale the underlying design matrix internally. The exact scaling depends on the
+  selected penalty type. For \code{"ordinal"} and \code{"nominal"} terms, an
+  additional ridge component is included by default.
 }
 
 \references{
@@ -132,7 +150,7 @@ plot_lasso(m1, which = "coefficients", term = 5,
 plot_lasso(m1, which = "coefficients", term = 5,
   zoom = c(8, 7), main = "Fused Lasso")
 
-## simulated example using the normal lasso
+## simulated example using the nominal fused lasso
 ## and a matrix as argument for la()
 set.seed(1328)
 

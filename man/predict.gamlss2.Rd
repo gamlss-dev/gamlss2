@@ -36,7 +36,10 @@ of the response distribution.
     by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
   \item{drop}{Logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data frame (\code{FALSE})?}
-  \item{...}{Currently only used for catching \code{what} as an alias for \code{model}.}
+  \item{...}{Further control arguments. Supported aliases are \code{what} and
+    \code{parameter} for \code{model}. Additional arguments are used for
+    simulation-based summaries, including \code{FUN}, \code{R}, \code{seed},
+    \code{burnin}, and \code{nogrep}.}
 }
 
 \details{
@@ -47,13 +50,26 @@ distribution parameter. Applying the inverse link function yields the predicted
 distribution parameters. If requested, the mean of the corresponding response
 distribution is computed in a final step.
 
+If \code{se.fit = TRUE}, or if a summary function is supplied via \code{FUN},
+predictions are based on simulation draws from the approximate multivariate
+normal distribution of the fitted coefficients, unless the object already
+contains stored draws in \code{samples}. For objects of class \code{"bamlss2"},
+stored posterior draws are used directly.
+
+For \code{type = "terms"}, the \code{terms} argument is matched against linear
+and special-term labels. By default, partial matching is used; set
+\code{nogrep = TRUE} in \code{...} to require exact matching.
+
 See also \code{\link{prodist.gamlss2}} for setting up a full \pkg{distributions3} object
 from which moments, probabilities, quantiles, or random numbers can be obtained.
 }
 
 \value{
 If \code{drop = FALSE}, a data frame is returned. If \code{drop = TRUE}
-(the default), the result may be simplified to a numeric vector when possible.
+ (the default), the result may be simplified to a numeric vector when possible.
+ For \code{type = "terms"}, a data frame is returned with one column per selected
+ term. For \code{se.fit = TRUE}, the returned object contains fitted values and
+ corresponding simulation-based standard errors.
 }
 
 \seealso{

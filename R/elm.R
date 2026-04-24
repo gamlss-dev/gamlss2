@@ -68,6 +68,9 @@ elm_group_scale <- function(X) {
     Xc <- sweep(X[, cn, drop = FALSE], 2, mu[cn], "-")
 
     decomp <- qr(Xc)
+    if(decomp$rank < ncol(Xc)) {
+      stop("elm_group_scale: X not full rank after centering")
+    }
     R <- qr.R(decomp)
     Tmat <- qr.solve(R, diag(ncol(R))) * sqrt(n)
 
@@ -265,8 +268,17 @@ elm <- function(x, k = 50, a = "tanh", ...)
   st$label <- gsub(" ", "", paste0("elm(", as.character(deparse(call[[2]])), ")"))
 
   if(!is.null(formula)) {
-    mf <- model.frame(formula, na.action = na.pass)
-    st$Z <- model.matrix(formula, mf)
+    mf <- model.frame(formula, na.action = na.pass,
+      xlev = st$control$xlev)
+    st$Z <- model.matrix(formula, mf,
+      contrasts.arg = st$control$contrasts.arg,
+      xlev = st$control$xlev)
+    form_vars <- all.vars(formula)
+    if(length(form_vars) == 1L && is.factor(mf[[form_vars]])) {
+      st$is_factor <- TRUE
+      st$lev <- levels(mf[[form_vars]])
+      st$is_ordered <- inherits(mf[[form_vars]], "ordered")
+    }
   } else {
     if(is.factor(x)) {
       st$is_factor <- TRUE
@@ -338,12 +350,16 @@ elm <- function(x, k = 50, a = "tanh", ...)
 
   st$X_center <- colMeans(st$X, na.rm = TRUE)
   st$X <- sweep(st$X, 2, st$X_center, "-")
+  st$X_scale <- apply(st$X, 2, sd, na.rm = TRUE)
+  st$X_scale[!is.finite(st$X_scale) | st$X_scale < 1e-12] <- 1
+  st$X <- sweep(st$X, 2, st$X_scale, "/")
   st$S <- list(diag(ncol(st$X)))
   st$rank <- qr(st$X)$rank
   st$pred_class <- "elm.fitted"
   st$ncol <- ncol(st$X)
   st$keep <- c("formula", "term", "weights", "scale_fun", "control",
-    "is_factor", "is_ordered", "colnames", "activation", "X_center", "ncol", "lev")
+    "is_factor", "is_ordered", "colnames", "activation", "X_center",
+    "X_scale", "ncol", "lev")
 
   class(st) <- c("special", "elm", "X %*% b", "mcmc")
 
@@ -362,8 +378,11 @@ special_predict.elm.fitted <- function(x, data, se.fit = FALSE, samples = NULL, 
 {
   if(!is.null(x$formula)) {
     tt <- terms(x$formula)
-    mf <- model.frame(tt, data = data, na.action = na.pass)
-    Z <- model.matrix(tt, mf)
+    mf <- model.frame(tt, data = data, na.action = na.pass,
+      xlev = x$control$xlev)
+    Z <- model.matrix(tt, mf,
+      contrasts.arg = x$control$contrasts.arg,
+      xlev = x$control$xlev)
   } else {
     if(isTRUE(x$is_factor)) {
       vals <- as.character(data[[x$term]])
@@ -396,6 +415,9 @@ special_predict.elm.fitted <- function(x, data, se.fit = FALSE, samples = NULL, 
 
   if(!is.null(x$X_center)) {
     X <- sweep(X, 2, x$X_center, "-")
+  }
+  if(!is.null(x$X_scale)) {
+    X <- sweep(X, 2, x$X_scale, "/")
   }
 
   if(!is.null(samples)) {

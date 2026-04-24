@@ -286,7 +286,7 @@ Logical, should plotting parameters be automatically set in <code>par</code>?
 <code id="...">…</code>
 </td>
 <td>
-For function <code>la()</code> further control arguments can be passed: The <code>criterion = “bic”</code> for shrinkage parameter selection, arguments for creating the <code>model.matrix</code> if the model term is specified using a formula. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied. An additional ridge penalty (elastic net) can be added to each <code>la()</code> term be setting <code>add_ridge = TRUE</code> in the <code>gamlss2</code> call.
+For function <code>la()</code> further control arguments can be passed: The <code>criterion = “bic”</code> for shrinkage parameter selection, arguments for creating the <code>model.matrix</code> if the model term is specified using a formula, and <code>scale = TRUE</code>/<code>FALSE</code> to control the internal scaling of the design matrix. For function <code>plot_lasso()</code> arguments like <code>lwd</code>, <code>col</code>, <code>main</code>, etc., that control plotting parameters can be supplied. An additional ridge penalty (elastic net) can be added to each <code>la()</code> term be setting <code>add_ridge = TRUE</code> in the <code>gamlss2</code> call.
 </td>
 </tr>
 </tbody></table>
@@ -294,6 +294,22 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>To implement the Lasso penalty, an approximation of the absolute value function is used, following the approach by Oelker and Tutz (2015). This enables the use of standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has its own shrinkage parameter, allowing a mix of different penalty types within the model. The framework builds on the methodology of Groll et al.&nbsp;(2019), where coefficients are updated through iteratively reweighted least squares (IWLS). This is feasible due to the absolute function approximation, which results in a quadratic penalty matrix similar to that used in penalized splines. By default, the shrinkage parameters are selected using the Bayesian Information Criterion (BIC).</p>
+<p>The choice of <code>type</code> determines the structure that is penalized:</p>
+<ul>
+<li>
+<p><code>“normal”</code> penalizes individual coefficients and is suitable for numeric covariates or general design matrices.</p>
+</li>
+<li>
+<p><code>“group”</code> penalizes one complete block of coefficients jointly and is mainly useful for factor effects or other grouped design matrices.</p>
+</li>
+<li>
+<p><code>“ordinal”</code> uses an adjacent-differences fusion penalty and is intended for ordered factor effects or matrices whose columns represent ordered levels.</p>
+</li>
+<li>
+<p><code>“nominal”</code> uses a pairwise-differences fusion penalty and is intended for unordered factor effects or matrices whose columns represent unordered levels.</p>
+</li>
+</ul>
+<p>For numerical stability and comparable shrinkage across terms, <code>la()</code> can scale the underlying design matrix internally. The exact scaling depends on the selected penalty type. For <code>“ordinal”</code> and <code>“nominal”</code> terms, an additional ridge component is included by default.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -361,7 +377,7 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_lasso</span>(m1, <span class="at">which =</span> <span class="st">"coefficients"</span>, <span class="at">term =</span> <span class="dv">5</span>,</span>
 <span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">zoom =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">7</span>), <span class="at">main =</span> <span class="st">"Fused Lasso"</span>)</span>
 <span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="do">## simulated example using the normal lasso</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="do">## simulated example using the nominal fused lasso</span></span>
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="do">## and a matrix as argument for la()</span></span>
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>

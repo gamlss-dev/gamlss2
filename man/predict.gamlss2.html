@@ -556,7 +556,7 @@ Logical. Should the predictions be simplified to a vector if possible (<code>TRU
 <code id="...">…</code>
 </td>
 <td>
-Currently only used for catching <code>what</code> as an alias for <code>model</code>.
+Further control arguments. Supported aliases are <code>what</code> and <code>parameter</code> for <code>model</code>. Additional arguments are used for simulation-based summaries, including <code>FUN</code>, <code>R</code>, <code>seed</code>, <code>burnin</code>, and <code>nogrep</code>.
 </td>
 </tr>
 </tbody></table>
@@ -564,11 +564,13 @@ Currently only used for catching <code>what</code> as an alias for <code>model</
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>Prediction for a <code>gamlss2</code> object proceeds in stages. First, the required model terms are evaluated for the original data or for <code>newdata</code>. These terms are then added to form the full additive predictor for each distribution parameter. Applying the inverse link function yields the predicted distribution parameters. If requested, the mean of the corresponding response distribution is computed in a final step.</p>
+<p>If <code>se.fit = TRUE</code>, or if a summary function is supplied via <code>FUN</code>, predictions are based on simulation draws from the approximate multivariate normal distribution of the fitted coefficients, unless the object already contains stored draws in <code>samples</code>. For objects of class <code>“bamlss2”</code>, stored posterior draws are used directly.</p>
+<p>For <code>type = “terms”</code>, the <code>terms</code> argument is matched against linear and special-term labels. By default, partial matching is used; set <code>nogrep = TRUE</code> in <code>…</code> to require exact matching.</p>
 <p>See also <code>prodist.gamlss2</code> for setting up a full <span class="pkg">distributions3</span> object from which moments, probabilities, quantiles, or random numbers can be obtained.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>If <code>drop = FALSE</code>, a data frame is returned. If <code>drop = TRUE</code> (the default), the result may be simplified to a numeric vector when possible.</p>
+<p>If <code>drop = FALSE</code>, a data frame is returned. If <code>drop = TRUE</code> (the default), the result may be simplified to a numeric vector when possible. For <code>type = “terms”</code>, a data frame is returned with one column per selected term. For <code>se.fit = TRUE</code>, the returned object contains fitted values and corresponding simulation-based standard errors.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

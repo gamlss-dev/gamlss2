@@ -464,6 +464,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -518,7 +519,7 @@ Character or integer specifying for which distribution parameter the plots shoul
 <code id="which">which</code>
 </td>
 <td>
-Character or integer selecting the type of plot. <code>“effects”</code> produces effect plots of model terms, <code>“resid”</code> shows the available residual diagnostics, <code>“hist-resid”</code> produces a histogram of residuals, <code>“qq-resid”</code> a quantile-quantile plot of residuals, <code>“wp-resid”</code> a worm plot of residuals, and <code>“scatter-resid”</code> a scatter plot of residuals against fitted values for the distribution mean (or median, if available in the family object).
+Character or integer selecting the type of plot. <code>“effects”</code> produces effect plots of model terms, <code>“resid”</code> shows the available residual diagnostics, <code>“hist-resid”</code> produces a histogram of residuals, <code>“qq-resid”</code> a quantile-quantile plot of residuals, <code>“wp-resid”</code> a worm plot of residuals, and <code>“scatter-resid”</code> a scatter plot of residuals against fitted values for the distribution mean (or median, if available in the family object). In addition, <code>“selection”</code> plots the GAIC path stored for a fitted stepwise or selection object, and <code>“samples”</code> visualizes posterior or simulation draws for objects that contain <code>samples</code>.
 </td>
 </tr>
 <tr>
@@ -558,10 +559,15 @@ Logical. Should a legend be added for plots with multiple models?
 <code id="...">…</code>
 </td>
 <td>
-Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code>col</code>, <code>legend = TRUE</code> (for multiple model plots), among others, depending on the type of plot. See the examples.
+Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code>col</code>, <code>legend = TRUE</code> (for multiple model plots), among others, depending on the type of plot. Arguments <code>model</code> and <code>what</code> are treated as aliases for <code>parameter</code>.
 </td>
 </tr>
 </tbody></table>
+</section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>For objects of class <code>“gamlss2”</code>, <code>which = “effects”</code> is the default and plots the partial effects stored in <code>results(object)</code>. If no effect information is available, residual diagnostics are shown instead.</p>
+<p>For objects of class <code>“gamlss2.list”</code>, plots compare effect estimates across several fitted models. Residual diagnostics are only available for single-model objects.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -603,17 +609,20 @@ Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"wp-resid"</span>)</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"scatter-resid"</span>)</span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate another model</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> film90, <span class="at">family =</span> BCPE)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="do">## if available, plot stored stepwise-selection path</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="do">## plot(m1, which = "selection")</span></span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="do">## compare estimated effects</span></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2))</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">term =</span> <span class="st">"lboopen"</span>,</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">1</span>,</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">pos =</span> <span class="fu">c</span>(<span class="st">"topleft"</span>, <span class="st">"topright"</span>, <span class="st">"bottomleft"</span>, <span class="st">"bottomright"</span>))</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">term =</span> <span class="dv">2</span>)</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"nu"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate another model</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> film90, <span class="at">family =</span> BCPE)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="do">## compare estimated effects</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2))</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">term =</span> <span class="st">"lboopen"</span>,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">1</span>,</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">pos =</span> <span class="fu">c</span>(<span class="st">"topleft"</span>, <span class="st">"topright"</span>, <span class="st">"bottomleft"</span>, <span class="st">"bottomright"</span>))</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">term =</span> <span class="dv">2</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"nu"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

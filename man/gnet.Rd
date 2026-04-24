@@ -1,10 +1,10 @@
 \name{gnet}
 \alias{gnet}
 
-\title{Lasso with \pkg{glmnet}}
+\title{Model Terms with \pkg{glmnet}}
 
 \description{
-  Compatibility constructor for estimating Lasso model terms using
+  Constructor for estimating penalized model terms using
   the \pkg{glmnet} package.
 }
 
@@ -20,10 +20,10 @@ gnet(formula, ...)
 }
 
 \details{
-  \code{gnet()} is a compatibility wrapper around the current
-  \code{\link{lasso}}/\code{"glmnet"} special-term path. It constructs a
-  \code{\link[stats]{model.matrix}} representation and delegates estimation
-  to \code{\link[glmnet]{glmnet}} inside the backfitting algorithm.
+  \code{gnet()} constructs a \code{\link[stats]{model.matrix}} representation
+  of the supplied formula and delegates estimation to \code{\link[glmnet]{glmnet}}
+  inside the backfitting algorithm. The optimal penalty parameter is selected
+  using an information criterion, with \code{criterion = "bic"} used by default.
 }
 
 \value{
@@ -31,7 +31,7 @@ gnet(formula, ...)
 }
 
 \seealso{
-  \code{\link{lasso}}, \code{\link{la}}, \code{\link{gamlss2}}, \code{\link{specials}}.
+  \code{\link{la}}, \code{\link{gamlss2}}, \code{\link{specials}}.
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}

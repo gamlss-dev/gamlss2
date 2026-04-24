@@ -606,8 +606,8 @@ special_predict.lo.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
-## Lasso.
-lasso <- function(formula, ...)
+## glmnet-based model term.
+gnet <- function(formula, ...)
 {
   stopifnot(requireNamespace("glmnet"))
 
@@ -620,32 +620,24 @@ lasso <- function(formula, ...)
     environment(formula) <- sys.frame(-1)
   }
 
-  ## List for setting up the special model term. 
+  ## List for setting up the special model term.
   st <- list()
   st$control <- list(...)
   if(is.null(st$control$criterion))
     st$control$criterion <- "bic"
-  st$term <- all.vars(formula) 
-  st$label <- paste0("la(", paste0(gsub(" ", "",
-    as.character(formula)), collapse = ""), ")") 
+  st$term <- all.vars(formula)
+  st$label <- paste0("gnet(", paste0(gsub(" ", "",
+    as.character(formula)), collapse = ""), ")")
   st$X <- model.matrix(formula)
   if(length(j <- grep("(Intercept)", colnames(st$X), fixed = TRUE))) {
     st$X <- st$X[, -j, drop = FALSE]
   }
   st$formula <- formula
 
-  ## Assign the "special" class and the new class "n".
+  ## Assign the "special" class and the glmnet implementation class.
   class(st) <- c("special", "glmnet")
 
-  return(st) 
-}
-
-gnet <- function(formula, ...)
-{
-  st <- lasso(formula, ...)
-  st$label <- paste0("gnet(", paste0(gsub(" ", "",
-    as.character(st$formula)), collapse = ""), ")")
-  st
+  return(st)
 }
 
 special_fit.glmnet <- function(x, z, w, control, ...)

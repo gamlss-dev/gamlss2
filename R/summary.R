@@ -289,6 +289,43 @@ summary.gamlss2 <- function(object, ...)
   return(sg)
 }
 
+summary.bamlss2 <- function(object, thres = 0.01, ...)
+{
+  par <- coef(object, full = FALSE, dropall = FALSE)
+  ct <- t(apply(object$samples[, names(par), drop = FALSE], 2, function(x) {
+    c("Mean" = mean(x, na.rm = TRUE),
+      quantile(x, probs = c(0.025, 0.975)),
+      mean(abs(x) < thres))
+  }))
+  colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
+  nx <- unique(sapply(strsplit(names(par), ".", fixed = TRUE),
+    function(x) x[1L]))
+  ctl <- list()
+  for(i in nx) {
+    ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
+    rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
+  }
+  sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "dic", "iterations", "elapsed")]
+  sg$coefficients <- ctl
+  if(!is.null(object$fitted.specials)) {
+    sg$specials <- sg$alpha <- list()
+    for(i in names(object$fitted.specials)) {
+      for(j in names(object$fitted.specials[[i]])) {
+        sg$specials[[i]] <- rbind(sg$specials[[i]], object$fitted.specials[[i]][[j]]$edf)
+        sg$alpha[[i]] <- rbind(sg$alpha[[i]], object$fitted.specials[[i]][[j]]$alpha)
+      }
+      rownames(sg$specials[[i]]) <- names(object$fitted.specials[[i]])
+      colnames(sg$specials[[i]]) <- "edf"
+
+      rownames(sg$alpha[[i]]) <- names(object$fitted.specials[[i]])
+      colnames(sg$alpha[[i]]) <- "alpha"
+    }
+  }
+  sg$elapsed <- object$elapsed
+  class(sg) <- "summary.gamlss2"
+  sg
+}
+
 ## For MCMC samples.
 summary.gamlss2.mcmc <- function(object, thres = 0.01, ...)
 {
@@ -559,4 +596,3 @@ BIC.gamlss2 <- function(object, ...)
 {
   GAIC(object, ..., k = log(object$nobs), corrected = FALSE)
 }
-

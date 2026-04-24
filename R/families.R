@@ -202,13 +202,20 @@ tF <- function(x, ...)
     return(call)
   }
 
+  eval_expr <- function(expr, ..., .parent = parent.frame()) {
+    args <- list(...)
+    if(!is.null(args$y) && is.null(args$bd))
+      args$bd <- attr(args$y, "bd", exact = TRUE)
+    eval(expr, envir = list2env(args, parent = .parent))
+  }
+
   if("mu" %in% nx) {
     mu.link <- make.link2(x$mu.link)
     mu.cs <- make_call(x$dldm)
     mu.hs <- make_call(x$d2ldm2)
     score$mu  <- function(y, par, ...) {
       par <- check_range(par)
-      res <- eval(mu.cs) * mu.link$mu.eta(mu.link$linkfun(par$mu))
+      res <- eval_expr(mu.cs, y = y, par = par) * mu.link$mu.eta(mu.link$linkfun(par$mu))
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -217,8 +224,7 @@ tF <- function(x, ...)
     }
     hess$mu <- function(y, par, ...) {
       par <- check_range(par)
-      ## score <- eval(mu.cs)
-      hess <- -1 * eval(mu.hs)
+      hess <- -1 * eval_expr(mu.hs, y = y, par = par)
       eta <- mu.link$linkfun(par$mu)
       res <- drop(hess * mu.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
@@ -233,7 +239,11 @@ tF <- function(x, ...)
           if(!is.null(dim(y)))
             y <- y[, ncol(y)]
         }
-        res <- eval(x$mu.initial)
+        eval_env <- list2env(list(
+          "y" = y,
+          "bd" = attr(y, "bd", exact = TRUE)
+        ), parent = parent.frame())
+        res <- eval(x$mu.initial, envir = eval_env)
         if(!is.null(dim(res))) {
           if(length(dim(res)) > 1)
             res <- res[, 1]
@@ -249,7 +259,7 @@ tF <- function(x, ...)
     sigma.hs <- make_call(x$d2ldd2)
     score$sigma  <- function(y, par, ...) {
       par <- check_range(par)
-      res <- eval(sigma.cs) * sigma.link$mu.eta(sigma.link$linkfun(par$sigma))
+      res <- eval_expr(sigma.cs, y = y, par = par) * sigma.link$mu.eta(sigma.link$linkfun(par$sigma))
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -258,8 +268,7 @@ tF <- function(x, ...)
     }
     hess$sigma <- function(y, par, ...) {
       par <- check_range(par)
-      ## score <- eval(sigma.cs)
-      hess <- -1 * eval(sigma.hs)
+      hess <- -1 * eval_expr(sigma.hs, y = y, par = par)
       eta <- sigma.link$linkfun(par$sigma)
       ## res <- drop(score * sigma.link$mu.eta2(eta) + hess * sigma.link$mu.eta(eta)^2)
       res <- drop(hess * sigma.link$mu.eta(eta)^2)
@@ -287,7 +296,7 @@ tF <- function(x, ...)
     nu.hs <- make_call(x$d2ldv2)
     score$nu  <- function(y, par, ...) {
       par <- check_range(par)
-      res <- eval(nu.cs) * nu.link$mu.eta(nu.link$linkfun(par$nu))
+      res <- eval_expr(nu.cs, y = y, par = par) * nu.link$mu.eta(nu.link$linkfun(par$nu))
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -296,8 +305,7 @@ tF <- function(x, ...)
     }
     hess$nu <- function(y, par, ...) {
       par <- check_range(par)
-      ## score <- eval(nu.cs)
-      hess <- -1 * eval(nu.hs)
+      hess <- -1 * eval_expr(nu.hs, y = y, par = par)
       eta <- nu.link$linkfun(par$nu)
       ## res <- drop(score * nu.link$mu.eta2(eta) + hess * nu.link$mu.eta(eta)^2)
       res <- drop(hess * nu.link$mu.eta(eta)^2)
@@ -325,7 +333,7 @@ tF <- function(x, ...)
     tau.hs <- make_call(x$d2ldt2)
     score$tau  <- function(y, par, ...) {
       par <- check_range(par)
-      res <- eval(tau.cs) * tau.link$mu.eta(tau.link$linkfun(par$tau))
+      res <- eval_expr(tau.cs, y = y, par = par) * tau.link$mu.eta(tau.link$linkfun(par$tau))
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -334,8 +342,7 @@ tF <- function(x, ...)
     }
     hess$tau <- function(y, par, ...) {
       par <- check_range(par)
-      ## score <- eval(tau.cs)
-      hess <- -1 * eval(tau.hs)
+      hess <- -1 * eval_expr(tau.hs, y = y, par = par)
       eta <- tau.link$linkfun(par$tau)
       ## res <- drop(score * tau.link$mu.eta2(eta) + hess * tau.link$mu.eta(eta)^2)
       res <- drop(hess * tau.link$mu.eta(eta)^2)
@@ -364,7 +371,7 @@ tF <- function(x, ...)
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.sigma <- sigma.link$linkfun(par$sigma)
-      hess <- -1 * eval(mu.sigma.hs)
+      hess <- -1 * eval_expr(mu.sigma.hs, y = y, par = par)
       hess * (mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma))
     }
     hess$sigma.mu <- hess$mu.sigma
@@ -375,7 +382,7 @@ tF <- function(x, ...)
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.nu <- nu.link$linkfun(par$nu)
-      hess <- -1 * eval(mu.nu.hs)
+      hess <- -1 * eval_expr(mu.nu.hs, y = y, par = par)
       hess * (mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu))
     }
     hess$nu.mu <- hess$mu.nu
@@ -385,7 +392,7 @@ tF <- function(x, ...)
       par <- check_range(par)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.nu <- nu.link$linkfun(par$nu)
-      hess <- -1 * eval(sigma.nu.hs)
+      hess <- -1 * eval_expr(sigma.nu.hs, y = y, par = par)
       hess * (sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu))
     }
     hess$nu.sigma <- hess$sigma.nu
@@ -397,7 +404,7 @@ tF <- function(x, ...)
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.tau <- tau.link$linkfun(par$tau)
-      hess <- -1 * eval(mu.tau.hs)
+      hess <- -1 * eval_expr(mu.tau.hs, y = y, par = par)
       hess * (mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau))
     }
     hess$tau.mu <- hess$mu.tau
@@ -407,7 +414,7 @@ tF <- function(x, ...)
       par <- check_range(par)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.tau <- tau.link$linkfun(par$tau)
-      hess <- -1 * eval(sigma.tau.hs)
+      hess <- -1 * eval_expr(sigma.tau.hs, y = y, par = par)
       hess * (sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau))
     }
     hess$tau.sigma <- hess$sigma.tau
@@ -417,7 +424,7 @@ tF <- function(x, ...)
       par <- check_range(par)
       eta.nu <- nu.link$linkfun(par$nu)
       eta.tau <- tau.link$linkfun(par$tau)
-      hess <- -1 * eval(nu.tau.hs)
+      hess <- -1 * eval_expr(nu.tau.hs, y = y, par = par)
       hess * (nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau))
     }
     hess$tau.nu <- hess$nu.tau
@@ -451,14 +458,14 @@ tF <- function(x, ...)
     "score" = score,
     "hess" = hess,
     "pdf" = function(y, par, log = FALSE, ...) {
-       d <- eval(dc)
+       d <- eval_expr(dc, y = y, par = par, log = log, ...)
        return(d)
     },
     "cdf" = if(!inherits(pfun, "try-error")) function(q, par, log = FALSE, ...) {
-      p <- eval(pc)
+      p <- eval_expr(pc, q = q, par = par, log = log, ...)
       if(length(p) < length(par[[1L]])) {
         q <- rep(q, length.out = length(par[[1L]]))
-        p <- eval(pc)
+        p <- eval_expr(pc, q = q, par = par, log = log, ...)
       }
       return(p)
     } else NULL,
@@ -467,15 +474,15 @@ tF <- function(x, ...)
         p[i] <- 1e-10
       if(any(i <- p >= (1- 1e-10)))
         p[i] <- 1 - 1e-10
-      q <- eval(qc)
+      q <- eval_expr(qc, p = p, par = par, log = log, ...)
       if(length(q) < length(par[[1L]])) {
         p <- rep(p, length.out = length(par[[1L]]))
-        q <- eval(qc)
+        q <- eval_expr(qc, p = p, par = par, log = log, ...)
       }
       return(q)
     } else NULL,
     "random" = if(!inherits(rfun, "try-error")) function(n, par, ...) {
-      return(eval(rc))
+      return(eval_expr(rc, n = n, par = par, ...))
     } else NULL
   )
   names(rval$links) <- nx
@@ -523,7 +530,7 @@ tF <- function(x, ...)
 
   rval$logLik <- function(y, par) {
     log <- TRUE
-    d <- try(eval(dc), silent = TRUE)
+    d <- try(eval_expr(dc, y = y, par = par, log = log), silent = TRUE)
     if(inherits(d, "try-error")) {
       warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
       return(-Inf)
@@ -1142,7 +1149,7 @@ ologit4 <- function(...) {
   return(fam)
 }
 
-ologit <- function(k) {
+OL <- function(k) {
   stopifnot(k >= 2)
 
   ## Parameter names: location and delta-encoded cutpoints.
@@ -1153,6 +1160,41 @@ ologit <- function(k) {
   links <- rep("identity", length(par_names))
   names(links) <- par_names
 
+  compute_components <- function(par) {
+    n <- length(par$location)
+
+    ## Build increasing cutpoints.
+    cuts <- matrix(NA_real_, nrow = n, ncol = k - 1)
+    cuts[, 1] <- par$theta1
+    if(k > 2) {
+      for(j in 2:(k - 1)) {
+        cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
+      }
+    }
+
+    ## Cumulative probabilities: c_j = P(Y > j).
+    cum_probs <- do.call(
+      cbind,
+      lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
+    )
+
+    ## Category probabilities.
+    probs <- matrix(NA_real_, nrow = n, ncol = k)
+    probs[, 1] <- 1 - cum_probs[, 1]
+    if(k > 2) {
+      for(j in 2:(k - 1)) {
+        probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
+      }
+    }
+    probs[, k] <- cum_probs[, k - 1]
+
+    list(
+      cuts = cuts,
+      cum_probs = cum_probs,
+      probs = probs
+    )
+  }
+
   fam <- list(
     family = paste0("Ordered Logit (", k, " categories)"),
     names = par_names,
@@ -1160,65 +1202,46 @@ ologit <- function(k) {
 
     pdf = function(y, par, log = FALSE, ...) {
       n <- length(y)
+      y_int <- as.integer(y)
 
-      ## Build increasing cutpoints for all observations
-      cuts <- matrix(NA, nrow = n, ncol = k - 1)
-      cuts[, 1] <- par$theta1
+      comps <- compute_components(par)
+      probs <- comps$probs
 
-      if (k > 2) {
-        for (j in 2:(k - 1)) {
-          cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
-        }
-      }
-
-      ## Compute cumulative probabilities
-      cum_probs <- lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
-      cum_probs <- do.call(cbind, cum_probs)
-
-      ## Compute category probabilities
-      probs <- matrix(NA, nrow = n, ncol = k)
-      probs[, 1] <- 1 - cum_probs[, 1]
-      for (j in 2:(k - 1)) {
-        probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
-      }
-      probs[, k] <- cum_probs[, k - 1]
-
-      ## Select correct category
-      p <- probs[cbind(seq_len(n), y)]
+      p <- probs[cbind(seq_len(n), y_int)]
       p[p < 1e-8 | is.na(p)] <- 1e-8
 
-      if (log) {
+      if(log) {
         p <- log(p)
         p[is.na(p)] <- -1e10
       }
 
-      return(p)
+      p
     },
 
     initialize = {
       init_list <- list()
 
-      ## Start value for location
+      ## Start value for location.
       init_list$location <- function(y, ...) {
         rep(mean(as.numeric(y)), length(y))
       }
 
-      ## Initialize theta1
+      ## Initialize theta1.
       init_list$theta1 <- function(y, ...) {
         probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
         q <- qlogis(probs[1])
         rep(q, length(y))
       }
 
-      ## Initialize deltas: log of spacing between cutpoints
-      for (j in 2:(k - 1)) {
+      ## Initialize deltas: log of spacing between cutpoints.
+      for(j in 2:(k - 1)) {
         init_list[[paste0("delta", j)]] <- local({
           jj <- j
           function(y, ...) {
             probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
             q <- qlogis(probs)
             diffs <- diff(q)
-            val <- if (jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
+            val <- if(jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
             rep(val, length(y))
           }
         })
@@ -1228,37 +1251,150 @@ ologit <- function(k) {
     }
   )
 
+  ## Probabilities on response scale.
   fam$probabilities <- function(par, ...) {
-    n <- length(par$location)
-    k <- length(par) - 1 + 1  ## Infer number of categories from number of deltas.
-
-    ## Reconstruct cutpoints.
-    cuts <- matrix(NA, nrow = n, ncol = k - 1)
-    cuts[, 1] <- par$theta1
-    if (k > 2) {
-      for (j in 2:(k - 1)) {
-        cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
-      }
-    }
-
-    ## Compute cumulative probabilities.
-    cum_probs <- lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
-    cum_probs <- do.call(cbind, cum_probs)
-
-    ## Category probabilities.
-    probs <- matrix(NA, nrow = n, ncol = k)
-    probs[, 1] <- 1 - cum_probs[, 1]
-    for (j in 2:(k - 1)) {
-      probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
-    }
-    probs[, k] <- cum_probs[, k - 1]
-
+    comps <- compute_components(par)
+    probs <- comps$probs
     colnames(probs) <- paste0("Pr(Y=", 1:k, ")")
-    return(probs)
+    probs
   }
 
+  fam$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
+    probs <- fam$probabilities(par)
+    n <- nrow(probs)
+    K <- ncol(probs)
+
+    if(length(y) == 1L)
+      y <- rep.int(y, n)
+
+    y_int <- as.integer(y)
+
+    if(any(is.na(y_int)))
+      stop("missing values in y are not allowed in cdf().")
+
+    if(any(y_int < 1L | y_int > K)) {
+      bad_vals <- sort(unique(y_int[y_int < 1L | y_int > K]))
+      stop(
+        "y has values outside 1..", K, " implied by ologit(k).\n",
+        "Offending values: ", paste(bad_vals, collapse = ", ")
+      )
+    }
+
+    cprobs <- t(apply(probs, 1L, cumsum))
+    ans <- cprobs[cbind(seq_len(n), y_int)]
+
+    if(!lower.tail)
+      ans <- 1 - ans
+
+    if(log.p)
+      ans <- log(ans)
+
+    ans
+  }
+
+  fam$quantile <- function(p, par, ...) {
+    probs <- fam$probabilities(par)
+    n <- nrow(probs)
+    K <- ncol(probs)
+
+    if(length(p) == 1L)
+      p <- rep.int(p, n)
+
+    if(length(p) != n)
+      stop("length(p) must be 1 or equal to the number of observations.")
+    if(any(is.na(p)))
+      stop("p must not contain NA.")
+    if(any(p < 0 | p > 1))
+      stop("p must be in [0, 1].")
+
+    cprobs <- t(apply(probs, 1L, cumsum))
+
+    q <- integer(n)
+    for(i in seq_len(n)) {
+      idx <- which(cprobs[i, ] >= p[i])[1L]
+      if(is.na(idx))
+        idx <- K
+      q[i] <- idx
+    }
+
+    q
+  }
+
+  fam$logLik <- function(y, par, ...) {
+    sum(fam$pdf(y, par, log = TRUE))
+  }
+
+  fam$valid.response <- function(x) {
+    if(is.factor(x)) {
+      lev <- levels(x)
+      ok <- all(lev %in% as.character(seq_len(k)))
+      if(!ok)
+        stop("factor response levels must be 1, ..., ", k)
+    } else {
+      if(!is.numeric(x))
+        stop("response must be numeric or factor for ologit().")
+      if(any(is.na(x)))
+        stop("missing values in response are not allowed.")
+      if(!all(x %in% seq_len(k)))
+        stop("numeric response values must be in {1, ..., ", k, "}.")
+    }
+    TRUE
+  }
+
+  fam$residuals <- function(object, ...) {
+    rqres_ologit(object, ...)
+  }
+
+  fam$type <- "discrete"
+
   class(fam) <- c("gamlss2.family", "family.bamlss")
-  return(fam)
+  fam
+}
+
+rqres_ologit <- function(object, ...) {
+  fam <- family(object)
+  if(!grepl("^Ordered Logit", fam$family))
+    stop("ologit family required.")
+
+  mf <- model.frame(object)
+  y <- stats::model.response(mf)
+  y_int <- as.integer(y)
+
+  par <- predict(object)
+  probs <- fam$probabilities(par)
+
+  n <- length(y_int)
+  K <- ncol(probs)
+
+  if(any(y_int < 1L | y_int > K | is.na(y_int))) {
+    bad_vals <- sort(unique(y_int[y_int < 1L | y_int > K]))
+    stop(
+      "response has values outside 1..", K, " implied by ologit(k).\n",
+      "Offending values: ", paste(bad_vals, collapse = ", ")
+    )
+  }
+
+  cprobs <- t(apply(probs, 1L, cumsum))
+  F_upper <- cprobs[cbind(seq_len(n), y_int)]
+
+  F_lower <- numeric(n)
+  idx1 <- which(y_int == 1L)
+  if(length(idx1) > 0L)
+    F_lower[idx1] <- 0
+
+  idx_gt1 <- which(y_int > 1L)
+  if(length(idx_gt1) > 0L) {
+    F_lower[idx_gt1] <- cprobs[cbind(idx_gt1, y_int[idx_gt1] - 1L)]
+  }
+
+  u <- stats::runif(n, min = F_lower, max = F_upper)
+  u[u <= 0] <- 1e-12
+  u[u >= 1] <- 1 - 1e-12
+  stats::qnorm(u)
+}
+
+ologit <- function(k) {
+  OL(k = k)
 }
 
 #if(FALSE) {
@@ -1504,3 +1640,203 @@ discretize <- function(family = NO) {
   return(fam)
 }
 
+MN <- function(k)
+{
+  stopifnot(k >= 2)
+
+  pn <- paste0("pi", 2:k)
+  links <- rep("log", k - 1)
+  names(links) <- pn
+
+  rval <- list(
+    family = "Multinomial Logit",
+    names  = pn,
+    links  = links,
+
+    valid.response = function(x) {
+      if(!is.factor(x))
+        stop("the response must be a factor!")
+      if(nlevels(x) != k)
+        stop("number of levels of the response and argument k differ in MN()!")
+      TRUE
+    },
+
+    pdf = function(y, par, log = FALSE) {
+      y_int <- as.integer(y)
+      w <- do.call("cbind", par)
+      denom <- 1 + rowSums(w)
+
+      logp <- numeric(length(y_int))
+      is_ref <- (y_int == 1L)
+      logp[is_ref] <- -log(denom[is_ref])
+
+      if(any(!is_ref)) {
+        jj <- y_int[!is_ref] - 1L
+        wsub <- w[!is_ref, , drop = FALSE]
+        logp[!is_ref] <- log(wsub[cbind(seq_len(nrow(wsub)), jj)]) - log(denom[!is_ref])
+      }
+
+      if(!log) exp(logp) else logp
+    },
+
+    logLik = function(y, par, ...) sum(rval$pdf(y, par, log = TRUE), na.rm = TRUE),
+
+    type = "discrete"
+  )
+
+  rval$score <- setNames(vector("list", k - 1), pn)
+  for(j in seq_len(k - 1)) {
+    id <- pn[j]
+    rval$score[[id]] <- local({
+      jj <- j
+      idd <- id
+      function(y, par, ...) {
+        y_int <- as.integer(y)
+        w <- do.call("cbind", par)
+        denom <- 1 + rowSums(w)
+        p_j <- par[[idd]] / denom
+        as.numeric(y_int == (jj + 1L)) - p_j
+      }
+    })
+  }
+
+  rval$hess <- list()
+  for(j in seq_len(k - 1)) {
+    idj <- pn[j]
+
+    rval$hess[[idj]] <- local({
+      idd <- idj
+      function(y, par, ...) {
+        w <- do.call("cbind", par)
+        denom <- 1 + rowSums(w)
+        p_j <- par[[idd]] / denom
+        p_j * (1 - p_j)
+      }
+    })
+
+    for(m in seq_len(k - 1)) if(m != j) {
+      idm <- pn[m]
+      nm  <- paste0(idj, ".", idm)
+
+      rval$hess[[nm]] <- local({
+        idd_j <- idj
+        idd_m <- idm
+        function(y, par, ...) {
+          w <- do.call("cbind", par)
+          denom <- 1 + rowSums(w)
+          p_j <- par[[idd_j]] / denom
+          p_m <- par[[idd_m]] / denom
+          -1 * p_j * p_m
+        }
+      })
+    }
+  }
+
+  rval$probabilities <- function(par, numeric = TRUE, ...) {
+    w <- do.call("cbind", par)
+    denom <- 1 + rowSums(w)
+    p <- cbind(1/denom, w/denom)
+    colnames(p) <- c("pi1", names(par))
+    as.data.frame(p)
+  }
+
+  rval$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
+    probs <- rval$probabilities(par)
+    P <- as.matrix(probs)
+    n <- nrow(P)
+    K <- ncol(P)
+
+    if(length(y) == 1L) y <- rep.int(y, n)
+    y_int <- if(is.factor(y)) as.integer(y) else as.integer(y)
+
+    if(anyNA(y_int))
+      stop("missing values in y are not allowed in cdf().", call. = FALSE)
+    if(any(y_int < 1L | y_int > K)) {
+      bad <- sort(unique(y_int[y_int < 1L | y_int > K]))
+      stop("y has values outside 1..", K, ". Offending values: ",
+        paste(bad, collapse = ", "), call. = FALSE)
+    }
+
+    cP <- P
+    cP[] <- t(apply(P, 1L, cumsum))
+
+    ans <- cP[cbind(seq_len(n), y_int)]
+    if(!lower.tail) ans <- 1 - ans
+    if(log.p) ans <- log(ans)
+    ans
+  }
+
+  rval$quantile <- function(p, par, ...) {
+    probs <- rval$probabilities(par)
+    P <- as.matrix(probs)
+    n <- nrow(P)
+    K <- ncol(P)
+
+    if(length(p) == 1L) p <- rep.int(p, n)
+    if(length(p) != n)
+      stop("length(p) must be 1 or equal to the number of observations.", call. = FALSE)
+    if(anyNA(p)) stop("p must not contain NA.", call. = FALSE)
+    if(any(p < 0 | p > 1)) stop("p must be in [0, 1].", call. = FALSE)
+
+    cP <- P
+    cP[] <- t(apply(P, 1L, cumsum))
+
+    q <- integer(n)
+    for(i in seq_len(n)) {
+      q[i] <- which(cP[i, ] >= p[i])[1L]
+      if(is.na(q[i])) q[i] <- K
+    }
+    q
+  }
+
+  rval$residuals <- function(object, ...) {
+    rqres_mn(object, ...)
+  }
+
+  class(rval) <- "gamlss2.family"
+  rval
+}
+
+rqres_mn <- function(object, ...) {
+  fam <- family(object)
+  if(!identical(fam$family, "Multinomial Logit"))
+    stop("MN() family required.", call. = FALSE)
+
+  mf <- model.frame(object)
+  y <- stats::model.response(mf)
+
+  if(!is.factor(y))
+    stop("response must be a factor for MN().", call. = FALSE)
+
+  y_int <- as.integer(y)
+  par <- predict(object)
+  probs <- fam$probabilities(par)
+  P <- as.matrix(probs)
+
+  n <- length(y_int)
+  K <- ncol(P)
+
+  if(length(y_int) != nrow(P))
+    stop("length(response) and number of predicted rows differ.", call. = FALSE)
+  if(any(y_int < 1L | y_int > K))
+    stop("response contains invalid category indices.", call. = FALSE)
+
+  cP <- P
+  cP[] <- t(apply(P, 1L, cumsum))
+
+  lower <- numeric(n)
+  upper <- numeric(n)
+  idx_ref <- (y_int == 1L)
+  lower[idx_ref] <- 0
+  upper[idx_ref] <- cP[cbind(which(idx_ref), 1L)]
+
+  if(any(!idx_ref)) {
+    ii <- which(!idx_ref)
+    yy <- y_int[ii]
+    lower[ii] <- cP[cbind(ii, yy - 1L)]
+    upper[ii] <- cP[cbind(ii, yy)]
+  }
+
+  u <- stats::runif(n, min = lower, max = upper)
+  stats::qnorm(u)
+}

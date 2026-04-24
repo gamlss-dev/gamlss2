@@ -1,4 +1,5 @@
-\name{ologit}
+\name{OL}
+\alias{OL}
 \alias{ologit}
 
 \title{Ordered Logistic Family for Ordinal Regression}
@@ -10,6 +11,8 @@
 }
 
 \usage{
+OL(k)
+
 ologit(k)
 }
 
@@ -27,11 +30,13 @@ ologit(k)
       ensuring that the thresholds remain ordered.
   }
 
-  The \code{ologit()} family supports modeling the location and threshold differences (\code{delta_j}) 
+  The \code{OL()} family supports modeling the location and threshold differences (\code{delta_j}) 
   as functions of covariates using additive predictors in \code{\link{gamlss2}} via the \code{"|"} formula interface.
 
   The family returns an object of class \code{"gamlss2.family"}, which includes methods for evaluating 
   the log-likelihood, simulating from the model, and computing predicted probabilities.
+
+  \code{ologit()} is retained as a compatibility alias for \code{OL()}.
 }
 
 \value{
@@ -47,29 +52,29 @@ ologit(k)
 library("MASS")
 
 ## fit standard cumulative logit model using polr()
-m <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
-summary(m)
+m1 <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
+summary(m1)
 
 ## convert response to integer for use with gamlss2
 housing$Satint <- as.integer(housing$Sat)
 
 ## fit equivalent model using gamlss2
-m <- gamlss2(Satint ~ Infl + Type + Cont,
+m2 <- gamlss2(Satint ~ Infl + Type + Cont,
   data = housing, weights = Freq,
-  family = ologit(k = 3))
-summary(m)
+  family = OL(k = 3))
+summary(m2)
 
 ## compare coefficients
-coef(m)
-coef(m)
+coef(m1)
+coef(m2)
 
 ## predict class probabilities
-pm <- predict(m, type = "p")
-pb <- predict(m)
-pb <- family(m)$probabilities(pb)
+pm1 <- predict(m1, type = "p")
+pm2 <- predict(m2)
+pm2 <- family(m2)$probabilities(pm2)
 
-print(head(pm))
-print(head(pb))
+print(head(pm1))
+print(head(pm2))
 }
 
 \keyword{regression}

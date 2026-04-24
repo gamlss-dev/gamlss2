@@ -281,6 +281,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     fenv <- environment(family[["d"]])
     ybd <- get_y_bd(Y)
     Y <- ybd$y
+    attr(Y, "bd") <- ybd$bd
     fenv$bd <- ybd$bd
     environment(optimizer) <- fenv
   }
@@ -397,7 +398,7 @@ model.frame.gamlss2 <- function(formula, ...)
   dots <- list(...)
   if(is.null(dots$keepresponse))
     dots$keepresponse <- FALSE
-  nargs <- dots[match(c("data", "na.action", "subset"), names(dots), 0)]
+  nargs <- intersect(c("data", "na.action", "subset"), names(dots))
   if(length(nargs) || is.null(formula$model)) {
     fcall <- formula$call
     m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"), names(fcall), 0L)
@@ -424,7 +425,7 @@ model.frame.gamlss2 <- function(formula, ...)
     if(isTRUE(no_weights)) {
       fcall["weights"] <- NULL
     }
-    fcall[names(nargs)] <- nargs[names(nargs)]
+    fcall[nargs] <- dots[nargs]
     env <- if(is.null(environment(formula$terms))) {
       parent.frame()
     } else {
@@ -531,4 +532,3 @@ c.gamlss2 <- function(...)
   class(x) <- c("gamlss2.list")
   return(x)
 }
-

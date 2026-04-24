@@ -1,14 +1,17 @@
 ## Compute results for linear effects
 ## and smooth terms for plotting and
 ## summary statistics.
-results <- function(x, data, ...)
+results <- function(x, data = NULL, ...)
 {
   UseMethod("results")
 }
 
 ## Extract linear and special term information.
-results.gamlss2 <- function(x, data, ...)
+results.gamlss2 <- function(x, data = NULL, ...)
 {
+  if(is.null(data))
+    data <- model.frame(x, keepresponse = TRUE)
+
   res <- list()
   np <- x$family$names
 
@@ -337,4 +340,3 @@ results_linear <- function(x, parameter = NULL, data, ...)
 
   p
 }
-

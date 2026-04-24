@@ -5,7 +5,7 @@ predict.gamlss2 <- function(object,
 {
   ## FIXME: se.fit, terms ...
   samples <- NULL
-  if(se.fit || !is.null(list(...)$FUN)) {
+  if(se.fit || !is.null(list(...)$FUN) || inherits(object, "bamlss2")) {
     if(is.null(object$samples)) {
       R <- list(...)$R
       if(is.null(R))
@@ -21,6 +21,14 @@ predict.gamlss2 <- function(object,
       samples <- sampling(object, R = R, full = TRUE)
     } else {
       samples <- object$samples
+    }
+  }
+
+  if(!is.null(samples)) {
+    burnin <- list(...)$burnin
+    if(!is.null(burnin)) {
+      burnin <- as.integer(burnin)
+      samples <- samples[-seq.int(burnin), , drop = FALSE]
     }
   }
 
@@ -339,4 +347,3 @@ fitted.gamlss2 <- function(object, newdata = NULL,
 
   return(fit[, model])
 }
-

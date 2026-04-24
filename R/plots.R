@@ -4,10 +4,10 @@ plot.gamlss2 <- function(x, parameter = NULL,
   scale = TRUE, spar = TRUE, ...)
 {
   ## What should be plotted?
-  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection")
+  which.match <- c("effects", "hist-resid", "qq-resid", "wp-resid", "scatter-resid", "selection", "samples")
   if(!is.character(which)) {
-    if(any(which > 5L))
-      which <- which[which <= 5L]
+    k <- length(which.match)
+    which <- which[which >= 1L & which <= k]
     which <- which.match[which]
   } else which <- which.match[grep(tolower(which), which.match, fixed = TRUE)]
   if(length(which) > length(which.match) || !any(which %in% which.match))
@@ -211,6 +211,57 @@ plot.gamlss2 <- function(x, parameter = NULL,
       }
     }
   }
+
+  if(("samples" %in% which) && !is.null(x$samples)) {
+    if(spar) {
+      opar <- par(no.readonly = TRUE)
+      on.exit(par(opar), add = TRUE)
+      par(mfrow = c(1, 2))
+    }
+
+    cn <- colnames(x$samples)
+    cn <- grep2(parameter, cn, fixed = TRUE, value = TRUE)
+
+    if(!is.null(terms)) {
+      if(is.character(terms)) {
+        cn <- grep2(terms, cn, fixed = TRUE, value = TRUE)
+      } else {
+        if(max(terms) > length(cn))
+          stop("argument terms is specified wrong!")
+        cn <- cn[terms]
+      }
+    }
+
+    if(length(cn)) {
+      for(j in cn) {
+        if(isTRUE(ask)) grDevices::devAskNewPage(TRUE)
+
+        xsamps <- x$samples[, j]
+        traceplot2(xsamps, ylab = "Samples", main = "")
+        mtext(paste("Trace of", j), side = 3, line = 1, font = 2)
+
+        nu <- length(unique(xsamps))
+        stats::acf(if(nu < 2) stats::jitter(xsamps) else xsamps,
+          main = "", lag.max = list(...)$lag.max, na.action = stats::na.pass)
+        mtext(paste("ACF of", j), side = 3, line = 1, font = 2)
+      }
+    }
+  }
+}
+
+traceplot2 <- function(theta, n.plot = 100, ylab = "", ...) {
+  cuq <- Vectorize(function(n, x) {
+    as.numeric(quantile(x[1:n], c(.025, .5, .975), na.rm = TRUE))
+  }, vectorize.args = "n")
+  n.rep <- length(theta)
+  plot(seq.int(n.rep), theta, col = "lightgrey", xlab = "Iteration",
+    ylab = ylab, type = "l", ...)
+  iter <- round(seq(1, n.rep, length = n.plot + 1)[-1])
+  tq <- cuq(iter, theta)
+  lines(iter, tq[2, ])
+  lines(iter, tq[1, ], lty = 2)
+  lines(iter, tq[3, ], lty = 2)
+  lines(stats::lowess(seq.int(n.rep), theta), col = 2)
 }
 
 ## Plot univariate smooth effects.
@@ -678,4 +729,3 @@ plot.gamlss2.list <- function(x, parameter = NULL, which = "effects", terms = NU
 
   return(invisible(NULL))
 }
-

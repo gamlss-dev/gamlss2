@@ -291,3 +291,163 @@ find_gamlss2 <- function(formula, families = NULL, k = 2,
   return(m)
 }
 
+calibration <- function(..., newdata = NULL,
+  y = NULL, parameter = NULL, breaks = seq(0, 1, by = 0.1),
+  minn = 20, main = "Calibration plot",
+  xlab = "Predicted probability",
+  ylab = "Observed proportion", plot = TRUE,
+  add_loess = TRUE, smooth_n = 200,
+  col = NULL, lty = NULL, legend = TRUE, pos = "topleft",
+  xlim = NULL, ylim = NULL)
+{
+  models <- list(...)
+  if(length(models) == 0L) {
+    stop("Provide at least one fitted model to 'calibration()'.")
+  }
+  n_models <- length(models)
+
+  mc <- match.call(expand.dots = FALSE)
+  model_exprs <- as.list(mc$...)
+  model_labels <- vapply(model_exprs, function(x) paste(deparse(x), collapse = ""),
+    FUN.VALUE = character(1))
+
+  if(is.function(col)) {
+    col <- col(n_models)
+  }
+  if(is.null(col)) {
+    col <- colorspace::qualitative_hcl(n_models)
+  } else if(length(col) < n_models) {
+    col <- rep(col, length.out = n_models)
+  }
+
+  if(is.null(lty)) {
+    lty <- seq_len(n_models)
+  } else if(length(lty) < n_models) {
+    lty <- rep(lty, length.out = n_models)
+  }
+
+  if(is.null(y)) {
+    ref <- models[[1L]]
+    if(is.null(newdata)) {
+      if(!is.null(ref$y)) {
+        y <- ref$y
+      } else {
+        y <- tryCatch(
+          stats::model.response(model.frame(ref)),
+          error = function(e) NULL
+        )
+      }
+    } else {
+      y <- stats::model.response(model.frame(models[[1L]], data = newdata,
+        keepresponse = TRUE))
+    }
+    if(is.null(y)) {
+      stop("Could not extract response 'y'. Please provide 'y' explicitly.")
+    }
+  }
+
+  if(!is.null(dim(y))) {
+    y <- y[, 1L]
+  }
+
+  if(is.factor(y)) {
+    if(nlevels(y) > 2L)
+      stop("Number of levels of response 'y' greater than two!")
+    y <- as.integer(y) - 1L
+  }
+
+  if(!all(y %in% c(0, 1))) {
+    stop("Response 'y' must be 0/1 for 'calibration()'.")
+  }
+
+  if(range(breaks)[1] > 0 || range(breaks)[2] < 1) {
+    stop("'breaks' must cover [0, 1].")
+  }
+
+  res_list <- vector("list", n_models)
+
+  for(m in seq_len(n_models)) {
+    obj <- models[[m]]
+
+    p_hat <- predict(obj, newdata = newdata, parameter = parameter, type = "parameter")
+
+    if(!is.null(family(obj)$probabilities))
+      p_hat <- family(obj)$probabilities(p_hat)
+
+    if(!is.null(dim(p_hat)))
+      p_hat <- p_hat[, 1L]
+
+    if(length(p_hat) != length(y)) {
+      stop("Length of predictions and 'y' differ for model ", m, ".")
+    }
+
+    grp <- cut(p_hat, breaks = breaks, include.lowest = TRUE, right = TRUE)
+    lev <- levels(grp)
+
+    tab2 <- do.call(rbind, lapply(lev, function(iv) {
+      idx <- grp == iv
+      idx[is.na(idx)] <- FALSE
+      nobs <- sum(idx)
+      if(nobs < minn || nobs == 0L)
+        return(NULL)
+      data.frame(
+        interval = factor(iv, levels = lev),
+        probs = mean(p_hat[idx]),
+        y = mean(y[idx]),
+        n = nobs,
+        model = model_labels[m]
+      )
+    }))
+
+    if(is.null(tab2)) {
+      tab2 <- data.frame(
+        interval = factor(character(0), levels = lev),
+        probs = numeric(0),
+        y = numeric(0),
+        n = integer(0),
+        model = character(0)
+      )
+    }
+    res_list[[m]] <- tab2
+  }
+
+  res <- do.call(rbind, res_list)
+
+  if(!plot) {
+    if(n_models == 1L)
+      res$model <- NULL
+    return(res)
+  }
+
+  if(is.null(xlim))
+    xlim <- c(0, 1)
+  if(is.null(ylim))
+    ylim <- c(0, 1)
+
+  graphics::plot(NA, NA, xlim = xlim, ylim = ylim,
+    xlab = xlab, ylab = ylab, main = main)
+  graphics::abline(0, 1, lty = 2, col = "grey50")
+
+  for(m in seq_len(n_models)) {
+    ri <- res[res$model == model_labels[m], , drop = FALSE]
+    if(!nrow(ri))
+      next
+
+    cex <- sqrt(ri$n) / max(sqrt(ri$n))
+    graphics::points(ri$probs, ri$y, pch = 16, col = col[m], cex = cex)
+
+    if(isTRUE(add_loess) && nrow(ri) >= 3L) {
+      lo <- stats::loess(y ~ probs, data = ri)
+      gx <- seq(min(ri$probs), max(ri$probs), length.out = smooth_n)
+      gy <- stats::predict(lo, newdata = data.frame(probs = gx))
+      graphics::lines(gx, gy, col = col[m], lty = lty[m], lwd = 2)
+    }
+  }
+
+  if(isTRUE(legend) && n_models > 1L) {
+    graphics::legend(pos, legend = model_labels, col = col, lty = lty,
+      lwd = 2, bty = "n")
+  }
+
+  invisible(res)
+}

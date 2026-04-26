@@ -83,10 +83,10 @@ plot(m1)
 ## plot specific effect
 plot(m1, parameter = "sigma")
 plot(m1, model = "sigma")
-plot(m1, model = "nu", term = 1)
-plot(m1, model = "nu", term = 2)
-plot(m1, model = "nu", term = "lnosc")
-plot(m1, term = "lnosc")
+plot(m1, model = "nu", terms = 1)
+plot(m1, model = "nu", terms = 2)
+plot(m1, model = "nu", terms = "lnosc")
+plot(m1, terms = "lnosc")
 
 ## plot all residual diagnostics
 plot(m1, which = "resid")
@@ -105,11 +105,11 @@ m2 <- gamlss2(f, data = film90, family = BCPE)
 
 ## compare estimated effects
 plot(c(m1, m2))
-plot(c(m1, m2), term = "lboopen",
+plot(c(m1, m2), terms = "lboopen",
   col = c(1, 4), lwd = 3, lty = 1,
   pos = c("topleft", "topright", "bottomleft", "bottomright"))
 plot(c(m1, m2), model = "sigma")
-plot(c(m1, m2), model = "sigma", term = 2)
+plot(c(m1, m2), model = "sigma", terms = 2)
 plot(c(m1, m2), model = c("mu", "nu"))
 }
 }

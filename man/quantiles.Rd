@@ -20,15 +20,18 @@
 }
 
 \value{
-  A data frame of the estimated quantiles.
+  The estimated quantiles. For multiple probabilities, a data frame is returned.
+  For a single probability and \code{variable = NULL}, the result is simplified
+  to a numeric vector.
 }
 
 \arguments{
   \item{x}{An object of class \code{"gamlss2"}.}
   \item{probs}{Numeric vector of probabilities with values in [0,1].}
-  \item{variable}{Logical or integer, should quantiles be plotted using
-    the covariate data? Note that the variable option is only possible for
-    single covariate models.}
+  \item{variable}{Logical, integer, or character. Should quantiles be plotted
+    against a covariate? If \code{TRUE}, the single model covariate is used.
+    Alternatively, a covariate can be selected by position or name. This option
+    is only available for single-covariate models.}
   \item{newdata}{Data frame that should be used for computing the quantiles.}
   \item{plot}{Logical, should a plot be shown?}
   \item{data}{Logical, should the raw data be added to the plot?}

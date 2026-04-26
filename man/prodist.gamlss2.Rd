@@ -24,10 +24,9 @@ model objects, the \code{\link[distributions3]{prodist}} method extracts fitted
 or predicted probability \code{distribution} objects. Internally, the
 \code{\link{predict.gamlss2}} method is used first to obtain the distribution
 parameters (\code{mu}, \code{sigma}, \code{tau}, \code{nu}, or a subset thereof).
-Subsequently, the corresponding \code{distribution} object is set up using the
-\code{\link[gamlss.dist]{GAMLSS}} class from the \pkg{gamlss.dist} package,
-enabling the workflow provided by the \pkg{distributions3} package (see Zeileis
-et al. 2022).
+Subsequently, the corresponding \code{distribution} object is set up as a
+\code{\link{GDF}} object, a unified \pkg{gamlss2} distribution interface for
+the workflow provided by the \pkg{distributions3} package (see Zeileis et al. 2022).
 
 Note that these probability distributions only reflect the random variation in
 the dependent variable based on the model employed (and its associated
@@ -36,7 +35,7 @@ uncertainty in the parameter estimates.
 }
 
 \value{
-An object of class \code{GAMLSS} inheriting from \code{distribution}.
+An object of class \code{GDF} inheriting from \code{distribution}.
 }
 
 \references{
@@ -47,7 +46,7 @@ Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
 }
 
 \seealso{
-\code{\link[gamlss.dist]{GAMLSS}}, \code{\link{predict.gamlss2}}
+\code{\link{GDF}}, \code{\link{predict.gamlss2}}
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}

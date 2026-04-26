@@ -85,10 +85,11 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
     \item{data}: The data for which predictions should be computed.
     \item{se.fit}: Logical, should standard errors of the predictions be computed.
   }
-  The function \code{special_predict()} should return a data frame with a column
-  named \code{"fit"}. Optional columns such as \code{"lower"} and \code{"upper"}
-  can be added if interval information is available. Thus, the minimal valid
-  return value is a data frame with a \code{"fit"} column.
+  The function \code{special_predict()} should return fitted contributions for
+  the supplied \code{data}. The minimal valid return value is a numeric vector.
+  If \code{se.fit = TRUE}, the method may instead return a data frame with a
+  column named \code{"fit"} and optional columns such as \code{"lower"} and
+  \code{"upper"} when interval information is available.
 }
 
 \seealso{

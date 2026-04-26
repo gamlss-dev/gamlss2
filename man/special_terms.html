@@ -679,7 +679,7 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <p>se.fit: Logical, should standard errors of the predictions be computed.</p>
 </li>
 </ul>
-<p>The function <code>special_predict()</code> should return a data frame with a column named <code>“fit”</code>. Optional columns such as <code>“lower”</code> and <code>“upper”</code> can be added if interval information is available. Thus, the minimal valid return value is a data frame with a <code>“fit”</code> column.</p>
+<p>The function <code>special_predict()</code> should return fitted contributions for the supplied <code>data</code>. The minimal valid return value is a numeric vector. If <code>se.fit = TRUE</code>, the method may instead return a data frame with a column named <code>“fit”</code> and optional columns such as <code>“lower”</code> and <code>“upper”</code> when interval information is available.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

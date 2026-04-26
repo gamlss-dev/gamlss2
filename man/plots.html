@@ -659,10 +659,10 @@ Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## plot specific effect</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"nu"</span>, <span class="at">term =</span> <span class="dv">1</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"nu"</span>, <span class="at">term =</span> <span class="dv">2</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"nu"</span>, <span class="at">term =</span> <span class="st">"lnosc"</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">term =</span> <span class="st">"lnosc"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"nu"</span>, <span class="at">terms =</span> <span class="dv">1</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"nu"</span>, <span class="at">terms =</span> <span class="dv">2</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"nu"</span>, <span class="at">terms =</span> <span class="st">"lnosc"</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">terms =</span> <span class="st">"lnosc"</span>)</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="do">## plot all residual diagnostics</span></span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"resid"</span>)</span>
@@ -681,11 +681,11 @@ Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="do">## compare estimated effects</span></span>
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2))</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">term =</span> <span class="st">"lboopen"</span>,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">terms =</span> <span class="st">"lboopen"</span>,</span>
 <span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">1</span>,</span>
 <span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">pos =</span> <span class="fu">c</span>(<span class="st">"topleft"</span>, <span class="st">"topright"</span>, <span class="st">"bottomleft"</span>, <span class="st">"bottomright"</span>))</span>
 <span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">term =</span> <span class="dv">2</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="dv">2</span>)</span>
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(m1, m2), <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"nu"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 

@@ -580,12 +580,12 @@ Arguments passed on to <code>predict.gamlss2</code>, e.g., <code>newdata</code>.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>To facilitate making probabilistic forecasts based on <code>gamlss2</code> model objects, the <code>prodist</code> method extracts fitted or predicted probability <code>distribution</code> objects. Internally, the <code>predict.gamlss2</code> method is used first to obtain the distribution parameters (<code>mu</code>, <code>sigma</code>, <code>tau</code>, <code>nu</code>, or a subset thereof). Subsequently, the corresponding <code>distribution</code> object is set up using the <code>GAMLSS</code> class from the <span class="pkg">gamlss.dist</span> package, enabling the workflow provided by the <span class="pkg">distributions3</span> package (see Zeileis et al.&nbsp;2022).</p>
+<p>To facilitate making probabilistic forecasts based on <code>gamlss2</code> model objects, the <code>prodist</code> method extracts fitted or predicted probability <code>distribution</code> objects. Internally, the <code>predict.gamlss2</code> method is used first to obtain the distribution parameters (<code>mu</code>, <code>sigma</code>, <code>tau</code>, <code>nu</code>, or a subset thereof). Subsequently, the corresponding <code>distribution</code> object is set up as a <code>GDF</code> object, a unified <span class="pkg">gamlss2</span> distribution interface for the workflow provided by the <span class="pkg">distributions3</span> package (see Zeileis et al.&nbsp;2022).</p>
 <p>Note that these probability distributions only reflect the random variation in the dependent variable based on the model employed (and its associated distributional assumption for the dependent variable). This does not capture the uncertainty in the parameter estimates.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>An object of class <code>GAMLSS</code> inheriting from <code>distribution</code>.</p>
+<p>An object of class <code>GDF</code> inheriting from <code>distribution</code>.</p>
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
@@ -593,7 +593,7 @@ Arguments passed on to <code>predict.gamlss2</code>, e.g., <code>newdata</code>.
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>GAMLSS</code>, <code>predict.gamlss2</code></p>
+<p><code>GDF</code>, <code>predict.gamlss2</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
@@ -666,10 +666,10 @@ GAMLSS-RS iteration  2: Global Deviance = 405.7368 eps = 0.000000     </code></p
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate random numbers</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1      r_2      r_3       r_4      r_5
-1 30.07587 35.20041 22.25488  31.16192 27.42432
-2 39.45748 78.89305 62.86465  64.74683 41.10931
-3 66.38659 70.68321 88.01449 120.01558 99.36118</code></pre>
+<pre><code>        r_1       r_2      r_3       r_4       r_5
+1  10.82660  23.05984  23.8248  37.58107  23.47797
+2  40.58951  51.68507  46.6612  55.88003  80.76801
+3 109.58028 156.36738 100.5149 101.58407 127.34563</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## density and distribution</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">50</span> <span class="sc">*</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

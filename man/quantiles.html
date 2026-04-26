@@ -581,7 +581,7 @@ Numeric vector of probabilities with values in [0,1].
 <code id="variable">variable</code>
 </td>
 <td>
-Logical or integer, should quantiles be plotted using the covariate data? Note that the variable option is only possible for single covariate models.
+Logical, integer, or character. Should quantiles be plotted against a covariate? If <code>TRUE</code>, the single model covariate is used. Alternatively, a covariate can be selected by position or name. This option is only available for single-covariate models.
 </td>
 </tr>
 <tr>
@@ -632,7 +632,7 @@ Arguments such as <code>col</code>, <code>legend = TRUE/FALSE</code>. See the ex
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A data frame of the estimated quantiles.</p>
+<p>The estimated quantiles. For multiple probabilities, a data frame is returned. For a single probability and <code>variable = NULL</code>, the result is simplified to a numeric vector.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

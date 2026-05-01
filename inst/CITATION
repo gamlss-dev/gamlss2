@@ -10,5 +10,34 @@ bibentry("Article",
   author = c(person("R.A. Rigby"), person("D.M. Stasinopoulos")),
   textVersion = "Rigby R.A. and Stasinopoulos D.M. (2005). Generalized Additive Models for Location, Scale and Shape, (with Discussion), Journal of the Royal Statistical Society, Series C (Applied Statistics), 54, pp 507-554.")
 
+bibentry("InProceedings",
+  key = "NiksBib-A:Umlauf+Stasinopoulos+DeBastiani+Heller+Kneib+Mayr+Rigby+Stauffer+Zeileis:2025a",
+  title = "gamlss2: The Next Generation of Distributional Regression",
+  booktitle = "Proceedings of the 39th International Workshop on Statistical Modelling, Limerick, Ireland",
+  year = "2025",
+  url = "https://iwsm2025.ie/",
+  pages = "312--317",
+  author = c(
+    person("Mikis", "Stasinopoulos"),
+    person("Fernanda", "De Bastiani"),
+    person("Gillian", "Heller"),
+    person("Thomas", "Kneib"),
+    person("Andreas", "Mayr"),
+    person("Robert", "Rigby"),
+    person("Reto", "Stauffer"),
+    person("Nikolaus", "Umlauf"),
+    person("Achim", "Zeileis")
+  ),
+  textVersion =
+    paste(
+      "Stasinopoulos M, De Bastiani F, Heller G, Kneib T, Mayr A,",
+      "Rigby R, Stauffer R, Umlauf N, Zeileis A (2025).",
+      "gamlss2: The Next Generation of Distributional Regression.",
+      "In: Proceedings of the 39th International Workshop on Statistical Modelling,",
+      "Limerick, Ireland, pp. 312--317.",
+      "URL https://iwsm2025.ie/."
+    )
+)
+
 citFooter("We have invested a lot of time and effort in creating GAMLSS,",
   "please cite it when using it for data analysis.")

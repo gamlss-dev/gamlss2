@@ -19,7 +19,7 @@ bibentry("InProceedings",
   pages = "312--317",
   author = c(
     person("Mikis", "Stasinopoulos"),
-    person("Fernanda", "De Bastiani"),
+    person("Fernanda", "de Bastiani"),
     person("Gillian", "Heller"),
     person("Thomas", "Kneib"),
     person("Andreas", "Mayr"),

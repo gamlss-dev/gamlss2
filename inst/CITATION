@@ -1,4 +1,29 @@
-citHeader("To cite GAMLSS in publications use:")
+bibentry("InProceedings",
+  title = "gamlss2: The Next Generation of Distributional Regression",
+  booktitle = "Proceedings of the 39th International Workshop on Statistical Modelling",
+  address = "Limerick, Ireland",
+  year = "2025",
+  url = "https://iwsm2025.ie/",
+  pages = "312--317",
+  author = c(
+    person("Nikolaus", "Umlauf", email = "Nikolaus.Umlauf@uibk.ac.at", comment = c(ORCID = "0000-0003-2160-9803")),
+    person("Mikis", "Stasinopoulos", email = "d.stasinopoulos@gre.ac.uk", comment = c(ORCID = "0000-0003-2407-5704")),
+    person("Fernanda", "De Bastiani", email = "fernanda.bastiani@ufpe.br", comment = c(ORCID = "0000-0001-8532-639X")),
+    person("Gillian", "Heller", email = "gillian.heller@sydney.edu.au", comment = c(ORCID = "0000-0003-1270-1499")),
+    person("Thomas", "Kneib", email = "tkneib@uni-goettingen.de", comment = c(ORCID = "0000-0003-3390-0972")),
+    person("Andreas", "Mayr", email = "andreas.mayr@uni-marburg.de", comment = c(ORCID = "0000-0001-7106-9732")),
+    person("Robert", "Rigby", email = "r.rigby@gre.ac.uk", comment = c(ORCID = "0000-0003-3853-1707")),
+    person("Reto", "Stauffer", email = "Reto.Stauffer@uibk.ac.at", comment = c(ORCID = "0000-0002-3798-5507")),
+    person("Achim", "Zeileis", email = "Achim.Zeileis@R-project.org", comment = c(ORCID = "0000-0003-0918-3766"))
+  ),
+  editor = c(
+    person("David", "O'Sullivan"),
+    person("James", "Sweeney"),
+    person("Shirin", "Moghaddam"),
+    person("Kevin", "Burke")
+  ),
+  header = "To cite gamlss2 in publications use:"
+)
 
 bibentry("Article",
   title = "Generalized Additive Models for Location, Scale and Shape (with Discussion)",
@@ -7,37 +32,9 @@ bibentry("Article",
   pages = "507--554",
   year = "2005",
   doi = "10.1111/j.1467-9876.2005.00510.x",
-  author = c(person("R.A. Rigby"), person("D.M. Stasinopoulos")),
-  textVersion = "Rigby R.A. and Stasinopoulos D.M. (2005). Generalized Additive Models for Location, Scale and Shape, (with Discussion), Journal of the Royal Statistical Society, Series C (Applied Statistics), 54, pp 507-554.")
-
-bibentry("InProceedings",
-  key = "NiksBib-A:Umlauf+Stasinopoulos+DeBastiani+Heller+Kneib+Mayr+Rigby+Stauffer+Zeileis:2025a",
-  title = "gamlss2: The Next Generation of Distributional Regression",
-  booktitle = "Proceedings of the 39th International Workshop on Statistical Modelling, Limerick, Ireland",
-  year = "2025",
-  url = "https://iwsm2025.ie/",
-  pages = "312--317",
   author = c(
-    person("Mikis", "Stasinopoulos"),
-    person("Fernanda", "de Bastiani"),
-    person("Gillian", "Heller"),
-    person("Thomas", "Kneib"),
-    person("Andreas", "Mayr"),
-    person("Robert", "Rigby"),
-    person("Reto", "Stauffer"),
-    person("Nikolaus", "Umlauf"),
-    person("Achim", "Zeileis")
+    person(c("Robert", "A."), "Rigby", email = "r.rigby@gre.ac.uk", comment = c(ORCID = "0000-0003-3853-1707")),
+    person(c("D.", "Mikis"), "Stasinopoulos", email = "d.stasinopoulos@gre.ac.uk", comment = c(ORCID = "0000-0003-2407-5704"))
   ),
-  textVersion =
-    paste(
-      "Stasinopoulos M, De Bastiani F, Heller G, Kneib T, Mayr A,",
-      "Rigby R, Stauffer R, Umlauf N, Zeileis A (2025).",
-      "gamlss2: The Next Generation of Distributional Regression.",
-      "In: Proceedings of the 39th International Workshop on Statistical Modelling,",
-      "Limerick, Ireland, pp. 312--317.",
-      "URL https://iwsm2025.ie/."
-    )
+  header = "For the underlying methods cite:"
 )
-
-citFooter("We have invested a lot of time and effort in creating GAMLSS,",
-  "please cite it when using it for data analysis.")

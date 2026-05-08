@@ -240,14 +240,14 @@ We can compare the models using the `AIC()`.
 AIC(b1, b2)
 ```
 
-Finally, we visualize the estimated effects from the second model.
+Finally, we visualize the estimated `lo()` effects from the second model.
 
 ```{r}
 #| fig-height: 8
 #| fig-width: 8
 #| fig-align: center
 par(mfrow = c(2, 2))
-plot(b2, spar = FALSE)
+plot(b2, terms = "lo(", spar = FALSE)
 ```
 
 This example illustrates how easy it is to integrate loess smoothers into `gamlss2`

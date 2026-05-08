@@ -14,7 +14,7 @@
   \code{\link{gamlss2.family}}.
 
   In addition to ordinary linear terms, \code{gamlss2()} supports smooth terms
-  from \pkg{mgcv} as well as the model-term infrastructure from \pkg{gamlss}.
+  from \pkg{mgcv} as well special user-defined model-terms, see \code{\link{specials}}.
 }
 
 \usage{

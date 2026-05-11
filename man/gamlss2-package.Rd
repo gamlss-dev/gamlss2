@@ -32,14 +32,14 @@
 }
 
 \author{
-  Nikolaus Umlauf
-  Mikis Stasinopoulos
-  Robert Rigby
-  Achim Zeileis
-  Reto Stauffer
-  Gillian Heller
-  Fernanda de Bastiani
-  Andreas Mayr
+  Nikolaus Umlauf,
+  Mikis Stasinopoulos,
+  Robert Rigby,
+  Achim Zeileis,
+  Reto Stauffer,
+  Gillian Heller,
+  Fernanda de Bastiani,
+  Andreas Mayr.
 
   Maintainer: Nikolaus Umlauf \email{Nikolaus.Umlauf@uibk.ac.at}
 }

@@ -41,7 +41,7 @@
   Fernanda de Bastiani,
   Andreas Mayr.
 
-  Maintainer: Nikolaus Umlauf \email{Nikolaus.Umlauf@uibk.ac.at}
+  Maintainer: Nikolaus Umlauf \email{Nikolaus.Umlauf@uibk.ac.at}.
 }
 
 \keyword{package}

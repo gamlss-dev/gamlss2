@@ -165,13 +165,13 @@ plot(m1, which = "resid")
 par <- predict(m1)
 
 ## predict quantiles
-pq <- sapply(c(0.05, 0.5, 0.95), function(q) family(m1)$quantile(q, par))
+pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
 
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matplot(abdom$x, pq, type = "l", lwd = 2,
-  lty = 1, col = 4, add = TRUE)
+matlines(abdom$x, pq, lwd = 2,
+  lty = 1, col = 4)
 
 ## another example that defines only the density
 ## function; in this case all derivatives are

@@ -32,9 +32,16 @@
 }
 
 \author{
-  \packageAuthor{gamlss2}
+  Nikolaus Umlauf
+  Mikis Stasinopoulos
+  Robert Rigby
+  Achim Zeileis
+  Reto Stauffer
+  Gillian Heller
+  Fernanda de Bastiani
+  Andreas Mayr
 
-  Maintainer: \packageMaintainer{gamlss2}
+  Maintainer: Nikolaus Umlauf \email{Nikolaus.Umlauf@uibk.ac.at}
 }
 
 \keyword{package}

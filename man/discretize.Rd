@@ -45,7 +45,22 @@ fam <- discretize(family = BCT(mu.link = "log"))
 
 ## fit a count regression model using the discretized family
 fit_family(y, family = fam)
-}
+
+## including covariate
+\dontrun{set.seed(111)
+x <- sort(runif(1000, -3, 3))
+y <- rpois(1000, lambda = exp(sin(x)))
+
+m <- gamlss2(y ~ s(x) | s(x) | s(x) | s(x), family = fam)
+
+## plot effects
+plot(m)
+
+## predict 95%-quantile
+p <- quantile(m, probs = 0.95)
+plot(x, y, pch = 19, col = adjustcolor(1, 0.3))
+lines(p ~ x, lty = 1, col = 4, lwd = 3)
+}}
 
 \keyword{utilities}
 \keyword{count data}

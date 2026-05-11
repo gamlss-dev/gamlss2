@@ -130,8 +130,8 @@ pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
 ## visualize
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matplot(abdom$x, pq, type = "l", lwd = 2,
-  lty = 1, col = 4, add = TRUE)
+matlines(abdom$x, pq, lwd = 2,
+  lty = 1, col = 4)
 
 ## count response example using HarzTraffic data
 data("HarzTraffic", package = "gamlss2")
@@ -159,8 +159,8 @@ pq <- quantile(m2, newdata = nd, probs = c(0.05, 0.5, 0.95))
 ## visualize fitted quantiles
 plot(bikes ~ yday, data = HarzTraffic, pch = 19,
   col = gray(0.1, alpha = 0.3))
-matplot(nd$yday, pq, type = "l", lty = c(2, 1, 2),
-  lwd = 2, col = 4, add = TRUE)
+matlines(nd$yday, pq, lty = c(2, 1, 2),
+  lwd = 2, col = 4)
 }
 
 \keyword{models}

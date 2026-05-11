@@ -58,7 +58,7 @@ f <- y ~ s(x) | s(x)
 ## estimate model with different step length
 ## control in the RS algorithm
 m1 <- gamlss2(f, data = abdom, family = BCT, step = 1)
-m2 <- gamlss2(f, data = abdom, family = BCT, step = 0.9)
+m2 <- gamlss2(f, data = abdom, family = BCT, step = 0.1)
 }}
 
 \keyword{models}

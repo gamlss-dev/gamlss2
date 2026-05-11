@@ -37,17 +37,24 @@ gnet(formula, ...)
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
 \dontrun{data("rent", package = "gamlss.data")
 
+## transform to categorical
 rent$Flc <- cut(rent$Fl, breaks = seq(20, 160, by = 10),
   include.lowest = TRUE)
 rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
   include.lowest = TRUE)
 
-f <- R ~ gnet(~Flc + Ac + loc) |
-  gnet(~Flc + Ac + loc) |
-  gnet(~Flc + Ac + loc) |
-  gnet(~Flc + Ac + loc)
+## model formula, for each parameter we use
+## the same gnet() model term
+f <- R ~ gnet(~Flc + Ac + loc) | . | . | .
 
+## estimate model
 m <- gamlss2(f, data = rent, family = BCT)
 
+## summary with edf
 summary(m)
+
+## plot coefficient paths
+sp <- specials(m, model = "mu", term = "gnet(", element = "model")
+print(class(sp))
+plot(sp)
 }}

@@ -90,7 +90,7 @@ p <- quantile(m, newdata = nd, probs = c(0.05, 0.5, 0.95))
 
 ## visualization
 plot(bikes ~ yday, data = HarzTraffic, pch = 19, col = gray(0.1, alpha = 0.3))
-matplot(nd$yday, p, type = "l", lty = c(2, 1, 2), lwd = 2, col = 4, add = TRUE)
+matlines(nd$yday, p, lty = c(2, 1, 2), lwd = 2, col = 4)
 }
 
 \keyword{datasets}

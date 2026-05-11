@@ -38,14 +38,18 @@ MN(k)
 
 \examples{\dontrun{data("marital.nz", package = "VGAM")
 
+## multinomial model
 m <- gamlss2(mstatus ~ s(age) | . | ., data = marital.nz, family = MN(4))
 
+## plot effects
 plot(m)
 
+## predict probabilities
 par <- predict(m)
 probs <- family(m)$probabilities(par)
 names(probs) <- levels(marital.nz$mstatus)
 
+## plot
 i <- order(marital.nz$age)
 matplot(marital.nz$age[i], probs[i, ], type = "l", lty = 1, lwd = 2,
   xlab = "Age", ylab = "Probabilities")

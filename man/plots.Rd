@@ -70,9 +70,7 @@
 data("film90", package = "gamlss.data")
 
 ## model formula
-f <-  ~ s(lboopen) + s(lnosc)
-f <- rep(list(f), 4)
-f[[1]] <- update(f[[1]], lborev1 ~ .)
+f <- lborev1 ~ s(lboopen) + s(lnosc) | . | . | .
 
 ## estimate model
 m1 <- gamlss2(f, data = film90, family = BCCG)

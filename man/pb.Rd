@@ -68,8 +68,8 @@ pq <- quantile(m, probs = c(0.05, 0.5, 0.95))
 ## plot
 plot(head ~ age, data = dbhh, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matplot(dbhh$age, pq, type = "l",
-  lty = 1, col = 4, add = TRUE)
+matlines(dbhh$age, pq,
+  lty = 1, col = 4)
 }}
 
 \keyword{utilities}

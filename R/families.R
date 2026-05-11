@@ -1610,34 +1610,95 @@ discretize <- function(family = NO) {
 
   fam$pdf <- function(y, par, log = FALSE, ...) {
     n <- length(y)
+
     par <- lapply(par, function(x) rep(x, length.out = n))
-    d <- family$cdf(y + 1, par) - family$cdf(y, par)
+    par <- as.data.frame(par)
+
+    F0 <- family$cdf(rep(0, n), par, ...)
+    S0 <- 1 - F0
+
+    d <- family$cdf(y + 1, par, ...) - family$cdf(y, par, ...)
+    d <- d / S0
+
     if(log)
       d <- log(d)
-    return(d)
+
+    d
   }
 
   fam$cdf <- function(y, par, log = FALSE, ...) {
     par <- as.data.frame(par)
+
     np <- nrow(par)
     ny <- length(y)
-    n <- max(c(ny, np))
+    n <- max(ny, np)
+
     y <- rep(y, length.out = n)
+
     par <- lapply(par, function(x) rep(x, length.out = n))
     par <- as.data.frame(par)
-    n <- length(y)
-    p <- rep(0, n)
-    for(i in 1:n) {
-      dy <- family$cdf((y[i] + 1):1, par[i, , drop = FALSE]) - family$cdf((y[i]):0, par[i, , drop = FALSE])
-      p[i] <- sum(dy)
-    }
-    return(p)
+
+    yy <- floor(y)
+    yy[yy < 0] <- -1
+
+    F0 <- family$cdf(rep(0, n), par, ...)
+    S0 <- 1 - F0
+
+    p <- numeric(n)
+
+    ii <- yy >= 0
+    p[ii] <- (
+      family$cdf(yy[ii] + 1, par[ii, , drop = FALSE], ...) -
+        F0[ii]
+    ) / S0[ii]
+
+    p <- pmin(pmax(p, 0), 1)
+
+    if(log)
+      p <- log(p)
+
+    p
+  }
+
+  fam$quantile <- function(p, par, ...) {
+    par <- as.data.frame(par)
+
+    np <- nrow(par)
+    n <- max(length(p), np)
+
+    p <- rep(p, length.out = n)
+
+    par <- lapply(par, function(x) rep(x, length.out = n))
+    par <- as.data.frame(par)
+
+    if(any(is.na(p)))
+      stop("p must not contain NA.", call. = FALSE)
+
+    if(any(p < 0 | p > 1))
+      stop("p must be in [0, 1].", call. = FALSE)
+
+    F0 <- family$cdf(rep(0, n), par, ...)
+    S0 <- 1 - F0
+
+    pp <- F0 + p * S0
+
+    pp[pp <= 0] <- 0
+    pp[pp >= 1] <- 1
+
+    qc <- family$quantile(pp, par, ...)
+
+    q <- ceiling(qc) - 1
+
+    q[p <= 0] <- 0
+    q[q < 0] <- 0
+
+    q
   }
 
   fam$type <- "discrete"
   class(fam) <- "gamlss2.family"
 
-  return(fam)
+  fam
 }
 
 MN <- function(k)

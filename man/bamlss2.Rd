@@ -59,10 +59,10 @@ bamlss2(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, \dots)
 data("abdom", package = "gamlss.data")
 
 ## specify the model formula
-f <- y ~ s(x) | s(x) | s(x) | s(x)
+f <- y ~ s(x) | s(x) | 1 | 1
 
 ## estimate Bayesian model
-m <- bamlss2(f, data = abdom, family = BCT)
+m <- bamlss2(f, data = abdom, family = BCPE)
 
 ## posterior summary
 summary(m)

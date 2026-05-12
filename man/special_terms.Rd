@@ -208,10 +208,10 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 \dontrun{## example with data
-data("abdom", package = "gamlss.data")
+data("film90", package = "gamlss.data")
 
 ## specify the model formula
-f <- y ~ n(~x) | n(~x) | n(~x) | n(~x)
+f <- y ~ n(~x,decay=0.01) | . | . | .
 
 ## estimate model,
 ## set the seed for reproducibility
@@ -231,14 +231,14 @@ pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
 ## plot
 plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matplot(abdom$x, pq, type = "l", lwd = 2,
-  lty = 1, col = 4, add = TRUE)
+matlines(abdom$x, pq, lwd = 2,
+  lty = 1, col = 4)
 
 ## another example using the Munich rent data
 data("rent", package = "gamlss.data")
 
 ## model formula
-f <- R ~ n(~Fl+A,size=10,decay=0.7) | n(~Fl+A,size=10,decay=0.7)
+f <- R ~ n(~Fl+A,size=10,decay=0.7) | .
 
 ## estimate model
 set.seed(456)

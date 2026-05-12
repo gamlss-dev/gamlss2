@@ -801,10 +801,10 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p)</span>
 <span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"film90"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model formula</span></span>
-<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>x) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>x) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>x) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>x)</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>x,<span class="at">decay=</span><span class="fl">0.01</span>) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
 <span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model,</span></span>
 <span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a><span class="do">## set the seed for reproducibility</span></span>
@@ -824,14 +824,14 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a><span class="do">## plot</span></span>
 <span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y <span class="sc">~</span> x, <span class="at">data =</span> abdom, <span class="at">pch =</span> <span class="dv">19</span>,</span>
 <span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
-<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(abdom<span class="sc">$</span>x, pq, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(abdom<span class="sc">$</span>x, pq, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>)</span>
 <span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="do">## another example using the Munich rent data</span></span>
 <span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"rent"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
 <span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="do">## model formula</span></span>
-<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>Fl<span class="sc">+</span>A,<span class="at">size=</span><span class="dv">10</span>,<span class="at">decay=</span><span class="fl">0.7</span>) <span class="sc">|</span> <span class="fu">n</span>(<span class="sc">~</span>Fl<span class="sc">+</span>A,<span class="at">size=</span><span class="dv">10</span>,<span class="at">decay=</span><span class="fl">0.7</span>)</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> R <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>Fl<span class="sc">+</span>A,<span class="at">size=</span><span class="dv">10</span>,<span class="at">decay=</span><span class="fl">0.7</span>) <span class="sc">|</span> .</span>
 <span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>

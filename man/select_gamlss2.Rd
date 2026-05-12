@@ -114,12 +114,10 @@ sigma <- with(d, exp(1.5 + f2 + f4 + f5))
 d$y <- rnorm(n, mean = mu, sd = sigma)
 
 ## model formula
-f <- paste("~", paste0("s(x", 1:k, ")", collapse = "+"))
+f <- paste("y ~", paste0("s(x", 1:k, ")", collapse = "+"), "| .")
 f <- as.formula(f)
-f <- list(f, f)
-f[[1]] <- update(f[[1]], y ~ .)
 
-## estimate model
+## estimate model (takes some time)
 m <- select_gamlss2(f, data = d, family = NO)
 
 ## plot selected estimated effects

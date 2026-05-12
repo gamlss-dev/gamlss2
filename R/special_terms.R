@@ -405,7 +405,20 @@ re <- function(random, correlation = NULL, ...)
 }
 
 ## Set up the special "re" model term fitting function
-special_fit.re <- function(x, z, w, control, ...)
+edf_random_intercept <- function(fit, w) {
+  g <- nlme::getGroups(fit)
+
+  vc <- nlme::VarCorr(fit)
+  tau2 <- as.numeric(vc[1, "Variance"])
+  sigma2 <- fit$sigma^2
+
+  wg <- tapply(w, g, sum)
+
+  h <- tau2 * wg / sigma2
+  sum(h / (1 + h))
+}
+
+special_fit.re   <- function(x, z, w, control, ...)
 {
   ## Assign current working response.
   x$data$response_z <- z
@@ -428,15 +441,23 @@ special_fit.re <- function(x, z, w, control, ...)
   rval <- list("model" = do.call(nlme::lme, args))
 
   ## Get the fitted.values.
+  lvl <- length(rval$model$modelStruct$reStruct)
   p0 <- predict(rval$model, newdata = x$data, level = 0)
-  p1 <- predict(rval$model, newdata = x$data, level = 1)
+  p1 <- predict(rval$model, newdata = x$data, level = lvl)
   fit <- as.numeric(p1 - p0)
   rval$fitted.values <- fit ## fitted(rval$model)
   rval$coefficients <- nlme::ranef(rval$model)
 
   ## Degrees of freedom.
-  N <- sum(w != 0)
-  rval$edf <- N - sum(w * (z - rval$fitted.values)^2)/(rval$model$sigma^2)
+  ## For random-intercept-only models use shrinkage-aware edf.
+  re_df <- nlme::ranef(rval$model)
+
+  if(ncol(re_df) == 1L) {
+    rval$edf <- edf_random_intercept(rval$model, 1/w)
+  } else {
+    ## Fallback: approximate numerical trace, or conservative upper bound.
+    rval$edf <- nrow(re_df) * ncol(re_df)
+  }
 
   ## Assign class for predict method.
   class(rval) <- "re.fitted"

@@ -107,20 +107,20 @@ CG(x, y, specials, family, offsets,
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
+\dontrun{## count response example using HarzTraffic data
+data("HarzTraffic", package = "gamlss2")
 
 ## specify the model formula
-f <- y ~ s(x) | s(x) | s(x) | s(x)
+f <- bikes ~ s(yday, bs = "cc") + s(temp) + s(rain) | .
 
 ## estimate model using RS (default)
-m1 <- gamlss2(f, data = abdom, family = BCT, optimizer = RS)
+m1 <- gamlss2(f, data = HarzTraffic, family = NBI, optimizer = RS)
 
 ## now with CG
-m2 <- gamlss2(f, data = abdom, family = BCT, optimizer = CG)
+m2 <- gamlss2(f, data = HarzTraffic, family = NBI, optimizer = CG)
 
 ## first 2 RS iterations and afterwards switch to CG
-m3 <- gamlss2(f, data = abdom, family = BCT, CG = 2)
+m3 <- gamlss2(f, data = HarzTraffic, family = NBI, CG = 2)
 }}
 
 \keyword{models}

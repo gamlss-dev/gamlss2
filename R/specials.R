@@ -341,7 +341,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     }
 
     ## Check for fx = TRUE.
-    if(isTRUE(x$fx)) {
+    if(isTRUE(x$fixed)) {
       if(is.null(x$sp)) {
         np <- if(length(x$S)) length(x$S) else 1L
         x$sp <- rep(1e-10, np)

@@ -291,7 +291,7 @@ predict.gamlss2 <- function(object,
     for(j in names(p)) {
       p[[j]] <- apply(p[[j]], 1, FUN)
       if(!is.null(dim(p[[j]]))) {
-        if(nrow(p[[j]]) != nrow(mf))
+        if((nrow(p[[j]]) != nrow(mf)) || any(rownames(p[[j]]) %in% c("fit", "se")))
           p[[j]] <- t(p[[j]])
       }
     }

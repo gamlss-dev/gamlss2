@@ -1,21 +1,46 @@
 ## Function to compute multivariate normal samples
 ## given the maximum likelihood estimator.
-sampling <- function(object, R = 100, ...)
+sampling <- function(object, R = 100, antithetic = TRUE, ...)
 {
   V <- vcov(object, ...)
-  ok <- TRUE
-  Cv <- tryCatch(chol(V), error=function(e) { ok <<- FALSE; NULL })
-  if(!ok) {
+
+  Cv <- tryCatch(
+    chol(V),
+    error = function(e) NULL
+  )
+
+  if(is.null(Cv)) {
     V <- as.matrix(Matrix::nearPD(V)$mat)
     Cv <- chol(V)
   }
+
   cb <- coef(object, dropall = FALSE, ...)
-  sc <- rnorm(R * length(cb))
-  sc <- t(cb + t(Cv) %*% matrix(sc, nrow = length(cb), ncol = R))
-  d <- drop(cb - apply(sc, 2, mean))
-  sc <- t(t(sc) + d)
+  p <- length(cb)
+
+  ## Antithetic sampling gives exact symmetry around zero
+  ## if R is even. If R is odd, add one extra draw and drop later.
+  if(antithetic) {
+    R0 <- ceiling(R / 2)
+    Z <- matrix(rnorm(R0 * p), nrow = p, ncol = R0)
+    Z <- cbind(Z, -Z)
+    Z <- Z[, seq_len(R), drop = FALSE]
+  } else {
+    Z <- matrix(rnorm(R * p), nrow = p, ncol = R)
+  }
+
+  ## Transform standard normal draws.
+  sc <- t(Cv) %*% Z
+
+  ## Force exact zero column means coefficient-wise.
+  sc <- sweep(sc, 1L, rowMeans(sc), "-")
+
+  ## Add coefficient vector.
+  sc <- sweep(sc, 1L, cb, "+")
+
+  sc <- t(sc)
   colnames(sc) <- names(cb)
-  return(sc)
+
+  sc
 }
 
 ## Bayesian GAMLSS sampler function. Unbounded slice sampler!?

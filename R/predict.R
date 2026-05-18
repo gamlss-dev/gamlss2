@@ -284,7 +284,17 @@ predict.gamlss2 <- function(object,
       if(!is.null(warn))
         warning(warn)
     }
-    p <- if(is.null(fm)) p[[1L]] else fm(p)
+    if(!is.null(samples)) {
+      yp <- matrix(0.0, nrow(p[[1L]]), ncol(p[[1L]]))
+      for(i in 1:ncol(p[[1L]])) {
+        pi <- sapply(names(p), function(j) { p[[j]][, i] })
+        pi <- as.data.frame(pi)
+        yp[, i] <- fm(pi)
+      }
+      p <- t(apply(yp, 1, FUN))
+    } else {
+      p <- if(is.null(fm)) p[[1L]] else fm(p)
+    }
   }
 
   if(!is.null(samples) & !tt) {
@@ -304,6 +314,11 @@ predict.gamlss2 <- function(object,
     } else {
       if(!tt)
         p <- as.data.frame(p)
+    }
+  }
+  if(is.matrix(p)) {
+    if(!is.null(colnames(p))) {
+      p <- as.data.frame(p)
     }
   }
 

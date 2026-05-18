@@ -84,6 +84,7 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   } else {
     object$y
   }
+
   x <- if(is.null(object[["x"]])) {
     model.matrix(object)
   } else {
@@ -92,86 +93,170 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
   n <- if(is.null(dim(y))) length(y) else nrow(y)
 
-  par <- coef(object, full = TRUE, drop = TRUE, dropall = FALSE)
-  lpar <- par2list(par)
-
   family <- object$family
   nx <- family$names
 
-  loglik <- function(par, full) {
+  ## Helper: compute fitted special terms as fixed offsets.
+  ## This is used when full = FALSE, i.e. when only the linear
+  ## coefficients are varied but fitted smooth/special terms should
+  ## still enter the predictor.
+  special_offset <- function(i)
+  {
+    off <- rep(0.0, n)
+
+    if(is.null(object$fitted.specials[[i]]))
+      return(off)
+
+    for(j in names(object$fitted.specials[[i]])) {
+      fs <- object$fitted.specials[[i]][[j]]
+
+      if(is.null(fs))
+        next
+
+      co <- fs$coefficients
+
+      if(is.null(co))
+        next
+
+      ## Standard smooth/special with design matrix stored in object$specials[[j]]$X.
+      if(!is.null(object$specials[[j]]) && !is.null(object$specials[[j]]$X)) {
+        fit <- drop(object$specials[[j]]$X %*% co)
+
+        if(!is.null(object$specials[[j]]$binning)) {
+          fit <- fit[object$specials[[j]]$binning$match.index]
+        }
+
+        off <- off + fit
+        next
+      }
+
+      ## Random effect case, if stored as a named coefficient vector.
+      if(inherits(co, "random")) {
+        ## Cannot safely reconstruct without the model variable here.
+        ## Leave unchanged; such terms should usually be handled via
+        ## the design matrix case above or via prediction methods.
+        next
+      }
+    }
+
+    off
+  }
+
+  ## Precompute special offsets for full = FALSE.
+  soff <- lapply(nx, special_offset)
+  names(soff) <- nx
+
+  loglik <- function(par, full)
+  {
     par <- par2list(par)
     eta <- list()
+
     for(i in nx) {
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
       } else {
         eta[[i]] <- rep(0.0, n)
       }
-      if(full | TRUE) { ## FIXME: always add?
+
+      if(full) {
+        ## In the full Hessian, smooth/special coefficients are part
+        ## of the parameter vector and are varied by optimHess().
         if(!is.null(par[[i]]$s)) {
           for(j in names(par[[i]]$s)) {
+            if(is.null(object$specials[[j]]) || is.null(object$specials[[j]]$X))
+              next
+
             fit <- drop(object$specials[[j]]$X %*% par[[i]]$s[[j]])
+
             if(!is.null(object$specials[[j]]$binning)) {
               fit <- fit[object$specials[[j]]$binning$match.index]
             }
+
             eta[[i]] <- eta[[i]] + fit
           }
         }
+      } else {
+        ## In the reduced Hessian, smooth/special terms are fixed
+        ## at their fitted values and enter as offsets.
+        eta[[i]] <- eta[[i]] + soff[[i]]
       }
     }
-    ll <- family$logLik(y, family$map2par(eta))
-    return(ll)
+
+    family$logLik(y, family$map2par(eta))
   }
 
-  gradient <- function(par, full) {
+  gradient <- function(par, full)
+  {
     npar <- names(par)
     par <- par2list(par)
     eta <- list()
+
     for(i in nx) {
       if(!is.null(par[[i]]$p)) {
         eta[[i]] <- drop(x[, names(par[[i]]$p), drop = FALSE] %*% par[[i]]$p)
       } else {
         eta[[i]] <- rep(0.0, n)
       }
-      if(full | TRUE) { ## FIXME: always add?
+
+      if(full) {
+        ## Smooth/special coefficients are part of the parameter vector.
         if(!is.null(par[[i]]$s)) {
           for(j in names(par[[i]]$s)) {
+            if(is.null(object$specials[[j]]) || is.null(object$specials[[j]]$X))
+              next
+
             fit <- drop(object$specials[[j]]$X %*% par[[i]]$s[[j]])
+
             if(!is.null(object$specials[[j]]$binning)) {
               fit <- fit[object$specials[[j]]$binning$match.index]
             }
+
             eta[[i]] <- eta[[i]] + fit
           }
         }
+      } else {
+        ## Smooth/special terms are fixed offsets.
+        eta[[i]] <- eta[[i]] + soff[[i]]
       }
     }
+
     par2 <- family$map2par(eta)
+
     g <- NULL
+
     for(i in nx) {
       score <- family$score[[i]](y, par2)
+
       if(!is.null(par[[i]]$p)) {
         g <- c(g, colSums(x[, names(par[[i]]$p), drop = FALSE] * score))
       }
-      if(full | TRUE) { ## FIXME: always add?
+
+      if(full) {
         if(!is.null(par[[i]]$s)) {
           for(j in names(par[[i]]$s)) {
+            if(is.null(object$specials[[j]]) || is.null(object$specials[[j]]$X))
+              next
+
+            Xs <- object$specials[[j]]$X
+
             if(!is.null(object$specials[[j]]$binning)) {
-              fit <- fit[object$specials[[j]]$binning$match.index]
-              g <- c(g, colSums(object$specials[[j]]$X[object$specials[[j]]$binning$match.index, ] * score))
-            } else {
-              g <- c(g, colSums(object$specials[[j]]$X * score))
+              Xs <- Xs[object$specials[[j]]$binning$match.index, , drop = FALSE]
             }
+
+            g <- c(g, colSums(Xs * score))
           }
         }
       }
     }
+
     names(g) <- npar
-    return(g)
+    g
   }
 
+  ## Parameter vector for the requested covariance matrix.
   par <- coef(object, full = full, drop = TRUE, dropall = FALSE)
 
-  ## Set NA coefficients to zero.
+  ## Set NA coefficients to zero for numerical Hessian computation.
   p_na <- is.na(par)
   if(any(p_na))
     par[p_na] <- 0.0
@@ -182,22 +267,42 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   control <- list(...)
   control$fnscale <- -1
 
-  H <- try(optimHess(par, fn = loglik, gr = gradient, control = control, full = full), silent = TRUE)
-  if(inherits(H, "try-error")) {
-    H <- optimHess(par, fn = loglik, gr = gradient, control = control, full = TRUE)
+  ## Hessian of the log-likelihood.
+  H <- try(
+    optimHess(par, fn = loglik, gr = gradient, control = control, full = full),
+    silent = TRUE
+  )
+
+  ## Fallback: numerical Hessian without analytic gradient.
+  if(inherits(H, "try-error") || all(is.na(H))) {
+    H <- optimHess(par, fn = loglik, control = control, full = full)
   }
 
   H <- as.matrix(H)
-  if(all(is.na(H))) {
-    H <- as.matrix(optimHess(par, fn = loglik, control = control))
-  }
   H <- 0.5 * (H + t(H))
+
+  ## Convert Hessian of log-likelihood to negative Hessian.
   H <- -1 * H
+
+  ## Add smoothing penalty to the precision matrix for full = TRUE.
+  ## Penalized log-likelihood:
+  ##   l_p(theta) = l(theta) - 0.5 * theta' P theta
+  ## Therefore:
+  ##   -d2 l_p(theta) = -d2 l(theta) + P
+  if(full) {
+    P <- penalty_matrix(object, par)
+    H <- H + P
+    H <- 0.5 * (H + t(H))
+  }
+
+  ## Invert precision matrix.
   if(ncol(H) > 1L) {
     v <- try(solve(H), silent = TRUE)
+
     if(inherits(v, "try-error")) {
       H <- H + diag(1e-05, ncol(H))
       v <- try(solve(H), silent = TRUE)
+
       if(inherits(v, "try-error")) {
         H <- H + diag(1e-03, ncol(H))
         v <- solve(H)
@@ -215,11 +320,87 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
   if(type == "se")
     v <- sqrt(diag(v))
 
-  if(any(p_na))
-    v[p_na, p_na] <- NA
+  if(any(p_na)) {
+    if(is.matrix(v)) {
+      v[p_na, p_na] <- NA
+    } else {
+      v[p_na] <- NA
+    }
+  }
 
-  return(v)
+  v
 }
+
+## Helper for penalties.
+penalty_matrix <- function(object, par)
+{
+  np <- names(par)
+
+  P <- matrix(0.0, nrow = length(par), ncol = length(par))
+  dimnames(P) <- list(np, np)
+
+  pl <- par2list(par)
+
+  for(i in names(pl)) {
+    if(is.null(pl[[i]]$s))
+      next
+
+    for(j in names(pl[[i]]$s)) {
+      prefix <- paste0(i, ".s.", j, ".")
+      ind <- grep(prefix, np, fixed = TRUE)
+
+      if(!length(ind))
+        next
+
+      if(is.null(object$specials[[j]]))
+        next
+
+      S <- object$specials[[j]]$S
+
+      if(is.null(S))
+        next
+
+      ## A single penalty matrix is stored as a matrix.
+      ## Multiple penalties are stored as a list of matrices.
+      if(!is.list(S) || is.matrix(S))
+        S <- list(S)
+
+      lambda <- object$fitted.specials[[i]][[j]]$lambdas
+
+      if(is.null(lambda))
+        lambda <- rep(1.0, length(S))
+
+      if(length(lambda) == 1L && length(S) > 1L)
+        lambda <- rep(lambda, length(S))
+
+      if(length(lambda) < length(S)) {
+        lambda <- c(lambda, rep(tail(lambda, 1L), length(S) - length(lambda)))
+      }
+
+      Sj <- matrix(0.0, nrow = length(ind), ncol = length(ind))
+
+      for(k in seq_along(S)) {
+        Sk <- as.matrix(S[[k]])
+
+        if(nrow(Sk) != length(ind) || ncol(Sk) != length(ind)) {
+          stop(
+            "Penalty matrix dimension does not match smooth coefficient block for term '",
+            j, "' in parameter '", i, "'.\n",
+            "Expected ", length(ind), " x ", length(ind), 
+            ", got ", nrow(Sk), " x ", ncol(Sk), "."
+          )
+        }
+
+        Sj <- Sj + lambda[k] * Sk
+      }
+
+      P[ind, ind] <- P[ind, ind] + Sj
+    }
+  }
+
+  P
+}
+
 
 ## Little helper function.
 par2list <- function(par)

@@ -1259,6 +1259,13 @@ OL <- function(k) {
     probs
   }
 
+  fam$transition <- function(par, ...) {
+    comps <- compute_components(par)
+    tp <- comps$cum_probs
+    colnames(tp) <- paste0("Pr(Y>", 1:(k - 1), ")")
+    tp
+  }
+
   fam$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
     probs <- fam$probabilities(par)
     n <- nrow(probs)

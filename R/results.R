@@ -277,6 +277,8 @@ results_linear <- function(x, parameter = NULL, data, ...)
 
   nd <- list()
   for(j in names(data)) {
+    if(!((j %in% vn) && (j != yn)))
+      next
     if(is.numeric(data[[j]])) {
       nd[[j]] <- seq(min(data[[j]]), max(data[[j]]), length = 300L)
     } else {

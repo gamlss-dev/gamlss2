@@ -91,7 +91,7 @@ find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
 
   warn <- options("warn")$warn
   options("warn" = -1)
-  on.exit(options("warn" = warn))
+  on.exit(options("warn" = warn), add = TRUE)
 
   for(j in names(families)) {
     if(verbose) {
@@ -255,7 +255,7 @@ find_gamlss2 <- function(formula, families = NULL, k = 2,
 
   warn <- options("warn")$warn
   options("warn" = -1)
-  on.exit(options("warn" = warn))
+  on.exit(options("warn" = warn), add = TRUE)
 
   for(j in names(families)) {
     if(verbose) {

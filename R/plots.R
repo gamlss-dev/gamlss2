@@ -53,7 +53,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if(spare) {
       owd <- par(no.readonly = TRUE)
-      on.exit(par(owd))
+      on.exit(par(owd), add = TRUE)
     }
 
     if(!is.null(terms)) {
@@ -127,7 +127,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
     if(spare) {
       owd <- par(no.readonly = TRUE)
-      on.exit(par(owd))
+      on.exit(par(owd), add = TRUE)
     }
 
     ## Number of plots.
@@ -694,7 +694,7 @@ plot.gamlss2.list <- function(x, parameter = NULL, which = "effects", terms = NU
     if(length(eff) > 0L) {
       if(spar) {
         owd <- par(no.readonly = TRUE)
-        on.exit(par(owd))
+        on.exit(par(owd), add = TRUE)
         par(mfrow = n2mfrow(length(eff)))
       }
       if(legend) {

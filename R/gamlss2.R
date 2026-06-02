@@ -491,6 +491,7 @@ print.gamlss2 <- function(x, ...)
   cat("\n")
   cat(info2)
   cat("\n")
+  return(invisible(NULL))
 }
 
 ## Merging formulas.

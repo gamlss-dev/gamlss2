@@ -793,6 +793,7 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
       }
     }
   }
+  return(invisible(x))
 }
 
 ## Some example families.

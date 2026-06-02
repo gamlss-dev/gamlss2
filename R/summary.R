@@ -72,6 +72,7 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
 print.coef.gamlss2 <- function(x, ...)
 {
   print(unclass(x), ...)
+  return(invisible(x))
 }
 
 ## Variance-covariance matrix.
@@ -606,6 +607,8 @@ print.summary.gamlss2 <- function(x,
   cat("\n")
   cat(info3)
   cat("\n")
+
+  return(invisible(x))
 }
 
 ## Confint method.

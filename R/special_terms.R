@@ -1,4 +1,4 @@
-## Special conditional inference ctree constructor.
+## Special conditional inference tree constructor.
 tree <- function(formula, ...)
 {
   stopifnot(requireNamespace("rpart"))
@@ -13,7 +13,7 @@ tree <- function(formula, ...)
   return(st)
 }
 
-## ctree fitting function for the backfitting algorithm.
+## tree fitting function for the backfitting algorithm.
 special_fit.tree <- function(x, z, w, y, eta, j, family, control, ...)
 {
   f <- update(x$formula, response_z ~ .)
@@ -98,6 +98,45 @@ special_predict.cf.fitted <- function(x, data, se.fit = FALSE, ...)
   } else {
     p <- predict(x$model, newdata = data, type = "response")
   }
+  p <- p - x$shift
+  return(p)
+}
+
+## Now ctree.
+ct <- function(formula, ...)
+{
+  stopifnot(requireNamespace("partykit"))
+  st <- list()
+  ctr <- list(...)
+  st$control <- do.call(partykit::ctree_control, ctr)
+  st$formula <- formula
+  st$term <- all.vars(formula)
+  st$label <- paste0("ct(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$data <- model.frame(formula)
+  class(st) <- c("special", "ct")
+  return(st)
+}
+
+special_fit.ct <- function(x, z, w, y, eta, j, family, control, ...)
+{
+  f <- update(x$formula, response_z ~ .)
+  x$data$response_z <- z
+  x$data$w <- w
+  rval <- list(
+    "model" = partykit::ctree(formula = f, data = x$data, weights = w,
+      control = x$control)
+  )
+  rval$fitted.values <- predict(rval$model)
+  rval$shift <- mean(rval$fitted.values)
+  rval$fitted.values <- rval$fitted.values - rval$shift
+  rval$edf <- length(nodeids(rval$model, terminal = TRUE))
+  class(rval) <- "ct.fitted"
+  return(rval)
+}
+
+special_predict.ct.fitted <- function(x, data, ...)
+{
+  p <- predict(x$model, newdata = data, type = "response")
   p <- p - x$shift
   return(p)
 }

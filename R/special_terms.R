@@ -129,7 +129,7 @@ special_fit.ct <- function(x, z, w, y, eta, j, family, control, ...)
   rval$fitted.values <- predict(rval$model)
   rval$shift <- mean(rval$fitted.values)
   rval$fitted.values <- rval$fitted.values - rval$shift
-  rval$edf <- length(nodeids(rval$model, terminal = TRUE))
+  rval$edf <- length(partykit::nodeids(rval$model, terminal = TRUE))
   class(rval) <- "ct.fitted"
   return(rval)
 }

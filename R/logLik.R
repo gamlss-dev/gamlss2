@@ -66,30 +66,66 @@ get_df <- function(object)
   return(df)
 }
 
-deviance.gamlss2 <- function(object, ..., newdata = NULL)
+deviance.gamlss2 <- function(object, ..., newdata = NULL, sum = TRUE)
 {
   objs <- list(object, ...)
 
-  devs <- NULL
-  for(j in 1:length(objs)) {
-    devs <- c(devs, -2 * as.numeric(logLik(objs[[j]], newdata = newdata)))
-  }
-
-  if(length(devs) > 1L) {
-    Call <- match.call()
-    rn <- as.character(Call[-1L])
-    if("..1" %in% rn) {
-      rn <- as.character(sys.call(-1))[-1L]
+  if(sum) {
+    devs <- NULL
+    for(j in 1:length(objs)) {
+      devs <- c(devs, -2 * as.numeric(logLik(objs[[j]], newdata = newdata)))
     }
-    i <- order(devs, decreasing = FALSE)
-    devs <- devs[i]
-    rn <- rn[i]
-    if(any(j <- duplicated(rn)))
-      rn[j] <- paste0(rn[j], ".", 1:sum(j))
-    names(devs) <- rn
+
+    if(length(devs) > 1L) {
+      Call <- match.call()
+      rn <- as.character(Call[-1L])
+      if("..1" %in% rn) {
+        rn <- as.character(sys.call(-1))[-1L]
+      }
+      i <- order(devs, decreasing = FALSE)
+      devs <- devs[i]
+      rn <- rn[i]
+      if(any(j <- duplicated(rn)))
+        rn[j] <- paste0(rn[j], ".", 1:sum(j))
+      names(devs) <- rn
+    }
+  } else {
+    devs <- NULL
+    for(j in 1:length(objs)) {
+      devs <- cbind(devs, .deviance.gamlss2(objs[[j]], newdata = newdata))
+    }
+    if(!is.null(dim(devs))) {
+      if(ncol(devs) < 2) {
+        devs <- devs[, 1L]
+      } else {
+        Call <- match.call()
+        rn <- as.character(Call[-1L])
+        if("..1" %in% rn) {
+          rn <- as.character(sys.call(-1))[-1L]
+        }
+        colnames(devs) <- rn[1:ncol(devs)]
+      }
+    }
   }
 
   return(devs)
+}
+
+.deviance.gamlss2 <- function(object, newdata = NULL)
+{
+  if(is.null(newdata)) {
+    newdata <- model.frame(object)
+  }
+
+  par <- predict(object, type = "parameter", newdata = newdata)
+  y <- if(!is.null(newdata)) {
+    model.response(model.frame(object, data = newdata, keepresponse = TRUE))
+  } else {
+    model.response(model.frame(object, keepresponse = TRUE))
+  }
+  dev <- -2 * family(object)$pdf(y, par, log = TRUE)
+  
+  return(dev)
 }
 
 response_name <- function(formula) {

@@ -122,6 +122,7 @@ S3method(smooth.construct, lin.smooth.spec)
 S3method(Predict.matrix, lin.effect)
 S3method(new_formula, default)
 S3method(new_formula, select)
+S3method(deviance, gamlss2)
 
 S3method(distributions3::prodist, gamlss2)
 

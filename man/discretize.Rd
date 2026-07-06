@@ -36,7 +36,7 @@ discretize(family = NO)
 }
 
 \examples{
-## simulate count data using the Poisson distribution
+\dontrun{## simulate count data using the Poisson distribution
 set.seed(111)
 y <- rpois(1000, lambda = 10)
 
@@ -47,7 +47,7 @@ fam <- discretize(family = BCT(mu.link = "log"))
 fit_family(y, family = fam)
 
 ## including covariate
-\dontrun{set.seed(111)
+set.seed(111)
 x <- sort(runif(1000, -3, 3))
 y <- rpois(1000, lambda = exp(sin(x)))
 

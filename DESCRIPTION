@@ -34,5 +34,4 @@ BugReports: https://github.com/gamlss-dev/gamlss2/issues
 Depends: R (>= 4.1.0), gamlss.dist, mgcv
 Imports: parallel, Formula, mvtnorm, distributions3
 Suggests: colorspace, future.apply, gamlss, gamlss.data, glmnet, lattice, Matrix, MASS, nlme, nnet, partykit, quarto, rpart, scoringRules, sf
-LazyLoad: yes
 VignetteBuilder: quarto

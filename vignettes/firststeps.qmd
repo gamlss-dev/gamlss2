@@ -78,25 +78,25 @@ if(!("gamlss.add" %in% installed.packages())) {
 library("gamlss.add")
 ```
 ```{r}
-f1 <- Tmax ~ ga(~ s(year) + s(yday, bs = "cc") +
-  te(year, yday, bs = c("cr", "cc")))
+f1 <- Tmax ~ ga(~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
+  ti(year, yday, bs = c("cr", "cc"), k = c(5, 5)))
 b1 <- gamlss(f1, family = SEP,
   data = MUC[, c("Tmax", "year", "yday")])
 ```
 
 This setup requires loading the `gamlss.add` package to access `mgcv`-based
 smooth terms. Estimation takes 20 iterations of the backfitting algorithm (without full convergence) 
-and about 44 seconds on a 64-bit Linux system. Moreover, `gamlss()` requires that the
+and about 62 seconds on a 64-bit Linux system. Moreover, `gamlss()` requires that the
 input data contains no `NA` values. In `gamlss2` the model can be
 specified directly, following `mgcv` syntax
 
 ```{r}
-f2 <- Tmax ~ s(year) + s(yday, bs = "cc") +
-  te(year, yday, bs = c("cr", "cc"))
+f2 <- Tmax ~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
+  ti(year, yday, bs = c("cr", "cc"), k = c(5, 5))
 b2 <- gamlss2(f2, family = SEP, data = MUC)
 ```
 
-This model converges in 11 iterations and requires only about 2 seconds of computation time, 
+This model converges in 15 iterations and requires only about 7.5 seconds of computation time, 
 yielding a similar deviance (small differences arise due to differences in smoothing
 parameter optimization). In many applications, it is desirable to use the same predictor
 structure for all distribution parameters. In `gamlss`, this requires specifying
@@ -104,12 +104,12 @@ identical formulas separately via `sigma.formula`, `nu.formula`, and
 `tau.formula`, which can be tedious. In `gamlss2`, this is simplified using "`.`"
 
 ```{r}
-f3 <- Tmax ~ s(year) + s(yday, bs = "cc") +
-  te(year, yday, bs = c("cr", "cc")) | . | . | .
+f3 <- Tmax ~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
+  ti(year, yday, bs = c("cr", "cc"), k = c(5, 5)) | . | . | .
 b3 <- gamlss2(f3, family = SEP, data = MUC)
 ```
 
-This model converges in 20 iterations in about 30 seconds. After estimation, results can be
+This model converges in 14 iterations in about 26 seconds. After estimation, results can be
 inspected using the `summary()` method for both packages. Using `plot()` in
 `gamlss` produces standard residual diagnostic plots, whereas in `gamlss2`
 

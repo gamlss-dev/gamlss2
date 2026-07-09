@@ -21,6 +21,8 @@ website:
         file: man/gamlss2-package.qmd
       - text: Vignettes
         menu:
+        - text: "First steps"
+          file: vignettes/firststeps.qmd
         - text: "Families"
           file: vignettes/families.qmd
         - text: "Specials"

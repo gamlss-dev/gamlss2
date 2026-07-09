@@ -37,6 +37,12 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
 
   ask <- list(...)$ask
+  if(is.null(ask)) {
+    pages <- list(...)$pages
+    if(!is.null(pages)) {
+      ask <- if(pages > 0) FALSE else TRUE
+    }
+  }
   if(is.null(ask))
     ask <- FALSE
   spare <- spar

@@ -122,7 +122,8 @@ plot(m1, which = "effects")
 plot(m1, which = "resid")
 
 ## predict selected distribution parameters
-par <- predict(m1, model = c("mu", "sigma"))
+par <- predict(m1, parameter = c("mu", "sigma"))
+print(head(par))
 
 ## fitted centile curves
 pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
@@ -132,6 +133,13 @@ plot(y ~ x, data = abdom, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matlines(abdom$x, pq, lwd = 2,
   lty = 1, col = 4)
+
+## using new data
+nd <- with(abdom,
+  data.frame("x" = seq(min(x), max(x), length = 5))
+)
+print(quantile(m1, newdata = nd))
+print(predict(m1, newdata = nd))
 
 ## count response example using HarzTraffic data
 data("HarzTraffic", package = "gamlss2")

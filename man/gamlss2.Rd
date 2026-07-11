@@ -100,17 +100,18 @@ gamlss2(formula, \dots)
   \code{\link{gamlss2_start}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
+\examples{
+## air quality data
+air <- subset(airquality, !is.na(Ozone))
 
-## specify a distributional model:
-## location and scale vary with x,
-## shape parameters remain constant
-f <- y ~ s(x) | s(x) | 1 | 1
+## positive skewed response
+hist(air$Ozone)
+
+## specify a distributional model
+f <- Ozone ~ s(Temp) + s(Wind) | s(Temp)
 
 ## estimate model
-m1 <- gamlss2(f, data = abdom, family = BCT)
+m1 <- gamlss2(f, data = air, family = GA)
 
 ## model summary
 summary(m1)
@@ -121,25 +122,49 @@ plot(m1, which = "effects")
 ## plot diagnostics
 plot(m1, which = "resid")
 
-## predict selected distribution parameters
+## predict distribution parameters
 par <- predict(m1, parameter = c("mu", "sigma"))
 print(head(par))
 
-## fitted centile curves
-pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
+## create new data:
+## vary temperature while holding wind constant
+nd <- with(air, data.frame(
+  Temp = seq(min(Temp), max(Temp), length.out = 100),
+  Wind = median(Wind)
+))
+
+## fitted conditional quantiles
+pq <- quantile(
+  m1,
+  newdata = nd,
+  probs = c(0.05, 0.5, 0.95)
+)
 
 ## visualize
-plot(y ~ x, data = abdom, pch = 19,
-  col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matlines(abdom$x, pq, lwd = 2,
-  lty = 1, col = 4)
+plot(Ozone ~ Temp, data = air, pch = 19,
+  col = rgb(0.1, 0.1, 0.1, alpha = 0.3),
+  xlab = "Temperature (degrees F)",
+  ylab = "Ozone (ppb)")
+matlines(nd$Temp, pq,
+  lwd = 2,
+  lty = c(2, 1, 2),
+  col = 4)
 
-## using new data
-nd <- with(abdom,
-  data.frame("x" = seq(min(x), max(x), length = 5))
+## exceedance probabilities
+nd5 <- with(air, data.frame(
+  Temp = seq(min(Temp), max(Temp), length.out = 5),
+  Wind = min(Wind)
+))
+par <- predict(m1, newdata = nd5)
+nd5$Probs <- 1 - family(m1)$cdf(90, par)
+
+barplot(
+  nd5$Probs,
+  names.arg = round(nd5$Temp),
+  xlab = "Temperature (°F)",
+  ylab = "Pr(Ozone > 90 ppb)",
+  ylim = c(0, 1)
 )
-print(quantile(m1, newdata = nd))
-print(predict(m1, newdata = nd))
 
 ## count response example using HarzTraffic data
 data("HarzTraffic", package = "gamlss2")
@@ -173,3 +198,4 @@ matlines(nd$yday, pq, lty = c(2, 1, 2),
 
 \keyword{models}
 \keyword{regression}
+

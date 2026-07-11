@@ -58,6 +58,9 @@ bamlss2(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, \dots)
 \dontrun{## air quality data
 air <- subset(airquality, !is.na(Ozone))
 
+## set the seed
+set.seed(123)
+
 ## estimate Gamma model with MCMC
 m <- bamlss2(
   Ozone ~ s(Temp) + s(Wind) | s(Temp),

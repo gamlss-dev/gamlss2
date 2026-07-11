@@ -4,6 +4,12 @@ cv_gamlss2 <- function(..., data, folds = 5,
 {
   n <- nrow(data)
 
+  if(is.vector(folds)) {
+    if(length(folds) > 1) {
+      folds <- split(seq_len(n), folds)
+    }
+  }
+
   if(!is.matrix(folds) & !is.list(folds) & !is.data.frame(folds)) {
     folds <- split(sample(seq_len(n)), rep_len(seq_len(folds), n))
   } else {

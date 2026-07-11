@@ -72,19 +72,27 @@ The convenience metrics return a numeric vector of scores or residuals.
 }
 
 \examples{
-\dontshow{ if(!requireNamespace("distributions3")) {
-  if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) {
-    stop("not all packages required for the example are installed")
-  } else q() }}
-\dontrun{## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
+\dontrun{## air quality data
+air <- subset(airquality, !is.na(Ozone))
 
-## cross-validation using the NO distribution
-## only model the mean with s(x)
-cv1 <- cv_gamlss2(y ~ s(x), data = abdom, family = NO)
+## set the seed
+set.seed(123)
 
-## now, also model the standard deviation with s(x)
-cv2 <- cv_gamlss2(y ~ s(x) | s(x), data = abdom, family = BCT)
+## cross-validation using the GA distribution
+## only model mu parameter with s(Temp)
+cv1 <- cv_gamlss2(
+  Ozone ~ s(Temp),
+  data = air,
+  family = GA
+)
+
+## now, add effects
+cv2 <- cv_gamlss2(
+  Ozone ~ s(Temp) + s(Wind) | s(Temp),
+  data = air,
+  family = GA,
+  folds = cv1$fold
+)
 
 ## evaluate log-likelihood
 sum(cv1$score)

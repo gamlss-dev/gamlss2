@@ -45,6 +45,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
   }
   if(is.null(ask))
     ask <- FALSE
+  if(!interactive())
+    ask <- FALSE
   spare <- spar
 
   ## Effect plots.

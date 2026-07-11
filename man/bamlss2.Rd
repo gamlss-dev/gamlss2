@@ -54,15 +54,16 @@ bamlss2(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, \dots)
   \code{\link{gamlss2}}, \code{\link{mcmc}}, \code{\link{BS}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
+\examples{
+\dontrun{## air quality data
+air <- subset(airquality, !is.na(Ozone))
 
-## specify the model formula
-f <- y ~ s(x) | s(x) | 1 | 1
-
-## estimate Bayesian model
-m <- bamlss2(f, data = abdom, family = BCPE)
+## estimate Gamma model with MCMC
+m <- bamlss2(
+  Ozone ~ s(Temp) + s(Wind) | s(Temp),
+  data = air,
+  family = GA
+)
 
 ## posterior summary
 summary(m)
@@ -71,7 +72,7 @@ summary(m)
 plot(m)
 
 ## plot samples
-plot(m, which = "samples")
+plot(m, which = "samples", ask = TRUE)
 
 ## predict parameters using samples
 pm <- predict(m, FUN = mean)

@@ -50,7 +50,7 @@
 }
 
 \examples{
-## specify a distributional model:
+\dontrun{## specify a distributional model:
 ## location and scale vary with x,
 ## shape parameters remain constant
 f <- dist ~ s(speed) | s(speed) | 1 | 1
@@ -80,7 +80,7 @@ head(di)
 nd <- cars[1:5, ]
 deviance(m1, newdata = nd)
 deviance(m1, newdata = nd, sum = FALSE)
-}
+}}
 
 \keyword{models}
 \keyword{regression}

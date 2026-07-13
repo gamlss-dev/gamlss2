@@ -109,10 +109,8 @@ fit <- quantile(m, probs = qu)
 ## plot
 plot(fev1 ~ age, data = d)
 i <- order(d$age)
-matplot(d$age[i], fit[i, ],
-  type = "l", lty = 1, lwd = 2,
-  col = c(2, rep(4, ncol(fit) - 1)),
-  add = TRUE)
+matlines(d$age[i], fit[i, ],
+  lty = 1, lwd = 2, col = c(2, rep(4, ncol(fit) - 1)))
 
 ## main effects and interactions
 f <- fev1 ~ s(age) + s(height) + s(weight) +

@@ -71,34 +71,29 @@ find_gamlss2(formula, families = NULL, k = 2,
   \code{\link{gamlss2}}.
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load data
-data("rent", package = "gamlss.data")
-
-## find a suitable response to the response
-ic <- find_family(rent$R)
+\examples{\dontrun{## find a suitable response to the response
+ic <- find_family(airquality$Ozone)
 print(ic)
 
-## fit parameters using the BCCG family
-fit_family(rent$R, family = BCCG)
+## fit parameters using the WEI family
+fit_family(airquality$Ozone, family = WEI)
 
-## count data
-data("polio", package = "gamlss.data")
-
+## count data,
 ## search best count model
-ic <- find_family(polio, k = 0,
+ic <- find_family(InsectSprays$count, k = 0,
   families = available_families(type = "discrete"))
 print(ic)
 
-## fit parameters using the ZAPIG family
-fit_family(polio, family = ZAPIG)
+## fit parameters using the ZANBI family
+fit_family(InsectSprays$count, family = ZANBI)
 
 ## search complete model
-## m <- find_gamlss2(R ~ s(Fl) + s(A) | . | . | ., data = rent,
-##   select = TRUE, mu.link = "log")
+## m <- find_gamlss2(Ozone ~ s(Temp) + s(Wind) | . | . | .,
+##   data = airquality, select = TRUE, mu.link = "log")
 }
 }
 
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
+

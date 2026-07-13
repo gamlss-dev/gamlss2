@@ -49,17 +49,14 @@
   \code{\link{gamlss2}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
-
+\examples{
 ## specify a distributional model:
 ## location and scale vary with x,
 ## shape parameters remain constant
-f <- y ~ s(x) | s(x) | 1 | 1
+f <- dist ~ s(speed) | s(speed) | 1 | 1
 
 ## estimate model
-m1 <- gamlss2(f, data = abdom, family = BCT)
+m1 <- gamlss2(f, data = cars, family = BCT)
 
 ## total deviance
 deviance(m1)
@@ -72,7 +69,7 @@ sum(di)
 deviance(m1)
 
 ## compare two models
-m2 <- gamlss2(y ~ s(x) | 1 | 1 | 1, data = abdom, family = BCT)
+m2 <- gamlss2(dist ~ s(speed) | 1 | 1 | 1, data = cars, family = BCT)
 deviance(m1, m2)
 
 ## compare observation-wise deviance contributions
@@ -80,11 +77,12 @@ di <- deviance(m1, m2, sum = FALSE)
 head(di)
 
 ## deviance on new data
-nd <- abdom[1:20, ]
+nd <- cars[1:5, ]
 deviance(m1, newdata = nd)
 deviance(m1, newdata = nd, sum = FALSE)
 }
 
 \keyword{models}
 \keyword{regression}
+
 

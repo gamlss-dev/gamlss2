@@ -83,8 +83,7 @@ elm(x, k = 50, a = "tanh", ...)
   \code{\link{gamlss2}}, \code{\link{specials}}.
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load data
+\examples{\dontrun{## load data
 data("SpirometryUS")
 
 ## subset for female
@@ -154,5 +153,8 @@ image(age, weight, z,
       col = hcl.colors(100, "YlOrRd"),
       xlab = "age", ylab = "weight")
 contour(age, weight, z, add = TRUE)
-}
-}
+}}
+
+\keyword{models}
+\keyword{regression}
+

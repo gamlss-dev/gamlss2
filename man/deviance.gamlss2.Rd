@@ -49,8 +49,7 @@
   \code{\link{gamlss2}}
 }
 
-\examples{
-\dontrun{## specify a distributional model:
+\examples{\dontrun{## specify a distributional model:
 ## location and scale vary with x,
 ## shape parameters remain constant
 f <- dist ~ s(speed) | s(speed) | 1 | 1

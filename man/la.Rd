@@ -102,21 +102,19 @@ plot_lasso(x, terms = NULL,
   \code{\link{gamlss2}}, \code{\link{specials}}.
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load data
-data("rent", package = "gamlss.data")
+\examples{\dontrun{## transform numeric to factor variables
+air <- subset(airquality, !is.na(Ozone))
 
-## transform numeric to factor variables
-rent$Flc <- cut(rent$Fl, breaks = seq(20, 160, by = 10),
+air$Tc <- cut(air$Temp, breaks = seq(50, 100, by = 10),
   include.lowest = TRUE)
-rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
+air$Wc <- cut(air$Wind, breaks = seq(2, 22, by = 4),
   include.lowest = TRUE)
 
 ## set up the model formula for a BCT model
-f <- R ~ la(Flc,type=3) + la(Ac,type=3) + la(loc,type=4) | . | .
+f <- Ozone ~ la(Tc,type=3) + la(Wc,type=3) | . | . | .
 
 ## estimation
-m1 <- gamlss2(f, data = rent, family = BCT)
+m1 <- gamlss2(f, data = air, family = BCT)
 
 ## summary, shows the estimated degrees of freedom
 ## for each model term
@@ -133,21 +131,21 @@ plot_lasso(m1)
 plot_lasso(m1, which = "coefficients")
 
 ## plot a single model term
-plot_lasso(m1, which = "coefficients", term = 5)
+plot_lasso(m1, which = "coefficients", term = 2)
 
 ## same with
-plot_lasso(m1, which = "coefficients", term = "sigma.la(Ac")
+plot_lasso(m1, which = "coefficients", term = "mu.la(Wc")
 
 ## zoom out
-plot_lasso(m1, which = "coefficients", term = 5,
+plot_lasso(m1, which = "coefficients", term = 2,
   zoom = c(8, 7))
 
 ## set names
-plot_lasso(m1, which = "coefficients", term = 5,
-  zoom = c(8, 7), names = c("A", "B", "C"))
+plot_lasso(m1, which = "coefficients", term = 2,
+  zoom = c(8, 7), names = c("A", "B", "C", "D"))
 
 ## set title
-plot_lasso(m1, which = "coefficients", term = 5,
+plot_lasso(m1, which = "coefficients", term = 2,
   zoom = c(8, 7), main = "Fused Lasso")
 
 ## simulated example using the nominal fused lasso
@@ -213,3 +211,4 @@ fp <- mean(c(abs(cb_mu[beta$mu == 0]) > thres,
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
+

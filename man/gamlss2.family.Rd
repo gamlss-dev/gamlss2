@@ -84,8 +84,7 @@
   \code{\link{gamlss2}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## new family object for the normal distribution
+\examples{\dontrun{## new family object for the normal distribution
 Normal <- function(...) {
   fam <- list(
     "family" = "Normal",
@@ -146,14 +145,11 @@ Normal <- function(...) {
   return(fam)
 }
 
-## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
-
 ## specify the model formula
-f <- y ~ s(x) | s(x)
+f <- Ozone ~ s(Wind) | s(Wind)
 
 ## estimate model
-m1 <- gamlss2(f, data = abdom, family = Normal)
+m1 <- gamlss2(f, data = airquality, family = Normal)
 
 ## plot estimated effects
 plot(m1, which = "effects")
@@ -162,15 +158,18 @@ plot(m1, which = "effects")
 plot(m1, which = "resid")
 
 ## predict parameters
-par <- predict(m1)
+nd <- model.frame(m1)
+nd <- nd[order(nd$Wind), ]
+par <- predict(m1, newdata = nd)
 
 ## predict quantiles
-pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(m1, newdata = nd, probs = c(0.05, 0.5, 0.95))
 
 ## visualize
-plot(y ~ x, data = abdom, pch = 19,
-  col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matlines(abdom$x, pq, lwd = 2,
+plot(Ozone ~ Wind, data = nd,
+  pch = 19, col = rgb(0.1, 0.1, 0.1, alpha = 0.3),
+  ylim = range(nd$Ozone, pq))
+matlines(nd$Wind, pq, lwd = 2,
   lty = 1, col = 4)
 
 ## another example that defines only the density
@@ -205,15 +204,11 @@ Gamma <- function(...) {
   return(fam)
 }
 
-## example using the Munich rent data
-data("rent", package = "gamlss.data")
-
 ## model formula
-f <- R ~ ti(Fl) + ti(A) + ti(Fl, A, bs = "ps") |
-  ti(Fl) + ti(A) + ti(Fl, A, bs = "ps")
+f <- Ozone ~ s(Temp) + s(Wind) | .
 
 ## estimate model
-m2 <- gamlss2(f, data = rent, family = Gamma)
+m2 <- gamlss2(f, data = airquality, family = Gamma)
 
 ## visualize estimated effects
 plot(m2, which = "effects")

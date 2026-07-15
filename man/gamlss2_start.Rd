@@ -33,19 +33,15 @@
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
-
-## distributional model
-f <- y ~ s(x) | s(x) | 1 | 1
+\examples{\dontrun{## distributional model
+f <- Ozone ~ s(Wind) | s(Wind) | 1 | 1
 
 ## scalar starting values for the distribution parameters
-m1 <- gamlss2(f, data = abdom, family = BCT,
+m1 <- gamlss2(f, data = airquality, family = BCT,
   start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10))
 
 ## fix shape parameters during estimation
-m2 <- gamlss2(f, data = abdom, family = BCT,
+m2 <- gamlss2(f, data = airquality, family = BCT,
   start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10),
   fixed = c(nu = TRUE, tau = TRUE))
 
@@ -53,15 +49,15 @@ m2 <- gamlss2(f, data = abdom, family = BCT,
 coef(m2)
 
 ## use fitted additive predictors as starting values
-m3 <- gamlss2(f, data = abdom, family = BCT,
+m3 <- gamlss2(f, data = airquality, family = BCT,
   start = fitted(m2))
 
 ## same using the fitted model object directly
-m4 <- gamlss2(f, data = abdom, family = BCT,
+m4 <- gamlss2(f, data = airquality, family = BCT,
   start = m2)
 
 ## coefficient-wise initialization
-m5 <- gamlss2(f, data = abdom, family = BCT,
+m5 <- gamlss2(f, data = airquality, family = BCT,
   start = coef(m2))
 }}
 

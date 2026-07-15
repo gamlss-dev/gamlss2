@@ -57,15 +57,11 @@ mcmc(object, n.iter = 1200, burnin = 200, thin = 1)
   \code{\link{gamlss2}}, \code{\link{bamlss2}}, \code{\link{BS}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
-
-## specify the model formula
-f <- y ~ s(x) | s(x) | 1 | 1
+\examples{\dontrun{## specify the model formula
+f <- Ozone ~ s(Temp) | . | 1
 
 ## estimate model using backfitting
-m1 <- gamlss2(f, data = abdom, family = BCT)
+m1 <- gamlss2(f, data = airquality, family = GIG)
 
 ## run MCMC sampling
 set.seed(1328)
@@ -84,7 +80,7 @@ plot(m2)
 plot(m2, which = "samples")
 plot(m2, which = "samples", ask = TRUE)
 plot(m2, which = "samples", ask = TRUE,
-  model = "mu", lag.max = 120, term = "s(x)")
+  model = "mu", lag.max = 120, term = "s(Temp)")
 
 ## samples can be extracted for further inspection
 print(head(m2$samples))

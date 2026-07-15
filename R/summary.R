@@ -121,6 +121,13 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
 
       ## Standard smooth/special with design matrix stored in object$specials[[j]]$X.
       if(!is.null(object$specials[[j]]) && !is.null(object$specials[[j]]$X)) {
+        ## fix for intercepts, e.e., when using gnet()
+        if("(Intercept)" %in% names(co)) {
+          if(!("(Intercept)" %in% colnames(object$specials[[j]]$X))) {
+            object$specials[[j]]$X <- cbind("(Intercept)" = 1, object$specials[[j]]$X)
+          }
+        }
+
         fit <- drop(object$specials[[j]]$X %*% co)
 
         if(!is.null(object$specials[[j]]$binning)) {

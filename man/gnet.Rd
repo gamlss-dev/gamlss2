@@ -34,21 +34,20 @@ gnet(formula, ...)
   \code{\link{la}}, \code{\link{gamlss2}}, \code{\link{specials}}.
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{data("rent", package = "gamlss.data")
+\examples{\dontrun{## transform to categorical
+air <- subset(airquality, !is.na(Ozone))
 
-## transform to categorical
-rent$Flc <- cut(rent$Fl, breaks = seq(20, 160, by = 10),
+air$Tc <- cut(air$Temp, breaks = seq(50, 100, by = 10),
   include.lowest = TRUE)
-rent$Ac <- cut(rent$A, breaks = seq(1890, 1990, by = 10),
+air$Wc <- cut(air$Wind, breaks = seq(2, 22, by = 4),
   include.lowest = TRUE)
 
 ## model formula, for each parameter we use
 ## the same gnet() model term
-f <- R ~ gnet(~Flc + Ac + loc) | . | . | .
+f <- Ozone ~ gnet(~Tc + Wc) | .
 
 ## estimate model
-m <- gamlss2(f, data = rent, family = BCT)
+m <- gamlss2(f, data = air, family = NO)
 
 ## summary with edf
 summary(m)

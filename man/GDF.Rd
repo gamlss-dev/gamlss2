@@ -92,11 +92,9 @@ X <- GDF("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
 X
 
 ## see ?gamlss.dist::GAMLSS for the remainder of this example
-## example using gamlss2
-data("abdom", package = "gamlss.data")
 
-## estimate model
-m <- gamlss2(y ~ s(x) | . | . | ., data = abdom, family = GA)
+## example using gamlss2
+m <- gamlss2(Ozone ~ s(Temp) | ., data = airquality, family = GA)
 
 ## extract, also works with newdata
 d <- data.frame(

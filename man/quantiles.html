@@ -601,7 +601,7 @@ Data frame that should be used for computing the quantiles.
 <code id="plot">plot</code>
 </td>
 <td>
-Logical, should a plot be shown?
+Logical, should an ordered quantile plot or a covariate plot be shown?
 </td>
 </tr>
 <tr>
@@ -609,7 +609,7 @@ Logical, should a plot be shown?
 <code id="data">data</code>
 </td>
 <td>
-Logical, should the raw data be added to the plot?
+Logical, should observed responses be added to the plot when available?
 </td>
 </tr>
 <tr>
@@ -633,6 +633,7 @@ Arguments such as <code>col</code>, <code>legend = TRUE/FALSE</code>. See the ex
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The function applies the predict method to determine the parameters of the response distribution. It then computes the quantiles as specified in the argument <code>probs</code>.</p>
+<p>With <code>plot = TRUE</code> and <code>variable = NULL</code>, observations are ordered once by their fitted median. The same ordering is applied to the observed responses and all fitted quantiles, so values at each position refer to the same observation. If <code>newdata</code> does not contain the response, only the fitted quantile curves are shown.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -662,7 +663,7 @@ Arguments such as <code>col</code>, <code>legend = TRUE/FALSE</code>. See the ex
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> d[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ]</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd))</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## plot sorted quantiles</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantiles ordered by the fitted median</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m, <span class="at">plot =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## quantile plot using covariate data</span></span>

@@ -155,7 +155,10 @@ quantile.gamlss2 <- function(x,
       if(is.null(legend))
         legend <- TRUE
       if(isTRUE(legend)) {
-        legend("topleft", colnames(f), col = col, lwd = 2, bty = "n")
+        pos <- list(...)$pos
+        if(is.null(pos))
+          pos <- "topleft"
+        legend(pos, colnames(f), col = col, lwd = 2, bty = "n")
       }
     } else {
       if(data) {
@@ -174,7 +177,10 @@ quantile.gamlss2 <- function(x,
       if(is.null(legend))
         legend <- TRUE
       if(isTRUE(legend)) {
-        legend("topleft", colnames(f), col = col, lwd = 2, bty = "n")
+        pos <- list(...)$pos
+        if(is.null(pos))
+          pos <- "topleft"
+        legend(pos, colnames(f), col = col, lwd = 2, bty = "n")
       }
     }
   }

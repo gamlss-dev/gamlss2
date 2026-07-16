@@ -45,28 +45,32 @@
   \code{\link{gamlss2}}.
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load data
-data("film90", package = "gamlss.data")
+\examples{\dontrun{## load data
+data("SpirometryUS", package = "gamlss2")
+
+## subset for female
+d <- subset(SpirometryUS, gender == "female")
 
 ## model formula
-f <- lborev1 ~ s(lboopen) | . | . | .
+f <- fev1 ~ s(age) | . | . | .
 
 ## estimate model
-m <- gamlss2(f, data = film90, family = BCPE)
+m <- gamlss2(f, data = d, family = BCPE)
 
 ## compute quantiles using "newdata"
-nd <- film90[1:10, ]
+nd <- d[1:10, ]
 print(quantile(m, newdata = nd))
 
 ## plot sorted quantiles
 quantile(m, plot = TRUE)
 
 ## quantile plot using covariate data
-quantile(m, plot = TRUE, variable = TRUE)
+quantile(m, plot = TRUE,
+  variable = TRUE, pos = "topright")
 
 ## plot without raw data
-quantile(m, plot = TRUE, variable = TRUE, data = FALSE)
+quantile(m, plot = TRUE,
+  variable = TRUE, pos = "topright", data = FALSE)
 }
 }
 

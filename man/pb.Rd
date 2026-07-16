@@ -46,15 +46,15 @@ pb(x, k = 20, ...)
   \code{\link{gamlss2}}, \code{\link[mgcv]{smooth.construct.ps.smooth.spec}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load head circumference data
-data("dbhh", package = "gamlss.data")
+\examples{\dontrun{## air quality data
+air <- subset(airquality, !is.na(Ozone))
+air <- air[order(air$Temp), ]
 
 ## specify the model formula
-f <- head ~ pb(age) | pb(age) | pb(age) | pb(age)
+f <- Ozone ~ pb(Temp) | . | 1 | 1
 
 ## estimate model
-m <- gamlss2(f, data = dbhh, family = BCT)
+m <- gamlss2(f, data = air, family = BCPE)
 
 ## visualize estimated effects
 plot(m, which = "effects")
@@ -66,9 +66,9 @@ plot(m, which = "resid")
 pq <- quantile(m, probs = c(0.05, 0.5, 0.95))
 
 ## plot
-plot(head ~ age, data = dbhh, pch = 19,
+plot(Ozone ~ Temp, data = air, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matlines(dbhh$age, pq,
+matlines(air$Temp, pq,
   lty = 1, col = 4)
 }}
 

@@ -17,6 +17,12 @@
 \details{
   The function applies the predict method to determine the parameters of the response distribution.
   It then computes the quantiles as specified in the argument \code{probs}.
+
+  With \code{plot = TRUE} and \code{variable = NULL}, observations are
+  ordered once by their fitted median. The same ordering is applied to the
+  observed responses and all fitted quantiles, so values at each position
+  refer to the same observation. If \code{newdata} does not contain the
+  response, only the fitted quantile curves are shown.
 }
 
 \value{
@@ -33,8 +39,8 @@
     Alternatively, a covariate can be selected by position or name. This option
     is only available for single-covariate models.}
   \item{newdata}{Data frame that should be used for computing the quantiles.}
-  \item{plot}{Logical, should a plot be shown?}
-  \item{data}{Logical, should the raw data be added to the plot?}
+  \item{plot}{Logical, should an ordered quantile plot or a covariate plot be shown?}
+  \item{data}{Logical, should observed responses be added to the plot when available?}
   \item{n}{Integer, number of observations that should be used to compute
     an equidistant grid for the selected \code{variable}.}
   \item{\dots}{Arguments such as
@@ -61,7 +67,7 @@ m <- gamlss2(f, data = d, family = BCPE)
 nd <- d[1:10, ]
 print(quantile(m, newdata = nd))
 
-## plot sorted quantiles
+## plot quantiles ordered by the fitted median
 quantile(m, plot = TRUE)
 
 ## quantile plot using covariate data

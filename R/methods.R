@@ -103,9 +103,16 @@ quantile.gamlss2 <- function(x,
   probs = c(0.025, 0.25, 0.50, 0.75, 0.975),
   variable = NULL, newdata = NULL, plot = FALSE, data = TRUE, n = 100L, ...)
 {
-  mf <- model.frame(x)
+  mf <- model.frame(x, keepresponse = TRUE)
+  y <- model.response(mf)
   rn <- all.vars(formula(x$fake_formula, rhs = 0))
   mf <- mf[, !(names(mf) %in% rn), drop = FALSE]
+  if(is.logical(variable)) {
+    if(length(variable) != 1L || is.na(variable))
+      stop("argument variable is specified wrong!")
+    if(!variable)
+      variable <- NULL
+  }
   if(is.null(variable)) {
     par <- predict(x, newdata = if(is.null(newdata)) mf else newdata, type = "parameter", drop = FALSE)
   } else {
@@ -122,7 +129,7 @@ quantile.gamlss2 <- function(x,
     if(is.null(newdata)) {
       newdata <- list()
       for(j in names(mf))
-        newdata[[j]] <- rep(mean(mf[[j]]), lenghth = n)
+        newdata[[j]] <- rep(mean(mf[[j]]), length.out = n)
       newdata[[variable]] <- seq(xr[1L], xr[2L], length = n)
       newdata <- as.data.frame(newdata)
     } else {
@@ -136,20 +143,37 @@ quantile.gamlss2 <- function(x,
   colnames(f) <- paste0(probs * 100, "%")
   if(plot) {
     if(is.null(variable)) {
-      ind <- 1:nrow(f)
-      ind <- ind / max(ind) * 100
-      plot(range(c(x$y, f)), range(ind), type = "n",
-        xlab = rn, ylab = "%")
+      fit_median <- family(x)$quantile(0.5, par)
+      o <- order(fit_median)
+      ind <- seq_len(nrow(f)) / nrow(f) * 100
+
+      plot_y <- NULL
       if(data) {
-        points(sort(x$y), 1:length(x$y) / length(x$y) * 100,
-          col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 16)
+        if(is.null(newdata)) {
+          plot_y <- y
+        } else {
+          plot_y <- tryCatch(
+            model.response(model.frame(x, data = newdata, keepresponse = TRUE)),
+            error = function(e) NULL
+          )
+        }
+        if(length(plot_y) != nrow(f))
+          plot_y <- NULL
       }
+
+      ylim <- range(c(f, plot_y), finite = TRUE)
+      plot(range(ind), ylim, type = "n",
+        xlab = "Observations ordered by fitted median (%)", ylab = rn)
       col <- list(...)$col
       if(is.null(col))
         col <- rev(colorspace::heat_hcl(ncol(f) + 1L))[-1L]
       col <- rep(col, length.out = ncol(f))
+      if(!is.null(plot_y)) {
+        points(ind, plot_y[o],
+          col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 16)
+      }
       for(j in 1:ncol(f)) {
-        lines(ind ~ sort(f[, j]), col = col[j], lwd = 2)
+        lines(ind, f[o, j], col = col[j], lwd = 2)
       }
       legend <- list(...)$legend
       if(is.null(legend))
@@ -162,7 +186,7 @@ quantile.gamlss2 <- function(x,
       }
     } else {
       if(data) {
-        plot(mf[[variable]], x$y,
+        plot(mf[[variable]], y,
           col = rgb(0.1, 0.1, 0.1, alpha = 0.3), pch = 16,
           xlab = variable, ylab = rn)
       }
@@ -187,7 +211,7 @@ quantile.gamlss2 <- function(x,
   cn <- colnames(f)
   if(!is.null(variable)) {
     f <- as.data.frame(cbind(newdata[[variable]], f))
-    colnames(f) <- c(x, cn)
+    colnames(f) <- c(variable, cn)
   } else {
     f <- as.data.frame(f)
     colnames(f) <- cn
@@ -200,4 +224,3 @@ quantile.gamlss2 <- function(x,
     return(f)
   }
 }
-

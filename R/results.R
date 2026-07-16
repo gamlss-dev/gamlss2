@@ -47,7 +47,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
                 }
               } else {
                 if(!is.factor(data[[x$specials[[i]]$term]])) {
-                  xr <- range(data[[x$specials[[i]]$term]])
+                  xr <- range(data[[x$specials[[i]]$term]], na.rm = TRUE)
                   nd <- data.frame(seq(xr[1L], xr[2L], length = 300L))
                 } else {
                   xf <- sort(unique(data[[x$specials[[i]]$term]]))

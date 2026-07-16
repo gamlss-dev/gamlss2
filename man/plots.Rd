@@ -66,14 +66,11 @@
 }
 
 \examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load data
-data("film90", package = "gamlss.data")
-
-## model formula
-f <- lborev1 ~ s(lboopen) + s(lnosc) | . | . | .
+\dontrun{## model formula
+f <- Ozone ~ s(Temp) + s(Wind) + s(Solar.R)| . | 1 | 1
 
 ## estimate model
-m1 <- gamlss2(f, data = film90, family = BCCG)
+m1 <- gamlss2(f, data = airquality, family = BCCG)
 
 ## plot effects (default)
 plot(m1)
@@ -81,10 +78,10 @@ plot(m1)
 ## plot specific effect
 plot(m1, parameter = "sigma")
 plot(m1, model = "sigma")
-plot(m1, model = "nu", terms = 1)
-plot(m1, model = "nu", terms = 2)
-plot(m1, model = "nu", terms = "lnosc")
-plot(m1, terms = "lnosc")
+plot(m1, model = "mu", terms = 1)
+plot(m1, model = "mu", terms = 2)
+plot(m1, model = "mu", terms = "Solar")
+plot(m1, terms = "Solar.R")
 
 ## plot all residual diagnostics
 plot(m1, which = "resid")
@@ -99,16 +96,16 @@ plot(m1, which = "scatter-resid")
 ## plot(m1, which = "selection")
 
 ## estimate another model
-m2 <- gamlss2(f, data = film90, family = BCPE)
+m2 <- gamlss2(f, data = airquality, family = BCPE)
 
 ## compare estimated effects
 plot(c(m1, m2))
-plot(c(m1, m2), terms = "lboopen",
+plot(c(m1, m2), terms = "Wind",
   col = c(1, 4), lwd = 3, lty = 1,
-  pos = c("topleft", "topright", "bottomleft", "bottomright"))
+  pos = c("topright", "bottomleft"))
 plot(c(m1, m2), model = "sigma")
 plot(c(m1, m2), model = "sigma", terms = 2)
-plot(c(m1, m2), model = c("mu", "nu"))
+plot(c(m1, m2), model = c("mu", "sigma"))
 }
 }
 

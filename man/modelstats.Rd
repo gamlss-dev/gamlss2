@@ -60,13 +60,21 @@ Rsq(object, ...,
 
 \seealso{\code{\link{gamlss2}}}
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## load the aids data set
-data("aids", package = "gamlss.data")
+\examples{\dontrun{## load HarzTraffic data
+data("HarzTraffic", package = "gamlss2")
 
 ## estimate negative binomial count models
-m1 <- gamlss2(y ~ x + qrt, data = aids, family = NBI)
-m2 <- gamlss2(y ~ s(x) + s(qrt, bs = "re"), data = aids, family = NBI)
+m1 <- gamlss2(
+  bikes ~ s(yday, bs = "cc"),
+  data = HarzTraffic,
+  family = NBI
+)
+
+m2 <- gamlss2(
+  bikes ~ s(yday, bs = "cc") | .,
+  data = HarzTraffic,
+  family = NBI
+)
 
 ## compare models
 Rsq(m1)
@@ -78,6 +86,7 @@ BIC(m1, m2)
 
 ## plot estimated effects
 plot(m2)
-}
+}}
 
 \keyword{regression}
+

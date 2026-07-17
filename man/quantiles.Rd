@@ -81,3 +81,5 @@ quantile(m, plot = TRUE,
 }
 
 \keyword{aplot}
+\keyword{regression}
+

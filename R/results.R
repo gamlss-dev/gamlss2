@@ -139,7 +139,6 @@ results.gamlss2 <- function(x, data = NULL, ...)
           ## gamlss smooth terms.
           if("smooth" %in% class(x$specials[[i]])) {
             ## FIXME: vcov?
-
             if(inherits(x$fitted.specials[[j]][[i]]$coefficients, "pb")) {
               xn <- attr(x$specials[[i]], "Name")
               xr <- range(data[[xn]])
@@ -162,7 +161,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
 
             if(dim > 1) {
               xc <- unlist(lapply(data[, x$specials[[i]]$term, drop = FALSE], class))
-              if(all(xc %in% c("numeric", "matrix", "array"))) {
+              if(all(xc %in% c("integer", "numeric", "matrix", "array"))) {
                 nd <- expand.grid(seq(min(data[[x$specials[[i]]$term[1L]]]),
                   max(data[[x$specials[[i]]$term[1L]]]), length = 50),
                   seq(min(data[[x$specials[[i]]$term[2L]]]),

@@ -96,7 +96,7 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
   \code{\link{gamlss2}}, \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
+\examples{
 ## example special term for neural networks,
 ## the constructor function is used in the formula
 ## when calling gamlss2()
@@ -208,16 +208,16 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 \dontrun{## example with data
-data("film90", package = "gamlss.data")
+data("HarzTraffic", package = "gamlss2")
 
 ## specify the model formula
-f <- y ~ n(~x,decay=0.01) | . | . | .
+f <- bikes ~ n(~yday,decay=0.01) | .
 
 ## estimate model,
 ## set the seed for reproducibility
 ## note, data should be scaled!
 set.seed(123)
-m1 <- gamlss2(f, data = abdom, family = BCT)
+m1 <- gamlss2(f, data = HarzTraffic, family = NBI)
 
 ## visualize estimated effects
 plot(m1, which = "effects")
@@ -226,35 +226,33 @@ plot(m1, which = "effects")
 plot(m1, which = "resid")
 
 ## predict quantiles
-pq <- quantile(m1, probs = c(0.05, 0.5, 0.95))
+nd <- data.frame("yday" = 0:364)
+pq <- quantile(m1, newdata = nd, probs = c(0.05, 0.5, 0.95))
 
 ## plot
-plot(y ~ x, data = abdom, pch = 19,
+plot(bikes ~ yday, data = HarzTraffic, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-matlines(abdom$x, pq, lwd = 2,
+matlines(nd$yday, pq, lwd = 2,
   lty = 1, col = 4)
 
-## another example using the Munich rent data
-data("rent", package = "gamlss.data")
-
-## model formula
-f <- R ~ n(~Fl+A,size=10,decay=0.7) | .
+## include another covariate
+f <- bikes ~ n(~yday+rain,size=100,decay=0.2) | .
 
 ## estimate model
 set.seed(456)
-m2 <- gamlss2(f, data = rent, family = GA)
+m2 <- gamlss2(f, data = HarzTraffic, family = NBI)
 
 ## plot estimated effects
-plot(m2, which = "effects", persp = FALSE)
+plot(m2, which = "effects")
 
 ## diagnostics
 plot(m2, which = "resid")
 
 ## predict using new data
 n <- 50
-nd <- with(rent, expand.grid(
-  "Fl" = seq(min(Fl), max(Fl), length = n),
-  "A" = seq(min(A), max(A), length = n)
+nd <- with(HarzTraffic, expand.grid(
+  "yday" = seq(0, 364, length = n),
+  "rain" = seq(min(rain), max(rain), length = n)
 ))
 
 ## compute median rent R estimate
@@ -263,16 +261,22 @@ nd$fit <- quantile(m2, newdata = nd, probs = 0.5)
 ## visualize
 library("lattice")
 
-p1 <- wireframe(fit ~ Fl + A, data = nd,
+p1 <- wireframe(
+  fit ~ yday + rain, data = nd,
   screen = list(z = 50, x = -70, y = -10),
   aspect = c(1, 0.9), drape = TRUE,
-  main = "n(~Fl+A)",
-  xlab = "Floor", ylab = "YoC",
-  zlab = "Rent")
+  main = "n(~yday+rain)",
+  xlab = "Day of the year", ylab = "Precipitation [mm]",
+  zlab = "#Bikes"
+)
 
-p2 <- levelplot(fit ~ Fl + A, data = nd,
+p2 <- levelplot(
+  fit ~ yday + rain, data = nd,
   contour = TRUE,
-  main = "n(~Fl+A)", xlab = "Floor", ylab = "YoC")
+  main = "n(~yday+rain)",
+  xlab = "Day of the year",
+  ylab = "Precipitation [mm]"
+)
 
 print(p1, split = c(1, 1, 2, 1), more = TRUE)
 print(p2, split = c(2, 1, 2, 1), more = FALSE)
@@ -290,3 +294,4 @@ specials(m2, model = "sigma", elements = "names")
 
 \keyword{models}
 \keyword{regression}
+

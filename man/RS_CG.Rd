@@ -106,8 +106,7 @@ CG(x, y, specials, family, offsets,
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## count response example using HarzTraffic data
+\examples{\dontrun{## count response example using HarzTraffic data
 data("HarzTraffic", package = "gamlss2")
 
 ## specify the model formula

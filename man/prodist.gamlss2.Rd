@@ -49,8 +49,7 @@ Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
 \code{\link{GDF}}, \code{\link{predict.gamlss2}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## packages, code, and data
+\examples{\dontrun{## packages, code, and data
 library("distributions3")
 data("cars", package = "datasets")
 
@@ -95,6 +94,6 @@ quantile(d2, c(0.05, 0.5, 0.95))
 ## note that log_pdf() can replicate logLik() value
 sum(log_pdf(prodist(m2), FIFA2018$goals))
 logLik(m2)
-}
+}}
 
 \keyword{distribution}

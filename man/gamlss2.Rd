@@ -161,7 +161,7 @@ nd5$Probs <- 1 - family(m1)$cdf(90, par)
 barplot(
   nd5$Probs,
   names.arg = round(nd5$Temp),
-  xlab = "Temperature (°F)",
+  xlab = "Temperature (degrees F)",
   ylab = "Pr(Ozone > 90 ppb)",
   ylim = c(0, 1)
 )

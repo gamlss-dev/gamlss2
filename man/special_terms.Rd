@@ -236,7 +236,7 @@ matlines(nd$yday, pq, lwd = 2,
   lty = 1, col = 4)
 
 ## include another covariate
-f <- bikes ~ n(~yday+rain,size=100,decay=0.2) | .
+f <- bikes ~ n(~yday+rain,size=100,decay=0.3) | .
 
 ## estimate model
 set.seed(456)

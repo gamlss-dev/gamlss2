@@ -106,24 +106,23 @@ stepwise(x, y, specials, family, offsets,
   \code{\link{new_formula}}, \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
-\examples{\dontshow{ if(!requireNamespace("gamlss.data")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-\dontrun{## load the Munich rent data
-data("rent", package = "gamlss.data")
-
-## because of possible linear interactions,
+\examples{\dontrun{## because of possible linear interactions,
 ## scale the covariates first
-rent$Fl <- scale(rent$Fl)
-rent$A <- scale(rent$A)
+air <- subset(airquality, !is.na(Ozone))
+air$Wind <- scale(air$Wind)
+air$Temp <- scale(air$Temp)
 
 ## the formula defines the searching scope
-f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
-  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
+f <- Ozone ~ Wind + Temp + Wind:Temp +
+  ti(Wind) + ti(Temp) + ti(Wind, Temp) | .
 
 ## estimate a Gamma model using the stepwise algorithm
-m1 <- step_gamlss2(f, data = rent, family = GA, K = 2)
+m1 <- step_gamlss2(f, data = air, family = GA, K = 2)
 
 ## same with
-## m <- gamlss2(f, data = rent, family = GA, optimizer = stepwise, K = 2)
+## m <- gamlss2(f, data = air, family = NO,
+##   optimizer = stepwise, K = 2)
+
 ## show the new formula of selected model terms
 new_formula(m1)
 
@@ -140,24 +139,11 @@ plot(m1, which = "resid")
 plot(m1, which = "selection")
 
 ## use forward linear, replace and backward strategy
-m2 <- step_gamlss2(f, data = rent, family = GA, K = 2,
+m2 <- step_gamlss2(f, data = air, family = GA, K = 2,
   strategy = c("forward.linear", "replace", "backward"))
 
-## more complex model
-## note, the third parameter
-## nu does not include any model terms
-f <- R ~ Fl + A + Fl:A + loc + s(Fl) + s(A) + te(Fl, A) |
-  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A) |
-  1 |
-  Fl + A + loc + Fl:A + s(Fl) + s(A) + te(Fl, A)
-
-## model using the BCT family
-m3 <- step_gamlss2(f, data = rent, family = BCT,
-  K = 2, strategy = c("forward.linear", "both"),
-  keeporder = TRUE)
-
 ## plot GAIC
-plot(m3, which = "selection")
+plot(m2, which = "selection")
 }}
 
 \keyword{models}

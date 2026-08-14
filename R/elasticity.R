@@ -5,12 +5,12 @@
 
 #b <- gamlss2(num ~ s(x1) + s(x2) + s(x3) + s(x4), data = d)
 
-#ll1 <- family(b)$pdf(d$num, predict(b), log = TRUE)
+#ll1 <- family(b)$pdf(predict(b), d$num, log = TRUE)
 
 #nd <- d
 #nd$x2 <- nd$x2 + 0.00001
 
-#ll2 <- family(b)$pdf(d$num, predict(b, newdata = nd), log = TRUE)
+#ll2 <- family(b)$pdf(predict(b, newdata = nd), d$num, log = TRUE)
 
 #dx2 <- (ll1 - ll2) / 0.00001
 

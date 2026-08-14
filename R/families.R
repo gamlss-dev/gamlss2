@@ -213,7 +213,7 @@ tF <- function(x, ...)
     mu.link <- make.link2(x$mu.link)
     mu.cs <- make_call(x$dldm)
     mu.hs <- make_call(x$d2ldm2)
-    score$mu  <- function(y, par, ...) {
+    score$mu  <- function(par, y, ...) {
       par <- check_range(par)
       res <- eval_expr(mu.cs, y = y, par = par) * mu.link$mu.eta(mu.link$linkfun(par$mu))
       if(!is.null(dim(res))) {
@@ -222,7 +222,7 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$mu <- function(y, par, ...) {
+    hess$mu <- function(par, y, ...) {
       par <- check_range(par)
       hess <- -1 * eval_expr(mu.hs, y = y, par = par)
       eta <- mu.link$linkfun(par$mu)
@@ -257,7 +257,7 @@ tF <- function(x, ...)
     sigma.link <- make.link2(x$sigma.link)
     sigma.cs <- make_call(x$dldd)
     sigma.hs <- make_call(x$d2ldd2)
-    score$sigma  <- function(y, par, ...) {
+    score$sigma  <- function(par, y, ...) {
       par <- check_range(par)
       res <- eval_expr(sigma.cs, y = y, par = par) * sigma.link$mu.eta(sigma.link$linkfun(par$sigma))
       if(!is.null(dim(res))) {
@@ -266,7 +266,7 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$sigma <- function(y, par, ...) {
+    hess$sigma <- function(par, y, ...) {
       par <- check_range(par)
       hess <- -1 * eval_expr(sigma.hs, y = y, par = par)
       eta <- sigma.link$linkfun(par$sigma)
@@ -294,7 +294,7 @@ tF <- function(x, ...)
     nu.link <- make.link2(x$nu.link)
     nu.cs <- make_call(x$dldv)
     nu.hs <- make_call(x$d2ldv2)
-    score$nu  <- function(y, par, ...) {
+    score$nu  <- function(par, y, ...) {
       par <- check_range(par)
       res <- eval_expr(nu.cs, y = y, par = par) * nu.link$mu.eta(nu.link$linkfun(par$nu))
       if(!is.null(dim(res))) {
@@ -303,7 +303,7 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$nu <- function(y, par, ...) {
+    hess$nu <- function(par, y, ...) {
       par <- check_range(par)
       hess <- -1 * eval_expr(nu.hs, y = y, par = par)
       eta <- nu.link$linkfun(par$nu)
@@ -331,7 +331,7 @@ tF <- function(x, ...)
     tau.link <- make.link2(x$tau.link)
     tau.cs <- make_call(x$dldt)
     tau.hs <- make_call(x$d2ldt2)
-    score$tau  <- function(y, par, ...) {
+    score$tau  <- function(par, y, ...) {
       par <- check_range(par)
       res <- eval_expr(tau.cs, y = y, par = par) * tau.link$mu.eta(tau.link$linkfun(par$tau))
       if(!is.null(dim(res))) {
@@ -340,7 +340,7 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$tau <- function(y, par, ...) {
+    hess$tau <- function(par, y, ...) {
       par <- check_range(par)
       hess <- -1 * eval_expr(tau.hs, y = y, par = par)
       eta <- tau.link$linkfun(par$tau)
@@ -367,7 +367,7 @@ tF <- function(x, ...)
   ## For CG algorithm.
   if(all(c("mu", "sigma") %in% nx)) {
     mu.sigma.hs <- make_call(x$d2ldmdd)
-    hess$mu.sigma <- function(y, par, ...) {
+    hess$mu.sigma <- function(par, y, ...) {
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.sigma <- sigma.link$linkfun(par$sigma)
@@ -378,7 +378,7 @@ tF <- function(x, ...)
   }
   if("nu" %in% nx) {
     mu.nu.hs <- make_call(x$d2ldmdv)
-    hess$mu.nu <- function(y, par, ...) {
+    hess$mu.nu <- function(par, y, ...) {
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.nu <- nu.link$linkfun(par$nu)
@@ -388,7 +388,7 @@ tF <- function(x, ...)
     hess$nu.mu <- hess$mu.nu
 
     sigma.nu.hs <- make_call(x$d2ldddv)
-    hess$sigma.nu <- function(y, par, ...) {
+    hess$sigma.nu <- function(par, y, ...) {
       par <- check_range(par)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.nu <- nu.link$linkfun(par$nu)
@@ -400,7 +400,7 @@ tF <- function(x, ...)
 
   if("tau" %in% nx) {
     mu.tau.hs <- make_call(x$d2ldmdt)
-    hess$mu.tau <- function(y, par, ...) {
+    hess$mu.tau <- function(par, y, ...) {
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.tau <- tau.link$linkfun(par$tau)
@@ -410,7 +410,7 @@ tF <- function(x, ...)
     hess$tau.mu <- hess$mu.tau
 
     sigma.tau.hs <- make_call(x$d2ldddt)
-    hess$sigma.tau <- function(y, par, ...) {
+    hess$sigma.tau <- function(par, y, ...) {
       par <- check_range(par)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.tau <- tau.link$linkfun(par$tau)
@@ -420,7 +420,7 @@ tF <- function(x, ...)
     hess$tau.sigma <- hess$sigma.tau
 
     nu.tau.hs <- make_call(x$d2ldvdt)
-    hess$nu.tau <- function(y, par, ...) {
+    hess$nu.tau <- function(par, y, ...) {
       par <- check_range(par)
       eta.nu <- nu.link$linkfun(par$nu)
       eta.tau <- tau.link$linkfun(par$tau)
@@ -457,7 +457,7 @@ tF <- function(x, ...)
     "links" = unlist(x[paste(nx, "link", sep = ".")]),
     "score" = score,
     "hess" = hess,
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
        d <- eval_expr(dc, y = y, par = par, log = log, ...)
        return(d)
     },
@@ -469,7 +469,7 @@ tF <- function(x, ...)
       }
       return(p)
     } else NULL,
-    "quantile" = if(!inherits(qfun, "try-error")) function(p, par, log = FALSE, ...) {
+    "quantile" = if(!inherits(qfun, "try-error")) function(par, p, log = FALSE, ...) {
       if(any(i <- p <= 1e-10))
         p[i] <- 1e-10
       if(any(i <- p >= (1- 1e-10)))
@@ -528,7 +528,7 @@ tF <- function(x, ...)
     return(eta)
   }
 
-  rval$logLik <- function(y, par) {
+  rval$log_likelihood <- function(par, y) {
     log <- TRUE
     d <- try(eval_expr(dc, y = y, par = par, log = log), silent = TRUE)
     if(inherits(d, "try-error")) {
@@ -550,7 +550,7 @@ tF <- function(x, ...)
     nenv <- new.env()
     assign("rqres", utils::getFromNamespace("rqres", "gamlss"), envir = nenv)
 
-    rval$rqres <- function(y, par, ...) {
+    rval$rqres <- function(par, y, ...) {
       assign("y", y, envir = nenv)
       for(i in nx)
         assign(i, par[[i]], envir = nenv)
@@ -600,6 +600,13 @@ complete_family <- function(family)
   if(is.null(family$pdf))
     stop("the family needs a $pdf() function!")
 
+  if(is.null(family$log_likelihood)) {
+    family$log_likelihood <- function(par, y, ...) {
+      sum(family$pdf(par, y, log = TRUE, ...), na.rm = TRUE)
+    }
+    family["logLik"] <- NULL
+  }
+
   if(!is.list(family$links))
     family$links <- as.list(family$links)
   if(is.null(names(family$links)))
@@ -631,18 +638,14 @@ complete_family <- function(family)
     family$mu.eta <- mu.eta
   }
 
-  if(is.null(family$mu)) {
-    family$mu <- function(par) { par[[1]] }
-  }
-
   if(is.null(family$mean)) {
     family$mean <- function(par) { par[[1]] }
   }
 
-  if(is.null(family$logLik)) {
+  if(is.null(family$log_likelihood)) {
     if(!is.null(family$pdf)) {
-      family$logLik <- function(y, par, ...) {
-        logdens <- try(family$pdf(y, par, log = TRUE), silent = TRUE)
+      family$log_likelihood <- function(par, y, ...) {
+        logdens <- try(family$pdf(par = par, y = y, log = TRUE), silent = TRUE)
         if(inherits(logdens, "try-error")) {
           warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
           return(-Inf)
@@ -671,12 +674,12 @@ complete_family <- function(family)
   for(i in family$names) {
     if(is.null(family$score[[i]]) & !is.null(family$pdf)) {
       fun <- c(
-        "function(y, par, ...) {",
+        "function(par, y, ...) {",
         paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
         paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
-        "  d1 <- family$pdf(y, par, log = TRUE);",
+        "  d1 <- family$pdf(par = par, y = y, log = TRUE);",
         paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
-        "  d2 <- family$pdf(y, par, log = TRUE);",
+        "  d2 <- family$pdf(par = par, y = y, log = TRUE);",
         "  return((d1 - d2) / err02)",
         "}"
       )
@@ -691,31 +694,31 @@ complete_family <- function(family)
     if(is.null(family$hess[[i]]) & !is.null(family$pdf)) {
       fun <- if(!is.null(attr(family$score[[i]], "dnum"))) {
         c(
-          "function(y, par, ...) {",
+          "function(par, y, ...) {",
           paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
           paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err11);", sep = ""),
-          paste("  d1 <- family$score[['", i, "']](y, par, ...);", sep = ""),
+          paste("  d1 <- family$score[['", i, "']](par, y, ...);", sep = ""),
           paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err11);", sep = ""),
-          paste("  d2 <- family$score[['", i, "']](y, par, ...);", sep = ""),
+          paste("  d2 <- family$score[['", i, "']](par, y, ...);", sep = ""),
           "  return(-1 * (d1 - d2) / err12)",
           "}"
         )
       } else {
         c(
-          "function(y, par, ...) {",
+          "function(par, y, ...) {",
           paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
           paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
-          paste("  d1 <- family$score[['", i, "']](y, par, ...);", sep = ""),
+          paste("  d1 <- family$score[['", i, "']](par, y, ...);", sep = ""),
           paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
-          paste("  d2 <- family$score[['", i, "']](y, par, ...);", sep = ""),
+          paste("  d2 <- family$score[['", i, "']](par, y, ...);", sep = ""),
           "  return(-1 * (d1 - d2) / err02)",
           "}"
         )
       }
 
 #      fun <- c(
-#        "function(y, par, ...) {",
-#        paste0("sc <- family$score[['", i, "']](y, par, ...); return(sc^2)"),
+#        "function(par, y, ...) {",
+#        paste0("sc <- family$score[['", i, "']](par, y, ...); return(sc^2)"),
 #        "}"
 #      )
 
@@ -731,19 +734,19 @@ complete_family <- function(family)
           nj <- family$names[j]
 
           fun <- c(
-            "function(y, par, ...) {",
+            "function(par, y, ...) {",
             paste("  eta <- linkfun[['", ni, "']](par[['", ni, "']]);", sep = ""),
             paste("  par[['", ni, "']] <- linkinv[['", ni, "']](eta + err01);", sep = ""),
-            paste("  d1 <- family$score[['", nj, "']](y, par, ...);", sep = ""),
+            paste("  d1 <- family$score[['", nj, "']](par, y, ...);", sep = ""),
             paste("  par[['", ni, "']] <- linkinv[['", ni, "']](eta - err01);", sep = ""),
-            paste("  d2 <- family$score[['", nj, "']](y, par, ...);", sep = ""),
+            paste("  d2 <- family$score[['", nj, "']](par, y, ...);", sep = ""),
             "  return(-1 * (d1 - d2) / err02)",
             "}"
           )
 
 #          fun <- c(
-#            "function(y, par, ...) {",
-#            paste0("family$score[['", ni, "']](y, par, ...)*family$score[['", nj, "']](y, par, ...)"),
+#            "function(par, y, ...) {",
+#            paste0("family$score[['", ni, "']](par, y, ...)*family$score[['", nj, "']](par, y, ...)"),
 #            "}"
 #          )
 
@@ -806,32 +809,32 @@ Gaussian <- function(...)
     "names" = c("mu", "sigma"),
     "links" = parse_links(links, c(mu = "identity", sigma = "log"), ...),
     "score" = list(
-      "mu" = function(y, par, ...) { drop((y - par$mu) / (par$sigma^2)) },
-      "sigma" = function(y, par, ...) { drop(-1 + (y - par$mu)^2 / (par$sigma^2)) }
+      "mu" = function(par, y, ...) { drop((y - par$mu) / (par$sigma^2)) },
+      "sigma" = function(par, y, ...) { drop(-1 + (y - par$mu)^2 / (par$sigma^2)) }
     ),
     "hess" = list(
-      "mu" = function(y, par, ...) { drop(1 / (par$sigma^2)) },
-      "sigma" = function(y, par, ...) { rep(2, length(y)) }
+      "mu" = function(par, y, ...) { drop(1 / (par$sigma^2)) },
+      "sigma" = function(par, y, ...) { rep(2, length(y)) }
     ),
-    "logLik" = function(y, par, ...) {
+    "log_likelihood" = function(par, y, ...) {
       sum(dnorm(y, par$mu, par$sigma, log = TRUE))
     },
     "mu" = function(par, ...) {
       par$mu
     },
-    "pdf" = function(y, par, log = FALSE) {
+    "pdf" = function(par, y, log = FALSE) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "cdf" = function(y, par, ...) {
+    "cdf" = function(par, y, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
     "random" = function(n, par) {
       rnorm(n, mean = par$mu, sd = par$sigma)
     },
-    "quantile" = function(p, par) {
+    "quantile" = function(par, p) {
       qnorm(p, mean = par$mu, sd = par$sigma)
     },
-    "crps" = function(y, par, ...) {
+    "crps" = function(par, y, ...) {
       sum(scoringRules::crps_norm(y, mean = par$mu, sd = par$sigma), na.rm = TRUE)
     },
     "initialize" = list(
@@ -873,7 +876,7 @@ Weibull <- function(...)
     "family" = "Weibull",
     "names" = c("mu", "sigma"),
     "links" = c(mu = "identity", sigma = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       delta <- y[, "status"]
       y <- log(y[, "time"])
       yms <- (y - par$mu) / par$sigma
@@ -884,7 +887,7 @@ Weibull <- function(...)
         d <- exp(d)
       return(d)
     },
-    "cdf" = function(y, par, ...) {
+    "cdf" = function(par, y, ...) {
       delta <- y[, "status"]
       y <- log(y[, "time"])
       p1 <- 1 - exp(-exp((y - par$mu) / par$sigma))
@@ -892,14 +895,14 @@ Weibull <- function(...)
       prob <- ifelse(delta > 0, p1, p2)
       return(prob)
     },
-    "quantile" = function(p, par, ...) {
+    "quantile" = function(par, p, ...) {
       lambda <- exp(-par$mu/par$sigma)
       alpha <- 1 / par$sigma
       q <- lambda * (-log(1 - p))^(1 / alpha)
       return(q)
     },
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         delta <- y[, "status"]
         y <- log(y[, "time"])
         eyms <- exp((y - par$mu)/par$sigma)
@@ -909,7 +912,7 @@ Weibull <- function(...)
         b <- (1 - delta) * (eymss1)
         return(a + b)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         delta <- y[, "status"]
         y <- log(y[, "time"])
         yms <- (y - par$mu)/par$sigma
@@ -921,7 +924,7 @@ Weibull <- function(...)
       }
     ),
     "hess" <- list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         delta <- y[, "status"]
         y <- log(y[, "time"])
         eyms <- exp((y - par$mu)/par$sigma) * 1/par$sigma^2
@@ -929,7 +932,7 @@ Weibull <- function(...)
         b <- -((1 - delta) * eyms)
         return(-(a + b))
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         delta <- y[, "status"]
         y <- log(y[, "time"])
         yms <- (y - par$mu)/par$sigma
@@ -1022,7 +1025,7 @@ YJ <- function(...) {
     "family" = "Yeo-Johnson",
     "names" = c("mu", "sigma", "lambda"),
     "links" = c(mu = "identity", sigma = "log", lambda = "identity"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       psi <- YJt(y, par$lambda)
       d <- -0.918938533204675 - log(par$sigma) - 0.5 * ((psi - par$mu)/par$sigma)^2 +
         (par$lambda - 1) * sign(y) * log1p(abs(y))
@@ -1030,33 +1033,33 @@ YJ <- function(...) {
         d <- exp(d)
       return(d)
     },
-    "cdf" = function(y, par) {
+    "cdf" = function(par, y) {
       psi <- YJt(y, par$lambda)
       pnorm(psi, mean = par$mu, sd = par$sigma)
     },
-    "quantile" = function(p, par) {
+    "quantile" = function(par, p) {
       q <- qnorm(p, mean = par$mu, sd = par$sigma)
       YJt(q, par$lambda, inverse = TRUE)
     },
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         psi <- YJt(y, par$lambda)
         (psi - par$mu)/(par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         psi <- YJt(y, par$lambda)
         -1/par$sigma + (psi - par$mu)^2/(par$sigma^3)
       },
-      "lambda" = function(y, par, ...) {
+      "lambda" = function(par, y, ...) {
         psi <- YJt(y, par$lambda)
         -(psi - par$mu) / (par$sigma^2) * YJt(y, par$lambda, derivative = 1) + sign(y) * log1p(abs(y))
       }
     ),
     "hess" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         1 / par$sigma^2
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         2 / (par$sigma^2)
       }
     ),
@@ -1119,7 +1122,7 @@ ologit4 <- function(...) {
     "family" = "Ordered Logit",
     "names" = c("mu", "r1", "r2", "r3"),
     "links" = c(mu = "identity", r1 = "identity", r2 = "identity", r3 = "identity"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       e1 <- exp(par$mu - par$r1) / (1 + exp(par$mu - par$r1))
       e2 <- exp(par$mu - par$r2) / (1 + exp(par$mu - par$r2))
       e3 <- exp(par$mu - par$r3) / (1 + exp(par$mu - par$r3))
@@ -1201,7 +1204,7 @@ OL <- function(k) {
     names = par_names,
     links = links,
 
-    pdf = function(y, par, log = FALSE, ...) {
+    pdf = function(par, y, log = FALSE, ...) {
       n <- length(y)
       y_int <- as.integer(y)
 
@@ -1267,7 +1270,7 @@ OL <- function(k) {
     tp
   }
 
-  fam$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
+  fam$cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
     probs <- fam$probabilities(par)
     n <- nrow(probs)
     K <- ncol(probs)
@@ -1300,7 +1303,7 @@ OL <- function(k) {
     ans
   }
 
-  fam$quantile <- function(p, par, ...) {
+  fam$quantile <- function(par, p, ...) {
     probs <- fam$probabilities(par)
     n <- nrow(probs)
     K <- ncol(probs)
@@ -1328,8 +1331,8 @@ OL <- function(k) {
     q
   }
 
-  fam$logLik <- function(y, par, ...) {
-    sum(fam$pdf(y, par, log = TRUE))
+  fam$log_likelihood <- function(par, y, ...) {
+    sum(fam$pdf(par, y, log = TRUE))
   }
 
   fam$valid.response <- function(x) {
@@ -1463,24 +1466,24 @@ Kumaraswamy <- KS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
     "family" = "Kumaraswamy",
     "names" = c("a", "b"),
     "links" = c("a" = a.link, "b" = b.link),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       d <- log(par$a) + log(par$b) + (par$a - 1) * log(y) + (par$b - 1) * log(1 - y^(par$a))
       if(!log)
         d <- exp(d)
       return(d)
     },
     "score" = list(
-      "a" = function(y, par, ...) {
+      "a" = function(par, y, ...) {
         ly <- log(y)
         ya <- y^par$a
         (1/par$a + ly - (par$b - 1) * (ya * ly/(1 - ya))) * lfa$mu.eta(lfa$linkfun(par$a))
       },
-      "b" = function(y, par, ...) {
+      "b" = function(par, y, ...) {
         (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
       }
     ),
     "hess" = list(
-      "a" = function(y, par, ...) {
+      "a" = function(par, y, ...) {
         ya <- y^par$a
         ly <- log(y)
         y1a <- 1 - ya
@@ -1488,14 +1491,14 @@ Kumaraswamy <- KS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
 
         (1/par$a^2 + (par$b - 1) * (ya * ly2/(y1a) + ya^2 * ly2 /(y1a)^2)) * lfa$mu.eta(lfa$linkfun(par$a))^2
       },
-      "b" = function(y, par, ...) {
+      "b" = function(par, y, ...) {
         1/par$b^2 * lfb$mu.eta(lfb$linkfun(par$b))^2
       }
     ),
-    "cdf" = function(y, par) {
+    "cdf" = function(par, y) {
       1 - (1 - y^par$a)^par$b
     },
-    "quantile" = function(p, par) {
+    "quantile" = function(par, p) {
       (1 - (1 - p)^par$b)^(1 / par$a)
     },
     "random" = function(n, par) {
@@ -1534,24 +1537,24 @@ LKS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
     "family" = "Kumaraswamy",
     "names" = c("a", "b"),
     "links" = c("a" = a.link, "b" = b.link),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       d <- log(par$a) + log(par$b) + (par$a - 1) * log(y) + (par$b - 1) * log(1 - y^(par$a))
       if(!log)
         d <- exp(d)
       return(d)
     },
     "score" = list(
-      "a" = function(y, par, ...) {
+      "a" = function(par, y, ...) {
         ly <- log(y)
         ya <- y^par$a
         (1/par$a + ly - (par$b - 1) * (ya * ly/(1 - ya))) * lfa$mu.eta(lfa$linkfun(par$a))
       },
-      "b" = function(y, par, ...) {
+      "b" = function(par, y, ...) {
         (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
       }
     ),
     "hess" = list(
-      "a" = function(y, par, ...) {
+      "a" = function(par, y, ...) {
         ya <- y^par$a
         ly <- log(y)
         y1a <- 1 - ya
@@ -1559,14 +1562,14 @@ LKS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
 
         (1/par$a^2 + (par$b - 1) * (ya * ly2/(y1a) + ya^2 * ly2 /(y1a)^2)) * lfa$mu.eta(lfa$linkfun(par$a))^2
       },
-      "b" = function(y, par, ...) {
+      "b" = function(par, y, ...) {
         1/par$b^2 * lfb$mu.eta(lfb$linkfun(par$b))^2
       }
     ),
-    "cdf" = function(y, par) {
+    "cdf" = function(par, y) {
       1 - (1 - y^par$a)^par$b
     },
-    "quantile" = function(p, par) {
+    "quantile" = function(par, p) {
       (1 - (1 - p)^par$b)^(1 / par$a)
     },
     "random" = function(n, par) {
@@ -1616,16 +1619,16 @@ discretize <- function(family = NO) {
     }
   )
 
-  fam$pdf <- function(y, par, log = FALSE, ...) {
+  fam$pdf <- function(par, y, log = FALSE, ...) {
     n <- length(y)
 
     par <- lapply(par, function(x) rep(x, length.out = n))
     par <- as.data.frame(par)
 
-    F0 <- family$cdf(rep(0, n), par, ...)
+    F0 <- family$cdf(par = par, y = rep(0, n), ...)
     S0 <- 1 - F0
 
-    d <- family$cdf(y + 1, par, ...) - family$cdf(y, par, ...)
+    d <- family$cdf(par = par, y = y + 1, ...) - family$cdf(par = par, y = y, ...)
     d <- d / S0
 
     if(log)
@@ -1634,7 +1637,7 @@ discretize <- function(family = NO) {
     d
   }
 
-  fam$cdf <- function(y, par, log = FALSE, ...) {
+  fam$cdf <- function(par, y, log = FALSE, ...) {
     par <- as.data.frame(par)
 
     np <- nrow(par)
@@ -1649,14 +1652,14 @@ discretize <- function(family = NO) {
     yy <- floor(y)
     yy[yy < 0] <- -1
 
-    F0 <- family$cdf(rep(0, n), par, ...)
+    F0 <- family$cdf(par = par, y = rep(0, n), ...)
     S0 <- 1 - F0
 
     p <- numeric(n)
 
     ii <- yy >= 0
     p[ii] <- (
-      family$cdf(yy[ii] + 1, par[ii, , drop = FALSE], ...) -
+      family$cdf(par = par[ii, , drop = FALSE], y = yy[ii] + 1, ...) -
         F0[ii]
     ) / S0[ii]
 
@@ -1668,7 +1671,7 @@ discretize <- function(family = NO) {
     p
   }
 
-  fam$quantile <- function(p, par, ...) {
+  fam$quantile <- function(par, p, ...) {
     par <- as.data.frame(par)
 
     np <- nrow(par)
@@ -1685,7 +1688,7 @@ discretize <- function(family = NO) {
     if(any(p < 0 | p > 1))
       stop("p must be in [0, 1].", call. = FALSE)
 
-    F0 <- family$cdf(rep(0, n), par, ...)
+    F0 <- family$cdf(par = par, y = rep(0, n), ...)
     S0 <- 1 - F0
 
     pp <- F0 + p * S0
@@ -1693,7 +1696,7 @@ discretize <- function(family = NO) {
     pp[pp <= 0] <- 0
     pp[pp >= 1] <- 1
 
-    qc <- family$quantile(pp, par, ...)
+    qc <- family$quantile(par, pp, ...)
 
     q <- ceiling(qc) - 1
 
@@ -1730,7 +1733,7 @@ MN <- function(k)
       TRUE
     },
 
-    pdf = function(y, par, log = FALSE) {
+    pdf = function(par, y, log = FALSE) {
       y_int <- as.integer(y)
       w <- do.call("cbind", par)
       denom <- 1 + rowSums(w)
@@ -1748,7 +1751,7 @@ MN <- function(k)
       if(!log) exp(logp) else logp
     },
 
-    logLik = function(y, par, ...) sum(rval$pdf(y, par, log = TRUE), na.rm = TRUE),
+    log_likelihood = function(par, y, ...) sum(rval$pdf(par, y, log = TRUE), na.rm = TRUE),
 
     type = "discrete"
   )
@@ -1759,7 +1762,7 @@ MN <- function(k)
     rval$score[[id]] <- local({
       jj <- j
       idd <- id
-      function(y, par, ...) {
+      function(par, y, ...) {
         y_int <- as.integer(y)
         w <- do.call("cbind", par)
         denom <- 1 + rowSums(w)
@@ -1775,7 +1778,7 @@ MN <- function(k)
 
     rval$hess[[idj]] <- local({
       idd <- idj
-      function(y, par, ...) {
+      function(par, y, ...) {
         w <- do.call("cbind", par)
         denom <- 1 + rowSums(w)
         p_j <- par[[idd]] / denom
@@ -1790,7 +1793,7 @@ MN <- function(k)
       rval$hess[[nm]] <- local({
         idd_j <- idj
         idd_m <- idm
-        function(y, par, ...) {
+        function(par, y, ...) {
           w <- do.call("cbind", par)
           denom <- 1 + rowSums(w)
           p_j <- par[[idd_j]] / denom
@@ -1809,7 +1812,7 @@ MN <- function(k)
     as.data.frame(p)
   }
 
-  rval$cdf <- function(y, par, lower.tail = TRUE, log.p = FALSE, ...) {
+  rval$cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
     probs <- rval$probabilities(par)
     P <- as.matrix(probs)
     n <- nrow(P)
@@ -1835,7 +1838,7 @@ MN <- function(k)
     ans
   }
 
-  rval$quantile <- function(p, par, ...) {
+  rval$quantile <- function(par, p, ...) {
     probs <- rval$probabilities(par)
     P <- as.matrix(probs)
     n <- nrow(P)

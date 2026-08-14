@@ -139,11 +139,11 @@ quantile.gamlss2 <- function(x,
   }
   f <- NULL
   for(p in probs)
-    f <- cbind(f, family(x)$quantile(p, par))
+    f <- cbind(f, family(x)$quantile(par, p))
   colnames(f) <- paste0(probs * 100, "%")
   if(plot) {
     if(is.null(variable)) {
-      fit_median <- family(x)$quantile(0.5, par)
+      fit_median <- family(x)$quantile(par, p)
       o <- order(fit_median)
       ind <- seq_len(nrow(f)) / nrow(f) * 100
 

@@ -252,7 +252,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Null deviance.
-  dev0 <- -2 * family$logLik(y, family$map2par(etastart))
+  dev0 <- -2 * family$logLik(par = family$map2par(etastart), y = y)
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(xterms)) {
@@ -264,12 +264,12 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     beta <- unlist(beta)
 
     if(!any(is.na(beta))) {
-      lli <- family$logLik(y, family$map2par(ieta))
+      lli <- family$logLik(par = family$map2par(ieta), y = y)
 
       fn_ll <- function(par) {
         for(j in np)
           ieta[[j]] <- rep(par[j], n)
-        ll <- family$logLik(y, family$map2par(ieta)) - 1e-05 * sum(par^2)
+        ll <- family$logLik(par = family$map2par(ieta), y = y) - 1e-05 * sum(par^2)
         return(-ll)
       }
 
@@ -288,7 +288,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           }
         }
         ## Null deviance.
-        dev0 <- -2 * family$logLik(y, family$map2par(eta))
+        dev0 <- -2 * family$logLik(par = family$map2par(eta), y = y)
       }
     }
   }
@@ -339,7 +339,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         peta <- family$map2par(eta)
 
         ## Compute old log-likelihood.
-        pibeta <- family$logLik(y, peta)
+        pibeta <- family$logLik(par = peta, y = y)
 
         ## Old parameters.
         b0 <- fit[[j]]$coefficients
@@ -387,7 +387,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         peta <- family$map2par(eta)
 
         ## Compute new log likelihood.
-        pibetaprop <- family$logLik(y, peta)
+        pibetaprop <- family$logLik(par = peta, y = y)
 
         ## Compute new score and hess.
         score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
@@ -467,7 +467,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## Save global logLik / deviance once per saved iteration.
     if(do_save) {
-      ll_iter <- family$logLik(y, family$map2par(eta))
+      ll_iter <- family$logLik(par = family$map2par(eta), y = y)
       track$logLik[isave] <- ll_iter
       track$deviance[isave] <- -2 * ll_iter
       isave <- isave + 1L
@@ -524,7 +524,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   samples <- do.call("cbind", samples)
 
-  ll <- family$logLik(y, family$map2par(track$eta))
+  ll <- family$logLik(par = family$map2par(track$eta), y = y)
 
   Dbar <- mean(track$deviance, na.rm = TRUE)
   Dhat <- -2 * ll
@@ -701,7 +701,7 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   peta <- family$map2par(eta)
 
   ## Compute old log-likelihood.
-  pibeta <- family$logLik(y, peta)
+  pibeta <- family$logLik(par = peta, y = y)
 
   ## Old parameters.
   b0 <- fitted$coefficients
@@ -777,7 +777,7 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   peta <- family$map2par(eta)
 
   ## Compute new log likelihood.
-  pibetaprop <- family$logLik(y, peta)
+  pibetaprop <- family$logLik(par = peta, y = y)
 
   ## Compute new score and hess.
   score <- deriv_checks(
@@ -828,7 +828,7 @@ log_posterior <- function(coefficients, x, family, y,
 {
   if(is.null(log_likelihood)) {
     eta[[parameter]] <- eta[[parameter]] + drop(x$X %*% coefficients[1:ncol(x$X)])
-    log_likelihood <- family$logLik(y, family$map2par(eta))
+    log_likelihood <- family$logLik(par = family$map2par(eta), y = y)
   }
 
   log_prior <- x$prior(coefficients)
@@ -1084,7 +1084,7 @@ if(FALSE) {
 
   fit <- NULL
   for(j in c(0.025, 0.5, 0.975))
-    fit <- cbind(fit, family(b)$quantile(j, p))
+    fit <- cbind(fit, family(b)$quantile(p, j))
 
   par(mfrow = c(1, 2))
   plot(d)

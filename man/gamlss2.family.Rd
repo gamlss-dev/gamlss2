@@ -34,7 +34,7 @@
     \item \code{links}: a named character vector specifying the link function for each parameter
           (e.g., \code{c(mu = "identity", sigma = "log")}), or a list of link functions, see
           \code{\link{softplus}}.
-    \item \code{pdf(y, par, log = FALSE, ...)}: a function to evaluate the (log-)density.
+    \item \code{pdf(par, y, log = FALSE, ...)}: a function to evaluate the (log-)density.
   }
 
   The \code{pdf()} function must accept the response \code{y}, a named list
@@ -47,15 +47,15 @@
   \itemize{
     \item \code{score}: a named list of functions (one per parameter), each computing the
       first derivative of the log-likelihood with respect to the linear predictor:
-      \code{score[[param]](y, par, ...)}.
+      \code{score[[param]](par, y, ...)}.
     \item \code{hess}: a named list of functions computing second derivatives (the negative Hessian).
       For parameters \code{mu} and \code{sigma}, this includes:
       \code{hess[["mu"]]()}, \code{hess[["sigma"]]()}, and optionally
       cross derivatives like \code{hess[["mu.sigma"]]()}.
-    \item \code{loglik(y, par, ...)}: a function computing the total log-likelihood.
-    \item \code{cdf(y, par, ...)}: cumulative distribution function.
-    \item \code{quantile(p, par, ...)}: quantile function.
-    \item \code{random(n, par, ...)}: random number generator.
+    \item \code{loglik(par, y, ...)}: a function computing the total log-likelihood.
+    \item \code{cdf(par, y, ...)}: cumulative distribution function.
+    \item \code{quantile(par, p, ...)}: quantile function.
+    \item \code{random(par, n, ...)}: random number generator.
     \item \code{mean(par, ...)}: mean function.
     \item \code{variance(par, ...)}: variance function.
     \item \code{skewness(par, ...)}, \code{kurtosis(par, ...)}: optional higher-order moment functions.
@@ -91,34 +91,34 @@ Normal <- function(...) {
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         (y - par$mu) / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
     "hess" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         1 / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         rep(2, length(y))
       },
-      "mu.sigma" = function(y, par, ...) {
+      "mu.sigma" = function(par, y, ...) {
         rep(0, length(y))
       }
     ),
-    "loglik" = function(y, par, ...) {
+    "loglik" = function(par, y, ...) {
       sum(dnorm(y, par$mu, par$sigma, log = TRUE))
     },
     "mu" = function(par, ...) {
       par$mu
     },
-    "pdf" = function(y, par, log = FALSE) {
+    "pdf" = function(par, y, log = FALSE) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "cdf" = function(y, par, ...) {
+    "cdf" = function(par, y, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
     "random" = function(n, par) {
@@ -180,12 +180,12 @@ Gamma <- function(...) {
   fam <- list(
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "log", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       shape <- par$sigma
       scale <- par$mu/par$sigma
       dgamma(y, shape = shape, scale = scale, log = log)
     },
-    "cdf" = function(y, par, lower.tail = TRUE, log.p = FALSE) {
+    "cdf" = function(par, y, lower.tail = TRUE, log.p = FALSE) {
       shape <- par$sigma
       scale <- par$mu/par$sigma
       pgamma(y, shape = shape, scale = scale,

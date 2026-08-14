@@ -183,7 +183,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Null deviance.
-  dev0 <- -2 * family$logLik(y, family$map2par(etastart))
+  dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
@@ -202,7 +202,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     beta <- unlist(beta)
 
     if(!any(is.na(beta)) && nullmodel_ok) {
-      lli <- family$logLik(y, family$map2par(ieta))
+      lli <- family$log_likelihood(par = family$map2par(ieta), y = y)
 
       fn_ll <- function(par) {
         for(j in np) {
@@ -212,7 +212,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               ieta[[j]] <- ieta[[j]] + offsets[[j]]
           }
         }
-        ll <- family$logLik(y, family$map2par(ieta)) - lambda * sum(par^2)
+        ll <- family$log_likelihood(par = family$map2par(ieta), y = y) - lambda * sum(par^2)
         return(-ll)
       }
 
@@ -292,9 +292,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   while((eps[1L] > stop.eps[1L]) && (iter[1L] < maxit[1L])) {
     ## Old log-likelihood.
     if(is.null(weights)) {
-      llo0 <- family$logLik(y, family$map2par(eta))
+      llo0 <- family$log_likelihood(par = family$map2par(eta), y = y)
     } else {
-      llo0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+      llo0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## For CG.
@@ -317,9 +317,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     while((eps_outer > stop.eps[3L]) && (iter_outer < maxit[3L])) {
       if(iter[1L] >= CGk) {
         if(is.null(weights)) {
-          outer_ll0 <- family$logLik(y, family$map2par(eta))
+          outer_ll0 <- family$log_likelihood(par = family$map2par(eta), y = y)
         } else {
-          outer_ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          outer_ll0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
         }
       }
 
@@ -344,7 +344,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             for(l in seq_along(h)) {
               parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
               k <- parts[2L]
-              hess_l <- family$hess[[h[l]]](y, peta)
+              hess_l <- family$hess[[h[l]]](par = peta, y = y)
               if(!is.null(weights))
                 hess_l <- hess_l * weights
               adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
@@ -363,9 +363,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
           ## Current log-likelihood.
           if(is.null(weights)) {
-            ll0 <- family$logLik(y, family$map2par(eta))
+            ll0 <- family$log_likelihood(par = family$map2par(eta), y = y)
           } else {
-            ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+            ll0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
           ll02 <- ll0
 
@@ -397,16 +397,16 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai[[j]] <- etai[[j]] + m$fitted.values
 
             if(is.null(weights)) {
-              ll1 <- family$logLik(y, family$map2par(etai))
+              ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
             } else {
-              ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+              ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
             }
 
             if(ll1 < ll02 && isTRUE(control$backup)) {
               ll <- function(par) {
                 etai <- eta
                 etai[[j]] <- etai[[j]] + drop(Xj %*% par)
-                -family$logLik(y, family$map2par(etai)) + lambda * sum(par^2)
+                -family$log_likelihood(par = family$map2par(etai), y = y) + lambda * sum(par^2)
               }
               warn <- getOption("warn")
               options("warn" = -1)
@@ -427,9 +427,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 m$fitted.values <- drop(Xj %*% opt$par)
                 etai[[j]] <- etai[[j]] + m$fitted.values
                 if(is.null(weights)) {
-                  ll1 <- family$logLik(y, family$map2par(etai))
+                  ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
                 } else {
-                  ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+                  ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
                 }
               }
             }
@@ -443,7 +443,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                     f <- drop(Xj %*% b)
                     etai <- eta
                     etai[[j]] <- etai[[j]] + f
-                    -family$logLik(y, family$map2par(etai))
+                    -family$log_likelihood(par = family$map2par(etai), y = y)
                   }
                   s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
                   if(-s$objective > ll02) {
@@ -460,9 +460,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai[[j]] <- etai[[j]] + m$fitted.values
 
             if(is.null(weights)) {
-              ll1 <- family$logLik(y, family$map2par(etai))
+              ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
             } else {
-              ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+              ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
             }
 
             if(ll1 > ll02) {
@@ -550,9 +550,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               etai[[j]] <- etai[[j]] + fs$fitted.values
 
               if(is.null(weights)) {
-                ll1 <- family$logLik(y, family$map2par(etai))
+                ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
               } else {
-                ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+                ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
               }
 
               if(ll1 > ll02) {
@@ -576,9 +576,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           ## New log-likelihood.
           if(is.null(weights)) {
-            ll1 <- family$logLik(y, family$map2par(eta))
+            ll1 <- family$log_likelihood(par = family$map2par(eta), y = y)
           } else {
-            ll1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+            ll1 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
 
           ## Stopping criterion.
@@ -607,9 +607,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## New log-likelihood.
     if(is.null(weights)) {
-      llo1 <- family$logLik(y, family$map2par(eta))
+      llo1 <- family$log_likelihood(par = family$map2par(eta), y = y)
     } else {
-      llo1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+      llo1 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## Stopping criterion.
@@ -680,7 +680,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Message if not converged due to NAs or Inf!
-  d <- family$pdf(y, family$map2par(eta), log = TRUE)
+  d <- family$pdf(par = family$map2par(eta), y = y, log = TRUE)
   if(!is.null(weights))
     d <- d * weights
   if(any(is.na(d))) {
@@ -763,8 +763,8 @@ deriv_checks <- function(x, is.weight = FALSE)
 z_weights <- function(y, eta, peta, family, j)
 {
   if(is.null(family$z_weights)) {
-    score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-    hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+    score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
+    hess <- deriv_checks(family$hess[[j]](par = peta, y = y, id = j), is.weight = TRUE)
     z <- eta + 1 / hess * score
     return(list("z" = z, "weights" = hess))
   } else {

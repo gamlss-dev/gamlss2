@@ -120,28 +120,28 @@ kurtosis.GDF <- function(x, ...) {
 pdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$pdf(at, d, log = FALSE) }
+  FUN <- function(at, d) { f$pdf(par = d, y = at, log = FALSE) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "density", drop = drop, elementwise = elementwise)
 }
 
 log_pdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$pdf(at, d, log = TRUE) }
+  FUN <- function(at, d) { f$pdf(par = d, y = at, log = TRUE) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "logLik", drop = drop, elementwise = elementwise)
 }
 
 cdf.GDF <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(d)
-  FUN <- function(at, d) { f$cdf(at, d) }
+  FUN <- function(at, d) { f$cdf(par = d, y = at) }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", drop = drop, elementwise = elementwise)
 }
 
 quantile.GDF <- function(x, probs, drop = TRUE, elementwise = NULL, ...) {
   stopifnot(requireNamespace("distributions3"))
   f <- .GDF_family(x)
-  FUN <- function(at, d) { f$quantile(at, d) }
+  FUN <- function(at, d) { f$quantile(d, at) }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = probs, type = "quantile", drop = drop, elementwise = elementwise)
 }
 
@@ -150,7 +150,7 @@ random.GDF <- function(x, n = 1L, drop = TRUE, ...) {
   f <- .GDF_family(x)
   n <- distributions3::make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
-  FUN <- function(at, d) { f$random(at, d) }
+  FUN <- function(at, d) { f$random(d, at) }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
 }
 

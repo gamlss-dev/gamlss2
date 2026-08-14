@@ -57,7 +57,7 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous"
@@ -72,7 +72,7 @@ In this example, we define a normal distribution with two parameters: `"mu"` (me
 it is the log function. The probability density function (`pdf()`) must accept the following arguments:
 
 ```{r, eval=FALSE}
-pdf(y, par, log = FALSE, ...)
+pdf(par, y, log = FALSE, ...)
 ```
 
 * `y`: The response variable.
@@ -90,7 +90,7 @@ functions are used during model fitting to improve optimization efficiency and a
 All derivative functions must follow the structure:
 
 ```r
-function(y, par, ...)
+function(par, y, ...)
 ```
 
 First-order derivatives must be provided as a named list called `"score"`, with one function per 
@@ -107,7 +107,7 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous",
@@ -116,21 +116,21 @@ Normal <- function(...) {
       "sigma" = function(y, ...) { rep(sd(y), length(y)) }
     ),
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         (y - par$mu) / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
     "hess" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         1 / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         rep(2, length(y))
       },
-      "mu.sigma" = function(y, par, ...) {
+      "mu.sigma" = function(par, y, ...) {
         rep(0, length(y)) ## example cross-derivative
       }
     )
@@ -161,9 +161,9 @@ significantly improve the stability and speed of the estimation process.
 
 Family objects can also include other functions such as
 
-* `cdf(y, par, ...)`: Cumulative distribution function.
-* `quantile(p, par, ...)`: Quantile function with probability vector `p`.
-* `random(n, par, ...)`: Random number generation with number of samples `n`.
+* `cdf(par, y, ...)`: Cumulative distribution function.
+* `quantile(par, p, ...)`: Quantile function with probability vector `p`.
+* `random(par, n, ...)`: Random number generation with number of samples `n`.
 * `mean(par, ...)`: Mean function.
 * `variance(par, ...)`: Variance function.
 * `skewness(par, ...)`: Skewness function.
@@ -180,10 +180,10 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "cdf" = function(y, par, ...) {
+    "cdf" = function(par, y, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
     "random" = function(n, par) {
@@ -207,21 +207,21 @@ Normal <- function(...) {
       return(TRUE)
     },
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         (y - par$mu) / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
     "hess" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         1 / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         rep(2, length(y))
       },
-      "mu.sigma" = function(y, par, ...) {
+      "mu.sigma" = function(par, y, ...) {
         rep(0, length(y)) ## example cross-derivative
       }
     )
@@ -250,7 +250,7 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = mu.link, "sigma" = sigma.link),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous"

@@ -100,13 +100,13 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     "family"   = distribution,
     "names"    = nams,
     "links"    = links,
-    "logLik"   = function(y, par, ...) sum(distributions3::log_pdf(d3(par), y, elementwise = TRUE, ...)),
+    "log_likelihood"   = function(par, y, ...) sum(distributions3::log_pdf(d3(par), y, elementwise = TRUE, ...)),
     "mu"       = function(par, ...) mean(d3(par), ...),
-    "pdf"      = function(y, par, log = FALSE) distributions3::pdf(d3(par), y, elementwise = TRUE, log = log),
-    "cdf"      = function(y, par, ...) distributions3::cdf(d3(par), y, elementwise = TRUE, ...),
-    "random"   = function(n, par) distributions3::random(d3(par), n),
-    "quantile" = function(p, par) quantile(d3(par), p, elementwise = TRUE),
-    "crps"     = function(y, par, ...) sum(scoringRules::crps(d3(par), y, elementwise = TRUE, ...)),
+    "pdf"      = function(par, y, log = FALSE) distributions3::pdf(d3(par), y, elementwise = TRUE, log = log),
+    "cdf"      = function(par, y, ...) distributions3::cdf(d3(par), y, elementwise = TRUE, ...),
+    "random"   = function(par, n) distributions3::random(d3(par), n),
+    "quantile" = function(par, p) quantile(d3(par), p, elementwise = TRUE),
+    "crps"     = function(par, y, ...) sum(scoringRules::crps(d3(par), y, elementwise = TRUE, ...)),
     "mean"     = function(par) mean(d3(par)),
     "variance" = function(par) distributions3::variance(d3(par)),
     "skewness" = function(par) distributions3::skewness(d3(par)),
@@ -117,7 +117,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   ## add score function if desired and available
   has_score <- hasS3method("score", distribution)
   if (score && has_score) rval$score <- structure(lapply(nams, function(n) { ## FIXME: score(par, y, which, ...)
-    function(y, par, ...) {
+    function(par, y, ...) {
       lnk <- links[[n]]
       eta <- lnk$linkfun(par[[n]])
       score(d3(par), y, which = n, ...) * lnk$mu.eta(eta)
@@ -127,7 +127,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   ## add hessian function if desired and available
   has_hessian <- hasS3method("hessian", distribution)
   if (hessian && has_hessian) rval$hess <- structure(lapply(nams, function(n) { ## FIXME: hessian(par, y, which, ...)
-    function(y, par, ...) {
+    function(par, y, ...) {
       lnk <- links[[n]]
       eta <- lnk$linkfun(par[[n]])
       par <- d3(par)

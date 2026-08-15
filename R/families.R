@@ -461,11 +461,11 @@ tF <- function(x, ...)
        d <- eval_expr(dc, y = y, par = par, log = log, ...)
        return(d)
     },
-    "cdf" = if(!inherits(pfun, "try-error")) function(q, par, log = FALSE, ...) {
-      p <- eval_expr(pc, q = q, par = par, log = log, ...)
+    "cdf" = if(!inherits(pfun, "try-error")) function(par, y, log = FALSE, ...) {
+      p <- eval_expr(pc, q = y, par = par, log = log, ...)
       if(length(p) < length(par[[1L]])) {
         q <- rep(q, length.out = length(par[[1L]]))
-        p <- eval_expr(pc, q = q, par = par, log = log, ...)
+        p <- eval_expr(pc, q = y, par = par, log = log, ...)
       }
       return(p)
     } else NULL,
@@ -481,7 +481,7 @@ tF <- function(x, ...)
       }
       return(q)
     } else NULL,
-    "random" = if(!inherits(rfun, "try-error")) function(n, par, ...) {
+    "random" = if(!inherits(rfun, "try-error")) function(par, n, ...) {
       return(eval_expr(rc, n = n, par = par, ...))
     } else NULL
   )

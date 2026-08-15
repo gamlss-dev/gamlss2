@@ -179,7 +179,7 @@ tF <- function(x, ...)
     par
   }
   nx <- names(x$parameters)[unlist(x$parameters)]
-  score <- hess <- initialize <- list()
+  score <- hessian <- initialize <- list()
 
   make_call <- function(fun) {
     fn <- deparse(substitute(fun), backtick = TRUE, width.cutoff = 500)
@@ -222,11 +222,11 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$mu <- function(par, y, ...) {
+    hessian$mu <- function(par, y, ...) {
       par <- check_range(par)
-      hess <- -1 * eval_expr(mu.hs, y = y, par = par)
+      hessian <- -1 * eval_expr(mu.hs, y = y, par = par)
       eta <- mu.link$linkfun(par$mu)
-      res <- drop(hess * mu.link$mu.eta(eta)^2)
+      res <- drop(hessian * mu.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -266,12 +266,12 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$sigma <- function(par, y, ...) {
+    hessian$sigma <- function(par, y, ...) {
       par <- check_range(par)
-      hess <- -1 * eval_expr(sigma.hs, y = y, par = par)
+      hessian <- -1 * eval_expr(sigma.hs, y = y, par = par)
       eta <- sigma.link$linkfun(par$sigma)
-      ## res <- drop(score * sigma.link$mu.eta2(eta) + hess * sigma.link$mu.eta(eta)^2)
-      res <- drop(hess * sigma.link$mu.eta(eta)^2)
+      ## res <- drop(score * sigma.link$mu.eta2(eta) + hessian * sigma.link$mu.eta(eta)^2)
+      res <- drop(hessian * sigma.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -303,12 +303,12 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$nu <- function(par, y, ...) {
+    hessian$nu <- function(par, y, ...) {
       par <- check_range(par)
-      hess <- -1 * eval_expr(nu.hs, y = y, par = par)
+      hessian <- -1 * eval_expr(nu.hs, y = y, par = par)
       eta <- nu.link$linkfun(par$nu)
-      ## res <- drop(score * nu.link$mu.eta2(eta) + hess * nu.link$mu.eta(eta)^2)
-      res <- drop(hess * nu.link$mu.eta(eta)^2)
+      ## res <- drop(score * nu.link$mu.eta2(eta) + hessian * nu.link$mu.eta(eta)^2)
+      res <- drop(hessian * nu.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -340,12 +340,12 @@ tF <- function(x, ...)
       }
       res
     }
-    hess$tau <- function(par, y, ...) {
+    hessian$tau <- function(par, y, ...) {
       par <- check_range(par)
-      hess <- -1 * eval_expr(tau.hs, y = y, par = par)
+      hessian <- -1 * eval_expr(tau.hs, y = y, par = par)
       eta <- tau.link$linkfun(par$tau)
-      ## res <- drop(score * tau.link$mu.eta2(eta) + hess * tau.link$mu.eta(eta)^2)
-      res <- drop(hess * tau.link$mu.eta(eta)^2)
+      ## res <- drop(score * tau.link$mu.eta2(eta) + hessian * tau.link$mu.eta(eta)^2)
+      res <- drop(hessian * tau.link$mu.eta(eta)^2)
       if(!is.null(dim(res))) {
         if(length(dim(res)) > 1)
           res <- res[, 1]
@@ -367,67 +367,67 @@ tF <- function(x, ...)
   ## For CG algorithm.
   if(all(c("mu", "sigma") %in% nx)) {
     mu.sigma.hs <- make_call(x$d2ldmdd)
-    hess$mu.sigma <- function(par, y, ...) {
+    hessian$mu.sigma <- function(par, y, ...) {
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.sigma <- sigma.link$linkfun(par$sigma)
-      hess <- -1 * eval_expr(mu.sigma.hs, y = y, par = par)
-      hess * (mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma))
+      hessian <- -1 * eval_expr(mu.sigma.hs, y = y, par = par)
+      hessian * (mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma))
     }
-    hess$sigma.mu <- hess$mu.sigma
+    hessian$sigma.mu <- hessian$mu.sigma
   }
   if("nu" %in% nx) {
     mu.nu.hs <- make_call(x$d2ldmdv)
-    hess$mu.nu <- function(par, y, ...) {
+    hessian$mu.nu <- function(par, y, ...) {
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.nu <- nu.link$linkfun(par$nu)
-      hess <- -1 * eval_expr(mu.nu.hs, y = y, par = par)
-      hess * (mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu))
+      hessian <- -1 * eval_expr(mu.nu.hs, y = y, par = par)
+      hessian * (mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu))
     }
-    hess$nu.mu <- hess$mu.nu
+    hessian$nu.mu <- hessian$mu.nu
 
     sigma.nu.hs <- make_call(x$d2ldddv)
-    hess$sigma.nu <- function(par, y, ...) {
+    hessian$sigma.nu <- function(par, y, ...) {
       par <- check_range(par)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.nu <- nu.link$linkfun(par$nu)
-      hess <- -1 * eval_expr(sigma.nu.hs, y = y, par = par)
-      hess * (sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu))
+      hessian <- -1 * eval_expr(sigma.nu.hs, y = y, par = par)
+      hessian * (sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu))
     }
-    hess$nu.sigma <- hess$sigma.nu
+    hessian$nu.sigma <- hessian$sigma.nu
   }
 
   if("tau" %in% nx) {
     mu.tau.hs <- make_call(x$d2ldmdt)
-    hess$mu.tau <- function(par, y, ...) {
+    hessian$mu.tau <- function(par, y, ...) {
       par <- check_range(par)
       eta.mu <- mu.link$linkfun(par$mu)
       eta.tau <- tau.link$linkfun(par$tau)
-      hess <- -1 * eval_expr(mu.tau.hs, y = y, par = par)
-      hess * (mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau))
+      hessian <- -1 * eval_expr(mu.tau.hs, y = y, par = par)
+      hessian * (mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau))
     }
-    hess$tau.mu <- hess$mu.tau
+    hessian$tau.mu <- hessian$mu.tau
 
     sigma.tau.hs <- make_call(x$d2ldddt)
-    hess$sigma.tau <- function(par, y, ...) {
+    hessian$sigma.tau <- function(par, y, ...) {
       par <- check_range(par)
       eta.sigma <- sigma.link$linkfun(par$sigma)
       eta.tau <- tau.link$linkfun(par$tau)
-      hess <- -1 * eval_expr(sigma.tau.hs, y = y, par = par)
-      hess * (sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau))
+      hessian <- -1 * eval_expr(sigma.tau.hs, y = y, par = par)
+      hessian * (sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau))
     }
-    hess$tau.sigma <- hess$sigma.tau
+    hessian$tau.sigma <- hessian$sigma.tau
 
     nu.tau.hs <- make_call(x$d2ldvdt)
-    hess$nu.tau <- function(par, y, ...) {
+    hessian$nu.tau <- function(par, y, ...) {
       par <- check_range(par)
       eta.nu <- nu.link$linkfun(par$nu)
       eta.tau <- tau.link$linkfun(par$tau)
-      hess <- -1 * eval_expr(nu.tau.hs, y = y, par = par)
-      hess * (nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau))
+      hessian <- -1 * eval_expr(nu.tau.hs, y = y, par = par)
+      hessian * (nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau))
     }
-    hess$tau.nu <- hess$nu.tau
+    hessian$tau.nu <- hessian$nu.tau
   }
 
   dfun <- get(paste("d", x$family[1], sep = ""))
@@ -456,7 +456,7 @@ tF <- function(x, ...)
     "names" = nx,
     "links" = unlist(x[paste(nx, "link", sep = ".")]),
     "score" = score,
-    "hess" = hess,
+    "hessian" = hessian,
     "pdf" = function(par, y, log = FALSE, ...) {
        d <- eval_expr(dc, y = y, par = par, log = log, ...)
        return(d)
@@ -688,10 +688,17 @@ complete_family <- function(family)
     }
   }
 
-  if(is.null(family$hess) & !is.null(family$pdf))
-    family$hess <- list()
+  if(is.null(family$hessian)) {
+    if(is.null(family[["hess"]])) {
+      family$hessian <- family[["hess"]]
+      family["hess"] <- NULL
+    }
+  }
+
+  if(is.null(family$hessian) & !is.null(family$pdf))
+    family$hessian <- list()
   for(i in family$names) {
-    if(is.null(family$hess[[i]]) & !is.null(family$pdf)) {
+    if(is.null(family$hessian[[i]]) & !is.null(family$pdf)) {
       fun <- if(!is.null(attr(family$score[[i]], "dnum"))) {
         c(
           "function(par, y, ...) {",
@@ -722,14 +729,14 @@ complete_family <- function(family)
 #        "}"
 #      )
 
-      family$hess[[i]] <- eval(parse(text = paste(fun, collapse = "")))
+      family$hessian[[i]] <- eval(parse(text = paste(fun, collapse = "")))
     }
   }
   for(i in seq_along(family$names)) {
     for(j in seq_along(family$names)) {
       if(i < j) {
         hij <- paste0(family$names[i], ".", family$names[j])
-        if(is.null(family$hess[[hij]])) {
+        if(is.null(family$hessian[[hij]])) {
           ni <- family$names[i]
           nj <- family$names[j]
 
@@ -750,9 +757,9 @@ complete_family <- function(family)
 #            "}"
 #          )
 
-          family$hess[[hij]] <- eval(parse(text = paste(fun, collapse = "")))
+          family$hessian[[hij]] <- eval(parse(text = paste(fun, collapse = "")))
           hji <- paste0(family$names[j], ".", family$names[i])
-          family$hess[[hji]] <- family$hess[[hij]]
+          family$hessian[[hji]] <- family$hessian[[hij]]
         }
       }
     }
@@ -785,7 +792,7 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
       for(j in nfun)
         cat(" ..$ ", j, "\n", sep = "")
     }
-    nfun <- names(x[c("score", "hess")])
+    nfun <- names(x[c("score", "hessian")])
     if(!all(is.na(nfun))) {
       nfun <- nfun[!is.na(nfun)]
       cat("---\nDerivative functions:\n")
@@ -812,7 +819,7 @@ Gaussian <- function(...)
       "mu" = function(par, y, ...) { drop((y - par$mu) / (par$sigma^2)) },
       "sigma" = function(par, y, ...) { drop(-1 + (y - par$mu)^2 / (par$sigma^2)) }
     ),
-    "hess" = list(
+    "hessian" = list(
       "mu" = function(par, y, ...) { drop(1 / (par$sigma^2)) },
       "sigma" = function(par, y, ...) { rep(2, length(y)) }
     ),
@@ -854,9 +861,9 @@ Gaussian <- function(...)
 
 #  rval$update <- function(par, y, eta, which) {
 #    score <- deriv_checks(rval$score[[which]](par = par, y = y, id = which), is.weight = FALSE)
-#    hess <- deriv_checks(rval$hess[[which]](par = par, y = y, id = which), is.weight = TRUE)
-#    z <- eta + 1 / hess * score
-#    return(list("eta" = z, "weights" = hess))
+#    hessian <- deriv_checks(rval$hessian[[which]](par = par, y = y, id = which), is.weight = TRUE)
+#    z <- eta + 1 / hessian * score
+#    return(list("eta" = z, "weights" = hessian))
 #  }
 
   rval$update <- update_Gaussian
@@ -923,7 +930,7 @@ Weibull <- function(...)
         return(a + b)
       }
     ),
-    "hess" <- list(
+    "hessian" <- list(
       "mu" = function(par, y, ...) {
         delta <- y[, "status"]
         y <- log(y[, "time"])
@@ -1055,7 +1062,7 @@ YJ <- function(...) {
         -(psi - par$mu) / (par$sigma^2) * YJt(y, par$lambda, derivative = 1) + sign(y) * log1p(abs(y))
       }
     ),
-    "hess" = list(
+    "hessian" = list(
       "mu" = function(par, y, ...) {
         1 / par$sigma^2
       },
@@ -1482,7 +1489,7 @@ Kumaraswamy <- KS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
         (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
       }
     ),
-    "hess" = list(
+    "hessian" = list(
       "a" = function(par, y, ...) {
         ya <- y^par$a
         ly <- log(y)
@@ -1553,7 +1560,7 @@ LKS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
         (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
       }
     ),
-    "hess" = list(
+    "hessian" = list(
       "a" = function(par, y, ...) {
         ya <- y^par$a
         ly <- log(y)
@@ -1772,11 +1779,11 @@ MN <- function(k)
     })
   }
 
-  rval$hess <- list()
+  rval$hessian <- list()
   for(j in seq_len(k - 1)) {
     idj <- pn[j]
 
-    rval$hess[[idj]] <- local({
+    rval$hessian[[idj]] <- local({
       idd <- idj
       function(par, y, ...) {
         w <- do.call("cbind", par)
@@ -1790,7 +1797,7 @@ MN <- function(k)
       idm <- pn[m]
       nm  <- paste0(idj, ".", idm)
 
-      rval$hess[[nm]] <- local({
+      rval$hessian[[nm]] <- local({
         idd_j <- idj
         idd_m <- idm
         function(par, y, ...) {

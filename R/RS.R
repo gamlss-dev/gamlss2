@@ -249,9 +249,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   CG <- isTRUE(control$CG)
   if(CG)
     CGk <- 0L
-  if(length(family$hess) < 2L)
+  if(length(family$hessian) < 2L)
     CGk <- Inf
-  if(!any(grepl(".", names(family$hess), fixed = TRUE)))
+  if(!any(grepl(".", names(family$hessian), fixed = TRUE)))
     CGk <- Inf
   if(is.finite(CGk))
     eta_old <- eta
@@ -337,19 +337,19 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           family$map2par(etastart)
         }
 
-        ## Compute working response z and weights hess from family.
+        ## Compute working response z and weights hessian from family.
         ## Cole and Green adjustment.
         if(iter[1L] >= CGk) {
-          h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
+          h <- grep(paste0(j, "."), names(family$hessian), value = TRUE)
           if(length(h)) {
             adj <- 0.0
             for(l in seq_along(h)) {
               parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
               k <- parts[2L]
-              hess_l <- family$hess[[h[l]]](par = peta, y = y)
+              hessian_l <- family$hessian[[h[l]]](par = peta, y = y)
               if(!is.null(weights))
-                hess_l <- hess_l * weights
-              adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
+                hessian_l <- hessian_l * weights
+              adj <- adj + hessian_l * (eta[[k]] - eta_old[[k]])
             }
           }
           ew <- ew_CG[[j]]
@@ -750,7 +750,7 @@ initialize_eta <- function(y, family, nobs, initialize)
   return(eta)
 }
 
-## Function to check values of score and hess vectors
+## Function to check values of score and hessian vectors
 deriv_checks <- function(x, is.weight = FALSE)
 {
   x[is.na(x)] <- 1.490116e-08
@@ -765,14 +765,14 @@ deriv_checks <- function(x, is.weight = FALSE)
   return(x)
 }
 
-## Compute working response z and weights hess from family.
+## Compute working response z and weights hessian from family.
 update <- function(par, y, eta, family, which)
 {
   if(is.null(family$update)) {
     score <- deriv_checks(family$score[[which]](par = par, y = y, id = which), is.weight = FALSE)
-    hess <- deriv_checks(family$hess[[which]](par = par, y = y, id = which), is.weight = TRUE)
-    z <- eta + 1 / hess * score
-    return(list("eta" = z, "weights" = hess))
+    hessian <- deriv_checks(family$hessian[[which]](par = par, y = y, id = which), is.weight = TRUE)
+    z <- eta + 1 / hessian * score
+    return(list("eta" = z, "weights" = hessian))
   } else {
     return(family$update(par = par, y = y, eta = eta, which = which))
   }

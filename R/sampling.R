@@ -349,17 +349,17 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## Derivatives.
         score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](par = peta, y = y, id = j), is.weight = TRUE)
+        hessian <- deriv_checks(family$hessian[[j]](par = peta, y = y, id = j), is.weight = TRUE)
 
         ## Working response.
-        z <- eta[[j]] + 1 / hess * score
+        z <- eta[[j]] + 1 / hessian * score
 
         ## Compute residuals.
         eta2 <- eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
         e <- z - eta2
 
         ## Weights.
-        wj <- if(is.null(weights)) hess else hess * weights
+        wj <- if(is.null(weights)) hessian else hessian * weights
 
         ## Compute mean and precision.
         Xj <- x[, xterms[[j]], drop = FALSE]
@@ -389,15 +389,15 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Compute new log likelihood.
         pibetaprop <- family$log_likelihood(par = peta, y = y)
 
-        ## Compute new score and hess.
+        ## Compute new score and hessian.
         score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](par = peta, y = y, id = j), is.weight = TRUE)
+        hessian <- deriv_checks(family$hessian[[j]](par = peta, y = y, id = j), is.weight = TRUE)
 
         ## Weights.
-        wj <- if(is.null(weights)) hess else hess * weights
+        wj <- if(is.null(weights)) hessian else hessian * weights
 
         ## New working observations.
-        z <- eta[[j]] + 1 / hess * score
+        z <- eta[[j]] + 1 / hessian * score
 
         ## New residuals.
         e <- z - eta2
@@ -738,20 +738,20 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
     family$score[[parameter]](par = peta, y = y, id = parameter),
     is.weight = FALSE
   )
-  hess <- deriv_checks(
-    family$hess[[parameter]](par = peta, y = y, id = parameter),
+  hessian <- deriv_checks(
+    family$hessian[[parameter]](par = peta, y = y, id = parameter),
     is.weight = TRUE
   )
 
   ## Working response.
-  z <- eta[[parameter]] + 1 / hess * score
+  z <- eta[[parameter]] + 1 / hessian * score
 
   ## Compute residuals.
   eta2 <- eta[[parameter]] <- eta[[parameter]] - fitted$fitted.values
   e <- z - eta2
 
   ## Weights.
-  wj <- if(is.null(weights)) hess else hess * weights
+  wj <- if(is.null(weights)) hessian else hessian * weights
 
   ## Build proposal precision + mean (+ edf) using binning-aware code.
   tmp <- build_QM_edf(wj, e, tau)
@@ -779,21 +779,21 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   ## Compute new log likelihood.
   pibetaprop <- family$log_likelihood(par = peta, y = y)
 
-  ## Compute new score and hess.
+  ## Compute new score and hessian.
   score <- deriv_checks(
     family$score[[parameter]](par = peta, y = y, id = parameter),
     is.weight = FALSE
   )
-  hess <- deriv_checks(
-    family$hess[[parameter]](par = peta, y = y, id = parameter),
+  hessian <- deriv_checks(
+    family$hessian[[parameter]](par = peta, y = y, id = parameter),
     is.weight = TRUE
   )
 
   ## Weights.
-  wj <- if(is.null(weights)) hess else hess * weights
+  wj <- if(is.null(weights)) hessian else hessian * weights
 
   ## New working observations.
-  z <- eta[[parameter]] + 1 / hess * score
+  z <- eta[[parameter]] + 1 / hessian * score
 
   ## New residuals.
   e <- z - eta2

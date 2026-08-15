@@ -126,7 +126,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
 
   ## add hessian function if desired and available
   has_hessian <- hasS3method("hessian", distribution)
-  if (hessian && has_hessian) rval$hess <- structure(lapply(nams, function(n) { ## FIXME: hessian(par, y, which, ...)
+  if (hessian && has_hessian) rval$hessian <- structure(lapply(nams, function(n) { ## FIXME: hessian(par, y, which, ...)
     function(par, y, ...) {
       lnk <- links[[n]]
       eta <- lnk$linkfun(par[[n]])
@@ -148,12 +148,12 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     score <- gamlss2:::deriv_checks(score, is.weight = FALSE)
 
     h <- hessian(par, y, which = j)
-    hess <- h * mu.eta^2 + s * lnk$mu.eta2(eta)
-    hess <- gamlss2:::deriv_checks(hess, is.weight = TRUE)
+    hessian <- h * mu.eta^2 + s * lnk$mu.eta2(eta)
+    hessian <- gamlss2:::deriv_checks(hessian, is.weight = TRUE)
 
     list(
-      eta = eta + 1/hess * score,
-      weights = hess
+      eta = eta + 1/hessian * score,
+      weights = hessian
     )
   }
 
@@ -229,7 +229,7 @@ hessian.distribution <- function(d, x, which = NULL, drop = TRUE, expected = FAL
   w <- unique(p[which])
 
   ## compute scores
-  hess <- function(par) {
+  hessian <- function(par) {
     par <- strsplit(par, ":", fixed = TRUE)[[1L]]
     par <- rep_len(par, 2L)
     d1 <- d2 <- d
@@ -240,9 +240,9 @@ hessian.distribution <- function(d, x, which = NULL, drop = TRUE, expected = FAL
 
   ## if possible return single vector, otherwise collect in matrix
   if (drop && length(which) == 1L) {
-    h <- setNames(hess(w), names(d))
+    h <- setNames(hessian(w), names(d))
   } else {
-    h <- lapply(w, hess)
+    h <- lapply(w, hessian)
     h <- do.call("cbind", h)
     dimnames(h) <- list(names(d), w)
     if (!identical(w, which)) h <- h[, p[which], drop = FALSE]
@@ -294,7 +294,7 @@ hessian.Normal <- function(d, x, which = NULL, drop = TRUE, expected = FALSE, ..
   w <- unique(p[which])
 
   ## function for computing Hessian elements (expected or observed)
-  hess <- if (expected) {
+  hessian <- if (expected) {
     function(par) switch(par,
       "mu"    = rep_len(-1/d$sigma^2, n),
       "sigma" = rep_len(-2 /d$sigma^2, n),
@@ -308,9 +308,9 @@ hessian.Normal <- function(d, x, which = NULL, drop = TRUE, expected = FALSE, ..
   
   ## if possible return single vector, otherwise collect in matrix
   if (drop && length(which) == 1L) {
-    h <- setNames(hess(w), names(d))
+    h <- setNames(hessian(w), names(d))
   } else {
-    h <- lapply(w, hess)
+    h <- lapply(w, hessian)
     h <- do.call("cbind", h)
     dimnames(h) <- list(names(d), w)
     if (!identical(w, which)) h <- h[, p[which], drop = FALSE]
@@ -498,7 +498,7 @@ hessian.GAMLSS <- function(d, x, which = NULL, drop = TRUE, ...) {
   d2l <- c("mu" = "d2ldm2", "sigma" = "d2ldd2", "nu" = "d2ldv2", "tau" = "d2ldt2",
     "mu:sigma" = "d2ldmdd", "mu:nu" = "d2ldmdv", "mu:tau" = "d2ldmdt",
     "sigma:nu" = "d2ldddv", "sigma:tau" = "d2ldddt", "nu:tau" = "d2ldvdt")
-  hess <- function(par) {
+  hessian <- function(par) {
     d2l_fun <- f[[d2l[par]]]
     formals(d2l_fun) <- c(formals(d2l_fun), alist("..." = ))
     do.call(d2l_fun, c(list(y = x), as.list(d), list(...)))
@@ -506,9 +506,9 @@ hessian.GAMLSS <- function(d, x, which = NULL, drop = TRUE, ...) {
   
   ## if possible return single vector, otherwise collect in matrix
   if (drop && length(which) == 1L) {
-    h <- setNames(hess(w), names(d))
+    h <- setNames(hessian(w), names(d))
   } else {
-    h <- lapply(w, hess)
+    h <- lapply(w, hessian)
     h <- do.call("cbind", h)
     dimnames(h) <- list(names(d), w)
     if (!identical(w, which)) h <- h[, p[which], drop = FALSE]

@@ -348,8 +348,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         p1 <- priors$p(b0)
 
         ## Derivatives.
-        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+        score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
+        hess <- deriv_checks(family$hess[[j]](par = peta, y = y, id = j), is.weight = TRUE)
 
         ## Working response.
         z <- eta[[j]] + 1 / hess * score
@@ -390,8 +390,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         pibetaprop <- family$log_likelihood(par = peta, y = y)
 
         ## Compute new score and hess.
-        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+        score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
+        hess <- deriv_checks(family$hess[[j]](par = peta, y = y, id = j), is.weight = TRUE)
 
         ## Weights.
         wj <- if(is.null(weights)) hess else hess * weights
@@ -735,11 +735,11 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
 
   ## Derivatives.
   score <- deriv_checks(
-    family$score[[parameter]](y, peta, id = parameter),
+    family$score[[parameter]](par = peta, y = y, id = parameter),
     is.weight = FALSE
   )
   hess <- deriv_checks(
-    family$hess[[parameter]](y, peta, id = parameter),
+    family$hess[[parameter]](par = peta, y = y, id = parameter),
     is.weight = TRUE
   )
 
@@ -781,11 +781,11 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
 
   ## Compute new score and hess.
   score <- deriv_checks(
-    family$score[[parameter]](y, peta, id = parameter),
+    family$score[[parameter]](par = peta, y = y, id = parameter),
     is.weight = FALSE
   )
   hess <- deriv_checks(
-    family$hess[[parameter]](y, peta, id = parameter),
+    family$hess[[parameter]](par = peta, y = y, id = parameter),
     is.weight = TRUE
   )
 

@@ -305,9 +305,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       } else {
         family$map2par(etastart)
       }
-      zw_CG <- list()
+      ew_CG <- list()
       for(j in np) {
-        zw_CG[[j]] <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+        ew_CG[[j]] <- update(par = peta, y = y,
+          eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
+          family = family, which = j)
       }
     }
 
@@ -350,13 +352,15 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
             }
           }
-          zw <- zw_CG[[j]]
-          wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+          ew <- ew_CG[[j]]
+          wj <- if(is.null(weights)) ew$weights else ew$weights * weights
           wj[!is.finite(wj)] <- 0
           wj[wj < 0] <- 0
-          zw$z <- zw$z - adj / wj
+          ew$eta <- ew$eta - adj / wj
         } else {
-          zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+          ew <- update(par = peta, y = y,
+            eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
+            family = family, which = j)
         }
 
         ## Start inner loop.
@@ -373,10 +377,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           if(length(xterms[[j]])) {
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-            e <- zw$z - eta[[j]]
+            e <- ew$eta - eta[[j]]
 
             ## Weights.
-            wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+            wj <- if(is.null(weights)) ew$weights else ew$weights * weights
             wj[!is.finite(wj)] <- 0
             wj[wj < 0] <- 0
 
@@ -519,14 +523,14 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             for(k in sterms[[j]]) {
               ## Compute partial residuals.
               eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
-              e <- zw$z - eta[[j]]
+              e <- ew$eta - eta[[j]]
 
               ## Additive model term fit.
               fs <- if(is.null(weights)) {
-                special.wfit(specials[[k]], e, zw$weights, y, eta, j, family, control,
+                special.wfit(specials[[k]], e, ew$weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               } else {
-                special.wfit(specials[[k]], e, zw$weights * weights, y, eta, j, family, control,
+                special.wfit(specials[[k]], e, ew$weights * weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               }
 
@@ -587,7 +591,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           ## Update working response.
           if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
             peta <- family$map2par(eta)
-            zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+            ew <- update(par = peta, y = y,
+              eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
+              family = family, which = j)
           }
 
           ## Update inner loop iterator.
@@ -760,15 +766,15 @@ deriv_checks <- function(x, is.weight = FALSE)
 }
 
 ## Compute working response z and weights hess from family.
-z_weights <- function(y, eta, peta, family, j)
+update <- function(par, y, eta, family, which)
 {
-  if(is.null(family$z_weights)) {
-    score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
-    hess <- deriv_checks(family$hess[[j]](par = peta, y = y, id = j), is.weight = TRUE)
+  if(is.null(family$update)) {
+    score <- deriv_checks(family$score[[which]](par = par, y = y, id = which), is.weight = FALSE)
+    hess <- deriv_checks(family$hess[[which]](par = par, y = y, id = which), is.weight = TRUE)
     z <- eta + 1 / hess * score
-    return(list("z" = z, "weights" = hess))
+    return(list("eta" = z, "weights" = hess))
   } else {
-    return(family$z_weights(y, eta, peta, j))
+    return(family$update(par = par, y = y, eta = eta, which = which))
   }
 }
 

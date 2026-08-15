@@ -852,22 +852,22 @@ Gaussian <- function(...)
     }
   )
 
-#  rval$z_weights <- function(y, eta, peta, j) {
-#    score <- deriv_checks(rval$score[[j]](y, peta, id = j), is.weight = FALSE)
-#    hess <- deriv_checks(rval$hess[[j]](y, peta, id = j), is.weight = TRUE)
+#  rval$update <- function(par, y, eta, which) {
+#    score <- deriv_checks(rval$score[[which]](par = par, y = y, id = which), is.weight = FALSE)
+#    hess <- deriv_checks(rval$hess[[which]](par = par, y = y, id = which), is.weight = TRUE)
 #    z <- eta + 1 / hess * score
-#    return(list("z" = z, "weights" = hess))
+#    return(list("eta" = z, "weights" = hess))
 #  }
 
-  rval$z_weights <- z_weights_Gaussian
+  rval$update <- update_Gaussian
   rval$type <- "continuous"
 
   class(rval) <- "gamlss2.family"
   rval
 }
 
-z_weights_Gaussian <- function(y, eta, peta, j) {
-  .Call("z_weights_Gaussian", y, eta, peta, j, PACKAGE = "gamlss2")
+update_Gaussian <- function(par, y, eta, which) {
+  .Call("update_Gaussian", par, y, eta, which, PACKAGE = "gamlss2")
 }
 
 Weibull <- function(...)

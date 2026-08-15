@@ -99,7 +99,7 @@ SEXP calc_XWX(SEXP x, SEXP w, SEXP index)
 }
 
 /* Compute working response and weights for the Gaussian family. */
-SEXP z_weights_Gaussian(SEXP y, SEXP eta, SEXP peta, SEXP j)
+SEXP update_Gaussian(SEXP peta, SEXP y, SEXP eta, SEXP j)
 {
   int n = length(eta);
   int i;
@@ -109,7 +109,7 @@ SEXP z_weights_Gaussian(SEXP y, SEXP eta, SEXP peta, SEXP j)
     if(isInteger(y)) {
       y = coerceVector(y, REALSXP);
     } else {
-      error("Argument 'y' must be numeric or integer in z_weights().");
+      error("Argument 'y' must be numeric or integer in update().");
     }
   }
 
@@ -157,7 +157,7 @@ SEXP z_weights_Gaussian(SEXP y, SEXP eta, SEXP peta, SEXP j)
   SEXP nrval;
   PROTECT(nrval = allocVector(STRSXP, 2));
 
-  SET_STRING_ELT(nrval, 0, mkChar("z"));
+  SET_STRING_ELT(nrval, 0, mkChar("eta"));
   SET_STRING_ELT(nrval, 1, mkChar("weights"));
 
   setAttrib(rval, R_NamesSymbol, nrval);

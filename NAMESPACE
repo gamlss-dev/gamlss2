@@ -5,7 +5,7 @@ import("mgcv")
 importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "make.link", "model.frame", "model.matrix", "model.offset",
   "model.response", "model.weights", "nlminb", "pnorm",
-  "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
+  "qnorm", "rnorm", "runif", "sd", "predict", "family",
   "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "optimize", "median", "pchisq",

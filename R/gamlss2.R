@@ -417,7 +417,7 @@ model.frame.gamlss2 <- function(formula, ...)
     fcall$xlev <- xlev
     fcall$formula <- formula$fake_formula
     if(!dots$keepresponse) {
-      fcall$formula <- update(fcall$formula, NULL ~ .)
+      fcall$formula <- stats::update(fcall$formula, NULL ~ .)
       fcall$formula <- formula(as.Formula(fcall$formula), lhs = 0)
     }
     fcall$formula <- formula(as.Formula(fcall$formula), collapse = TRUE, update = TRUE)

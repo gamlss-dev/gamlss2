@@ -138,7 +138,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   }), names = nams)
 
   ## add Newton/Fisher update function if desired and available
-  if (update && has_score && has_hessian) rval$z_weights <- function(y, eta, peta, j) { ## FIXME: update(par, y, eta, which) -> list(eta, weights)
+  if (update && has_score && has_hessian) rval$update <- function(par, y, eta, which) { ## FIXME: update(par, y, eta, which) -> list(eta, weights)
     lnk <- links[[j]]
     mu.eta <- lnk$mu.eta(eta)
     par <- d3(peta)
@@ -152,7 +152,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     hess <- gamlss2:::deriv_checks(hess, is.weight = TRUE)
 
     list(
-      z = eta + 1/hess * score,
+      eta = eta + 1/hess * score,
       weights = hess
     )
   }

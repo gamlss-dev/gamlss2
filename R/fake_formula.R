@@ -107,10 +107,10 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
           }
         }
         os <- c(os, j)
-        eval(parse(text = paste0("formula <- update(formula, NULL ~ . -", j,")")))
+        eval(parse(text = paste0("formula <- stats::update(formula, NULL ~ . -", j,")")))
         if(!nospecials) {
           for(i in ff) {
-            eval(parse(text = paste0("formula <- update(formula, NULL ~ . +", deparse(i),")")))
+            eval(parse(text = paste0("formula <- stats::update(formula, NULL ~ . +", deparse(i),")")))
           }
         }
       }
@@ -129,7 +129,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       }
       tf <- terms(formula, specials = stn)
       if(length(j <- grep("list(", attr(tf, "term.labels"), fixed = TRUE, value = TRUE))) {
-        fc <- paste("formula <- update(formula, . ~ . -", j, ")")
+        fc <- paste("formula <- stats::update(formula, . ~ . -", j, ")")
         eval(parse(text = fc))
       }
     }
@@ -152,7 +152,7 @@ ff_replace <- function(formula)
     f <- gsub(":", "+", f, fixed = TRUE)
     f <- as.call(parse(text = f))
     formula[[n]] <- f[[1L]]
-    formula <- update(formula, . ~ .)
+    formula <- stats::update(formula, . ~ .)
   }
   return(formula)
 }

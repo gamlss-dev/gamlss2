@@ -16,7 +16,7 @@ tree <- function(formula, ...)
 ## tree fitting function for the backfitting algorithm.
 special_fit.tree <- function(x, z, w, y, eta, j, family, control, ...)
 {
-  f <- update(x$formula, response_z ~ .)
+  f <- stats::update(x$formula, response_z ~ .)
   x$data$response_z <- z
   x$data$w <- w
   rval <- list(
@@ -66,7 +66,7 @@ cf <- function(formula, ...)
 ## The fitting function for the backfitting algorithm.
 special_fit.cf <- function(x, z, w, y, eta, j, family, control, ...)
 {
-  f <- update(x$formula, response_z ~ .)
+  f <- stats::update(x$formula, response_z ~ .)
   x$data$response_z <- z
   rval <- list(
     "model" = partykit::cforest(formula = f, data = x$data, weights = w,
@@ -119,7 +119,7 @@ ct <- function(formula, ...)
 
 special_fit.ct <- function(x, z, w, y, eta, j, family, control, ...)
 {
-  f <- update(x$formula, response_z ~ .)
+  f <- stats::update(x$formula, response_z ~ .)
   x$data$response_z <- z
   x$data$w <- w
   rval <- list(
@@ -205,7 +205,7 @@ n <- function(formula, ...)
 special_fit.n <- function(x, z, w, control, ...)
 {
   ## Model formula needs to be updated.
-  .fnns <- update(x$formula, response_z ~ .)
+  .fnns <- stats::update(x$formula, response_z ~ .)
 
   ## Assign current working response.
   x$data$response_z <- z
@@ -384,7 +384,7 @@ re <- function(random, correlation = NULL, ...)
   ## Put all information together.
   st$fixed <- fixed
   ## Update fixed formula for working response z.
-  st$fixed <- update(st$fixed, response_z ~ .)
+  st$fixed <- stats::update(st$fixed, response_z ~ .)
   st$random <- random
 
   vr <- try(stats::formula(random), silent = TRUE)
@@ -612,7 +612,7 @@ lo <- function(formula, ...)
   st$data <- model.frame(formula)
 
   ## New model formula used for fitting.
-  st$formula <- update(formula, response_z ~ .)
+  st$formula <- stats::update(formula, response_z ~ .)
 
   ## Assign the "special" class and the new class "n".
   class(st) <- c("special", "lo")

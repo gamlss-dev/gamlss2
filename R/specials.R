@@ -354,7 +354,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       rho <- log(pmax(lambdas, 1e-10))
       eps <- Inf
       lk <- 0L
-      while((eps > 0.000001) && (lk < 1000L)) {
+      while((eps > 0.000001) && (lk < 5L)) {
         rho0 <- rho
         opt <- nlminb(
           rho,

@@ -245,10 +245,10 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(iter[1L] > -1) {
     lambdas <- transfer$lambdas
   } else {
-    lambdas <- 10
+    lambdas <- 1.0
   }
   if(is.null(lambdas)) {
-    lambdas <- if(is.null(control$start)) 10 else control$start
+    lambdas <- if(is.null(control$start)) 1.0 else control$start
   }
   lambdas <- rep(lambdas, length.out = length(x$S))
 

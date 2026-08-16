@@ -1070,7 +1070,7 @@ new_formula <- function(object, ...)
 new_formula.default <- function(object, ...) {
   f <- object$selection$formula
   rn <- response_name(object)
-  f[[1L]] <- eval(parse(text = paste("stats::update(f[[1L]], ", rn, " ~ .)")))
+  f[[1L]] <- eval(parse(text = paste("update(f[[1L]], ", rn, " ~ .)")))
   return(f)
 }
 

@@ -307,7 +307,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       }
       ew_CG <- list()
       for(j in np) {
-        ew_CG[[j]] <- update(par = peta, y = y,
+        ew_CG[[j]] <- .update(par = peta, y = y,
           eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
           family = family, which = j)
       }
@@ -358,7 +358,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           wj[wj < 0] <- 0
           ew$eta <- ew$eta - adj / wj
         } else {
-          ew <- update(par = peta, y = y,
+          ew <- .update(par = peta, y = y,
             eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
             family = family, which = j)
         }
@@ -591,7 +591,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           ## Update working response.
           if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
             peta <- family$map2par(eta)
-            ew <- update(par = peta, y = y,
+            ew <- .update(par = peta, y = y,
               eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
               family = family, which = j)
           }
@@ -766,7 +766,7 @@ deriv_checks <- function(x, is.weight = FALSE)
 }
 
 ## Compute working response z and weights hessian from family.
-update <- function(par, y, eta, family, which)
+.update <- function(par, y, eta, family, which)
 {
   if(is.null(family$update)) {
     score <- deriv_checks(family$score[[which]](par = par, y = y, id = which), is.weight = FALSE)

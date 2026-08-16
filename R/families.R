@@ -562,6 +562,87 @@ tF <- function(x, ...)
   rval
 }
 
+## Factory for numerically approximated score functions.
+make_numeric_score <- function(parameter, pdf, linkfun, linkinv,
+  step = .Machine$double.eps^(1/3))
+{
+  force(parameter)
+  force(pdf)
+  force(linkfun)
+  force(linkinv)
+  force(step)
+
+  function(par, y, ...) {
+    eta <- linkfun(par[[parameter]])
+
+    par[[parameter]] <- linkinv(eta + step)
+    upper <- pdf(par = par, y = y, log = TRUE)
+
+    par[[parameter]] <- linkinv(eta - step)
+    lower <- pdf(par = par, y = y, log = TRUE)
+
+    (upper - lower) / (2 * step)
+  }
+}
+
+## Factory for numerically approximated negative Hessian functions.
+make_numeric_hessian <- function(parameter, score, linkfun, linkinv,
+  step = .Machine$double.eps^(1/3))
+{
+  force(parameter)
+  force(score)
+  force(linkfun)
+  force(linkinv)
+  force(step)
+
+  function(par, y, ...) {
+    eta <- linkfun(par[[parameter]])
+
+    par[[parameter]] <- linkinv(eta + step)
+    upper <- score(par = par, y = y, ...)
+
+    par[[parameter]] <- linkinv(eta - step)
+    lower <- score(par = par, y = y, ...)
+
+    -(upper - lower) / (2 * step)
+  }
+}
+
+## Factory for joint numerical score and negative Hessian updates.
+make_numeric_update <- function(pdf, linkinv,
+  step = .Machine$double.eps^(1/4))
+{
+  force(pdf)
+  force(linkinv)
+  force(step)
+
+  function(par, y, eta, which) {
+    par_plus <- par_minus <- par
+
+    par_plus[[which]] <- linkinv[[which]](eta + step)
+    upper <- pdf(par = par_plus, y = y, log = TRUE)
+
+    center <- pdf(par = par, y = y, log = TRUE)
+
+    par_minus[[which]] <- linkinv[[which]](eta - step)
+    lower <- pdf(par = par_minus, y = y, log = TRUE)
+
+    score <- deriv_checks(
+      (upper - lower) / (2 * step),
+      is.weight = FALSE
+    )
+    hessian <- deriv_checks(
+      -(upper - 2 * center + lower) / step^2,
+      is.weight = TRUE
+    )
+
+    list(
+      eta = eta + score / hessian,
+      weights = hessian
+    )
+  }
+}
+
 ## Complete a family object, e.g.,
 ## if derivatives are not supplied they
 ## will be approximated numerically.
@@ -600,6 +681,12 @@ complete_family <- function(family)
   if(is.null(family$pdf))
     stop("the family needs a $pdf() function!")
 
+  use_numeric_update <-
+    is.null(family[["update"]]) &&
+    is.null(family[["score"]]) &&
+    is.null(family[["hessian"]]) &&
+    is.null(family[["hess"]])
+
   if(is.null(family$log_likelihood)) {
     family$log_likelihood <- function(par, y, ...) {
       sum(family$pdf(par, y, log = TRUE, ...), na.rm = TRUE)
@@ -618,6 +705,13 @@ complete_family <- function(family)
     linkinv[[j]] <- link$linkinv
     linkfun[[j]] <- link$linkfun
     mu.eta[[j]] <- link$mu.eta
+  }
+
+  if(use_numeric_update) {
+    family$update <- make_numeric_update(
+      pdf = family$pdf,
+      linkinv = linkinv
+    )
   }
 
   if(is.null(family$map2par)) {
@@ -665,71 +759,41 @@ complete_family <- function(family)
   }
 
   err01 <- .Machine$double.eps^(1/3)
-  err02 <- err01 * 2
   err11 <- .Machine$double.eps^(1/4)
-  err12 <- err11 * 2
 
-  if(is.null(family$score) & !is.null(family$pdf))
+  if(is.null(family$score) && !is.null(family$pdf))
     family$score <- list()
-  for(i in family$names) {
-    if(is.null(family$score[[i]]) & !is.null(family$pdf)) {
-      fun <- c(
-        "function(par, y, ...) {",
-        paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
-        paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
-        "  d1 <- family$pdf(par = par, y = y, log = TRUE);",
-        paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
-        "  d2 <- family$pdf(par = par, y = y, log = TRUE);",
-        "  return((d1 - d2) / err02)",
-        "}"
+  for(parameter in family$names) {
+    if(is.null(family$score[[parameter]]) && !is.null(family$pdf)) {
+      family$score[[parameter]] <- make_numeric_score(
+        parameter = parameter,
+        pdf = family$pdf,
+        linkfun = linkfun[[parameter]],
+        linkinv = linkinv[[parameter]],
+        step = err01
       )
-      family$score[[i]] <- eval(parse(text = paste(fun, collapse = "")))
-      attr(family$score[[i]], "dnum") <- TRUE
+      attr(family$score[[parameter]], "dnum") <- TRUE
     }
   }
 
-  if(is.null(family$hessian)) {
-    if(is.null(family[["hess"]])) {
-      family$hessian <- family[["hess"]]
-      family["hess"] <- NULL
-    }
+  if(is.null(family[["hessian"]]) && !is.null(family[["hess"]])) {
+    family[["hessian"]] <- family[["hess"]]
+    family[["hess"]] <- NULL
   }
 
-  if(is.null(family$hessian) & !is.null(family$pdf))
+  if(is.null(family$hessian) && !is.null(family$pdf))
     family$hessian <- list()
-  for(i in family$names) {
-    if(is.null(family$hessian[[i]]) & !is.null(family$pdf)) {
-      fun <- if(!is.null(attr(family$score[[i]], "dnum"))) {
-        c(
-          "function(par, y, ...) {",
-          paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
-          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err11);", sep = ""),
-          paste("  d1 <- family$score[['", i, "']](par, y, ...);", sep = ""),
-          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err11);", sep = ""),
-          paste("  d2 <- family$score[['", i, "']](par, y, ...);", sep = ""),
-          "  return(-1 * (d1 - d2) / err12)",
-          "}"
-        )
-      } else {
-        c(
-          "function(par, y, ...) {",
-          paste("  eta <- linkfun[['", i, "']](par[['", i, "']]);", sep = ""),
-          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta + err01);", sep = ""),
-          paste("  d1 <- family$score[['", i, "']](par, y, ...);", sep = ""),
-          paste("  par[['", i, "']] <- linkinv[['", i, "']](eta - err01);", sep = ""),
-          paste("  d2 <- family$score[['", i, "']](par, y, ...);", sep = ""),
-          "  return(-1 * (d1 - d2) / err02)",
-          "}"
-        )
-      }
-
-#      fun <- c(
-#        "function(par, y, ...) {",
-#        paste0("sc <- family$score[['", i, "']](par, y, ...); return(sc^2)"),
-#        "}"
-#      )
-
-      family$hessian[[i]] <- eval(parse(text = paste(fun, collapse = "")))
+  for(parameter in family$names) {
+    if(is.null(family$hessian[[parameter]]) && !is.null(family$pdf)) {
+      score <- family$score[[parameter]]
+      step <- if(isTRUE(attr(score, "dnum"))) err11 else err01
+      family$hessian[[parameter]] <- make_numeric_hessian(
+        parameter = parameter,
+        score = score,
+        linkfun = linkfun[[parameter]],
+        linkinv = linkinv[[parameter]],
+        step = step
+      )
     }
   }
   for(i in seq_along(family$names)) {
@@ -740,24 +804,13 @@ complete_family <- function(family)
           ni <- family$names[i]
           nj <- family$names[j]
 
-          fun <- c(
-            "function(par, y, ...) {",
-            paste("  eta <- linkfun[['", ni, "']](par[['", ni, "']]);", sep = ""),
-            paste("  par[['", ni, "']] <- linkinv[['", ni, "']](eta + err01);", sep = ""),
-            paste("  d1 <- family$score[['", nj, "']](par, y, ...);", sep = ""),
-            paste("  par[['", ni, "']] <- linkinv[['", ni, "']](eta - err01);", sep = ""),
-            paste("  d2 <- family$score[['", nj, "']](par, y, ...);", sep = ""),
-            "  return(-1 * (d1 - d2) / err02)",
-            "}"
+          family$hessian[[hij]] <- make_numeric_hessian(
+            parameter = ni,
+            score = family$score[[nj]],
+            linkfun = linkfun[[ni]],
+            linkinv = linkinv[[ni]],
+            step = err01
           )
-
-#          fun <- c(
-#            "function(par, y, ...) {",
-#            paste0("family$score[['", ni, "']](par, y, ...)*family$score[['", nj, "']](par, y, ...)"),
-#            "}"
-#          )
-
-          family$hessian[[hij]] <- eval(parse(text = paste(fun, collapse = "")))
           hji <- paste0(family$names[j], ".", family$names[i])
           family$hessian[[hji]] <- family$hessian[[hij]]
         }

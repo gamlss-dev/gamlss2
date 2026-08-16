@@ -299,14 +299,15 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   } else {
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
+      Sl <- S
       if(length(x$S)) {
-        for(j in 1:length(x$S))
-          S <- S + l[j] * x$S[[j]]
+        for(k in seq_along(x$S))
+          Sl <- Sl + l[k] * x$S[[k]]
       }
 
-      P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
+      P <- try(chol2inv(chol(XWX + Sl)), silent = TRUE)
       if(inherits(P, "try-error"))
-        P <- solve(XWX + S)
+        P <- solve(XWX + Sl)
 
       b <- drop(P %*% XWz)
 
@@ -322,8 +323,9 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
           "lambdas" = l, "vcov" = P, "df" = n - edf))
       } else {
         if(isTRUE(control$logLik)) {
-          eta[[j]] <- eta[[j]] + fit
-          rss <- family$logLik(y, family$map2par(eta))
+          etai <- eta
+          etai[[j]] <- etai[[j]] + fit
+          rss <- -2 * family$log_likelihood(par = family$map2par(etai), y = y)
         } else {
           rss <- sum(w * (z - fit)^2)
         }
@@ -349,16 +351,22 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     }
 
     if(is.null(x$sp)) {
-      eps <- 1
-      lambdas0 <- lambdas
-      lk <- 0
-       while((eps > 0.000001) & (lk < 1000L)) {
-         opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
-         eps <- mean(abs((opt$par - lambdas0) / lambdas0))
-         lambdas0 <- lambdas
-         lambdas <- opt$par
-         lk <- lk + 1L
-       }
+      rho <- log(pmax(lambdas, 1e-10))
+      eps <- Inf
+      lk <- 0L
+      while((eps > 0.000001) && (lk < 1000L)) {
+        rho0 <- rho
+        opt <- nlminb(
+          rho,
+          objective = function(rho) fl(exp(rho)),
+          lower = pmax(rho - log(10), log(1e-10)),
+          upper = pmin(rho + log(10), log(1e+10))
+        )
+        rho <- opt$par
+        eps <- max(abs(rho - rho0))
+        lk <- lk + 1L
+      }
+      opt <- list(par = exp(rho))
     } else {
       opt <- list(par = x$sp)
     }

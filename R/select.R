@@ -106,7 +106,7 @@ sRS <- function(x, y, specials, family, offsets, weights,
 new_formula.select <- function(object, ...) {
   f <- object$selection$formula
   rn <- response_name(object)
-  f[[1L]] <- eval(parse(text = paste("stats::update(f[[1L]], ", rn, " ~ .)")))
+  f[[1L]] <- eval(parse(text = paste("update(f[[1L]], ", rn, " ~ .)")))
   return(f)
 }
 

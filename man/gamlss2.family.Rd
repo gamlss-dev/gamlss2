@@ -112,19 +112,16 @@ Normal <- function(...) {
     "loglik" = function(par, y, ...) {
       sum(dnorm(y, par$mu, par$sigma, log = TRUE))
     },
-    "mu" = function(par, ...) {
-      par$mu
-    },
     "pdf" = function(par, y, log = FALSE) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "cdf" = function(par, y, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
-    "random" = function(n, par) {
+    "random" = function(par, n) {
       rnorm(n, mean = par$mu, sd = par$sigma)
     },
-    "quantile" = function(p, par) {
+    "quantile" = function(par, p) {
       qnorm(p, mean = par$mu, sd = par$sigma)
     },
     "initialize" = list(
@@ -191,7 +188,7 @@ Gamma <- function(...) {
       pgamma(y, shape = shape, scale = scale,
         lower.tail = lower.tail, log.p = log.p)
     },
-    "quantile" = function(p, par, lower.tail = TRUE, log.p = FALSE) {
+    "quantile" = function(par, p, lower.tail = TRUE, log.p = FALSE) {
       shape <- par$sigma
       scale <- par$mu/par$sigma
        qgamma(p, shape = shape, scale = scale,

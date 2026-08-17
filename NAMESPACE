@@ -13,7 +13,7 @@ importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "deviance", "drop1", "plogis", "qlogis", "setNames")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace",
-  "capture.output", "combn", "head")
+  "capture.output", "combn", "head", "argsAnywhere", "getS3method")
 
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d",
   "dev.off", "png")
@@ -27,7 +27,8 @@ importFrom("parallel", "mclapply")
 importFrom("mvtnorm", "dmvnorm", "rmvnorm")
 
 importFrom("distributions3", "variance", "pdf", "cdf", "skewness",
-  "kurtosis", "random", "is_continuous", "is_discrete", "prodist")
+  "kurtosis", "random", "is_continuous", "is_discrete", "prodist",
+  "log_pdf", "log_likelihood")
 
 export(
   "fake_formula",

@@ -1,7 +1,7 @@
 .logLik.gamlss2 <- function(object, newdata = NULL)
 {
   if(is.null(newdata)) {
-    ll <- object$log_likelihood
+    ll <- object$logLik
     nobs <- object$nobs
   } else {
     par <- predict(object, type = "parameter", newdata = newdata)

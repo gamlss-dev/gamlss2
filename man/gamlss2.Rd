@@ -156,7 +156,7 @@ nd5 <- with(air, data.frame(
   Wind = min(Wind)
 ))
 par <- predict(m1, newdata = nd5)
-nd5$Probs <- 1 - family(m1)$cdf(90, par)
+nd5$Probs <- 1 - family(m1)$cdf(par, 90)
 
 barplot(
   nd5$Probs,

@@ -297,6 +297,8 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
       "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
   } else {
+    zWz <- sum(w * z^2)
+
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
       Sl <- S
@@ -305,36 +307,58 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
           Sl <- Sl + l[k] * x$S[[k]]
       }
 
-      P <- try(chol2inv(chol(XWX + Sl)), silent = TRUE)
-      if(inherits(P, "try-error"))
-        P <- solve(XWX + Sl)
+      A <- XWX + Sl
+      R <- chol(A)
 
-      b <- drop(P %*% XWz)
+      b <- drop(backsolve(
+        R,
+        forwardsolve(t(R), XWz)
+      ))
 
-      fit <- drop(x$X %*% b)
+      P <- chol2inv(R)
+      edf <- sum(XWX * P)
 
-      if(control$binning)
-        fit <- fit[x$binning$match.index]
+      ## Fitted values are only needed for the final result or
+      ## if the full log-likelihood is used as fitting criterion.
+      if(rf || isTRUE(control$logLik)) {
+        fit <- drop(x$X %*% b)
 
-      edf <- sum(diag(XWX %*% P))
+        if(control$binning)
+          fit <- fit[x$binning$match.index]
+      }
 
       if(rf) {
-        return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-          "lambdas" = l, "vcov" = P, "df" = n - edf))
+        return(list(
+          "coefficients" = b,
+          "fitted.values" = fit,
+          "edf" = edf,
+          "lambdas" = l,
+          "vcov" = P,
+          "df" = n - edf
+        ))
       } else {
         if(isTRUE(control$logLik)) {
           etai <- eta
           etai[[j]] <- etai[[j]] + fit
-          rss <- -2 * family$log_likelihood(par = family$map2par(etai), y = y)
+          rss <- -2 * family$log_likelihood(
+            par = family$map2par(etai),
+            y = y
+          )
         } else {
-          rss <- sum(w * (z - fit)^2)
+          ## Weighted RSS from precomputed crossproducts:
+          ## z'Wz - 2 b'X'Wz + b'X'WXb.
+          rss <- zWz -
+            2 * sum(b * XWz) +
+            sum(b * (XWX %*% b))
         }
 
-        rval <- switch(tolower(control$criterion),
+        rval <- switch(
+          tolower(control$criterion),
           "gcv" = rss * n / (n - edf)^2,
           "aic" = rss + 2 * edf,
           "gaic" = rss + K * edf,
-          "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+          "aicc" = rss + 2 * edf +
+            (2 * edf * (edf + 1)) / (n - edf - 1),
           "bic" = rss + log(n) * edf
         )
 

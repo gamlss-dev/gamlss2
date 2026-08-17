@@ -100,17 +100,17 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     "family"   = distribution,
     "names"    = nams,
     "links"    = links,
-    "log_likelihood"   = function(par, y, ...) sum(distributions3::log_pdf(d3(par), y, elementwise = TRUE, ...)),
+    "log_likelihood"   = function(par, y, ...) sum(log_pdf(d3(par), y, elementwise = TRUE, ...)),
     "mu"       = function(par, ...) mean(d3(par), ...),
-    "pdf"      = function(par, y, log = FALSE) distributions3::pdf(d3(par), y, elementwise = TRUE, log = log),
-    "cdf"      = function(par, y, ...) distributions3::cdf(d3(par), y, elementwise = TRUE, ...),
-    "random"   = function(par, n) distributions3::random(d3(par), n),
+    "pdf"      = function(par, y, log = FALSE) pdf(d3(par), y, elementwise = TRUE, log = log),
+    "cdf"      = function(par, y, ...) cdf(d3(par), y, elementwise = TRUE, ...),
+    "random"   = function(par, n) random(d3(par), n),
     "quantile" = function(par, p) quantile(d3(par), p, elementwise = TRUE),
     "crps"     = function(par, y, ...) sum(scoringRules::crps(d3(par), y, elementwise = TRUE, ...)),
     "mean"     = function(par) mean(d3(par)),
-    "variance" = function(par) distributions3::variance(d3(par)),
-    "skewness" = function(par) distributions3::skewness(d3(par)),
-    "kurtosis" = function(par) distributions3::kurtosis(d3(par)),
+    "variance" = function(par) variance(d3(par)),
+    "skewness" = function(par) skewness(d3(par)),
+    "kurtosis" = function(par) kurtosis(d3(par)),
     "create_distribution" = d3
   )
 
@@ -139,17 +139,17 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
 
   ## add Newton/Fisher update function if desired and available
   if (update && has_score && has_hessian) rval$update <- function(par, y, eta, which) { ## FIXME: update(par, y, eta, which) -> list(eta, weights)
-    lnk <- links[[j]]
+    lnk <- links[[which]]
     mu.eta <- lnk$mu.eta(eta)
-    par <- d3(peta)
+    par <- d3(par)
 
-    s <- score(par, y, which = j)
+    s <- score(par, y, which = which)
     score <- s * mu.eta
-    score <- gamlss2:::deriv_checks(score, is.weight = FALSE)
+    score <- deriv_checks(score, is.weight = FALSE)
 
-    h <- hessian(par, y, which = j)
+    h <- hessian(par, y, which = which)
     hessian <- h * mu.eta^2 + s * lnk$mu.eta2(eta)
-    hessian <- gamlss2:::deriv_checks(hessian, is.weight = TRUE)
+    hessian <- deriv_checks(hessian, is.weight = TRUE)
 
     list(
       eta = eta + 1/hessian * score,

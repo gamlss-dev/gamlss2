@@ -139,7 +139,7 @@ quantile.gamlss2 <- function(x,
   }
   f <- NULL
   for(p in probs)
-    f <- cbind(f, family(x)$quantile(par, p))
+    f <- cbind(f, family(x)$quantile(par = par, p = p))
   colnames(f) <- paste0(probs * 100, "%")
   if(plot) {
     if(is.null(variable)) {

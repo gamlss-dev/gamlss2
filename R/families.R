@@ -689,7 +689,7 @@ complete_family <- function(family)
 
   if(is.null(family$log_likelihood)) {
     family$log_likelihood <- function(par, y, ...) {
-      sum(family$pdf(par, y, log = TRUE, ...), na.rm = TRUE)
+      sum(family$pdf(par = par, y = y, log = TRUE, ...), na.rm = TRUE)
     }
     family["logLik"] <- NULL
   }

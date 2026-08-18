@@ -39,6 +39,12 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## in order to support more than 4 parameter models.
   family <- complete_family(family)
 
+  ## Use numeric hessian?
+  if(isTRUE(control$numhessian)) {
+    family$hessian <- NULL
+    family <- complete_family(family)
+  }
+
   ## Call.
   cl <- match.call()
   if(missing(data)) data <- environment(formula)

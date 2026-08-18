@@ -738,6 +738,10 @@ make_numeric_update <- function(pdf, linkinv,
 ## will be approximated numerically.
 complete_family <- function(family)
 {
+  if(!is.null(attr(family, "family"))) {
+    family <- attr(family, "family")
+  }
+
   if(is.character(family)) {
     family <- get(family)
   }

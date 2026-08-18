@@ -92,18 +92,4 @@ X <- GAMLSS2("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
 X
 
 ## see ?gamlss.dist::GAMLSS for the remainder of this example
-
-## example using gamlss2
-m <- gamlss2(Ozone ~ s(Temp) | ., data = airquality, family = GA)
-
-## extract, also works with newdata
-d <- data.frame(
-  "mean" = mean(m),
-  "median" = median(m),
-  "q95" = quantile(m, probs = 0.95),
-  "variance" = variance(m),
-  "pdf" = pdf(m),
-  "cdf" = cdf(m)
-)
-print(head(d))
 }

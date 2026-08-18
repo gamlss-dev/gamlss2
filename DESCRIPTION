@@ -31,8 +31,8 @@ Description: Next generation infrastructure for generalized additive models for 
 License: GPL-2 | GPL-3
 URL: https://gamlss-dev.github.io/gamlss2/
 BugReports: https://github.com/gamlss-dev/gamlss2/issues
-Depends: R (>= 4.1.0), gamlss.dist, mgcv
-Imports: parallel, Formula, mvtnorm, distributions3 (>= 0.3.0)
+Depends: R (>= 4.1.0), gamlss.dist, mgcv, distributions3 (>= 0.3.0)
+Imports: parallel, Formula, mvtnorm
 Suggests: colorspace, future.apply, gamlss, glmnet, lattice, Matrix, MASS, nlme, nnet, partykit, quarto, rpart, scoringRules, sf
 VignetteBuilder: quarto
 Config/roxygen2/version: 8.0.0

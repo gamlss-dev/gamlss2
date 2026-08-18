@@ -747,7 +747,7 @@ complete_family <- function(family)
   }
 
   if(inherits(family, "gamlss.family")) {
-    return(tF2(family))
+    return(tF(family))
   }
 
   if(is.null(family$family)) {

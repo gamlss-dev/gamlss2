@@ -103,6 +103,8 @@ website:
           contents:
             - text: discretize
               file: man/discretize.qmd
+            - text: family.distribution
+              file: man/family.distribution.qmd
             - text: find_family
               file: man/find_family.qmd
             - text: gamlss2.family

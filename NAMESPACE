@@ -28,7 +28,7 @@ importFrom("mvtnorm", "dmvnorm", "rmvnorm")
 
 importFrom("distributions3", "variance", "pdf", "cdf", "skewness",
   "kurtosis", "random", "is_continuous", "is_discrete", "prodist",
-  "log_pdf", "log_likelihood")
+  "log_pdf", "log_likelihood", "support", "score", "hessian")
 
 export(
   "fake_formula",
@@ -73,7 +73,8 @@ export(
   "mse_metric",
   "BS",
   "bamlss2",
-  "mcmc"
+  "mcmc",
+  "distributions3_family"
 )
 
 S3method(gamlss2, formula)
@@ -125,28 +126,32 @@ S3method(new_formula, default)
 S3method(new_formula, select)
 S3method(deviance, gamlss2)
 
-S3method(distributions3::prodist, gamlss2)
+S3method(prodist, gamlss2)
 
 S3method(anova, gamlss2)
 S3method(drop1, gamlss2)
 S3method(print, drop1.gamlss2)
+
+S3method(family, distribution)
+S3method(family, GAMLSS)
+S3method(family, gamlss.family)
 
 ## distributions3 class GDF, encapsulating gamlss2 families
 export(GDF)
 S3method(format, GDF)
 S3method(print, GDF)
 S3method(mean, GDF)
-S3method(distributions3::variance, GDF)
-S3method(distributions3::skewness, GDF)
-S3method(distributions3::kurtosis, GDF)
-S3method(distributions3::pdf, GDF)
-S3method(distributions3::log_pdf, GDF)
-S3method(distributions3::cdf, GDF)
+S3method(variance, GDF)
+S3method(skewness, GDF)
+S3method(kurtosis, GDF)
+S3method(pdf, GDF)
+S3method(log_pdf, GDF)
+S3method(cdf, GDF)
 S3method(quantile, GDF)
-S3method(distributions3::random, GDF)
-S3method(distributions3::is_continuous, GDF)
-S3method(distributions3::is_discrete, GDF)
-S3method(distributions3::support, GDF)
+S3method(random, GDF)
+S3method(is_continuous, GDF)
+S3method(is_discrete, GDF)
+S3method(support, GDF)
 
 S3method(mean, gamlss2)
 S3method(median, gamlss2)

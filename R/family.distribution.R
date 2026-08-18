@@ -27,7 +27,8 @@ family.distribution <- function(object, links, score = TRUE, hessian = FALSE, up
 ## S3 methods for generating a gamlss2.family from gamlss.dist objects
 ## (either a gamlss.family or a GAMLSS distribution)
 family.GAMLSS <- function(object, ...) {
-  object <- gamlss.dist:::.gamlss_family(object)
+  .gamlss_family <- function (x) get(attr(object, "family")[1L], asNamespace("gamlss.dist"))()
+  object <- .gamlss_family(object)
   NextMethod()
 }
 

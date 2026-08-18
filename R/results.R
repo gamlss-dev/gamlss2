@@ -257,10 +257,13 @@ results_linear <- function(x, parameter = NULL, data, ...)
   if(!is.null(x$selection)) {
     ff <- x$selection$formula
     names(ff) <- NULL
+    ## Keep variables occurring inside selected special terms when building
+    ## the prediction grid; fake_formula(..., nospecials = TRUE) removes them.
+    vn <- unique(unlist(lapply(ff, all.vars)))
     ff <- fake_formula(ff, nospecials = TRUE)
+  } else {
+    vn <- all.vars(ff)
   }
-
-  vn <- all.vars(ff)
 
   if(!length(vn)) {
     return(NULL)

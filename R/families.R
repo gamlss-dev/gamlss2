@@ -159,402 +159,895 @@ parse_links <- function(links, default.links, ...)
 ## Function takes a gamlss family and sets it up
 ## a bit different in order to support more than
 ## 4 parameter models.
+#tF <- function(x, ...)
+#{
+#  if(is.function(x))
+#    x <- x()
+#  if(!inherits(x, "gamlss.family")) {
+#    return(x)
+#  }
+
+#  args <- list(...)
+#  pr <- args$range
+#  check_range <- function(par) {
+#    for(j in names(par)) {
+#      if(!is.null(pr[[j]])) {
+#        par[[j]][par[[j]] < min(pr[[j]])] <- min(pr[[j]])
+#        par[[j]][par[[j]] > max(pr[[j]])] <- max(pr[[j]])
+#      }
+#    }
+#    par
+#  }
+#  nx <- names(x$parameters)[unlist(x$parameters)]
+#  score <- hessian <- initialize <- list()
+
+#  make_call <- function(fun) {
+#    fn <- deparse(substitute(fun), backtick = TRUE, width.cutoff = 500)
+#    nf <- names(formals(fun))
+#    if(length(nf) < 1) {
+#      call <- paste(fn, "()", sep = "")
+#    } else {
+#      call <- paste(fn, "(", if("y" %in% nf) "y," else "", sep = "")
+#      np <- nx[nx %in% nf]
+#      if(!length(np)) {
+#        call <- paste(fn, "(y", sep = "")
+#      } else {
+#        call <- paste(call, paste(np, '=', 'par$', np, sep = '', collapse = ','), sep = "")
+#      }
+#      if("bd" %in% nf) {
+#        call <- paste(call, ",bd", sep = "")
+#      }
+#    }
+#    call <- parse(text = paste(call, ")", sep = ""))
+#    return(call)
+#  }
+
+#  eval_expr <- function(expr, ..., .parent = parent.frame()) {
+#    args <- list(...)
+#    if(!is.null(args$y) && is.null(args$bd))
+#      args$bd <- attr(args$y, "bd", exact = TRUE)
+#    eval(expr, envir = list2env(args, parent = .parent))
+#  }
+
+#  if("mu" %in% nx) {
+#    mu.link <- make.link2(x$mu.link)
+#    mu.cs <- make_call(x$dldm)
+#    mu.hs <- make_call(x$d2ldm2)
+#    score$mu  <- function(par, y, ...) {
+#      par <- check_range(par)
+#      res <- eval_expr(mu.cs, y = y, par = par) * mu.link$mu.eta(mu.link$linkfun(par$mu))
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    hessian$mu <- function(par, y, ...) {
+#      par <- check_range(par)
+#      hessian <- -1 * eval_expr(mu.hs, y = y, par = par)
+#      eta <- mu.link$linkfun(par$mu)
+#      res <- drop(hessian * mu.link$mu.eta(eta)^2)
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    if(!is.null(x$mu.initial)) {
+#      initialize$mu <- function(y, ...) {
+#        if(!is.null(attr(y, "contrasts"))) {
+#          if(!is.null(dim(y)))
+#            y <- y[, ncol(y)]
+#        }
+#        eval_env <- list2env(list(
+#          "y" = y,
+#          "bd" = attr(y, "bd", exact = TRUE)
+#        ), parent = parent.frame())
+#        res <- eval(x$mu.initial, envir = eval_env)
+#        if(!is.null(dim(res))) {
+#          if(length(dim(res)) > 1)
+#            res <- res[, 1]
+#        }
+#        res
+#      }
+#    }
+#  }
+
+#  if("sigma" %in% nx) {
+#    sigma.link <- make.link2(x$sigma.link)
+#    sigma.cs <- make_call(x$dldd)
+#    sigma.hs <- make_call(x$d2ldd2)
+#    score$sigma  <- function(par, y, ...) {
+#      par <- check_range(par)
+#      res <- eval_expr(sigma.cs, y = y, par = par) * sigma.link$mu.eta(sigma.link$linkfun(par$sigma))
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    hessian$sigma <- function(par, y, ...) {
+#      par <- check_range(par)
+#      hessian <- -1 * eval_expr(sigma.hs, y = y, par = par)
+#      eta <- sigma.link$linkfun(par$sigma)
+#      ## res <- drop(score * sigma.link$mu.eta2(eta) + hessian * sigma.link$mu.eta(eta)^2)
+#      res <- drop(hessian * sigma.link$mu.eta(eta)^2)
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    if(!is.null(x$sigma.initial)) {
+#      initialize$sigma <- function(y, ...) {
+#        res <- eval(x$sigma.initial)
+#        if(!is.null(dim(res))) {
+#          if(length(dim(res)) > 1)
+#            res <- res[, 1]
+#        }
+#        res
+#      }
+#    }
+#  }
+
+#  if("nu" %in% nx) {
+#    nu.link <- make.link2(x$nu.link)
+#    nu.cs <- make_call(x$dldv)
+#    nu.hs <- make_call(x$d2ldv2)
+#    score$nu  <- function(par, y, ...) {
+#      par <- check_range(par)
+#      res <- eval_expr(nu.cs, y = y, par = par) * nu.link$mu.eta(nu.link$linkfun(par$nu))
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    hessian$nu <- function(par, y, ...) {
+#      par <- check_range(par)
+#      hessian <- -1 * eval_expr(nu.hs, y = y, par = par)
+#      eta <- nu.link$linkfun(par$nu)
+#      ## res <- drop(score * nu.link$mu.eta2(eta) + hessian * nu.link$mu.eta(eta)^2)
+#      res <- drop(hessian * nu.link$mu.eta(eta)^2)
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    if(!is.null(x$nu.initial)) {
+#      initialize$nu <- function(y, ...) {
+#        res <- eval(x$nu.initial)
+#        if(!is.null(dim(res))) {
+#          if(length(dim(res)) > 1)
+#            res <- res[, 1]
+#        }
+#        res
+#      }
+#    }
+#  }
+
+#  if("tau" %in% nx) {
+#    tau.link <- make.link2(x$tau.link)
+#    tau.cs <- make_call(x$dldt)
+#    tau.hs <- make_call(x$d2ldt2)
+#    score$tau  <- function(par, y, ...) {
+#      par <- check_range(par)
+#      res <- eval_expr(tau.cs, y = y, par = par) * tau.link$mu.eta(tau.link$linkfun(par$tau))
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    hessian$tau <- function(par, y, ...) {
+#      par <- check_range(par)
+#      hessian <- -1 * eval_expr(tau.hs, y = y, par = par)
+#      eta <- tau.link$linkfun(par$tau)
+#      ## res <- drop(score * tau.link$mu.eta2(eta) + hessian * tau.link$mu.eta(eta)^2)
+#      res <- drop(hessian * tau.link$mu.eta(eta)^2)
+#      if(!is.null(dim(res))) {
+#        if(length(dim(res)) > 1)
+#          res <- res[, 1]
+#      }
+#      res
+#    }
+#    if(!is.null(x$tau.initial)) {
+#      initialize$tau <- function(y, ...) {
+#        res <- eval(x$tau.initial)
+#        if(!is.null(dim(res))) {
+#          if(length(dim(res)) > 1)
+#            res <- res[, 1]
+#        }
+#        res
+#      }
+#    }
+#  }
+
+#  ## For CG algorithm.
+#  if(all(c("mu", "sigma") %in% nx)) {
+#    mu.sigma.hs <- make_call(x$d2ldmdd)
+#    hessian$mu.sigma <- function(par, y, ...) {
+#      par <- check_range(par)
+#      eta.mu <- mu.link$linkfun(par$mu)
+#      eta.sigma <- sigma.link$linkfun(par$sigma)
+#      hessian <- -1 * eval_expr(mu.sigma.hs, y = y, par = par)
+#      hessian * (mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma))
+#    }
+#    hessian$sigma.mu <- hessian$mu.sigma
+#  }
+#  if("nu" %in% nx) {
+#    mu.nu.hs <- make_call(x$d2ldmdv)
+#    hessian$mu.nu <- function(par, y, ...) {
+#      par <- check_range(par)
+#      eta.mu <- mu.link$linkfun(par$mu)
+#      eta.nu <- nu.link$linkfun(par$nu)
+#      hessian <- -1 * eval_expr(mu.nu.hs, y = y, par = par)
+#      hessian * (mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu))
+#    }
+#    hessian$nu.mu <- hessian$mu.nu
+
+#    sigma.nu.hs <- make_call(x$d2ldddv)
+#    hessian$sigma.nu <- function(par, y, ...) {
+#      par <- check_range(par)
+#      eta.sigma <- sigma.link$linkfun(par$sigma)
+#      eta.nu <- nu.link$linkfun(par$nu)
+#      hessian <- -1 * eval_expr(sigma.nu.hs, y = y, par = par)
+#      hessian * (sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu))
+#    }
+#    hessian$nu.sigma <- hessian$sigma.nu
+#  }
+
+#  if("tau" %in% nx) {
+#    mu.tau.hs <- make_call(x$d2ldmdt)
+#    hessian$mu.tau <- function(par, y, ...) {
+#      par <- check_range(par)
+#      eta.mu <- mu.link$linkfun(par$mu)
+#      eta.tau <- tau.link$linkfun(par$tau)
+#      hessian <- -1 * eval_expr(mu.tau.hs, y = y, par = par)
+#      hessian * (mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau))
+#    }
+#    hessian$tau.mu <- hessian$mu.tau
+
+#    sigma.tau.hs <- make_call(x$d2ldddt)
+#    hessian$sigma.tau <- function(par, y, ...) {
+#      par <- check_range(par)
+#      eta.sigma <- sigma.link$linkfun(par$sigma)
+#      eta.tau <- tau.link$linkfun(par$tau)
+#      hessian <- -1 * eval_expr(sigma.tau.hs, y = y, par = par)
+#      hessian * (sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau))
+#    }
+#    hessian$tau.sigma <- hessian$sigma.tau
+
+#    nu.tau.hs <- make_call(x$d2ldvdt)
+#    hessian$nu.tau <- function(par, y, ...) {
+#      par <- check_range(par)
+#      eta.nu <- nu.link$linkfun(par$nu)
+#      eta.tau <- tau.link$linkfun(par$tau)
+#      hessian <- -1 * eval_expr(nu.tau.hs, y = y, par = par)
+#      hessian * (nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau))
+#    }
+#    hessian$tau.nu <- hessian$nu.tau
+#  }
+
+#  dfun <- get(paste("d", x$family[1], sep = ""))
+#  pfun <- try(get(paste("p", x$family[1], sep = "")), silent = TRUE)
+#  qfun <- try(get(paste("q", x$family[1], sep = "")), silent = TRUE)
+#  rfun <- try(get(paste("r", x$family[1], sep = "")), silent = TRUE)
+
+#  nf <- names(formals(dfun))
+#  bdc <- "bd" %in% nf
+
+#  dc <- parse(text = paste('dfun(y,', paste(paste(nx, 'par$', sep = "="),
+#    nx, sep = '', collapse = ','), ',log=log,...',
+#    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
+#  pc <- parse(text = paste('pfun(q,', paste(paste(nx, 'par$', sep = "="),
+#    nx, sep = '', collapse = ','), ',log=log,...',
+#    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
+#  qc <- parse(text = paste('qfun(p,', paste(paste(nx, 'par$', sep = "="),
+#    nx, sep = '', collapse = ','), ',log=log,...',
+#    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
+#  rc <- parse(text = paste('rfun(n,', paste(paste(nx, 'par$', sep = "="),
+#    nx, sep = '', collapse = ','), ',...',
+#    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
+
+#  rval <- list(
+#    "family" = x$family[1],
+#    "names" = nx,
+#    "links" = unlist(x[paste(nx, "link", sep = ".")]),
+#    "score" = score,
+#    "hessian" = hessian,
+#    "pdf" = function(par, y, log = FALSE, ...) {
+#       d <- eval_expr(dc, y = y, par = par, log = log, ...)
+#       return(d)
+#    },
+#    "cdf" = if(!inherits(pfun, "try-error")) function(par, y, log = FALSE, ...) {
+#      p <- eval_expr(pc, q = y, par = par, log = log, ...)
+#      if(length(p) < length(par[[1L]])) {
+#        q <- rep(q, length.out = length(par[[1L]]))
+#        p <- eval_expr(pc, q = y, par = par, log = log, ...)
+#      }
+#      return(p)
+#    } else NULL,
+#    "quantile" = if(!inherits(qfun, "try-error")) function(par, p, log = FALSE, ...) {
+#      if(any(i <- p <= 1e-10))
+#        p[i] <- 1e-10
+#      if(any(i <- p >= (1- 1e-10)))
+#        p[i] <- 1 - 1e-10
+#      q <- eval_expr(qc, p = p, par = par, log = log, ...)
+#      if(length(q) < length(par[[1L]])) {
+#        p <- rep(p, length.out = length(par[[1L]]))
+#        q <- eval_expr(qc, p = p, par = par, log = log, ...)
+#      }
+#      return(q)
+#    } else NULL,
+#    "random" = if(!inherits(rfun, "try-error")) function(par, n, ...) {
+#      return(eval_expr(rc, n = n, par = par, ...))
+#    } else NULL
+#  )
+#  names(rval$links) <- nx
+#  rval$valid.response <- x$y.valid
+#  rval$initialize <- initialize
+#  rval$type <- tolower(x$type)
+
+#  if(!is.null(x$mean)) {
+#    meanc <- make_call(x$mean)
+#    rval$mean  <- function(par, ...) {
+#      res <- eval(meanc)
+#      if(!is.null(dim(res)))
+#        res <- res[, 1]
+#      res
+#    }
+#  }
+
+#  if(!is.null(x$variance)) {
+#    varc <- make_call(x$variance)
+#    rval$variance  <- function(par, ...) {
+#      res <- eval(varc)
+#      if(!is.null(dim(res)))
+#        res <- res[, 1]
+#      res
+#    }
+#  }
+
+#  linkinv <- list()
+#  for(j in rval$names) {
+#    link <- make.link2(rval$links[[j]])
+#    linkinv[[j]] <- link$linkinv
+#  }
+
+#  rval$map2par <- function(eta) {
+#    for(j in names(eta)) {
+#      eta[[j]] <- linkinv[[j]](eta[[j]])
+#      eta[[j]][is.na(eta[[j]])] <- 0
+#      if(any(jj <- eta[[j]] == Inf))
+#        eta[[j]][jj] <- 10
+#      if(any(jj <- eta[[j]] == -Inf))
+#        eta[[j]][jj] <- -10
+#    }
+#    return(eta)
+#  }
+
+#  rval$log_likelihood <- function(par, y) {
+#    log <- TRUE
+#    d <- try(eval_expr(dc, y = y, par = par, log = log), silent = TRUE)
+#    if(inherits(d, "try-error")) {
+#      warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
+#      return(-Inf)
+#    }
+##    if(any(is.na(d))) {
+##      warning("NA log-density values!")
+##    }
+#    if(any(i <- !is.finite(d))) {
+#      ## warning("non finite log-density values, set to -100!")
+#      d[i] <- -100
+#    }
+#    return(sum(d, na.rm = TRUE))
+#  }
+
+#  if(!is.null(x$rqres)) {
+#    rqres <- utils::getFromNamespace("rqres", "gamlss")
+#    nenv <- new.env()
+#    assign("rqres", utils::getFromNamespace("rqres", "gamlss"), envir = nenv)
+
+#    rval$rqres <- function(par, y, ...) {
+#      assign("y", y, envir = nenv)
+#      for(i in nx)
+#        assign(i, par[[i]], envir = nenv)
+#      eval(x$rqres, envir = nenv)
+#    }
+#  }
+
+#  class(rval) <- "gamlss2.family"
+#  rval
+#}
+
 tF <- function(x, ...)
 {
-  if(is.function(x))
-    x <- x()
-  if(!inherits(x, "gamlss.family")) {
-    return(x)
-  }
+  if(is.function(x)) x <- x()
+  if(!inherits(x, "gamlss.family")) return(x)
 
-  args <- list(...)
-  pr <- args$range
-  check_range <- function(par) {
-    for(j in names(par)) {
-      if(!is.null(pr[[j]])) {
-        par[[j]][par[[j]] < min(pr[[j]])] <- min(pr[[j]])
-        par[[j]][par[[j]] > max(pr[[j]])] <- max(pr[[j]])
-      }
-    }
-    par
-  }
+  dots <- list(...)
+  pr <- dots$range
   nx <- names(x$parameters)[unlist(x$parameters)]
   score <- hessian <- initialize <- list()
 
-  make_call <- function(fun) {
-    fn <- deparse(substitute(fun), backtick = TRUE, width.cutoff = 500)
+  ## Find make.link2() in the package namespace or the search path.
+  make_link2 <- if(exists("make.link2", mode = "function", inherits = TRUE)) {
+    get("make.link2", mode = "function", inherits = TRUE)
+  } else {
+    utils::getFromNamespace("make.link2", "gamlss2")
+  }
+
+  ## Code-generation helpers.
+  qstr <- function(z) encodeString(z, quote = '"')
+  pref <- function(z) paste0("par[[", qstr(z), "]]" )
+
+  mkfun <- function(src, bindings = list()) {
+    e <- list2env(bindings, parent = baseenv())
+    f <- eval(parse(text = src), envir = e)
+    ## Compile generated functions once during family setup.
+    compiler::cmpfun(f)
+  }
+
+  ## Precompute parameter bounds used by the generated functions.
+  rnames <- nx[vapply(nx, function(j) !is.null(pr[[j]]), logical(1L))]
+  if(length(rnames)) {
+    rlo <- vapply(rnames, function(j) min(pr[[j]]), numeric(1L))
+    rhi <- vapply(rnames, function(j) max(pr[[j]]), numeric(1L))
+  } else {
+    rlo <- rhi <- numeric()
+  }
+
+  numtxt <- function(z) {
+    if(is.na(z)) return("NA_real_")
+    if(is.infinite(z)) return(if(z > 0) "Inf" else "-Inf")
+    sprintf("%.17g", z)
+  }
+
+  range_src <- if(length(rnames)) {
+    paste(vapply(seq_along(rnames), function(k) {
+      j <- rnames[[k]]
+      lo <- numtxt(rlo[[k]])
+      hi <- numtxt(rhi[[k]])
+      pj <- pref(j)
+      paste0(
+        "z__ <- ", pj, "\n",
+        "ii__ <- z__ < ", lo, "\n",
+        "chg__ <- any(ii__)\n",
+        "if(chg__) z__[ii__] <- ", lo, "\n",
+        "ii__ <- z__ > ", hi, "\n",
+        "if(any(ii__)) { z__[ii__] <- ", hi, "; chg__ <- TRUE }\n",
+        "if(chg__) ", pj, " <- z__"
+      )
+    }, character(1L)), collapse = "\n")
+  } else ""
+
+  deriv_call <- function(fun, binding = ".fun") {
     nf <- names(formals(fun))
-    if(length(nf) < 1) {
-      call <- paste(fn, "()", sep = "")
+    if(!length(nf)) return(paste0(binding, "()"))
+
+    aa <- character()
+    if("y" %in% nf) aa <- c(aa, "y")
+
+    np <- nx[nx %in% nf]
+    if(length(np)) {
+      aa <- c(aa, paste0(np, "=", vapply(np, pref, character(1L))))
+    } else if(!("y" %in% nf)) {
+      ## Keep the fallback used by make_call().
+      aa <- c(aa, "y")
+    }
+
+    if("bd" %in% nf)
+      aa <- c(aa, 'bd=attr(y, "bd", exact=TRUE)')
+
+    paste0(binding, "(", paste(aa, collapse = ","), ")")
+  }
+
+  ## Derivative of a parameter with respect to its linear predictor.
+  link_objects <- setNames(lapply(nx, function(j) {
+    make_link2(x[[paste0(j, ".link")]])
+  }), nx)
+
+  link_name <- function(j) {
+    z <- link_objects[[j]]$name
+    if(is.null(z) || length(z) != 1L) "" else as.character(z)
+  }
+
+  mult_expr <- function(j, tag = "") {
+    p <- pref(j)
+    switch(link_name(j),
+      identity = "1",
+      log      = p,
+      inverse  = paste0("-(", p, " * ", p, ")"),
+      sqrt     = paste0("2 * sqrt(", p, ")"),
+      logit    = paste0(p, " * (1 - ", p, ")"),
+      paste0(".", tag, "mueta(.", tag, "linkfun(", p, "))")
+    )
+  }
+
+  hot_bindings <- function(fun, j, tag = "") {
+    out <- list(.fun = fun)
+    ## Bind link functions for the generated expression.
+    out[[paste0(".", tag, "linkfun")]] <- link_objects[[j]]$linkfun
+    out[[paste0(".", tag, "mueta")]] <- link_objects[[j]]$mu.eta
+    out
+  }
+
+  make_score <- function(fun, j) {
+    dc <- deriv_call(fun)
+    mm <- mult_expr(j)
+    rr <- if(identical(mm, "1")) dc else paste0("(", dc, ") * (", mm, ")")
+    src <- paste0(
+      "function(par, y, ...) {\n", range_src, "\n",
+      "res <- ", rr, "\n",
+      "if(length(dim(res)) > 1L) res <- res[, 1L]\n",
+      "res\n}"
+    )
+    mkfun(src, hot_bindings(fun, j))
+  }
+
+  make_hessian <- function(fun, j) {
+    dc <- deriv_call(fun)
+    mm <- mult_expr(j)
+    rr <- if(identical(mm, "1")) {
+      paste0("-", dc)
     } else {
-      call <- paste(fn, "(", if("y" %in% nf) "y," else "", sep = "")
-      np <- nx[nx %in% nf]
-      if(!length(np)) {
-        call <- paste(fn, "(y", sep = "")
-      } else {
-        call <- paste(call, paste(np, '=', 'par$', np, sep = '', collapse = ','), sep = "")
-      }
-      if("bd" %in% nf) {
-        call <- paste(call, ",bd", sep = "")
-      }
+      paste0("-", dc, " * (", mm, ") * (", mm, ")")
     }
-    call <- parse(text = paste(call, ")", sep = ""))
-    return(call)
+    src <- paste0(
+      "function(par, y, ...) {\n", range_src, "\n",
+      "res <- drop(", rr, ")\n",
+      "if(length(dim(res)) > 1L) res <- res[, 1L]\n",
+      "res\n}"
+    )
+    mkfun(src, hot_bindings(fun, j))
   }
 
-  eval_expr <- function(expr, ..., .parent = parent.frame()) {
-    args <- list(...)
-    if(!is.null(args$y) && is.null(args$bd))
-      args$bd <- attr(args$y, "bd", exact = TRUE)
-    eval(expr, envir = list2env(args, parent = .parent))
+  make_cross_hessian <- function(fun, j1, j2) {
+    dc <- deriv_call(fun)
+    m1 <- mult_expr(j1, "a_")
+    m2 <- mult_expr(j2, "b_")
+    src <- paste0(
+      "function(par, y, ...) {\n", range_src, "\n",
+      "-", dc, " * (", m1, ") * (", m2, ")\n}"
+    )
+    b <- list(.fun = fun)
+    b$.a_linkfun <- link_objects[[j1]]$linkfun
+    b$.a_mueta   <- link_objects[[j1]]$mu.eta
+    b$.b_linkfun <- link_objects[[j2]]$linkfun
+    b$.b_mueta   <- link_objects[[j2]]$mu.eta
+    mkfun(src, b)
   }
 
+  ## Score and Hessian functions.
   if("mu" %in% nx) {
-    mu.link <- make.link2(x$mu.link)
-    mu.cs <- make_call(x$dldm)
-    mu.hs <- make_call(x$d2ldm2)
-    score$mu  <- function(par, y, ...) {
-      par <- check_range(par)
-      res <- eval_expr(mu.cs, y = y, par = par) * mu.link$mu.eta(mu.link$linkfun(par$mu))
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
-    hessian$mu <- function(par, y, ...) {
-      par <- check_range(par)
-      hessian <- -1 * eval_expr(mu.hs, y = y, par = par)
-      eta <- mu.link$linkfun(par$mu)
-      res <- drop(hessian * mu.link$mu.eta(eta)^2)
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
+    score$mu   <- make_score(x$dldm, "mu")
+    hessian$mu <- make_hessian(x$d2ldm2, "mu")
+
     if(!is.null(x$mu.initial)) {
+      mu.initial <- x$mu.initial
       initialize$mu <- function(y, ...) {
-        if(!is.null(attr(y, "contrasts"))) {
-          if(!is.null(dim(y)))
-            y <- y[, ncol(y)]
-        }
-        eval_env <- list2env(list(
-          "y" = y,
-          "bd" = attr(y, "bd", exact = TRUE)
-        ), parent = parent.frame())
-        res <- eval(x$mu.initial, envir = eval_env)
-        if(!is.null(dim(res))) {
-          if(length(dim(res)) > 1)
-            res <- res[, 1]
-        }
+        if(!is.null(attr(y, "contrasts")) && !is.null(dim(y)))
+          y <- y[, ncol(y)]
+        bd <- attr(y, "bd", exact = TRUE)
+        res <- eval(mu.initial)
+        if(length(dim(res)) > 1L) res <- res[, 1L]
         res
       }
     }
   }
 
   if("sigma" %in% nx) {
-    sigma.link <- make.link2(x$sigma.link)
-    sigma.cs <- make_call(x$dldd)
-    sigma.hs <- make_call(x$d2ldd2)
-    score$sigma  <- function(par, y, ...) {
-      par <- check_range(par)
-      res <- eval_expr(sigma.cs, y = y, par = par) * sigma.link$mu.eta(sigma.link$linkfun(par$sigma))
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
-    hessian$sigma <- function(par, y, ...) {
-      par <- check_range(par)
-      hessian <- -1 * eval_expr(sigma.hs, y = y, par = par)
-      eta <- sigma.link$linkfun(par$sigma)
-      ## res <- drop(score * sigma.link$mu.eta2(eta) + hessian * sigma.link$mu.eta(eta)^2)
-      res <- drop(hessian * sigma.link$mu.eta(eta)^2)
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
+    score$sigma   <- make_score(x$dldd, "sigma")
+    hessian$sigma <- make_hessian(x$d2ldd2, "sigma")
+
     if(!is.null(x$sigma.initial)) {
+      sigma.initial <- x$sigma.initial
       initialize$sigma <- function(y, ...) {
-        res <- eval(x$sigma.initial)
-        if(!is.null(dim(res))) {
-          if(length(dim(res)) > 1)
-            res <- res[, 1]
-        }
+        res <- eval(sigma.initial)
+        if(length(dim(res)) > 1L) res <- res[, 1L]
         res
       }
     }
   }
 
   if("nu" %in% nx) {
-    nu.link <- make.link2(x$nu.link)
-    nu.cs <- make_call(x$dldv)
-    nu.hs <- make_call(x$d2ldv2)
-    score$nu  <- function(par, y, ...) {
-      par <- check_range(par)
-      res <- eval_expr(nu.cs, y = y, par = par) * nu.link$mu.eta(nu.link$linkfun(par$nu))
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
-    hessian$nu <- function(par, y, ...) {
-      par <- check_range(par)
-      hessian <- -1 * eval_expr(nu.hs, y = y, par = par)
-      eta <- nu.link$linkfun(par$nu)
-      ## res <- drop(score * nu.link$mu.eta2(eta) + hessian * nu.link$mu.eta(eta)^2)
-      res <- drop(hessian * nu.link$mu.eta(eta)^2)
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
+    score$nu   <- make_score(x$dldv, "nu")
+    hessian$nu <- make_hessian(x$d2ldv2, "nu")
+
     if(!is.null(x$nu.initial)) {
+      nu.initial <- x$nu.initial
       initialize$nu <- function(y, ...) {
-        res <- eval(x$nu.initial)
-        if(!is.null(dim(res))) {
-          if(length(dim(res)) > 1)
-            res <- res[, 1]
-        }
+        res <- eval(nu.initial)
+        if(length(dim(res)) > 1L) res <- res[, 1L]
         res
       }
     }
   }
 
   if("tau" %in% nx) {
-    tau.link <- make.link2(x$tau.link)
-    tau.cs <- make_call(x$dldt)
-    tau.hs <- make_call(x$d2ldt2)
-    score$tau  <- function(par, y, ...) {
-      par <- check_range(par)
-      res <- eval_expr(tau.cs, y = y, par = par) * tau.link$mu.eta(tau.link$linkfun(par$tau))
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
-    hessian$tau <- function(par, y, ...) {
-      par <- check_range(par)
-      hessian <- -1 * eval_expr(tau.hs, y = y, par = par)
-      eta <- tau.link$linkfun(par$tau)
-      ## res <- drop(score * tau.link$mu.eta2(eta) + hessian * tau.link$mu.eta(eta)^2)
-      res <- drop(hessian * tau.link$mu.eta(eta)^2)
-      if(!is.null(dim(res))) {
-        if(length(dim(res)) > 1)
-          res <- res[, 1]
-      }
-      res
-    }
+    score$tau   <- make_score(x$dldt, "tau")
+    hessian$tau <- make_hessian(x$d2ldt2, "tau")
+
     if(!is.null(x$tau.initial)) {
+      tau.initial <- x$tau.initial
       initialize$tau <- function(y, ...) {
-        res <- eval(x$tau.initial)
-        if(!is.null(dim(res))) {
-          if(length(dim(res)) > 1)
-            res <- res[, 1]
-        }
+        res <- eval(tau.initial)
+        if(length(dim(res)) > 1L) res <- res[, 1L]
         res
       }
     }
   }
 
-  ## For CG algorithm.
+  ## Cross derivatives for CG.
   if(all(c("mu", "sigma") %in% nx)) {
-    mu.sigma.hs <- make_call(x$d2ldmdd)
-    hessian$mu.sigma <- function(par, y, ...) {
-      par <- check_range(par)
-      eta.mu <- mu.link$linkfun(par$mu)
-      eta.sigma <- sigma.link$linkfun(par$sigma)
-      hessian <- -1 * eval_expr(mu.sigma.hs, y = y, par = par)
-      hessian * (mu.link$mu.eta(eta.mu) * sigma.link$mu.eta(eta.sigma))
-    }
+    hessian$mu.sigma <- make_cross_hessian(x$d2ldmdd, "mu", "sigma")
     hessian$sigma.mu <- hessian$mu.sigma
   }
   if("nu" %in% nx) {
-    mu.nu.hs <- make_call(x$d2ldmdv)
-    hessian$mu.nu <- function(par, y, ...) {
-      par <- check_range(par)
-      eta.mu <- mu.link$linkfun(par$mu)
-      eta.nu <- nu.link$linkfun(par$nu)
-      hessian <- -1 * eval_expr(mu.nu.hs, y = y, par = par)
-      hessian * (mu.link$mu.eta(eta.mu) * nu.link$mu.eta(eta.nu))
-    }
+    hessian$mu.nu <- make_cross_hessian(x$d2ldmdv, "mu", "nu")
     hessian$nu.mu <- hessian$mu.nu
 
-    sigma.nu.hs <- make_call(x$d2ldddv)
-    hessian$sigma.nu <- function(par, y, ...) {
-      par <- check_range(par)
-      eta.sigma <- sigma.link$linkfun(par$sigma)
-      eta.nu <- nu.link$linkfun(par$nu)
-      hessian <- -1 * eval_expr(sigma.nu.hs, y = y, par = par)
-      hessian * (sigma.link$mu.eta(eta.sigma) * nu.link$mu.eta(eta.nu))
-    }
+    hessian$sigma.nu <- make_cross_hessian(x$d2ldddv, "sigma", "nu")
     hessian$nu.sigma <- hessian$sigma.nu
   }
-
   if("tau" %in% nx) {
-    mu.tau.hs <- make_call(x$d2ldmdt)
-    hessian$mu.tau <- function(par, y, ...) {
-      par <- check_range(par)
-      eta.mu <- mu.link$linkfun(par$mu)
-      eta.tau <- tau.link$linkfun(par$tau)
-      hessian <- -1 * eval_expr(mu.tau.hs, y = y, par = par)
-      hessian * (mu.link$mu.eta(eta.mu) * tau.link$mu.eta(eta.tau))
-    }
+    hessian$mu.tau <- make_cross_hessian(x$d2ldmdt, "mu", "tau")
     hessian$tau.mu <- hessian$mu.tau
 
-    sigma.tau.hs <- make_call(x$d2ldddt)
-    hessian$sigma.tau <- function(par, y, ...) {
-      par <- check_range(par)
-      eta.sigma <- sigma.link$linkfun(par$sigma)
-      eta.tau <- tau.link$linkfun(par$tau)
-      hessian <- -1 * eval_expr(sigma.tau.hs, y = y, par = par)
-      hessian * (sigma.link$mu.eta(eta.sigma) * tau.link$mu.eta(eta.tau))
-    }
+    hessian$sigma.tau <- make_cross_hessian(x$d2ldddt, "sigma", "tau")
     hessian$tau.sigma <- hessian$sigma.tau
 
-    nu.tau.hs <- make_call(x$d2ldvdt)
-    hessian$nu.tau <- function(par, y, ...) {
-      par <- check_range(par)
-      eta.nu <- nu.link$linkfun(par$nu)
-      eta.tau <- tau.link$linkfun(par$tau)
-      hessian <- -1 * eval_expr(nu.tau.hs, y = y, par = par)
-      hessian * (nu.link$mu.eta(eta.nu) * tau.link$mu.eta(eta.tau))
-    }
+    hessian$nu.tau <- make_cross_hessian(x$d2ldvdt, "nu", "tau")
     hessian$tau.nu <- hessian$nu.tau
   }
 
-  dfun <- get(paste("d", x$family[1], sep = ""))
-  pfun <- try(get(paste("p", x$family[1], sep = "")), silent = TRUE)
-  qfun <- try(get(paste("q", x$family[1], sep = "")), silent = TRUE)
-  rfun <- try(get(paste("r", x$family[1], sep = "")), silent = TRUE)
+  ## Working response and weights for RS.
+  diag_score_fun <- list()
+  diag_hess_fun <- list()
+  if("mu" %in% nx) {
+    diag_score_fun$mu <- x$dldm
+    diag_hess_fun$mu <- x$d2ldm2
+  }
+  if("sigma" %in% nx) {
+    diag_score_fun$sigma <- x$dldd
+    diag_hess_fun$sigma <- x$d2ldd2
+  }
+  if("nu" %in% nx) {
+    diag_score_fun$nu <- x$dldv
+    diag_hess_fun$nu <- x$d2ldv2
+  }
+  if("tau" %in% nx) {
+    diag_score_fun$tau <- x$dldt
+    diag_hess_fun$tau <- x$d2ldt2
+  }
 
-  nf <- names(formals(dfun))
-  bdc <- "bd" %in% nf
+  make_update <- function() {
+    zb <- list()
+    branches <- vapply(seq_along(nx), function(k) {
+      j <- nx[[k]]
+      sf <- diag_score_fun[[j]]
+      hf <- diag_hess_fun[[j]]
+      if(is.null(sf) || is.null(hf))
+        stop("cannot build fused update() for parameter '", j, "'")
 
-  dc <- parse(text = paste('dfun(y,', paste(paste(nx, 'par$', sep = "="),
-    nx, sep = '', collapse = ','), ',log=log,...',
-    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
-  pc <- parse(text = paste('pfun(q,', paste(paste(nx, 'par$', sep = "="),
-    nx, sep = '', collapse = ','), ',log=log,...',
-    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
-  qc <- parse(text = paste('qfun(p,', paste(paste(nx, 'par$', sep = "="),
-    nx, sep = '', collapse = ','), ',log=log,...',
-    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
-  rc <- parse(text = paste('rfun(n,', paste(paste(nx, 'par$', sep = "="),
-    nx, sep = '', collapse = ','), ',...',
-    if(bdc) paste0(",bd") else NULL, ")", sep = ""))
+      sb <- paste0(".zscore", k)
+      hb <- paste0(".zhess", k)
+      sc <- deriv_call(sf, binding = sb)
+      hc <- deriv_call(hf, binding = hb)
+
+      tag <- paste0("zw", k, "_")
+      mm <- mult_expr(j, tag = tag)
+      if(identical(mm, "1")) {
+        msrc <- ""
+        score_expr <- sc
+        hess_expr <- paste0("-", hc)
+      } else {
+        msrc <- paste0("m__ <- ", mm, "\n")
+        score_expr <- paste0("(", sc, ") * m__")
+        hess_expr <- paste0("-", hc, " * m__ * m__")
+      }
+
+      zb[[sb]] <<- sf
+      zb[[hb]] <<- hf
+      zb[[paste0(".", tag, "linkfun")]] <<- link_objects[[j]]$linkfun
+      zb[[paste0(".", tag, "mueta")]] <<- link_objects[[j]]$mu.eta
+
+      ## Match deriv_checks() used by RS().
+      paste0(
+        qstr(j), " = {\n",
+        msrc,
+        "score__ <- ", score_expr, "\n",
+        "if(length(dim(score__)) > 1L) score__ <- score__[, 1L]\n",
+        "hess__ <- drop(", hess_expr, ")\n",
+        "if(length(dim(hess__)) > 1L) hess__ <- hess__[, 1L]\n",
+        "score__[is.na(score__)] <- 1.490116e-08\n",
+        "score__[score__ > 1e10] <- 1e10\n",
+        "score__[score__ < -1e10] <- -1e10\n",
+        "hess__[is.na(hess__)] <- 1.490116e-08\n",
+        "hess__[hess__ > 1e10] <- 1e10\n",
+        "ii__ <- (hess__ == 0) | !is.finite(hess__)\n",
+        "hess__[ii__] <- 1.490116e-08\n",
+        "ii__ <- hess__ < 0\n",
+        "hess__[ii__] <- -hess__[ii__]\n",
+        "hess__[hess__ < 1e-10] <- 1e-10\n",
+        "list(eta = eta + score__ / hess__, weights = hess__)\n",
+        "}"
+      )
+    }, character(1L))
+
+    src <- paste0(
+      "function(par, y, eta, which) {\n",
+      ## Clip parameters in the local copy when ranges are supplied.
+      range_src, "\n",
+      "switch(which,\n", paste(branches, collapse = ",\n"),
+      ",\nstop(\"unknown parameter in update(): \", which, call. = FALSE))\n",
+      "}"
+    )
+    mkfun(src, zb)
+  }
+
+  update_fun <- make_update()
+
+  ## Distribution functions.
+  fam <- x$family[1L]
+  dfun <- get(paste0("d", fam), mode = "function", inherits = TRUE)
+  pfun <- get0(paste0("p", fam), mode = "function", inherits = TRUE)
+  qfun <- get0(paste0("q", fam), mode = "function", inherits = TRUE)
+  rfun <- get0(paste0("r", fam), mode = "function", inherits = TRUE)
+
+  dist_call <- function(fun, first, with_log = FALSE, with_dots = TRUE,
+                        binding = ".fun") {
+    aa <- c(first, paste0(nx, "=", vapply(nx, pref, character(1L))))
+    if(with_log) aa <- c(aa, "log=log")
+    if(with_dots) aa <- c(aa, "...")
+
+    ## Add bd only for functions that use a response argument.
+    nf <- names(formals(fun))
+    if("bd" %in% nf && identical(first, "y"))
+      aa <- c(aa, 'bd=attr(y, "bd", exact=TRUE)')
+
+    paste0(binding, "(", paste(aa, collapse = ","), ")")
+  }
+
+  dcall <- dist_call(dfun, "y", with_log = TRUE, with_dots = TRUE)
+  pdf_fun <- mkfun(
+    paste0("function(par, y, log=FALSE, ...) ", dcall),
+    list(.fun = dfun)
+  )
+
+  cdf_fun <- NULL
+  if(!is.null(pfun)) {
+    pcall <- dist_call(pfun, "y", with_log = TRUE, with_dots = TRUE)
+    cdf_fun <- mkfun(paste0(
+      "function(par, y, log=FALSE, ...) {\n",
+      "p__ <- ", pcall, "\n",
+      "n__ <- length(par[[1L]])\n",
+      "if(length(p__) < n__) { y <- rep(y, length.out=n__); p__ <- ", pcall, " }\n",
+      "p__\n}"
+    ), list(.fun = pfun))
+  }
+
+  quantile_fun <- NULL
+  if(!is.null(qfun)) {
+    qcall <- dist_call(qfun, "p", with_log = TRUE, with_dots = TRUE)
+    quantile_fun <- mkfun(paste0(
+      "function(par, p, log=FALSE, ...) {\n",
+      "ii__ <- p <= 1e-10; if(any(ii__)) p[ii__] <- 1e-10\n",
+      "ii__ <- p >= (1 - 1e-10); if(any(ii__)) p[ii__] <- 1 - 1e-10\n",
+      "q__ <- ", qcall, "\n",
+      "n__ <- length(par[[1L]])\n",
+      "if(length(q__) < n__) { p <- rep(p, length.out=n__); q__ <- ", qcall, " }\n",
+      "q__\n}"
+    ), list(.fun = qfun))
+  }
+
+  random_fun <- NULL
+  if(!is.null(rfun)) {
+    rcall <- dist_call(rfun, "n", with_log = FALSE, with_dots = TRUE)
+    random_fun <- mkfun(
+      paste0("function(par, n, ...) ", rcall),
+      list(.fun = rfun)
+    )
+  }
 
   rval <- list(
-    "family" = x$family[1],
-    "names" = nx,
-    "links" = unlist(x[paste(nx, "link", sep = ".")]),
-    "score" = score,
-    "hessian" = hessian,
-    "pdf" = function(par, y, log = FALSE, ...) {
-       d <- eval_expr(dc, y = y, par = par, log = log, ...)
-       return(d)
-    },
-    "cdf" = if(!inherits(pfun, "try-error")) function(par, y, log = FALSE, ...) {
-      p <- eval_expr(pc, q = y, par = par, log = log, ...)
-      if(length(p) < length(par[[1L]])) {
-        q <- rep(q, length.out = length(par[[1L]]))
-        p <- eval_expr(pc, q = y, par = par, log = log, ...)
-      }
-      return(p)
-    } else NULL,
-    "quantile" = if(!inherits(qfun, "try-error")) function(par, p, log = FALSE, ...) {
-      if(any(i <- p <= 1e-10))
-        p[i] <- 1e-10
-      if(any(i <- p >= (1- 1e-10)))
-        p[i] <- 1 - 1e-10
-      q <- eval_expr(qc, p = p, par = par, log = log, ...)
-      if(length(q) < length(par[[1L]])) {
-        p <- rep(p, length.out = length(par[[1L]]))
-        q <- eval_expr(qc, p = p, par = par, log = log, ...)
-      }
-      return(q)
-    } else NULL,
-    "random" = if(!inherits(rfun, "try-error")) function(par, n, ...) {
-      return(eval_expr(rc, n = n, par = par, ...))
-    } else NULL
+    family = fam,
+    names = nx,
+    links = unlist(x[paste(nx, "link", sep = ".")]),
+    score = score,
+    hessian = hessian,
+    update = update_fun,
+    pdf = pdf_fun,
+    cdf = cdf_fun,
+    quantile = quantile_fun,
+    random = random_fun
   )
   names(rval$links) <- nx
   rval$valid.response <- x$y.valid
   rval$initialize <- initialize
   rval$type <- tolower(x$type)
 
+  ## Moments.
+  moment_call <- function(fun) {
+    nf <- names(formals(fun))
+    if(!length(nf)) return(".fun()")
+    np <- nx[nx %in% nf]
+    if(!length(np)) return(".fun()")
+    paste0(".fun(", paste0(np, "=", vapply(np, pref, character(1L)),
+      collapse = ","), ")")
+  }
+
   if(!is.null(x$mean)) {
-    meanc <- make_call(x$mean)
-    rval$mean  <- function(par, ...) {
-      res <- eval(meanc)
-      if(!is.null(dim(res)))
-        res <- res[, 1]
-      res
-    }
+    mc <- moment_call(x$mean)
+    rval$mean <- mkfun(paste0(
+      "function(par, ...) { res <- ", mc,
+      "; if(length(dim(res)) > 1L) res <- res[,1L]; res }"
+    ), list(.fun = x$mean))
   }
 
   if(!is.null(x$variance)) {
-    varc <- make_call(x$variance)
-    rval$variance  <- function(par, ...) {
-      res <- eval(varc)
-      if(!is.null(dim(res)))
-        res <- res[, 1]
-      res
-    }
+    vc <- moment_call(x$variance)
+    rval$variance <- mkfun(paste0(
+      "function(par, ...) { res <- ", vc,
+      "; if(length(dim(res)) > 1L) res <- res[,1L]; res }"
+    ), list(.fun = x$variance))
   }
 
-  linkinv <- list()
-  for(j in rval$names) {
-    link <- make.link2(rval$links[[j]])
-    linkinv[[j]] <- link$linkinv
-  }
+  ## Map linear predictors to parameters.
+  map_blocks <- vapply(seq_along(nx), function(k) {
+    j <- nx[[k]]
+    ej <- paste0("eta[[", qstr(j), "]]" )
+    nm <- link_name(j)
+    inv <- switch(nm,
+      identity = ej,
+      log = paste0("exp(", ej, ")"),
+      paste0(".li", k, "(", ej, ")")
+    )
+    paste0(
+      "if(!is.null(", ej, ")) {\n",
+      "z__ <- ", inv, "\n",
+      "bad__ <- !is.finite(z__)\n",
+      "if(any(bad__)) {\n",
+      "  ii__ <- is.na(z__); if(any(ii__)) z__[ii__] <- 0\n",
+      "  ii__ <- z__ == Inf; if(any(ii__)) z__[ii__] <- 10\n",
+      "  ii__ <- z__ == -Inf; if(any(ii__)) z__[ii__] <- -10\n",
+      "}\n",
+      ej, " <- z__\n",
+      "}"
+    )
+  }, character(1L))
 
-  rval$map2par <- function(eta) {
-    for(j in names(eta)) {
-      eta[[j]] <- linkinv[[j]](eta[[j]])
-      eta[[j]][is.na(eta[[j]])] <- 0
-      if(any(jj <- eta[[j]] == Inf))
-        eta[[j]][jj] <- 10
-      if(any(jj <- eta[[j]] == -Inf))
-        eta[[j]][jj] <- -10
-    }
-    return(eta)
-  }
+  li_bindings <- setNames(lapply(seq_along(nx), function(k) {
+    link_objects[[nx[[k]]]]$linkinv
+  }), paste0(".li", seq_along(nx)))
 
-  rval$log_likelihood <- function(par, y) {
-    log <- TRUE
-    d <- try(eval_expr(dc, y = y, par = par, log = log), silent = TRUE)
-    if(inherits(d, "try-error")) {
-      warning("problems evaluating the log-density of the model, set log-likelihood to -Inf")
-      return(-Inf)
-    }
-#    if(any(is.na(d))) {
-#      warning("NA log-density values!")
-#    }
-    if(any(i <- !is.finite(d))) {
-      ## warning("non finite log-density values, set to -100!")
-      d[i] <- -100
-    }
-    return(sum(d, na.rm = TRUE))
-  }
+  rval$map2par <- mkfun(paste0(
+    "function(eta) {\n", paste(map_blocks, collapse = "\n"), "\neta\n}"
+  ), li_bindings)
 
+  ## Log-likelihood.
+  dll <- dist_call(dfun, "y", with_log = TRUE, with_dots = FALSE, binding = ".dfun")
+  ## Use log = TRUE directly in the generated call.
+  dll <- sub("log=log", "log=TRUE", dll, fixed = TRUE)
+  rval$log_likelihood <- mkfun(paste0(
+    "function(par, y) {\n",
+    "d__ <- ", dll, "\n",
+    "ii__ <- !is.finite(d__); if(any(ii__)) d__[ii__] <- -100\n",
+    "sum(d__, na.rm=TRUE)\n}"
+  ), list(.dfun = dfun))
+
+  ## Randomized quantile residuals.
   if(!is.null(x$rqres)) {
-    rqres <- utils::getFromNamespace("rqres", "gamlss")
-    nenv <- new.env()
+    rqres_expr <- x$rqres
+    nenv <- new.env(parent = baseenv())
     assign("rqres", utils::getFromNamespace("rqres", "gamlss"), envir = nenv)
 
     rval$rqres <- function(par, y, ...) {
       assign("y", y, envir = nenv)
-      for(i in nx)
-        assign(i, par[[i]], envir = nenv)
-      eval(x$rqres, envir = nenv)
+      for(i in nx) assign(i, par[[i]], envir = nenv)
+      eval(rqres_expr, envir = nenv)
     }
   }
 

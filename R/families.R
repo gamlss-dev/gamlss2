@@ -9,7 +9,7 @@ make.link2 <- function(link)
       stop("link is spefified wrong!")
   } else {
     if(inherits(link, "link-glm")) {
-      class(link) <- c("link_gamlss2", "link-glm")
+      class(link) <- c("link-gamlss2", "link-glm")
       return(link)
     }
     link0 <- link
@@ -126,13 +126,13 @@ make.link2 <- function(link)
   if(is.null(rval$linkinv) | is.null(rval$linkfun))
     rval <- gamlss.dist::make.link.gamlss(as.character(rval$name))
 
-  class(rval) <- c("link_gamlss2", "link-glm")
+  class(rval) <- c("link-gamlss2", "link-glm")
 
   rval
 }
 
 ## Helper function.
-"c.link_gamlss2" <- function(...) {
+"c.link-gamlss2" <- function(...) {
   return(list(...))
 }
 

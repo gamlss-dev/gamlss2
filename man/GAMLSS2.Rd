@@ -1,20 +1,20 @@
-\name{GDF}
+\name{GAMLSS2}
 
-\alias{GDF}
-\alias{format.GDF}
-\alias{print.GDF}
-\alias{mean.GDF}
-\alias{variance.GDF}
-\alias{skewness.GDF}
-\alias{kurtosis.GDF}
-\alias{pdf.GDF}
-\alias{log_pdf.GDF}
-\alias{cdf.GDF}
-\alias{quantile.GDF}
-\alias{random.GDF}
-\alias{support.GDF}
-\alias{is_discrete.GDF}
-\alias{is_continuous.GDF}
+\alias{GAMLSS2}
+\alias{format.GAMLSS2}
+\alias{print.GAMLSS2}
+\alias{mean.GAMLSS2}
+\alias{variance.GAMLSS2}
+\alias{skewness.GAMLSS2}
+\alias{kurtosis.GAMLSS2}
+\alias{pdf.GAMLSS2}
+\alias{log_pdf.GAMLSS2}
+\alias{cdf.GAMLSS2}
+\alias{quantile.GAMLSS2}
+\alias{random.GAMLSS2}
+\alias{support.GAMLSS2}
+\alias{is_discrete.GAMLSS2}
+\alias{is_continuous.GAMLSS2}
 
 \alias{mean.gamlss2}
 \alias{variance.gamlss2}
@@ -28,17 +28,17 @@
 \alias{is_discrete.gamlss2}
 \alias{is_continuous.gamlss2}
 
-\title{Create a GDF Distribution}
+\title{Create a GAMLSS2 Distribution}
 
 \description{
-The GDF (gamlss2 Distribution Family) is a unified class with corresponding methods
+The GAMLSS2 family is a unified class with corresponding methods
 that represent all distributional families supported by the \pkg{gamlss2} package. It 
 enables seamless integration with the \pkg{distributions3} workflow and provides a 
 consistent interface for model fitting and distributional computations.
 }
 
 \usage{
-GDF(family, parameters)
+GAMLSS2(family, parameters)
 }
 
 \arguments{
@@ -50,12 +50,12 @@ GDF(family, parameters)
 }
 
 \details{
-The S3 class \code{GDF} is a slightly more general implementation of the S3 class
+The S3 class \code{GAMLSS2} is a slightly more general implementation of the S3 class
 \code{\link[gamlss.dist]{GAMLSS}} tailored for \pkg{gamlss2}. For details please see the documentation of \code{\link[gamlss.dist]{GAMLSS}}
 }
 
 \value{
-A \code{GDF} object, inheriting from \code{distribution}.
+A \code{GAMLSS2} object, inheriting from \code{distribution}.
 }
 
 \references{
@@ -80,15 +80,15 @@ library("distributions3")
 set.seed(6020)
 
 ## one normal distribution
-X <- GDF("NO", c(mu = 1, sigma = 2))
+X <- GAMLSS2("NO", c(mu = 1, sigma = 2))
 X
 
 ## two normal distributions
-X <- GDF("NO", cbind(c(1, 1.5), c(0.6, 1.2)))
+X <- GAMLSS2("NO", cbind(c(1, 1.5), c(0.6, 1.2)))
 X
 
 ## three Weibull distributions
-X <- GDF("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
+X <- GAMLSS2("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
 X
 
 ## see ?gamlss.dist::GAMLSS for the remainder of this example

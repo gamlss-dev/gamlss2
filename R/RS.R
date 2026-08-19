@@ -188,6 +188,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         link <- make.link2(family$links[[j]])
         fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
         eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
+        fit[[j]]$fitted.values <- eta[[j]]
         etastart[[j]] <- eta[[j]]
       }
     }

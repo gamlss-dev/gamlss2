@@ -251,6 +251,18 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       etastart[[j]] <- eta[[j]]
   }
 
+  if(!is.null(control$fixed)) {
+    for(j in np) {
+      if(control$fixed[[j]]) {
+        link <- make.link2(family$links[[j]])
+        fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
+        eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
+        fit[[j]]$fitted.values <- eta[[j]]
+        etastart[[j]] <- eta[[j]]
+      }
+    }
+  }
+
   ## Null deviance.
   dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
 
@@ -267,8 +279,11 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       lli <- family$log_likelihood(par = family$map2par(ieta), y = y)
 
       fn_ll <- function(par) {
-        for(j in np)
+        for(j in np) {
+          if(control$fixed[[j]])
+            par[j] <- beta[j]
           ieta[[j]] <- rep(par[j], n)
+        }
         ll <- family$log_likelihood(par = family$map2par(ieta), y = y) - 1e-05 * sum(par^2)
         return(-ll)
       }
@@ -330,8 +345,12 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     do_save <- (isave <= length(iterthin) && iter == iterthin[isave])
     for(j in np) {
       ## Check if paramater is fixed.
-      if(control$fixed[[j]])
-        stop("fixed parameters not supported yet!")
+      if(control$fixed[[j]]) {
+        if(do_save) {
+          samples[[j]]$p[isave, ] <- c(fit[[j]]$coefficients, 1)
+        }
+        next
+      }
 
       ## Sampling linear part.
       if(length(xterms[[j]])) {

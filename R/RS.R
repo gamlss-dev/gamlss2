@@ -182,6 +182,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       etastart[[j]] <- eta[[j]]
   }
 
+  if(!is.null(control$fixed)) {
+    for(j in np) {
+      if(control$fixed[[j]]) {
+        link <- make.link2(family$links[[j]])
+        fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
+        eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
+        etastart[[j]] <- eta[[j]]
+      }
+    }
+  }
+
   ## Null deviance.
   dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
 
@@ -206,6 +217,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
       fn_ll <- function(par) {
         for(j in np) {
+          if(control$fixed[[j]])
+            par[j] <- beta[j]
           ieta[[j]] <- rep(par[j], n)
           if(!is.null(offsets)) {
             if(!is.null(offsets[[j]]))
@@ -300,14 +313,14 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     ## For CG.
     if(iter[1L] >= CGk) {
       eta_old <- if(iter[1L] > 0L) eta else etastart
-      peta <- if(iter[1L] > 0L) {
+      par <- if(iter[1L] > 0L) {
         family$map2par(eta)
       } else {
         family$map2par(etastart)
       }
       ew_CG <- list()
       for(j in np) {
-        ew_CG[[j]] <- .update(par = peta, y = y,
+        ew_CG[[j]] <- .update(par = par, y = y,
           eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
           family = family, which = j)
       }
@@ -331,7 +344,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           next
 
         ## Outer loop working response and weights.
-        peta <- if(iter[1L] > 0L) {
+        par <- if(iter[1L] > 0L) {
           family$map2par(eta)
         } else {
           family$map2par(etastart)
@@ -346,7 +359,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             for(l in seq_along(h)) {
               parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
               k <- parts[2L]
-              hessian_l <- family$hessian[[h[l]]](par = peta, y = y)
+              hessian_l <- family$hessian[[h[l]]](par = par, y = y)
               if(!is.null(weights))
                 hessian_l <- hessian_l * weights
               adj <- adj + hessian_l * (eta[[k]] - eta_old[[k]])
@@ -358,7 +371,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           wj[wj < 0] <- 0
           ew$eta <- ew$eta - adj / wj
         } else {
-          ew <- .update(par = peta, y = y,
+          ew <- .update(par = par, y = y,
             eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
             family = family, which = j)
         }
@@ -590,8 +603,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           ## Update working response.
           if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
-            peta <- family$map2par(eta)
-            ew <- .update(par = peta, y = y,
+            par <- family$map2par(eta)
+            ew <- .update(par = par, y = y,
               eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
               family = family, which = j)
           }

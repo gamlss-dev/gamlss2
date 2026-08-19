@@ -1615,7 +1615,7 @@ special_predict.fk.fitted <- function(x, data, se.fit = FALSE, ...)
 }
 
 ## Monotonic P-spline.
-ms <- function(x, k = 10, mono = c("up", "down"),
+ms <- function(x, mono = c("up", "down"), k = 10,
   criterion = "aicc", lambda = NULL,
   lambda.min = 1e-8, lambda.max = 1e8, lambda.tol = 1e-4,
   ...)

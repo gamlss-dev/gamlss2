@@ -111,8 +111,8 @@ website:
               file: man/find_family.qmd
             - text: gamlss2.family
               file: man/gamlss2.family.qmd
-            - text: GDF
-              file: man/GDF.qmd
+            - text: GAMLSS2
+              file: man/GAMLSS2.qmd
             - text: Kumaraswamy
               file: man/Kumaraswamy.qmd
             - text: MN

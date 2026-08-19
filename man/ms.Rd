@@ -81,9 +81,7 @@ ms(x, mono = c("up", "down"), k = 10,
 
   If \code{lambda = NULL}, the smoothing parameter is selected by a
   one-dimensional search on \code{log(lambda)} using the criterion specified
-  by \code{criterion}. Information from the preceding backfitting iteration
-  is used to warm-start both the smoothing parameter search and the active
-  constraint set.
+  by \code{criterion}.
 
   The fitted term is centered before it is returned to the additive
   backfitting algorithm.

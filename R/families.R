@@ -762,10 +762,11 @@ complete_family <- function(family, .links = NULL)
     fn <- class(family)[1L]
     ff <- get(fn)
     np <- names(formals(ff))
-    if(is.null(.links))
+    if(is.null(.links)) {
       stop(paste0("no links for parameters (",
         paste0(np, collapse = ", "),
         ") supplied!"))
+    }
     family <- family(family, links = .links)
   }
 

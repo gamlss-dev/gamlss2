@@ -21,14 +21,14 @@ ms(x, mono = c("up", "down"), k = 10,
   \item{x}{
     A numeric covariate to be represented by a monotonic P-spline.
   }
-  \item{k}{
-    Integer giving the dimension of the B-spline basis. The default is
-    \code{10}.
-  }
   \item{mono}{
     Character specifying the direction of monotonicity. Use
     \code{"up"} for a monotonically increasing effect or \code{"down"}
     for a monotonically decreasing effect.
+  }
+  \item{k}{
+    Integer giving the dimension of the B-spline basis. The default is
+    \code{10}.
   }
   \item{criterion}{
     Character specifying the criterion used for automatic smoothing

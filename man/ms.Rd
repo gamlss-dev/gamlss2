@@ -130,7 +130,7 @@ air <- air[order(air$Temp), ]
 
 ## monotone Temp effect for mu and sigma
 ## Wind is modeled by an unconstrained smooth
-f <- Ozone ~  s(Wind) + ms(Temp, mono = "up") | ms(Temp, mono = "down")
+f <- Ozone ~ s(Wind) + ms(Temp, "up") | ms(Temp, "down")
 
 ## estimate model
 m <- gamlss2(f, data = air, family = GA)

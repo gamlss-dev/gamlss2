@@ -37,12 +37,12 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Evaluate and complete family.
   ## Note, families structure is a bit different
   ## in order to support more than 4 parameter models.
-  family <- complete_family(family)
+  family <- complete_family(family, .links = control$links)
 
   ## Use numeric hessian?
   if(isTRUE(control$numhessian)) {
     family$hessian <- NULL
-    family <- complete_family(family)
+    family <- complete_family(family, .links = control$links)
   }
 
   ## Call.

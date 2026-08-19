@@ -736,7 +736,7 @@ make_numeric_update <- function(pdf, linkinv,
 ## Complete a family object, e.g.,
 ## if derivatives are not supplied they
 ## will be approximated numerically.
-complete_family <- function(family)
+complete_family <- function(family, .links = NULL)
 {
   if(!is.null(attr(family, "family"))) {
     family <- attr(family, "family")
@@ -756,6 +756,17 @@ complete_family <- function(family)
 
   if(is.null(family$family)) {
     family$family <- "No family name supplied!"
+  }
+
+  if(inherits(family, "distribution")) {
+    fn <- class(family)[1L]
+    ff <- get(fn)
+    np <- names(formals(ff))
+    if(is.null(.links))
+      stop(paste0("no links for parameters (",
+        paste0(np, collapse = ", "),
+        ") supplied!"))
+    family <- family(family, links = .links)
   }
 
   if(!is.null(family[["d"]])) {

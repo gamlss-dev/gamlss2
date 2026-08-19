@@ -63,7 +63,6 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   ## one is a function from the distributions3 package, pick the distributions3
   ## version.
   if (is.list(args) && length(grep("^package:distributions3$", names(args), value = TRUE)) == 1L) {
-      print(args)
       args <- args[[grep("^package:distributions3$", names(args), value = TRUE)[[1]]]]
   }
   stopifnot(is.function(args))

@@ -85,6 +85,8 @@ website:
               file: man/pb.qmd
             - text: random
               file: man/random.qmd
+            - text: ms
+              file: man/ms.qmd
         - section: Predictions and model statistics
           contents:
             - text: modelstats

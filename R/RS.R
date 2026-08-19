@@ -265,7 +265,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     CGk <- 0L
   if(length(family$hessian) < 2L)
     CGk <- Inf
-  if(!any(grepl(".", names(family$hessian), fixed = TRUE)))
+  if(!any(grepl(":", names(family$hessian), fixed = TRUE)))
     CGk <- Inf
   if(is.finite(CGk))
     eta_old <- eta
@@ -354,11 +354,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         ## Compute working response z and weights hessian from family.
         ## Cole and Green adjustment.
         if(iter[1L] >= CGk) {
-          h <- grep(paste0(j, "."), names(family$hessian), value = TRUE)
+          h <- grep(paste0(j, ":"), names(family$hessian), value = TRUE)
           if(length(h)) {
             adj <- 0.0
             for(l in seq_along(h)) {
-              parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
+              parts <- strsplit(h[l], ":", fixed = TRUE)[[1]]
               k <- parts[2L]
               hessian_l <- family$hessian[[h[l]]](par = par, y = y)
               if(!is.null(weights))

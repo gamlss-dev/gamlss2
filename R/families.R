@@ -379,25 +379,25 @@ tF <- function(x, ...)
 
   ## Cross derivatives for CG.
   if(all(c("mu", "sigma") %in% nx)) {
-    hessian$mu.sigma <- make_cross_hessian(x$d2ldmdd, "mu", "sigma")
-    hessian$sigma.mu <- hessian$mu.sigma
+    hessian[["mu:sigma"]] <- make_cross_hessian(x$d2ldmdd, "mu", "sigma")
+    hessian[["sigma:mu"]] <- hessian[["mu:sigma"]]
   }
   if("nu" %in% nx) {
-    hessian$mu.nu <- make_cross_hessian(x$d2ldmdv, "mu", "nu")
-    hessian$nu.mu <- hessian$mu.nu
+    hessian[["mu:nu"]] <- make_cross_hessian(x$d2ldmdv, "mu", "nu")
+    hessian[["nu:mu"]] <- hessian[["mu:nu"]]
 
-    hessian$sigma.nu <- make_cross_hessian(x$d2ldddv, "sigma", "nu")
-    hessian$nu.sigma <- hessian$sigma.nu
+    hessian[["sigma:nu"]] <- make_cross_hessian(x$d2ldddv, "sigma", "nu")
+    hessian[["nu:sigma"]] <- hessian[["sigma:nu"]]
   }
   if("tau" %in% nx) {
-    hessian$mu.tau <- make_cross_hessian(x$d2ldmdt, "mu", "tau")
-    hessian$tau.mu <- hessian$mu.tau
+    hessian[["mu:tau"]] <- make_cross_hessian(x$d2ldmdt, "mu", "tau")
+    hessian[["tau:mu"]] <- hessian[["mu:tau"]]
 
-    hessian$sigma.tau <- make_cross_hessian(x$d2ldddt, "sigma", "tau")
-    hessian$tau.sigma <- hessian$sigma.tau
+    hessian[["sigma:tau"]] <- make_cross_hessian(x$d2ldddt, "sigma", "tau")
+    hessian[["tau:sigma"]] <- hessian[["sigma:tau"]]
 
-    hessian$nu.tau <- make_cross_hessian(x$d2ldvdt, "nu", "tau")
-    hessian$tau.nu <- hessian$nu.tau
+    hessian[["nu:tau"]] <- make_cross_hessian(x$d2ldvdt, "nu", "tau")
+    hessian[["tau:nu"]] <- hessian[["nu:tau"]]
   }
 
   ## Working response and weights for RS.
@@ -906,7 +906,7 @@ complete_family <- function(family, .links = NULL)
   for(i in seq_along(family$names)) {
     for(j in seq_along(family$names)) {
       if(i < j) {
-        hij <- paste0(family$names[i], ".", family$names[j])
+        hij <- paste0(family$names[i], ":", family$names[j])
         if(is.null(family$hessian[[hij]])) {
           ni <- family$names[i]
           nj <- family$names[j]

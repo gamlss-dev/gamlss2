@@ -113,8 +113,13 @@ ms(x, k = 10, mono = c("up", "down"),
 \references{
   Eilers, P. H. C. and Marx, B. D. (1996).
   Flexible Smoothing with B-Splines and Penalties.
-  \emph{Statistical Science}, \bold{11}(2), 89--121.
+  \emph{Statistical Science}, 11(2), 89--121.
   \doi{10.1214/ss/1038425655}
+
+  Bollaerts, K., Eilers, P. H. C. and van Mechelen, I. (2006).
+  Simple and multiple P-splines regression with shape constraints.
+  \emph{British Journal of Mathematical and Statistical Psychology},
+  59(2), 451--469. \doi{10.1348/00071105X84293}
 }
 
 \seealso{

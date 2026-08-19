@@ -1613,3 +1613,462 @@ special_predict.fk.fitted <- function(x, data, se.fit = FALSE, ...)
 
   return(p)
 }
+
+## Monotonic P-spline.
+ms <- function(x, k = 10, mono = c("up", "down"),
+  criterion = "aicc", lambda = NULL,
+  lambda.min = 1e-8, lambda.max = 1e8, lambda.tol = 1e-4,
+  ...)
+{
+  mono <- match.arg(mono)
+
+  xexpr <- substitute(x)
+  term <- deparse1(xexpr, backtick = TRUE)
+
+  f <- as.formula(paste("~", term), env = parent.frame())
+  xv <- model.frame(f, na.action = na.pass)[[1L]]
+
+  if(!is.numeric(xv))
+    stop("ms() currently requires a numeric covariate")
+
+  if(length(unique(xv[is.finite(xv)])) < 4L)
+    stop("ms() needs at least four distinct finite covariate values")
+
+  ss <- s(x, bs = "ps", k = k, ...)
+
+  sm <- smoothCon(
+    ss,
+    data = data.frame(x = xv),
+    absorb.cons = FALSE
+  )[[1L]]
+
+  sx <- list(
+    term = term,
+    label = paste0("ms(", term, ")"),
+    formula = f,
+    X = sm$X,
+    S = sm$S[[1L]],
+    smooth = sm,
+    mono = mono,
+    control = list(
+      criterion = criterion,
+      lambda = lambda,
+      lambda.min = lambda.min,
+      lambda.max = lambda.max,
+      lambda.tol = lambda.tol
+    )
+  )
+
+  class(sx) <- c("special", "ms")
+  sx
+}
+
+special_fit.ms <- function(x, z, w, y, eta, j, family, control,
+  transfer = NULL, iter = NULL, ...)
+{
+  n <- length(z)
+  X <- x$X
+  p <- ncol(X)
+
+  if(p < 2L)
+    stop("ms() needs at least two spline coefficients")
+
+  if(length(w) != n || any(!is.finite(w)) || any(w < 0))
+    stop("invalid working weights in ms()")
+
+  if(is.null(transfer))
+    transfer <- list()
+
+  if(!is.null(x$control)) {
+    control[names(x$control)] <- x$control
+    if(!is.null(control$method))
+      control$criterion <- tolower(control$method)
+  }
+
+  if(is.null(control$criterion))
+    control$criterion <- "aicc"
+
+  criterion <- tolower(control$criterion)
+
+  if(criterion == "ml")
+    criterion <- "aicc"
+
+  K <- if(is.null(control$K)) 2 else control$K
+
+  if(!is.null(x$binning)) {
+    rw <- numeric(length(x$binning$nodups))
+    rz <- numeric(length(x$binning$nodups))
+
+    calc_Xe(
+      x$binning$sorted.index,
+      w, z, rw, rz,
+      x$binning$order
+    )
+
+    XWX <- crossprod(X * rw, X)
+    XWz <- drop(crossprod(X, rz))
+  } else {
+    XW <- X * w
+    XWX <- crossprod(XW, X)
+    XWz <- drop(crossprod(XW, z))
+  }
+
+  zWz <- sum(w * z^2)
+
+  ## P-spline penalty.
+  S <- if(is.list(x$S)) x$S[[1L]] else x$S
+  S <- 0.5 * (S + t(S))
+
+  ## Monotonicity matrix G:
+  ##
+  ##     G %*% b >= 0.
+  ##
+  ## For an increasing B-spline, adjacent coefficients are constrained
+  ## to be non-decreasing. For decreasing, reverse the sign.
+  D <- matrix(0, p - 1L, p)
+  ii <- seq_len(p - 1L)
+
+  D[cbind(ii, ii)] <- -1
+  D[cbind(ii, ii + 1L)] <- 1
+
+  mono <- if(is.null(x$mono)) "up" else tolower(x$mono[1L])
+
+  if(mono %in% c("up", "increasing", "increase", "+", "1")) {
+    G <- D
+  } else if(mono %in% c("down", "decreasing", "decrease", "-", "-1")) {
+    G <- -D
+  } else {
+    stop("unknown 'mono' specification in ms(): ", mono)
+  }
+
+  warm.active <- transfer$active
+  if(is.null(warm.active))
+    warm.active <- integer(0L)
+
+  warm.active <- intersect(
+    as.integer(warm.active),
+    seq_len(nrow(G))
+  )
+
+  solve_lambda <- function(lambda, active0 = integer(0L))
+  {
+    A <- XWX + lambda * S
+
+    R <- try(chol(A), silent = TRUE)
+
+    if(inherits(R, "try-error")) {
+      ridge <- max(
+        1e-10,
+        max(abs(diag(A)), na.rm = TRUE) * 1e-10
+      )
+      R <- chol(A + diag(ridge, p))
+    }
+
+    H <- chol2inv(R)
+    b0 <- drop(H %*% XWz)
+
+    active <- active0
+
+    tol <- sqrt(.Machine$double.eps) *
+      (1 + max(abs(b0)))
+
+    eqsolve <- function(active)
+    {
+      if(!length(active)) {
+        return(list(
+          b = b0,
+          mu = numeric(0L),
+          P = H
+        ))
+      }
+
+      C <- G[active, , drop = FALSE]
+      HC <- H %*% t(C)
+      M <- C %*% HC
+
+      RM <- chol(M)
+
+      mu <- -drop(
+        backsolve(
+          RM,
+          forwardsolve(
+            t(RM),
+            drop(C %*% b0)
+          )
+        )
+      )
+
+      b <- drop(b0 + HC %*% mu)
+
+      Q <- backsolve(
+        RM,
+        forwardsolve(
+          t(RM),
+          t(HC)
+        )
+      )
+
+      P <- H - HC %*% Q
+      P <- 0.5 * (P + t(P))
+
+      list(
+        b = b,
+        mu = mu,
+        P = P
+      )
+    }
+
+
+    ans <- eqsolve(active)
+
+    maxit <- max(20L, 4L * p)
+
+    for(it in seq_len(maxit)) {
+      gb <- drop(G %*% ans$b)
+
+      bad <- which(gb < -tol)
+
+      if(length(bad)) {
+        add <- bad[which.min(gb[bad])]
+
+        if(!(add %in% active))
+          active <- c(active, add)
+
+        ## Restore dual feasibility after adding a constraint.
+        repeat {
+          ans <- eqsolve(active)
+
+          neg <- which(ans$mu < -tol)
+          if(!length(neg))
+            break
+
+          rem <- neg[which.min(ans$mu[neg])]
+          active <- active[-rem]
+        }
+
+        next
+      }
+
+      ## Primal feasible; verify dual feasibility.
+      if(length(active)) {
+        ans <- eqsolve(active)
+
+        neg <- which(ans$mu < -tol)
+
+        if(length(neg)) {
+          rem <- neg[which.min(ans$mu[neg])]
+          active <- active[-rem]
+          ans <- eqsolve(active)
+          next
+        }
+      }
+
+      ## tr(X'WX P), using sum(A * t(B)) with symmetric matrices.
+      edf <- sum(XWX * ans$P)
+
+      return(list(
+        coefficients = ans$b,
+        edf = edf,
+        vcov = ans$P,
+        active = sort(active)
+      ))
+    }
+
+    stop("active-set algorithm did not converge in special_fit.ms()")
+  }
+
+  ## Fast smoothing-parameter criterion.
+  ## RSS = z'Wz - 2 b'X'Wz + b'X'WX b.
+  objective <- function(rho)
+  {
+    l <- exp(rho)
+
+    qf <- solve_lambda(
+      l,
+      active0 = warm.active
+    )
+
+    b <- qf$coefficients
+    edf <- qf$edf
+
+    rss <- zWz -
+      2 * sum(b * XWz) +
+      sum(b * (XWX %*% b))
+
+    rss <- max(rss, 0)
+
+    switch(
+      criterion,
+
+      "gcv" =
+        rss * n / (n - edf)^2,
+
+      "aic" =
+        rss + 2 * edf,
+
+      "gaic" =
+        rss + K * edf,
+
+      "aicc" = {
+        den <- n - edf - 1
+        if(den <= 0)
+          Inf
+        else
+          rss + 2 * edf +
+            (2 * edf * (edf + 1)) / den
+      },
+
+      "bic" =
+        rss + log(n) * edf,
+
+      stop(
+        "unknown smoothing criterion for ms(): ",
+        criterion
+      )
+    )
+  }
+
+  ## Select lambda.
+  fixed.lambda <- control$lambda
+
+  if(!is.null(fixed.lambda)) {
+    l <- as.numeric(fixed.lambda[1L])
+
+    if(!is.finite(l) || l <= 0)
+      stop("'lambda' in ms() must be a positive finite number")
+  } else {
+    lambda.min <- if(is.null(control$lambda.min))
+      1e-8 else as.numeric(control$lambda.min[1L])
+
+    lambda.max <- if(is.null(control$lambda.max))
+      1e8 else as.numeric(control$lambda.max[1L])
+
+    lambda.tol <- if(is.null(control$lambda.tol))
+      1e-4 else as.numeric(control$lambda.tol[1L])
+
+    if(!is.finite(lambda.min) || !is.finite(lambda.max) ||
+       lambda.min <= 0 || lambda.max <= lambda.min)
+      stop("invalid lambda search interval in ms()")
+
+    lower <- log(lambda.min)
+    upper <- log(lambda.max)
+
+    ## Warm-start the lambda search from the previous backfitting fit.
+    lold <- transfer$lambdas
+
+    if(length(lold) && is.finite(lold[1L]) && lold[1L] > 0) {
+      r0 <- log(lold[1L])
+
+      lower <- max(lower, r0 - log(10))
+      upper <- min(upper, r0 + log(10))
+
+      ## Defensive guard for a degenerate clipped interval.
+      if(lower >= upper) {
+        lower <- log(lambda.min)
+        upper <- log(lambda.max)
+      }
+    }
+
+    opt <- optimize(
+      objective,
+      interval = c(lower, upper),
+      tol = lambda.tol
+    )
+
+    l <- exp(opt$minimum)
+  }
+
+  ## Final fit for selected lambda.
+  qf <- solve_lambda(
+    l,
+    active0 = warm.active
+  )
+
+  b <- qf$coefficients
+  P <- qf$vcov
+  edf <- qf$edf
+
+  fit <- drop(X %*% b)
+
+  if(!is.null(x$binning))
+    fit <- fit[x$binning$match.index]
+
+
+  ## Center term for identifiability in additive backfitting.
+  shift <- mean(fit)
+  fit <- fit - shift
+
+  ## Return the same essential contract as smooth.construct_wfit().
+  rval <- list(
+    "coefficients" = b,
+    "fitted.values" = fit,
+    "edf" = edf,
+    "lambdas" = l,
+    "vcov" = P,
+    "df" = n - edf,
+
+    ## ms-specific bookkeeping.
+    "shift" = shift,
+    "term" = x$term,
+    "formula" = x$formula,
+    "smooth" = x$smooth,
+    "mono" = x$mono,
+    "active" = qf$active,
+
+    ## Warm starts for the next gamlss2 backfitting iteration.
+    "transfer" = list(
+      "lambdas" = l,
+      "coefficients" = b,
+      "active" = qf$active
+    )
+  )
+
+  class(rval) <- "ms.fitted"
+  rval
+}
+
+## Prediction method.
+special_predict.ms.fitted <- function(x, data, se.fit = FALSE,
+  alpha = 0.05, ...)
+{
+  if(nrow(data) == 0L) {
+    if(!se.fit)
+      return(numeric(0L))
+
+    return(data.frame(
+      fit = numeric(0L),
+      lower = numeric(0L),
+      upper = numeric(0L)
+    ))
+  }
+
+  mf <- model.frame(
+    x$formula,
+    data = data,
+    na.action = na.pass
+  )
+
+  xv <- mf[[1L]]
+
+  Xp <- PredictMat(
+    x$smooth,
+    data.frame(x = xv)
+  )
+
+  fit <- drop(Xp %*% x$coefficients) - x$shift
+
+  if(!se.fit)
+    return(fit)
+
+  XP <- Xp %*% x$vcov
+  se <- sqrt(pmax(0, rowSums(XP * Xp)))
+
+  za <- qnorm(1 - alpha / 2)
+
+  data.frame(
+    fit = fit,
+    lower = fit - za * se,
+    upper = fit + za * se
+  )
+}
+

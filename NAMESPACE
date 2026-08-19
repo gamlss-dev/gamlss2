@@ -74,7 +74,8 @@ export(
   "BS",
   "bamlss2",
   "mcmc",
-  "distributions3_family"
+  "distributions3_family",
+  "ms"
 )
 
 S3method(gamlss2, formula)
@@ -96,6 +97,8 @@ S3method(special_fit, elm)
 S3method(special_predict, elm.fitted)
 S3method(special_fit, fk)
 S3method(special_predict, fk.fitted)
+S3method(special_fit, ms)
+S3method(special_predict, ms.fitted)
 S3method(special_fit, glmnet)
 S3method(special_predict, glmnet.fitted)
 S3method(special_fit, lo)

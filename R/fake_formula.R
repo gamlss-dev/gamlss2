@@ -45,7 +45,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       "tx", "tx2", "tx3", "tx4", "la", "gnet", "n", "lin",
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
       "random", "ra", "lo", "tr", "tree", "ct", "cf", "NN", "pb2", "ct",
-      "st", "ps2", "pdDiag", "user", "ridge", "elm")
+      "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms")
     stn <- unique(c(stn, specials))
     if(!nospecials) ## still experimental
       formula <- ff_replace(formula)

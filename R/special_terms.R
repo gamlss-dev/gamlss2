@@ -1634,10 +1634,10 @@ ms <- function(x, mono = c("up", "down"), k = 10,
   if(length(unique(xv[is.finite(xv)])) < 4L)
     stop("ms() needs at least four distinct finite covariate values")
 
-  ss <- s(x, bs = "ps", k = k, ...)
+  sc <- s(x, bs = "ps", k = k, ...)
 
   sm <- smoothCon(
-    ss,
+    sc,
     data = data.frame(x = xv),
     absorb.cons = FALSE
   )[[1L]]

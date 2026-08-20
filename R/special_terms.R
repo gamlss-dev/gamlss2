@@ -1467,158 +1467,442 @@ plot_lasso <- function(x, terms = NULL,
   return(invisible(NULL))
 }
 
-## Free knots.
-free_knots <- function(x, y, w = NULL, k = -1, degree = 1, criterion = "bic", knots = NULL, K = NULL, ...)
+## Information criterion used by the free-knot term.
+fk_ic <- function(rss, n, edf, criterion = "bic", K = 2)
 {
-  if(is.null(K))
-    K <- 2
-  if(is.null(k))
-    k <- -1
-  if(is.null(degree))
-    degree <- 1
-  if(is.null(criterion))
-    criterion <- "bic"
+  if(!is.finite(rss) || !is.finite(edf) || n < 1L)
+    return(Inf)
 
-  if(k < 0)
-    k <- min(c(2, length(unique(x))))
-  k <- k + 1
+  switch(criterion,
+    "gcv" = if(n > edf) rss * n / (n - edf)^2 else Inf,
+    "aic" = rss + 2 * edf,
+    "gaic" = rss + K * edf,
+    "aicc" = if(n > edf + 1) {
+      rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1)
+    } else Inf,
+    "bic" = rss + log(n) * edf,
+    stop("unknown free-knot selection criterion: ", criterion, call. = FALSE)
+  )
+}
 
-  n <- length(y)
-  if(is.null(w))
-    w <- rep(1, n)
+## Map log gaps to ordered interior knots. Fixing the final log gap at zero
+## makes the parameterization identifiable and prevents knot crossings.
+fk_theta2knots <- function(theta, boundary)
+{
+  if(!length(theta))
+    return(numeric())
 
-  nk <- k - degree
-  xl <- min(x)
-  xu <- max(x)
-  xr <- xu - xl
-  xl <- xl - xr * 0.001
-  xu <- xu + xr * 0.001
-  dx <- (xu - xl)/(nk - 1)
+  loggaps <- c(theta, 0)
+  loggaps <- loggaps - max(loggaps)
+  gaps <- exp(loggaps)
+  gaps <- gaps / sum(gaps)
+  boundary[1L] + diff(boundary) * cumsum(gaps)[seq_along(theta)]
+}
 
-  k <- seq(xl - dx * (degree + 1), xu + dx * (degree + 1), 
-    length = nk + 2 * degree + 2)
+## Inverse transformation, used for supplied and warm-start knot locations.
+fk_knots2theta <- function(knots, boundary)
+{
+  if(!length(knots))
+    return(numeric())
 
-  ic_fun <- function(knots, rf = FALSE) {
-    X <- splines::spline.des(knots, x, degree + 1, x * 0)$design
+  gaps <- diff(c(boundary[1L], knots, boundary[2L])) / diff(boundary)
+  if(any(!is.finite(gaps)) || any(gaps <= 0))
+    stop("interior knots must be distinct and strictly inside the data range",
+      call. = FALSE)
+  log(gaps[-length(gaps)]) - log(gaps[length(gaps)])
+}
 
-    XW <- X * w
-    XWX <- crossprod(XW, X)
-    XWz <- crossprod(XW, y)
-    S <- diag(1e-10, ncol(X))
+## Construct a centered B-spline basis. Because the rows of the uncentered
+## basis sum to one, the final centered column is redundant and is omitted
+## during fitting.
+fk_basis <- function(x, interior, boundary, degree, center = NULL)
+{
+  order <- degree + 1L
+  knots <- c(rep(boundary[1L], order), interior, rep(boundary[2L], order))
+  finite <- is.finite(x)
+  if(all(finite)) {
+    X <- splines::splineDesign(knots, x, ord = order, outer.ok = FALSE)
+  } else {
+    if(is.null(center))
+      stop("non-finite covariate values in free-knot basis construction",
+        call. = FALSE)
+    X <- matrix(NA_real_, length(x), length(knots) - order)
+    if(any(finite))
+      X[finite, ] <- splines::splineDesign(knots, x[finite],
+        ord = order, outer.ok = FALSE)
+  }
+  if(is.null(center))
+    center <- colMeans(X)
+  X <- sweep(X, 2L, center, FUN = "-")
+  keep <- if(ncol(X) > 1L) seq_len(ncol(X) - 1L) else integer()
+  list(X = X[, keep, drop = FALSE], X.full = X, center = center,
+    knots = knots, keep = keep)
+}
 
-    P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
-    if(inherits(P, "try-error"))
-      P <- solve(XWX + S)
+## Weighted least-squares fit conditional on a set of interior knots.
+fk_wfit <- function(x, y, w, interior, boundary, degree, final = FALSE,
+  knot.edf = length(interior), criterion = "bic", K = 2)
+{
+  bs <- fk_basis(x, interior, boundary, degree)
+  X <- bs$X
+  n <- sum(w > 0)
 
-    b <- drop(P %*% XWz)
-    fit <- drop(X %*% b)
-    edf <- sum(diag(XWX %*% P))
+  if(!ncol(X)) {
+    coefficients <- numeric(ncol(bs$X.full))
+    vcov <- matrix(0, ncol(bs$X.full), ncol(bs$X.full))
+    fit <- rep(0, length(y))
+    basis.edf <- 0
+  } else {
+    XWX <- crossprod(X * w, X)
+    XWy <- crossprod(X, w * y)
+    ridge <- max(1e-12, 1e-10 * mean(diag(XWX)))
+    A <- XWX + diag(ridge, ncol(X))
+    R <- try(chol(A), silent = TRUE)
+    if(inherits(R, "try-error"))
+      return(NULL)
 
-    rss <- sum(w * (y - fit)^2)
+    coefficients.reduced <- drop(backsolve(R,
+      forwardsolve(t(R), XWy)))
+    fit <- drop(X %*% coefficients.reduced)
 
-    ic_val <- switch(tolower(criterion),
-      "gcv" = rss * n / (n - edf)^2,
-      "aic" = rss + 2 * edf,
-      "gaic" = rss + K * edf,
-      "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
-      "bic" = rss + log(n) * edf
-    )
-
-    if(rf) {
-      return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-        "lambdas" = 0, "vcov" = P, "df" = n - edf, "ic" = ic_val, "knots" = knots, "degree" = degree))
+    ## The inverse and conditional EDF are needed only for the final fit.
+    if(final) {
+      P <- chol2inv(R)
+      basis.edf <- sum(diag(XWX %*% P))
+      coefficients <- c(coefficients.reduced, 0)
+      vcov <- matrix(0, ncol(bs$X.full), ncol(bs$X.full))
+      vcov[bs$keep, bs$keep] <- P
     } else {
-      return(ic_val)
+      basis.edf <- ncol(X)
+      coefficients <- vcov <- NULL
     }
   }
 
-  if(is.null(knots)) {
-    opt <- optim(k, fn = ic_fun, method = "L-BFGS-B",
-      lower = xl - dx * (degree + 1), upper = xu + dx * (degree + 1))
-  } else {
-    opt <- list("par" = knots)
-  }
+  rss <- sum(w * (y - fit)^2)
+  edf <- basis.edf + knot.edf
+  rval <- list(rss = rss, edf = edf,
+    ic = fk_ic(rss, n, edf, criterion = criterion, K = K))
 
-  return(ic_fun(opt$par, rf = TRUE))
+  if(final) {
+    rval <- c(rval, list(
+      coefficients = coefficients,
+      fitted.values = fit,
+      basis.edf = basis.edf,
+      knot.edf = knot.edf,
+      lambdas = 0,
+      vcov = vcov,
+      df = n - edf,
+      knots = bs$knots,
+      interior.knots = interior,
+      boundary = boundary,
+      basis.center = bs$center,
+      degree = degree
+    ))
+  }
+  rval
 }
 
-## Search optimum number of free knots.
-n_free_knots <- function(..., nk = 10) {
-  if(is.null(nk))
-    nk <- 10
-  ic <- m <- NULL
-  k <- 1
-  while(k <= nk) {
-    b <- try(free_knots(..., k = k), silent = TRUE)
-    if(!inherits(b, "try-error")) {
-      ic <- c(ic, b$ic)
+## Fit a fixed number of free interior knots. Supplying 'knots' fixes their
+## locations; 'start' supplies warm-start locations that remain free.
+free_knots <- function(x, y, w = NULL, k = 0L, degree = 1L,
+  criterion = "bic", knots = NULL, K = 2, start = NULL,
+  optim.control = list(), ...)
+{
+  x <- as.numeric(x)
+  y <- as.numeric(y)
+  if(is.null(w))
+    w <- rep(1, length(y))
+  w <- as.numeric(w)
+
+  if(length(x) != length(y) || length(w) != length(y))
+    stop("'x', 'y', and 'w' must have equal lengths", call. = FALSE)
+  if(any(!is.finite(x)) || any(!is.finite(y)) || any(!is.finite(w)) ||
+      any(w < 0) || !any(w > 0))
+    stop("free-knot inputs must be finite with nonnegative, nonzero weights",
+      call. = FALSE)
+
+  degree <- as.integer(degree)[1L]
+  if(is.na(degree) || degree < 0L)
+    stop("'degree' must be a nonnegative integer", call. = FALSE)
+  criterion <- match.arg(tolower(criterion),
+    c("gcv", "aic", "gaic", "aicc", "bic"))
+  K <- as.numeric(K)[1L]
+  if(!is.finite(K) || K < 0)
+    stop("'K' must be a nonnegative finite number", call. = FALSE)
+
+  xr <- range(x)
+  if(diff(xr) <= 0)
+    stop("fk() needs at least two distinct covariate values", call. = FALSE)
+  boundary <- xr + c(-1, 1) * diff(xr) * 1e-07
+
+  fixed <- !is.null(knots)
+  if(fixed) {
+    interior <- sort(as.numeric(knots))
+    if(any(!is.finite(interior)) || anyDuplicated(interior) ||
+        any(interior <= xr[1L]) || any(interior >= xr[2L]))
+      stop("'knots' must be distinct, finite, and strictly inside the data range",
+        call. = FALSE)
+    k <- length(interior)
+  } else {
+    k <- as.integer(k)[1L]
+    if(is.na(k) || k < 0L)
+      stop("'k' must be a nonnegative integer", call. = FALSE)
+    interior <- NULL
+  }
+
+  max.k <- max(0L, length(unique(x[w > 0])) - degree - 1L)
+  if(k > max.k)
+    stop("too many interior knots for the distinct covariate values",
+      call. = FALSE)
+
+  opt <- list(par = numeric(), value = NA_real_, counts = integer(),
+    convergence = 0L, message = NULL)
+  if(!fixed && k > 0L) {
+    valid.start <- !is.null(start) && length(start) == k &&
+      all(is.finite(start)) && all(start > xr[1L]) && all(start < xr[2L]) &&
+      !anyDuplicated(start)
+    if(!valid.start) {
+      start <- as.numeric(quantile(x, probs = seq_len(k) / (k + 1),
+        names = FALSE, type = 8))
+      if(anyDuplicated(start) || any(start <= xr[1L]) || any(start >= xr[2L]))
+        start <- seq(xr[1L], xr[2L],
+          length.out = k + 2L)[-c(1L, k + 2L)]
+    } else {
+      start <- sort(start)
     }
-    if(length(ic) > 1) {
-      if(all(ic[-length(ic)] > ic[length(ic)])) {
-        m <- b
+
+    theta <- fk_knots2theta(start, xr)
+    objective <- function(theta) {
+      interior <- fk_theta2knots(theta, xr)
+      fit <- fk_wfit(x, y, w, interior, boundary, degree,
+        final = FALSE, knot.edf = k, criterion = criterion, K = K)
+      if(is.null(fit)) Inf else fit$rss
+    }
+    ocontrol <- utils::modifyList(list(maxit = 100L, factr = 1e7),
+      optim.control)
+    opt <- optim(theta, fn = objective, method = "L-BFGS-B",
+      lower = rep(-20, k), upper = rep(20, k), control = ocontrol)
+
+    ## A B-spline objective is only piecewise smooth when a free knot passes an
+    ## observed x value. Retry line-search failures with a derivative-free
+    ## method while retaining L-BFGS-B as the fast path.
+    if(opt$convergence != 0L) {
+      retry.control <- list(
+        maxit = max(200L, if(is.null(ocontrol$maxit)) 0L else ocontrol$maxit),
+        reltol = 1e-08
+      )
+      retry <- if(k == 1L) {
+        optim(opt$par, fn = objective, method = "Brent",
+          lower = -20, upper = 20, control = retry.control)
+      } else {
+        optim(opt$par, fn = objective, method = "Nelder-Mead",
+          control = retry.control)
       }
+      if(retry$convergence == 0L || retry$value < opt$value)
+        opt <- retry
     }
-    k <- k + 1L
+    interior <- fk_theta2knots(opt$par, xr)
   }
-  return(m)
+
+  knot.edf <- if(fixed) 0L else k
+  rval <- fk_wfit(x, y, w, interior, boundary, degree, final = TRUE,
+    knot.edf = knot.edf, criterion = criterion, K = K)
+  if(is.null(rval))
+    stop("free-knot weighted least-squares fit is singular", call. = FALSE)
+
+  rval$nk <- k
+  rval$criterion <- criterion
+  rval$K <- K
+  rval$fixed.knots <- fixed
+  rval$convergence <- opt$convergence
+  rval$message <- opt$message
+  rval$counts <- opt$counts
+  if(opt$convergence != 0L)
+    warning("free-knot optimization did not converge",
+      if(!is.null(opt$message)) paste0(": ", opt$message), call. = FALSE)
+  rval
 }
 
-## Free knots model term constructor.
-fk <- function(x, ...)
+## Search for the optimum number of free interior knots.
+n_free_knots <- function(..., nk = 10L, start = NULL)
 {
-  sx <- list()
-  sx$term <- as.character(substitute(x))
-  if(sx$term[1L] == "I")
-    sx$term <- paste0("I(", sx$term[2L], ")")
-  if(length(sx$term) > 1L) {
-    stop("check the fk() term, use I()!")
+  nk <- as.integer(nk)[1L]
+  if(is.na(nk) || nk < 0L)
+    stop("'nk' must be a nonnegative integer", call. = FALSE)
+
+  best <- NULL
+  search <- vector("list", nk + 1L)
+  errors <- character()
+  for(k in 0:nk) {
+    start.k <- if(!is.null(start) && length(start) == k) start else NULL
+    fit <- suppressWarnings(try(
+      free_knots(..., k = k, start = start.k), silent = TRUE))
+    if(inherits(fit, "try-error")) {
+      errors <- c(errors, paste0("k = ", k, ": ",
+        conditionMessage(attr(fit, "condition"))))
+      next
+    }
+    if(fit$convergence != 0L) {
+      errors <- c(errors, paste0("k = ", k, ": optimization did not converge"))
+      next
+    }
+
+    search[[k + 1L]] <- data.frame(nk = k, ic = fit$ic,
+      convergence = fit$convergence)
+    if(is.null(best) || fit$ic < best$ic)
+      best <- fit
   }
-  sx$label <- paste0("fk(", sx$term, ")")
-  f <- as.formula(paste("~", sx$term))
-  environment(f) <- sys.frame(-1)
-  sx$x <- model.frame(f)[[1L]]
-  sx$control <- list(...)
+
+  if(is.null(best))
+    stop("all free-knot candidate fits failed: ", paste(errors, collapse = "; "),
+      call. = FALSE)
+  best$search <- do.call(rbind, search)
+  best$search.errors <- errors
+  best
+}
+
+## Free-knots model term constructor.
+fk <- function(x, k = 10L, nk = NULL, degree = 1L,
+  criterion = "bic", knots = NULL, K = NULL, reselect = FALSE,
+  optim.control = list(), ...)
+{
+  xexpr <- substitute(x)
+  expr <- deparse1(xexpr, backtick = TRUE)
+  term <- all.vars(xexpr)
+  if(length(term) != 1L)
+    stop("fk() requires an expression involving one numeric covariate",
+      call. = FALSE)
+  f <- as.formula(paste("~", expr), env = parent.frame())
+
+  ## special_terms() evaluates constructors in the model-frame data mask.
+  ## For transformed terms that mask contains a column named by the complete
+  ## expression rather than the original variable.
+  penv <- parent.frame()
+  xv <- if(exists(expr, envir = penv, inherits = FALSE)) {
+    get(expr, envir = penv, inherits = FALSE)
+  } else x
+  if(!is.numeric(xv) || is.matrix(xv))
+    stop("fk() requires a numeric covariate", call. = FALSE)
+
+  degree <- as.integer(degree)[1L]
+  k <- as.integer(k)[1L]
+  if(!is.null(nk))
+    nk <- as.integer(nk)[1L]
+  if(is.na(k) || k < 0L || (!is.null(nk) && (is.na(nk) || nk < 0L)))
+    stop("'k' and 'nk' must be nonnegative integers", call. = FALSE)
+  if(is.na(degree) || degree < 0L)
+    stop("'degree' must be a nonnegative integer", call. = FALSE)
+  criterion <- match.arg(tolower(criterion),
+    c("gcv", "aic", "gaic", "aicc", "bic"))
+  if(!is.null(K)) {
+    K <- as.numeric(K)[1L]
+    if(!is.finite(K) || K < 0)
+      stop("'K' must be a nonnegative finite number", call. = FALSE)
+  }
+  if(!is.list(optim.control))
+    stop("'optim.control' must be a list", call. = FALSE)
+  optim.control <- utils::modifyList(optim.control, list(...))
+
+  if(!is.null(knots)) {
+    knots <- as.numeric(knots)
+    if(!is.null(nk) && nk != length(knots))
+      stop("'nk' must equal length(knots) when both are supplied",
+        call. = FALSE)
+    nk <- length(knots)
+  }
+
+  sx <- list(
+    term = term,
+    label = paste0("fk(", expr, ")"),
+    expression = expr,
+    formula = f,
+    x = as.numeric(xv),
+    control = list(k = k, nk = nk, degree = degree,
+      criterion = criterion, knots = knots, K = K,
+      reselect = isTRUE(reselect), optim.control = optim.control)
+  )
   class(sx) <- c("special", "fk")
-  return(sx)
+  sx
 }
 
-## Free knots fit function.
-special_fit.fk <- function(x, z, w, y, eta, j, family, control, ...)
+## Free-knots fit function.
+special_fit.fk <- function(x, z, w, y, eta, j, family, control,
+  transfer = NULL, ...)
 {
-  K <- control$K
-  if(is.null(K))
-    K <- 2
-  if(is.null(x$control$nk)) {
-    sx <- n_free_knots(x$x, z, w, nk = x$control$k, degree = x$control$degree, criterion = control$criterion, K = K)
+  ctr <- x$control
+  K <- if(is.null(ctr$K)) {
+    if(is.null(control$K)) 2 else control$K
+  } else ctr$K
+  criterion <- if(is.null(ctr$criterion)) {
+    if(is.null(control$criterion)) "bic" else control$criterion
+  } else ctr$criterion
+
+  start <- NULL
+  if(!is.null(transfer$interior.knots))
+    start <- transfer$interior.knots
+
+  if(!is.null(ctr$knots)) {
+    sx <- free_knots(x$x, z, w, degree = ctr$degree,
+      criterion = criterion, knots = ctr$knots, K = K,
+      optim.control = ctr$optim.control)
+  } else if(!is.null(ctr$nk)) {
+    sx <- free_knots(x$x, z, w, k = ctr$nk, degree = ctr$degree,
+      criterion = criterion, K = K, start = start,
+      optim.control = ctr$optim.control)
+  } else if(!isTRUE(ctr$reselect) && !is.null(transfer$nk)) {
+    sx <- free_knots(x$x, z, w, k = transfer$nk, degree = ctr$degree,
+      criterion = criterion, K = K, start = start,
+      optim.control = ctr$optim.control)
   } else {
-    sx <- free_knots(x$x, z, w, k = x$control$nk, degree = x$control$degree, criterion = control$criterion, K = K)
+    sx <- n_free_knots(x$x, z, w, nk = ctr$k, degree = ctr$degree,
+      criterion = criterion, K = K, start = start,
+      optim.control = ctr$optim.control)
   }
-  sx$shift <- mean(sx$fitted.values)
-  sx$fitted.values <- sx$fitted.values - sx$shift
+
+  if(is.null(sx$search) && !is.null(transfer$search))
+    sx$search <- transfer$search
+  if(is.null(sx$search.errors) && !is.null(transfer$search.errors))
+    sx$search.errors <- transfer$search.errors
+  sx$shift <- 0
   sx$term <- x$term
+  sx$formula <- x$formula
+  sx$transfer <- list(
+    nk = sx$nk,
+    interior.knots = sx$interior.knots,
+    search = sx$search,
+    search.errors = sx$search.errors
+  )
   class(sx) <- "fk.fitted"
-  return(sx)
+  sx
 }
 
-## Free knots predict function.
-special_predict.fk.fitted <- function(x, data, se.fit = FALSE, ...)
+## Free-knots predict function. Intervals are conditional on the selected knot
+## locations; uncertainty from knot search is not included.
+special_predict.fk.fitted <- function(x, data, se.fit = FALSE,
+  alpha = 0.05, ...)
 {
-  X <- splines::spline.des(x$knots, data[[x$term]], x$degree + 1, data[[x$term]] * 0)$design
+  expr <- deparse1(x$formula[[2L]], backtick = TRUE)
+  xv <- if(expr %in% names(data)) {
+    data[[expr]]
+  } else {
+    f <- x$formula
+    model.frame(f, data = data, na.action = na.pass)[[1L]]
+  }
+  bs <- fk_basis(as.numeric(xv), x$interior.knots, x$boundary,
+    x$degree, center = x$basis.center)
+  X <- bs$X.full
   p <- drop(X %*% coef(x))
 
   if(se.fit) {
-    se <- rowSums((X %*% x$vcov) * X)
-    se <- 2 * sqrt(se)
+    se <- sqrt(pmax(0, rowSums((X %*% x$vcov) * X)))
+    crit <- qnorm(1 - alpha / 2)
     p <- data.frame(
-      "fit" = p - x$shift,
-      "lower" = (p - se) - x$shift,
-      "upper" = (p + se) - x$shift
+      fit = p,
+      lower = p - crit * se,
+      upper = p + crit * se
     )
-  } else {
-    p <- p - x$shift
   }
-
-  return(p)
+  p
 }
 
 ## Monotonic P-spline.

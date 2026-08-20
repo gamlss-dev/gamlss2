@@ -389,6 +389,8 @@ gamlss2_control <- function(optimizer = RS,
 
   if(is.null(ctr$binning))
     ctr$binning <- FALSE
+  if(is.null(ctr$demmler.reinsch))
+    ctr$demmler.reinsch <- "auto"
   if(is.null(ctr$digits))
     ctr$digits <- Inf
   if(is.null(ctr$initialize))

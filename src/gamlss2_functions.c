@@ -98,6 +98,118 @@ SEXP calc_XWX(SEXP x, SEXP w, SEXP index)
   return rval;
 }
 
+/* Fused dense weighted crossproducts using symmetric BLAS updates. */
+SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
+{
+  if(!isReal(x) || !isMatrix(x))
+    error("'x' must be a numeric matrix");
+  if(!isReal(w) || !isReal(z))
+    error("'w' and 'z' must be numeric");
+
+  int nr = nrows(x);
+  int nc = ncols(x);
+  if(nr < 1 || nc < 1)
+    error("'x' must have positive dimensions");
+  if(XLENGTH(w) != nr || XLENGTH(z) != nr)
+    error("incompatible dimensions in weighted crossproducts");
+
+  const double *xptr = REAL(x);
+  const double *wptr = REAL(w);
+  const double *zptr = REAL(z);
+
+  SEXP XWX;
+  PROTECT(XWX = allocMatrix(REALSXP, nc, nc));
+  double *XWXptr = REAL(XWX);
+
+  SEXP XWz;
+  PROTECT(XWz = allocVector(REALSXP, nc));
+  double *XWzptr = REAL(XWz);
+
+  SEXP zWz;
+  PROTECT(zWz = allocVector(REALSXP, 1));
+  long double zWzvalue = 0.0;
+
+  /* Keep the scaled work matrix near 8 MiB, while retaining sufficiently
+     large BLAS calls for tall matrices. */
+  const size_t max_work = 1048576;
+  int block_rows = (int) (max_work / (size_t) nc);
+  if(block_rows < 1)
+    block_rows = 1;
+  if(block_rows > nr)
+    block_rows = nr;
+
+  size_t matrix_work = (size_t) block_rows * (size_t) nc;
+  double *work = (double *) R_alloc(
+    matrix_work + 2 * (size_t) block_rows, sizeof(double)
+  );
+  double *sqrtw = work + matrix_work;
+  double *zw = sqrtw + block_rows;
+
+  const char upper = 'U';
+  const char transpose = 'T';
+  const double one = 1.0;
+  const int increment = 1;
+  int first = 1;
+
+  for(int start = 0; start < nr; start += block_rows) {
+    int nb = nr - start;
+    if(nb > block_rows)
+      nb = block_rows;
+
+    for(int i = 0; i < nb; i++) {
+      double wi = wptr[start + i];
+      if(!R_FINITE(wi) || wi < 0.0)
+        error("'w' must contain finite nonnegative values");
+      sqrtw[i] = sqrt(wi);
+      double zi = zptr[start + i];
+      zw[i] = zi * sqrtw[i];
+      double zi2 = zi * zi;
+      zWzvalue += (long double) (wi * zi2);
+    }
+
+    for(int j = 0; j < nc; j++) {
+      const double *xcol = xptr + (size_t) j * nr + start;
+      double *workcol = work + (size_t) j * nb;
+      for(int i = 0; i < nb; i++)
+        workcol[i] = xcol[i] * sqrtw[i];
+    }
+
+    double beta = first ? 0.0 : 1.0;
+    F77_CALL(dsyrk)(
+      &upper, &transpose, &nc, &nb, &one, work, &nb,
+      &beta, XWXptr, &nc FCONE FCONE
+    );
+    F77_CALL(dgemv)(
+      &transpose, &nb, &nc, &one, work, &nb, zw,
+      &increment, &beta, XWzptr, &increment FCONE
+    );
+    first = 0;
+  }
+
+  /* DSYRK writes one triangle only. */
+  for(int j = 0; j < nc; j++)
+    for(int i = j + 1; i < nc; i++)
+      XWXptr[i + (size_t) j * nc] = XWXptr[j + (size_t) i * nc];
+
+  REAL(zWz)[0] = (double) zWzvalue;
+
+  SEXP rval;
+  PROTECT(rval = allocVector(VECSXP, 3));
+  SET_VECTOR_ELT(rval, 0, XWX);
+  SET_VECTOR_ELT(rval, 1, XWz);
+  SET_VECTOR_ELT(rval, 2, zWz);
+
+  SEXP nrval;
+  PROTECT(nrval = allocVector(STRSXP, 3));
+  SET_STRING_ELT(nrval, 0, mkChar("XWX"));
+  SET_STRING_ELT(nrval, 1, mkChar("XWz"));
+  SET_STRING_ELT(nrval, 2, mkChar("zWz"));
+  setAttrib(rval, R_NamesSymbol, nrval);
+
+  UNPROTECT(5);
+  return rval;
+}
+
 /* Compute working response and weights for the Gaussian family. */
 SEXP update_Gaussian(SEXP peta, SEXP y, SEXP eta, SEXP j)
 {

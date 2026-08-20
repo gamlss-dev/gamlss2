@@ -194,6 +194,12 @@ calc_XWX <- function(x, w, index = NULL)
   rval
 }
 
+## Fused dense weighted crossproducts.
+calc_XWXz <- function(x, w, z)
+{
+  .Call("calc_XWXz", x, as.numeric(w), as.numeric(z), PACKAGE = "gamlss2")
+}
+
 ## Weighted Demmler-Reinsch reparameterization for a single penalty.
 smooth.construct_dr <- function(XWX, XWz, S, ridge = 1e-05)
 {
@@ -247,13 +253,24 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   }
 
   ## Pre compute matrices.
+  zWz <- NULL
   if(control$binning) {
     XWz <- crossprod(x$X, rz)
     XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
   } else {
-    XW <- x$X * w
-    XWX <- crossprod(XW, x$X)
-    XWz <- crossprod(XW, z)
+    use.symmetric <- ncol(x$X) >= 40L &&
+      all(is.finite(w)) && all(w >= 0)
+    if(use.symmetric) {
+      crossproducts <- calc_XWXz(x$X, w, z)
+      XWX <- crossproducts$XWX
+      XWz <- crossproducts$XWz
+      zWz <- crossproducts$zWz
+    } else {
+      ## Preserve the previous behavior for non-finite or negative weights.
+      XW <- x$X * w
+      XWX <- crossprod(XW, x$X)
+      XWz <- crossprod(XW, z)
+    }
   }
   S <- diag(1e-05, ncol(x$X))
 
@@ -403,7 +420,8 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
       "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
   } else {
-    zWz <- sum(w * z^2)
+    if(is.null(zWz))
+      zWz <- sum(w * z^2)
     criterion.evaluations <- 0L
 
     ## Function to search for smoothing parameters using GCV etc.

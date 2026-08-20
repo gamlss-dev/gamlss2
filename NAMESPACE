@@ -76,7 +76,9 @@ export(
   "bamlss2",
   "mcmc",
   "distributions3_family",
-  "ms"
+  "ms",
+  "lo",
+  "n"
 )
 
 S3method(gamlss2, formula)

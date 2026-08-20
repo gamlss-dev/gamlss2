@@ -81,6 +81,14 @@ website:
               file: man/la.qmd
             - text: elm
               file: man/elm.qmd
+            - text: lin / ridge
+              file: man/lin.qmd
+            - text: fk
+              file: man/fk.qmd
+            - text: lo
+              file: man/lo.qmd
+            - text: "n"
+              file: man/n.qmd
             - text: pb
               file: man/pb.qmd
             - text: random
@@ -91,6 +99,12 @@ website:
           contents:
             - text: modelstats
               file: man/modelstats.qmd
+            - text: logLik.gamlss2
+              file: man/logLik.gamlss2.qmd
+            - text: deviance.gamlss2
+              file: man/deviance.gamlss2.qmd
+            - text: residuals.gamlss2
+              file: man/residuals.gamlss2.qmd
             - text: calibration
               file: man/calibration.qmd
             - text: plots
@@ -112,7 +126,7 @@ website:
             - text: gamlss2.family
               file: man/gamlss2.family.qmd
             - text: GAMLSS2
-              file: man/GAMLSS2.qmd
+              file: man/GAMLSS2_distribution.qmd
             - text: Kumaraswamy
               file: man/Kumaraswamy.qmd
             - text: MN

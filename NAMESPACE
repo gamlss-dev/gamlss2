@@ -44,6 +44,8 @@ export(
   "OL",
   "ologit",
   "elm",
+  "lin",
+  "ridge",
   "special_fit",
   "special_predict",
   "specials",

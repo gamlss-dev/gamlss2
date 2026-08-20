@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -94,10 +97,10 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6ad69d7dd7341c7e033412c00e5f8bd4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c2cacce5d9bf5d72743caf4e266d4542.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -127,7 +130,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -323,21 +326,21 @@ GAMLSS-RS iteration 20: Global Deviance = 64842.89 </code></pre>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>))</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 65324.4373 eps = 0.572869     
-GAMLSS-RS iteration  2: Global Deviance = 64896.6815 eps = 0.006548     
-GAMLSS-RS iteration  3: Global Deviance = 64855.003 eps = 0.000642     
-GAMLSS-RS iteration  4: Global Deviance = 64849.251 eps = 0.000088     
-GAMLSS-RS iteration  5: Global Deviance = 64846.9841 eps = 0.000034     
-GAMLSS-RS iteration  6: Global Deviance = 64845.2563 eps = 0.000026     
-GAMLSS-RS iteration  7: Global Deviance = 64843.7845 eps = 0.000022     
-GAMLSS-RS iteration  8: Global Deviance = 64842.4976 eps = 0.000019     
-GAMLSS-RS iteration  9: Global Deviance = 64841.3626 eps = 0.000017     
-GAMLSS-RS iteration 10: Global Deviance = 64840.3451 eps = 0.000015     
-GAMLSS-RS iteration 11: Global Deviance = 64839.4323 eps = 0.000014     
-GAMLSS-RS iteration 12: Global Deviance = 64838.6079 eps = 0.000012     
-GAMLSS-RS iteration 13: Global Deviance = 64837.8612 eps = 0.000011     
-GAMLSS-RS iteration 14: Global Deviance = 64837.1834 eps = 0.000010     
-GAMLSS-RS iteration 15: Global Deviance = 64836.5682 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 65324.4367 eps = 0.572869     
+GAMLSS-RS iteration  2: Global Deviance = 64896.6813 eps = 0.006548     
+GAMLSS-RS iteration  3: Global Deviance = 64855.0025 eps = 0.000642     
+GAMLSS-RS iteration  4: Global Deviance = 64849.2504 eps = 0.000088     
+GAMLSS-RS iteration  5: Global Deviance = 64846.9837 eps = 0.000034     
+GAMLSS-RS iteration  6: Global Deviance = 64845.2562 eps = 0.000026     
+GAMLSS-RS iteration  7: Global Deviance = 64843.7849 eps = 0.000022     
+GAMLSS-RS iteration  8: Global Deviance = 64842.4985 eps = 0.000019     
+GAMLSS-RS iteration  9: Global Deviance = 64841.3639 eps = 0.000017     
+GAMLSS-RS iteration 10: Global Deviance = 64840.3464 eps = 0.000015     
+GAMLSS-RS iteration 11: Global Deviance = 64839.4335 eps = 0.000014     
+GAMLSS-RS iteration 12: Global Deviance = 64838.6091 eps = 0.000012     
+GAMLSS-RS iteration 13: Global Deviance = 64837.8623 eps = 0.000011     
+GAMLSS-RS iteration 14: Global Deviance = 64837.1844 eps = 0.000010     
+GAMLSS-RS iteration 15: Global Deviance = 64836.5691 eps = 0.000009     </code></pre>
 </div>
 </div>
 <p>This model converges in 15 iterations and requires only about 7.5 seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
@@ -346,20 +349,21 @@ GAMLSS-RS iteration 15: Global Deviance = 64836.5682 eps = 0.000009     </code><
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>)) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 64645.7308 eps = 0.577307     
-GAMLSS-RS iteration  2: Global Deviance = 64591.6803 eps = 0.000836     
-GAMLSS-RS iteration  3: Global Deviance = 64583.7217 eps = 0.000123     
-GAMLSS-RS iteration  4: Global Deviance = 64580.5972 eps = 0.000048     
-GAMLSS-RS iteration  5: Global Deviance = 64578.2507 eps = 0.000036     
-GAMLSS-RS iteration  6: Global Deviance = 64576.2768 eps = 0.000030     
-GAMLSS-RS iteration  7: Global Deviance = 64574.5853 eps = 0.000026     
-GAMLSS-RS iteration  8: Global Deviance = 64573.1226 eps = 0.000022     
-GAMLSS-RS iteration  9: Global Deviance = 64571.8646 eps = 0.000019     
-GAMLSS-RS iteration 10: Global Deviance = 64570.7829 eps = 0.000016     
-GAMLSS-RS iteration 11: Global Deviance = 64569.8635 eps = 0.000014     
-GAMLSS-RS iteration 12: Global Deviance = 64569.086 eps = 0.000012     
-GAMLSS-RS iteration 13: Global Deviance = 64568.4217 eps = 0.000010     
-GAMLSS-RS iteration 14: Global Deviance = 64567.8546 eps = 0.000008     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 64648.258 eps = 0.577291     
+GAMLSS-RS iteration  2: Global Deviance = 64597.8289 eps = 0.000780     
+GAMLSS-RS iteration  3: Global Deviance = 64590.9467 eps = 0.000106     
+GAMLSS-RS iteration  4: Global Deviance = 64588.4538 eps = 0.000038     
+GAMLSS-RS iteration  5: Global Deviance = 64586.6225 eps = 0.000028     
+GAMLSS-RS iteration  6: Global Deviance = 64584.4382 eps = 0.000033     
+GAMLSS-RS iteration  7: Global Deviance = 64581.8517 eps = 0.000040     
+GAMLSS-RS iteration  8: Global Deviance = 64579.8375 eps = 0.000031     
+GAMLSS-RS iteration  9: Global Deviance = 64578.2013 eps = 0.000025     
+GAMLSS-RS iteration 10: Global Deviance = 64576.8374 eps = 0.000021     
+GAMLSS-RS iteration 11: Global Deviance = 64575.6818 eps = 0.000017     
+GAMLSS-RS iteration 12: Global Deviance = 64574.6935 eps = 0.000015     
+GAMLSS-RS iteration 13: Global Deviance = 64573.8424 eps = 0.000013     
+GAMLSS-RS iteration 14: Global Deviance = 64573.1059 eps = 0.000011     
+GAMLSS-RS iteration 15: Global Deviance = 64572.4692 eps = 0.000009     </code></pre>
 </div>
 </div>
 <p>This model converges in 14 iterations in about 26 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
@@ -389,7 +393,7 @@ GAMLSS-RS iteration 14: Global Deviance = 64567.8546 eps = 0.000008     </code><
 </div>
 </div>
 </div>
-<p>showing good model calibration. Finally, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from `topmodels predicts the fitted distributions</p>
+<p>showing good model calibration. Finally, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from <code>topmodels</code> predicts the fitted distributions</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">procast</span>(b3, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

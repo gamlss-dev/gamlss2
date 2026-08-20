@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -75,10 +78,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6ad69d7dd7341c7e033412c00e5f8bd4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c2cacce5d9bf5d72743caf4e266d4542.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -340,6 +343,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">random</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/ms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ms</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -406,6 +415,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/family.distribution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">family.distribution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/find_family.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">find_family</span></a>
   </div>
@@ -418,8 +433,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/GDF.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">GDF</span></a>
+  <a href="../man/GAMLSS2.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GAMLSS2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -582,12 +597,12 @@ Arguments passed on to <code>predict.gamlss2</code>, e.g., <code>newdata</code>.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>To facilitate making probabilistic forecasts based on <code>gamlss2</code> model objects, the <code>prodist</code> method extracts fitted or predicted probability <code>distribution</code> objects. Internally, the <code>predict.gamlss2</code> method is used first to obtain the distribution parameters (<code>mu</code>, <code>sigma</code>, <code>tau</code>, <code>nu</code>, or a subset thereof). Subsequently, the corresponding <code>distribution</code> object is set up as a <code>GDF</code> object, a unified <span class="pkg">gamlss2</span> distribution interface for the workflow provided by the <span class="pkg">distributions3</span> package (see Zeileis et al.&nbsp;2022).</p>
+<p>To facilitate making probabilistic forecasts based on <code>gamlss2</code> model objects, the <code>prodist</code> method extracts fitted or predicted probability <code>distribution</code> objects. Internally, the <code>predict.gamlss2</code> method is used first to obtain the distribution parameters (<code>mu</code>, <code>sigma</code>, <code>tau</code>, <code>nu</code>, or a subset thereof). Subsequently, the corresponding <code>distribution</code> object is set up as a <code>GAMLSS2</code> object, a unified <span class="pkg">gamlss2</span> distribution interface for the workflow provided by the <span class="pkg">distributions3</span> package (see Zeileis et al.&nbsp;2022).</p>
 <p>Note that these probability distributions only reflect the random variation in the dependent variable based on the model employed (and its associated distributional assumption for the dependent variable). This does not capture the uncertainty in the parameter estimates.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>An object of class <code>GDF</code> inheriting from <code>distribution</code>.</p>
+<p>An object of class <code>GAMLSS2</code> inheriting from <code>distribution</code>.</p>
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
@@ -595,7 +610,7 @@ Arguments passed on to <code>predict.gamlss2</code>, e.g., <code>newdata</code>.
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>GDF</code>, <code>predict.gamlss2</code></p>
+<p><code>GAMLSS2</code>, <code>predict.gamlss2</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>

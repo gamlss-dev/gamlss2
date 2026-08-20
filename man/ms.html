@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>harztraffic – gamlss2</title>
+<title>ms – gamlss2</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -141,10 +141,8 @@ window.Quarto = {
 </script>
 
 <meta property="og:title" content="gamlss2">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/HarzTraffic_files/figure-html/unnamed-chunk-1-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="960">
-<meta property="og:image:width" content="1344">
 </head>
 
 <body class="nav-sidebar floating nav-fixed quarto-light">
@@ -218,7 +216,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/HarzTraffic.html">Data</a></li><li class="breadcrumb-item"><a href="../man/HarzTraffic.html">HarzTraffic</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/special_terms.html">Special model terms</a></li><li class="breadcrumb-item"><a href="../man/ms.html">ms</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -331,13 +329,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">Special model terms</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/special_terms.html" class="sidebar-item-text sidebar-link">
@@ -376,7 +374,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/ms.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/ms.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">ms</span></a>
   </div>
 </li>
@@ -513,16 +511,16 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
  <span class="menu-text">Data</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/HarzTraffic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HarzTraffic</span></a>
   </div>
 </li>
@@ -573,263 +571,178 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#traffic-counts-at-sonnenberg-in-the-harz-region" id="toc-traffic-counts-at-sonnenberg-in-the-harz-region" class="nav-link active" data-scroll-target="#traffic-counts-at-sonnenberg-in-the-harz-region">Traffic Counts at Sonnenberg in the Harz Region</a>
+  <li><a href="#monotonic-p-splines-for-gamlss" id="toc-monotonic-p-splines-for-gamlss" class="nav-link active" data-scroll-target="#monotonic-p-splines-for-gamlss">Monotonic P-Splines for GAMLSS</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
-  <li><a href="#format" id="toc-format" class="nav-link" data-scroll-target="#format">Format</a></li>
+  <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
-  <li><a href="#source" id="toc-source" class="nav-link" data-scroll-target="#source">Source</a></li>
+  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/HarzTraffic.html">Data</a></li><li class="breadcrumb-item"><a href="../man/HarzTraffic.html">HarzTraffic</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/special_terms.html">Special model terms</a></li><li class="breadcrumb-item"><a href="../man/ms.html">ms</a></li></ol></nav></header>
 
 
 
 
-<section id="traffic-counts-at-sonnenberg-in-the-harz-region" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="traffic-counts-at-sonnenberg-in-the-harz-region">Traffic Counts at Sonnenberg in the Harz Region</h2>
+<section id="monotonic-p-splines-for-gamlss" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="monotonic-p-splines-for-gamlss">Monotonic P-Splines for GAMLSS</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>This dataset contains daily traffic counts near Sonnenberg in the Harz region of Germany. It covers nearly three years, from 2021-01-01 to 2023-11-30, and combines traffic counts with weather covariates. The data are useful for illustrating seasonal count regression models, for example with cyclic smoothers over the day of the year.</p>
+<p>Constructs a monotonic penalized B-spline (P-spline) model term for use with <code>gamlss2</code>. The smooth can be constrained to be monotonically increasing or decreasing. The smoothing parameter is either supplied by the user or selected automatically during estimation.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">data("HarzTraffic", package = "gamlss2")</code></pre>
+<pre><code class="language-R">ms(x, mono = c("up", "down"), k = 10,
+  criterion = "aicc", lambda = NULL,
+  lambda.min = 1e-8, lambda.max = 1e8,
+  lambda.tol = 1e-4, ...)
+</code></pre>
 </section>
-<section id="format" class="level3">
-<h3 class="anchored" data-anchor-id="format">Format</h3>
-<p>A data frame containing 1057 observations on 16 variables.</p>
-<dl>
-<dt>
-date
-</dt>
-<dd>
-Date, the date of the record.
-</dd>
-<dt>
-yday
-</dt>
-<dd>
-Integer, the day of the year extracted from <code>date</code>. This is convenient for modeling within-year seasonality.
-</dd>
-<dt>
-bikes
-</dt>
-<dd>
-Integer, the number of motorcycles on that day.
-</dd>
-<dt>
-cars
-</dt>
-<dd>
-Integer, the number of cars on that day.
-</dd>
-<dt>
-trucks
-</dt>
-<dd>
-Integer, the number of trucks on that day.
-</dd>
-<dt>
-others
-</dt>
-<dd>
-Integer, the number of other vehicles on that day.
-</dd>
-<dt>
-tempmin
-</dt>
-<dd>
-Numeric, minimum temperature in <span class="math inline">\(^{\circ}C\)</span>.
-</dd>
-<dt>
-tempmax
-</dt>
-<dd>
-Numeric, maximum temperature in <span class="math inline">\(^{\circ}C\)</span>.
-</dd>
-<dt>
-temp
-</dt>
-<dd>
-Numeric, mean temperature in <span class="math inline">\(^{\circ}C\)</span>.
-</dd>
-<dt>
-humidity
-</dt>
-<dd>
-Numeric, mean relative humidity in percent.
-</dd>
-<dt>
-tempdew
-</dt>
-<dd>
-Numeric, average dewpoint temperature in <span class="math inline">\(^{\circ}C\)</span>.
-</dd>
-<dt>
-cloudiness
-</dt>
-<dd>
-Numeric, average cloud cover in percent.
-</dd>
-<dt>
-rain
-</dt>
-<dd>
-Numeric, amount of precipitation in mm (snow and rain).
-</dd>
-<dt>
-sunshine
-</dt>
-<dd>
-Numeric, sunshine duration in minutes.
-</dd>
-<dt>
-wind
-</dt>
-<dd>
-Numeric, mean wind speed in m/s.
-</dd>
-<dt>
-windmax
-</dt>
-<dd>
-Numeric, maximum wind speed in m/s.
-</dd>
-</dl>
+<section id="arguments" class="level3">
+<h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
+<table role="presentation">
+<tbody><tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="x">x</code>
+</td>
+<td>
+<p>A numeric covariate to be represented by a monotonic P-spline.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="mono">mono</code>
+</td>
+<td>
+<p>Character specifying the direction of monotonicity. Use <code>“up”</code> for a monotonically increasing effect or <code>“down”</code> for a monotonically decreasing effect.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="k">k</code>
+</td>
+<td>
+<p>Integer giving the dimension of the B-spline basis. The default is <code>10</code>.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="criterion">criterion</code>
+</td>
+<td>
+<p>Character specifying the criterion used for automatic smoothing parameter selection. Available criteria are <code>“aicc”</code>, <code>“aic”</code>, <code>“gaic”</code>, <code>“bic”</code>, and <code>“gcv”</code>. The default is <code>“aicc”</code>.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="lambda">lambda</code>
+</td>
+<td>
+<p>Optional positive smoothing parameter. If <code>NULL</code>, the smoothing parameter is selected automatically. If supplied, <code>lambda</code> is kept fixed during fitting.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="lambda.min">lambda.min</code>, <code id="lambda.max">lambda.max</code>
+</td>
+<td>
+<p>Positive lower and upper limits for automatic smoothing parameter selection. The search is performed on the logarithmic scale.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="lambda.tol">lambda.tol</code>
+</td>
+<td>
+<p>Tolerance used in the one-dimensional optimization of the smoothing parameter.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="...">…</code>
+</td>
+<td>
+<p>Further arguments passed to <code>s</code> when constructing the P-spline basis.</p>
+</td>
+</tr>
+</tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The traffic variables record daily counts by vehicle type. The weather variables summarize daily conditions measured at a nearby station. In package examples, <code>bikes</code> is often modeled as a seasonal response because motorcycle traffic shows a pronounced annual cycle and substantial variation across weather conditions.</p>
+<p>Function <code>ms()</code> defines a special model term for <code>gamlss2</code>. The underlying basis is an <code>mgcv</code> P-spline basis constructed with <code>bs = “ps”</code>.</p>
+<p>For an increasing smooth, adjacent B-spline coefficients are constrained to satisfy</p>
+<p style="text-align: center;">
+</p><p><span class="math inline">\(\beta_{r+1} - \beta_r \ge 0,\)</span></p>
+<p>whereas for a decreasing smooth the inequalities are reversed. Because B-spline basis functions are non-negative and form a partition of unity, ordering the spline coefficients in this way produces a monotonic fitted effect.</p>
+<p>Estimation is based on penalized weighted least squares. For a given smoothing parameter <span class="math inline">\(\lambda\)</span>, the coefficient vector minimizes</p>
+<p style="text-align: center;">
+</p><p><code class="reqn"> (z - X)^W (z - X) + ^S </code></p>
+<p>subject to the monotonicity constraints. The constrained problem is solved with an active-set algorithm. Weighted cross-products are computed once per backfitting update, so smoothing parameter selection only requires operations on matrices having dimension determined by <code>k</code>.</p>
+<p>If <code>lambda = NULL</code>, the smoothing parameter is selected by a one-dimensional search on <code>log(lambda)</code> using the criterion specified by <code>criterion</code>.</p>
+<p>The fitted term is centered before it is returned to the additive backfitting algorithm.</p>
 </section>
-<section id="source" class="level3">
-<h3 class="anchored" data-anchor-id="source">Source</h3>
-<p>Weather Data:</p>
-<dl>
-<dt>
-Data Source:
-</dt>
-<dd>
-Deutscher Wetterdienst (DWD), Climate Data Center (CDC).
-</dd>
-<dt>
-Licence:
-</dt>
-<dd>
-CC BY 4.0
-</dd>
-<dt>
-URL:
-</dt>
-<dd>
-<a href="https://opendata.dwd.de/climate_environment/CDC/">https://opendata.dwd.de/climate_environment/CDC/</a>
-</dd>
-<dt>
-Station:
-</dt>
-<dd>
-Wernigerode (5490; Sachsen-Anhalt)
-</dd>
-<dt>
-Position:
-</dt>
-<dd>
-10.7686/51.8454/233 (lon, lat, alt, EPSG 4326)
-</dd>
-</dl>
-<p>Traffic Data:</p>
-<dl>
-<dt>
-Data Source:
-</dt>
-<dd>
-Bundesanstalt für Strassenwesen (BASt)
-</dd>
-<dt>
-Licence:
-</dt>
-<dd>
-CC BY 4.0
-</dd>
-<dt>
-URL:
-</dt>
-<dd>
-<a href="https://www.bast.de">https://www.bast.de</a>
-</dd>
-</dl>
+<section id="value" class="level3">
+<h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>The constructor <code>ms()</code> returns an object of classes <code>“special”</code> and <code>“ms”</code> containing the P-spline design and penalty matrices and information required for fitting and prediction.</p>
+<p>After fitting with <code>gamlss2</code>, the corresponding fitted special term contains the following main components:</p>
+<ul>
+<li>
+<p><code>coefficients</code>: estimated B-spline coefficients.</p>
+</li>
+<li>
+<p><code>fitted.values</code>: centered fitted contribution of the term.</p>
+</li>
+<li>
+<p><code>edf</code>: effective degrees of freedom.</p>
+</li>
+<li>
+<p><code>lambdas</code>: selected or fixed smoothing parameter.</p>
+</li>
+<li>
+<p><code>vcov</code>: covariance/influence matrix conditional on the active constraints.</p>
+</li>
+<li>
+<p><code>df</code>: residual degrees of freedom for the term, <code>n - edf</code>.</p>
+</li>
+</ul>
+<p>Additional components are stored for prediction and for warm starts in subsequent backfitting iterations.</p>
+</section>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Eilers, P. H. C. and Marx, B. D. (1996). “Flexible Smoothing with B-Splines and Penalties.” <em>Statistical Science</em>, 11(2), 89–121. <a href="https://doi.org/10.1214/ss/1038425655">doi:10.1214/ss/1038425655</a></p>
+<p>Bollaerts, K., Eilers, P. H. C. and van Mechelen, I. (2006). “Simple and Multiple P-splines Regression with Shape Constraints.” <em>British Journal of Mathematical and Statistical Psychology</em>, 59(2), 451–469. <a href="https://doi.org/10.1348/00071105X84293">doi:10.1348/00071105X84293</a></p>
+</section>
+<section id="see-also" class="level3">
+<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
+<p><code>gamlss2</code>, <code>special_terms</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## seasonal variation of motorcycle counts at Sonnenberg/Harz</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="HarzTraffic_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## count distribution</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(HarzTraffic<span class="sc">$</span>bikes))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="HarzTraffic_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## negative binomial seasonal model using cyclic splines</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 10151.1432 eps = 0.149402     
-GAMLSS-RS iteration  2: Global Deviance = 10150.8948 eps = 0.000024     
-GAMLSS-RS iteration  3: Global Deviance = 10150.8818 eps = 0.000001     </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## visualize effects</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="HarzTraffic_files/figure-html/unnamed-chunk-1-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## residual diagnostics</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="HarzTraffic_files/figure-html/unnamed-chunk-1-4.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fitted parameters for each day of the year</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">365</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## corresponding quantiles</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## visualization</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">gray</span>(<span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday, p, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="HarzTraffic_files/figure-html/unnamed-chunk-1-5.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">subset</span>(airquality, <span class="sc">!</span><span class="fu">is.na</span>(Ozone))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> air[<span class="fu">order</span>(air<span class="sc">$</span>Temp), ]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## monotone Temp effect for mu and sigma</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Wind is modeled by an unconstrained smooth</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> Ozone <span class="sc">~</span> <span class="fu">s</span>(Wind) <span class="sc">+</span> <span class="fu">ms</span>(Temp, <span class="st">"up"</span>) <span class="sc">|</span> <span class="fu">ms</span>(Temp, <span class="st">"down"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> air, <span class="at">family =</span> GA)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## model summary</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## visualize estimated effects</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

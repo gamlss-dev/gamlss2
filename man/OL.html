@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -75,10 +78,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6ad69d7dd7341c7e033412c00e5f8bd4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c2cacce5d9bf5d72743caf4e266d4542.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -107,6 +110,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <meta property="og:title" content="gamlss2">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
@@ -340,6 +372,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">random</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/ms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ms</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -406,6 +444,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/family.distribution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">family.distribution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/find_family.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">find_family</span></a>
   </div>
@@ -418,8 +462,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/GDF.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">GDF</span></a>
+  <a href="../man/GAMLSS2.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GAMLSS2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -550,7 +594,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="ordered-logistic-family-for-ordinal-regression">Ordered Logistic Family for Ordinal Regression</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Defines the ordered logistic (cumulative logit) family for modeling ordinal response variables within the <code>gamlss2</code> framework. This implementation supports flexible modeling of the location and threshold (cutpoint) parameters, including effects of covariates.</p>
+<p>Defines the ordered logistic (cumulative logit) family for modeling ordinal response variables within the <code>gamlss2</code> framework. The location and ordered cutpoints can be modeled as functions of covariates.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -567,29 +611,34 @@ ologit(k)
 <code id="k">k</code>
 </td>
 <td>
-An integer specifying the number of response categories. Must be <code>k &gt;= 2</code>.
+A single integer specifying the number of response categories. Must be <code>k &gt;= 2</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>This family implements a cumulative logit model for ordinal responses with <code>k</code> ordered categories. The linear predictor models a latent location parameter, and the cutpoints between response categories are parameterized via a monotonic transformation:</p>
-<ul>
-<li>
-<p>The first cutpoint is modeled directly (<code>theta1</code>).</p>
-</li>
-<li>
-<p>The remaining cutpoints are expressed as <code>theta1 + exp(delta_j)</code> for <code>j = 2, …, k - 1</code>, ensuring that the thresholds remain ordered.</p>
-</li>
-</ul>
-<p>The <code>OL()</code> family supports modeling the location and threshold differences (<code>delta_j</code>) as functions of covariates using additive predictors in <code>gamlss2</code> via the <code>“|”</code> formula interface.</p>
-<p>The family returns an object of class <code>“gamlss2.family”</code>, which includes methods for evaluating the log-likelihood, simulating from the model, and computing predicted probabilities.</p>
+<p>This family implements a cumulative logit model for an ordinal response with <code>k</code> categories. The response must be coded as the integers <code>1, …, k</code>, or as a factor with exactly these levels.</p>
+<p>The linear predictor models a latent <code>location</code> parameter. Let <span class="math inline">\(\gamma_j\)</span> denote the cutpoint between categories <span class="math inline">\(j\)</span> and <span class="math inline">\(j + 1\)</span>. The cutpoints are parameterized as</p>
+<p style="text-align: center;">
+</p><p><span class="math inline">\(\gamma_1 = \theta_1\)</span></p>
+<p>and, recursively,</p>
+<p style="text-align: center;">
+</p><p><code class="reqn"><em>j = </em>{j-1} + (_j), j = 2, , k - 1.</code></p>
+<p>Equivalently,</p>
+<p style="text-align: center;">
+</p><p><span class="math inline">\(\gamma_j = \gamma_1 + \sum_{\ell=2}^j \exp(\delta_\ell),\)</span></p>
+<p>which ensures strictly ordered cutpoints. In the family object, <span class="math inline">\(\theta_1\)</span> is named <code>theta1</code> and <span class="math inline">\(\delta_j\)</span> is named <code>delta</code><span class="math inline">\(j\)</span>. For <code>k = 2</code>, only <code>location</code> and <code>theta1</code> are required; there are no <code>delta</code> parameters.</p>
+<p>The cumulative probabilities are</p>
+<p style="text-align: center;">
+</p><p><code class="reqn">(Y &gt; j) = ^{-1}( - _j), j = 1, , k - 1.</code></p>
+<p>The <code>OL()</code> family supports modeling the location, first cutpoint, and cutpoint differences as functions of covariates using additive predictors in <code>gamlss2</code> via the <code>“|”</code> formula interface.</p>
+<p>The returned family object provides functions for evaluating probability masses and log-likelihoods, cumulative probabilities and quantiles, category and transition probabilities, and the mean and variance of the numeric category labels.</p>
 <p><code>ologit()</code> is retained as a compatibility alias for <code>OL()</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A <code>“gamlss2.family”</code> object to be used with <code>gamlss2</code>.</p>
+<p>A <code>“gamlss2.family”</code> object to be used with <code>gamlss2</code>. Its distribution parameters are <code>location</code>, <code>theta1</code>, and, when <code>k &gt; 2</code>, one cutpoint-difference parameter <code>delta</code><span class="math inline">\(j\)</span> for each <span class="math inline">\(j = 2, \ldots, k - 1\)</span>.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -600,7 +649,7 @@ An integer specifying the number of response categories. Must be <code>k &gt;= 2
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## example using the housing data from the MASS package:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## example using the housing data from the MASS package</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"MASS"</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## fit standard cumulative logit model using polr()</span></span>
@@ -627,15 +676,15 @@ Medium|High  0.6907  0.1255     5.5049
 Residual Deviance: 3479.149 
 AIC: 3495.149 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## convert response to integer for use with gamlss2</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## OL() uses integer category labels 1, ..., k</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>housing<span class="sc">$</span>Satint <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(housing<span class="sc">$</span>Sat)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## fit equivalent model using gamlss2</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## fit the corresponding model using gamlss2</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(Satint <span class="sc">~</span> Infl <span class="sc">+</span> Type <span class="sc">+</span> Cont,</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> housing, <span class="at">weights =</span> Freq,</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">OL</span>(<span class="at">k =</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 3479.1765 eps = 0.323474     
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 3479.1765 eps = 0.058036     
 GAMLSS-RS iteration  2: Global Deviance = 3479.1493 eps = 0.000007     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -648,22 +697,22 @@ Family: Ordered Logit (3 categories)
 Link functions: location = identity, theta1 = identity, delta2 = identity
 *--------
 Coefficients:
-                        Estimate Std. Error t value Pr(&gt;|t|)  
-location.(Intercept)     -0.1968  7895.1612   0.000   1.0000  
-location.InflMedium       0.5665     0.5366   1.056   0.2952  
-location.InflHigh         1.2889     0.5570   2.314   0.0239 *
-location.TypeApartment   -0.5724     0.6343  -0.902   0.3703  
-location.TypeAtrium      -0.3662     0.6362  -0.576   0.5669  
-location.TypeTerrace     -1.0911     0.6400  -1.705   0.0931 .
-location.ContHigh         0.3603     0.4461   0.808   0.4223  
-theta1.(Intercept)       -0.6932  7895.1611   0.000   0.9999  
-delta2.(Intercept)        0.1714     0.2191   0.782   0.4371  
+                       Estimate Std. Error t value Pr(&gt;|t|)  
+location.(Intercept)    -0.1969   223.6070  -0.001   0.9993  
+location.InflMedium      0.5665     0.5366   1.056   0.2952  
+location.InflHigh        1.2889     0.5570   2.314   0.0239 *
+location.TypeApartment  -0.5724     0.6343  -0.902   0.3703  
+location.TypeAtrium     -0.3662     0.6362  -0.576   0.5669  
+location.TypeTerrace    -1.0911     0.6400  -1.705   0.0931 .
+location.ContHigh        0.3603     0.4461   0.808   0.4223  
+theta1.(Intercept)      -0.6932   223.6070  -0.003   0.9975  
+delta2.(Intercept)       0.1714     0.2191   0.782   0.4371  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 72 df =  9 res.df =  63
 Deviance = 3479.1493 Null Dev. Red. = -2099.21%
-AIC = 3497.1493 elapsed =  0.04sec</code></pre>
+AIC = 3497.1493 elapsed =  0.02sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare coefficients</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -676,18 +725,17 @@ AIC = 3497.1493 elapsed =  0.04sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  location.p.(Intercept)    location.p.InflMedium      location.p.InflHigh 
-              -0.1968484                0.5664539                1.2889495 
+              -0.1968537                0.5664539                1.2889495 
 location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace 
               -0.5724084               -0.3662225               -1.0911265 
      location.p.ContHigh     theta1.p.(Intercept)     delta2.p.(Intercept) 
-               0.3603203               -0.6931505                0.1713817 </code></pre>
+               0.3603203               -0.6931558                0.1713817 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict class probabilities</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pm1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m1, <span class="at">type =</span> <span class="st">"p"</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pm2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pm2 <span class="ot">&lt;-</span> <span class="fu">family</span>(m2)<span class="sc">$</span><span class="fu">probabilities</span>(pm2)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pm1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pm2 <span class="ot">&lt;-</span> <span class="fu">family</span>(m2)<span class="sc">$</span><span class="fu">probabilities</span>(<span class="fu">predict</span>(m2))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pm1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        Low    Medium      High
 1 0.3784493 0.2876752 0.3338755
@@ -703,9 +751,9 @@ location.p.TypeApartment    location.p.TypeAtrium   location.p.TypeTerrace
 [1,] 0.3784101 0.2876996 0.3338904
 [2,] 0.3784101 0.2876996 0.3338904
 [3,] 0.3784101 0.2876996 0.3338904
-[4,] 0.2567831 0.2742240 0.4689929
-[5,] 0.2567831 0.2742240 0.4689929
-[6,] 0.2567831 0.2742240 0.4689929</code></pre>
+[4,] 0.2567831 0.2742239 0.4689929
+[5,] 0.2567831 0.2742239 0.4689929
+[6,] 0.2567831 0.2742239 0.4689929</code></pre>
 </div>
 </div>
 

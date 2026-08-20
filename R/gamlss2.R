@@ -337,7 +337,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     if(control$x) {
       rval$x <- X
     }
-    rval$results <- results(rval, data = data)
+    rval$results <- results(rval, data = mf)
   } else {
     rval$fitted.values <- NULL
     rval$weights <- NULL

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>modelstats – gamlss2</title>
+<title>lin – gamlss2</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -216,7 +216,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/modelstats.html">Predictions and model statistics</a></li><li class="breadcrumb-item"><a href="../man/modelstats.html">modelstats</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/special_terms.html">Special model terms</a></li><li class="breadcrumb-item"><a href="../man/lin.html">lin / ridge</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -329,13 +329,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">Special model terms</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../man/special_terms.html" class="sidebar-item-text sidebar-link">
@@ -362,7 +362,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/lin.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/lin.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">lin / ridge</span></a>
   </div>
 </li>
@@ -406,16 +406,16 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
  <span class="menu-text">Predictions and model statistics</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/modelstats.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">modelstats</span></a>
   </div>
 </li>
@@ -613,7 +613,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#gaic-and-generalised-pseudo-r-squared-for-gamlss-models" id="toc-gaic-and-generalised-pseudo-r-squared-for-gamlss-models" class="nav-link active" data-scroll-target="#gaic-and-generalised-pseudo-r-squared-for-gamlss-models">GAIC and Generalised (Pseudo) R-squared for GAMLSS Models</a>
+  <li><a href="#bundled-linear-and-ridge-penalized-model-terms" id="toc-bundled-linear-and-ridge-penalized-model-terms" class="nav-link active" data-scroll-target="#bundled-linear-and-ridge-penalized-model-terms">Bundled Linear and Ridge-Penalized Model Terms</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
@@ -628,27 +628,22 @@ window.Quarto = {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/modelstats.html">Predictions and model statistics</a></li><li class="breadcrumb-item"><a href="../man/modelstats.html">modelstats</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/special_terms.html">Special model terms</a></li><li class="breadcrumb-item"><a href="../man/lin.html">lin / ridge</a></li></ol></nav></header>
 
 
 
 
-<section id="gaic-and-generalised-pseudo-r-squared-for-gamlss-models" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="gaic-and-generalised-pseudo-r-squared-for-gamlss-models">GAIC and Generalised (Pseudo) R-squared for GAMLSS Models</h2>
+<section id="bundled-linear-and-ridge-penalized-model-terms" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="bundled-linear-and-ridge-penalized-model-terms">Bundled Linear and Ridge-Penalized Model Terms</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Functions to compute the GAIC and the generalized R-squared of Nagelkerke (1991) for GAMLSS models.</p>
+<p>Constructs a model-matrix block for use as a single model term in a <code>gamlss2</code> formula. Function <code>lin()</code> fits the block with only a negligible numerical penalty, whereas <code>ridge()</code> standardizes its columns and estimates a ridge penalty for the complete block.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">## information criteria
-GAIC(object, ...,
-  k = 2, corrected = FALSE)
+<pre><code class="language-R">lin(x, ..., ridge = FALSE, scale = FALSE)
 
-## r-squared
-Rsq(object, ...,
-  type = c("Cox Snell", "Cragg Uhler", "both", "simple"),
-  newdata = NULL)
+ridge(...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -656,10 +651,10 @@ Rsq(object, ...,
 <table role="presentation">
 <tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="object">object</code>
+<code id="x">x</code>
 </td>
 <td>
-A fitted model object.
+<p>A one-sided formula or the first unquoted predictor expression. A formula is recommended when transformations, factors, or interactions are used, for example <code>~ x1 + x2</code>, <code>~ x1:x2</code>, or <code>~ 0 + f</code>.</p>
 </td>
 </tr>
 <tr>
@@ -667,94 +662,118 @@ A fitted model object.
 <code id="...">…</code>
 </td>
 <td>
-Optionally more fitted model objects.
+<p>In <code>lin()</code>, additional unquoted predictor expressions that are combined additively with <code>x</code> when <code>x</code> is not a formula. In <code>ridge()</code>, all arguments are forwarded to <code>lin()</code>; consequently, calls such as <code>ridge(x1, x2)</code> and <code>ridge(~ x1 + x2)</code> are both supported. For precise control of formula expansion, a one-sided formula is recommended.</p>
 </td>
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="k">k</code>
+<code id="ridge">ridge</code>
 </td>
 <td>
-Numeric, the <em>penalty</em> to be used. The default <code>k = 2</code> corresponds to the classical AIC.
+<p>Logical. Should the identity-penalty smoothing parameter be estimated? This is primarily a low-level argument; <code>ridge()</code> is the convenient interface for <code>ridge = TRUE</code> with scaling enabled.</p>
 </td>
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="corrected">corrected</code>
+<code id="scale">scale</code>
 </td>
 <td>
-Logical, whether the corrected AIC should be used? Note that it applies only when <code>k = 2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="type">type</code>
-</td>
-<td>
-Which definition of R-squared should be used? Possible values are <code>“Cox Snell”</code>, <code>“Cragg Uhler”</code>, <code>“both”</code>, and <code>“simple”</code>. The option <code>“simple”</code> computes an R-squared based on the mean; in this case <code>newdata</code> may also be supplied.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="newdata">newdata</code>
-</td>
-<td>
-For <code>type = “simple”</code>, the R-squared can also be evaluated on <code>newdata</code>.
+<p>Logical. Should the columns of the constructed design matrix be centered and divided by their sample standard deviations? Columns with zero or non-finite standard deviation are left unchanged. Function <code>ridge()</code> always uses <code>scale = TRUE</code>.</p>
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The <code>Rsq()</code> function uses the following definition of R-squared:</p>
+<p><strong>Model-matrix construction.</strong> The supplied predictors are converted to a design matrix using <code>model.matrix</code>. Any column named <code>“(Intercept)”</code> is removed because the distributional predictor has its own intercept. Apart from that removal, standard R formula rules and contrasts are used. Thus, <code>~ x1 * x2</code> expands to two main effects and their interaction, while <code>~ x1:x2</code> produces a pure interaction without adding the marginal terms. Pure interactions are therefore supported. For a factor <code>f</code>, <code>~ f</code> uses the current contrast coding (normally treatment coding), whereas <code>~ 0 + f</code> requests one indicator column per level.</p>
+<p>Supplying several predictors without a formula is a convenience shortcut: <code>lin(x1, x2)</code> is equivalent to <code>lin(~ x1 + x2)</code>, and similarly for <code>ridge()</code>. A formula should be used whenever operators such as <code>:</code>, <code>*</code>, <code>-</code>, or <code>0 +</code> need to be interpreted explicitly.</p>
+<p><strong>Unpenalized linear blocks.</strong> Function <code>lin()</code> fixes the identity-penalty multiplier at a negligible value. It therefore behaves like weighted linear regression for the current working response, while entering all columns as one model term rather than as separate ordinary linear terms. This can be useful for keeping a block of columns together and for using the same model-matrix and prediction machinery as penalized terms. Ordinary linear effects can still be specified directly in the surrounding <code>gamlss2</code> formula.</p>
+<p><strong>Ridge-penalized blocks.</strong> For <code>ridge()</code>, coefficients are estimated from the current weighted working response using an identity penalty. Ignoring the small numerical stabilization used by the fitting algorithm, the update minimizes</p>
 <p style="text-align: center;">
-</p><p><span class="math inline">\(R^2=1- \left(\frac{L(0)}{L(\hat{\theta})}\right)^{2/n}\)</span></p>
-<p>where <span class="math inline">\(L(0)\)</span> is the null model (only a constant is fitted to all parameters) and <span class="math inline">\(L(\hat{\theta})\)</span> is the fitted model under consideration. This definition is sometimes referred to as the Cox and Snell R-squared. The Nagelkerke or Cragg and Uhler definition divides the above by</p>
-<p style="text-align: center;">
-</p><p><span class="math inline">\(1 - L(0)^{2/n}\)</span></p>
+</p><p><code class="reqn"> (z - X)^ W (z - X) + ,^, </code></p>
+<p>where <span class="math inline">\(z\)</span> and <span class="math inline">\(W\)</span> are the current working response and weights. A large <span class="math inline">\(\lambda\)</span> shrinks the whole coefficient block toward zero.</p>
+<p>Before fitting, every nonconstant column of <span class="math inline">\(X\)</span> is standardized using its training-data mean and standard deviation. The stored transformation is reused for prediction. Consequently, the identity penalty is applied on a comparable scale across numeric predictors, indicator columns, and interaction columns. The reported ridge coefficients are coefficients for this standardized design matrix; fitted effects and predictions are returned on the additive-predictor scale.</p>
+<p>The smoothing parameter <span class="math inline">\(\lambda\)</span> is selected during backfitting using the smooth-term criterion supplied to <code>gamlss2()</code>. The default is corrected AIC (<code>criterion = “aicc”</code>); supported alternatives include <code>“gcv”</code>, <code>“aic”</code>, <code>“gaic”</code>, and <code>“bic”</code>. For example, use <code>gamlss2(…, criterion = “bic”)</code> to select the ridge penalty by BIC. The previous estimate is used to warm-start subsequent backfitting updates.</p>
+<p>The effective degrees of freedom are computed from the penalized weighted hat matrix. They approach the number of design columns as the penalty tends to zero and approach zero under sufficiently strong shrinkage.</p>
+<p>Both constructors create a single special model term. Its fitted components, including <code>coefficients</code>, <code>fitted.values</code>, <code>edf</code>, <code>lambdas</code>, and <code>vcov</code>, can be inspected with <code>specials</code>. For a numeric two-variable interaction, the stored effect can be displayed as an image/contour effect by <code>plot()</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Numeric vector or data frame, depending on the number of fitted model objects.</p>
+<p><code>lin()</code> and <code>ridge()</code> return a smooth specification object of class <code>“lin.smooth.spec”</code>, which is completed to an object of class <code>“lin.effect”</code> during model setup. The object contains the defining formula, variable names, model-term label, design and penalty information, and, when requested, the scaling transformation needed for prediction.</p>
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Nagelkerke NJD (1991). “A Note on a General Definition of the Coefficient of Determination.” <em>Biometrika</em>, <b>78</b>(3), 691–692. <a href="https://doi.org/10.1093/biomet/78.3.691">doi:10.1093/biomet/78.3.691</a></p>
+<p>Hoerl AE, Kennard RW (1970). “Ridge Regression: Biased Estimation for Nonorthogonal Problems.” <em>Technometrics</em>, <b>12</b>(1), 55–67. <a href="https://doi.org/10.1080/00401706.1970.10488634">doi:10.1080/00401706.1970.10488634</a></p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code></p>
+<p><code>gamlss2</code>, <code>specials</code>, <code>model.matrix</code>, <code>smooth.construct</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate negative binomial count models</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>),</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span> .,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## compare models</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(m1)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(m1, <span class="at">type =</span> <span class="st">"both"</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">Rsq</span>(m1, m2)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(m1, m2)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m1, m2)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(m1, m2)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated effects</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Simulated data with main effects and a weak interaction.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>nobs <span class="ot">&lt;-</span> <span class="dv">150</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x1 =</span> <span class="fu">rnorm</span>(nobs),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x2 =</span> <span class="fu">rnorm</span>(nobs)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fl">1.5</span> <span class="sc">*</span> d<span class="sc">$</span>x1 <span class="sc">-</span> d<span class="sc">$</span>x2 <span class="sc">+</span> <span class="fl">0.25</span> <span class="sc">*</span> d<span class="sc">$</span>x1 <span class="sc">*</span> d<span class="sc">$</span>x2 <span class="sc">+</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm</span>(nobs, <span class="at">sd =</span> <span class="fl">0.8</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Fit two predictors as one effectively unpenalized linear block.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>m_lin <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">lin</span>(x1, x2), <span class="at">data =</span> d, <span class="at">family =</span> NO,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Ridge-penalize main effects and their interaction as one block.</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>m_ridge <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">ridge</span>(<span class="sc">~</span> x1 <span class="sc">*</span> x2), <span class="at">data =</span> d, <span class="at">family =</span> NO,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## A pure interaction is supported. The main effects here remain ordinary</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## linear terms and only the interaction coefficient is ridge-penalized.</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>m_interaction <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">ridge</span>(<span class="sc">~</span> x1<span class="sc">:</span>x2),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> d, <span class="at">family =</span> NO, <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## Inspect the selected penalty and effective degrees of freedom.</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m_ridge, <span class="at">model =</span> <span class="st">"mu"</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">elements =</span> <span class="fu">c</span>(<span class="st">"coefficients"</span>, <span class="st">"edf"</span>, <span class="st">"lambdas"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$coefficients
+[1]  1.379550 -1.109882  0.236843
+
+$edf
+[1] 2.990017
+
+$lambdas
+[1] 0.01047728
+
+$response_name
+[1] "y"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Factor coding follows model.matrix() rules.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>group <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rep</span>(letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">length.out =</span> nobs))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>m_group <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">ridge</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> group), <span class="at">data =</span> d, <span class="at">family =</span> NO,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m_group, <span class="at">model =</span> <span class="st">"mu"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">elements =</span> <span class="fu">c</span>(<span class="st">"coefficients"</span>, <span class="st">"edf"</span>, <span class="st">"lambdas"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$coefficients
+[1] -4.714332e-06  1.542178e-07  4.560114e-06
+
+$edf
+[1] 0.0001649583
+
+$lambdas
+[1] 1e+05
+
+$response_name
+[1] "y"</code></pre>
+</div>
 </div>
 
 

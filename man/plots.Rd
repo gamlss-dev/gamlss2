@@ -56,6 +56,12 @@
   and plots the partial effects stored in \code{results(object)}. If no effect
   information is available, residual diagnostics are shown instead.
 
+  Linear effects are constructed separately for each formula term, so a main
+  effect does not include columns belonging to an interaction. A linear
+  interaction between two numeric covariates is displayed as an image and
+  contour plot, in the same way as a bivariate smooth effect. Linear terms
+  involving more than two covariates are not plotted automatically.
+
   For objects of class \code{"gamlss2.list"}, plots compare effect estimates
   across several fitted models. Residual diagnostics are only available for
   single-model objects.
@@ -66,7 +72,7 @@
 }
 
 \examples{\dontrun{## model formula
-f <- Ozone ~ s(Temp) + s(Wind) + s(Solar.R)| . | 1 | 1
+f <- Ozone ~ s(Temp) + s(Wind) + s(Solar.R) | . | 1 | 1
 
 ## estimate model
 m1 <- gamlss2(f, data = airquality, family = BCCG)
@@ -91,7 +97,7 @@ plot(m1, which = "qq-resid")
 plot(m1, which = "wp-resid")
 plot(m1, which = "scatter-resid")
 
-## if available, plot stored stepwise-selection path
+## if available, plot stored step_gamlss2()-selection path
 ## plot(m1, which = "selection")
 
 ## estimate another model

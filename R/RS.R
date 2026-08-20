@@ -7,6 +7,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   ## Parameter names. FIXME: TRUE/FALSE?
   np <- family$names
 
+  ## Stepwise candidate fits only need the objective and degrees of freedom.
+  ## Expensive inferential output is computed by
+  ## the final, full fit.
+  stepwise_candidate <- isTRUE(control$.stepwise_candidate)
+
   ## Initialize predictors.
   etastart <- if(is.null(control$etastart)) TRUE else isTRUE(control$etastart)
   etastart <- initialize_eta(y, family, n, etastart)
@@ -198,7 +203,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
 
   ## Estimate intercept only model first.
-  if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
+  run_nullmodel <- !stepwise_candidate ||
+    (isTRUE(control$initialize) && is.null(start))
+  if(run_nullmodel && isTRUE(control$nullmodel) & length(unlist(xterms))) {
     nullmodel_ok <- TRUE
     beta <- ieta <- list()
     for(j in np) {
@@ -407,7 +414,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               penalty[j] <- m$penalty
             } else {
               m <- lm.wfit(Xj, e, wj, method = "qr")
-              m$vcov <- vcov_lm_wfit_safe(m)
+              if(!stepwise_candidate)
+                m$vcov <- vcov_lm_wfit_safe(m)
             }
 
             ## If linear model does not improve the fit, use ML.
@@ -491,38 +499,40 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               if(!is.null(m$edf))
                 fit[[j]]$edf <- m$edf
 
-              if(!is.null(m$vcov)) {
-                fit[[j]]$vcov <- m$vcov
-              } else {
-                Xw <- Xj * sqrt(pmax(wj, 0))
-                XWX <- crossprod(Xw)
+              if(!stepwise_candidate) {
+                if(!is.null(m$vcov)) {
+                  fit[[j]]$vcov <- m$vcov
+                } else {
+                  Xw <- Xj * sqrt(pmax(wj, 0))
+                  XWX <- crossprod(Xw)
 
-                eps <- 1e-8 * mean(diag(XWX))
-                if(!is.finite(eps) || eps <= 0) eps <- 1e-8
-                diag(XWX) <- diag(XWX) + eps
+                  eps <- 1e-8 * mean(diag(XWX))
+                  if(!is.finite(eps) || eps <= 0) eps <- 1e-8
+                  diag(XWX) <- diag(XWX) + eps
 
-                R <- tryCatch(chol(XWX), error = function(e) NULL)
+                  R <- tryCatch(chol(XWX), error = function(e) NULL)
 
-                if(is.null(R)) {
-                  lambda <- eps
-                  for(k in 1:6) {
-                    Xt <- XWX + diag(lambda, ncol(XWX))
-                    R <- tryCatch(chol(Xt), error = function(e) NULL)
-                    if(!is.null(R)) {
-                      XWX <- Xt
-                      break
+                  if(is.null(R)) {
+                    lambda <- eps
+                    for(k in 1:6) {
+                      Xt <- XWX + diag(lambda, ncol(XWX))
+                      R <- tryCatch(chol(Xt), error = function(e) NULL)
+                      if(!is.null(R)) {
+                        XWX <- Xt
+                        break
+                      }
+                      lambda <- lambda * 10
                     }
-                    lambda <- lambda * 10
+                  }
+                  if(is.null(R)) {
+                    fit[[j]]$vcov <- MASS::ginv(XWX)
+                  } else {
+                    fit[[j]]$vcov <- chol2inv(R)
                   }
                 }
-                if(is.null(R)) {
-                  fit[[j]]$vcov <- MASS::ginv(XWX)
-                } else {
-                  fit[[j]]$vcov <- chol2inv(R)
-                }
-              }
 
-              colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
+                colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
+              }
               ll02 <- ll1
             }
 
@@ -678,7 +688,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       if(length(sfit[[j]])) {
         drop <- NULL
         for(i in names(sfit[[j]])) {
-          if(control$light) {
+          if(isTRUE(control$light) || stepwise_candidate) {
             sfit[[j]][[i]]$fitted.values <- NULL
           }
           if(!isTRUE(sfit[[j]][[i]]$selected))
@@ -699,6 +709,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     attr(fit, "edf") <- unlist(sapply(fit, function(x) x$edf))
   }
 
+  if(stepwise_candidate && length(fit)) {
+    for(j in names(fit))
+      fit[[j]]$fitted.values <- NULL
+  }
+
   ## Message if not converged due to NAs or Inf!
   d <- family$pdf(par = family$map2par(eta), y = y, log = TRUE)
   if(!is.null(weights))
@@ -711,7 +726,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   rval <- list(
-    "fitted.values" = as.data.frame(eta),
+    "fitted.values" = if(stepwise_candidate) NULL else as.data.frame(eta),
     "fitted.specials" = sfit,
     "fitted.linear" = fit,
     "coefficients" = coef_lin,
@@ -891,7 +906,7 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
         fitted.values = fit,
         edf = edf,
         penalty = pen,
-        vcov = chol2inv(cholQ),
+        vcov = if(isTRUE(control$.stepwise_candidate)) NULL else chol2inv(cholQ),
         df = n - edf
       ))
     }

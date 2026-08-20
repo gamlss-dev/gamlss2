@@ -13,7 +13,7 @@
 
 \usage{
 ## wrapper function for stepwise GAMLSS estimation
-step_gamlss2(formula, ..., K = 2,
+step_gamlss2(formula, ..., fixed = NULL, K = 2,
   strategy = c("both.linear", "both"), keeporder = FALSE,
   cores = 1L)
 
@@ -25,6 +25,11 @@ stepwise(x, y, specials, family, offsets,
 \arguments{
   \item{formula}{A model formula for \code{\link{gamlss2}}.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2}}.}
+  \item{fixed}{An optional one-sided formula, \code{Formula} object, or list of
+    formulas specifying model terms that must always remain in the model. Terms
+    must also occur in the search scope given by \code{formula}. For
+    multi-parameter families, right-hand sides or list elements correspond to
+    the distributional parameters in their usual order.}
   \item{K}{Numeric, the penalty for the \code{\link{GAIC}}.}
   \item{strategy}{Character, the strategy to be used by the stepwise algorithm.
     Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
@@ -77,6 +82,18 @@ stepwise(x, y, specials, family, offsets,
 
   The selected strategies are iterated until no further improvement is achieved.
 
+  Terms supplied in \code{fixed} are included in the initial model and are never
+  eligible for removal or replacement. The intercept is always retained and
+  need not be included in \code{fixed}. Fixing a linear interaction also fixes
+  all of its available lower-order marginal terms.
+
+  Linear selection is performed on formula terms, not individual columns of the
+  model matrix. Thus, all columns representing a factor or an interaction with
+  a factor are added, removed, or replaced together. Linear interactions obey
+  strong hierarchy: an interaction can enter only after its available
+  lower-order terms have entered, and a lower-order term cannot be removed while
+  an included interaction depends on it.
+
   The different strategies can be selected using argument \code{strategy}; see
   the examples. Possible values are \code{"both"}, \code{"forward"},
   \code{"backward"}, \code{"replace"}, and \code{"all"}.
@@ -118,6 +135,10 @@ f <- Ozone ~ Wind + Temp + Wind:Temp +
 
 ## estimate a Gamma model using the stepwise algorithm
 m1 <- step_gamlss2(f, data = air, family = GA, K = 2)
+
+## always retain both linear main effects
+m2 <- step_gamlss2(f, data = air, family = GA, K = 2,
+  fixed = ~ Wind + Temp | .)
 
 ## same with
 ## m <- gamlss2(f, data = air, family = NO,

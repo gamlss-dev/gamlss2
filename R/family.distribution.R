@@ -53,7 +53,6 @@ family.gamlss.family <- function(object, score = TRUE, hessian = FALSE, update =
 ## workhorse function
 distributions3_family <- function(distribution, links, score = TRUE, hessian = FALSE, update = FALSE, create_distribution = "structure",
   type = NULL, valid.response = NULL, initialize = NULL, ...) {
-
   ## distribution must be a character,
   ## corresponding to a distribution generator
   stopifnot(is.character(distribution))

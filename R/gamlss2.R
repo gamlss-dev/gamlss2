@@ -41,6 +41,7 @@ gamlss2.formula <- function(formula, data, family = NO,
 
   ## Use numeric hessian?
   if(isTRUE(control$numhessian)) {
+    family$update <- NULL
     family$hessian <- NULL
     family <- complete_family(family, .links = control$links)
   }

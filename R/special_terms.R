@@ -278,6 +278,13 @@ lin <- function(x, ..., ridge = FALSE, scale = FALSE)
 
   v <- all.vars(f)
 
+  label_terms <- v
+  if(ridge && ":" %in% all.names(f, functions = TRUE)) {
+    tl <- attr(terms(f), "term.labels")
+    if(length(tl))
+      label_terms <- tl
+  }
+
   make_label <- function(v, prefix = "lin", max_terms = 3) {
     n <- length(v)
     if(n <= max_terms) {
@@ -294,7 +301,7 @@ lin <- function(x, ..., ridge = FALSE, scale = FALSE)
   sx <- list(
     formula = f,
     term    = v,
-    label   = make_label(v, if(ridge) "ridge" else "lin"),
+    label   = make_label(label_terms, if(ridge) "ridge" else "lin"),
     by      = "NA",
     dim     = length(v),
     scale   = scale

@@ -251,8 +251,20 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       etastart[[j]] <- eta[[j]]
   }
 
+  if(!is.null(control$fixed)) {
+    for(j in np) {
+      if(control$fixed[[j]]) {
+        link <- make.link2(family$links[[j]])
+        fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
+        eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
+        fit[[j]]$fitted.values <- eta[[j]]
+        etastart[[j]] <- eta[[j]]
+      }
+    }
+  }
+
   ## Null deviance.
-  dev0 <- -2 * family$logLik(y, family$map2par(etastart))
+  dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(xterms)) {
@@ -264,12 +276,15 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     beta <- unlist(beta)
 
     if(!any(is.na(beta))) {
-      lli <- family$logLik(y, family$map2par(ieta))
+      lli <- family$log_likelihood(par = family$map2par(ieta), y = y)
 
       fn_ll <- function(par) {
-        for(j in np)
+        for(j in np) {
+          if(control$fixed[[j]])
+            par[j] <- beta[j]
           ieta[[j]] <- rep(par[j], n)
-        ll <- family$logLik(y, family$map2par(ieta)) - 1e-05 * sum(par^2)
+        }
+        ll <- family$log_likelihood(par = family$map2par(ieta), y = y) - 1e-05 * sum(par^2)
         return(-ll)
       }
 
@@ -288,7 +303,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           }
         }
         ## Null deviance.
-        dev0 <- -2 * family$logLik(y, family$map2par(eta))
+        dev0 <- -2 * family$log_likelihood(par = family$map2par(eta), y = y)
       }
     }
   }
@@ -330,8 +345,12 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     do_save <- (isave <= length(iterthin) && iter == iterthin[isave])
     for(j in np) {
       ## Check if paramater is fixed.
-      if(control$fixed[[j]])
-        stop("fixed parameters not supported yet!")
+      if(control$fixed[[j]]) {
+        if(do_save) {
+          samples[[j]]$p[isave, ] <- c(fit[[j]]$coefficients, 1)
+        }
+        next
+      }
 
       ## Sampling linear part.
       if(length(xterms[[j]])) {
@@ -339,7 +358,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         peta <- family$map2par(eta)
 
         ## Compute old log-likelihood.
-        pibeta <- family$logLik(y, peta)
+        pibeta <- family$log_likelihood(par = peta, y = y)
 
         ## Old parameters.
         b0 <- fit[[j]]$coefficients
@@ -348,18 +367,18 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         p1 <- priors$p(b0)
 
         ## Derivatives.
-        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+        score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
+        hessian <- deriv_checks(family$hessian[[j]](par = peta, y = y, id = j), is.weight = TRUE)
 
         ## Working response.
-        z <- eta[[j]] + 1 / hess * score
+        z <- eta[[j]] + 1 / hessian * score
 
         ## Compute residuals.
         eta2 <- eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
         e <- z - eta2
 
         ## Weights.
-        wj <- if(is.null(weights)) hess else hess * weights
+        wj <- if(is.null(weights)) hessian else hessian * weights
 
         ## Compute mean and precision.
         Xj <- x[, xterms[[j]], drop = FALSE]
@@ -387,17 +406,17 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         peta <- family$map2par(eta)
 
         ## Compute new log likelihood.
-        pibetaprop <- family$logLik(y, peta)
+        pibetaprop <- family$log_likelihood(par = peta, y = y)
 
-        ## Compute new score and hess.
-        score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-        hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
+        ## Compute new score and hessian.
+        score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
+        hessian <- deriv_checks(family$hessian[[j]](par = peta, y = y, id = j), is.weight = TRUE)
 
         ## Weights.
-        wj <- if(is.null(weights)) hess else hess * weights
+        wj <- if(is.null(weights)) hessian else hessian * weights
 
         ## New working observations.
-        z <- eta[[j]] + 1 / hess * score
+        z <- eta[[j]] + 1 / hessian * score
 
         ## New residuals.
         e <- z - eta2
@@ -467,8 +486,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## Save global logLik / deviance once per saved iteration.
     if(do_save) {
-      ll_iter <- family$logLik(y, family$map2par(eta))
-      track$logLik[isave] <- ll_iter
+      ll_iter <- family$log_likelihood(par = family$map2par(eta), y = y)
+      track$log_likelihood[isave] <- ll_iter
       track$deviance[isave] <- -2 * ll_iter
       isave <- isave + 1L
     }
@@ -524,7 +543,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   samples <- do.call("cbind", samples)
 
-  ll <- family$logLik(y, family$map2par(track$eta))
+  ll <- family$log_likelihood(par = family$map2par(track$eta), y = y)
 
   Dbar <- mean(track$deviance, na.rm = TRUE)
   Dhat <- -2 * ll
@@ -598,51 +617,162 @@ prior <- function(x, ...) {
 ## Log-prior for mgcv smooth terms.
 prior.mgcv.smooth <- function(x, ...)
 {
-  function(parameters) {
-    nms <- names(parameters)
-    i <- integer(0)
-    if(!is.null(nms)) {
-      nms <- sapply(strsplit(nms, ".s."), function(x) x[length(x)])
-      i <- grep(".tau", nms, fixed = TRUE)
+  penalties <- x$S
+  m <- length(penalties)
+
+  a <- b <- 0.0001
+  igs <- log((b^a)) - log(gamma(a))
+  var_prior_fun <- function(tau) {
+    sum(igs + (-a - 1) * log(tau) - b/tau)
+  }
+
+  ## A single scaled penalty has a fixed eigensystem:
+  ## log|S/tau|+ = log|S|+ - rank(S) * log(tau).
+  if(m == 1L) {
+    ev <- eigen(penalties[[1L]], symmetric = TRUE, only.values = TRUE)$values
+    tol <- max(ev) * 1e-12
+    ev_pos <- ev[ev > tol]
+    logdetS <- sum(log(ev_pos))
+    rankS <- length(ev_pos)
+  } else {
+    ## The common null space is fixed for positive penalty weights.
+    ## Restricting to its orthogonal complement turns every subsequent
+    ## pseudo-determinant into an ordinary determinant.
+    Ssum <- Reduce(`+`, penalties)
+    ev <- eigen(Ssum, symmetric = TRUE)
+    tol <- max(ev$values) * 1e-12
+    U <- ev$vectors[, ev$values > tol, drop = FALSE]
+    reduced_penalties <- lapply(penalties, function(S) {
+      crossprod(U, S %*% U)
+    })
+
+    rank_aware_logdet <- function(tau) {
+      P <- penalties[[1L]] / tau[1L]
+      for(j in 2:m)
+        P <- P + penalties[[j]] / tau[j]
+      ev <- eigen(P, symmetric = TRUE, only.values = TRUE)$values
+      tol <- max(ev) * 1e-12
+      ev_pos <- ev[ev > tol]
+      sum(log(ev_pos))
     }
-    if(length(i) == 0L) {
-      m <- length(x$S)
-      i <- (length(parameters) - m + 1L):length(parameters)
+
+    ## Two penalties admit a one-time Demmler-Reinsch decomposition:
+    ## every later log-determinant is then only a vector calculation.
+    two_penalty_dr <- FALSE
+    if(m == 2L && ncol(U)) {
+      Rsum <- try(chol(reduced_penalties[[1L]] +
+        reduced_penalties[[2L]]), silent = TRUE)
+      if(!inherits(Rsum, "try-error")) {
+        Ri <- backsolve(Rsum, diag(nrow(Rsum)))
+        S1 <- crossprod(
+          Ri,
+          reduced_penalties[[1L]] %*% Ri
+        )
+        S1 <- (S1 + t(S1)) / 2
+        penalty_eigen <- eigen(
+          S1, symmetric = TRUE, only.values = TRUE
+        )$values
+        eig_tol <- sqrt(.Machine$double.eps)
+        if(all(penalty_eigen > -eig_tol &
+            penalty_eigen < 1 + eig_tol)) {
+          penalty_eigen <- pmin(1, pmax(0, penalty_eigen))
+          logdetSsum <- 2 * sum(log(diag(Rsum)))
+          two_penalty_dr <- TRUE
+        }
+      }
+    }
+  }
+
+  ## Slice updates repeatedly reuse both tau and the coefficient vector.
+  cache <- new.env(parent = emptyenv())
+  cache$tau <- NULL
+  cache$logdetP <- NULL
+  cache$gamma <- NULL
+  cache$quadratics <- NULL
+
+  function(parameters) {
+    np <- length(parameters)
+    i <- seq.int(np - m + 1L, np)
+    nms <- names(parameters)
+
+    ## The sampler stores tau at the end. Preserve support for externally
+    ## supplied parameter vectors with a different named ordering.
+    if(!is.null(nms) && !all(grepl(".tau", nms[i], fixed = TRUE))) {
+      short_names <- vapply(
+        strsplit(nms, ".s.", fixed = TRUE),
+        function(z) z[length(z)],
+        character(1L)
+      )
+      named_i <- grep(".tau", short_names, fixed = TRUE)
+      if(length(named_i))
+        i <- named_i
     }
 
     tau <- parameters[i]
-    gamma <- parameters[-i]
+    gamma_coef <- parameters[-i]
+    ld <- var_prior_fun(tau)
 
-    a <- b <- 0.0001
-    igs <- log((b^a)) - log(gamma(a))
-    var_prior_fun <- function(tau) {
-      igs + (-a - 1) * log(tau) - b/tau
+    if(m == 1L) {
+      Pgamma <- drop(penalties[[1L]] %*% gamma_coef)
+      quad <- sum(gamma_coef * Pgamma) / tau[1L]
+      logdetP <- logdetS - rankS * log(tau[1L])
+    } else {
+      tau_numeric <- as.numeric(tau)
+      if(identical(tau_numeric, cache$tau)) {
+        logdetP <- cache$logdetP
+      } else {
+        if(!ncol(U)) {
+          logdetP <- 0
+        } else if(two_penalty_dr) {
+          penalty_values <- penalty_eigen / tau[1L] +
+            (1 - penalty_eigen) / tau[2L]
+          use_dr <- all(is.finite(penalty_values)) &&
+            all(penalty_values > 0) &&
+            max(tau) <= 1e08 * min(tau) &&
+            min(penalty_values) > 1e-12 * max(penalty_values)
+          logdetP <- if(use_dr) {
+            logdetSsum + sum(log(penalty_values))
+          } else {
+            rank_aware_logdet(tau)
+          }
+        } else {
+          Pr <- reduced_penalties[[1L]] / tau[1L]
+          for(j in 2:m)
+            Pr <- Pr + reduced_penalties[[j]] / tau[j]
+
+          cholPr <- try(chol(Pr), silent = TRUE)
+          use_chol <- !inherits(cholPr, "try-error")
+          if(use_chol) {
+            chol_diag <- abs(diag(cholPr))
+            use_chol <- min(chol_diag) > 1e-06 * max(chol_diag)
+          }
+
+          logdetP <- if(use_chol) {
+            2 * sum(log(chol_diag))
+          } else {
+            rank_aware_logdet(tau)
+          }
+        }
+
+        cache$tau <- tau_numeric
+        cache$logdetP <- logdetP
+      }
+
+      gamma_numeric <- as.numeric(gamma_coef)
+      if(identical(gamma_numeric, cache$gamma)) {
+        quadratics <- cache$quadratics
+      } else {
+        quadratics <- vapply(penalties, function(S) {
+          sum(gamma_coef * drop(S %*% gamma_coef))
+        }, numeric(1L))
+        cache$gamma <- gamma_numeric
+        cache$quadratics <- quadratics
+      }
+      quad <- sum(quadratics / tau)
     }
-
-    ld <- 0
-    P <- 0
-
-    for(j in seq_along(tau)) {
-      P <- P + 1/tau[j] * x$S[[j]]
-      ld <- ld + var_prior_fun(tau[j])
-    }
-
-    if(is.null(dim(P))) {
-      P <- matrix(P, 1L, 1L)
-    }
-
-    ## Pseudo log-determinant (rank-aware).
-    ev <- eigen(P, symmetric = TRUE, only.values = TRUE)$values
-    tol <- max(ev) * 1e-12
-    ev_pos <- ev[ev > tol]
-    logdetP <- sum(log(ev_pos))
-
-    ## Quadratic form.
-    quad <- drop(crossprod(gamma, P %*% gamma))
 
     lp <- 0.5 * logdetP - 0.5 * quad + ld
-
-    return(lp[1L])
+    lp[1L]
   }
 }
 
@@ -656,8 +786,8 @@ propose <- function(x, y, family, eta, fitted, parameter, weights = NULL, contro
 propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   parameter, weights = NULL, control = NULL)
 {
-  ## Helper to build chol(Q), mean M, and edf using (optional) binning.
-  build_QM_edf <- function(wj, e, tau) {
+  ## Build chol(Q) and its mean. EDF is needed for the forward proposal only.
+  build_QM_edf <- function(wj, e, tau, compute_edf = FALSE) {
     if(isTRUE(control$binning) && !is.null(x$binning)) {
       rw <- numeric(length(x$binning$nodups))
       rz <- numeric(length(x$binning$nodups))
@@ -668,40 +798,73 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
       ## X'WX and X'We using reduced weights/response.
       XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
       XWz <- crossprod(x$X, rz)
-
-      ## For edf we need W^{1/2}X on unique rows.
-      XW <- x$X * sqrt(rw)
     } else {
-      ## Full data.
-      XWX <- crossprod(x$X * sqrt(wj))
-      XWz <- crossprod(x$X, wj * e)
-      XW  <- x$X * sqrt(wj)
+      ## The fused native path avoids materializing two weighted matrices.
+      use_native <- ncol(x$X) >= 16L &&
+        all(is.finite(wj)) && all(wj >= 0)
+      if(use_native) {
+        crossproducts <- calc_XWXz(x$X, wj, e)
+        XWX <- crossproducts$XWX
+        XWz <- crossproducts$XWz
+      } else {
+        XWX <- crossprod(x$X * sqrt(wj))
+        XWz <- crossprod(x$X, wj * e)
+      }
     }
+
+    ## Keep the unpenalized crossproduct only for the forward EDF.
+    if(compute_edf)
+      XWX_unpenalized <- XWX
 
     ## Add penalties.
-    for(jj in seq_along(tau)) {
+    for(jj in seq_along(tau))
       XWX <- XWX + 1/tau[jj] * x$S[[jj]]
-    }
 
     ## Stabilize and factorize.
-    XWX <- XWX + diag(1e-08, ncol(XWX))
+    diag(XWX) <- diag(XWX) + 1e-08
     cholQ <- chol(XWX)
 
-    ## Mean: M = Q^{-1}X'We (no explicit inverse).
-    M <- backsolve(cholQ, forwardsolve(t(cholQ), XWz))
+    ## Mean: M = Q^{-1}X'We, avoiding an explicit transpose.
+    M <- backsolve(
+      cholQ,
+      backsolve(cholQ, XWz, transpose = TRUE)
+    )
     M <- drop(M)
 
-    ## EDF: tr( XW Q^{-1} XW' ).
-    edf <- edf_from_cholQ_XP(XW, cholQ)
+    ## tr(XW Q^{-1} XW') = tr(X'WX Q^{-1}). This avoids solving
+    ## against all n rows of XW and is not needed for the reverse density.
+    edf <- if(compute_edf) {
+      sum(XWX_unpenalized * chol2inv(cholQ))
+    } else {
+      NULL
+    }
 
     list("cholQ" = cholQ, "M" = M, "edf" = edf)
+  }
+
+  ## With parameter-independent Hessians, the reverse proposal has the
+  ## same precision. Only its mean must then be updated.
+  build_M <- function(wj, e, cholQ) {
+    if(isTRUE(control$binning) && !is.null(x$binning)) {
+      rw <- numeric(length(x$binning$nodups))
+      rz <- numeric(length(x$binning$nodups))
+      calc_Xe(x$binning$sorted.index, wj, e, rw, rz, x$binning$order)
+      XWz <- crossprod(x$X, rz)
+    } else {
+      XWz <- crossprod(x$X, wj * e)
+    }
+
+    drop(backsolve(
+      cholQ,
+      backsolve(cholQ, XWz, transpose = TRUE)
+    ))
   }
 
   ## Get parameters.
   peta <- family$map2par(eta)
 
   ## Compute old log-likelihood.
-  pibeta <- family$logLik(y, peta)
+  pibeta <- family$log_likelihood(par = peta, y = y)
 
   ## Old parameters.
   b0 <- fitted$coefficients
@@ -733,38 +896,36 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
     }
   }
 
-  ## Derivatives.
-  score <- deriv_checks(
-    family$score[[parameter]](y, peta, id = parameter),
-    is.weight = FALSE
+  ## Working response and weights.
+  ew <- .update(
+    par = peta, y = y, eta = eta[[parameter]],
+    family = family, which = parameter
   )
-  hess <- deriv_checks(
-    family$hess[[parameter]](y, peta, id = parameter),
-    is.weight = TRUE
-  )
-
-  ## Working response.
-  z <- eta[[parameter]] + 1 / hess * score
+  z <- ew$eta
+  hessian <- ew$weights
 
   ## Compute residuals.
   eta2 <- eta[[parameter]] <- eta[[parameter]] - fitted$fitted.values
   e <- z - eta2
 
   ## Weights.
-  wj <- if(is.null(weights)) hess else hess * weights
+  wj <- if(is.null(weights)) hessian else hessian * weights
+  wj_forward <- wj
 
-  ## Build proposal precision + mean (+ edf) using binning-aware code.
-  tmp <- build_QM_edf(wj, e, tau)
+  ## Build the forward proposal, including EDF for saved output.
+  tmp <- build_QM_edf(wj, e, tau, compute_edf = TRUE)
   cholQ <- tmp$cholQ
   M <- tmp$M
   edf <- tmp$edf
+  cholQ_forward <- cholQ
 
-  ## Sample new parameters.
-  b1 <- rmvnorm_cholQ(M, cholQ)
+  ## Sample new parameters and reuse the standardized draw for its density.
+  draw <- rmvnorm_cholQ(M, cholQ, log_density = TRUE)
+  b1 <- draw$sample
+  qbetaprop <- draw$log_density
 
-  ## Log-priors.
+  ## Log-prior.
   p2 <- x$prior(c(b1, tau))
-  qbetaprop <- dmvnorm_cholQ(b1, M, cholQ)
 
   ## New fitted values.
   fj0 <- drop(x$X %*% b1)
@@ -773,40 +934,31 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   ## Set up new predictor.
   eta[[parameter]] <- eta[[parameter]] + fj
 
-  ## New parameters.
+  ## New parameters and log-likelihood.
   peta <- family$map2par(eta)
+  pibetaprop <- family$log_likelihood(par = peta, y = y)
 
-  ## Compute new log likelihood.
-  pibetaprop <- family$logLik(y, peta)
-
-  ## Compute new score and hess.
-  score <- deriv_checks(
-    family$score[[parameter]](y, peta, id = parameter),
-    is.weight = FALSE
+  ## New working response and weights.
+  ew <- .update(
+    par = peta, y = y, eta = eta[[parameter]],
+    family = family, which = parameter
   )
-  hess <- deriv_checks(
-    family$hess[[parameter]](y, peta, id = parameter),
-    is.weight = TRUE
-  )
+  hessian <- ew$weights
+  wj <- if(is.null(weights)) hessian else hessian * weights
+  e <- ew$eta - eta2
 
-  ## Weights.
-  wj <- if(is.null(weights)) hess else hess * weights
-
-  ## New working observations.
-  z <- eta[[parameter]] + 1 / hess * score
-
-  ## New residuals.
-  e <- z - eta2
-
-  ## Reverse density: rebuild Q,M at the new state.
-  tmp <- build_QM_edf(wj, e, tau)
-  cholQ <- tmp$cholQ
-  M <- tmp$M
-
-  ## Log-priors.
+  ## Reverse density: reuse Q when the Hessian weights are unchanged.
+  if(identical(wj, wj_forward)) {
+    cholQ <- cholQ_forward
+    M <- build_M(wj, e, cholQ)
+  } else {
+    tmp <- build_QM_edf(wj, e, tau)
+    cholQ <- tmp$cholQ
+    M <- tmp$M
+  }
   qbeta <- dmvnorm_cholQ(b0, M, cholQ)
 
-  ## Acceptance probablity.
+  ## Acceptance probability.
   alpha <- (pibetaprop + qbeta + p2) - (pibeta + qbetaprop + p1)
 
   ## Assign names.
@@ -819,7 +971,7 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   fitted$edf <- edf
   fitted$alpha <- min(1, exp(alpha))
 
-  return(fitted)
+  fitted
 }
 
 ## Function to compute proportional log-posterior.
@@ -828,7 +980,7 @@ log_posterior <- function(coefficients, x, family, y,
 {
   if(is.null(log_likelihood)) {
     eta[[parameter]] <- eta[[parameter]] + drop(x$X %*% coefficients[1:ncol(x$X)])
-    log_likelihood <- family$logLik(y, family$map2par(eta))
+    log_likelihood <- family$log_likelihood(par = family$map2par(eta), y = y)
   }
 
   log_prior <- x$prior(coefficients)
@@ -836,11 +988,19 @@ log_posterior <- function(coefficients, x, family, y,
   return(log_likelihood + log_prior)
 }
 
-rmvnorm_cholQ <- function(mean, cholQ) {
+rmvnorm_cholQ <- function(mean, cholQ, log_density = FALSE) {
   p <- length(mean)
   z <- rnorm(p)
   x <- mean + backsolve(cholQ, z, upper.tri = TRUE)
-  x
+
+  if(!isTRUE(log_density))
+    return(x)
+
+  log_density <- sum(log(diag(cholQ))) -
+    0.5 * sum(z * z) -
+    0.5 * p * log(2 * pi)
+
+  list("sample" = x, "log_density" = log_density)
 }
 
 dmvnorm_cholQ <- function(x, mean, cholQ) {
@@ -1084,7 +1244,7 @@ if(FALSE) {
 
   fit <- NULL
   for(j in c(0.025, 0.5, 0.975))
-    fit <- cbind(fit, family(b)$quantile(j, p))
+    fit <- cbind(fit, family(b)$quantile(p, j))
 
   par(mfrow = c(1, 2))
   plot(d)

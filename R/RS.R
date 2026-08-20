@@ -7,6 +7,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   ## Parameter names. FIXME: TRUE/FALSE?
   np <- family$names
 
+  ## Stepwise candidate fits only need the objective and degrees of freedom.
+  ## Expensive inferential output is computed by
+  ## the final, full fit.
+  stepwise_candidate <- isTRUE(control$.stepwise_candidate)
+
   ## Initialize predictors.
   etastart <- if(is.null(control$etastart)) TRUE else isTRUE(control$etastart)
   etastart <- initialize_eta(y, family, n, etastart)
@@ -182,11 +187,25 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       etastart[[j]] <- eta[[j]]
   }
 
+  if(!is.null(control$fixed)) {
+    for(j in np) {
+      if(control$fixed[[j]]) {
+        link <- make.link2(family$links[[j]])
+        fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
+        eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
+        fit[[j]]$fitted.values <- eta[[j]]
+        etastart[[j]] <- eta[[j]]
+      }
+    }
+  }
+
   ## Null deviance.
-  dev0 <- -2 * family$logLik(y, family$map2par(etastart))
+  dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
 
   ## Estimate intercept only model first.
-  if(isTRUE(control$nullmodel) & length(unlist(xterms))) {
+  run_nullmodel <- !stepwise_candidate ||
+    (isTRUE(control$initialize) && is.null(start))
+  if(run_nullmodel && isTRUE(control$nullmodel) & length(unlist(xterms))) {
     nullmodel_ok <- TRUE
     beta <- ieta <- list()
     for(j in np) {
@@ -202,17 +221,19 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     beta <- unlist(beta)
 
     if(!any(is.na(beta)) && nullmodel_ok) {
-      lli <- family$logLik(y, family$map2par(ieta))
+      lli <- family$log_likelihood(par = family$map2par(ieta), y = y)
 
       fn_ll <- function(par) {
         for(j in np) {
+          if(control$fixed[[j]])
+            par[j] <- beta[j]
           ieta[[j]] <- rep(par[j], n)
           if(!is.null(offsets)) {
             if(!is.null(offsets[[j]]))
               ieta[[j]] <- ieta[[j]] + offsets[[j]]
           }
         }
-        ll <- family$logLik(y, family$map2par(ieta)) - lambda * sum(par^2)
+        ll <- family$log_likelihood(par = family$map2par(ieta), y = y) - lambda * sum(par^2)
         return(-ll)
       }
 
@@ -249,9 +270,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   CG <- isTRUE(control$CG)
   if(CG)
     CGk <- 0L
-  if(length(family$hess) < 2L)
+  if(length(family$hessian) < 2L)
     CGk <- Inf
-  if(!any(grepl(".", names(family$hess), fixed = TRUE)))
+  if(!any(grepl(":", names(family$hessian), fixed = TRUE)))
     CGk <- Inf
   if(is.finite(CGk))
     eta_old <- eta
@@ -292,22 +313,24 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   while((eps[1L] > stop.eps[1L]) && (iter[1L] < maxit[1L])) {
     ## Old log-likelihood.
     if(is.null(weights)) {
-      llo0 <- family$logLik(y, family$map2par(eta))
+      llo0 <- family$log_likelihood(par = family$map2par(eta), y = y)
     } else {
-      llo0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+      llo0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## For CG.
     if(iter[1L] >= CGk) {
       eta_old <- if(iter[1L] > 0L) eta else etastart
-      peta <- if(iter[1L] > 0L) {
+      par <- if(iter[1L] > 0L) {
         family$map2par(eta)
       } else {
         family$map2par(etastart)
       }
-      zw_CG <- list()
+      ew_CG <- list()
       for(j in np) {
-        zw_CG[[j]] <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+        ew_CG[[j]] <- .update(par = par, y = y,
+          eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
+          family = family, which = j)
       }
     }
 
@@ -317,9 +340,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     while((eps_outer > stop.eps[3L]) && (iter_outer < maxit[3L])) {
       if(iter[1L] >= CGk) {
         if(is.null(weights)) {
-          outer_ll0 <- family$logLik(y, family$map2par(eta))
+          outer_ll0 <- family$log_likelihood(par = family$map2par(eta), y = y)
         } else {
-          outer_ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+          outer_ll0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
         }
       }
 
@@ -329,43 +352,45 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           next
 
         ## Outer loop working response and weights.
-        peta <- if(iter[1L] > 0L) {
+        par <- if(iter[1L] > 0L) {
           family$map2par(eta)
         } else {
           family$map2par(etastart)
         }
 
-        ## Compute working response z and weights hess from family.
+        ## Compute working response z and weights hessian from family.
         ## Cole and Green adjustment.
         if(iter[1L] >= CGk) {
-          h <- grep(paste0(j, "."), names(family$hess), value = TRUE)
+          h <- grep(paste0(j, ":"), names(family$hessian), value = TRUE)
           if(length(h)) {
             adj <- 0.0
             for(l in seq_along(h)) {
-              parts <- strsplit(h[l], ".", fixed = TRUE)[[1]]
+              parts <- strsplit(h[l], ":", fixed = TRUE)[[1]]
               k <- parts[2L]
-              hess_l <- family$hess[[h[l]]](y, peta)
+              hessian_l <- family$hessian[[h[l]]](par = par, y = y)
               if(!is.null(weights))
-                hess_l <- hess_l * weights
-              adj <- adj + hess_l * (eta[[k]] - eta_old[[k]])
+                hessian_l <- hessian_l * weights
+              adj <- adj + hessian_l * (eta[[k]] - eta_old[[k]])
             }
           }
-          zw <- zw_CG[[j]]
-          wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+          ew <- ew_CG[[j]]
+          wj <- if(is.null(weights)) ew$weights else ew$weights * weights
           wj[!is.finite(wj)] <- 0
           wj[wj < 0] <- 0
-          zw$z <- zw$z - adj / wj
+          ew$eta <- ew$eta - adj / wj
         } else {
-          zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+          ew <- .update(par = par, y = y,
+            eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
+            family = family, which = j)
         }
 
         ## Start inner loop.
         while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
           ## Current log-likelihood.
           if(is.null(weights)) {
-            ll0 <- family$logLik(y, family$map2par(eta))
+            ll0 <- family$log_likelihood(par = family$map2par(eta), y = y)
           } else {
-            ll0 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+            ll0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
           ll02 <- ll0
 
@@ -373,10 +398,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           if(length(xterms[[j]])) {
             ## Compute partial residuals.
             eta[[j]] <- eta[[j]] - fit[[j]]$fitted.values
-            e <- zw$z - eta[[j]]
+            e <- ew$eta - eta[[j]]
 
             ## Weights.
-            wj <- if(is.null(weights)) zw$weights else zw$weights * weights
+            wj <- if(is.null(weights)) ew$weights else ew$weights * weights
             wj[!is.finite(wj)] <- 0
             wj[wj < 0] <- 0
 
@@ -389,7 +414,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               penalty[j] <- m$penalty
             } else {
               m <- lm.wfit(Xj, e, wj, method = "qr")
-              m$vcov <- vcov_lm_wfit_safe(m)
+              if(!stepwise_candidate)
+                m$vcov <- vcov_lm_wfit_safe(m)
             }
 
             ## If linear model does not improve the fit, use ML.
@@ -397,16 +423,16 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai[[j]] <- etai[[j]] + m$fitted.values
 
             if(is.null(weights)) {
-              ll1 <- family$logLik(y, family$map2par(etai))
+              ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
             } else {
-              ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+              ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
             }
 
             if(ll1 < ll02 && isTRUE(control$backup)) {
               ll <- function(par) {
                 etai <- eta
                 etai[[j]] <- etai[[j]] + drop(Xj %*% par)
-                -family$logLik(y, family$map2par(etai)) + lambda * sum(par^2)
+                -family$log_likelihood(par = family$map2par(etai), y = y) + lambda * sum(par^2)
               }
               warn <- getOption("warn")
               options("warn" = -1)
@@ -427,9 +453,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 m$fitted.values <- drop(Xj %*% opt$par)
                 etai[[j]] <- etai[[j]] + m$fitted.values
                 if(is.null(weights)) {
-                  ll1 <- family$logLik(y, family$map2par(etai))
+                  ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
                 } else {
-                  ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+                  ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
                 }
               }
             }
@@ -443,7 +469,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                     f <- drop(Xj %*% b)
                     etai <- eta
                     etai[[j]] <- etai[[j]] + f
-                    -family$logLik(y, family$map2par(etai))
+                    -family$log_likelihood(par = family$map2par(etai), y = y)
                   }
                   s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
                   if(-s$objective > ll02) {
@@ -460,9 +486,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai[[j]] <- etai[[j]] + m$fitted.values
 
             if(is.null(weights)) {
-              ll1 <- family$logLik(y, family$map2par(etai))
+              ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
             } else {
-              ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+              ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
             }
 
             if(ll1 > ll02) {
@@ -473,38 +499,40 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               if(!is.null(m$edf))
                 fit[[j]]$edf <- m$edf
 
-              if(!is.null(m$vcov)) {
-                fit[[j]]$vcov <- m$vcov
-              } else {
-                Xw <- Xj * sqrt(pmax(wj, 0))
-                XWX <- crossprod(Xw)
+              if(!stepwise_candidate) {
+                if(!is.null(m$vcov)) {
+                  fit[[j]]$vcov <- m$vcov
+                } else {
+                  Xw <- Xj * sqrt(pmax(wj, 0))
+                  XWX <- crossprod(Xw)
 
-                eps <- 1e-8 * mean(diag(XWX))
-                if(!is.finite(eps) || eps <= 0) eps <- 1e-8
-                diag(XWX) <- diag(XWX) + eps
+                  eps <- 1e-8 * mean(diag(XWX))
+                  if(!is.finite(eps) || eps <= 0) eps <- 1e-8
+                  diag(XWX) <- diag(XWX) + eps
 
-                R <- tryCatch(chol(XWX), error = function(e) NULL)
+                  R <- tryCatch(chol(XWX), error = function(e) NULL)
 
-                if(is.null(R)) {
-                  lambda <- eps
-                  for(k in 1:6) {
-                    Xt <- XWX + diag(lambda, ncol(XWX))
-                    R <- tryCatch(chol(Xt), error = function(e) NULL)
-                    if(!is.null(R)) {
-                      XWX <- Xt
-                      break
+                  if(is.null(R)) {
+                    lambda <- eps
+                    for(k in 1:6) {
+                      Xt <- XWX + diag(lambda, ncol(XWX))
+                      R <- tryCatch(chol(Xt), error = function(e) NULL)
+                      if(!is.null(R)) {
+                        XWX <- Xt
+                        break
+                      }
+                      lambda <- lambda * 10
                     }
-                    lambda <- lambda * 10
+                  }
+                  if(is.null(R)) {
+                    fit[[j]]$vcov <- MASS::ginv(XWX)
+                  } else {
+                    fit[[j]]$vcov <- chol2inv(R)
                   }
                 }
-                if(is.null(R)) {
-                  fit[[j]]$vcov <- MASS::ginv(XWX)
-                } else {
-                  fit[[j]]$vcov <- chol2inv(R)
-                }
-              }
 
-              colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
+                colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
+              }
               ll02 <- ll1
             }
 
@@ -519,14 +547,14 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             for(k in sterms[[j]]) {
               ## Compute partial residuals.
               eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
-              e <- zw$z - eta[[j]]
+              e <- ew$eta - eta[[j]]
 
               ## Additive model term fit.
               fs <- if(is.null(weights)) {
-                special.wfit(specials[[k]], e, zw$weights, y, eta, j, family, control,
+                special.wfit(specials[[k]], e, ew$weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               } else {
-                special.wfit(specials[[k]], e, zw$weights * weights, y, eta, j, family, control,
+                special.wfit(specials[[k]], e, ew$weights * weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               }
 
@@ -550,9 +578,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               etai[[j]] <- etai[[j]] + fs$fitted.values
 
               if(is.null(weights)) {
-                ll1 <- family$logLik(y, family$map2par(etai))
+                ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
               } else {
-                ll1 <- sum(family$pdf(y, family$map2par(etai), log = TRUE) * weights, na.rm = TRUE)
+                ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
               }
 
               if(ll1 > ll02) {
@@ -576,9 +604,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           ## New log-likelihood.
           if(is.null(weights)) {
-            ll1 <- family$logLik(y, family$map2par(eta))
+            ll1 <- family$log_likelihood(par = family$map2par(eta), y = y)
           } else {
-            ll1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+            ll1 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
 
           ## Stopping criterion.
@@ -586,8 +614,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           ## Update working response.
           if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
-            peta <- family$map2par(eta)
-            zw <- z_weights(y, if(iter[1L] > 0L) eta[[j]] else etastart[[j]], peta, family, j)
+            par <- family$map2par(eta)
+            ew <- .update(par = par, y = y,
+              eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
+              family = family, which = j)
           }
 
           ## Update inner loop iterator.
@@ -607,9 +637,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## New log-likelihood.
     if(is.null(weights)) {
-      llo1 <- family$logLik(y, family$map2par(eta))
+      llo1 <- family$log_likelihood(par = family$map2par(eta), y = y)
     } else {
-      llo1 <- sum(family$pdf(y, family$map2par(eta), log = TRUE) * weights, na.rm = TRUE)
+      llo1 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## Stopping criterion.
@@ -658,7 +688,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       if(length(sfit[[j]])) {
         drop <- NULL
         for(i in names(sfit[[j]])) {
-          if(control$light) {
+          if(isTRUE(control$light) || stepwise_candidate) {
             sfit[[j]][[i]]$fitted.values <- NULL
           }
           if(!isTRUE(sfit[[j]][[i]]$selected))
@@ -679,8 +709,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     attr(fit, "edf") <- unlist(sapply(fit, function(x) x$edf))
   }
 
+  if(stepwise_candidate && length(fit)) {
+    for(j in names(fit))
+      fit[[j]]$fitted.values <- NULL
+  }
+
   ## Message if not converged due to NAs or Inf!
-  d <- family$pdf(y, family$map2par(eta), log = TRUE)
+  d <- family$pdf(par = family$map2par(eta), y = y, log = TRUE)
   if(!is.null(weights))
     d <- d * weights
   if(any(is.na(d))) {
@@ -691,7 +726,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   rval <- list(
-    "fitted.values" = as.data.frame(eta),
+    "fitted.values" = if(stepwise_candidate) NULL else as.data.frame(eta),
     "fitted.specials" = sfit,
     "fitted.linear" = fit,
     "coefficients" = coef_lin,
@@ -744,7 +779,7 @@ initialize_eta <- function(y, family, nobs, initialize)
   return(eta)
 }
 
-## Function to check values of score and hess vectors
+## Function to check values of score and hessian vectors
 deriv_checks <- function(x, is.weight = FALSE)
 {
   x[is.na(x)] <- 1.490116e-08
@@ -759,16 +794,16 @@ deriv_checks <- function(x, is.weight = FALSE)
   return(x)
 }
 
-## Compute working response z and weights hess from family.
-z_weights <- function(y, eta, peta, family, j)
+## Compute working response z and weights hessian from family.
+.update <- function(par, y, eta, family, which)
 {
-  if(is.null(family$z_weights)) {
-    score <- deriv_checks(family$score[[j]](y, peta, id = j), is.weight = FALSE)
-    hess <- deriv_checks(family$hess[[j]](y, peta, id = j), is.weight = TRUE)
-    z <- eta + 1 / hess * score
-    return(list("z" = z, "weights" = hess))
+  if(is.null(family$update)) {
+    score <- deriv_checks(family$score[[which]](par = par, y = y, id = which), is.weight = FALSE)
+    hessian <- deriv_checks(family$hessian[[which]](par = par, y = y, id = which), is.weight = TRUE)
+    z <- eta + 1 / hessian * score
+    return(list("eta" = z, "weights" = hessian))
   } else {
-    return(family$z_weights(y, eta, peta, j))
+    return(family$update(par = par, y = y, eta = eta, which = which))
   }
 }
 
@@ -871,7 +906,7 @@ ridge.lm.wfit <- function(x, y, w, penalty, control)
         fitted.values = fit,
         edf = edf,
         penalty = pen,
-        vcov = chol2inv(cholQ),
+        vcov = if(isTRUE(control$.stepwise_candidate)) NULL else chol2inv(cholQ),
         df = n - edf
       ))
     }

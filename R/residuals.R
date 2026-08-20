@@ -59,7 +59,7 @@ residuals.gamlss2 <- function(object,
     ## Randomized quantile residuals.
     if(type == "quantile") {
       if(!is.null(family$rqres)) {
-        res <- family$rqres(y, par)
+        res <- family$rqres(par = par, y = y)
       } else {
         if(is.null(family$cdf)) {
           type <- "response"
@@ -77,9 +77,9 @@ residuals.gamlss2 <- function(object,
           ## Discrete case.
           if(discrete) {
             ymin <- min(y, na.rm = TRUE)
-            a <- family$cdf(ifelse(y == ymin, y, y - 1), par)
+            a <- family$cdf(par = par, y = ifelse(y == ymin, y, y - 1))
             a <- ifelse(y == ymin, 0, a)
-            b <- family$cdf(y, par)
+            b <- family$cdf(par = par, y = y)
             u <- runif(length(y), a, b)
             u <- ifelse(u > 0.999999, u - 1e-16, u)
             u <- ifelse(u < 1e-06, u + 1e-16, u)
@@ -97,7 +97,7 @@ residuals.gamlss2 <- function(object,
               if(ncol(mass.p) != ncol(prob.mp))
                 stop()
 
-              res <- family$cdf(y, par)
+              res <- family$cdf(par = par, y = y)
               for(j in mass.p) {
                 i <- which(y == j)
                 if(j == 1) {
@@ -106,7 +106,7 @@ residuals.gamlss2 <- function(object,
               }
             } else {
               ## Continuous case.
-              prob <- family$cdf(y, par)
+              prob <- family$cdf(par = par, y = y)
               thres <- 0.999999999999999
               prob[prob > thres] <- thres
               prob[prob < (1 - thres)] <- 1 - thres
@@ -117,7 +117,7 @@ residuals.gamlss2 <- function(object,
       }
 
       if(length(ix <- which(!is.finite(res))) > 0L) {
-        res[ix] <- qnorm(family$cdf(y[ix], par[ix, , drop = FALSE], log = TRUE), log.p = TRUE)
+        res[ix] <- qnorm(family$cdf(par = par[ix, , drop = FALSE], y = y[ix], log = TRUE), log.p = TRUE)
       }
 
       if(any(isnf <- !is.finite(res))) {
@@ -130,9 +130,9 @@ residuals.gamlss2 <- function(object,
 
     ## Response residuals.
     if(type == "response") {
-      mu <- if(is.null(family$mu)) {
+      mu <- if(is.null(family$mean)) {
         function(par, ...) { par[[1]] }
-      } else family$mu
+      } else family$mean
       res <- y - mu(par)
       attr(res, "type") <- "response"
     }

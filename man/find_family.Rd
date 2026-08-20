@@ -54,7 +54,7 @@ find_gamlss2(formula, families = NULL, k = 2,
   models for each specified family object in the \code{families} argument. Note that model
   estimation occurs within a \code{\link[base]{try}} block with warnings suppressed.
   Additionally, the function calculates the \code{\link{GAIC}} for each family whenever
-  feasible and returns the values sorted in ascending order of the selected fit criterion,
+  feasible and returns the values sorted in decreasing order of the selected fit criterion,
   so smaller values indicate a better fit.
 
   Function \code{fit_family()} fits a single intercept-only model using the

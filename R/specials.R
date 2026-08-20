@@ -194,6 +194,52 @@ calc_XWX <- function(x, w, index = NULL)
   rval
 }
 
+## Fused dense weighted crossproducts.
+calc_XWXz <- function(x, w, z)
+{
+  .Call("calc_XWXz", x, as.numeric(w), as.numeric(z), PACKAGE = "gamlss2")
+}
+
+## Weighted Demmler-Reinsch reparameterization for a single penalty.
+smooth.construct_dr <- function(XWX, XWz, S, ridge = 1e-05)
+{
+  p <- ncol(XWX)
+  if(!is.matrix(S) || !identical(dim(S), c(p, p)))
+    stop("invalid penalty matrix")
+  if(!isSymmetric(S, tol = sqrt(.Machine$double.eps)))
+    stop("penalty matrix is not symmetric")
+
+  ## The small ridge penalty is part of the metric so that the
+  ## reparameterized fit is equivalent to the direct penalized solve.
+  G <- XWX
+  diag(G) <- diag(G) + ridge
+  R <- chol(G)
+  Ri <- backsolve(R, diag(p))
+
+  S <- (S + t(S)) / 2
+  St <- crossprod(Ri, S %*% Ri)
+  St <- (St + t(St)) / 2
+  ev <- eigen(St, symmetric = TRUE)
+
+  tol <- sqrt(.Machine$double.eps) * max(1, abs(ev$values))
+  if(any(ev$values < -tol))
+    stop("penalty matrix is not positive semi-definite")
+  ev$values[ev$values < 0] <- 0
+
+  T <- Ri %*% ev$vectors
+  h <- 1 - ridge * colSums(T^2)
+
+  rval <- list(
+    "T" = T,
+    "d" = ev$values,
+    "h" = h,
+    "g" = drop(crossprod(T, XWz))
+  )
+  if(!all(vapply(rval, function(x) all(is.finite(x)), logical(1L))))
+    stop("non-finite Demmler-Reinsch reparameterization")
+  rval
+}
+
 ## Fitting function for mgcv smooth terms.
 smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
@@ -207,13 +253,24 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   }
 
   ## Pre compute matrices.
+  zWz <- NULL
   if(control$binning) {
     XWz <- crossprod(x$X, rz)
     XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
   } else {
-    XW <- x$X * w
-    XWX <- crossprod(XW, x$X)
-    XWz <- crossprod(XW, z)
+    use.symmetric <- ncol(x$X) >= 40L &&
+      all(is.finite(w)) && all(w >= 0)
+    if(use.symmetric) {
+      crossproducts <- calc_XWXz(x$X, w, z)
+      XWX <- crossproducts$XWX
+      XWz <- crossproducts$XWz
+      zWz <- crossproducts$zWz
+    } else {
+      ## Preserve the previous behavior for non-finite or negative weights.
+      XW <- x$X * w
+      XWX <- crossprod(XW, x$X)
+      XWz <- crossprod(XW, z)
+    }
   }
   S <- diag(1e-05, ncol(x$X))
 
@@ -245,10 +302,10 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(iter[1L] > -1) {
     lambdas <- transfer$lambdas
   } else {
-    lambdas <- 10
+    lambdas <- 1.0
   }
   if(is.null(lambdas)) {
-    lambdas <- if(is.null(control$start)) 10 else control$start
+    lambdas <- if(is.null(control$start)) 1.0 else control$start
   }
   lambdas <- rep(lambdas, length.out = length(x$S))
 
@@ -262,6 +319,54 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       control$criterion <- "aicc"
   }
 
+  ## Choose the direct or Demmler-Reinsch solver. In automatic mode the
+  ## reparameterization is delayed until the current search needs a restart.
+  dr.mode <- control$demmler.reinsch
+  if(is.null(dr.mode))
+    dr.mode <- "auto"
+  if(is.character(dr.mode) && length(dr.mode) == 1L)
+    dr.mode <- tolower(dr.mode)
+  if(!(identical(dr.mode, "auto") || identical(dr.mode, TRUE) ||
+      identical(dr.mode, FALSE)))
+    stop("'demmler.reinsch' must be one of 'auto', TRUE or FALSE")
+
+  dr.eligible <- isTRUE(x$dim == 1L) &&
+      length(x$S) == 1L &&
+      is.null(x$sp) &&
+      !isTRUE(x$fixed) &&
+      (iter[1L] > 0L || localML)
+
+  dr_setup <- function() {
+    dr.ridge <- if(control$criterion == "ml" && localML) 0 else 1e-05
+    rval <- try(smooth.construct_dr(
+      XWX = XWX, XWz = XWz, S = x$S[[1L]], ridge = dr.ridge
+    ), silent = TRUE)
+    if(inherits(rval, "try-error"))
+      NULL
+    else
+      rval
+  }
+
+  dr <- NULL
+  dr.attempted <- FALSE
+  if(dr.eligible && (identical(dr.mode, TRUE) ||
+      (localML && !identical(dr.mode, FALSE)))) {
+    dr <- dr_setup()
+    dr.attempted <- TRUE
+  }
+
+  dr_fit <- function(lambda) {
+    denominator <- 1 + as.numeric(lambda[1L]) * dr$d
+    if(any(!is.finite(denominator)) || any(denominator <= 0))
+      stop("invalid smoothing parameter in Demmler-Reinsch fit")
+
+    alpha <- dr$g / denominator
+    list(
+      "coefficients" = drop(dr$T %*% alpha),
+      "edf" = sum(dr$h / denominator)
+    )
+  }
+
   if(control$criterion == "ml" & (length(x$S) < 2L) & localML) {
     ## Local ML method, only for pb2() yet!
     order <- x$m[1L]
@@ -271,17 +376,23 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     N <- sum(w != 0)
 
     for(it in 1:50) {
-      P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
-      if(inherits(P, "try-error"))
-        P <- solve(XWX + lambdas * x$S[[1L]])
+      if(is.null(dr)) {
+        P <- try(chol2inv(chol(XWX + lambdas * x$S[[1L]])), silent = TRUE)
+        if(inherits(P, "try-error"))
+          P <- solve(XWX + lambdas * x$S[[1L]])
 
-      b <- drop(P %*% XWz)
+        b <- drop(P %*% XWz)
+        edf <- sum(diag(XWX %*% P))
+      } else {
+        drs <- dr_fit(lambdas)
+        b <- drs$coefficients
+        edf <- drs$edf
+      }
+
       fit <- drop(x$X %*% b)
 
       if(control$binning)
         fit <- fit[x$binning$match.index]
-
-      edf <- sum(diag(XWX %*% P))
 
       sig2 <- sum(w * (z - fit)^2) / (N - edf)
       tau2 <- drop(t(b) %*% x$S[[1L]] %*% b) / (edf - order)
@@ -294,45 +405,93 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       if(abs(lambdas - lambdas.old) < 1e-07 || lambdas > 1e+10) break
     }
 
+    if(!is.null(dr)) {
+      P <- try(chol2inv(chol(XWX + lambdas.old * x$S[[1L]])), silent = TRUE)
+      if(inherits(P, "try-error"))
+        P <- solve(XWX + lambdas.old * x$S[[1L]])
+
+      b <- drop(P %*% XWz)
+      fit <- drop(x$X %*% b)
+      if(control$binning)
+        fit <- fit[x$binning$match.index]
+      edf <- sum(diag(XWX %*% P))
+    }
+
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
       "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
   } else {
+    if(is.null(zWz))
+      zWz <- sum(w * z^2)
+    criterion.evaluations <- 0L
+
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
-      if(length(x$S)) {
-        for(j in 1:length(x$S))
-          S <- S + l[j] * x$S[[j]]
-      }
-
-      P <- try(chol2inv(chol(XWX + S)), silent = TRUE)
-      if(inherits(P, "try-error"))
-        P <- solve(XWX + S)
-
-      b <- drop(P %*% XWz)
-
-      fit <- drop(x$X %*% b)
-
-      if(control$binning)
-        fit <- fit[x$binning$match.index]
-
-      edf <- sum(diag(XWX %*% P))
-
-      if(rf) {
-        return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-          "lambdas" = l, "vcov" = P, "df" = n - edf))
+      if(!rf)
+        criterion.evaluations <<- criterion.evaluations + 1L
+      if(!is.null(dr) && !rf) {
+        drs <- dr_fit(l)
+        edf <- drs$edf
+        b <- drs$coefficients
       } else {
-        if(isTRUE(control$logLik)) {
-          eta[[j]] <- eta[[j]] + fit
-          rss <- family$logLik(y, family$map2par(eta))
-        } else {
-          rss <- sum(w * (z - fit)^2)
+        Sl <- S
+        if(length(x$S)) {
+          for(k in seq_along(x$S))
+            Sl <- Sl + l[k] * x$S[[k]]
         }
 
-        rval <- switch(tolower(control$criterion),
+        A <- XWX + Sl
+        R <- chol(A)
+
+        b <- drop(backsolve(
+          R,
+          forwardsolve(t(R), XWz)
+        ))
+
+        P <- chol2inv(R)
+        edf <- sum(XWX * P)
+      }
+
+      ## Fitted values are only needed for the final result or
+      ## if the full log-likelihood is used as fitting criterion.
+      if(rf || isTRUE(control$logLik)) {
+        fit <- drop(x$X %*% b)
+
+        if(control$binning)
+          fit <- fit[x$binning$match.index]
+      }
+
+      if(rf) {
+        return(list(
+          "coefficients" = b,
+          "fitted.values" = fit,
+          "edf" = edf,
+          "lambdas" = l,
+          "vcov" = P,
+          "df" = n - edf
+        ))
+      } else {
+        if(isTRUE(control$logLik)) {
+          etai <- eta
+          etai[[j]] <- etai[[j]] + fit
+          rss <- -2 * family$log_likelihood(
+            par = family$map2par(etai),
+            y = y
+          )
+        } else {
+          ## Weighted RSS from precomputed crossproducts:
+          ## z'Wz - 2 b'X'Wz + b'X'WXb.
+          rss <- zWz -
+            2 * sum(b * XWz) +
+            sum(b * (XWX %*% b))
+        }
+
+        rval <- switch(
+          tolower(control$criterion),
           "gcv" = rss * n / (n - edf)^2,
           "aic" = rss + 2 * edf,
           "gaic" = rss + K * edf,
-          "aicc" = rss + 2 * edf + (2 * edf * (edf + 1)) / (n - edf - 1),
+          "aicc" = rss + 2 * edf +
+            (2 * edf * (edf + 1)) / (n - edf - 1),
           "bic" = rss + log(n) * edf
         )
 
@@ -349,16 +508,29 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     }
 
     if(is.null(x$sp)) {
-      eps <- 1
-      lambdas0 <- lambdas
-      lk <- 0
-       while((eps > 0.000001) & (lk < 1000L)) {
-         opt <- nlminb(lambdas, objective = fl, lower = lambdas / 10, upper = lambdas * 10)
-         eps <- mean(abs((opt$par - lambdas0) / lambdas0))
-         lambdas0 <- lambdas
-         lambdas <- opt$par
-         lk <- lk + 1L
-       }
+      rho <- log(pmax(lambdas, 1e-10))
+      eps <- Inf
+      lk <- 0L
+      while((eps > 0.000001) && (lk < 5L)) {
+        rho0 <- rho
+        opt <- nlminb(
+          rho,
+          objective = function(rho) fl(exp(rho)),
+          lower = pmax(rho - log(10), log(1e-10)),
+          upper = pmin(rho + log(10), log(1e+10))
+        )
+        rho <- opt$par
+        eps <- max(abs(rho - rho0))
+        lk <- lk + 1L
+
+        ## Reaching the search-window boundary predicts another costly restart.
+        if(identical(dr.mode, "auto") && dr.eligible && !dr.attempted &&
+            lk < 5L && eps >= 0.9 * log(10)) {
+          dr <- dr_setup()
+          dr.attempted <- TRUE
+        }
+      }
+      opt <- list(par = exp(rho))
     } else {
       opt <- list(par = x$sp)
     }
@@ -366,7 +538,12 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
   rval <- fl(opt$par, rf = TRUE)
 
-  rval$transfer <- list("lambdas" = rval$lambdas, "coefficients" = rval$coefficients)
+  rval$transfer <- list(
+    "lambdas" = rval$lambdas,
+    "coefficients" = rval$coefficients,
+    "criterion.evaluations" = criterion.evaluations,
+    "demmler.reinsch" = !is.null(dr)
+  )
 
   return(rval)
 }

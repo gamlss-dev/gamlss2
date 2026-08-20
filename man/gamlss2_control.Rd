@@ -38,6 +38,21 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   The set of control parameters can be extended. For example, if a different
   optimizer is used, newly specified control parameters are passed on to that
   optimizer automatically.
+
+  For the \code{RS} and \code{CG} optimizers, argument
+  \code{demmler.reinsch} controls the use of a weighted Demmler--Reinsch
+  reparameterization when selecting the smoothing parameter of an eligible
+  univariate, single-penalty smooth. The default, \code{"auto"}, starts with
+  the direct solver and switches only when the current smoothing-parameter
+  search reaches the edge of its one-decade search window. This indicates that
+  another costly optimizer restart is needed and amortizes the setup of the
+  reparameterization. Set \code{demmler.reinsch = TRUE} to force it for eligible
+  updates, or \code{FALSE} to disable it. To preserve the numerical trajectory of
+  nonlinear distributional models, the initial outer iteration continues to use the
+  direct solver.
+
+  Smooths with fixed smoothing parameters or multiple penalties, including
+  adaptive and tensor-product smooths, always use the direct solver.
 } 
 
 \value{

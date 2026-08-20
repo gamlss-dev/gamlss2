@@ -45,7 +45,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       "tx", "tx2", "tx3", "tx4", "la", "gnet", "n", "lin",
       "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
       "random", "ra", "lo", "tr", "tree", "ct", "cf", "NN", "pb2", "ct",
-      "st", "ps2", "pdDiag", "user", "ridge", "elm")
+      "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms")
     stn <- unique(c(stn, specials))
     if(!nospecials) ## still experimental
       formula <- ff_replace(formula)
@@ -138,7 +138,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
   return(formula)
 }
 
-## Replace * and : with +.
+## Replace ':' with '+' outside ridge terms.
 ff_replace <- function(formula)
 {
   n <- length(formula)
@@ -147,11 +147,29 @@ ff_replace <- function(formula)
   } else {
     f <- formula[[n]]
   }
-  f <- deparse(f)
-  if(any(grepl(":", f, fixed = TRUE))) {
-    f <- gsub(":", "+", f, fixed = TRUE)
-    f <- as.call(parse(text = f))
-    formula[[n]] <- f[[1L]]
+
+  replace_colon <- function(x) {
+    if(!is.call(x))
+      return(x)
+
+    ## A colon inside ridge() is part of its design formula and must not be
+    ## expanded into additive main effects.
+    if(identical(x[[1L]], as.name("ridge")))
+      return(x)
+
+    if(identical(x[[1L]], as.name(":")))
+      x[[1L]] <- as.name("+")
+
+    if(length(x) > 1L) {
+      for(i in 2:length(x))
+        x[[i]] <- replace_colon(x[[i]])
+    }
+    x
+  }
+
+  fr <- replace_colon(f)
+  if(!identical(fr, f)) {
+    formula[[n]] <- fr
     formula <- update(formula, . ~ .)
   }
   return(formula)

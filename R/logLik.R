@@ -10,7 +10,7 @@
     } else {
       model.response(model.frame(object, keepresponse = TRUE))
     }
-    ll <- family(object)$logLik(y, par)
+    ll <- family(object)$log_likelihood(par = par, y = y)
     nobs <- length(y)
   }
   attr(ll, "nobs") <- nobs
@@ -123,7 +123,7 @@ deviance.gamlss2 <- function(object, ..., newdata = NULL, sum = TRUE)
   } else {
     model.response(model.frame(object, keepresponse = TRUE))
   }
-  dev <- -2 * family(object)$pdf(y, par, log = TRUE)
+  dev <- -2 * family(object)$pdf(par = par, y = y, log = TRUE)
   
   return(dev)
 }

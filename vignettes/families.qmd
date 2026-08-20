@@ -57,7 +57,7 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous"
@@ -72,7 +72,7 @@ In this example, we define a normal distribution with two parameters: `"mu"` (me
 it is the log function. The probability density function (`pdf()`) must accept the following arguments:
 
 ```{r, eval=FALSE}
-pdf(y, par, log = FALSE, ...)
+pdf(par, y, log = FALSE, ...)
 ```
 
 * `y`: The response variable.
@@ -90,15 +90,15 @@ functions are used during model fitting to improve optimization efficiency and a
 All derivative functions must follow the structure:
 
 ```r
-function(y, par, ...)
+function(par, y, ...)
 ```
 
 First-order derivatives must be provided as a named list called `"score"`, with one function per 
-distribution parameter. Second-order derivatives must be provided in a list named `"hess"`. Each 
-function in `"hess"` must return the **negative (expected)** second derivative with respect to the 
+distribution parameter. Second-order derivatives must be provided in a list named `"hessian"`. Each 
+function in `"hessian"` must return the **negative (expected)** second derivative with respect to the 
 predictor.
 
-The following code illustrates how to provide both `"score"` and `"hess"` functions for
+The following code illustrates how to provide both `"score"` and `"hessian"` functions for
 a normal distribution:
 
 ```r
@@ -107,7 +107,7 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous",
@@ -116,21 +116,21 @@ Normal <- function(...) {
       "sigma" = function(y, ...) { rep(sd(y), length(y)) }
     ),
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         (y - par$mu) / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
-    "hess" = list(
-      "mu" = function(y, par, ...) {
+    "hessian" = list(
+      "mu" = function(par, y, ...) {
         1 / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         rep(2, length(y))
       },
-      "mu.sigma" = function(y, par, ...) {
+      "mu:sigma" = function(par, y, ...) {
         rep(0, length(y)) ## example cross-derivative
       }
     )
@@ -143,8 +143,8 @@ Normal <- function(...) {
 If no derivative functions are provided, all necessary derivatives will be
 approximated numerically. In addition to derivatives with respect to single parameters,
 **cross-derivatives** (i.e., second-order derivatives involving two different parameters)
-can also be specified. These should be added to the `"hess"` list and named using the
-format `"param1.param2"`, for example `"mu.sigma"`. They must use the same function
+can also be specified. These should be added to the `"hessian"` list and named using the
+format `"param1:param2"`, for example `"mu:sigma"`. They must use the same function
 arguments as the other derivative functions.
 
 Cross-derivatives can be beneficial when using second-order optimization
@@ -161,9 +161,9 @@ significantly improve the stability and speed of the estimation process.
 
 Family objects can also include other functions such as
 
-* `cdf(y, par, ...)`: Cumulative distribution function.
-* `quantile(p, par, ...)`: Quantile function with probability vector `p`.
-* `random(n, par, ...)`: Random number generation with number of samples `n`.
+* `cdf(par, y, ...)`: Cumulative distribution function.
+* `quantile(par, p, ...)`: Quantile function with probability vector `p`.
+* `random(par, n, ...)`: Random number generation with number of samples `n`.
 * `mean(par, ...)`: Mean function.
 * `variance(par, ...)`: Variance function.
 * `skewness(par, ...)`: Skewness function.
@@ -180,10 +180,10 @@ Normal <- function(...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "cdf" = function(y, par, ...) {
+    "cdf" = function(par, y, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
     "random" = function(n, par) {
@@ -207,21 +207,21 @@ Normal <- function(...) {
       return(TRUE)
     },
     "score" = list(
-      "mu" = function(y, par, ...) {
+      "mu" = function(par, y, ...) {
         (y - par$mu) / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
-    "hess" = list(
-      "mu" = function(y, par, ...) {
+    "hessian" = list(
+      "mu" = function(par, y, ...) {
         1 / (par$sigma^2)
       },
-      "sigma" = function(y, par, ...) {
+      "sigma" = function(par, y, ...) {
         rep(2, length(y))
       },
-      "mu.sigma" = function(y, par, ...) {
+      "mu:sigma" = function(par, y, ...) {
         rep(0, length(y)) ## example cross-derivative
       }
     )
@@ -236,7 +236,7 @@ Normal <- function(...) {
 The example above used static link functions to define the family object. However, `gamlss2`
 also allows users to define families with flexible link functions.
 To support this, the helper function `make.link2()` is used. The only nontrivial part is
-adapting the `score` and `hess` functions to work on the linear predictor scale.
+adapting the `score` and `hessian` functions to work on the linear predictor scale.
 This is not done automatically in `gamlss2` for performance reasons - users may even
 write these functions in C for speed. Below is a minimal example of implementing the
 `Normal` family with flexible link functions:
@@ -250,7 +250,7 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
     "family" = "Normal",
     "names" = c("mu", "sigma"),
     "links" = c("mu" = mu.link, "sigma" = sigma.link),
-    "pdf" = function(y, par, log = FALSE, ...) {
+    "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
     "type" = "continuous"
@@ -261,7 +261,7 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
 }
 ```
 
-Note that the `score` and `hess` elements are omitted and approximated
+Note that the `score` and `hessian` elements are omitted and approximated
 numerically during estimation.
 
 The following is a small example using the new `Normal` family with different link functions.

@@ -25,7 +25,7 @@ or predicted probability \code{distribution} objects. Internally, the
 \code{\link{predict.gamlss2}} method is used first to obtain the distribution
 parameters (\code{mu}, \code{sigma}, \code{tau}, \code{nu}, or a subset thereof).
 Subsequently, the corresponding \code{distribution} object is set up as a
-\code{\link{GDF}} object, a unified \pkg{gamlss2} distribution interface for
+\code{\link{GAMLSS2}} object, a unified \pkg{gamlss2} distribution interface for
 the workflow provided by the \pkg{distributions3} package (see Zeileis et al. 2022).
 
 Note that these probability distributions only reflect the random variation in
@@ -35,7 +35,7 @@ uncertainty in the parameter estimates.
 }
 
 \value{
-An object of class \code{GDF} inheriting from \code{distribution}.
+An object of class \code{GAMLSS2} inheriting from \code{distribution}.
 }
 
 \references{
@@ -46,7 +46,7 @@ Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
 }
 
 \seealso{
-\code{\link{GDF}}, \code{\link{predict.gamlss2}}
+\code{\link{GAMLSS2}}, \code{\link{predict.gamlss2}}
 }
 
 \examples{\dontrun{## packages, code, and data

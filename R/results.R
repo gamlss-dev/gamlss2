@@ -252,19 +252,14 @@ results_linear <- function(x, parameter = NULL, data, ...)
   if(length(parameter) < 1L)
     stop("argument parameter is specified wrong!")
 
-  ff <- fake_formula(formula(x), nospecials = TRUE)
-
-  if(!is.null(x$selection)) {
-    ff <- x$selection$formula
-    names(ff) <- NULL
-    ff <- fake_formula(ff, nospecials = TRUE)
+  ff <- if(is.null(x$selection)) {
+    formula(x)
+  } else {
+    f <- x$selection$formula
+    names(f) <- NULL
+    f
   }
-
-  vn <- all.vars(ff)
-
-  if(!length(vn)) {
-    return(NULL)
-  }
+  ff <- fake_formula(ff, nospecials = TRUE)
 
   env <- environment(formula(x))
 
@@ -274,68 +269,106 @@ results_linear <- function(x, parameter = NULL, data, ...)
     return(NULL)
   }
 
-  nd <- list()
-  for(j in names(data)) {
-    if(!((j %in% vn) && (j != yn)))
-      next
-    if(is.numeric(data[[j]])) {
-      nd[[j]] <- seq(min(data[[j]]), max(data[[j]]), length = 300L)
-    } else {
-      if(is.character(data[[j]])) {
-        nd[[j]] <- factor(rep(unique(data[[j]]), length.out = 300L))
-      } else {
-        if(is.factor(data[[j]])) {
-          nd[[j]] <- factor(rep(levels(data[[j]]), length.out = 300L),
-            levels = levels(data[[j]]))
-        } else {
-          nd[[j]] <- rep(unique(data[[j]]), length.out = 300L)
-        }
-      }
+  ## Values used for term-specific prediction grids. A two-dimensional
+  ## numerical term uses a square grid so it can be drawn with image/contour.
+  grid_values <- function(z, n) {
+    if(is.factor(z)) {
+      return(factor(levels(z), levels = levels(z), ordered = is.ordered(z)))
     }
+    if(is.character(z)) {
+      z <- unique(z[!is.na(z)])
+      return(factor(z, levels = z))
+    }
+    if(is.numeric(z)) {
+      r <- range(z, na.rm = TRUE)
+      if(!all(is.finite(r)))
+        return(NULL)
+      if(r[1L] == r[2L])
+        return(r[1L])
+      return(seq(r[1L], r[2L], length.out = n))
+    }
+    z <- unique(z[!is.na(z)])
+    if(length(z) > n)
+      z <- z[round(seq(1, length(z), length.out = n))]
+    z
   }
-  rm(data)
-  nd <- as.data.frame(nd)
-  X <- model.matrix(x, data = nd)
+
+  make_grid <- function(variables) {
+    if(!length(variables) || length(variables) > 2L)
+      return(NULL)
+    n <- if(length(variables) == 1L) 300L else 50L
+    values <- lapply(variables, function(v) grid_values(data[[v]], n))
+    names(values) <- variables
+    if(any(lengths(values) < 1L))
+      return(NULL)
+    do.call(expand.grid, c(values,
+      list(KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)))
+  }
+
+  reference_value <- function(z) {
+    if(is.matrix(z))
+      z <- as.vector(z)
+    i <- which(!is.na(z))[1L]
+    if(is.na(i)) return(NA)
+    z[i]
+  }
+
+  make_newdata <- function(grid, model_variables) {
+    n <- nrow(grid)
+    nd <- data[rep.int(1L, n), model_variables, drop = FALSE]
+    for(v in model_variables)
+      nd[[v]] <- rep(reference_value(data[[v]]), length.out = n)
+    for(v in names(grid))
+      nd[[v]] <- grid[[v]]
+    rownames(nd) <- NULL
+    nd
+  }
 
   p <- list()
   for(j in seq_along(parameter)) {
-    V <- x$fitted.linear[[j]]$vcov
-    cj <- x$fitted.linear[[j]]$coefficients
-    for(i in vn) {
-      if(i %in% all.vars(formula(ff, lhs = 0, rhs = j))) {
-        if(!(i %in% names(nd)))
-          next
-        ii <- grep(i, colnames(X), value = TRUE)
-        if(attr(terms(formula(ff, lhs = 0, rhs = j)), "intercept") > 0L)
-          ii <- c("(Intercept)", ii)
-        if(!all(ii %in% colnames(V)))
-          next
-        Xj   <- X[, ii, drop = FALSE]
-        Vsub <- V[ii, ii, drop = FALSE]
-        bsub <- cj[ii]
-        if(is.factor(nd[[i]])) {
-          Xjc <- Xj - matrix(colMeans(Xj), nrow(Xj), ncol(Xj), byrow = TRUE)
-          fit <- as.vector(Xjc %*% bsub)
-          vj  <- rowSums((Xjc %*% Vsub) * Xjc)
-          sj  <- sqrt(pmax(vj, 0))
-        } else {
-          Xjc <- sweep(Xj, 2, colMeans(Xj), FUN = "-")
-          fit <- as.vector(Xjc %*% bsub)
-          vj  <- rowSums((Xjc %*% Vsub) * Xjc)
-          sj  <- sqrt(pmax(vj, 0))
-        }
-        z <- qnorm(0.975)
-        upper <- fit + z * sj
-        lower <- fit - z * sj
-        ji <- paste0(parameter[j], ".", i)
-        p[[ji]] <- data.frame(nd[[i]], "fit" = fit, "lower" = lower, "upper" = upper)
-        colnames(p[[ji]])[1L] <- i
-        p[[ji]] <- p[[ji]][!duplicated(p[[ji]][[i]]), , drop = FALSE]
-        p[[ji]] <- p[[ji]][order(p[[ji]][[i]]), , drop = FALSE]
-        rownames(p[[ji]]) <- NULL
-        attr(p[[ji]], "label") <- paste(ji, "effect")
-        attr(p[[ji]], "linear") <- TRUE
-      }
+    k <- match(parameter[j], x$family$names)
+    V <- x$fitted.linear[[k]]$vcov
+    cj <- x$fitted.linear[[k]]$coefficients
+    if(is.null(V) || is.null(cj))
+      next
+
+    fj <- formula(ff, lhs = 0, rhs = k)
+    mt <- terms(fj, data = data)
+    labels <- attr(mt, "term.labels")
+    model_variables <- intersect(all.vars(fj), names(data))
+
+    for(i in seq_along(labels)) {
+      term_formula <- as.formula(paste("~", labels[i]), env = env)
+      variables <- intersect(all.vars(term_formula), names(data))
+      grid <- make_grid(variables)
+      if(is.null(grid))
+        next
+
+      nd <- make_newdata(grid, model_variables)
+      xlev <- if(length(x$xlevels) >= k) x$xlevels[[k]] else NULL
+      X <- model.matrix(mt, data = nd, contrasts.arg = x$contrasts,
+        xlev = xlev)
+      ii <- colnames(X)[attr(X, "assign") == i]
+      ii <- ii[ii %in% intersect(names(cj), colnames(V))]
+      if(!length(ii))
+        next
+
+      Xj <- X[, ii, drop = FALSE]
+      Xjc <- sweep(Xj, 2L, colMeans(Xj), FUN = "-")
+      Vsub <- V[ii, ii, drop = FALSE]
+      bsub <- cj[ii]
+      fit <- as.vector(Xjc %*% bsub)
+      vj <- rowSums((Xjc %*% Vsub) * Xjc)
+      sj <- sqrt(pmax(vj, 0))
+      z <- qnorm(0.975)
+
+      ji <- paste0(parameter[j], ".", labels[i])
+      p[[ji]] <- data.frame(grid, "fit" = fit,
+        "lower" = fit - z * sj, "upper" = fit + z * sj,
+        check.names = FALSE)
+      rownames(p[[ji]]) <- NULL
+      attr(p[[ji]], "label") <- paste(ji, "effect")
+      attr(p[[ji]], "linear") <- TRUE
     }
   }
 

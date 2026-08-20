@@ -85,6 +85,8 @@ website:
               file: man/pb.qmd
             - text: random
               file: man/random.qmd
+            - text: ms
+              file: man/ms.qmd
         - section: Predictions and model statistics
           contents:
             - text: modelstats
@@ -103,12 +105,14 @@ website:
           contents:
             - text: discretize
               file: man/discretize.qmd
+            - text: family.distribution
+              file: man/family.distribution.qmd
             - text: find_family
               file: man/find_family.qmd
             - text: gamlss2.family
               file: man/gamlss2.family.qmd
-            - text: GDF
-              file: man/GDF.qmd
+            - text: GAMLSS2
+              file: man/GAMLSS2.qmd
             - text: Kumaraswamy
               file: man/Kumaraswamy.qmd
             - text: MN

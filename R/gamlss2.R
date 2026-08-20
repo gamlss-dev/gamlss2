@@ -37,7 +37,14 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Evaluate and complete family.
   ## Note, families structure is a bit different
   ## in order to support more than 4 parameter models.
-  family <- complete_family(family)
+  family <- complete_family(family, .links = control$links)
+
+  ## Use numeric hessian?
+  if(isTRUE(control$numhessian)) {
+    family$update <- NULL
+    family$hessian <- NULL
+    family <- complete_family(family, .links = control$links)
+  }
 
   ## Call.
   cl <- match.call()
@@ -330,7 +337,7 @@ gamlss2.formula <- function(formula, data, family = NO,
     if(control$x) {
       rval$x <- X
     }
-    rval$results <- results(rval, data = data)
+    rval$results <- results(rval, data = mf)
   } else {
     rval$fitted.values <- NULL
     rval$weights <- NULL
@@ -382,6 +389,8 @@ gamlss2_control <- function(optimizer = RS,
 
   if(is.null(ctr$binning))
     ctr$binning <- FALSE
+  if(is.null(ctr$demmler.reinsch))
+    ctr$demmler.reinsch <- "auto"
   if(is.null(ctr$digits))
     ctr$digits <- Inf
   if(is.null(ctr$initialize))

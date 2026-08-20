@@ -190,7 +190,7 @@ vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = F
       }
     }
 
-    family$logLik(y, family$map2par(eta))
+    family$log_likelihood(par = family$map2par(eta), y = y)
   }
 
   gradient <- function(par, full)
@@ -657,7 +657,7 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
     par <- fitted(object, newdata = newdata, type = "parameter")
 
     if(is.null(family(object)$mean)) {
-      fit <- family(object)$quantile(0.5, par)
+      fit <- family(object)$quantile(par, 0.5)
     } else {
       fit <- family(object)$mean(par)
     }

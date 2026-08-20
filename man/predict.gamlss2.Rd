@@ -66,10 +66,11 @@ from which moments, probabilities, quantiles, or random numbers can be obtained.
 
 \value{
 If \code{drop = FALSE}, a data frame is returned. If \code{drop = TRUE}
- (the default), the result may be simplified to a numeric vector when possible.
- For \code{type = "terms"}, a data frame is returned with one column per selected
- term. For \code{se.fit = TRUE}, the returned object contains fitted values and
- corresponding simulation-based standard errors.
+(the default), the result may be simplified to a numeric vector when possible.
+For \code{type = "terms"}, a data frame is returned with one column per selected term.
+Multi-parameter models return a list of term matrices.
+For \code{se.fit = TRUE}, the returned object contains fitted values and
+corresponding simulation-based standard errors.
 }
 
 \seealso{

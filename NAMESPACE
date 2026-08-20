@@ -5,15 +5,15 @@ import("mgcv")
 importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "make.link", "model.frame", "model.matrix", "model.offset",
   "model.response", "model.weights", "nlminb", "pnorm",
-  "qnorm", "rnorm", "runif", "sd", "update", "predict", "family",
+  "qnorm", "rnorm", "runif", "sd", "predict", "family",
   "density", "fitted", "lm", "ppoints", "qqnorm", "quantile", "residuals",
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "optimize", "median", "pchisq",
-  "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess",
+  "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess", "update",
   "deviance", "drop1", "plogis", "qlogis", "setNames")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace",
-  "capture.output", "combn", "head")
+  "capture.output", "combn", "head", "argsAnywhere", "getS3method")
 
 importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3d",
   "dev.off", "png")
@@ -27,7 +27,8 @@ importFrom("parallel", "mclapply")
 importFrom("mvtnorm", "dmvnorm", "rmvnorm")
 
 importFrom("distributions3", "variance", "pdf", "cdf", "skewness",
-  "kurtosis", "random", "is_continuous", "is_discrete", "prodist")
+  "kurtosis", "random", "is_continuous", "is_discrete", "prodist",
+  "log_pdf", "log_likelihood", "support", "score", "hessian")
 
 export(
   "fake_formula",
@@ -66,13 +67,18 @@ export(
   "plot_lasso",
   "la",
   "gnet",
+  "fk",
   "cv_gamlss2",
   "log_pdf_metric",
   "rqres_metric",
   "mse_metric",
   "BS",
   "bamlss2",
-  "mcmc"
+  "mcmc",
+  "distributions3_family",
+  "ms",
+  "lo",
+  "n"
 )
 
 S3method(gamlss2, formula)
@@ -94,6 +100,8 @@ S3method(special_fit, elm)
 S3method(special_predict, elm.fitted)
 S3method(special_fit, fk)
 S3method(special_predict, fk.fitted)
+S3method(special_fit, ms)
+S3method(special_predict, ms.fitted)
 S3method(special_fit, glmnet)
 S3method(special_predict, glmnet.fitted)
 S3method(special_fit, lo)
@@ -116,7 +124,7 @@ S3method(print, coef.gamlss2)
 S3method(AIC, gamlss2)
 S3method(BIC, gamlss2)
 S3method(c, gamlss2)
-S3method(c, link_gamlss2)
+S3method(c, "link-gamlss2")
 S3method(quantile, gamlss2)
 S3method(smooth.construct, lin.smooth.spec)
 S3method(Predict.matrix, lin.effect)
@@ -124,28 +132,32 @@ S3method(new_formula, default)
 S3method(new_formula, select)
 S3method(deviance, gamlss2)
 
-S3method(distributions3::prodist, gamlss2)
+S3method(prodist, gamlss2)
 
 S3method(anova, gamlss2)
 S3method(drop1, gamlss2)
 S3method(print, drop1.gamlss2)
 
-## distributions3 class GDF, encapsulating gamlss2 families
-export(GDF)
-S3method(format, GDF)
-S3method(print, GDF)
-S3method(mean, GDF)
-S3method(distributions3::variance, GDF)
-S3method(distributions3::skewness, GDF)
-S3method(distributions3::kurtosis, GDF)
-S3method(distributions3::pdf, GDF)
-S3method(distributions3::log_pdf, GDF)
-S3method(distributions3::cdf, GDF)
-S3method(quantile, GDF)
-S3method(distributions3::random, GDF)
-S3method(distributions3::is_continuous, GDF)
-S3method(distributions3::is_discrete, GDF)
-S3method(distributions3::support, GDF)
+S3method(family, distribution)
+S3method(family, GAMLSS)
+S3method(family, gamlss.family)
+
+## distributions3 class GAMLSS2, encapsulating gamlss2 families
+export(GAMLSS2)
+S3method(format, GAMLSS2)
+S3method(print, GAMLSS2)
+S3method(mean, GAMLSS2)
+S3method(variance, GAMLSS2)
+S3method(skewness, GAMLSS2)
+S3method(kurtosis, GAMLSS2)
+S3method(pdf, GAMLSS2)
+S3method(log_pdf, GAMLSS2)
+S3method(cdf, GAMLSS2)
+S3method(quantile, GAMLSS2)
+S3method(random, GAMLSS2)
+S3method(is_continuous, GAMLSS2)
+S3method(is_discrete, GAMLSS2)
+S3method(support, GAMLSS2)
 
 S3method(mean, gamlss2)
 S3method(median, gamlss2)

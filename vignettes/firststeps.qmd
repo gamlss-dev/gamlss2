@@ -141,7 +141,7 @@ pithist(b3)
 ```
 
 showing good model calibration. Finally, we compute the probability of a heat day for 2025.
-First, the `procast()` function from `topmodels predicts the fitted distributions
+First, the `procast()` function from `topmodels` predicts the fitted distributions
 
 ```{r}
 nd <- data.frame("year" = 2025, "yday" = 0:365)

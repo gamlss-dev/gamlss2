@@ -1,6 +1,5 @@
 ## Mean function.
 mean.gamlss2 <- function(x, ...) {
-  stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
   mean(d)
 }
@@ -12,28 +11,24 @@ median.gamlss2 <- function(x, ...) {
 
 ## Variance function.
 variance.gamlss2 <- function(x, ...) {
-  stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
   distributions3::variance(d)
 }
 
 ## Skewness function.
 skewness.gamlss2 <- function(x, ...) {
-  stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
   distributions3::skewness(d)
 }
 
 ## Kurtosis function.
 kurtosis.gamlss2 <- function(x, ...) {
-  stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
   distributions3::kurtosis(d)
 }
 
 ## Density function.
 pdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
-  stopifnot(requireNamespace("distributions3"))
   if(!is.null(nd <- list(...)$newdata)) {
     x <- nd[[response_name(d)]]
   } else {
@@ -46,7 +41,6 @@ pdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
 
 ## Log-density function.
 log_pdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
-  stopifnot(requireNamespace("distributions3"))
   if(!is.null(nd <- list(...)$newdata)) {
     x <- nd[[response_name(d)]]
   } else {
@@ -59,7 +53,6 @@ log_pdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
 
 ## Cumulative distribution function.
 cdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
-  stopifnot(requireNamespace("distributions3"))
   if(!is.null(nd <- list(...)$newdata)) {
     x <- nd[[response_name(d)]]
   } else {
@@ -72,27 +65,23 @@ cdf.gamlss2 <- function(d, x, drop = TRUE, ...) {
 
 ## Random numbers.
 random.gamlss2 <- function(x, n = 1L, drop = TRUE, ...) {
-  stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(x, ...)
   distributions3::random(d, n, drop = drop, ...)
 }
 
 is_discrete.gamlss2 <- function(d, ...) {
-  stopifnot(requireNamespace("distributions3"))
   f <- family(d)
   if(is.null(f$type)) stop(sprintf("the type is not implemented for the %s family",  f$family[1L]))
   return(tolower(f$type) == "discrete")
 }
 
 is_continuous.gamlss2 <- function(d, ...) {
-  stopifnot(requireNamespace("distributions3"))
   f <- family(d)
   if(is.null(f$type)) stop(sprintf("the type is not implemented for the %s family", f$family[1L]))
   return(tolower(f$type) == "continuous")
 }
 
 support.gamlss2 <- function(d, drop = TRUE, ...) {
-  stopifnot(requireNamespace("distributions3"))
   d <- distributions3::prodist(d, ...)
   s <- quantile(d, probs = c(0, 1), elementwise = FALSE)
   distributions3::make_support(s[, 1L], s[, 2L], d, drop = drop)
@@ -139,11 +128,11 @@ quantile.gamlss2 <- function(x,
   }
   f <- NULL
   for(p in probs)
-    f <- cbind(f, family(x)$quantile(p, par))
+    f <- cbind(f, family(x)$quantile(par = par, p = p))
   colnames(f) <- paste0(probs * 100, "%")
   if(plot) {
     if(is.null(variable)) {
-      fit_median <- family(x)$quantile(0.5, par)
+      fit_median <- family(x)$quantile(par, 0.5)
       o <- order(fit_median)
       ind <- seq_len(nrow(f)) / nrow(f) * 100
 

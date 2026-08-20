@@ -53,7 +53,7 @@ CG(x, y, specials, family, offsets,
     \item \code{eps}: Numeric vector of length 2, the stopping criterion.
       Default is \code{eps = c(1e-05, 1e-05)} for the outer and the inner backfitting loop.
     \item \code{maxit}: Integer vector of length 2, the maximum number of iterations of
-      the outer and inner backfitting loop. Default is \code{maxit = c(100, 10)}.
+      the outer and inner backfitting loop. Default is \code{maxit = c(20, 20)}.
     \item \code{step}: Numeric, the step length control parameter. Default is \code{step = 1}.
       Note that if \code{step} is set smaller than 1, it might be appropriate to lower
       the stopping criterion \code{eps}, too.
@@ -81,7 +81,7 @@ CG(x, y, specials, family, offsets,
 \value{
   Functions \code{RS()} and \code{CG()} return a named list of class \code{"gamlss2"}
   containing the following objects:
-  \item{fitted.values}{A data frame of the fitted values of the modeled parameters
+  \item{fitted.values}{A data frame of the fitted values of the predictors
     of the selected distribution.}
   \item{fitted.specials}{A named list, one element for each parameter of the distribution,
     containing the fitted model object information of special model terms.}

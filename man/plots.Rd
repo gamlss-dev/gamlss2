@@ -36,7 +36,7 @@
     \code{"qq-resid"} a quantile-quantile plot of residuals,
     \code{"wp-resid"} a worm plot of residuals, and
     \code{"scatter-resid"} a scatter plot of residuals against fitted values
-    for the distribution mean (or median, if available in the family object).
+    for the distribution median.
     In addition, \code{"selection"} plots the GAIC path stored for a fitted
     stepwise or selection object, and \code{"samples"} visualizes posterior or
     simulation draws for objects that contain \code{samples}.}

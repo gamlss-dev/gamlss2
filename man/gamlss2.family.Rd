@@ -48,11 +48,11 @@
     \item \code{score}: a named list of functions (one per parameter), each computing the
       first derivative of the log-likelihood with respect to the linear predictor:
       \code{score[[param]](par, y, ...)}.
-    \item \code{hess}: a named list of functions computing second derivatives (the negative Hessian).
+    \item \code{hessian}: a named list of functions computing second derivatives (the negative Hessian).
       For parameters \code{mu} and \code{sigma}, this includes:
-      \code{hess[["mu"]]()}, \code{hess[["sigma"]]()}, and optionally
-      cross derivatives like \code{hess[["mu.sigma"]]()}.
-    \item \code{loglik(par, y, ...)}: a function computing the total log-likelihood.
+      \code{hessian[["mu"]]()}, \code{hessian[["sigma"]]()}, and optionally
+      cross derivatives like \code{hessian[["mu:sigma"]]()}.
+    \item \code{log_likelihood(par, y, ...)}: a function computing the total log-likelihood.
     \item \code{cdf(par, y, ...)}: cumulative distribution function.
     \item \code{quantile(par, p, ...)}: quantile function.
     \item \code{random(par, n, ...)}: random number generator.
@@ -98,18 +98,18 @@ Normal <- function(...) {
         -1 + (y - par$mu)^2 / (par$sigma^2)
       }
     ),
-    "hess" = list(
+    "hessian" = list(
       "mu" = function(par, y, ...) {
         1 / (par$sigma^2)
       },
       "sigma" = function(par, y, ...) {
         rep(2, length(y))
       },
-      "mu.sigma" = function(par, y, ...) {
+      "mu:sigma" = function(par, y, ...) {
         rep(0, length(y))
       }
     ),
-    "loglik" = function(par, y, ...) {
+    "log_likelihood" = function(par, y, ...) {
       sum(dnorm(y, par$mu, par$sigma, log = TRUE))
     },
     "pdf" = function(par, y, log = FALSE) {

@@ -47,7 +47,7 @@ BS(x, y, specials, family, offsets,
   \itemize{
     \item \code{n.iter}: integer, the total number of MCMC iterations;
     \item \code{burnin}: integer, the burn-in period;
-    \item \code{thinning}: integer, the thinning parameter for saved samples;
+    \item \code{thin}: integer, the thinning parameter for saved samples;
     \item \code{trace}: logical, should information be printed while the sampler is running;
     \item \code{flush}: logical, whether to use \code{\link[utils]{flush.console}}
       to display current output in the console;

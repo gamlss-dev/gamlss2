@@ -130,9 +130,9 @@ residuals.gamlss2 <- function(object,
 
     ## Response residuals.
     if(type == "response") {
-      mu <- if(is.null(family$mu)) {
+      mu <- if(is.null(family$mean)) {
         function(par, ...) { par[[1]] }
-      } else family$mu
+      } else family$mean
       res <- y - mu(par)
       attr(res, "type") <- "response"
     }

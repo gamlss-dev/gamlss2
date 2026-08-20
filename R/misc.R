@@ -112,9 +112,11 @@ find_family <- function(y, families = NULL, k = 2, verbose = TRUE, ...) {
 
     if(!inherits(b, "try-error") && !warning_occurred) {
       ic[j] <- GAIC(b, k = k)
-      cat(".. .. IC =", round(ic[j], 4), "\n")
+      if(verbose)
+        cat(".. .. IC =", round(ic[j], 4), "\n")
     } else {
-      cat(".. .. error\n")
+      if(verbose)
+        cat(".. .. error\n")
     }
   }
 
@@ -276,12 +278,14 @@ find_gamlss2 <- function(formula, families = NULL, k = 2,
 
     if(!inherits(b, "try-error") && !warning_occurred) {
       ic[j] <- GAIC(b, k = k)
-      cat(".. .. IC =", round(ic[j], 4), "\n")
+      if(verbose)
+        cat(".. .. IC =", round(ic[j], 4), "\n")
       if(ic[j] == min(ic, na.rm = TRUE)) {
         m <- b
       }
     } else {
-      cat(".. .. error\n")
+      if(verbose)
+        cat(".. .. error\n")
     }
   }
 

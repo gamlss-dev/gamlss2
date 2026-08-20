@@ -105,7 +105,12 @@ random.GAMLSS2 <- function(x, n = 1L, drop = TRUE, ...) {
   f <- complete_family(x)
   n <- distributions3::make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
-  FUN <- function(at, d) { f$random(d, at) }
+  FUN <- function(at, d) {
+    ## apply_dpqr() handles replication for vectorized distributions and
+    ## expects one draw per parameter row in that case. For a scalar
+    ## distribution, however, it delegates all requested draws at once.
+    f$random(d, if(length(d) == 1L) at else 1L)
+  }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
 }
 

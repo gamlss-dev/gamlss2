@@ -1321,43 +1321,98 @@ ologit4 <- function(...) {
 }
 
 OL <- function(k) {
-  stopifnot(k >= 2)
+  if(length(k) != 1L || !is.numeric(k) || is.na(k) || !is.finite(k) ||
+      k < 2 || k != floor(k) || k > .Machine$integer.max) {
+    stop("argument k must be a single integer greater than or equal to 2.")
+  }
+  k <- as.integer(k)
 
   ## Parameter names: location and delta-encoded cutpoints.
-  threshold_names <- c("theta1", paste0("delta", 2:(k - 1)))
+  delta_indices <- if(k > 2L) seq.int(2L, k - 1L) else integer(0L)
+  threshold_names <- c(
+    "theta1", if(length(delta_indices)) paste0("delta", delta_indices)
+  )
   par_names <- c("location", threshold_names)
+  categories <- seq_len(k)
+  category_levels <- as.character(categories)
 
   ## Identity links for now.
   links <- rep("identity", length(par_names))
   names(links) <- par_names
 
-  compute_components <- function(par) {
-    n <- length(par$location)
+  as_categories <- function(y, argument = "y") {
+    if(is.factor(y)) {
+      if(!identical(levels(y), category_levels)) {
+        stop(
+          argument, " must have factor levels ",
+          paste(category_levels, collapse = ", "), "."
+        )
+      }
+      y <- as.integer(y)
+    } else {
+      if(!is.numeric(y))
+        stop(argument, " must be numeric or a factor.")
+      if(anyNA(y) || any(!is.finite(y)))
+        stop(argument, " must not contain missing or non-finite values.")
+      if(any(y != floor(y)))
+        stop(argument, " must contain integer category values.")
+      y <- as.integer(y)
+    }
+
+    if(any(y < 1L | y > k))
+      stop(argument, " must contain category values in 1, ..., ", k, ".")
+
+    y
+  }
+
+  compute_components <- function(par, n = NULL) {
+    missing_parameters <- setdiff(par_names, names(par))
+    if(length(missing_parameters)) {
+      stop(
+        "missing distribution parameter(s): ",
+        paste(missing_parameters, collapse = ", "), "."
+      )
+    }
+
+    parameter_lengths <- vapply(par[par_names], length, integer(1L))
+    if(any(parameter_lengths < 1L))
+      stop("distribution parameters must not be empty.")
+
+    if(is.null(n))
+      n <- max(parameter_lengths)
+    else
+      n <- max(c(n, parameter_lengths))
+
+    if(any(!parameter_lengths %in% c(1L, n)))
+      stop("distribution parameters must have length 1 or a common length.")
 
     ## Build increasing cutpoints.
-    cuts <- matrix(NA_real_, nrow = n, ncol = k - 1)
-    cuts[, 1] <- par$theta1
-    if(k > 2) {
-      for(j in 2:(k - 1)) {
-        cuts[, j] <- cuts[, j - 1] + exp(par[[paste0("delta", j)]])
+    cuts <- matrix(NA_real_, nrow = n, ncol = k - 1L)
+    cuts[, 1L] <- rep_len(par$theta1, n)
+    if(k > 2L) {
+      for(j in delta_indices) {
+        cuts[, j] <- cuts[, j - 1L] +
+          exp(rep_len(par[[paste0("delta", j)]], n))
       }
     }
 
     ## Cumulative probabilities: c_j = P(Y > j).
     cum_probs <- do.call(
       cbind,
-      lapply(seq_len(k - 1), function(j) plogis(par$location - cuts[, j]))
+      lapply(seq_len(k - 1L), function(j) {
+        plogis(rep_len(par$location, n) - cuts[, j])
+      })
     )
 
     ## Category probabilities.
     probs <- matrix(NA_real_, nrow = n, ncol = k)
-    probs[, 1] <- 1 - cum_probs[, 1]
-    if(k > 2) {
-      for(j in 2:(k - 1)) {
-        probs[, j] <- cum_probs[, j - 1] - cum_probs[, j]
+    probs[, 1L] <- 1 - cum_probs[, 1L]
+    if(k > 2L) {
+      for(j in delta_indices) {
+        probs[, j] <- cum_probs[, j - 1L] - cum_probs[, j]
       }
     }
-    probs[, k] <- cum_probs[, k - 1]
+    probs[, k] <- cum_probs[, k - 1L]
 
     list(
       cuts = cuts,
@@ -1366,19 +1421,37 @@ OL <- function(k) {
     )
   }
 
+  initial_cutpoints <- function(y) {
+    y <- as_categories(y, "response")
+    if(!length(y))
+      stop("response must not be empty.")
+
+    counts <- tabulate(y, nbins = k)
+    n <- sum(counts)
+    cumulative_probs <- cumsum(counts)[seq_len(k - 1L)] / n
+
+    ## Keep empirical cumulative probabilities away from 0 and 1 so
+    ## initial cutpoints remain finite when boundary categories are empty.
+    eps <- 0.5 / (n + 1)
+    cumulative_probs <- pmin(pmax(cumulative_probs, eps), 1 - eps)
+    qlogis(cumulative_probs)
+  }
+
   fam <- list(
     family = paste0("Ordered Logit (", k, " categories)"),
     names = par_names,
     links = links,
 
     pdf = function(par, y, log = FALSE, ...) {
-      n <- length(y)
-      y_int <- as.integer(y)
+      comps <- compute_components(par, n = length(y))
+      n <- nrow(comps$probs)
+      if(length(y) == 1L && n > 1L)
+        y <- rep(y, n)
+      if(length(y) != n)
+        stop("y must have length 1 or match the distribution parameters.")
+      y_int <- as_categories(y)
 
-      comps <- compute_components(par)
-      probs <- comps$probs
-
-      p <- probs[cbind(seq_len(n), y_int)]
+      p <- comps$probs[cbind(seq_len(n), y_int)]
       p[p < 1e-8 | is.na(p)] <- 1e-8
 
       if(log) {
@@ -1392,27 +1465,26 @@ OL <- function(k) {
     initialize = {
       init_list <- list()
 
-      ## Start value for location.
+      ## Start with zero latent location so empirical cumulative logits
+      ## directly initialize the cutpoints.
       init_list$location <- function(y, ...) {
-        rep(mean(as.numeric(y)), length(y))
+        y <- as_categories(y, "response")
+        rep(0, length(y))
       }
 
       ## Initialize theta1.
       init_list$theta1 <- function(y, ...) {
-        probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
-        q <- qlogis(probs[1])
-        rep(q, length(y))
+        cuts <- initial_cutpoints(y)
+        rep(cuts[1L], length(y))
       }
 
-      ## Initialize deltas: log of spacing between cutpoints.
-      for(j in 2:(k - 1)) {
+      ## Initialize deltas as log-spacings between adjacent cutpoints.
+      for(j in delta_indices) {
         init_list[[paste0("delta", j)]] <- local({
           jj <- j
           function(y, ...) {
-            probs <- cumsum(prop.table(table(factor(y, levels = 1:k))))
-            q <- qlogis(probs)
-            diffs <- diff(q)
-            val <- if(jj - 1 <= length(diffs)) log(max(diffs[jj - 1], 1e-4)) else 0
+            cuts <- initial_cutpoints(y)
+            val <- log(max(cuts[jj] - cuts[jj - 1L], 1e-4))
             rep(val, length(y))
           }
         })
@@ -1424,39 +1496,38 @@ OL <- function(k) {
 
   ## Probabilities on response scale.
   fam$probabilities <- function(par, ...) {
-    comps <- compute_components(par)
-    probs <- comps$probs
-    colnames(probs) <- paste0("Pr(Y=", 1:k, ")")
+    probs <- compute_components(par)$probs
+    colnames(probs) <- paste0("Pr(Y=", categories, ")")
     probs
   }
 
+  ## Moments of the numeric category labels on the response scale.
+  fam$mean <- function(par, ...) {
+    probs <- fam$probabilities(par)
+    drop(probs %*% categories)
+  }
+
+  fam$variance <- function(par, ...) {
+    probs <- fam$probabilities(par)
+    ey <- drop(probs %*% categories)
+    drop(probs %*% categories^2) - ey^2
+  }
+
   fam$transition <- function(par, ...) {
-    comps <- compute_components(par)
-    tp <- comps$cum_probs
-    colnames(tp) <- paste0("Pr(Y>", 1:(k - 1), ")")
+    tp <- compute_components(par)$cum_probs
+    colnames(tp) <- paste0("Pr(Y>", seq_len(k - 1L), ")")
     tp
   }
 
   fam$cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
-    probs <- fam$probabilities(par)
+    probs <- compute_components(par, n = length(y))$probs
     n <- nrow(probs)
-    K <- ncol(probs)
 
-    if(length(y) == 1L)
-      y <- rep.int(y, n)
-
-    y_int <- as.integer(y)
-
-    if(any(is.na(y_int)))
-      stop("missing values in y are not allowed in cdf().")
-
-    if(any(y_int < 1L | y_int > K)) {
-      bad_vals <- sort(unique(y_int[y_int < 1L | y_int > K]))
-      stop(
-        "y has values outside 1..", K, " implied by ologit(k).\n",
-        "Offending values: ", paste(bad_vals, collapse = ", ")
-      )
-    }
+    if(length(y) == 1L && n > 1L)
+      y <- rep(y, n)
+    if(length(y) != n)
+      stop("y must have length 1 or match the distribution parameters.")
+    y_int <- as_categories(y)
 
     cprobs <- t(apply(probs, 1L, cumsum))
     ans <- cprobs[cbind(seq_len(n), y_int)]
@@ -1471,17 +1542,19 @@ OL <- function(k) {
   }
 
   fam$quantile <- function(par, p, ...) {
-    probs <- fam$probabilities(par)
-    n <- nrow(probs)
-    K <- ncol(probs)
+    if(!is.numeric(p))
+      stop("p must be numeric.")
 
-    if(length(p) == 1L)
+    probs <- compute_components(par, n = length(p))$probs
+    n <- nrow(probs)
+
+    if(length(p) == 1L && n > 1L)
       p <- rep.int(p, n)
 
     if(length(p) != n)
-      stop("length(p) must be 1 or equal to the number of observations.")
-    if(any(is.na(p)))
-      stop("p must not contain NA.")
+      stop("p must have length 1 or match the distribution parameters.")
+    if(anyNA(p) || any(!is.finite(p)))
+      stop("p must not contain missing or non-finite values.")
     if(any(p < 0 | p > 1))
       stop("p must be in [0, 1].")
 
@@ -1491,7 +1564,7 @@ OL <- function(k) {
     for(i in seq_len(n)) {
       idx <- which(cprobs[i, ] >= p[i])[1L]
       if(is.na(idx))
-        idx <- K
+        idx <- k
       q[i] <- idx
     }
 
@@ -1503,19 +1576,7 @@ OL <- function(k) {
   }
 
   fam$valid.response <- function(x) {
-    if(is.factor(x)) {
-      lev <- levels(x)
-      ok <- all(lev %in% as.character(seq_len(k)))
-      if(!ok)
-        stop("factor response levels must be 1, ..., ", k)
-    } else {
-      if(!is.numeric(x))
-        stop("response must be numeric or factor for ologit().")
-      if(any(is.na(x)))
-        stop("missing values in response are not allowed.")
-      if(!all(x %in% seq_len(k)))
-        stop("numeric response values must be in {1, ..., ", k, "}.")
-    }
+    as_categories(x, "response")
     TRUE
   }
 
@@ -1532,22 +1593,26 @@ OL <- function(k) {
 rqres_ologit <- function(object, ...) {
   fam <- family(object)
   if(!grepl("^Ordered Logit", fam$family))
-    stop("ologit family required.")
+    stop("OL family required.")
 
   mf <- model.frame(object)
   y <- stats::model.response(mf)
-  y_int <- as.integer(y)
 
   par <- predict(object)
   probs <- fam$probabilities(par)
 
-  n <- length(y_int)
   K <- ncol(probs)
+  y_int <- if(is.factor(y)) {
+    match(as.character(y), as.character(seq_len(K)))
+  } else {
+    as.integer(y)
+  }
+  n <- length(y_int)
 
   if(any(y_int < 1L | y_int > K | is.na(y_int))) {
-    bad_vals <- sort(unique(y_int[y_int < 1L | y_int > K]))
+    bad_vals <- sort(unique(y[is.na(y_int) | y_int < 1L | y_int > K]))
     stop(
-      "response has values outside 1..", K, " implied by ologit(k).\n",
+      "response has values outside 1..", K, " implied by OL(k).\n",
       "Offending values: ", paste(bad_vals, collapse = ", ")
     )
   }
@@ -1556,10 +1621,6 @@ rqres_ologit <- function(object, ...) {
   F_upper <- cprobs[cbind(seq_len(n), y_int)]
 
   F_lower <- numeric(n)
-  idx1 <- which(y_int == 1L)
-  if(length(idx1) > 0L)
-    F_lower[idx1] <- 0
-
   idx_gt1 <- which(y_int > 1L)
   if(length(idx_gt1) > 0L) {
     F_lower[idx_gt1] <- cprobs[cbind(idx_gt1, y_int[idx_gt1] - 1L)]
@@ -1607,18 +1668,40 @@ ologit <- function(k) {
 
 ## Shifted log-link.
 shiftlog <- function(shift = 1) {
-  linkfun <- function(mu) log(mu - shift)
+  if(length(shift) != 1L || !is.numeric(shift) ||
+      is.na(shift) || !is.finite(shift)) {
+    stop("argument shift must be a single finite number.")
+  }
+
+  linkfun <- function(mu) {
+    if(!is.numeric(mu) || anyNA(mu) || any(!is.finite(mu)) ||
+        any(mu <= shift)) {
+      stop("values must be finite and greater than shift.")
+    }
+    log(mu - shift)
+  }
   linkinv <- function(eta) exp(eta) + shift
   mu.eta <- function(eta) exp(eta)
-  valideta <- function(eta) TRUE
-  
+  valideta <- function(eta) all(is.finite(eta))
+  validmu <- function(mu) {
+    is.numeric(mu) && all(is.finite(mu)) && all(mu > shift)
+  }
+
+  shift_label <- if(shift == 0) {
+    ""
+  } else {
+    paste0(if(shift > 0) " + " else " - ", format(abs(shift)))
+  }
+
   structure(
     list(
       linkfun = linkfun,
       linkinv = linkinv,
       mu.eta = mu.eta,
+      mu.eta2 = mu.eta,
       valideta = valideta,
-      name = paste0("exp(x) +", shift)
+      validmu = validmu,
+      name = paste0("exp(x)", shift_label)
     ),
     class = "link-glm"
   )
@@ -1629,141 +1712,253 @@ Kumaraswamy <- KS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
   lfa <- make.link2(a.link)
   lfb <- make.link2(b.link)
 
+  prepare_parameters <- function(par, n = NULL) {
+    if(!is.list(par))
+      stop("par must be a list-like object containing a and b.")
+
+    a_value <- par$a
+    b_value <- par$b
+    missing_parameters <- c(
+      if(is.null(a_value)) "a",
+      if(is.null(b_value)) "b"
+    )
+    if(length(missing_parameters)) {
+      stop(
+        "missing distribution parameter(s): ",
+        paste(missing_parameters, collapse = ", "), "."
+      )
+    }
+    if(!is.numeric(a_value) || !is.numeric(b_value))
+      stop("parameters a and b must be numeric.")
+
+    parameter_lengths <- c(a = length(a_value), b = length(b_value))
+    if(any(parameter_lengths < 1L))
+      stop("parameters a and b must not be empty.")
+
+    if(is.null(n))
+      n <- max(parameter_lengths)
+    else
+      n <- max(c(n, parameter_lengths))
+
+    if(any(!parameter_lengths %in% c(1L, n)))
+      stop("parameters a and b must have length 1 or a common length.")
+
+    a <- rep_len(as.numeric(a_value), n)
+    b <- rep_len(as.numeric(b_value), n)
+    if(anyNA(a) || anyNA(b) || any(!is.finite(a)) || any(!is.finite(b)) ||
+        any(a <= 0) || any(b <= 0)) {
+      stop("parameters a and b must be finite and strictly positive.")
+    }
+
+    list(a = a, b = b, n = n)
+  }
+
+  recycle_argument <- function(x, n, argument) {
+    if(!is.numeric(x))
+      stop(argument, " must be numeric.")
+    if(length(x) == 1L && n > 1L)
+      x <- rep(x, n)
+    if(length(x) != n)
+      stop(argument, " must have length 1 or match the distribution parameters.")
+    as.numeric(x)
+  }
+
+  prepare_scores <- function(par, y) {
+    par <- prepare_parameters(par, n = length(y))
+    y <- recycle_argument(y, par$n, "y")
+    if(anyNA(y) || any(!is.finite(y)) || any(y <= 0) || any(y >= 1))
+      stop("y must contain finite values strictly between 0 and 1.")
+    list(par = par, y = y)
+  }
+
   fam <- list(
     "family" = "Kumaraswamy",
     "names" = c("a", "b"),
-    "links" = c("a" = a.link, "b" = b.link),
+    "links" = list("a" = a.link, "b" = b.link),
+
     "pdf" = function(par, y, log = FALSE, ...) {
-      d <- log(par$a) + log(par$b) + (par$a - 1) * log(y) + (par$b - 1) * log(1 - y^(par$a))
-      if(!log)
-        d <- exp(d)
-      return(d)
+      par <- prepare_parameters(par, n = length(y))
+      y <- recycle_argument(y, par$n, "y")
+      logd <- rep(-Inf, par$n)
+      logd[is.na(y)] <- NA_real_
+
+      inside <- !is.na(y) & is.finite(y) & y > 0 & y < 1
+      if(any(inside)) {
+        ly <- log(y[inside])
+        log_one_minus_ya <- log(-expm1(par$a[inside] * ly))
+        logd[inside] <- log(par$a[inside]) + log(par$b[inside]) +
+          (par$a[inside] - 1) * ly +
+          (par$b[inside] - 1) * log_one_minus_ya
+      }
+
+      at_zero <- !is.na(y) & y == 0
+      if(any(at_zero)) {
+        logd[at_zero & par$a < 1] <- Inf
+        logd[at_zero & par$a == 1] <- log(par$b[at_zero & par$a == 1])
+      }
+
+      at_one <- !is.na(y) & y == 1
+      if(any(at_one)) {
+        logd[at_one & par$b < 1] <- Inf
+        logd[at_one & par$b == 1] <- log(par$a[at_one & par$b == 1])
+      }
+
+      if(log) logd else exp(logd)
     },
+
     "score" = list(
       "a" = function(par, y, ...) {
-        ly <- log(y)
-        ya <- y^par$a
-        (1/par$a + ly - (par$b - 1) * (ya * ly/(1 - ya))) * lfa$mu.eta(lfa$linkfun(par$a))
+        z <- prepare_scores(par, y)
+        par <- z$par
+        ly <- log(z$y)
+        ya <- exp(par$a * ly)
+        one_minus_ya <- -expm1(par$a * ly)
+        score <- 1/par$a + ly -
+          (par$b - 1) * ya * ly/one_minus_ya
+        score * lfa$mu.eta(lfa$linkfun(par$a))
       },
       "b" = function(par, y, ...) {
-        (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
+        z <- prepare_scores(par, y)
+        par <- z$par
+        log_one_minus_ya <- log(-expm1(par$a * log(z$y)))
+        score <- 1/par$b + log_one_minus_ya
+        score * lfb$mu.eta(lfb$linkfun(par$b))
       }
     ),
+
     "hessian" = list(
       "a" = function(par, y, ...) {
-        ya <- y^par$a
-        ly <- log(y)
-        y1a <- 1 - ya
-        ly2 <- ly^2
-
-        (1/par$a^2 + (par$b - 1) * (ya * ly2/(y1a) + ya^2 * ly2 /(y1a)^2)) * lfa$mu.eta(lfa$linkfun(par$a))^2
+        z <- prepare_scores(par, y)
+        par <- z$par
+        ly <- log(z$y)
+        ya <- exp(par$a * ly)
+        one_minus_ya <- -expm1(par$a * ly)
+        hessian <- 1/par$a^2 +
+          (par$b - 1) * ya * ly^2/one_minus_ya^2
+        hessian * lfa$mu.eta(lfa$linkfun(par$a))^2
       },
       "b" = function(par, y, ...) {
+        z <- prepare_scores(par, y)
+        par <- z$par
         1/par$b^2 * lfb$mu.eta(lfb$linkfun(par$b))^2
       }
     ),
-    "cdf" = function(par, y) {
-      1 - (1 - y^par$a)^par$b
+
+    "cdf" = function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
+      par <- prepare_parameters(par, n = length(y))
+      y <- recycle_argument(y, par$n, "y")
+      p <- rep(NA_real_, par$n)
+
+      not_missing <- !is.na(y)
+      p[not_missing & y <= 0] <- if(lower.tail) 0 else 1
+      p[not_missing & y >= 1] <- if(lower.tail) 1 else 0
+
+      inside <- not_missing & y > 0 & y < 1
+      if(any(inside)) {
+        log_survival <- par$b[inside] *
+          log(-expm1(par$a[inside] * log(y[inside])))
+        p[inside] <- if(lower.tail) -expm1(log_survival) else exp(log_survival)
+      }
+
+      if(log.p)
+        p <- log(p)
+      p
     },
-    "quantile" = function(par, p) {
-      (1 - (1 - p)^par$b)^(1 / par$a)
+
+    "quantile" = function(par, p, lower.tail = TRUE, log.p = FALSE, ...) {
+      if(!is.numeric(p))
+        stop("p must be numeric.")
+
+      par <- prepare_parameters(par, n = length(p))
+      p <- recycle_argument(p, par$n, "p")
+      if(anyNA(p))
+        stop("p must not contain missing values.")
+
+      if(log.p) {
+        if(any(p > 0))
+          stop("log probabilities must not be greater than 0.")
+        p <- exp(p)
+      } else if(any(!is.finite(p))) {
+        stop("p must contain finite probabilities.")
+      }
+
+      if(!lower.tail)
+        p <- 1 - p
+      if(any(p < 0 | p > 1))
+        stop("p must be in [0, 1].")
+
+      inner <- -expm1(log1p(-p)/par$b)
+      inner^(1/par$a)
     },
-    "random" = function(n, par) {
-      par <- as.data.frame(par)
-      rn <- apply(par, 1, function(p2) {
-        p <- runif(n)
-        (1 - (1 - p)^p2["b"])^(1 / p2["a"])
-      })
-      if(!is.null(dim(rn)))
-        rn <- t(rn)
-      return(rn)
+
+    "random" = function(par, n) {
+      if(length(n) != 1L || !is.numeric(n) || is.na(n) ||
+          !is.finite(n) || n < 0 || n != floor(n) ||
+          n > .Machine$integer.max) {
+        stop("n must be a single non-negative integer.")
+      }
+      n <- as.integer(n)
+      if(n == 0L)
+        return(numeric(0L))
+
+      par <- prepare_parameters(par)
+      draws <- matrix(runif(par$n * n), nrow = par$n, ncol = n)
+      parameters <- list(a = par$a, b = par$b)
+      for(j in seq_len(n))
+        draws[, j] <- fam$quantile(parameters, draws[, j])
+
+      if(par$n == 1L)
+        return(as.vector(draws))
+      if(n == 1L)
+        return(draws[, 1L])
+
+      colnames(draws) <- paste0("r_", seq_len(n))
+      draws
     },
-    "mean" = function(par) {
-      par$b * gamma(1 + 1/par$a) * gamma(par$b) / gamma(1 + 1/par$a + par$b)
+
+    "mean" = function(par, ...) {
+      par <- prepare_parameters(par)
+      exp(log(par$b) + lbeta(1 + 1/par$a, par$b))
     },
-    "mode" = function(par) {
-      ((par$a - 1) / (par$a * par$b - 1))^(1/par$a)
+
+    "variance" = function(par, ...) {
+      par <- prepare_parameters(par)
+      mean <- exp(log(par$b) + lbeta(1 + 1/par$a, par$b))
+      second_moment <- exp(log(par$b) + lbeta(1 + 2/par$a, par$b))
+      pmax(second_moment - mean^2, 0)
     },
+
+    "mode" = function(par, ...) {
+      par <- prepare_parameters(par)
+      mode <- rep(NA_real_, par$n)
+      interior <- par$a > 1 & par$b > 1
+      mode[interior] <- (
+        (par$a[interior] - 1) /
+          (par$a[interior] * par$b[interior] - 1)
+      )^(1/par$a[interior])
+      mode
+    },
+
     "valid.response" = function(x) {
-      if(any(x < 0) | any(x > 1))
-        stop("the response should be in (0,1)!")
-      return(TRUE)
-    }
+      if(!is.numeric(x))
+        stop("the response must be numeric.")
+      if(!length(x) || anyNA(x) || any(!is.finite(x)) ||
+          any(x <= 0) || any(x >= 1)) {
+        stop("the response must contain finite values strictly between 0 and 1.")
+      }
+      TRUE
+    },
+
+    "type" = "continuous"
   )
 
   class(fam) <- "gamlss2.family"
-  return(fam)
+  fam
 }
 
-## The log-Kumaraswamy distribution.
+## Compatibility wrapper for the former internal duplicate.
 LKS <- function(a.link = shiftlog, b.link = shiftlog, ...) {
-  lfa <- make.link2(a.link)
-  lfb <- make.link2(b.link)
-
-  fam <- list(
-    "family" = "Kumaraswamy",
-    "names" = c("a", "b"),
-    "links" = c("a" = a.link, "b" = b.link),
-    "pdf" = function(par, y, log = FALSE, ...) {
-      d <- log(par$a) + log(par$b) + (par$a - 1) * log(y) + (par$b - 1) * log(1 - y^(par$a))
-      if(!log)
-        d <- exp(d)
-      return(d)
-    },
-    "score" = list(
-      "a" = function(par, y, ...) {
-        ly <- log(y)
-        ya <- y^par$a
-        (1/par$a + ly - (par$b - 1) * (ya * ly/(1 - ya))) * lfa$mu.eta(lfa$linkfun(par$a))
-      },
-      "b" = function(par, y, ...) {
-        (1/par$b + log(1 - y^par$a)) * lfb$mu.eta(lfb$linkfun(par$b))
-      }
-    ),
-    "hessian" = list(
-      "a" = function(par, y, ...) {
-        ya <- y^par$a
-        ly <- log(y)
-        y1a <- 1 - ya
-        ly2 <- ly^2
-
-        (1/par$a^2 + (par$b - 1) * (ya * ly2/(y1a) + ya^2 * ly2 /(y1a)^2)) * lfa$mu.eta(lfa$linkfun(par$a))^2
-      },
-      "b" = function(par, y, ...) {
-        1/par$b^2 * lfb$mu.eta(lfb$linkfun(par$b))^2
-      }
-    ),
-    "cdf" = function(par, y) {
-      1 - (1 - y^par$a)^par$b
-    },
-    "quantile" = function(par, p) {
-      (1 - (1 - p)^par$b)^(1 / par$a)
-    },
-    "random" = function(n, par) {
-      par <- as.data.frame(par)
-      rn <- apply(par, 1, function(p2) {
-        p <- runif(n)
-        (1 - (1 - p)^p2["b"])^(1 / p2["a"])
-      })
-      if(!is.null(dim(rn)))
-        rn <- t(rn)
-      return(rn)
-    },
-    "mean" = function(par) {
-      par$b * gamma(1 + 1/par$a) * gamma(par$b) / gamma(1 + 1/par$a + par$b)
-    },
-    "mode" = function(par) {
-      ((par$a - 1) / (par$a * par$b - 1))^(1/par$a)
-    },
-    "valid.response" = function(x) {
-      if(any(x < 0) | any(x > 1))
-        stop("the response should be in (0,1)!")
-      return(TRUE)
-    }
-  )
-
-  class(fam) <- "gamlss2.family"
-  return(fam)
+  Kumaraswamy(a.link = a.link, b.link = b.link, ...)
 }
 
 discretize <- function(family = NO) {

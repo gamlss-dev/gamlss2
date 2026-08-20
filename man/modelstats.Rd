@@ -30,7 +30,7 @@ Rsq(object, ...,
   \item{type}{Which definition of R-squared should be used?
     Possible values are \code{"Cox Snell"}, \code{"Cragg Uhler"},
     \code{"both"}, and \code{"simple"}. The option \code{"simple"}
-    computes an R-squared based on the median; in this case \code{newdata}
+    computes an R-squared based on the mean; in this case \code{newdata}
     may also be supplied.}
   \item{newdata}{For \code{type = "simple"}, the R-squared can also be evaluated on
     \code{newdata}.}

@@ -132,7 +132,7 @@ quantile.gamlss2 <- function(x,
   colnames(f) <- paste0(probs * 100, "%")
   if(plot) {
     if(is.null(variable)) {
-      fit_median <- family(x)$quantile(par, p)
+      fit_median <- family(x)$quantile(par, 0.5)
       o <- order(fit_median)
       ind <- seq_len(nrow(f)) / nrow(f) * 100
 

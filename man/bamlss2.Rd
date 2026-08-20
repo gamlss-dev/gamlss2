@@ -22,8 +22,7 @@ bamlss2(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, \dots)
   \item{burnin}{Integer, the burn-in period.}
   \item{thin}{Integer, the thinning parameter for saved samples.}
   \item{maxit}{Integer, the number of backfitting iterations used to compute
-    starting values before running MCMC. If \code{maxit = 0}, sampling starts
-    from default or user-supplied starting values.}
+    starting values before running MCMC.}
   \item{\dots}{Further arguments passed to \code{\link{gamlss2}} and/or
     \code{\link{gamlss2_control}}.}
 }

@@ -94,10 +94,10 @@ fk(x, k = 10L, nk = NULL, degree = 1L,
 data("SpirometryUS")
 
 ## subset for female
-d <- subset(SpirometryUS, gender == "female")
+d <- subset(SpirometryUS, gender == "male")
 
 ## Automatically select zero through four free interior knots
-m1 <- gamlss2(fev1 ~ fk(age, k = 4) | ., data = d, family = NO)
+m1 <- gamlss2(fev1 ~ fk(age, nk = 1) | ., data = d, family = NO)
 
 ## estimated effects
 plot(m1)

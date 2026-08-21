@@ -593,7 +593,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -738,13 +737,6 @@ Arguments passed to <code>gamlss2_control</code>.
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The object returned by the selected optimizer. By default, this is an object of class <code>“gamlss2”</code> produced by <code>RS</code>. Standard methods and extractor functions are available for this class.</p>
 </section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Rigby RA, Stasinopoulos DM (2005). “Generalized Additive Models for Location, Scale and Shape (with Discussion).” <em>Journal of the Royal Statistical Society, Series C (Applied Statistics)</em>, <b>54</b>, 507–554. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">doi:10.1111/j.1467-9876.2005.00510.x</a></p>
-<p>Rigby RA, Stasinopoulos DM, Heller GZ, De Bastiani F (2019). <em>Distributions for Modeling Location, Scale, and Shape: Using GAMLSS in R</em>, Chapman and Hall/CRC. <a href="https://doi.org/10.1201/9780429298547">doi:10.1201/9780429298547</a></p>
-<p>Stasinopoulos DM, Rigby RA (2007). “Generalized Additive Models for Location Scale and Shape (GAMLSS) in R.” <em>Journal of Statistical Software</em>, <b>23</b>(7), 1–46. <a href="https://doi.org/10.18637/jss.v023.i07">doi:10.18637/jss.v023.i07</a></p>
-<p>Stasinopoulos DM, Rigby RA, Heller GZ, Voudouris V, De Bastiani F (2017). <em>Flexible Regression and Smoothing: Using GAMLSS in R</em>, Chapman and Hall/CRC. <a href="https://doi.org/10.1201/b21973">doi:10.1201/b21973</a></p>
-</section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
 <p><code>RS</code>, <code>gamlss2_control</code>, <code>gamlss2.family</code>, <code>gamlss2_start</code></p>
@@ -811,7 +803,7 @@ edf     7.8749     3.4060        7.7046
 *--------
 n = 116 df =  20.99 res.df =  95.01
 Deviance = 899.5552 Null Dev. Red. = 16.94%
-AIC = 941.5263 elapsed =  0.76sec</code></pre>
+AIC = 941.5263 elapsed =  0.55sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot parameter-specific effects</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -932,7 +924,7 @@ edf     6.3823        6.2095
 *--------
 n = 1057 df =  14.59 res.df =  1042.41
 Deviance = 10150.8818 Null Dev. Red. = 12.62%
-AIC = 10180.0654 elapsed =  0.15sec</code></pre>
+AIC = 10180.0654 elapsed =  0.12sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## effect plots</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

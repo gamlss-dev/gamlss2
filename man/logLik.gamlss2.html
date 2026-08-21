@@ -670,16 +670,12 @@ An optional data frame in which to evaluate the log-likelihood. If omitted, the 
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> speed <span class="sc">|</span> <span class="dv">1</span>, <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 413.1569 eps = 0.113040     
-GAMLSS-RS iteration  2: Global Deviance = 413.1569 eps = 0.000000     
-[1] "gamlss2"
-[1] "gamlss2"</code></pre>
+GAMLSS-RS iteration  2: Global Deviance = 413.1569 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> speed <span class="sc">|</span> speed, <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 406.1491 eps = 0.128084     
-GAMLSS-RS iteration  2: Global Deviance = 406.1483 eps = 0.000001     
-[1] "gamlss2"
-[1] "gamlss2"</code></pre>
+GAMLSS-RS iteration  2: Global Deviance = 406.1483 eps = 0.000001     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fitted log-likelihood</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logLik</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

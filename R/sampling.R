@@ -1135,6 +1135,7 @@ bamlss2 <- function(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, .
   m[["optimizer"]] <- getFromNamespace(".mcmc", "gamlss2")
   model <- eval(m, parent.frame())
   model$df <- model$dic$pD
+  model$results <- results(model, data = model.frame(model))
   model$call <- call
   return(model)
 }

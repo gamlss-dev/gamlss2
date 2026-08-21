@@ -620,7 +620,6 @@ window.Quarto = {
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -677,31 +676,6 @@ window.Quarto = {
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The constructor <code>n()</code> returns an object of classes <code>“special”</code> and <code>“n”</code> containing the model formula, input data, neural network control arguments, and optional scaling information required for fitting.</p>
-<p>After estimation with <code>gamlss2</code>, the corresponding fitted special term contains the following main components:</p>
-<ul>
-<li>
-<p><code>model</code>: the underlying fitted <code>nnet</code> object.</p>
-</li>
-<li>
-<p><code>fitted.values</code>: centered fitted contribution of the neural network term.</p>
-</li>
-<li>
-<p><code>edf</code>: effective degrees of freedom, approximated by the number of fitted network coefficients.</p>
-</li>
-<li>
-<p><code>shift</code>: the mean value subtracted from the fitted neural network contribution.</p>
-</li>
-<li>
-<p><code>scalex</code>: ranges used to scale numeric predictors when <code>scale = TRUE</code>.</p>
-</li>
-<li>
-<p><code>transfer</code>: fitted network weights used to warm-start the next backfitting iteration.</p>
-</li>
-</ul>
-</section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Venables, W. N. and Ripley, B. D. (2002). <em>Modern Applied Statistics with S</em>, Fourth Edition. Springer, New York.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

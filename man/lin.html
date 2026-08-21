@@ -620,7 +620,6 @@ window.Quarto = {
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -690,20 +689,15 @@ ridge(...)
 <p><strong>Unpenalized linear blocks.</strong> Function <code>lin()</code> fixes the identity-penalty multiplier at a negligible value. It therefore behaves like weighted linear regression for the current working response, while entering all columns as one model term rather than as separate ordinary linear terms. This can be useful for keeping a block of columns together and for using the same model-matrix and prediction machinery as penalized terms. Ordinary linear effects can still be specified directly in the surrounding <code>gamlss2</code> formula.</p>
 <p><strong>Ridge-penalized blocks.</strong> For <code>ridge()</code>, coefficients are estimated from the current weighted working response using an identity penalty. Ignoring the small numerical stabilization used by the fitting algorithm, the update minimizes</p>
 <p style="text-align: center;">
-</p><p><code class="reqn"> (z - X)^ W (z - X) + ,^, </code></p>
+</p><p><span class="math inline">\((z - X\beta)^\mathsf{T} W (z - X\beta) + \lambda\,\beta^\mathsf{T}\beta,\)</span></p>
 <p>where <span class="math inline">\(z\)</span> and <span class="math inline">\(W\)</span> are the current working response and weights. A large <span class="math inline">\(\lambda\)</span> shrinks the whole coefficient block toward zero.</p>
-<p>Before fitting, every nonconstant column of <span class="math inline">\(X\)</span> is standardized using its training-data mean and standard deviation. The stored transformation is reused for prediction. Consequently, the identity penalty is applied on a comparable scale across numeric predictors, indicator columns, and interaction columns. The reported ridge coefficients are coefficients for this standardized design matrix; fitted effects and predictions are returned on the additive-predictor scale.</p>
+<p>Before fitting, every nonconstant column of <span class="math inline">\(X\)</span> is standardized using its training-data mean and standard deviation. The stored transformation is reused for prediction. Consequently, the identity penalty is applied on a comparable scale across numeric predictors, indicator columns, and interaction columns.</p>
 <p>The smoothing parameter <span class="math inline">\(\lambda\)</span> is selected during backfitting using the smooth-term criterion supplied to <code>gamlss2()</code>. The default is corrected AIC (<code>criterion = “aicc”</code>); supported alternatives include <code>“gcv”</code>, <code>“aic”</code>, <code>“gaic”</code>, and <code>“bic”</code>. For example, use <code>gamlss2(…, criterion = “bic”)</code> to select the ridge penalty by BIC. The previous estimate is used to warm-start subsequent backfitting updates.</p>
-<p>The effective degrees of freedom are computed from the penalized weighted hat matrix. They approach the number of design columns as the penalty tends to zero and approach zero under sufficiently strong shrinkage.</p>
-<p>Both constructors create a single special model term. Its fitted components, including <code>coefficients</code>, <code>fitted.values</code>, <code>edf</code>, <code>lambdas</code>, and <code>vcov</code>, can be inspected with <code>specials</code>. For a numeric two-variable interaction, the stored effect can be displayed as an image/contour effect by <code>plot()</code>.</p>
+<p>The effective degrees of freedom are computed from the penalized weighted hat matrix.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p><code>lin()</code> and <code>ridge()</code> return a smooth specification object of class <code>“lin.smooth.spec”</code>, which is completed to an object of class <code>“lin.effect”</code> during model setup. The object contains the defining formula, variable names, model-term label, design and penalty information, and, when requested, the scaling transformation needed for prediction.</p>
-</section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Hoerl AE, Kennard RW (1970). “Ridge Regression: Biased Estimation for Nonorthogonal Problems.” <em>Technometrics</em>, <b>12</b>(1), 55–67. <a href="https://doi.org/10.1080/00401706.1970.10488634">doi:10.1080/00401706.1970.10488634</a></p>
+<p><code>lin()</code> and <code>ridge()</code> return a smooth specification object of class <code>“lin.smooth.spec”</code>, which is completed to an object of class <code>“lin.effect”</code> during model setup.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -725,26 +719,34 @@ ridge(...)
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm</span>(nobs, <span class="at">sd =</span> <span class="fl">0.8</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Fit two predictors as one effectively unpenalized linear block.</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>m_lin <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">lin</span>(x1, x2), <span class="at">data =</span> d, <span class="at">family =</span> NO,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Ridge-penalize main effects and their interaction as one block.</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>m_ridge <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">ridge</span>(<span class="sc">~</span> x1 <span class="sc">*</span> x2), <span class="at">data =</span> d, <span class="at">family =</span> NO,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## A pure interaction is supported. The main effects here remain ordinary</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## linear terms and only the interaction coefficient is ridge-penalized.</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>m_interaction <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">ridge</span>(<span class="sc">~</span> x1<span class="sc">:</span>x2),</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> d, <span class="at">family =</span> NO, <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## Inspect the selected penalty and effective degrees of freedom.</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m_ridge, <span class="at">model =</span> <span class="st">"mu"</span>,</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">elements =</span> <span class="fu">c</span>(<span class="st">"coefficients"</span>, <span class="st">"edf"</span>, <span class="st">"lambdas"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>m_lin <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">lin</span>(x1, x2), <span class="at">data =</span> d, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 349.0786 eps = 0.426493     
+GAMLSS-RS iteration  2: Global Deviance = 349.0786 eps = 0.000000     </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Ridge-penalize main effects and their interaction as one block.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>m_ridge <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">ridge</span>(<span class="sc">~</span> x1 <span class="sc">*</span> x2), <span class="at">data =</span> d, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 334.7552 eps = 0.450025     
+GAMLSS-RS iteration  2: Global Deviance = 334.7552 eps = 0.000000     </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## A pure interaction is supported. The main effects here remain ordinary</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## linear terms and only the interaction coefficient is ridge-penalized.</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>m_interaction <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">ridge</span>(<span class="sc">~</span> x1<span class="sc">:</span>x2),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> d, <span class="at">family =</span> NO</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 334.8143 eps = 0.449928     
+GAMLSS-RS iteration  2: Global Deviance = 334.8142 eps = 0.000000     </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Inspect the selected penalty and effective degrees of freedom.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m_ridge, <span class="at">model =</span> <span class="st">"mu"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">elements =</span> <span class="fu">c</span>(<span class="st">"coefficients"</span>, <span class="st">"edf"</span>, <span class="st">"lambdas"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$coefficients
-[1]  1.379550 -1.109882  0.236843
+       x1        x2     x1:x2 
+ 1.379550 -1.109882  0.236843 
 
 $edf
 [1] 2.990017
@@ -755,15 +757,18 @@ $lambdas
 $response_name
 [1] "y"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Factor coding follows model.matrix() rules.</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>group <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rep</span>(letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">length.out =</span> nobs))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>m_group <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">ridge</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> group), <span class="at">data =</span> d, <span class="at">family =</span> NO,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m_group, <span class="at">model =</span> <span class="st">"mu"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">elements =</span> <span class="fu">c</span>(<span class="st">"coefficients"</span>, <span class="st">"edf"</span>, <span class="st">"lambdas"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Factor coding follows model.matrix() rules.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>group <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rep</span>(letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">length.out =</span> nobs))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>m_group <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">ridge</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> group), <span class="at">data =</span> d, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 608.6706 eps = 0.000005     </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m_group, <span class="at">model =</span> <span class="st">"mu"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">elements =</span> <span class="fu">c</span>(<span class="st">"coefficients"</span>, <span class="st">"edf"</span>, <span class="st">"lambdas"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$coefficients
-[1] -4.714332e-06  1.542178e-07  4.560114e-06
+       groupa        groupb        groupc 
+-4.714332e-06  1.542178e-07  4.560114e-06 
 
 $edf
 [1] 0.0001649583

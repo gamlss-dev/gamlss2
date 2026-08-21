@@ -83,21 +83,7 @@ fk(x, k = 10L, nk = NULL, degree = 1L,
 
 \value{
   The constructor returns an object of classes \code{"special"} and
-  \code{"fk"}. The fitted special term contains, among other components:
-  \itemize{
-    \item \code{coefficients}: centered B-spline coefficients.
-    \item \code{fitted.values}: centered fitted contribution.
-    \item \code{interior.knots}: selected or supplied interior locations.
-    \item \code{knots}: complete augmented B-spline knot sequence.
-    \item \code{basis.edf}, \code{knot.edf}, and \code{edf}: conditional
-      basis, knot-location, and total effective degrees of freedom.
-    \item \code{search}: candidate knot-count results when automatic
-      selection was performed in the retained update.
-    \item \code{search.errors}: diagnostics for candidates that failed or
-      did not converge.
-    \item \code{convergence}, \code{message}, and \code{counts}: optimizer
-      diagnostics.
-  }
+  \code{"fk"}.
 }
 
 \seealso{

@@ -77,10 +77,9 @@ ridge(...)
   For \code{ridge()}, coefficients are estimated from the current weighted
   working response using an identity penalty. Ignoring the small numerical
   stabilization used by the fitting algorithm, the update minimizes
-  \deqn{
-    (z - X\beta)^\mathsf{T} W (z - X\beta) +
-    \lambda\,\beta^\mathsf{T}\beta,
-  }
+
+  \deqn{(z - X\beta)^\mathsf{T} W (z - X\beta) + \lambda\,\beta^\mathsf{T}\beta,}
+
   where \eqn{z} and \eqn{W} are the current working response and weights.
   A large \eqn{\lambda} shrinks the whole coefficient block toward zero.
 
@@ -88,9 +87,7 @@ ridge(...)
   its training-data mean and standard deviation. The stored transformation is
   reused for prediction. Consequently, the identity penalty is applied on a
   comparable scale across numeric predictors, indicator columns, and
-  interaction columns. The reported ridge coefficients are coefficients for
-  this standardized design matrix; fitted effects and predictions are returned
-  on the additive-predictor scale.
+  interaction columns.
 
   The smoothing parameter \eqn{\lambda} is selected during backfitting using
   the smooth-term criterion supplied to \code{gamlss2()}. The default is
@@ -101,29 +98,13 @@ ridge(...)
   backfitting updates.
 
   The effective degrees of freedom are computed from the penalized weighted
-  hat matrix. They approach the number of design columns as the penalty tends
-  to zero and approach zero under sufficiently strong shrinkage.
-
-  Both constructors create a single special model term. Its fitted components,
-  including \code{coefficients}, \code{fitted.values}, \code{edf},
-  \code{lambdas}, and \code{vcov}, can be inspected with
-  \code{\link{specials}}. For a numeric two-variable interaction, the stored
-  effect can be displayed as an image/contour effect by \code{plot()}.
+  hat matrix.
 }
 
 \value{
   \code{lin()} and \code{ridge()} return a smooth specification object of
   class \code{"lin.smooth.spec"}, which is completed to an object of class
-  \code{"lin.effect"} during model setup. The object contains the defining
-  formula, variable names, model-term label, design and penalty information,
-  and, when requested, the scaling transformation needed for prediction.
-}
-
-\references{
-  Hoerl AE, Kennard RW (1970).
-  \dQuote{Ridge Regression: Biased Estimation for Nonorthogonal Problems.}
-  \emph{Technometrics}, \bold{12}(1), 55--67.
-  \doi{10.1080/00401706.1970.10488634}
+  \code{"lin.effect"} during model setup.
 }
 
 \seealso{
@@ -143,18 +124,16 @@ d$y <- 1 + 1.5 * d$x1 - d$x2 + 0.25 * d$x1 * d$x2 +
   rnorm(nobs, sd = 0.8)
 
 ## Fit two predictors as one effectively unpenalized linear block.
-m_lin <- gamlss2(y ~ lin(x1, x2), data = d, family = NO,
-  trace = FALSE)
+m_lin <- gamlss2(y ~ lin(x1, x2), data = d, family = NO)
 
 ## Ridge-penalize main effects and their interaction as one block.
-m_ridge <- gamlss2(y ~ ridge(~ x1 * x2), data = d, family = NO,
-  trace = FALSE)
+m_ridge <- gamlss2(y ~ ridge(~ x1 * x2), data = d, family = NO)
 
 ## A pure interaction is supported. The main effects here remain ordinary
 ## linear terms and only the interaction coefficient is ridge-penalized.
 m_interaction <- gamlss2(
   y ~ x1 + x2 + ridge(~ x1:x2),
-  data = d, family = NO, trace = FALSE
+  data = d, family = NO
 )
 
 ## Inspect the selected penalty and effective degrees of freedom.
@@ -163,8 +142,7 @@ specials(m_ridge, model = "mu",
 
 ## Factor coding follows model.matrix() rules.
 d$group <- factor(rep(letters[1:3], length.out = nobs))
-m_group <- gamlss2(y ~ ridge(~ 0 + group), data = d, family = NO,
-  trace = FALSE)
+m_group <- gamlss2(y ~ ridge(~ 0 + group), data = d, family = NO)
 specials(m_group, model = "mu",
   elements = c("coefficients", "edf", "lambdas"))
 }

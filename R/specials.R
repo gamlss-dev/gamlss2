@@ -542,7 +542,8 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     "lambdas" = rval$lambdas,
     "coefficients" = rval$coefficients,
     "criterion.evaluations" = criterion.evaluations,
-    "demmler.reinsch" = !is.null(dr)
+    "demmler.reinsch" = !is.null(dr),
+    "names" = colnames(x$X)
   )
 
   return(rval)

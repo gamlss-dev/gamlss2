@@ -704,6 +704,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     if(length(dropj))
       sfit[dropj] <- NULL
   }
+  if(length(sfit)) {
+    for(j in names(sfit)) {
+      for(i in names(sfit[[j]])) {
+        if(!is.null(sfit[[j]][[i]]$transfer$names)) {
+          if(length(sfit[[j]][[i]]$transfer$names) == length(sfit[[j]][[i]]$coefficients)) {
+            names(sfit[[j]][[i]]$coefficients) <- sfit[[j]][[i]]$transfer$names
+          }
+        }
+      }
+    }
+  }
 
   if(ridge) {
     attr(fit, "edf") <- unlist(sapply(fit, function(x) x$edf))

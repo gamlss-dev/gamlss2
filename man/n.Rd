@@ -68,28 +68,6 @@ n(formula, ...)
   \code{"special"} and \code{"n"} containing the model formula,
   input data, neural network control arguments, and optional scaling
   information required for fitting.
-
-  After estimation with \code{gamlss2}, the corresponding fitted special
-  term contains the following main components:
-  \itemize{
-    \item \code{model}: the underlying fitted \code{nnet} object.
-    \item \code{fitted.values}: centered fitted contribution of the
-          neural network term.
-    \item \code{edf}: effective degrees of freedom, approximated by the
-          number of fitted network coefficients.
-    \item \code{shift}: the mean value subtracted from the fitted neural
-          network contribution.
-    \item \code{scalex}: ranges used to scale numeric predictors when
-          \code{scale = TRUE}.
-    \item \code{transfer}: fitted network weights used to warm-start the
-          next backfitting iteration.
-  }
-}
-
-\references{
-  Venables, W. N. and Ripley, B. D. (2002).
-  \emph{Modern Applied Statistics with S}, Fourth Edition.
-  Springer, New York.
 }
 
 \seealso{

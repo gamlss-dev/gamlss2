@@ -112,41 +112,64 @@ ridge(...)
   \code{\link[stats]{model.matrix}}, \code{\link[mgcv]{smooth.construct}}
 }
 
-\examples{
-## Simulated data with main effects and a weak interaction.
-set.seed(1328)
-nobs <- 150
-d <- data.frame(
-  x1 = rnorm(nobs),
-  x2 = rnorm(nobs)
-)
-d$y <- 1 + 1.5 * d$x1 - d$x2 + 0.25 * d$x1 * d$x2 +
-  rnorm(nobs, sd = 0.8)
+\examples{\dontrun{
+## longley data example with
+## strongly correlated predictors
+data("longley")
 
-## Fit two predictors as one effectively unpenalized linear block.
-m_lin <- gamlss2(y ~ lin(x1, x2), data = d, family = NO)
-
-## Ridge-penalize main effects and their interaction as one block.
-m_ridge <- gamlss2(y ~ ridge(~ x1 * x2), data = d, family = NO)
-
-## A pure interaction is supported. The main effects here remain ordinary
-## linear terms and only the interaction coefficient is ridge-penalized.
-m_interaction <- gamlss2(
-  y ~ x1 + x2 + ridge(~ x1:x2),
-  data = d, family = NO
+## fit all predictors linearly
+m1 <- gamlss2(
+  Employed ~ lin(~ GNP.deflator + GNP + Unemployed +
+    Armed.Forces + Population + Year),
+  data = longley,
+  family = NO
 )
 
-## Inspect the selected penalty and effective degrees of freedom.
-specials(m_ridge, model = "mu",
-  elements = c("coefficients", "edf", "lambdas"))
+## fit the same model using a ridge-penalized block,
+## ridge() standardizes the model-matrix columns before applying the
+## common ridge penalty.
+m2 <- gamlss2(
+  Employed ~ ridge(~ GNP.deflator + GNP + Unemployed +
+    Armed.Forces + Population + Year),
+  data = longley,
+  family = NO
+)
 
-## Factor coding follows model.matrix() rules.
-d$group <- factor(rep(letters[1:3], length.out = nobs))
-m_group <- gamlss2(y ~ ridge(~ 0 + group), data = d, family = NO)
-specials(m_group, model = "mu",
-  elements = c("coefficients", "edf", "lambdas"))
-}
+## Compare model summaries.
+summary(m1)
+summary(m2)
+
+## extract coefficients
+cm <- cbind(
+  "linear" = specials(m1, model = "mu", elements = "coefficients"),
+  "ridge" = specials(m2, model = "mu", elements = "coefficients")
+)
+print(cm)
+
+## ridge terms combined with ordinary linear effects,
+## Year is left unpenalized, while the remaining correlated
+## economic variables are shrunk jointly
+m3 <- gamlss2(
+  Employed ~ Year +
+    ridge(~ GNP.deflator + GNP + Unemployed +
+      Armed.Forces + Population),
+  data = longley,
+  family = NO
+)
+
+summary(m3)
+
+## interactions
+m4 <- gamlss2(
+  Employed ~ ridge(~ GNP + Unemployed + GNP:Unemployed),
+  data = longley,
+  family = NO
+)
+
+specials(m4, model = "mu", elements = "coefficients")
+}}
 
 \keyword{models}
 \keyword{regression}
 \keyword{smooth}
+

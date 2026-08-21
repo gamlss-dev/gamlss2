@@ -340,7 +340,11 @@ GAMLSS-RS iteration 11: Global Deviance = 64839.4335 eps = 0.000014
 GAMLSS-RS iteration 12: Global Deviance = 64838.6091 eps = 0.000012     
 GAMLSS-RS iteration 13: Global Deviance = 64837.8623 eps = 0.000011     
 GAMLSS-RS iteration 14: Global Deviance = 64837.1844 eps = 0.000010     
-GAMLSS-RS iteration 15: Global Deviance = 64836.5691 eps = 0.000009     </code></pre>
+GAMLSS-RS iteration 15: Global Deviance = 64836.5691 eps = 0.000009     
+[1] "gamlss2"
+[1] "gamlss2"
+[1] "gamlss2"
+[1] "gamlss2"</code></pre>
 </div>
 </div>
 <p>This model converges in 15 iterations and requires only about 7.5 seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
@@ -363,7 +367,11 @@ GAMLSS-RS iteration 11: Global Deviance = 64575.6818 eps = 0.000017
 GAMLSS-RS iteration 12: Global Deviance = 64574.6935 eps = 0.000015     
 GAMLSS-RS iteration 13: Global Deviance = 64573.8424 eps = 0.000013     
 GAMLSS-RS iteration 14: Global Deviance = 64573.1059 eps = 0.000011     
-GAMLSS-RS iteration 15: Global Deviance = 64572.4692 eps = 0.000009     </code></pre>
+GAMLSS-RS iteration 15: Global Deviance = 64572.4692 eps = 0.000009     
+[1] "gamlss2"
+[1] "gamlss2"
+[1] "gamlss2"
+[1] "gamlss2"</code></pre>
 </div>
 </div>
 <p>This model converges in 14 iterations in about 26 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>

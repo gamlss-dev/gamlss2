@@ -329,7 +329,6 @@ results_linear <- function(x, parameter = NULL, data, ...)
     k <- match(parameter[j], x$family$names)
     V <- x$fitted.linear[[k]]$vcov
     cj <- x$fitted.linear[[k]]$coefficients
-print(class(x))
     if(is.null(V) || is.null(cj))
       next
 

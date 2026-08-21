@@ -497,17 +497,19 @@ summary.bamlss2 <- function(object, thres = 0.01, ...)
   sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "dic", "iterations", "elapsed")]
   sg$coefficients <- ctl
   if(!is.null(object$fitted.specials)) {
-    sg$specials <- sg$alpha <- list()
+    sg$specials <- alpha <- list()
     for(i in names(object$fitted.specials)) {
       for(j in names(object$fitted.specials[[i]])) {
         sg$specials[[i]] <- rbind(sg$specials[[i]], object$fitted.specials[[i]][[j]]$edf)
-        sg$alpha[[i]] <- rbind(sg$alpha[[i]], object$fitted.specials[[i]][[j]]$alpha)
+        alpha[[i]] <- rbind(alpha[[i]], object$fitted.specials[[i]][[j]]$alpha)
       }
       rownames(sg$specials[[i]]) <- names(object$fitted.specials[[i]])
       colnames(sg$specials[[i]]) <- "edf"
 
-      rownames(sg$alpha[[i]]) <- names(object$fitted.specials[[i]])
-      colnames(sg$alpha[[i]]) <- "alpha"
+      rownames(alpha[[i]]) <- names(object$fitted.specials[[i]])
+      colnames(alpha[[i]]) <- "alpha"
+
+      sg$specials[[i]] <- cbind(sg$specials[[i]], alpha[[i]])
     }
   }
   sg$elapsed <- object$elapsed
@@ -633,6 +635,31 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
     ci <- ci[unique(grep2(parm, rownames(ci), value = TRUE, fixed = TRUE)), ]
   }
   return(ci)
+}
+
+confint.bamlss2 <- function(object, parm, level = 0.95, ...)
+{
+  nc <- names(coef(object, full = FALSE, drop = TRUE))
+  nc <- nc[!grepl(".p.alpha", nc, fixed = TRUE)]
+  if(!length(nc))
+    stop("no coefficients!")
+  samps <- object$samples[, nc, drop = FALSE]
+  a2 <- (1 - level) / 2
+  ci <- apply(samps, 2, function(x) {
+    quantile(x, probs = c(a2, 1 - a2))
+  })
+  t(ci)
+}
+
+coef.bamlss2 <- function(object, ..., FUN = mean) {
+  co <- coef.gamlss2(object, ...)
+  nc <- names(co)
+  nc <- nc[!grepl(".p.alpha", nc, fixed = TRUE)]
+  if(!length(nc))
+    stop("no coefficients!")
+  samps <- object$samples[, nc, drop = FALSE]
+  res <- apply(samps, 2, FUN = FUN)
+  return(res)
 }
 
 ## R2.

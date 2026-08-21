@@ -76,25 +76,6 @@ gamlss2(formula, \dots)
   extractor functions are available for this class.
 }
 
-\references{
-  Rigby RA, Stasinopoulos DM (2005). \dQuote{Generalized Additive Models for Location,
-  Scale and Shape (with Discussion).} \emph{Journal of the Royal Statistical Society,
-  Series C (Applied Statistics)}, \bold{54}, 507--554.
-  \doi{10.1111/j.1467-9876.2005.00510.x}
-
-  Rigby RA, Stasinopoulos DM, Heller GZ, De Bastiani F (2019).
-  \emph{Distributions for Modeling Location, Scale, and Shape: Using GAMLSS in R},
-  Chapman and Hall/CRC. \doi{10.1201/9780429298547}
-
-  Stasinopoulos DM, Rigby RA (2007). \dQuote{Generalized Additive Models for
-  Location Scale and Shape (GAMLSS) in R.} \emph{Journal of Statistical Software},
-  \bold{23}(7), 1--46. \doi{10.18637/jss.v023.i07}
-
-  Stasinopoulos DM, Rigby RA, Heller GZ, Voudouris V, De Bastiani F (2017).
-  \emph{Flexible Regression and Smoothing: Using GAMLSS in R},
-  Chapman and Hall/CRC. \doi{10.1201/b21973}
-}
-
 \seealso{
   \code{\link{RS}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}},
   \code{\link{gamlss2_start}}

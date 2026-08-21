@@ -481,7 +481,7 @@ family.gamlss2 <- function(object, ...) object$family
 ## A simple printing method.
 print.gamlss2 <- function(x, ...)
 {
-  x$call[[1]] <- as.name("gamlss2")
+  x$call[[1]] <- if(inherits(x, "bamlss2")) as.name("bamlss2") else as.name("gamlss2")
   cat("Call:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n", sep = "")
   cat("---\n")
   print(x$family, full = FALSE)

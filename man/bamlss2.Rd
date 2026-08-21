@@ -53,8 +53,8 @@ bamlss2(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, \dots)
   \code{\link{gamlss2}}, \code{\link{mcmc}}, \code{\link{BS}}
 }
 
-\examples{
-\dontrun{## air quality data
+\examples{\dontrun{
+## air quality data
 air <- subset(airquality, !is.na(Ozone))
 
 ## set the seed

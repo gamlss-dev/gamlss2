@@ -209,7 +209,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             "fitted.values" = rep(0.0, n),
             "edf" = 0.0,
             "coefficients" = setNames(rep(0.0, ncol(specials[[i]]$X)),
-              paste0(j, ".s.", i, ".", seq_along(ncol(specials[[i]]$X)))),
+              paste0(j, ".s.", i, ".", seq_len(ncol(specials[[i]]$X)))),
             "tau" = setNames(rep(0.001, length(specials[[i]]$S)),
               paste0(j, ".s.", i, ".tau", seq_along(specials[[i]]$S)))
           )
@@ -218,6 +218,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           if(!is.null(cstart)) {
             sj <- grep(paste0(j, ".s.", i), names(cstart), fixed = TRUE, value = TRUE)
             sjb <- sj[!grepl(".lambda", sj, fixed = TRUE)]
+            sjb <- sjb[!grepl(".tau", sjb, fixed = TRUE)]
             if(length(sjb)) {
               sfit[[j]][[i]]$fitted.values <- drop(specials[[i]]$X %*% cstart[sjb])
               sfit[[j]][[i]]$coefficients <- cstart[sjb]
@@ -456,14 +457,19 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             eta = eta, fitted = sfit[[j]][[k]], parameter = j,
             weights = weights, control = control)
 
-          ## Set new state.
+          ## The smoothing variances are updated conditionally on the current
+          ## coefficients before the Metropolis step. Keep these Gibbs/slice
+          ## updates regardless of whether the coefficient proposal is
+          ## accepted.
+          sfit[[j]][[k]]$tau <- prop$tau
+          sfit[[j]][[k]]$edf <- prop$edf
+          sfit[[j]][[k]]$alpha <- prop$alpha
+
+          ## Set new coefficient state.
           if(runif(1L) <= prop$alpha) {
             eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values + prop$fitted.values
             sfit[[j]][[k]]$fitted.values <- prop$fitted.values
             sfit[[j]][[k]]$coefficients <- prop$coefficients
-            sfit[[j]][[k]]$tau <- prop$tau
-            sfit[[j]][[k]]$edf <- prop$edf
-            sfit[[j]][[k]]$alpha <- prop$alpha
           }
 
           ## Save.
@@ -487,7 +493,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     ## Save global logLik / deviance once per saved iteration.
     if(do_save) {
       ll_iter <- family$log_likelihood(par = family$map2par(eta), y = y)
-      track$log_likelihood[isave] <- ll_iter
+      track$logLik[isave] <- ll_iter
       track$deviance[isave] <- -2 * ll_iter
       isave <- isave + 1L
     }
@@ -516,7 +522,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         colnames(samples[[j]]$s[[k]]) <- c(
           paste0(j, ".s.", k, ".", 1:nc),
-          paste0(j, ".s.", k, ".lambdas", 1:length(specials[[k]]$S)),
+          paste0(j, ".s.", k, ".tau", 1:length(specials[[k]]$S)),
           paste0(j, ".s.", k, ".edf"),
           paste0(j, ".s.", k, ".alpha")
         )
@@ -526,8 +532,12 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         })
         kfit <- apply(kfit, 1, mean)
         sfit[[j]][[k]]$fitted.values <- drop(kfit)
-        lj <- grep(".lambdas", colnames(samples[[j]]$s[[k]]))
-        sfit[[j]][[k]]$lambdas <- apply(samples[[j]]$s[[k]][, lj, drop = FALSE], 2, mean)
+        lj <- grep(".tau", colnames(samples[[j]]$s[[k]]), fixed = TRUE)
+        tau_samples <- samples[[j]]$s[[k]][, lj, drop = FALSE]
+        sfit[[j]][[k]]$tau <- apply(tau_samples, 2, mean)
+        sfit[[j]][[k]]$lambdas <- apply(1 / tau_samples, 2, mean)
+        names(sfit[[j]][[k]]$lambdas) <- sub(
+          ".tau", ".lambda", names(sfit[[j]][[k]]$lambdas), fixed = TRUE)
         lj <- grep(".edf", colnames(samples[[j]]$s[[k]]))
         sfit[[j]][[k]]$edf <- mean(samples[[j]]$s[[k]][, lj])
         lj <- grep(".alpha", colnames(samples[[j]]$s[[k]]))
@@ -870,9 +880,6 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   b0 <- fitted$coefficients
   tau <- fitted$tau
 
-  ## Log-prior.
-  p1 <- x$prior(c(b0, tau))
-
   ## New shrinkage variance(s).
   if(!isTRUE(x$fixed)) {
     if(length(tau) > 1L) {
@@ -888,13 +895,18 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
       }
       tau <- theta[tau_idx]
     } else {
-      a <- x$rank / 2 + 0.001
-      b <- 0.5 * crossprod(b0, x$S[[1]]) %*% b0 + 0.001
+      a <- x$rank / 2 + 0.0001
+      b <- 0.5 * crossprod(b0, x$S[[1]]) %*% b0 + 0.0001
       nt <- names(tau)
       tau <- 1 / rgamma(1, a, b)
       names(tau) <- nt
     }
   }
+
+  ## The variance update is a separate Gibbs/slice step. The coefficient
+  ## Metropolis ratio is conditional on this updated variance, so both prior
+  ## densities must be evaluated at the same value of tau.
+  p1 <- x$prior(c(b0, tau))
 
   ## Working response and weights.
   ew <- .update(
@@ -1122,6 +1134,7 @@ bamlss2 <- function(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, .
   m[["maxit"]] <- maxit
   m[["optimizer"]] <- getFromNamespace(".mcmc", "gamlss2")
   model <- eval(m, parent.frame())
+  model$df <- model$dic$pD
   model$call <- call
   return(model)
 }
@@ -1215,7 +1228,7 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1)
 
   ## Update derived summaries (these rely on terms being present).
   object$results <- results(object)
-  object$df <- get_df(object)
+  object$df <- object$dic$pD
   object$elapsed <- elapsed
   object$call <- match.call()
 

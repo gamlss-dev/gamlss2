@@ -941,6 +941,12 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
   links <- paste(names(x$links), x$links, sep = " = ")
   links <- paste(links, collapse = ", ")
   if(links != "") {
+    if(!is.character(links)) {
+      if(inherits(links, c("link-gamlss2", "link-glm")))
+        links <- links$name
+      else
+        links <- sapply(links, function(x) x$name)
+    }
     cat(if(length(x$links) > 1) "Link functions:" else "Link function:", links, sep = " ")
     cat("\n")
   }

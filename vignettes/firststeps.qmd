@@ -96,7 +96,13 @@ f2 <- Tmax ~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
 b2 <- gamlss2(f2, family = SEP, data = MUC)
 ```
 
-This model converges in 15 iterations and requires only about 7.5 seconds of computation time, 
+This model converges in 15 iterations and requires only about
+
+```{r}
+round(b2$elapsed)
+```
+
+seconds of computation time, 
 yielding a similar deviance (small differences arise due to differences in smoothing
 parameter optimization). In many applications, it is desirable to use the same predictor
 structure for all distribution parameters. In `gamlss`, this requires specifying
@@ -109,7 +115,13 @@ f3 <- Tmax ~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
 b3 <- gamlss2(f3, family = SEP, data = MUC)
 ```
 
-This model converges in 14 iterations in about 26 seconds. After estimation, results can be
+This model converges in 15 iterations in about
+
+```{r}
+round(b3$elapsed)
+```
+
+seconds. After estimation, results can be
 inspected using the `summary()` method for both packages. Using `plot()` in
 `gamlss` produces standard residual diagnostic plots, whereas in `gamlss2`
 

@@ -940,9 +940,11 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
   cat("Family:", x$family, if(!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL,  "\n")
   if(!is.character(x$links)) {
     if(inherits(x$links, c("link-gamlss2", "link-glm")))
-      links <- links$name
+      links <- x$links$name
     else
-      links <- sapply(links, function(x) x$name)
+      links <- sapply(x$links, function(x) x$name)
+  } else {
+    links <- x$links
   }
   links <- paste(links, collapse = ", ")
   if(links != "") {

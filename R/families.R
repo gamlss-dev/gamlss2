@@ -938,15 +938,14 @@ complete_family <- function(family, .links = NULL)
 print.gamlss2.family <- function(x, full = TRUE, ...)
 {
   cat("Family:", x$family, if(!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL,  "\n")
-  links <- paste(names(x$links), x$links, sep = " = ")
+  if(!is.character(x$links)) {
+    if(inherits(x$links, c("link-gamlss2", "link-glm")))
+      links <- links$name
+    else
+      links <- sapply(links, function(x) x$name)
+  }
   links <- paste(links, collapse = ", ")
   if(links != "") {
-    if(!is.character(links)) {
-      if(inherits(links, c("link-gamlss2", "link-glm")))
-        links <- links$name
-      else
-        links <- sapply(links, function(x) x$name)
-    }
     cat(if(length(x$links) > 1) "Link functions:" else "Link function:", links, sep = " ")
     cat("\n")
   }

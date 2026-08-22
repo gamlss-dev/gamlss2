@@ -135,7 +135,7 @@ div.csl-indent {
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/families_files/figure-html/unnamed-chunk-5-1.png">
 <meta property="og:site_name" content="gamlss2">
 <meta property="og:image:height" content="768">
-<meta property="og:image:width" content="960">
+<meta property="og:image:width" content="1152">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -408,49 +408,67 @@ div.csl-indent {
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pdf"</span> <span class="ot">=</span> <span class="cf">function</span>(par, y, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, <span class="at">log =</span> log)</span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span> <span class="ot">=</span> <span class="st">"continuous"</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cdf"</span> <span class="ot">=</span> <span class="cf">function</span>(par, y, ...) {</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, ...)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"quantile"</span> <span class="ot">=</span> <span class="cf">function</span>(p, par) {</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">qnorm</span>(p, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"random"</span> <span class="ot">=</span> <span class="cf">function</span>(n, par) {</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rnorm</span>(n, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span> <span class="ot">=</span> <span class="st">"continuous"</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Note that the <code>score</code> and <code>hessian</code> elements are omitted and approximated numerically during estimation.</p>
 <p>The following is a small example using the new <code>Normal</code> family with different link functions. We now compare two models, one using an identity link (default) and one using a flexible <code>softplus</code> link.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load the abdominal circumference data</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"abdom"</span>, <span class="at">package =</span> <span class="st">"gamlss.data"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"SpirometryUS"</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate models</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## subset for female</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">subset</span>(SpirometryUS, gender <span class="sc">==</span> <span class="st">"female"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model Formula</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> fev1 <span class="sc">~</span> <span class="fu">s</span>(age) <span class="sc">|</span> <span class="fu">s</span>(age)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>     </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate models</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4785.9328 eps = 0.999867     
-GAMLSS-RS iteration  2: Global Deviance = 4784.9286 eps = 0.000209     
-GAMLSS-RS iteration  3: Global Deviance = 4784.9275 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9836.1849 eps = 0.865843     
+GAMLSS-RS iteration  2: Global Deviance = 9836.1847 eps = 0.000000     </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> abdom, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> softplus))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> softplus))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 4786.2809 eps = 0.999866     
-GAMLSS-RS iteration  2: Global Deviance = 4786.2618 eps = 0.000003     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9779.127 eps = 0.795981     
+GAMLSS-RS iteration  2: Global Deviance = 9779.127 eps = 0.000000     </code></pre>
 </div>
 </div>
 <p>The fitted means are visualized with</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y <span class="sc">~</span> x, <span class="at">data =</span> abdom, <span class="at">pch =</span> <span class="dv">19</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(abdom<span class="sc">$</span>x, <span class="fu">mean</span>(m1), <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">5</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(abdom<span class="sc">$</span>x, <span class="fu">mean</span>(m2), <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Identity"</span>, <span class="st">"Softplus"</span>),</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fev1 <span class="sc">~</span> age, <span class="at">data =</span> d, <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m1, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>q2 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m2, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="fu">order</span>(d<span class="sc">$</span>age)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(d<span class="sc">$</span>age[i], q1[i, ], <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">5</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(d<span class="sc">$</span>age[i], q2[i, ], <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Identity"</span>, <span class="st">"Softplus"</span>),</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="families_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+<p><img src="families_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
 </figure>
 </div>
 </div>

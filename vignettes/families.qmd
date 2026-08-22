@@ -253,6 +253,15 @@ Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
     "pdf" = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
+    "cdf" = function(par, y, ...) {
+      pnorm(y, mean = par$mu, sd = par$sigma, ...)
+    },
+    "quantile" = function(p, par) {
+      qnorm(p, mean = par$mu, sd = par$sigma)
+    },
+    "random" = function(n, par) {
+      rnorm(n, mean = par$mu, sd = par$sigma)
+    },
     "type" = "continuous"
   )
 
@@ -269,28 +278,39 @@ We now compare two models, one using an identity link (default) and one using a
 flexible `softplus` link.
 
 ```{r}
-## load the abdominal circumference data
-data("abdom", package = "gamlss.data")
+## load data
+data("SpirometryUS")
      
+## subset for female
+d <- subset(SpirometryUS, gender == "female")
+
 ## specify the model Formula
-f <- y ~ s(x) | s(x)
+f <- fev1 ~ s(age) | s(age)
      
 ## estimate models
-m1 <- gamlss2(f, data = abdom, family = Normal(mu.link = "identity"))
-m2 <- gamlss2(f, data = abdom, family = Normal(mu.link = softplus))
+m1 <- gamlss2(f, data = d, family = Normal(mu.link = "identity"))
+m2 <- gamlss2(f, data = d, family = Normal(mu.link = softplus))
 ```
 
 The fitted means are visualized with
 
 ```{r}
 #| fig-height: 4
-#| fig-width: 5
+#| fig-width: 6
 #| fig-align: center
+#| out-width: 80%
 par(mar = c(4, 4, 1, 1))
-plot(y ~ x, data = abdom, pch = 19,
+
+plot(fev1 ~ age, data = d, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-lines(abdom$x, mean(m1), col = 2, lwd = 5)
-lines(abdom$x, mean(m2), col = 4, lwd = 2)
+
+q1 <- quantile(m1, probs = c(0.025, 0.5, 0.975))
+q2 <- quantile(m2, probs = c(0.025, 0.5, 0.975))
+
+i <- order(d$age)
+matlines(d$age[i], q1[i, ], col = 2, lwd = 5)
+matlines(d$age[i], q2[i, ], col = 4, lwd = 2)
+
 legend("topleft",
   legend = c("Identity", "Softplus"),
   col = c(2, 4), lwd = 2, bty = "n")

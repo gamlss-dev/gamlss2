@@ -942,7 +942,9 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
     if(inherits(x$links, c("link-gamlss2", "link-glm")))
       links <- x$links$name
     else
-      links <- sapply(x$links, function(x) x$name)
+      links <- sapply(x$links, function(x) {
+        if(is.character(x)) return(x) else return(x$name)
+      })
   } else {
     links <- x$links
   }

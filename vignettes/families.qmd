@@ -170,7 +170,25 @@ Family objects can also include other functions such as
 * `kurtosis(par, ...)`: Kurtosis function.
 * `valid.response(y)`: Function to check the values of the response.
 
-Note that the `cdf()` function is needed it for computing the quantile residuals.
+Note that the `cdf()` function is needed for computing the quantile residuals.
+
+For faster estimation, it can also be useful to provide an optimized
+update function
+
+* `update(par, y, eta, which)`
+
+where `eta` denotes the predictor and `which` is a character string 
+identifying the parameter to be updated, as specified in the family's
+"names" component.
+
+The function must return a named list of the form `list(eta, weights)`,
+where `eta` is the updated predictor after one Newton–Raphson or
+Fisher-scoring iteration, and `weights` contains the corresponding working 
+weights used in subsequent fitting steps, such as IWLS updates.
+
+The main benefit of implementing this function arises
+when an optimized C implementation is provided for updating the predictor 
+within the package's default backfitting or MCMC algorithms.
 
 A complete version of the `Normal()` family is given below:
 
@@ -226,6 +244,12 @@ Normal <- function(...) {
       }
     )
   )
+  fam$update <- function(par, y, eta, which) {
+    score <- fam$score[[which]](par, y)
+    hessian <- fam$hessian[[which]](par, y)
+    z <- eta + 1 / hessian * score
+    return(list("eta" = z, "weights" = hessian))
+  }
   class(fam) <- "gamlss2.family"
   return(fam)
 }

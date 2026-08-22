@@ -319,10 +319,10 @@ m2 <- gamlss2(f, data = d, family = Normal(mu.link = softplus))
 The fitted quantiles are visualized with
 
 ```{r}
-#| fig-height: 4
-#| fig-width: 6
+#| fig-height: 5
+#| fig-width: 8
 #| fig-align: center
-#| out-width: 80%
+#| out-width: 90%
 par(mar = c(4, 4, 1, 1))
 
 plot(fev1 ~ age, data = d, pch = 19,

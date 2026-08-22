@@ -292,7 +292,7 @@ m1 <- gamlss2(f, data = d, family = Normal(mu.link = "identity"))
 m2 <- gamlss2(f, data = d, family = Normal(mu.link = softplus))
 ```
 
-The fitted means are visualized with
+The fitted quantiles are visualized with
 
 ```{r}
 #| fig-height: 4

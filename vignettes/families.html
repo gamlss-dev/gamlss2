@@ -336,7 +336,14 @@ div.csl-indent {
 <li><code>kurtosis(par, ...)</code>: Kurtosis function.</li>
 <li><code>valid.response(y)</code>: Function to check the values of the response.</li>
 </ul>
-<p>Note that the <code>cdf()</code> function is needed it for computing the quantile residuals.</p>
+<p>Note that the <code>cdf()</code> function is needed for computing the quantile residuals.</p>
+<p>For faster estimation, it can also be useful to provide an optimized update function</p>
+<ul>
+<li><code>update(par, y, eta, which)</code></li>
+</ul>
+<p>where <code>eta</code> denotes the predictor and <code>which</code> is a character string identifying the parameter to be updated, as specified in the family’s “names” component.</p>
+<p>The function must return a named list of the form <code>list(eta, weights)</code>, where <code>eta</code> is the updated predictor after one Newton–Raphson or Fisher-scoring iteration, and <code>weights</code> contains the corresponding working weights used in subsequent fitting steps, such as IWLS updates.</p>
+<p>The main benefit of implementing this function arises when an optimized C implementation is provided for updating the predictor within the package’s default backfitting or MCMC algorithms.</p>
 <p>A complete version of the <code>Normal()</code> family is given below:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Normal <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -389,9 +396,15 @@ div.csl-indent {
 <span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>      }</span>
 <span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>  fam<span class="sc">$</span>update <span class="ot">&lt;-</span> <span class="cf">function</span>(par, y, eta, which) {</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    score <span class="ot">&lt;-</span> fam<span class="sc">$</span>score[[which]](par, y)</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    hessian <span class="ot">&lt;-</span> fam<span class="sc">$</span>hessian[[which]](par, y)</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">&lt;-</span> eta <span class="sc">+</span> <span class="dv">1</span> <span class="sc">/</span> hessian <span class="sc">*</span> score</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="st">"eta"</span> <span class="ot">=</span> z, <span class="st">"weights"</span> <span class="ot">=</span> hessian))</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fam)</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="flexible-links" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="flexible-links"><span class="header-section-number">4</span> Flexible Links</h2>

@@ -335,7 +335,7 @@ i <- order(d$age)
 matlines(d$age[i], q1[i, ], col = 2, lwd = 5)
 matlines(d$age[i], q2[i, ], col = 4, lwd = 2)
 
-legend("topleft",
+legend("topright",
   legend = c("Identity", "Softplus"),
   col = c(2, 4), lwd = 2, bty = "n")
 ```

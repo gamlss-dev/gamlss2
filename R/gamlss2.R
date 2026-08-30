@@ -305,7 +305,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   elapsed <- as.numeric((proc.time() - tstart)["elapsed"])
 
   ## Further model information.
-  rval$call <- call
+  rval$call <- cl
   rval$formula <- formula
   rval$fake_formula <- fake_formula(formula)
   rval$terms <- mt ## terms(merge_formula(formula(rval$fake_formula, collapse = TRUE), as.formula(mt)))

@@ -599,7 +599,8 @@ print.summary.gamlss2 <- function(x,
   info2 <- c(
     ## paste("logLik =", round(x$logLik, digits = 4)),
     paste("Deviance =", round(-2 * x$logLik, digits = 4)),
-    paste0("Null Dev. Red. = ", round(x$dev.reduction * 100, digits = 2), "%")
+    paste("DIC =", round(x$dic$DIC, digits = 4))
+    ## paste0("Null Dev. Red. = ", round(x$dev.reduction * 100, digits = 2), "%")
   )
 
   rt <- x$elapsed

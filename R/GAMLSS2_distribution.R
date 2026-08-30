@@ -24,8 +24,12 @@ prodist.gamlss2 <- function(object, ...) {
   ## extract fitted parameters
   d <- predict(object, ..., type = "parameter", drop = FALSE)
 
-  ## set class to general GAMLSS or GAMLSS2 distribution (distributions3 object)
-  class(d) <- c("GAMLSS2", "distribution")
+  ## set class
+  if(is.null(object$family$create_distribution)) {
+    class(d) <- c("GAMLSS2", "distribution")
+  } else {
+    d <- object$family$create_distribution(d)
+  }
 
   ## include family information
   attr(d, "family") <- family(object)

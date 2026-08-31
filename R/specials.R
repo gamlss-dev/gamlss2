@@ -200,6 +200,19 @@ calc_XWXz <- function(x, w, z)
   .Call("calc_XWXz", x, as.numeric(w), as.numeric(z), PACKAGE = "gamlss2")
 }
 
+## Fused direct smooth-fit criterion and final-state kernel.
+calc_smooth_wfit <- function(XWX, XWz, penalties, lambda, ridge,
+  zWz, n, K, criterion, final = FALSE)
+{
+  .Call(
+    "calc_smooth_wfit",
+    XWX, as.numeric(XWz), penalties, as.numeric(lambda),
+    as.numeric(ridge), as.numeric(zWz), as.numeric(n), as.numeric(K),
+    as.integer(criterion), as.logical(final),
+    PACKAGE = "gamlss2"
+  )
+}
+
 ## Weighted Demmler-Reinsch reparameterization for a single penalty.
 smooth.construct_dr <- function(XWX, XWz, S, ridge = 1e-05)
 {
@@ -423,6 +436,19 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     if(is.null(zWz))
       zWz <- sum(w * z^2)
     criterion.evaluations <- 0L
+    criterion.levels <- c("gcv", "aic", "gaic", "aicc", "bic")
+    criterion.code <- match(tolower(control$criterion), criterion.levels)
+
+    native.penalties <- all(vapply(x$S, function(Sk) {
+      is.matrix(Sk) && is.double(Sk) &&
+        identical(dim(Sk), dim(XWX))
+    }, logical(1L)))
+    use.native.wfit <-
+      !identical(control$native.wfit, FALSE) &&
+      !isTRUE(control$logLik) &&
+      !is.na(criterion.code) &&
+      is.matrix(XWX) && is.double(XWX) &&
+      native.penalties
 
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
@@ -432,6 +458,25 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         drs <- dr_fit(l)
         edf <- drs$edf
         b <- drs$coefficients
+      } else if(use.native.wfit) {
+        native.fit <- calc_smooth_wfit(
+          XWX = XWX,
+          XWz = XWz,
+          penalties = x$S,
+          lambda = l,
+          ridge = 1e-05,
+          zWz = zWz,
+          n = n,
+          K = K,
+          criterion = criterion.code,
+          final = rf
+        )
+        if(!rf)
+          return(native.fit)
+
+        b <- native.fit$coefficients
+        edf <- native.fit$edf
+        P <- native.fit$vcov
       } else {
         Sl <- S
         if(length(x$S)) {

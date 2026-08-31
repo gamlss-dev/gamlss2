@@ -210,6 +210,195 @@ SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
   return rval;
 }
 
+/* Fused direct smooth-fit criterion and final-state kernel. */
+SEXP calc_smooth_wfit(
+  SEXP XWX, SEXP XWz, SEXP penalties, SEXP lambda,
+  SEXP ridge, SEXP zWz, SEXP nobs, SEXP K,
+  SEXP criterion, SEXP final
+)
+{
+  if(!isReal(XWX) || !isMatrix(XWX))
+    error("'XWX' must be a numeric matrix");
+  if(!isReal(XWz))
+    error("'XWz' must be numeric");
+  if(!isNewList(penalties))
+    error("'penalties' must be a list");
+  if(!isReal(lambda))
+    error("'lambda' must be numeric");
+
+  int p = nrows(XWX);
+  if(p < 1 || ncols(XWX) != p)
+    error("'XWX' must be a non-empty square matrix");
+  if(XLENGTH(XWz) != p)
+    error("incompatible dimensions for 'XWz'");
+
+  int m = length(penalties);
+  if(XLENGTH(lambda) < m)
+    error("not enough smoothing parameters");
+
+  const double *XWXptr = REAL(XWX);
+  const double *XWzptr = REAL(XWz);
+  const double *lptr = REAL(lambda);
+  const double **Sptr = (const double **) R_alloc(
+    (size_t) m, sizeof(double *)
+  );
+
+  for(int k = 0; k < m; k++) {
+    SEXP Sk = VECTOR_ELT(penalties, k);
+    if(!isReal(Sk) || !isMatrix(Sk) ||
+        nrows(Sk) != p || ncols(Sk) != p)
+      error("invalid penalty matrix");
+    Sptr[k] = REAL(Sk);
+  }
+
+  double ridge_value = asReal(ridge);
+  double zWz_value = asReal(zWz);
+  double n_value = asReal(nobs);
+  double K_value = asReal(K);
+  int criterion_value = asInteger(criterion);
+  int return_final = asLogical(final) == TRUE;
+
+  if(!R_FINITE(ridge_value) || ridge_value < 0.0)
+    error("'ridge' must be finite and nonnegative");
+  if(!R_FINITE(zWz_value) || !R_FINITE(n_value) || n_value <= 0.0)
+    error("invalid criterion constants");
+  if(criterion_value < 1 || criterion_value > 5)
+    error("invalid smoothness criterion");
+
+  SEXP P = R_NilValue;
+  double *Pptr;
+  if(return_final) {
+    PROTECT(P = allocMatrix(REALSXP, p, p));
+    Pptr = REAL(P);
+  } else {
+    Pptr = (double *) R_alloc(
+      (size_t) p * (size_t) p, sizeof(double)
+    );
+  }
+
+  /* DPOTRF reads one triangle only. Assemble the upper triangle directly,
+     avoiding the intermediate Sl and A matrices created by the R path. */
+  for(int j = 0; j < p; j++) {
+    for(int i = 0; i <= j; i++) {
+      R_xlen_t ij = i + (R_xlen_t) j * p;
+      double value = i == j ? ridge_value : 0.0;
+      for(int k = 0; k < m; k++)
+        value += lptr[k] * Sptr[k][ij];
+      Pptr[ij] = XWXptr[ij] + value;
+    }
+  }
+
+  const char upper = 'U';
+  int info = 0;
+  F77_CALL(dpotrf)(&upper, &p, Pptr, &p, &info FCONE);
+  if(info != 0)
+    error("native smooth-fit Cholesky factorization failed (info = %d)", info);
+
+  SEXP coefficients = R_NilValue;
+  double *bptr;
+  if(return_final) {
+    PROTECT(coefficients = allocVector(REALSXP, p));
+    bptr = REAL(coefficients);
+  } else {
+    bptr = (double *) R_alloc((size_t) p, sizeof(double));
+  }
+  for(int i = 0; i < p; i++)
+    bptr[i] = XWzptr[i];
+
+  const int nrhs = 1;
+  F77_CALL(dpotrs)(
+    &upper, &p, &nrhs, Pptr, &p, bptr, &p, &info FCONE
+  );
+  if(info != 0)
+    error("native smooth-fit triangular solve failed (info = %d)", info);
+
+  F77_CALL(dpotri)(&upper, &p, Pptr, &p, &info FCONE);
+  if(info != 0)
+    error("native smooth-fit inverse failed (info = %d)", info);
+
+  long double edf_accumulator = 0.0L;
+  for(int j = 0; j < p; j++) {
+    for(int i = 0; i < p; i++) {
+      R_xlen_t ij = i + (R_xlen_t) j * p;
+      R_xlen_t ji = j + (R_xlen_t) i * p;
+      edf_accumulator +=
+        (long double) XWXptr[ij] *
+        (long double) Pptr[i <= j ? ij : ji];
+    }
+  }
+
+  long double cross_accumulator = 0.0L;
+  for(int i = 0; i < p; i++)
+    cross_accumulator +=
+      (long double) bptr[i] * (long double) XWzptr[i];
+
+  double *XWXb = (double *) R_alloc((size_t) p, sizeof(double));
+  const char no_transpose = 'N';
+  const int increment = 1;
+  const double one = 1.0;
+  const double zero = 0.0;
+  F77_CALL(dgemv)(
+    &no_transpose, &p, &p, &one, XWXptr, &p, bptr,
+    &increment, &zero, XWXb, &increment FCONE
+  );
+
+  long double quadratic_accumulator = 0.0L;
+  for(int i = 0; i < p; i++)
+    quadratic_accumulator +=
+      (long double) bptr[i] * (long double) XWXb[i];
+
+  double edf = (double) edf_accumulator;
+  double rss = zWz_value -
+    2.0 * (double) cross_accumulator +
+    (double) quadratic_accumulator;
+
+  double value;
+  switch(criterion_value) {
+    case 1: {
+      double denominator = n_value - edf;
+      value = rss * n_value / (denominator * denominator);
+      break;
+    }
+    case 2:
+      value = rss + 2.0 * edf;
+      break;
+    case 3:
+      value = rss + K_value * edf;
+      break;
+    case 4:
+      value = rss + 2.0 * edf +
+        (2.0 * edf * (edf + 1.0)) / (n_value - edf - 1.0);
+      break;
+    default:
+      value = rss + log(n_value) * edf;
+  }
+
+  if(!return_final)
+    return ScalarReal(value);
+
+  /* DPOTRI writes the requested triangle only. Mirror it for the vcov
+     matrix returned by the final fit. */
+  for(int j = 0; j < p; j++)
+    for(int i = j + 1; i < p; i++)
+      Pptr[i + (R_xlen_t) j * p] = Pptr[j + (R_xlen_t) i * p];
+
+  SEXP rval;
+  PROTECT(rval = allocVector(VECSXP, 3));
+  SET_VECTOR_ELT(rval, 0, coefficients);
+  SET_VECTOR_ELT(rval, 1, ScalarReal(edf));
+  SET_VECTOR_ELT(rval, 2, P);
+
+  SEXP nrval;
+  PROTECT(nrval = allocVector(STRSXP, 3));
+  SET_STRING_ELT(nrval, 0, mkChar("coefficients"));
+  SET_STRING_ELT(nrval, 1, mkChar("edf"));
+  SET_STRING_ELT(nrval, 2, mkChar("vcov"));
+  setAttrib(rval, R_NamesSymbol, nrval);
+
+  UNPROTECT(4);
+  return rval;
+}
+
 /* Compute working response and weights for the Gaussian family. */
 SEXP update_Gaussian(SEXP peta, SEXP y, SEXP eta, SEXP j)
 {

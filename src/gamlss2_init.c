@@ -7,12 +7,14 @@
 SEXP calc_Xe(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_XWX(SEXP, SEXP, SEXP);
 SEXP calc_XWXz(SEXP, SEXP, SEXP);
+SEXP calc_smooth_wfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP update_Gaussian(SEXP, SEXP, SEXP, SEXP);
 
 static R_CallMethodDef callMethods[] = {
   {"calc_Xe", (DL_FUNC) &calc_Xe, 6},
   {"calc_XWX", (DL_FUNC) &calc_XWX, 3},
   {"calc_XWXz", (DL_FUNC) &calc_XWXz, 3},
+  {"calc_smooth_wfit", (DL_FUNC) &calc_smooth_wfit, 10},
   {"update_Gaussian", (DL_FUNC) &update_Gaussian, 4},
   {NULL, NULL, 0}
 };

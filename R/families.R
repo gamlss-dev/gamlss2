@@ -497,11 +497,15 @@ tF <- function(x, ...)
   dist_call <- function(fun, first, with_log = FALSE, with_dots = TRUE,
                         binding = ".fun") {
     aa <- c(first, paste0(nx, "=", vapply(nx, pref, character(1L))))
-    if(with_log) aa <- c(aa, "log=log")
+    nf <- names(formals(fun))
+    if(with_log) {
+      log_argument <- if("log" %in% nf) "log" else
+        if("log.p" %in% nf) "log.p" else "log"
+      aa <- c(aa, paste0(log_argument, "=log"))
+    }
     if(with_dots) aa <- c(aa, "...")
 
     ## Add bd only for functions that use a response argument.
-    nf <- names(formals(fun))
     if("bd" %in% nf && identical(first, "y"))
       aa <- c(aa, 'bd=attr(y, "bd", exact=TRUE)')
 

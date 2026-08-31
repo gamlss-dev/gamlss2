@@ -131,6 +131,8 @@ website:
               file: man/Kumaraswamy.qmd
             - text: MN
               file: man/MN.qmd
+            - text: mixture_family
+              file: man/mixture_family.qmd
             - text: OL / ologit
               file: man/OL.qmd
         - section: Link functions

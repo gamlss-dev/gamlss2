@@ -452,13 +452,13 @@ div.csl-indent {
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate models</span></span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9836.1849 eps = 0.865843     
-GAMLSS-RS iteration  2: Global Deviance = 9836.1847 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9836.2554 eps = 0.865842     
+GAMLSS-RS iteration  2: Global Deviance = 9836.2554 eps = 0.000000     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> d, <span class="at">family =</span> <span class="fu">Normal</span>(<span class="at">mu.link =</span> softplus))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9779.127 eps = 0.795981     
-GAMLSS-RS iteration  2: Global Deviance = 9779.127 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 9779.071 eps = 0.795982     
+GAMLSS-RS iteration  2: Global Deviance = 9779.071 eps = 0.000000     </code></pre>
 </div>
 </div>
 <p>The fitted quantiles are visualized with</p>

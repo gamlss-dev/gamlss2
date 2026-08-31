@@ -749,14 +749,17 @@ Logical. Should graphical parameters be set automatically for multiple plots?
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## fit heteroscedastic normal GAMLSS model</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 405.2078 eps = 0.130105     
-GAMLSS-RS iteration  2: Global Deviance = 405.1842 eps = 0.000058     
-GAMLSS-RS iteration  3: Global Deviance = 405.1769 eps = 0.000018     
-GAMLSS-RS iteration  4: Global Deviance = 405.1706 eps = 0.000015     
-GAMLSS-RS iteration  5: Global Deviance = 405.1651 eps = 0.000013     
-GAMLSS-RS iteration  6: Global Deviance = 405.1601 eps = 0.000012     
-GAMLSS-RS iteration  7: Global Deviance = 405.1556 eps = 0.000011     
-GAMLSS-RS iteration  8: Global Deviance = 405.1519 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 405.4242 eps = 0.129640     
+GAMLSS-RS iteration  2: Global Deviance = 405.2294 eps = 0.000480     
+GAMLSS-RS iteration  3: Global Deviance = 405.2069 eps = 0.000055     
+GAMLSS-RS iteration  4: Global Deviance = 405.1868 eps = 0.000049     
+GAMLSS-RS iteration  5: Global Deviance = 405.17 eps = 0.000041     
+GAMLSS-RS iteration  6: Global Deviance = 405.1562 eps = 0.000033     
+GAMLSS-RS iteration  7: Global Deviance = 405.1452 eps = 0.000027     
+GAMLSS-RS iteration  8: Global Deviance = 405.1365 eps = 0.000021     
+GAMLSS-RS iteration  9: Global Deviance = 405.1297 eps = 0.000016     
+GAMLSS-RS iteration 10: Global Deviance = 405.1244 eps = 0.000012     
+GAMLSS-RS iteration 11: Global Deviance = 405.1206 eps = 0.000009     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot estimated quantiles</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span>
@@ -774,7 +777,7 @@ GAMLSS-RS iteration  8: Global Deviance = 405.1519 eps = 0.000009     </code></p
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rq)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
--1.502641 -0.727054 -0.140146  0.003926  0.614139  3.302176 </code></pre>
+-1.500618 -0.725769 -0.144190  0.004394  0.615212  3.302438 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(rq, <span class="st">"type"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -785,16 +788,16 @@ GAMLSS-RS iteration  8: Global Deviance = 405.1519 eps = 0.000009     </code></p
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
--27.2199  -9.5519  -1.5735   0.3927   7.1773  45.6097 </code></pre>
+-27.1865  -9.5648  -1.5637   0.4061   7.1394  45.6459 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## residuals for new data</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> cars[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ]</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">residuals</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          1           2           3           4           5           6 
--0.10549759  1.10663409 -1.08043264  1.13686192 -0.01836491 -1.02801359 
+-0.11542272  1.10117234 -1.08708247  1.13528030 -0.02127194 -1.03123936 
           7           8           9          10 
--0.50305876  0.29960125  1.10226126 -0.89004209 
+-0.50444369  0.29901487  1.10247343 -0.89074902 
 attr(,"type")
 [1] "quantile"
 attr(,"class")

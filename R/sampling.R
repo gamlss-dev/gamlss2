@@ -178,24 +178,24 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     if(length(xterms[[j]])) {
       samples[[j]]$p <- matrix(NA, nrow = nsave, ncol = length(xterms[[j]]) + 1L)
       colnames(samples[[j]]$p) <- c(xterms[[j]], "alpha")
+      fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
+      names(fit[[j]]$coefficients) <- xterms[[j]]
       if("(Intercept)" %in% xterms[[j]]) {
-        fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
-        names(fit[[j]]$coefficients) <- xterms[[j]]
         fit[[j]]$coefficients["(Intercept)"] <- mean(etastart[[j]])
         fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
-        if(!is.null(cstart)) {
-          sj <- grep(paste0(j, ".p."), names(cstart), fixed = TRUE, value = TRUE)
-          sj <- sj[sj %in% paste0(j, ".p.", xterms[[j]])]
-          if(length(sj)) {
-            fit[[j]]$coefficients[gsub(paste0(j, ".p."), "", sj)] <- as.numeric(cstart[sj])
-            fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% fit[[j]]$coefficients)
-            nes[[j]] <- TRUE
-          }
-        }
-        eta[[j]] <- fit[[j]]$fitted.values
       } else {
-        fit[[j]] <- list("fitted.values" = eta[[j]])
+        fit[[j]]$fitted.values <- eta[[j]]
       }
+      if(!is.null(cstart)) {
+        sj <- grep(paste0(j, ".p."), names(cstart), fixed = TRUE, value = TRUE)
+        sj <- sj[sj %in% paste0(j, ".p.", xterms[[j]])]
+        if(length(sj)) {
+          fit[[j]]$coefficients[gsub(paste0(j, ".p."), "", sj)] <- as.numeric(cstart[sj])
+          fit[[j]]$fitted.values <- drop(x[, xterms[[j]], drop = FALSE] %*% fit[[j]]$coefficients)
+          nes[[j]] <- TRUE
+        }
+      }
+      eta[[j]] <- fit[[j]]$fitted.values
     }
     if(length(sterms)) {
       if(length(sterms[[j]])) {
@@ -216,7 +216,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           samples[[j]]$s[[i]] <- matrix(NA, nrow = nsave,
             ncol = ncol(specials[[i]]$X) + length(specials[[i]]$S) + 2L)
           if(!is.null(cstart)) {
-            sj <- grep(paste0(j, ".s.", i), names(cstart), fixed = TRUE, value = TRUE)
+            prefix <- paste0(j, ".s.", i, ".")
+            sj <- names(cstart)[startsWith(names(cstart), prefix)]
             sjb <- sj[!grepl(".lambda", sj, fixed = TRUE)]
             sjb <- sjb[!grepl(".tau", sjb, fixed = TRUE)]
             if(length(sjb)) {

@@ -138,24 +138,24 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eta[[j]] <- rep(0.0, n)
     nes[[j]] <- FALSE
     if(length(xterms[[j]])) {
+      fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
+      names(fit[[j]]$coefficients) <- xterms[[j]]
       if("(Intercept)" %in% xterms[[j]]) {
-        fit[[j]]$coefficients <- rep(0.0, length(xterms[[j]]))
-        names(fit[[j]]$coefficients) <- xterms[[j]]
         fit[[j]]$coefficients["(Intercept)"] <- mean(etastart[[j]])
         fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
-        if(!is.null(cstart)) {
-          sj <- grep(paste0(j, ".p."), names(cstart), fixed = TRUE, value = TRUE)
-          sj <- sj[sj %in% paste0(j, ".p.", xterms[[j]])]
-          if(length(sj)) {
-            fit[[j]]$coefficients[gsub(paste0(j, ".p."), "", sj)] <- as.numeric(cstart[sj])
-            fit[[j]]$fitted.values <- drop(x[, names(fit[[j]]$coefficients), drop = FALSE] %*% fit[[j]]$coefficients)
-            nes[[j]] <- TRUE
-          }
-        }
-        eta[[j]] <- fit[[j]]$fitted.values
       } else {
-        fit[[j]] <- list("fitted.values" = eta[[j]])
+        fit[[j]]$fitted.values <- eta[[j]]
       }
+      if(!is.null(cstart)) {
+        sj <- grep(paste0(j, ".p."), names(cstart), fixed = TRUE, value = TRUE)
+        sj <- sj[sj %in% paste0(j, ".p.", xterms[[j]])]
+        if(length(sj)) {
+          fit[[j]]$coefficients[gsub(paste0(j, ".p."), "", sj)] <- as.numeric(cstart[sj])
+          fit[[j]]$fitted.values <- drop(x[, names(fit[[j]]$coefficients), drop = FALSE] %*% fit[[j]]$coefficients)
+          nes[[j]] <- TRUE
+        }
+      }
+      eta[[j]] <- fit[[j]]$fitted.values
     }
     if(length(sterms)) {
       if(length(sterms[[j]])) {

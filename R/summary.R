@@ -423,15 +423,17 @@ par2list <- function(par)
   for(i in unique(nx)) {
     if(any(j <- (ps == "p") & (nx == i))) {
       pj <- paste0(i, ".p.")
-      pl[[i]]$p <- par[grep(pj, np, fixed = TRUE)]
-      names(pl[[i]]$p) <- gsub(pj, "", names(pl[[i]]$p), fixed = TRUE)
+      ind <- startsWith(np, pj)
+      pl[[i]]$p <- par[ind]
+      names(pl[[i]]$p) <- substring(names(pl[[i]]$p), nchar(pj) + 1L)
     }
     if(any(j <- (ps == "s") & (nx == i))) {
       pl[[i]]$s <- list()
       for(k in unique(lab[j])) {
         pj <- paste0(i, ".s.", k, ".")
-        pl[[i]]$s[[k]] <- par[grep(pj, np, fixed = TRUE)]
-        names(pl[[i]]$s[[k]]) <- gsub(pj, "", names(pl[[i]]$s[[k]]), fixed = TRUE)
+        ind <- startsWith(np, pj)
+        pl[[i]]$s[[k]] <- par[ind]
+        names(pl[[i]]$s[[k]]) <- substring(names(pl[[i]]$s[[k]]), nchar(pj) + 1L)
       }
     }
   }
@@ -456,8 +458,9 @@ summary.gamlss2 <- function(object, ...)
       function(x) x[1L]))
     ctl <- list()
     for(i in nx) {
-      ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
-      rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
+      pj <- paste0(i, ".p.")
+      ctl[[i]] <- ct[startsWith(rownames(ct), pj), , drop = FALSE]
+      rownames(ctl[[i]]) <- substring(rownames(ctl[[i]]), nchar(pj) + 1L)
     }
   }
   sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "iterations", "elapsed")]
@@ -481,18 +484,23 @@ summary.gamlss2 <- function(object, ...)
 summary.bamlss2 <- function(object, thres = 0.01, ...)
 {
   par <- coef(object, full = FALSE, dropall = FALSE)
-  ct <- t(apply(object$samples[, names(par), drop = FALSE], 2, function(x) {
-    c("Mean" = mean(x, na.rm = TRUE),
-      quantile(x, probs = c(0.025, 0.975)),
-      mean(abs(x) < thres))
-  }))
-  colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
-  nx <- unique(sapply(strsplit(names(par), ".", fixed = TRUE),
-    function(x) x[1L]))
+  if(length(par)) {
+    ct <- t(apply(object$samples[, names(par), drop = FALSE], 2, function(x) {
+      c("Mean" = mean(x, na.rm = TRUE),
+        quantile(x, probs = c(0.025, 0.975)),
+        mean(abs(x) < thres))
+    }))
+    colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
+  } else ct <- matrix(numeric(0L), nrow = 0L, ncol = 0L)
+  nx <- if(length(par)) {
+    unique(sapply(strsplit(names(par), ".", fixed = TRUE),
+      function(x) x[1L]))
+  } else character(0L)
   ctl <- list()
   for(i in nx) {
-    ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
-    rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
+    pj <- paste0(i, ".p.")
+    ctl[[i]] <- ct[startsWith(rownames(ct), pj), , drop = FALSE]
+    rownames(ctl[[i]]) <- substring(rownames(ctl[[i]]), nchar(pj) + 1L)
   }
   sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "dic", "iterations", "elapsed")]
   sg$coefficients <- ctl
@@ -522,16 +530,21 @@ summary.gamlss2.mcmc <- function(object, thres = 0.01, ...)
 {
   df.res <- object$nobs - object$df
   par <- coef(object, full = FALSE, dropall = FALSE)
-  ct <- t(apply(object$samples[, names(par), drop = FALSE], 2, function(x) {
-    c("Mean" = mean(x, na.rm =TRUE), quantile(x, probs = c(0.025, 0.975)), mean(abs(x) < thres))
-  }))
-  colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
-  nx <- unique(sapply(strsplit(names(par), ".", fixed = TRUE),
-    function(x) x[1L]))
+  if(length(par)) {
+    ct <- t(apply(object$samples[, names(par), drop = FALSE], 2, function(x) {
+      c("Mean" = mean(x, na.rm =TRUE), quantile(x, probs = c(0.025, 0.975)), mean(abs(x) < thres))
+    }))
+    colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
+  } else ct <- matrix(numeric(0L), nrow = 0L, ncol = 0L)
+  nx <- if(length(par)) {
+    unique(sapply(strsplit(names(par), ".", fixed = TRUE),
+      function(x) x[1L]))
+  } else character(0L)
   ctl <- list()
   for(i in nx) {
-    ctl[[i]] <- ct[grep(paste0(i, "."), rownames(ct), fixed = TRUE), , drop = FALSE]
-    rownames(ctl[[i]]) <- gsub(paste0(i, ".p."), "", rownames(ctl[[i]]), fixed = TRUE)
+    pj <- paste0(i, ".p.")
+    ctl[[i]] <- ct[startsWith(rownames(ct), pj), , drop = FALSE]
+    rownames(ctl[[i]]) <- substring(rownames(ctl[[i]]), nchar(pj) + 1L)
   }
   sg <- object[c("call", "family", "df", "nobs", "logLik", "dev.reduction", "iterations", "elapsed")]
   sg$call[[1L]] <- as.name("gamlss2")
@@ -657,7 +670,7 @@ coef.bamlss2 <- function(object, ..., FUN = mean) {
   nc <- names(co)
   nc <- nc[!grepl(".p.alpha", nc, fixed = TRUE)]
   if(!length(nc))
-    stop("no coefficients!")
+    return(numeric(0L))
   samps <- object$samples[, nc, drop = FALSE]
   res <- apply(samps, 2, FUN = FUN)
   return(res)

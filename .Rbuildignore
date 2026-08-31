@@ -13,6 +13,7 @@ README.qmd
 ^_quarto$
 ^altdoc$
 ^docs$
+^tests$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.Rproj\.user$

@@ -710,6 +710,7 @@ window.Quarto = {
 <p style="text-align: center;">
 </p><p><span class="math inline">\(r_{ij} = \frac{\pi_{ij}f_j(y_i)}{\sum_\ell \pi_{i\ell}f_\ell(y_i)}\)</span></p>
 <p>denotes a posterior responsibility, the score for a component parameter is its component score multiplied by <span class="math inline">\(r_{ij}\)</span>. The mixing-predictor score is <span class="math inline">\(r_{ij} - \pi_{ij}\)</span>. Missing Hessians are supplied numerically by the standard family completion infrastructure.</p>
+<p>The family supplies a fused working-response update for estimation. It uses the same finite-difference diagonal Hessian as the standard family completion infrastructure, but shares the component densities at the current parameters. For a component-parameter perturbation, only that component’s density is recomputed; mixing-parameter perturbations reuse every component density. Repeated identity and log links are mapped directly, and a single family repeated <code>k</code> times is completed only once. These optimizations do not change the numerical updates.</p>
 <p>The default <code>initialize = “separated”</code> strategy places recognized component location parameters at ordered empirical midpoint quantiles. Other parameters retain their component-family initializers and mixing probabilities start equally. This deliberately broad initialization is robust for flexible mixture regressions, where response-only clusters do not account for the model’s covariates and can select a poor local mode.</p>
 <p>With <code>initialize = “cluster”</code>, empirical midpoint quantiles first define ordered centers for a finite numeric response. One-dimensional Lloyd updates assign observations to their nearest center; a rank partition is used if tied centers would otherwise produce an empty cluster. Each component family’s initialization functions are then evaluated on the response observations assigned to that component, and the resulting values are reduced to component-level starts. Mixing probabilities are initialized from cluster proportions and converted to odds relative to the reference component. This can be useful for intercept-only or otherwise simple mixtures, but is not uniformly better for mixture regression.</p>
 <p>Every proposed natural-scale value is checked after applying its link. Values on a link boundary are shrunk toward the inverse-link value at zero using one pseudo-observation. If a cluster-specific value remains invalid, initialization falls back to the corresponding full-response component initializer and finally to the inverse-link value at zero. Non-numeric responses or responses that cannot be partitioned use these fallback values and equal mixing probabilities.</p>
@@ -725,6 +726,9 @@ window.Quarto = {
 </li>
 <li>
 <p><code>responsibilities(par, y)</code>: posterior component probabilities conditional on observations.</p>
+</li>
+<li>
+<p><code>score_matrix(par, y)</code>: observation-wise scores for all mixture parameters, evaluated with shared responsibilities.</p>
 </li>
 <li>
 <p><code>components</code>: the completed component families.</p>

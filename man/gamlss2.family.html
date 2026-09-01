@@ -619,6 +619,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'gamlss2'
 family(object, ...)
+## S3 method for class 'gamlss2.family'
+print(x, full = TRUE, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -630,6 +632,22 @@ family(object, ...)
 </td>
 <td>
 A fitted <code>“gamlss2”</code> model object.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="x">x</code>
+</td>
+<td>
+A <code>“gamlss2.family”</code> object.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="full">full</code>
+</td>
+<td>
+Logical; print available family-specific and derivative functions?
 </td>
 </tr>
 <tr>

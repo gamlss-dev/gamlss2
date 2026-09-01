@@ -40,10 +40,14 @@ mixture_family(families = NO, k = NULL, reference = 1L,
     joining the label and original parameter name with a dot.
   }
   \item{initialize}{
-    Logical. If \code{TRUE}, location parameters named \code{mu},
-    \code{mean}, or \code{location} receive separated empirical-quantile
-    starting values. Other starting-value functions are inherited from
-    their component families.
+    Starting-value strategy. \code{TRUE} (the default) or
+    \code{"separated"} uses separated empirical-quantile starts for
+    recognized component location parameters, the component-family
+    initializers for other parameters, and equal mixing probabilities.
+    \code{"cluster"} uses deterministic response-based clusters to obtain
+    component-specific parameter and mixing-probability starts.
+    \code{FALSE} or \code{"component"} uses the unmodified
+    component-family initializers and equal mixing probabilities.
   }
 }
 
@@ -78,6 +82,33 @@ mixture_family(families = NO, k = NULL, reference = 1L,
   are supplied numerically by the standard family completion
   infrastructure.
 
+  The default \code{initialize = "separated"} strategy places recognized
+  component location parameters at ordered empirical midpoint quantiles.
+  Other parameters retain their component-family initializers and mixing
+  probabilities start equally. This deliberately broad initialization is
+  robust for flexible mixture regressions, where response-only clusters do
+  not account for the model's covariates and can select a poor local mode.
+
+  With \code{initialize = "cluster"}, empirical midpoint quantiles first
+  define ordered centers for a finite numeric response. One-dimensional
+  Lloyd updates assign observations to their nearest center; a rank
+  partition is used if tied centers would otherwise produce an empty
+  cluster. Each component family's initialization functions are then
+  evaluated on the response observations assigned to that component, and
+  the resulting values are reduced to component-level starts. Mixing
+  probabilities are initialized from cluster proportions and converted to
+  odds relative to the reference component. This can be useful for
+  intercept-only or otherwise simple mixtures, but is not uniformly better
+  for mixture regression.
+
+  Every proposed natural-scale value is checked after applying its link.
+  Values on a link boundary are shrunk toward the inverse-link value at
+  zero using one pseudo-observation. If a cluster-specific value remains
+  invalid, initialization falls back to the corresponding full-response
+  component initializer and finally to the inverse-link value at zero.
+  Non-numeric responses or responses that cannot be partitioned use these
+  fallback values and equal mixing probabilities.
+
   The returned family includes \code{cdf()}, \code{quantile()},
   \code{random()}, \code{mean()}, and \code{variance()} whenever all
   component families provide the corresponding operation. All components
@@ -88,8 +119,9 @@ mixture_family(families = NO, k = NULL, reference = 1L,
   As with finite mixtures generally, the likelihood can have local
   optima and equivalent solutions obtained by exchanging component
   labels. Separated initialization helps but does not impose an ordering
-  constraint. Multiple fits with different starting values can still be
-  useful for difficult data.
+  constraint. Multiple fits, including fits using the optional
+  \code{"cluster"} strategy or explicitly supplied starting values, can
+  still be useful for difficult data.
 }
 
 \value{
@@ -219,4 +251,3 @@ legend(
 \keyword{distribution}
 \keyword{mixture}
 \keyword{regression}
-

@@ -57,9 +57,17 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
   if(anyDuplicated(component_labels))
     stop("component prefixes must be unique", call. = FALSE)
 
-  if(!is.logical(initialize) || length(initialize) != 1L ||
-      is.na(initialize)) {
-    stop("'initialize' must be TRUE or FALSE", call. = FALSE)
+  if(is.logical(initialize) && length(initialize) == 1L &&
+      !is.na(initialize)) {
+    initialize_mode <- if(initialize) "separated" else "component"
+  } else if(is.character(initialize) && length(initialize) == 1L &&
+      !is.na(initialize)) {
+    initialize_mode <- match.arg(
+      initialize, c("separated", "cluster", "component")
+    )
+  } else {
+    stop("'initialize' must be TRUE, FALSE, 'separated', 'cluster', or ",
+      "'component'", call. = FALSE)
   }
 
   components <- lapply(component_input, complete_family)
@@ -96,9 +104,194 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       inner <- inner_names[parameter]
       outer <- outer_names[parameter]
       links[[outer]] <- f$links[[inner]]
+    }
+  }
 
-      initializer <- f$initialize[[inner]]
-      if(initialize && inner %in% c("mu", "mean", "location")) {
+  nonreference <- setdiff(seq_len(k), reference)
+  mixing_names <- paste0("pi", nonreference)
+  if(any(mixing_names %in% family_names))
+    stop("component and mixing parameter names overlap", call. = FALSE)
+
+  for(parameter in mixing_names)
+    links[[parameter]] <- "log"
+  family_names <- c(family_names, mixing_names)
+
+  ## Deterministic response clustering for the optional "cluster" strategy.
+  ## Midpoint quantiles define ordered centers and observations are assigned
+  ## to the nearest center. A rank partition prevents empty clusters when
+  ## quantiles coincide.
+  response_partition <- function(y) {
+    if(initialize_mode != "cluster" || !is.numeric(y) || !is.null(dim(y)))
+      return(NULL)
+
+    finite <- which(is.finite(y))
+    if(!length(finite))
+      return(NULL)
+    yy <- as.numeric(y[finite])
+    quantiles <- as.numeric(stats::quantile(
+      yy, probs = (seq_len(k) - 0.5) / k,
+      names = FALSE, type = 7
+    ))
+
+    centers <- quantiles
+    cluster <- integer(length(yy))
+    for(iteration in seq_len(25L)) {
+      previous <- cluster
+      distance <- abs(outer(yy, centers, "-"))
+      cluster <- max.col(-distance, ties.method = "first")
+      counts <- tabulate(cluster, nbins = k)
+
+      if(length(yy) >= k && any(counts == 0L)) {
+        ordering <- order(yy, seq_along(yy))
+        ranked <- pmin(
+          k,
+          floor((seq_along(ordering) - 1L) * k / length(ordering)) + 1L
+        )
+        cluster[ordering] <- ranked
+        counts <- tabulate(cluster, nbins = k)
+      }
+      for(component in seq_len(k)) {
+        if(counts[component] > 0L)
+          centers[component] <- mean(yy[cluster == component])
+      }
+      if(identical(cluster, previous) || any(counts == 0L))
+        break
+    }
+    probabilities <- if(all(counts > 0L)) {
+      counts / sum(counts)
+    } else {
+      rep(1 / k, k)
+    }
+
+    list(
+      response = lapply(seq_len(k), function(component)
+        y[finite[cluster == component]]),
+      quantiles = quantiles,
+      centers = centers,
+      probabilities = probabilities
+    )
+  }
+
+  initializer_result <- function(fun, y, ...) {
+    if(!is.function(fun) || !length(y))
+      return(NULL)
+    value <- suppressWarnings(try(fun(y, ...), silent = TRUE))
+    if(inherits(value, "try-error") && is.null(dim(y))) {
+      value <- suppressWarnings(try(fun(matrix(y, ncol = 1L), ...),
+        silent = TRUE))
+    }
+    if(inherits(value, "try-error"))
+      return(NULL)
+    value
+  }
+
+  ## Reduce a component-family initializer to one component-level value.
+  initializer_value <- function(fun, y, ...) {
+    value <- initializer_result(fun, y, ...)
+    if(is.null(value))
+      return(NULL)
+    value <- suppressWarnings(as.numeric(value))
+    value <- value[is.finite(value)]
+    if(length(value)) mean(value) else NULL
+  }
+
+  ## Initial values are defined on the natural parameter scale. Only accept
+  ## values that remain finite after applying the parameter link.
+  valid_initial_values <- function(value, parameter) {
+    value <- suppressWarnings(as.numeric(value))
+    if(!length(value) || any(!is.finite(value)))
+      return(FALSE)
+    link <- make.link2(links[[parameter]])
+    eta <- suppressWarnings(try(link$linkfun(value), silent = TRUE))
+    !inherits(eta, "try-error") && length(eta) == length(value) &&
+      all(is.finite(eta))
+  }
+
+  valid_initial_value <- function(value, parameter) {
+    !is.null(value) && length(value) == 1L &&
+      valid_initial_values(value, parameter)
+  }
+
+  ## If a cluster estimate lies on a link boundary, add one observation at
+  ## the link-neutral value. This keeps log and logit starts in the interior.
+  initial_candidates <- function(value, parameter, n = 0L) {
+    if(is.null(value) || length(value) != 1L || !is.finite(value))
+      return(list())
+    candidates <- list(value)
+    if(!valid_initial_value(value, parameter) && n > 0L) {
+      link <- make.link2(links[[parameter]])
+      neutral <- suppressWarnings(link$linkinv(0))
+      regularized <- (n * value + neutral) / (n + 1)
+      if(valid_initial_value(regularized, parameter))
+        candidates[[2L]] <- regularized
+    }
+    candidates
+  }
+
+  component_initial_value <- function(y, component, inner, outer, ...) {
+    partition <- response_partition(y)
+    initializer <- components[[component]]$initialize[[inner]]
+    candidates <- list()
+
+    ## Preserve inherited observation-wise initialization for responses that
+    ## cannot be partitioned, provided it is valid on the linked scale.
+    if(is.null(partition)) {
+      value <- initializer_result(initializer, y, ...)
+      if(valid_initial_values(value, outer))
+        return(rep(as.numeric(value), length.out = length(y)))
+    }
+
+    if(!is.null(partition)) {
+      is_location <- inner %in% c("mu", "mean", "location")
+
+      value <- initializer_value(
+        initializer, partition$response[[component]], ...
+      )
+      candidates <- c(candidates, initial_candidates(
+        value, outer, length(partition$response[[component]])
+      ))
+      if(is_location) {
+        candidates <- c(candidates, initial_candidates(
+          partition$centers[component], outer,
+          length(partition$response[[component]])
+        ))
+        candidates <- c(candidates, initial_candidates(
+          partition$quantiles[component], outer,
+          length(partition$response[[component]])
+        ))
+      }
+    }
+
+    value <- initializer_value(initializer, y, ...)
+    candidates <- c(candidates, initial_candidates(value, outer, length(y)))
+
+    link <- make.link2(links[[outer]])
+    candidates[[length(candidates) + 1L]] <-
+      suppressWarnings(link$linkinv(0))
+    for(value in candidates) {
+      if(valid_initial_value(value, outer))
+        return(rep(as.numeric(value), length(y)))
+    }
+    stop("could not find a finite initial value for parameter '", outer,
+      "'", call. = FALSE)
+  }
+
+  for(component in seq_len(k)) {
+    map <- component_map[[component]]
+    for(inner in names(map)) {
+      outer <- unname(map[[inner]])
+      initializer <- components[[component]]$initialize[[inner]]
+      if(initialize_mode == "cluster") {
+        initializers[[outer]] <- local({
+          component_id <- component
+          inner_name <- inner
+          outer_name <- outer
+          function(y, ...) component_initial_value(
+            y, component_id, inner_name, outer_name, ...
+          )
+        })
+      } else if(initialize_mode == "separated" &&
+          inner %in% c("mu", "mean", "location")) {
         probability <- (component - 0.5) / k
         initializers[[outer]] <- local({
           prob <- probability
@@ -124,17 +317,27 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     }
   }
 
-  nonreference <- setdiff(seq_len(k), reference)
-  mixing_names <- paste0("pi", nonreference)
-  if(any(mixing_names %in% family_names))
-    stop("component and mixing parameter names overlap", call. = FALSE)
-
-  for(parameter in mixing_names) {
-    links[[parameter]] <- "log"
-    initializers[[parameter]] <- function(y, ...)
-      rep(1, length(y))
+  for(j in seq_along(nonreference)) {
+    component <- nonreference[j]
+    parameter <- mixing_names[j]
+    initializers[[parameter]] <- local({
+      component_id <- component
+      parameter_name <- parameter
+      function(y, ...) {
+        value <- 1
+        if(initialize_mode == "cluster") {
+          partition <- response_partition(y)
+          if(!is.null(partition)) {
+            value <- partition$probabilities[component_id] /
+              partition$probabilities[reference]
+          }
+        }
+        if(!valid_initial_value(value, parameter_name))
+          value <- 1
+        rep(value, length(y))
+      }
+    })
   }
-  family_names <- c(family_names, mixing_names)
 
   parameter_rows <- function(par, n = NULL) {
     lengths <- vapply(family_names, function(parameter) {

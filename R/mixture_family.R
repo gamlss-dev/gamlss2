@@ -70,7 +70,11 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       "'component'", call. = FALSE)
   }
 
-  components <- lapply(component_input, complete_family)
+  components <- if(is_component_list) {
+    lapply(component_input, complete_family)
+  } else {
+    rep(list(complete_family(component_input[[1L]])), k)
+  }
   if(any(!vapply(components, inherits, logical(1L),
       what = "gamlss2.family"))) {
     stop("all components must define gamlss2 families", call. = FALSE)
@@ -340,11 +344,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
   }
 
   parameter_rows <- function(par, n = NULL) {
-    lengths <- vapply(family_names, function(parameter) {
-      value <- par[[parameter]]
-      if(is.null(value)) 0L else length(value)
-    }, integer(1L))
-    max(c(1L, n, lengths))
+    max(c(1L, n, lengths(par[family_names])))
   }
 
   component_parameters <- function(par, component, n) {
@@ -353,7 +353,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       z <- par[[parameter]]
       if(is.null(z))
         stop("parameter '", parameter, "' is missing", call. = FALSE)
-      rep(z, length.out = n)
+      if(length(z) == n) z else rep(z, length.out = n)
     })
     names(value) <- names(map)
     value
@@ -369,7 +369,8 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       if(is.null(value))
         stop("mixing parameter '", mixing_names[j], "' is missing",
           call. = FALSE)
-      value <- rep(value, length.out = n)
+      if(length(value) != n)
+        value <- rep(value, length.out = n)
       if(any(!is.finite(value)) || any(value < 0))
         stop("mixing odds must be finite and nonnegative", call. = FALSE)
       odds[, component] <- value
@@ -382,18 +383,25 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
 
   component_logdensities <- function(par, y, ...) {
     n <- parameter_rows(par, length(y))
-    yy <- rep(y, length.out = n)
+    yy <- if(length(y) == n) y else rep(y, length.out = n)
     densities <- matrix(NA_real_, nrow = n, ncol = k)
     dots <- list(...)
     dots[c("par", "y", "log", "id")] <- NULL
 
     for(component in seq_len(k)) {
       component_par <- component_parameters(par, component, n)
-      value <- do.call(
-        components[[component]]$pdf,
-        c(list(par = component_par, y = yy, log = TRUE), dots)
-      )
-      value <- rep(as.numeric(value), length.out = n)
+      component_pdf <- components[[component]]$pdf
+      value <- if(length(dots)) {
+        do.call(
+          component_pdf,
+          c(list(par = component_par, y = yy, log = TRUE), dots)
+        )
+      } else {
+        component_pdf(par = component_par, y = yy, log = TRUE)
+      }
+      value <- as.numeric(value)
+      if(length(value) != n)
+        value <- rep(value, length.out = n)
       invalid <- is.na(value) & !is.na(yy)
       value[invalid] <- -Inf
       densities[, component] <- value
@@ -411,7 +419,11 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
 
   row_log_sum_exp <- function(x, missing = NULL) {
     x[is.na(x)] <- -Inf
-    maxima <- apply(x, 1L, max)
+    maxima <- x[, 1L]
+    if(ncol(x) > 1L) {
+      for(column in 2:ncol(x))
+        maxima <- pmax(maxima, x[, column])
+    }
     value <- rep(-Inf, nrow(x))
     finite <- is.finite(maxima)
     if(any(finite)) {
@@ -423,19 +435,31 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     value
   }
 
-  responsibility_matrix <- function(par, y, ...) {
-    n <- parameter_rows(par, length(y))
-    yy <- rep(y, length.out = n)
-    joint <- log_joint_density(par, yy, ...)
-    mixture <- row_log_sum_exp(joint, missing = is.na(yy))
+  responsibilities_from_parts <- function(logdensities, probabilities,
+    missing = NULL)
+  {
+    joint <- logdensities + log(probabilities)
+    mixture <- row_log_sum_exp(joint, missing = missing)
     responsibilities <- exp(joint - mixture)
 
-    invalid <- !is.finite(mixture) & !is.na(yy)
+    invalid <- !is.finite(mixture)
+    if(!is.null(missing))
+      invalid <- invalid & !missing
     if(any(invalid))
-      responsibilities[invalid, ] <- probability_matrix(par, n)[invalid, ]
+      responsibilities[invalid, ] <- probabilities[invalid, ]
 
     colnames(responsibilities) <- component_labels
     responsibilities
+  }
+
+  responsibility_matrix <- function(par, y, ...) {
+    n <- parameter_rows(par, length(y))
+    yy <- if(length(y) == n) y else rep(y, length.out = n)
+    probabilities <- probability_matrix(par, n)
+    logdensities <- component_logdensities(par, yy, ...)
+    responsibilities_from_parts(
+      logdensities, probabilities, missing = is.na(yy)
+    )
   }
 
   component_names <- vapply(components, function(x) {
@@ -485,16 +509,22 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
         score_function <- component_score
         function(par, y, ...) {
           n <- parameter_rows(par, length(y))
-          yy <- rep(y, length.out = n)
+          yy <- if(length(y) == n) y else rep(y, length.out = n)
           responsibilities <- responsibility_matrix(par, yy, ...)
           component_par <- component_parameters(par, component_id, n)
           dots <- list(...)
           dots[c("par", "y", "id")] <- NULL
-          score <- do.call(
-            score_function,
-            c(list(par = component_par, y = yy), dots)
-          )
-          score <- rep(as.numeric(score), length.out = n)
+          score <- if(length(dots)) {
+            do.call(
+              score_function,
+              c(list(par = component_par, y = yy), dots)
+            )
+          } else {
+            score_function(par = component_par, y = yy)
+          }
+          score <- as.numeric(score)
+          if(length(score) != n)
+            score <- rep(score, length.out = n)
           value <- responsibilities[, component_id] * score
           value[responsibilities[, component_id] == 0 & !is.finite(score)] <- 0
           value
@@ -515,6 +545,225 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
         responsibilities[, component_id] - probabilities[, component_id]
       }
     })
+  }
+
+  ## All parameter scores with a single responsibility calculation. This is
+  ## especially useful for optimizing intercept-only mixture models, where a
+  ## numerical gradient otherwise requires repeated full density evaluations.
+  fam$score_matrix <- function(par, y, ...) {
+    n <- parameter_rows(par, length(y))
+    yy <- if(length(y) == n) y else rep(y, length.out = n)
+    responsibilities <- responsibility_matrix(par, yy, ...)
+    value <- matrix(NA_real_, nrow = n, ncol = length(family_names),
+      dimnames = list(NULL, family_names))
+    dots <- list(...)
+    dots[c("par", "y", "id")] <- NULL
+
+    for(component in seq_len(k)) {
+      component_par <- component_parameters(par, component, n)
+      map <- component_map[[component]]
+      posterior <- responsibilities[, component]
+      for(inner in names(map)) {
+        outer <- unname(map[[inner]])
+        score_function <- components[[component]]$score[[inner]]
+        score <- if(length(dots)) {
+          do.call(
+            score_function,
+            c(list(par = component_par, y = yy), dots)
+          )
+        } else {
+          score_function(par = component_par, y = yy)
+        }
+        score <- as.numeric(score)
+        if(length(score) != n)
+          score <- rep(score, length.out = n)
+        z <- posterior * score
+        z[posterior == 0 & !is.finite(score)] <- 0
+        value[, outer] <- z
+      }
+    }
+
+    probabilities <- probability_matrix(par, n)
+    for(j in seq_along(nonreference)) {
+      component <- nonreference[j]
+      value[, mixing_names[j]] <- responsibilities[, component] -
+        probabilities[, component]
+    }
+    value
+  }
+
+  ## Compute mixture working responses and weights with a fused finite
+  ## difference. The generic numerical Hessian evaluates all component
+  ## densities for the center score and both perturbations. Here the center
+  ## densities are shared, and only the changed component density is
+  ## recomputed for a component-parameter perturbation. A mixing-parameter
+  ## perturbation reuses all component densities. This is algebraically the
+  ## same diagonal numerical Hessian used by complete_family().
+  outer_parameters <- unlist(component_map, use.names = FALSE)
+  parameter_component <- rep(seq_len(k), lengths(component_map))
+  names(parameter_component) <- outer_parameters
+  parameter_inner <- unlist(lapply(component_map, names), use.names = FALSE)
+  names(parameter_inner) <- outer_parameters
+  parameter_links <- lapply(links, make.link2)
+  parameter_link_type <- vapply(links, function(link) {
+    if(is.character(link) && length(link) == 1L &&
+        link %in% c("identity", "log")) {
+      link
+    } else {
+      "other"
+    }
+  }, character(1L))
+  hessian_step <- .Machine$double.eps^(1 / 3)
+
+  ## complete_family() otherwise builds a fully generic mapper that invokes a
+  ## link closure for every parameter. Mixtures often contain many repeated
+  ## identity and log links, so handle those common cases directly while
+  ## retaining the exact generic sanitation for non-finite values.
+  fam$map2par <- function(eta) {
+    for(parameter in names(eta)) {
+      value <- eta[[parameter]]
+      link_type <- parameter_link_type[[parameter]]
+      if(is.null(link_type))
+        stop("unknown mixture parameter: ", parameter, call. = FALSE)
+      if(link_type == "log") {
+        value <- pmax(exp(value), .Machine$double.eps)
+      } else if(link_type != "identity") {
+        value <- parameter_links[[parameter]]$linkinv(value)
+      }
+
+      bad <- !is.finite(value)
+      if(any(bad)) {
+        index <- is.na(value)
+        if(any(index))
+          value[index] <- 0
+        index <- value == Inf
+        if(any(index))
+          value[index] <- 10
+        index <- value == -Inf
+        if(any(index))
+          value[index] <- -10
+      }
+      eta[[parameter]] <- value
+    }
+    eta
+  }
+
+  normalize_result <- function(value, n) {
+    value <- as.numeric(value)
+    if(length(value) == n) value else rep(value, length.out = n)
+  }
+
+  component_logdensity <- function(component, component_par, y) {
+    value <- normalize_result(
+      components[[component]]$pdf(
+        par = component_par, y = y, log = TRUE
+      ),
+      length(y)
+    )
+    invalid <- is.na(value) & !is.na(y)
+    value[invalid] <- -Inf
+    value
+  }
+
+  weighted_component_score <- function(component, inner, component_par,
+    y, posterior)
+  {
+    score <- normalize_result(
+      components[[component]]$score[[inner]](
+        par = component_par, y = y
+      ),
+      length(y)
+    )
+    value <- posterior * score
+    value[posterior == 0 & !is.finite(score)] <- 0
+    value
+  }
+
+  fam$update <- function(par, y, eta, which) {
+    n <- parameter_rows(par, length(y))
+    yy <- if(length(y) == n) y else rep(y, length.out = n)
+    eta <- if(length(eta) == n) eta else rep(eta, length.out = n)
+    missing <- is.na(yy)
+    probabilities <- probability_matrix(par, n)
+    logdensities <- component_logdensities(par, yy)
+    responsibilities <- responsibilities_from_parts(
+      logdensities, probabilities, missing
+    )
+    link <- parameter_links[[which]]
+    if(is.null(link))
+      stop("unknown parameter in update(): ", which, call. = FALSE)
+
+    mixing_index <- match(which, mixing_names)
+    if(!is.na(mixing_index)) {
+      component <- nonreference[mixing_index]
+      posterior <- responsibilities[, component]
+      score <- posterior - probabilities[, component]
+
+      parameter_eta <- link$linkfun(par[[which]])
+      par_plus <- par_minus <- par
+      par_plus[[which]] <- link$linkinv(parameter_eta + hessian_step)
+      par_minus[[which]] <- link$linkinv(parameter_eta - hessian_step)
+
+      probabilities_plus <- probability_matrix(par_plus, n)
+      probabilities_minus <- probability_matrix(par_minus, n)
+      responsibilities_plus <- responsibilities_from_parts(
+        logdensities, probabilities_plus, missing
+      )
+      responsibilities_minus <- responsibilities_from_parts(
+        logdensities, probabilities_minus, missing
+      )
+      score_plus <- responsibilities_plus[, component] -
+        probabilities_plus[, component]
+      score_minus <- responsibilities_minus[, component] -
+        probabilities_minus[, component]
+    } else {
+      component <- unname(parameter_component[which])
+      inner <- unname(parameter_inner[which])
+      if(is.na(component) || is.na(inner))
+        stop("unknown parameter in update(): ", which, call. = FALSE)
+
+      component_par <- component_parameters(par, component, n)
+      score <- weighted_component_score(
+        component, inner, component_par, yy,
+        responsibilities[, component]
+      )
+
+      parameter_eta <- link$linkfun(par[[which]])
+      component_par_plus <- component_par_minus <- component_par
+      component_par_plus[[inner]] <- rep(
+        link$linkinv(parameter_eta + hessian_step), length.out = n
+      )
+      component_par_minus[[inner]] <- rep(
+        link$linkinv(parameter_eta - hessian_step), length.out = n
+      )
+
+      logdensities_plus <- logdensities_minus <- logdensities
+      logdensities_plus[, component] <- component_logdensity(
+        component, component_par_plus, yy
+      )
+      logdensities_minus[, component] <- component_logdensity(
+        component, component_par_minus, yy
+      )
+      responsibilities_plus <- responsibilities_from_parts(
+        logdensities_plus, probabilities, missing
+      )
+      responsibilities_minus <- responsibilities_from_parts(
+        logdensities_minus, probabilities, missing
+      )
+      score_plus <- weighted_component_score(
+        component, inner, component_par_plus, yy,
+        responsibilities_plus[, component]
+      )
+      score_minus <- weighted_component_score(
+        component, inner, component_par_minus, yy,
+        responsibilities_minus[, component]
+      )
+    }
+
+    hessian <- -(score_plus - score_minus) / (2 * hessian_step)
+    score <- deriv_checks(score, is.weight = FALSE)
+    hessian <- deriv_checks(hessian, is.weight = TRUE)
+    list(eta = eta + 1 / hessian * score, weights = hessian)
   }
 
   if(all(vapply(components, function(x) is.function(x$cdf),

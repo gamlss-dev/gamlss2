@@ -1,6 +1,7 @@
 \name{gamlss2.family} 
 \alias{gamlss2.family}
 \alias{family.gamlss2}
+\alias{print.gamlss2.family}
 
 \title{Family Objects in \pkg{gamlss2}}
 
@@ -14,10 +15,13 @@
 
 \usage{
 \method{family}{gamlss2}(object, ...)
+\method{print}{gamlss2.family}(x, full = TRUE, ...)
 }
 
 \arguments{
   \item{object}{A fitted \code{"gamlss2"} model object.}
+  \item{x}{A \code{"gamlss2.family"} object.}
+  \item{full}{Logical; print available family-specific and derivative functions?}
   \item{\dots}{Not used currently.}
 }
 

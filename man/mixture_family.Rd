@@ -82,6 +82,15 @@ mixture_family(families = NO, k = NULL, reference = 1L,
   are supplied numerically by the standard family completion
   infrastructure.
 
+  The family supplies a fused working-response update for estimation. It
+  uses the same finite-difference diagonal Hessian as the standard family
+  completion infrastructure, but shares the component densities at the
+  current parameters. For a component-parameter perturbation, only that
+  component's density is recomputed; mixing-parameter perturbations reuse
+  every component density. Repeated identity and log links are mapped
+  directly, and a single family repeated \code{k} times is completed only
+  once. These optimizations do not change the numerical updates.
+
   The default \code{initialize = "separated"} strategy places recognized
   component location parameters at ordered empirical midpoint quantiles.
   Other parameters retain their component-family initializers and mixing
@@ -132,6 +141,8 @@ mixture_family(families = NO, k = NULL, reference = 1L,
       probabilities.
     \item \code{responsibilities(par, y)}: posterior component
       probabilities conditional on observations.
+    \item \code{score_matrix(par, y)}: observation-wise scores for all
+      mixture parameters, evaluated with shared responsibilities.
     \item \code{components}: the completed component families.
     \item \code{component_map}: mappings from original component
       parameter names to mixture parameter names.

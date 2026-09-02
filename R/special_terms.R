@@ -322,6 +322,11 @@ ridge <- function(...)
 
 smooth.construct.lin.smooth.spec <- function(object, data, knots)
 {
+  if(is.null(object$formula)) {
+    object$formula <- as.formula(paste("~", paste(object$term, collapse = "+")))
+    object$ridge <- TRUE
+    object$scale <- TRUE
+  }
   object$X <- model.matrix(object$formula, data = if(is.list(data)) 
     data[all.vars(reformulate(names(data))) %in% all.vars(object$formula)]
     else data)

@@ -386,7 +386,21 @@ elm <- function(x, k = 50, a = "tanh", ...)
     st$control$scale <- TRUE
   st$control$termselect <- isTRUE(st$control$elastic)
   st$term <- xn
-  st$label <- gsub(" ", "", paste0("elm(", as.character(deparse(call[[2]])), ")"))
+
+  make_label <- function(v, max_terms = 3) {
+    n <- length(v)
+    if(n <= max_terms) {
+      inside <- paste(v, collapse = "+")
+    } else {
+      inside <- paste0(
+        paste0(v[1:(max_terms - 1)], collapse = "+"),
+        "+... [", n, "]"
+      )
+    }
+    paste0("elm(", inside, ")")
+  }
+
+  st$label <- make_label(xn)
 
   if(!is.null(formula)) {
     mf <- model.frame(formula, na.action = na.pass,

@@ -88,9 +88,37 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       call. = FALSE)
   }
 
+  ## Cache response-based starts because each parameter initializer is called
+  ## separately with the same response. For a one-column response matrix (as
+  ## returned by scale()), use its numeric column just like a numeric vector.
+  initialization_state <- new.env(parent = emptyenv())
+  initialization_state$response <- NULL
+  initialization_state$partition <- NULL
+  initialization_state$scale_floor <- NULL
+
+  lower_bound_link <- function(lower) {
+    link <- list(
+      linkfun = function(mu) log(mu - lower()),
+      linkinv = function(eta) lower() + exp(eta),
+      mu.eta = function(eta) exp(eta),
+      valideta = function(eta) all(is.finite(eta)),
+      name = "shifted log"
+    )
+    class(link) <- "link-glm"
+    link
+  }
+  scale_lower_bound <- function() {
+    value <- initialization_state$scale_floor
+    if(length(value) == 1L && is.finite(value) && value > 0) value else 0
+  }
+  jsu_tau_lower_bound <- function() {
+    if(scale_lower_bound() > 0) 1 else 0
+  }
+
   component_map <- vector("list", k)
   family_names <- character()
   links <- list()
+  component_parameter_links <- list()
   initializers <- list()
 
   for(component in seq_len(k)) {
@@ -107,7 +135,17 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     for(parameter in seq_along(inner_names)) {
       inner <- inner_names[parameter]
       outer <- outer_names[parameter]
-      links[[outer]] <- f$links[[inner]]
+      component_parameter_links[[outer]] <- make.link2(f$links[[inner]])
+      family_name <- as.character(f$family[1L])
+      links[[outer]] <- if(inner == "sigma" &&
+          identical(f$links[[inner]], "log")) {
+        lower_bound_link(scale_lower_bound)
+      } else if(inner == "tau" && identical(f$links[[inner]], "log") &&
+          grepl("^JSU", family_name, ignore.case = TRUE)) {
+        lower_bound_link(jsu_tau_lower_bound)
+      } else {
+        f$links[[inner]]
+      }
     }
   }
 
@@ -120,18 +158,132 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     links[[parameter]] <- "log"
   family_names <- c(family_names, mixing_names)
 
+  response_vector <- function(y) {
+    if(!is.numeric(y))
+      return(NULL)
+    if(!is.null(dim(y))) {
+      if(length(dim(y)) != 2L || ncol(y) != 1L)
+        return(NULL)
+      y <- y[, 1L]
+    }
+    as.numeric(y)
+  }
+
+  ## Locate well-separated modes of a continuous response. Starting at modes,
+  ## rather than marginal quantiles, avoids sending a component into a sparse
+  ## tail when the intended mixture is visibly multimodal. The bandwidth also
+  ## supplies a response-scaled lower bound that prevents the unbounded
+  ## continuous-mixture likelihood from collapsing a component onto a few
+  ## nearly identical observations.
+  modal_partition <- function(y) {
+    if(!identical(component_types[1L], "continuous"))
+      return(NULL)
+    yy <- response_vector(y)
+    if(is.null(yy))
+      return(NULL)
+    finite <- which(is.finite(yy))
+    if(length(finite) < max(20L, 5L * k) ||
+        length(unique(yy[finite])) < k) {
+      return(NULL)
+    }
+
+    values <- yy[finite]
+    bandwidth <- suppressWarnings(stats::bw.nrd0(values))
+    if(!is.finite(bandwidth) || bandwidth <= 0) {
+      spread <- stats::sd(values)
+      if(!is.finite(spread) || spread <= 0)
+        return(NULL)
+      bandwidth <- 0.9 * spread * length(values)^(-1 / 5)
+    }
+
+    estimate <- stats::density(
+      values, bw = bandwidth,
+      n = max(512L, 2L^ceiling(log2(length(values)))), cut = 0
+    )
+    maxima <- which(diff(sign(diff(estimate$y))) < 0) + 1L
+    if(estimate$y[1L] > estimate$y[2L])
+      maxima <- c(1L, maxima)
+    ngrid <- length(estimate$y)
+    if(estimate$y[ngrid] > estimate$y[ngrid - 1L])
+      maxima <- c(maxima, ngrid)
+    maxima <- maxima[
+      estimate$y[maxima] >= 0.05 * max(estimate$y)
+    ]
+    if(!length(maxima))
+      return(NULL)
+
+    maxima <- maxima[order(estimate$y[maxima], decreasing = TRUE)]
+    selected <- integer()
+    for(index in maxima) {
+      if(!length(selected) || all(abs(
+          estimate$x[index] - estimate$x[selected]
+        ) >= 2 * bandwidth)) {
+        selected <- c(selected, index)
+      }
+      if(length(selected) == k)
+        break
+    }
+    if(length(selected) < k)
+      return(NULL)
+
+    selected <- selected[order(estimate$x[selected])]
+    centers <- estimate$x[selected]
+    distance <- abs(outer(values, centers, "-"))
+    cluster <- max.col(-distance, ties.method = "first")
+    counts <- tabulate(cluster, nbins = k)
+    if(any(counts < max(5L, ceiling(0.01 * length(values)))))
+      return(NULL)
+
+    probabilities <- counts / sum(counts)
+    scales <- pmax(
+      bandwidth,
+      probabilities / (estimate$y[selected] * sqrt(2 * pi))
+    )
+    list(
+      response = lapply(seq_len(k), function(component)
+        values[cluster == component]),
+      quantiles = as.numeric(stats::quantile(
+        values, probs = (seq_len(k) - 0.5) / k,
+        names = FALSE, type = 7
+      )),
+      centers = centers,
+      probabilities = probabilities,
+      scales = scales,
+      bandwidth = bandwidth,
+      modal = TRUE
+    )
+  }
+
   ## Deterministic response clustering for the optional "cluster" strategy.
   ## Midpoint quantiles define ordered centers and observations are assigned
   ## to the nearest center. A rank partition prevents empty clusters when
   ## quantiles coincide.
   response_partition <- function(y) {
-    if(initialize_mode != "cluster" || !is.numeric(y) || !is.null(dim(y)))
+    if(initialize_mode == "component")
       return(NULL)
 
-    finite <- which(is.finite(y))
+    yy_all <- response_vector(y)
+    if(is.null(yy_all))
+      return(NULL)
+    if(identical(yy_all, initialization_state$response))
+      return(initialization_state$partition)
+
+    if(initialize_mode == "separated") {
+      partition <- modal_partition(yy_all)
+      initialization_state$response <- yy_all
+      initialization_state$partition <- partition
+      initialization_state$scale_floor <- if(is.null(partition)) {
+        NULL
+      } else {
+        0.8 * partition$bandwidth
+      }
+      return(partition)
+    }
+
+    finite <- which(is.finite(yy_all))
     if(!length(finite))
       return(NULL)
-    yy <- as.numeric(y[finite])
+    yy <- yy_all[finite]
     quantiles <- as.numeric(stats::quantile(
       yy, probs = (seq_len(k) - 0.5) / k,
       names = FALSE, type = 7
@@ -167,13 +319,18 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       rep(1 / k, k)
     }
 
-    list(
+    partition <- list(
       response = lapply(seq_len(k), function(component)
-        y[finite[cluster == component]]),
+        yy_all[finite[cluster == component]]),
       quantiles = quantiles,
       centers = centers,
-      probabilities = probabilities
+      probabilities = probabilities,
+      modal = FALSE
     )
+    initialization_state$response <- yy_all
+    initialization_state$partition <- partition
+    initialization_state$scale_floor <- NULL
+    partition
   }
 
   initializer_result <- function(fun, y, ...) {
@@ -236,17 +393,41 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     partition <- response_partition(y)
     initializer <- components[[component]]$initialize[[inner]]
     candidates <- list()
+    is_location <- inner %in% c("mu", "mean", "location")
 
     ## Preserve inherited observation-wise initialization for responses that
     ## cannot be partitioned, provided it is valid on the linked scale.
     if(is.null(partition)) {
+      if(initialize_mode == "separated" && is_location) {
+        yy <- response_vector(y)
+        yy <- yy[is.finite(yy)]
+        if(length(yy)) {
+          probability <- (component - 0.5) / k
+          value <- as.numeric(stats::quantile(
+            yy, probs = probability, names = FALSE, type = 7
+          ))
+          if(valid_initial_value(value, outer))
+            return(rep(value, length(y)))
+        }
+      }
       value <- initializer_result(initializer, y, ...)
       if(valid_initial_values(value, outer))
         return(rep(as.numeric(value), length.out = length(y)))
     }
 
     if(!is.null(partition)) {
-      is_location <- inner %in% c("mu", "mean", "location")
+      if(isTRUE(partition$modal) && is_location) {
+        candidates <- c(candidates, initial_candidates(
+          partition$centers[component], outer,
+          length(partition$response[[component]])
+        ))
+      }
+      if(isTRUE(partition$modal) && inner == "sigma") {
+        candidates <- c(candidates, initial_candidates(
+          partition$scales[component], outer,
+          length(partition$response[[component]])
+        ))
+      }
 
       value <- initializer_value(
         initializer, partition$response[[component]], ...
@@ -254,7 +435,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       candidates <- c(candidates, initial_candidates(
         value, outer, length(partition$response[[component]])
       ))
-      if(is_location) {
+      if(is_location && !isTRUE(partition$modal)) {
         candidates <- c(candidates, initial_candidates(
           partition$centers[component], outer,
           length(partition$response[[component]])
@@ -285,7 +466,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     for(inner in names(map)) {
       outer <- unname(map[[inner]])
       initializer <- components[[component]]$initialize[[inner]]
-      if(initialize_mode == "cluster") {
+      if(initialize_mode %in% c("separated", "cluster")) {
         initializers[[outer]] <- local({
           component_id <- component
           inner_name <- inner
@@ -293,27 +474,6 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
           function(y, ...) component_initial_value(
             y, component_id, inner_name, outer_name, ...
           )
-        })
-      } else if(initialize_mode == "separated" &&
-          inner %in% c("mu", "mean", "location")) {
-        probability <- (component - 0.5) / k
-        initializers[[outer]] <- local({
-          prob <- probability
-          fallback <- initializer
-          function(y, ...) {
-            if(is.numeric(y)) {
-              yy <- y[is.finite(y)]
-              if(length(yy)) {
-                value <- as.numeric(stats::quantile(
-                  yy, probs = prob, names = FALSE, type = 7
-                ))
-                return(rep(value, length(y)))
-              }
-            }
-            if(is.function(fallback))
-              return(fallback(y, ...))
-            rep(0, length(y))
-          }
         })
       } else if(is.function(initializer)) {
         initializers[[outer]] <- initializer
@@ -329,7 +489,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       parameter_name <- parameter
       function(y, ...) {
         value <- 1
-        if(initialize_mode == "cluster") {
+        if(initialize_mode %in% c("separated", "cluster")) {
           partition <- response_partition(y)
           if(!is.null(partition)) {
             value <- partition$probabilities[component_id] /
@@ -506,6 +666,8 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       component_score <- f$score[[inner]]
       fam$score[[outer]] <- local({
         component_id <- component
+        inner_name <- inner
+        outer_name <- outer
         score_function <- component_score
         function(par, y, ...) {
           n <- parameter_rows(par, length(y))
@@ -525,6 +687,9 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
           score <- as.numeric(score)
           if(length(score) != n)
             score <- rep(score, length.out = n)
+          score <- score * parameter_score_multiplier(
+            outer_name, component_par[[inner_name]]
+          )
           value <- responsibilities[, component_id] * score
           value[responsibilities[, component_id] == 0 & !is.finite(score)] <- 0
           value
@@ -577,6 +742,9 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
         score <- as.numeric(score)
         if(length(score) != n)
           score <- rep(score, length.out = n)
+        score <- score * parameter_score_multiplier(
+          outer, component_par[[inner]]
+        )
         z <- posterior * score
         z[posterior == 0 & !is.finite(score)] <- 0
         value[, outer] <- z
@@ -605,6 +773,16 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
   parameter_inner <- unlist(lapply(component_map, names), use.names = FALSE)
   names(parameter_inner) <- outer_parameters
   parameter_links <- lapply(links, make.link2)
+  parameter_score_multiplier <- function(parameter, value) {
+    component_link <- component_parameter_links[[parameter]]
+    mixture_link <- parameter_links[[parameter]]
+    component_eta <- component_link$linkfun(value)
+    mixture_eta <- mixture_link$linkfun(value)
+    multiplier <- mixture_link$mu.eta(mixture_eta) /
+      component_link$mu.eta(component_eta)
+    multiplier[!is.finite(multiplier)] <- 1
+    multiplier
+  }
   parameter_link_type <- vapply(links, function(link) {
     if(is.character(link) && length(link) == 1L &&
         link %in% c("identity", "log")) {
@@ -645,6 +823,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       }
       eta[[parameter]] <- value
     }
+
     eta
   }
 
@@ -673,6 +852,10 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
         par = component_par, y = y
       ),
       length(y)
+    )
+    outer <- unname(component_map[[component]][inner])
+    score <- score * parameter_score_multiplier(
+      outer, component_par[[inner]]
     )
     value <- posterior * score
     value[posterior == 0 & !is.finite(score)] <- 0

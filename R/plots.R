@@ -107,13 +107,17 @@ plot.gamlss2 <- function(x, parameter = NULL,
         if(!is.factor(x$results$effects[[j]][[1L]])) {
           xn <- colnames(x$results$effects[[j]])
           xn <- xn[!(xn %in% c("lower", "upper", "fit"))]
+          args <- list(...)
+          if(is.null(args$ylim))
+            args$ylim <- ylim[[p]]
+          args$x <- x$results$effects[[j]]
           if(length(xn) < 2) {
-            plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+            do.call("plot_smooth_effect", args)
           } else {
             if(any(sapply(x$results$effects[[j]], is.factor))) {
-              plot_smooth_effect(x$results$effects[[j]], ylim = ylim[[p]], ...)
+              do.call("plot_smooth_effect", args)
             } else {
-              plot_smooth_effect_2d(x$results$effects[[j]], ylim = ylim[[p]], ...)
+              do.call("plot_smooth_effect_2d", args)
             }
           }
         } else {

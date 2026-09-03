@@ -424,12 +424,13 @@ calibration <- function(..., newdata = NULL,
   }
 
   if(is.null(xlim))
-    xlim <- c(0, 1)
+    xlim <- c(0, max(res$probs))
   if(is.null(ylim))
-    ylim <- c(0, 1)
+    ylim <- c(0, max(res$probs))
 
   graphics::plot(NA, NA, xlim = xlim, ylim = ylim,
     xlab = xlab, ylab = ylab, main = main)
+  graphics::grid(col = "lightgray", lty = 2)
   graphics::abline(0, 1, lty = 2, col = "grey50")
 
   for(m in seq_len(n_models)) {
@@ -437,8 +438,9 @@ calibration <- function(..., newdata = NULL,
     if(!nrow(ri))
       next
 
-    cex <- sqrt(ri$n) / max(sqrt(ri$n))
+    cex <- 1 + sqrt(ri$n) / max(sqrt(ri$n))
     graphics::points(ri$probs, ri$y, pch = 16, col = col[m], cex = cex)
+    graphics::points(ri$probs, ri$y, pch = 1, col = 1, cex = cex)
 
     if(isTRUE(add_loess) && nrow(ri) >= 3L) {
       lo <- stats::loess(y ~ probs, data = ri)

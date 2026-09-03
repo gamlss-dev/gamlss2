@@ -464,17 +464,22 @@ plot_hist <- function(x, ...)
   x <- na.omit(x)
   h <- hist(x, breaks = "Scott", plot = FALSE)
   d <- density(x)
-  ylim <- list(...)$ylim
-  if(is.null(ylim))
-    ylim <- range(c(h$density, d$y))
-  main <- list(...)$main
-  if(is.null(main))
-    main <- "Histogram and Density"
-  xlab <- list(...)$xlab
-  if(is.null(xlab))
-    xlab <- "Quantile Residuals"
-  hist(x, breaks = "Scott", freq = FALSE, ylim = ylim,
-    xlab = xlab, main = main, ...)
+
+  args <- list(...)
+
+  if(is.null(args$ylim))
+    args$ylim <- range(c(h$density, d$y))
+  if(is.null(args$main))
+    args$main <- "Histogram and Density"
+  if(is.null(args$xlab))
+    args$xlab <- "Quantile Residuals"
+
+  args$x <- x
+  args$freq <- FALSE
+  args$breaks <- "Scott"
+ 
+  do.call("hist", args)
+
   lines(d, lwd = 2, col = 4)
   rug(x, col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 }

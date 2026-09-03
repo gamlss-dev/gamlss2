@@ -1388,15 +1388,17 @@ plot_lasso <- function(x, terms = NULL,
       if(is.null(ylab))
         ylab <- if(which == "criterion") toupper(x$criterion) else "Coefficients"
 
+      ylim <- list(...)$ylim
+
       if(which == "criterion") {
         plot(log(lambdas), ic, type = "l", lwd = lwd, col = col,
           xlab = xlab, ylab = ylab,
-          main = "", axes = FALSE, xlim = xlim)
+          main = "", axes = FALSE, xlim = xlim, ylim = ylim)
       } else {
         matplot(log(lambdas), cm,
           type = "l", lty = 1, lwd = lwd, col = col,
           xlab = xlab, ylab = ylab,
-          main = "", axes = FALSE, xlim = xlim)
+          main = "", axes = FALSE, xlim = xlim, ylim = ylim)
 
         names <- list(...)$names
         if(is.null(names))

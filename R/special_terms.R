@@ -1419,26 +1419,63 @@ plot_lasso <- function(x, terms = NULL,
           if(!all(names == "")) {
             at <- cm[1, ]
 
-            labs <- labs0 <- names
-            plab <- at
-            o <- order(plab, decreasing = TRUE)
-            labs <- labs[o]
-            plab <- plab[o]
-            rplab <- diff(range(plab))
-            if(length(plab) > 2L) {
-              for(i in 1:(length(plab) - 1)) {
-                dp <- abs(plab[i] - plab[i + 1]) / (rplab + 1e-08)
-                if((dp <= 0.02) || (rplab <= 0.02)) {
-                  labs[i + 1] <- paste(c(labs[i], labs[i + 1]), collapse = ",")
-                  labs[i] <- ""
-                }
+            ## Sort coefficient endpoints from top to bottom.
+            o <- order(at, decreasing = TRUE)
+            plab <- at[o]
+            labs <- names[o]
+
+            ## Minimum vertical separation needed for one line of text,
+            ## expressed in the coordinates of the current plotting window.
+            cex.axis <- par("cex.axis")
+
+            label.spacing <- list(...)$label.spacing
+            if(is.null(label.spacing))
+              label.spacing <- 1.2
+
+            minsep <- label.spacing * strheight(
+              "M",
+              units = "user",
+              cex = cex.axis
+            )
+
+            ## Form groups of labels that are too close vertically.
+            grp <- integer(length(plab))
+            grp[1L] <- 1L
+
+            if(length(plab) > 1L) {
+              for(i in 2:length(plab)) {
+                grp[i] <- grp[i - 1L] +
+                  as.integer(abs(plab[i - 1L] - plab[i]) > minsep)
               }
             }
-            labs <- labs[order(o)]
 
-            if(!all(labs == "")) {
-              axis(4, at = at, labels = labs, las = 1, gap.axis = -1)
-            }
+            ii <- split(seq_along(plab), grp)
+
+            ## Combine labels within a group and center the resulting
+            ## multiline label on the corresponding coefficient endpoints.
+            labs2 <- vapply(ii, function(j) {
+                lj <- labs[j][!is.na(labs[j])]
+                paste(lj, collapse = ",")
+              }, character(1L))
+
+            at2 <- vapply(ii, function(j)
+              mean(plab[j]),
+              numeric(1L))
+
+            ## Keep ticks at the actual coefficient endpoints.
+            axis(4,
+              at = at,
+              labels = FALSE
+            )
+
+            ## Draw labels separately, with merged labels centered on their group.
+            axis(4,
+              at = at2,
+              labels = labs2,
+              tick = FALSE,
+              las = 1,
+              gap.axis = -1
+            )
           }
         }
       }

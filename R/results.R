@@ -238,6 +238,39 @@ results.gamlss2 <- function(x, data = NULL, ...)
 
 '%||%' <- function(a, b) if (!is.null(a)) a else b
 
+## Helper to remove any offsets.
+remove_offset <- function(f) {
+  tt <- terms(f, specials = "offset")
+  labs <- attr(tt, "term.labels")
+
+  ## Remove offset terms.
+  labs <- labs[!grepl("^offset\\(", labs)]
+
+  ## Response, if present.
+  response <- if(length(f) == 3L)
+    paste(deparse(f[[2L]]), collapse = "")
+  else
+    NULL
+
+  ## Nothing left after removing the offset.
+  if(!length(labs)) {
+    if(is.null(response))
+      return(as.formula("~ 1", env = environment(f)))
+    else
+      return(as.formula(
+        paste(response, "~ 1"),
+        env = environment(f)
+      ))
+  }
+
+  reformulate(
+    labs,
+    response = response,
+    intercept = attr(tt, "intercept"),
+    env = environment(f)
+  )
+}
+
 results_linear <- function(x, parameter = NULL, data, ...)
 {
   if(is.null(parameter)) {
@@ -332,7 +365,7 @@ results_linear <- function(x, parameter = NULL, data, ...)
     if(is.null(V) || is.null(cj))
       next
 
-    fj <- formula(ff, lhs = 0, rhs = k)
+    fj <- remove_offset(formula(ff, lhs = 0, rhs = k))
     mt <- terms(fj, data = data)
     labels <- attr(mt, "term.labels")
     model_variables <- intersect(all.vars(fj), names(data))

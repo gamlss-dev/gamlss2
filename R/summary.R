@@ -19,6 +19,15 @@ coef.gamlss2 <- function(object, full = FALSE, drop = TRUE, ...)
         cos[[i]] <- list("s" = list())
       for(j in names(object$fitted.specials[[i]])) {
         cij <- object$fitted.specials[[i]][[j]]$coefficients
+        if(!is.null(names(cij))) {
+          ## BS stores fully qualified coefficient names, while unlist()
+          ## below adds the names of the enclosing model and term again.
+          ## Reduce such names to their term-local part first.
+          prefix <- paste0(i, ".s.", j, ".")
+          while(length(k <- which(startsWith(names(cij), prefix)))) {
+            names(cij)[k] <- substring(names(cij)[k], nchar(prefix) + 1L)
+          }
+        }
         lambdas <- NULL
         if(isTRUE(list(...)$lambdas)) {
           lambdas <- object$fitted.specials[[i]][[j]]$lambdas
@@ -671,8 +680,27 @@ coef.bamlss2 <- function(object, ..., FUN = mean) {
   nc <- nc[!grepl(".p.alpha", nc, fixed = TRUE)]
   if(!length(nc))
     return(numeric(0L))
-  samps <- object$samples[, nc, drop = FALSE]
+
+  ## Smooth variances are sampled as tau, but coef.gamlss2() exposes the
+  ## corresponding smoothing parameters as lambda = 1 / tau.
+  sample_names <- nc
+  is_lambda <- grepl("\\.lambda[[:digit:]]+$", sample_names)
+  sample_names[is_lambda] <- sub(
+    "\\.lambda([[:digit:]]+)$", ".tau\\1", sample_names[is_lambda])
+
+  missing_names <- !sample_names %in% colnames(object$samples)
+  if(any(missing_names)) {
+    stop("no samples found for coefficient(s): ",
+      paste(nc[missing_names], collapse = ", "))
+  }
+
+  samps <- object$samples[, sample_names, drop = FALSE]
+  if(any(is_lambda))
+    samps[, is_lambda] <- 1 / samps[, is_lambda]
+  colnames(samps) <- nc
   res <- apply(samps, 2, FUN = FUN)
+  if(is.null(dim(res)))
+    class(res) <- "coef.gamlss2"
   return(res)
 }
 

@@ -541,7 +541,6 @@ predict.ALDfit <- function(object, newdata = NULL, ...)
   ans
 }
 
-
 print.ALDfit <- function(x, ...)
 {
   requested <- x$diagnostics[x$diagnostics$requested, , drop = FALSE]

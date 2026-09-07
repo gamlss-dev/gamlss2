@@ -163,10 +163,27 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         for(i in sterms[[j]]) {
           sfit[[j]][[i]] <- list("fitted.values" = rep(0.0, n), "edf" = 0.0, "selected" = FALSE)
           if(!is.null(cstart)) {
-            sj <- grep(paste0(j, ".s.", i), names(cstart), fixed = TRUE, value = TRUE)
-            if(length(sj)) {
-              if(!is.null(specials[[i]]$X)) {
-                sfit[[j]][[i]]$fitted.values <- drop(specials[[i]]$X %*% cstart[sj])
+            prefix <- paste0(j, ".s.", i, ".")
+            sj <- names(cstart)[startsWith(names(cstart), prefix)]
+            sjb <- sj[!grepl(".lambda", sj, fixed = TRUE)]
+            sjb <- sjb[!grepl(".tau", sjb, fixed = TRUE)]
+            if(length(sjb)) {
+              if(!is.null(specials[[i]]$X) &&
+                  length(sjb) == ncol(specials[[i]]$X)) {
+                bstart <- as.numeric(cstart[sjb])
+                sfit[[j]][[i]]$fitted.values <- drop(specials[[i]]$X %*% bstart)
+                sfit[[j]][[i]]$coefficients <- bstart
+                sfit[[j]][[i]]$vcov <- matrix(
+                  NA_real_, length(bstart), length(bstart)
+                )
+                sfit[[j]][[i]]$transfer <- list(
+                  "coefficients" = bstart,
+                  "names" = colnames(specials[[i]]$X)
+                )
+                sjl <- sj[grepl(".lambda", sj, fixed = TRUE)]
+                if(length(sjl))
+                  sfit[[j]][[i]]$transfer$lambdas <- as.numeric(cstart[sjl])
+                sfit[[j]][[i]]$.from_start <- TRUE
                 if(control$binning) {
                   sfit[[j]][[i]]$fitted.values <- sfit[[j]][[i]]$fitted.values[specials[[i]]$binning$match.index]
                 }
@@ -590,6 +607,19 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 ll02 <- ll1
                 ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
               } else {
+                ## A coefficient warm start can already be better than the
+                ## first working-model fit.  Keep its predictor in that case,
+                ## but retain the freshly computed inferential metadata so the
+                ## fitted smooth is a complete object.
+                if(isTRUE(sfit[[j]][[k]]$.from_start)) {
+                  old <- sfit[[j]][[k]]
+                  fs$fitted.values <- old$fitted.values
+                  fs$coefficients <- old$coefficients
+                  fs$selected <- TRUE
+                  if(!is.null(fs$transfer))
+                    fs$transfer$coefficients <- old$coefficients
+                  sfit[[j]][[k]] <- fs
+                }
                 if(control$autostep) {
                   step[[j]]$sterms[k] <- step[[j]]$sterms[k] * 0.5
                 }
@@ -688,6 +718,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       if(length(sfit[[j]])) {
         drop <- NULL
         for(i in names(sfit[[j]])) {
+          sfit[[j]][[i]]$.from_start <- NULL
           if(isTRUE(control$light) || stepwise_candidate) {
             sfit[[j]][[i]]$fitted.values <- NULL
           }

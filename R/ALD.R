@@ -7,22 +7,18 @@ ALD <- function(tau = 0.5)
   tau_info <- tau * (1 - tau)
   inv_tau_info <- 1 / tau_info
 
-  ## Check / pinball loss
+  ## Check / pinball loss.
   rho <- function(u) {
     u * (tau - (u < 0))
   }
 
   ## Subgradient wrt mu.
-  ##
-  ## At r = 0, tau - 1/2 is the midpoint of the
-  ## valid subgradient interval [tau - 1, tau].
   psi_mu <- function(r) {
     tau - (r < 0) - 0.5 * (r == 0)
   }
 
-  ## ALD quantile helper
+  ## ALD quantile helper.
   qald <- function(p, mu, sigma) {
-
     n <- max(length(p), length(mu), length(sigma))
 
     p <- rep_len(p, n)
@@ -38,27 +34,18 @@ ALD <- function(tau = 0.5)
     hi <- !is.na(p) & !lo
 
     if(any(lo)) {
-      out[lo] <-
-        mu[lo] +
-        sigma[lo] *
-        (log(p[lo]) - log(tau)) /
-        (1 - tau)
+      out[lo] <- mu[lo] + sigma[lo] * (log(p[lo]) - log(tau)) / (1 - tau)
     }
 
     if(any(hi)) {
-      out[hi] <-
-        mu[hi] -
-        sigma[hi] *
-        (log1p(-p[hi]) - log1p(-tau)) /
-        tau
+      out[hi] <- mu[hi] - sigma[hi] * (log1p(-p[hi]) - log1p(-tau)) / tau
     }
 
     out
   }
 
-
   fam <- list(
-    family = "ALDQR_RS",
+    family = "ALD",
     names = c("mu", "sigma"),
     links = c(
       mu = "identity",
@@ -252,7 +239,6 @@ ALD <- function(tau = 0.5)
         weights = tau_info / (sigma * sigma)
       ))
     }
-
     if(identical(which, "sigma")) {
       u <- (y - par$mu) / par$sigma
       return(list(
@@ -260,7 +246,6 @@ ALD <- function(tau = 0.5)
         weights = rep.int(1, length(y))
       ))
     }
-
     stop("unknown ALD parameter: ", which)
   }
 
@@ -570,6 +555,7 @@ print.ALDfit <- function(x, ...)
   )
   invisible(x)
 }
+
 if(FALSE) {
   library("gamlss2")
   data("mcycle", package = "MASS")

@@ -31,6 +31,7 @@ importFrom("distributions3", "variance", "pdf", "cdf", "skewness",
   "log_pdf", "log_likelihood", "support", "score", "hessian")
 
 export(
+  "ALD",
   "fake_formula",
   "gamlss2",
   "gamlss2.formula",
@@ -55,6 +56,7 @@ export(
   "available_families",
   "find_family",
   "fit_family",
+  "fit_ALD",
   "find_gamlss2",
   "response_name",
   "stepwise",
@@ -90,9 +92,11 @@ S3method(plot, gamlss2)
 S3method(plot, gamlss2.list)
 S3method(plot, gamlss2.residuals)
 S3method(predict, gamlss2)
+S3method(predict, ALDfit)
 S3method(model.frame, gamlss2)
 S3method(model.matrix, gamlss2)
 S3method(fitted, gamlss2)
+S3method(fitted, ALDfit)
 S3method(residuals, gamlss2)
 S3method(family, gamlss2)
 S3method(logLik, gamlss2)
@@ -124,6 +128,7 @@ S3method(coef, bamlss2)
 S3method(summary, gamlss2)
 S3method(summary, bamlss2)
 S3method(print, gamlss2)
+S3method(print, ALDfit)
 S3method(print, gamlss2.family)
 S3method(print, summary.gamlss2)
 S3method(print, coef.gamlss2)

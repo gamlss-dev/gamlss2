@@ -13,7 +13,8 @@ of the response distribution.
 \usage{
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, ...)
+  se.fit = FALSE, drop = TRUE, ..., interval = c("none", "wald"),
+  level = 0.95, interval.cache = NULL)
 }
 \arguments{
   \item{object}{A model object of class \code{\link{gamlss2}}.}
@@ -36,6 +37,14 @@ of the response distribution.
     by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
   \item{drop}{Logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data frame (\code{FALSE})?}
+  \item{interval}{\code{"none"} retains the existing prediction behavior.
+    \code{"wald"} requests analytical, approximate pointwise confidence
+    bands without generating coefficient samples or calling \code{vcov()}.}
+  \item{level}{Confidence level for Wald bands, strictly between zero and one.}
+  \item{interval.cache}{Optional information factor obtained from the
+    \code{"interval.cache"} attribute of a previous Wald prediction for the
+    same, unchanged model. Reusing it avoids rebuilding the joint information
+    matrix for subsequent predictions.}
   \item{...}{Further control arguments. Supported aliases are \code{what} and
     \code{parameter} for \code{model}. Additional arguments are used for
     simulation-based summaries, including \code{FUN}, \code{R}, \code{seed},
@@ -43,25 +52,34 @@ of the response distribution.
 }
 
 \details{
-Prediction for a \code{\link{gamlss2}} object proceeds in stages. First, the
-required model terms are evaluated for the original data or for \code{newdata}.
-These terms are then added to form the full additive predictor for each
-distribution parameter. Applying the inverse link function yields the predicted
-distribution parameters. If requested, the mean of the corresponding response
-distribution is computed in a final step.
+Predictions can be computed for the original observations or for \code{newdata}.
+Depending on \code{type}, results are returned on the link scale, as distribution
+parameters, as individual model terms, or as the fitted response mean.
 
-If \code{se.fit = TRUE}, or if a summary function is supplied via \code{FUN},
-predictions are based on simulation draws from the approximate multivariate
-normal distribution of the fitted coefficients, unless the object already
-contains stored draws in \code{samples}. For objects of class \code{"bamlss2"},
-stored posterior draws are used directly.
+If \code{se.fit = TRUE}, standard errors are obtained from coefficient draws.
+Existing draws stored in the fitted object are used when available; otherwise,
+draws are generated from the approximate distribution of the fitted coefficients.
 
-For \code{type = "terms"}, the \code{terms} argument is matched against linear
-and special-term labels. By default, partial matching is used; set
-\code{nogrep = TRUE} in \code{...} to require exact matching.
+With \code{interval = "wald"}, approximate pointwise confidence intervals and
+standard errors are computed analytically, without simulation. Intervals on
+transformed parameter or response scales are transformed as needed and may be
+asymmetric. These are confidence intervals for the fitted model, not prediction
+intervals for future observations, and they do not include smoothing-parameter
+or model-selection uncertainty.
 
-See also \code{\link{prodist.gamlss2}} for setting up a full \pkg{distributions3} object
-from which moments, probabilities, quantiles, or random numbers can be obtained.
+Wald intervals currently support maximum-likelihood fits with linear terms and
+standard \pkg{mgcv} smooths. They are not available for Bayesian fits, custom
+special terms, or automatic term-selection penalties. Wald intervals cannot be
+combined with simulation controls such as \code{FUN}, \code{R}, \code{seed}, or
+\code{burnin}. The optional \code{interval.cache} can be reused for repeated
+predictions from the same unchanged model.
+
+For \code{type = "terms"}, term names are partially matched by default. Use
+\code{nogrep = TRUE} in \code{...} for exact matching.
+
+See also \code{\link{prodist.gamlss2}} for creating a full
+\pkg{distributions3} object for moments, probabilities, quantiles, and random
+numbers.
 }
 
 \value{
@@ -71,6 +89,14 @@ For \code{type = "terms"}, a data frame is returned with one column per selected
 Multi-parameter models return a list of term matrices.
 For \code{se.fit = TRUE}, the returned object contains fitted values and
 corresponding simulation-based standard errors.
+
+With \code{interval = "wald"}, a list with elements \code{fit}, \code{se.fit},
+\code{lower}, and \code{upper} is returned. Each element follows the structure
+of the ordinary point prediction, including \code{model}, \code{terms}, and
+\code{drop} selection. The \code{fit} element is the ordinary, non-simulated
+prediction. Attributes record the confidence level, method, and reusable
+\code{interval.cache}. The cache retains a reference to the fitted model;
+reuse it only with that unchanged model.
 }
 
 \seealso{
@@ -108,6 +134,11 @@ quantile(m, newdata = nd, probs = c(0.1, 0.5, 0.9))
 
 ## standard errors
 predict(m, newdata = nd, se.fit = TRUE, R = 200)
+
+## fast pointwise confidence bands, without sampling
+bands <- predict(m, newdata = nd, interval = "wald", level = 0.95)
+bands$lower
+bands$upper
 }
 
 \keyword{regression}

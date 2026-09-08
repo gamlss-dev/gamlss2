@@ -1,8 +1,14 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
   model = NULL, newdata = NULL, type = c("parameter", "link", "response", "terms"), 
-  terms = NULL, se.fit = FALSE, drop = TRUE, ...)
+  terms = NULL, se.fit = FALSE, drop = TRUE, ...,
+  interval = c("none", "wald"), level = 0.95, interval.cache = NULL)
 {
+  interval <- match.arg(interval)
+  if(interval == "wald")
+    return(predict_wald(object, model, newdata, match.arg(type), terms,
+      drop, list(...), level, interval.cache))
+
   ## FIXME: se.fit, terms ...
   samples <- NULL
   if(se.fit || !is.null(list(...)$FUN) || inherits(object, "bamlss2")) {

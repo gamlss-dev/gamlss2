@@ -48,6 +48,8 @@ mixture_family(families = NO, k = NULL, reference = 1L,
     component-specific parameter and mixing-probability starts.
     \code{FALSE} or \code{"component"} uses the unmodified
     component-family initializers and equal mixing probabilities.
+    \code{"modal"} uses separated density modes when available, with
+    response-scaled lower bounds for recognized scale parameters.
   }
 }
 
@@ -110,6 +112,17 @@ mixture_family(families = NO, k = NULL, reference = 1L,
   intercept-only or otherwise simple mixtures, but is not uniformly better
   for mixture regression.
 
+  With \code{initialize = "modal"}, sufficiently separated modes of a
+  kernel density estimate initialize continuous component locations and
+  scales, with mixing probabilities based on nearest-mode assignments.
+  If suitable modes cannot be found, this falls back to separated starts.
+  When modes are found, log-linked \code{sigma} parameters use a shifted
+  log link with lower bound 0.8 times the density bandwidth, and log-linked
+  JSU \code{tau} parameters have lower bound one. These bounds remain in
+  effect during fitting: this option changes the admissible parameter
+  space, not just the starting values. Other strategies retain the
+  component-family links without these bounds.
+
   Every proposed natural-scale value is checked after applying its link.
   Values on a link boundary are shrunk toward the inverse-link value at
   zero using one pseudo-observation. If a cluster-specific value remains
@@ -162,6 +175,11 @@ d <- faithful[order(faithful$eruptions), ]
 
 ## construct and estimate a two-normal mixture
 fam <- mixture_family(NO, k = 2)
+
+## fit mixture pdf
+fit_family(d$waiting, family = fam)
+
+## mixture of experts model
 m <- gamlss2(waiting ~ s(eruptions) | . | . | . | ., data = d, family = fam)
 
 ## estimated effects

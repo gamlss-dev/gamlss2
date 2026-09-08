@@ -63,11 +63,11 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
   } else if(is.character(initialize) && length(initialize) == 1L &&
       !is.na(initialize)) {
     initialize_mode <- match.arg(
-      initialize, c("separated", "cluster", "component")
+      initialize, c("separated", "cluster", "component", "modal")
     )
   } else {
-    stop("'initialize' must be TRUE, FALSE, 'separated', 'cluster', or ",
-      "'component'", call. = FALSE)
+    stop("'initialize' must be TRUE, FALSE, 'separated', 'cluster', ",
+      "'component', or 'modal'", call. = FALSE)
   }
 
   components <- if(is_component_list) {
@@ -137,10 +137,11 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       outer <- outer_names[parameter]
       component_parameter_links[[outer]] <- make.link2(f$links[[inner]])
       family_name <- as.character(f$family[1L])
-      links[[outer]] <- if(inner == "sigma" &&
+      links[[outer]] <- if(initialize_mode == "modal" && inner == "sigma" &&
           identical(f$links[[inner]], "log")) {
         lower_bound_link(scale_lower_bound)
-      } else if(inner == "tau" && identical(f$links[[inner]], "log") &&
+      } else if(initialize_mode == "modal" && inner == "tau" &&
+          identical(f$links[[inner]], "log") &&
           grepl("^JSU", family_name, ignore.case = TRUE)) {
         lower_bound_link(jsu_tau_lower_bound)
       } else {
@@ -259,7 +260,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
   ## to the nearest center. A rank partition prevents empty clusters when
   ## quantiles coincide.
   response_partition <- function(y) {
-    if(initialize_mode == "component")
+    if(initialize_mode %in% c("component", "separated"))
       return(NULL)
 
     yy_all <- response_vector(y)
@@ -268,7 +269,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     if(identical(yy_all, initialization_state$response))
       return(initialization_state$partition)
 
-    if(initialize_mode == "separated") {
+    if(initialize_mode == "modal") {
       partition <- modal_partition(yy_all)
       initialization_state$response <- yy_all
       initialization_state$partition <- partition
@@ -398,7 +399,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     ## Preserve inherited observation-wise initialization for responses that
     ## cannot be partitioned, provided it is valid on the linked scale.
     if(is.null(partition)) {
-      if(initialize_mode == "separated" && is_location) {
+      if(initialize_mode %in% c("separated", "modal") && is_location) {
         yy <- response_vector(y)
         yy <- yy[is.finite(yy)]
         if(length(yy)) {
@@ -466,7 +467,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
     for(inner in names(map)) {
       outer <- unname(map[[inner]])
       initializer <- components[[component]]$initialize[[inner]]
-      if(initialize_mode %in% c("separated", "cluster")) {
+      if(initialize_mode %in% c("separated", "cluster", "modal")) {
         initializers[[outer]] <- local({
           component_id <- component
           inner_name <- inner
@@ -489,7 +490,7 @@ mixture_family <- function(families = NO, k = NULL, reference = 1L,
       parameter_name <- parameter
       function(y, ...) {
         value <- 1
-        if(initialize_mode %in% c("separated", "cluster")) {
+        if(initialize_mode %in% c("cluster", "modal")) {
           partition <- response_partition(y)
           if(!is.null(partition)) {
             value <- partition$probabilities[component_id] /

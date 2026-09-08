@@ -220,6 +220,9 @@ calc_XWXz <- function(x, w, z, XWX = NULL)
 calc_smooth_wfit <- function(XWX, XWz, penalties, lambda, ridge,
   zWz, n, K, criterion, final = FALSE)
 {
+  ## mgcv represents an unpenalized (fx = TRUE) smooth with S = NULL.
+  if(is.null(penalties))
+    penalties <- list()
   .Call(
     "calc_smooth_wfit",
     XWX, as.numeric(XWz), penalties, as.numeric(lambda),
@@ -272,6 +275,11 @@ smooth.construct_dr <- function(XWX, XWz, S, ridge = 1e-05)
 ## Fitting function for mgcv smooth terms.
 smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
+  ## Fixed smooths can omit S entirely. Normalize with exact lookup: x$S
+  ## would otherwise partially match S.scale and return a numeric vector.
+  if(is.null(x[["S", exact = TRUE]]))
+    x$S <- list()
+
   ## Number of observations.
   n <- length(z)
 
@@ -578,8 +586,9 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       }
     }
 
-    ## Check for fx = TRUE.
-    if(isTRUE(x$fixed)) {
+    ## Check for fx = TRUE. Fully fixed tensor smooths may not have a scalar
+    ## fixed flag, but without penalties there is nothing to optimize.
+    if(isTRUE(x$fixed) || !length(x$S)) {
       if(is.null(x$sp)) {
         np <- if(length(x$S)) length(x$S) else 1L
         x$sp <- rep(1e-10, np)

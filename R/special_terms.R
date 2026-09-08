@@ -1856,7 +1856,7 @@ fk <- function(x, k = 10L, nk = NULL, degree = 1L,
   }
 
   sx <- list(
-    term = term,
+    term = if(is.symbol(xexpr)) term else expr,
     label = paste0("fk(", expr, ")"),
     expression = expr,
     formula = f,
@@ -2406,4 +2406,3 @@ special_predict.ms.fitted <- function(x, data, se.fit = FALSE,
     upper = fit + za * se
   )
 }
-

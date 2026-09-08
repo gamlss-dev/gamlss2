@@ -153,6 +153,13 @@ results.gamlss2 <- function(x, data = NULL, ...)
 
           ## special terms.
           if(("special" %in% class(x$specials[[i]])) & (i %in% names(x$fitted.specials[[j]]))) {
+            ## Free-knot terms use the evaluated expression as their column
+            ## name. Explicitly supplied data can still contain the raw variable.
+            if(inherits(x$specials[[i]], "fk") &&
+                !x$specials[[i]]$term %in% names(data)) {
+              data[[x$specials[[i]]$term]] <- model.frame(
+                x$specials[[i]]$formula, data = data, na.action = na.pass)[[1L]]
+            }
             dim <- length(x$specials[[i]]$term)
             if(dim > 2)
               next

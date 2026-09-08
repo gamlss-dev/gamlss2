@@ -1141,7 +1141,8 @@ bamlss2 <- function(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, .
   return(model)
 }
 
-mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1)
+mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
+  trace = interactive())
 {
   if(!inherits(object, "gamlss2") && !inherits(object, "bamlss2")) {
     stop("wrong object supplied!")
@@ -1151,6 +1152,7 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1)
   object$control$n.iter <- n.iter
   object$control$burnin <- burnin
   object$control$thin <- thin
+  object$control$trace <- trace
 
   ## Starting values (incl. lambdas).
   object$start <- coef(object, full = TRUE, lambdas = TRUE)

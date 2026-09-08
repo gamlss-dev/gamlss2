@@ -11,7 +11,8 @@
 }
 
 \usage{
-mcmc(object, n.iter = 1200, burnin = 200, thin = 1)
+mcmc(object, n.iter = 1200, burnin = 200, thin = 1,
+  trace = interactive())
 }
 
 \arguments{
@@ -20,14 +21,16 @@ mcmc(object, n.iter = 1200, burnin = 200, thin = 1)
   \item{n.iter}{Integer, the total number of MCMC iterations.}
   \item{burnin}{Integer, the burn-in period.}
   \item{thin}{Integer, the thinning parameter for saved samples.}
+  \item{trace}{Logical. Should progress information be printed while
+    sampling?}
 }
 
 \details{
-  The function sets \code{n.iter}, \code{burnin}, and \code{thin} in the model
-  control list and obtains starting values from the fitted object, including
-  smoothing parameters. The MCMC sampler \code{\link{BS}} is then called and
-  the resulting samples and posterior summaries are merged into the original
-  model object.
+  The function sets \code{n.iter}, \code{burnin}, \code{thin}, and \code{trace}
+  in the model control list and obtains starting values from the fitted object,
+  including smoothing parameters. The MCMC sampler \code{\link{BS}} is then
+  called and the resulting samples and posterior summaries are merged into the
+  original model object.
 
   This approach ensures that the result retains the \code{terms},
   \code{call}, and related components required by extractor and plotting

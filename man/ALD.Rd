@@ -61,8 +61,19 @@ fit_ALD(formula, data, tau, anchor = 0.5, max_step = 0.05,
   diagnostics.
 }
 
+\references{
+  Yu K, Moyeed RA (2001). \dQuote{Bayesian Quantile Regression.}
+  \emph{Statistics & Probability Letters}, \bold{54}(4), 437--447.
+  \doi{10.1016/S0167-7152(01)00124-9}
+
+  Chernozhukov V, Fernandez-Val I, Galichon A (2010).
+  \dQuote{Quantile and Probability Curves Without Crossing.}
+  \emph{Econometrica}, \bold{78}(3), 1093--1125.
+  \doi{10.3982/ECTA7880}
+}
+
 \seealso{
-  \code{\link{gamlss2}}, \code{\link[stats]{predict}}.
+  \code{\link{gamlss2}}, \code{\link[stats]{predict}}, \code{\link{mcmc}}.
 }
 
 \examples{\dontrun{## load data
@@ -77,14 +88,30 @@ m50 <- gamlss2(fev1 ~ s(age), data = d, family = ALD(tau = 0.5))
 ## estimate several conditional quantiles
 qu <- c(0.025, 0.5, 0.975)
 m <- fit_ALD(fev1 ~ s(age), data = d, tau = qu,
-  max_step = 0.25, monotone = TRUE, verbose = FALSE)
+  max_step = 0.1, monotone = TRUE, verbose = FALSE)
 
 ## plot fitted quantile curves
 fit <- fitted(m)
 i <- order(d$age)
 plot(fev1 ~ age, data = d)
 matlines(d$age[i], fit[i, ], lty = 1, lwd = 2,
-  col = c(2, 4, 2))
+  col = c(2, 4, 3))
+
+## estimate lower limits model using full MCMC
+set.seed(1328)
+m2.5 <- mcmc(m$models[["tau=0.025"]],
+  n.iter = 12000, burnin = 2000, thin = 10)
+
+summary(m2.5)
+
+## predict 95% credible intervals
+nd <- data.frame(age = seq(6, 80, length = 300))
+nd$p <- predict(m2.5, newdata = nd,
+  FUN = function(x) quantile(x, probs = c(0.025, 0.975)))
+
+## plot
+plot(fev1 ~ age, data = d)
+matlines(nd$age, nd$p, lty = 1, lwd = 2, col = 2)
 }}
 
 \keyword{models}

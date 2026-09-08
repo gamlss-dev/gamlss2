@@ -618,7 +618,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">mcmc(object, n.iter = 1200, burnin = 200, thin = 1)
+<pre><code class="language-R">mcmc(object, n.iter = 1200, burnin = 200, thin = 1,
+  trace = interactive())
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -656,11 +657,19 @@ Integer, the burn-in period.
 Integer, the thinning parameter for saved samples.
 </td>
 </tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="trace">trace</code>
+</td>
+<td>
+Logical. Should progress information be printed while sampling?
+</td>
+</tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The function sets <code>n.iter</code>, <code>burnin</code>, and <code>thin</code> in the model control list and obtains starting values from the fitted object, including smoothing parameters. The MCMC sampler <code>BS</code> is then called and the resulting samples and posterior summaries are merged into the original model object.</p>
+<p>The function sets <code>n.iter</code>, <code>burnin</code>, <code>thin</code>, and <code>trace</code> in the model control list and obtains starting values from the fitted object, including smoothing parameters. The MCMC sampler <code>BS</code> is then called and the resulting samples and posterior summaries are merged into the original model object.</p>
 <p>This approach ensures that the result retains the <code>terms</code>, <code>call</code>, and related components required by extractor and plotting methods. If the fitted model object does not contain the design information required for MCMC sampling, for example because a reduced control setting was used, sampling cannot be performed.</p>
 </section>
 <section id="value" class="level3">

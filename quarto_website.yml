@@ -117,6 +117,8 @@ website:
               file: man/quantiles.qmd
         - section: Families and distributions
           contents:
+            - text: ALD / fit_ALD
+              file: man/ALD.qmd
             - text: discretize
               file: man/discretize.qmd
             - text: family.distribution

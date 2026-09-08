@@ -739,6 +739,9 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>trace</code>: Logical, should information be printed while the algorithm is running?</p>
 </li>
 <li>
+<p><code>rs.cache</code>: Logical, reuse unchanged generated family evaluations and weighted matrix calculations within a fit? Default is <code>TRUE</code>. Reuse requires identical inputs and preserves the original arithmetic. User replacements of family callbacks are not memoized. Linear QR reuse is restricted to full-rank fits with strictly positive weights. Set <code>FALSE</code> to disable these caches, for example for comparisons.</p>
+</li>
+<li>
 <p><code>flush</code>: Logical, use <code>flush.console</code> for displaying the current output in the console.</p>
 </li>
 <li>

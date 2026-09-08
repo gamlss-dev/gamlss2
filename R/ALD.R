@@ -66,6 +66,16 @@ ALD <- function(tau = 0.5)
       else
         exp(ans)
     },
+    log_likelihood = function(par, y, ...) {
+      u <- (y - par$mu) / par$sigma
+      ans <-
+        log(tau) +
+        log1p(-tau) -
+        log(par$sigma) -
+        rho(u)
+
+      sum(ans, na.rm = TRUE)
+    },
     cdf = function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
       u <- (y - par$mu) / par$sigma
 

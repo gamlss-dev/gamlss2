@@ -99,7 +99,7 @@ SEXP calc_XWX(SEXP x, SEXP w, SEXP index)
 }
 
 /* Fused dense weighted crossproducts using symmetric BLAS updates. */
-SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
+SEXP calc_XWXz_cached(SEXP x, SEXP w, SEXP z, SEXP cached)
 {
   if(!isReal(x) || !isMatrix(x))
     error("'x' must be a numeric matrix");
@@ -117,8 +117,13 @@ SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
   const double *wptr = REAL(w);
   const double *zptr = REAL(z);
 
+  int reuse = !isNull(cached);
+  if(reuse && (!isReal(cached) || !isMatrix(cached) ||
+      nrows(cached) != nc || ncols(cached) != nc))
+    error("invalid cached weighted crossproduct");
+
   SEXP XWX;
-  PROTECT(XWX = allocMatrix(REALSXP, nc, nc));
+  PROTECT(XWX = reuse ? cached : allocMatrix(REALSXP, nc, nc));
   double *XWXptr = REAL(XWX);
 
   SEXP XWz;
@@ -175,10 +180,12 @@ SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
     }
 
     double beta = first ? 0.0 : 1.0;
-    F77_CALL(dsyrk)(
-      &upper, &transpose, &nc, &nb, &one, work, &nb,
-      &beta, XWXptr, &nc FCONE FCONE
-    );
+    if(!reuse) {
+      F77_CALL(dsyrk)(
+        &upper, &transpose, &nc, &nb, &one, work, &nb,
+        &beta, XWXptr, &nc FCONE FCONE
+      );
+    }
     F77_CALL(dgemv)(
       &transpose, &nb, &nc, &one, work, &nb, zw,
       &increment, &beta, XWzptr, &increment FCONE
@@ -187,9 +194,11 @@ SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
   }
 
   /* DSYRK writes one triangle only. */
-  for(int j = 0; j < nc; j++)
-    for(int i = j + 1; i < nc; i++)
-      XWXptr[i + (size_t) j * nc] = XWXptr[j + (size_t) i * nc];
+  if(!reuse) {
+    for(int j = 0; j < nc; j++)
+      for(int i = j + 1; i < nc; i++)
+        XWXptr[i + (size_t) j * nc] = XWXptr[j + (size_t) i * nc];
+  }
 
   REAL(zWz)[0] = (double) zWzvalue;
 
@@ -208,6 +217,12 @@ SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
 
   UNPROTECT(5);
   return rval;
+}
+
+/* Preserve the original three-argument entry point. */
+SEXP calc_XWXz(SEXP x, SEXP w, SEXP z)
+{
+  return calc_XWXz_cached(x, w, z, R_NilValue);
 }
 
 /* Fused direct smooth-fit criterion and final-state kernel. */
@@ -467,4 +482,3 @@ SEXP update_Gaussian(SEXP peta, SEXP y, SEXP eta, SEXP j)
 
   return rval;
 }
-

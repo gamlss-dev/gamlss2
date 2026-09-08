@@ -104,7 +104,7 @@ m2.5 <- mcmc(m$models[["tau=0.025"]],
 
 summary(m2.5)
 
-## predict 95% credible intervals
+## predict credible intervals
 nd <- data.frame(age = seq(6, 80, length = 300))
 nd$p <- predict(m2.5, newdata = nd,
   FUN = function(x) quantile(x, probs = c(0.025, 0.975)))

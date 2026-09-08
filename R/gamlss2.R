@@ -59,9 +59,6 @@ gamlss2.formula <- function(formula, data, family = NO,
     formula <- do.call("as.Formula", formula)
   }
   formula <- as.Formula(formula)
-  if(is.list(formula)) {
-    formula <- do.call("as.Formula", formula)
-  }
   if(length(formula)[2L] < 2L & FALSE) {
     formula <- as.Formula(formula(formula), ~ 1)
   }
@@ -93,33 +90,64 @@ gamlss2.formula <- function(formula, data, family = NO,
     }
   }
 
-  mf$formula <- fake_formula(formula)
+  ## Ordinary formulas need no special-term rewriting. This is the common
+  ## path, and avoids three costly recursive Formula reconstructions.
+  formula_names <- all.names(formula, functions = TRUE)
+  has_specials <- any(formula_names %in% .gamlss2_special_names)
+  has_list_term <- "list" %in% formula_names
+  if(has_specials || has_list_term) {
+    mf_formula <- fake_formula(formula)
+    ff <- fake_formula(formula, nospecials = TRUE)
+    Sterms <- fake_formula(formula, onlyspecials = TRUE)
+  } else {
+    ## A colon must be expanded only in the model-frame formula; it remains an
+    ## interaction in the linear design formula.
+    mf_formula <- if(":" %in% formula_names) fake_formula(formula) else formula
+    ff <- formula
+    Sterms <- rep.int(list(character(0L)), length(formula)[2L])
+  }
+  ## model.frame.Formula() immediately collapses all formula parts to an
+  ## ordinary terms object. Supplying that equivalent plain formula directly
+  ## avoids the extra S3 and Formula dispatch.
+  mf$formula <- formula(mf_formula, collapse = TRUE)
 
   ## Evaluate model.frame.
   mf[[1L]] <- as.name("model.frame")
   mf <- eval(mf, parent.frame())
 
   ## Response and model.matrix.
-  ff <- fake_formula(formula, nospecials = TRUE)
-  ## mt <- terms(ff, data = data)
-
   mt <- X <- list()
-  for(j in 1:length(ff)[2]) {
+  for(j in seq_len(length(ff)[2L])) {
     ffj <- formula(ff, lhs = 0, rhs = j)
     mt[[j]] <- terms(ffj, data = data)
     X[[j]] <- model.matrix(mt[[j]], mf)
   }
-  mt <- mt[seq_along(family$names)]
-  names(mt) <- family$names
 
-  X <- do.call("cbind", X)
-  X <- X[, sort(unique(colnames(X))), drop = FALSE]
+  xnames <- unlist(lapply(X, colnames), use.names = FALSE)
+  unique_xnames <- sort(unique(xnames))
+  first_xnames <- colnames(X[[1L]])
+  if(all(unique_xnames %in% first_xnames)) {
+    ## With expanded formulas, later parameter predictors are commonly just
+    ## an intercept already present in the first matrix. Reuse that matrix
+    ## instead of allocating a duplicate cbind followed by another subset.
+    X <- if(identical(unique_xnames, first_xnames)) {
+      X[[1L]]
+    } else {
+      X[[1L]][, unique_xnames, drop = FALSE]
+    }
+  } else {
+    X <- do.call("cbind", X)
+    X <- X[, unique_xnames, drop = FALSE]
+  }
 
-  if(!("(Intercept)" %in% colnames(X)))
+  if(!("(Intercept)" %in% unique_xnames))
     X <- cbind("(Intercept)" = 1.0, X)
-  if(any(is.na(X)))
+  xnames <- colnames(X)
+  if(anyNA(X))
     stop("detected 'NA' values in data!")
-  if(any(!is.finite(X)))
+  ## Avoid allocating a logical matrix as large as X in the usual all-finite
+  ## case. anyNA() above preserves the distinct NA diagnostic.
+  if(length(X) && (!is.finite(min(X)) || !is.finite(max(X))))
     stop("detected 'Inf' values in data!")
 
   Y <- model.response(mf)
@@ -149,18 +177,35 @@ gamlss2.formula <- function(formula, data, family = NO,
 
   ## Process variables and special term information.
   Xterms <- offsets <- list()
-  for(i in 1:(length(ff)[2])) {
-    Xterms[[i]] <- attr(terms(formula(ff, rhs = i, lhs = 0)), "term.labels")
-    if(attr(terms(formula(ff, rhs = i, lhs = 0)), "intercept") > 0)
+  for(i in seq_len(length(ff)[2L])) {
+    Xterms[[i]] <- attr(mt[[i]], "term.labels")
+    if(attr(mt[[i]], "intercept") > 0L)
       Xterms[[i]] <- c("(Intercept)", Xterms[[i]])
-    offi <- expand_offset(model.offset(model.part(ff, 
-      data = mf, rhs = i, terms = TRUE)))
+
+    ## model.part() rebuilds the terms object and subsets the whole model
+    ## frame. The already computed terms object identifies the same evaluated
+    ## offset columns directly.
+    oi <- attr(mt[[i]], "offset")
+    offi <- NULL
+    if(length(oi)) {
+      variables <- as.list(attr(mt[[i]], "variables"))[-1L]
+      offset_names <- vapply(variables[oi], deparse,
+        character(1L), width.cutoff = 500L)
+      offi <- mf[[offset_names[1L]]]
+      if(length(offset_names) > 1L) {
+        for(k in offset_names[-1L])
+          offi <- offi + mf[[k]]
+      }
+    }
+    offi <- expand_offset(offi)
     offsets[[i]] <- if(length(offi)) offi else numeric(0)
   }
-  Sterms <- fake_formula(formula, onlyspecials = TRUE)
+
+  mt <- mt[seq_along(family$names)]
+  names(mt) <- family$names
 
   if(!missing(offset)) {
-    anyoff <- any(sapply(offsets, function(x) length(x) > 0))
+    anyoff <- any(lengths(offsets) > 0L)
     if(anyoff)
       stop("multiple offsets supplied, either use argument offset or specify offsets in the formula!")
     cn <- NULL
@@ -171,7 +216,6 @@ gamlss2.formula <- function(formula, data, family = NO,
         offset <- as.data.frame(offset)
       }
     }
-    offset <- as.data.frame(offset)
     if(nrow(offset) < 2)
       offset <- offset[rep(1L, nrow(mf)), , drop = FALSE]
     rownames(offset) <- rownames(mf)
@@ -231,8 +275,8 @@ gamlss2.formula <- function(formula, data, family = NO,
     for(j in names(xlev[[i]])) {
       if(j %in% Xterms[[i]]) {
         xl <- xl0 <- paste0(j, xlev[[i]][[j]])
-        xl <- xl[xl %in% colnames(X)]
-        if(attr(mt[[i]], "intercept") > 0L && all(xl %in% colnames(X)) && length(xl0) == length(xl)) {
+        xl <- xl[xl %in% xnames]
+        if(attr(mt[[i]], "intercept") > 0L && all(xl %in% xnames) && length(xl0) == length(xl)) {
           xl <- xl[-1L]
         }
         if(length(xl)) {
@@ -244,18 +288,18 @@ gamlss2.formula <- function(formula, data, family = NO,
     }
     ## Others.
     for(j in Xterms[[i]]) {
-      if(!(j %in% colnames(X))) {
-        if(any(ij <- grepl(j, colnames(X), fixed = TRUE))) {
+      if(!(j %in% xnames)) {
+        if(any(ij <- grepl(j, xnames, fixed = TRUE))) {
           Xterms[[i]][Xterms[[i]] == j] <- NA
           Xterms[[i]] <- Xterms[[i]][!is.na(Xterms[[i]])]
-          Xterms[[i]] <- c(Xterms[[i]], colnames(X)[ij])
+          Xterms[[i]] <- c(Xterms[[i]], xnames[ij])
         }
       }
       ## Interactions.
       if(grepl(":", j, fixed = TRUE)) {
         xl <- strsplit(j, ":", fixed = TRUE)[[1]][2]
         xl <- paste0(":", xl)
-        xl <- grep(xl, colnames(X), fixed = TRUE, value = TRUE)
+        xl <- grep(xl, xnames, fixed = TRUE, value = TRUE)
         Xterms[[i]] <- unique(c(Xterms[[i]], xl))
       }
     }
@@ -263,7 +307,7 @@ gamlss2.formula <- function(formula, data, family = NO,
 
   ## Drop.
   for(i in names(Xterms)) {
-    Xterms[[i]] <- Xterms[[i]][Xterms[[i]] %in% colnames(X)]
+    Xterms[[i]] <- Xterms[[i]][Xterms[[i]] %in% xnames]
   }
 
   attr(Xterms, "xlevels") <- xlev
@@ -307,7 +351,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Further model information.
   rval$call <- cl
   rval$formula <- formula
-  rval$fake_formula <- fake_formula(formula)
+  rval$fake_formula <- mf_formula
   rval$terms <- mt ## terms(merge_formula(formula(rval$fake_formula, collapse = TRUE), as.formula(mt)))
   environment(rval$terms) <- menv
   rval$family <- family

@@ -60,6 +60,12 @@ CG(x, y, specials, family, offsets,
     \item \code{CG}: Integer, the number of iterations when to start the CG correction.
       Default is \code{CG = Inf}.
     \item \code{trace}: Logical, should information be printed while the algorithm is running?
+    \item \code{rs.cache}: Logical, reuse unchanged generated family evaluations
+      and weighted matrix calculations within a fit? Default is \code{TRUE}.
+      Reuse requires identical inputs and preserves the original arithmetic.
+      User replacements of family callbacks are not memoized. Linear QR reuse
+      is restricted to full-rank fits with strictly positive weights.
+      Set \code{FALSE} to disable these caches, for example for comparisons.
     \item \code{flush}: Logical, use \code{\link[utils]{flush.console}} for displaying the
       current output in the console.
     \item \code{ridge}: Logical, should automatic ridge penalization be applied

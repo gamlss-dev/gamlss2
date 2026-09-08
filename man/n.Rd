@@ -84,7 +84,7 @@ air <- air[order(air$Temp), ]
 ## Neural network effect of Temp and Wind for mu.
 ## A smaller hidden layer is used here for illustration.
 set.seed(1328)
-f <- Ozone ~ n(~Temp+Wind,size=50,decay=0.1) | .
+f <- Ozone ~ n(~ Temp + Wind, size = 10, decay = 0.05) | 1
 
 ## estimate model
 m <- gamlss2(f, data = air, family = GA)

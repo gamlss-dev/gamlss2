@@ -457,7 +457,15 @@ summary.gamlss2 <- function(object, ...)
   par <- coef(object, full = FALSE, dropall = FALSE)
   se <- sqrt(abs(diag(v)))
   tvalue <- par / se
-  pvalue <- 2 * pt(-abs(tvalue), df.res)
+  if(length(df.res) == 1L && !is.na(df.res) && df.res > 0) {
+    pvalue <- 2 * pt(-abs(tvalue), df.res)
+  } else {
+    warning(
+      "residual degrees of freedom are not positive; coefficient p-values are unavailable",
+      call. = FALSE
+    )
+    pvalue <- rep.int(NA_real_, length(tvalue))
+  }
   ct <- cbind(par, se, tvalue, pvalue)
   dimnames(ct) <- list(names(par),
     c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))

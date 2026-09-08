@@ -7,6 +7,31 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   ## Parameter names. FIXME: TRUE/FALSE?
   np <- family$names
 
+  ## Caches belong to this fit only. Only unchanged, generated distribution
+  ## callbacks opt in; user replacements may depend on external state.
+  use.cache <- !identical(control$rs.cache, FALSE)
+  cached.functions <- attr(family, "rs.cache", exact = TRUE)
+  map2par <- family$map2par
+  log_likelihood <- family$log_likelihood
+  pdf <- family$pdf
+  if(use.cache) {
+    if(identical(map2par, cached.functions$map2par))
+      map2par <- rs_cached_function(map2par)
+    if(identical(log_likelihood, cached.functions$log_likelihood))
+      log_likelihood <- rs_cached_function(log_likelihood)
+    if(identical(pdf, cached.functions$pdf))
+      pdf <- rs_cached_function(pdf)
+  }
+  linear.cache <- smooth.cache <- list()
+  if(use.cache) {
+    for(j in np) {
+      linear.cache[[j]] <- new.env(parent = emptyenv())
+      smooth.cache[[j]] <- list()
+      for(k in sterms[[j]])
+        smooth.cache[[j]][[k]] <- new.env(parent = emptyenv())
+    }
+  }
+
   ## Stepwise candidate fits only need the objective and degrees of freedom.
   ## Expensive inferential output is computed by
   ## the final, full fit.
@@ -217,7 +242,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Null deviance.
-  dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
+  dev0 <- -2 * log_likelihood(par = map2par(etastart), y = y)
 
   ## Estimate intercept only model first.
   run_nullmodel <- !stepwise_candidate ||
@@ -238,7 +263,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     beta <- unlist(beta)
 
     if(!any(is.na(beta)) && nullmodel_ok) {
-      lli <- family$log_likelihood(par = family$map2par(ieta), y = y)
+      lli <- log_likelihood(par = map2par(ieta), y = y)
 
       fn_ll <- function(par) {
         for(j in np) {
@@ -250,7 +275,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               ieta[[j]] <- ieta[[j]] + offsets[[j]]
           }
         }
-        ll <- family$log_likelihood(par = family$map2par(ieta), y = y) - lambda * sum(par^2)
+        ll <- log_likelihood(par = map2par(ieta), y = y) - lambda * sum(par^2)
         return(-ll)
       }
 
@@ -330,18 +355,18 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   while((eps[1L] > stop.eps[1L]) && (iter[1L] < maxit[1L])) {
     ## Old log-likelihood.
     if(is.null(weights)) {
-      llo0 <- family$log_likelihood(par = family$map2par(eta), y = y)
+      llo0 <- log_likelihood(par = map2par(eta), y = y)
     } else {
-      llo0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
+      llo0 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## For CG.
     if(iter[1L] >= CGk) {
       eta_old <- if(iter[1L] > 0L) eta else etastart
       par <- if(iter[1L] > 0L) {
-        family$map2par(eta)
+        map2par(eta)
       } else {
-        family$map2par(etastart)
+        map2par(etastart)
       }
       ew_CG <- list()
       for(j in np) {
@@ -357,9 +382,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     while((eps_outer > stop.eps[3L]) && (iter_outer < maxit[3L])) {
       if(iter[1L] >= CGk) {
         if(is.null(weights)) {
-          outer_ll0 <- family$log_likelihood(par = family$map2par(eta), y = y)
+          outer_ll0 <- log_likelihood(par = map2par(eta), y = y)
         } else {
-          outer_ll0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
+          outer_ll0 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
         }
       }
 
@@ -370,9 +395,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## Outer loop working response and weights.
         par <- if(iter[1L] > 0L) {
-          family$map2par(eta)
+          map2par(eta)
         } else {
-          family$map2par(etastart)
+          map2par(etastart)
         }
 
         ## Compute working response z and weights hessian from family.
@@ -405,9 +430,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
           ## Current log-likelihood.
           if(is.null(weights)) {
-            ll0 <- family$log_likelihood(par = family$map2par(eta), y = y)
+            ll0 <- log_likelihood(par = map2par(eta), y = y)
           } else {
-            ll0 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
+            ll0 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
           ll02 <- ll0
 
@@ -430,7 +455,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               m <- ridge.lm.wfit(Xj, e, wj, penalty = penalty[j], control)
               penalty[j] <- m$penalty
             } else {
-              m <- lm.wfit(Xj, e, wj, method = "qr")
+              m <- rs_lm_wfit(Xj, e, wj, linear.cache[[j]])
               if(!stepwise_candidate)
                 m$vcov <- vcov_lm_wfit_safe(m)
             }
@@ -440,16 +465,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai[[j]] <- etai[[j]] + m$fitted.values
 
             if(is.null(weights)) {
-              ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
+              ll1 <- log_likelihood(par = map2par(etai), y = y)
             } else {
-              ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
+              ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
             }
+            reuse_ll1 <- ll1 >= ll02
 
             if(ll1 < ll02 && isTRUE(control$backup)) {
               ll <- function(par) {
                 etai <- eta
                 etai[[j]] <- etai[[j]] + drop(Xj %*% par)
-                -family$log_likelihood(par = family$map2par(etai), y = y) + lambda * sum(par^2)
+                -log_likelihood(par = map2par(etai), y = y) + lambda * sum(par^2)
               }
               warn <- getOption("warn")
               options("warn" = -1)
@@ -470,9 +496,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 m$fitted.values <- drop(Xj %*% opt$par)
                 etai[[j]] <- etai[[j]] + m$fitted.values
                 if(is.null(weights)) {
-                  ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
+                  ll1 <- log_likelihood(par = map2par(etai), y = y)
                 } else {
-                  ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
+                  ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
                 }
               }
             }
@@ -486,7 +512,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                     f <- drop(Xj %*% b)
                     etai <- eta
                     etai[[j]] <- etai[[j]] + f
-                    -family$log_likelihood(par = family$map2par(etai), y = y)
+                    -log_likelihood(par = map2par(etai), y = y)
                   }
                   s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
                   if(-s$objective > ll02) {
@@ -502,10 +528,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai <- eta
             etai[[j]] <- etai[[j]] + m$fitted.values
 
-            if(is.null(weights)) {
-              ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
-            } else {
-              ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
+            if(!reuse_ll1) {
+              if(is.null(weights)) {
+                ll1 <- log_likelihood(par = map2par(etai), y = y)
+              } else {
+                ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
+              }
             }
 
             if(ll1 > ll02) {
@@ -566,12 +594,20 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               eta[[j]] <- eta[[j]] - sfit[[j]][[k]]$fitted.values
               e <- ew$eta - eta[[j]]
 
+              ## The default mgcv fitter consumes this private cache. Do not
+              ## attach it to the stored special or expose it to user fitters.
+              sk <- specials[[k]]
+              if(use.cache && inherits(sk, "mgcv.smooth") &&
+                  !inherits(sk, c("smooth", "special")) &&
+                  is.null(sk$special.wfit))
+                sk$.rs_cache <- smooth.cache[[j]][[k]]
+
               ## Additive model term fit.
               fs <- if(is.null(weights)) {
-                special.wfit(specials[[k]], e, ew$weights, y, eta, j, family, control,
+                special.wfit(sk, e, ew$weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               } else {
-                special.wfit(specials[[k]], e, ew$weights * weights, y, eta, j, family, control,
+                special.wfit(sk, e, ew$weights * weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               }
 
@@ -595,9 +631,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               etai[[j]] <- etai[[j]] + fs$fitted.values
 
               if(is.null(weights)) {
-                ll1 <- family$log_likelihood(par = family$map2par(etai), y = y)
+                ll1 <- log_likelihood(par = map2par(etai), y = y)
               } else {
-                ll1 <- sum(family$pdf(par = family$map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
+                ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
               }
 
               if(ll1 > ll02) {
@@ -634,9 +670,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           ## New log-likelihood.
           if(is.null(weights)) {
-            ll1 <- family$log_likelihood(par = family$map2par(eta), y = y)
+            ll1 <- log_likelihood(par = map2par(eta), y = y)
           } else {
-            ll1 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
+            ll1 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
 
           ## Stopping criterion.
@@ -644,7 +680,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
           ## Update working response.
           if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
-            par <- family$map2par(eta)
+            par <- map2par(eta)
             ew <- .update(par = par, y = y,
               eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
               family = family, which = j)
@@ -667,9 +703,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## New log-likelihood.
     if(is.null(weights)) {
-      llo1 <- family$log_likelihood(par = family$map2par(eta), y = y)
+      llo1 <- log_likelihood(par = map2par(eta), y = y)
     } else {
-      llo1 <- sum(family$pdf(par = family$map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
+      llo1 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
     ## Stopping criterion.
@@ -757,7 +793,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Message if not converged due to NAs or Inf!
-  d <- family$pdf(par = family$map2par(eta), y = y, log = TRUE)
+  d <- pdf(par = map2par(eta), y = y, log = TRUE)
   if(!is.null(weights))
     d <- d * weights
   if(any(is.na(d))) {
@@ -785,6 +821,63 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   class(rval) <- "gamlss2"
 
   rval
+}
+
+## Memoize the last evaluation of an opted-in, deterministic family callback.
+## Keep IEEE values and attributes distinct, including signed zero. Never
+## suppress warnings by reusing an evaluation that produced one.
+rs_cached_function <- function(fun)
+{
+  force(fun)
+  last.args <- last.value <- NULL
+  valid <- FALSE
+  function(...) {
+    args <- list(...)
+    if(valid && identical(args, last.args, num.eq = FALSE, single.NA = FALSE))
+      return(last.value)
+    valid <<- FALSE
+    warned <- FALSE
+    value <- withCallingHandlers(fun(...), warning = function(w) warned <<- TRUE)
+    if(!warned) {
+      last.args <<- args
+      last.value <<- value
+      valid <<- TRUE
+    }
+    value
+  }
+}
+
+## Reuse the same LINPACK QR and residual calculation as lm.wfit(). Restrict
+## reuse to full-rank fits with strictly positive weights; all other cases
+## keep lm.wfit()'s pivoting and zero-weight handling.
+rs_lm_wfit <- function(x, y, w, cache = NULL)
+{
+  if(is.environment(cache) && !is.null(cache$fit) &&
+      identical(w, cache$w, num.eq = FALSE, single.NA = FALSE) &&
+      identical(x, cache$x, num.eq = FALSE, single.NA = FALSE)) {
+    m <- cache$fit
+    wy <- y * cache$sqrtw
+    m$coefficients <- qr.coef(m$qr, wy)
+    m$residuals <- qr.resid(m$qr, wy) / cache$sqrtw
+    m$fitted.values <- y - m$residuals
+    effects <- qr.qty(m$qr, wy)
+    names(effects) <- names(m$effects)
+    m$effects <- effects
+    return(m)
+  }
+
+  m <- lm.wfit(x, y, w, method = "qr")
+  if(is.environment(cache)) {
+    cache$fit <- NULL
+    if(is.null(dim(y)) && m$rank == ncol(x) && ncol(x) > 0L &&
+        all(is.finite(w)) && all(w > 0)) {
+      cache$x <- x
+      cache$w <- w
+      cache$sqrtw <- sqrt(w)
+      cache$fit <- m
+    }
+  }
+  m
 }
 
 ## Cole and Green flavor.
@@ -824,6 +917,19 @@ initialize_eta <- function(y, family, nobs, initialize)
 ## Function to check values of score and hessian vectors
 deriv_checks <- function(x, is.weight = FALSE)
 {
+  ## Scores and weights are normally already finite and within bounds. Avoid
+  ## several full-vector subassignments in that common case.
+  if(!length(x))
+    return(x)
+  if(!anyNA(x)) {
+    if(is.weight) {
+      if(min(x) >= 1e-10 && max(x) <= 1e+10)
+        return(x)
+    } else if(min(x) >= -1e+10 && max(x) <= 1e+10) {
+      return(x)
+    }
+  }
+
   x[is.na(x)] <- 1.490116e-08
   x[x > 1e+10] <- 1e+10
   if(is.weight) {
@@ -1029,4 +1135,3 @@ vcov_lm_wfit_safe <- function(m, ridge = 1e-8, maxit = 6,
   V[piv[1:r], piv[1:r]] <- Vinv
   V
 }
-

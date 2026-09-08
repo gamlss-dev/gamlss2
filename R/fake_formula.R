@@ -3,6 +3,13 @@
 ## as well as the parts that are needed to setup smooth term
 ## specification lists, or any type of special model terms
 ## that should be used for fitting.
+.gamlss2_special_names <- unique(c(
+  "s", "te", "t2", "sx", "s2", "rs", "ti", "tx", "tx2", "tx3", "tx4",
+  "la", "gnet", "n", "lin", "pb", "pbc", "nn", "fk", "re", "ps",
+  "pbz", "ga", "random", "ra", "lo", "tr", "tree", "ct", "cf", "NN",
+  "pb2", "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms"
+))
+
 fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspecials = FALSE)
 {
   if(is.list(formula))
@@ -41,12 +48,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       }
     }
   } else {
-    stn <- c("s", "te", "t2", "sx", "s2", "rs", "ti",
-      "tx", "tx2", "tx3", "tx4", "la", "gnet", "n", "lin",
-      "pb", "pbc", "nn", "fk", "re", "ps", "pbz", "ga",
-      "random", "ra", "lo", "tr", "tree", "ct", "cf", "NN", "pb2", "ct",
-      "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms")
-    stn <- unique(c(stn, specials))
+    stn <- unique(c(.gamlss2_special_names, specials))
     if(!nospecials) ## still experimental
       formula <- ff_replace(formula)
 

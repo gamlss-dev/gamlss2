@@ -5,9 +5,11 @@
 special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
 {
   sterms <- list()
+  dots <- list(...)
   if(length(x)) {
     for(j in unique(unlist(x))) {
-      vj <- all.vars(parse(text = j))
+      expr <- str2lang(j)
+      vj <- all.vars(expr)
       vj <- vj[vj %in% names(data)]
 
       if(length(vj) < 1L) {
@@ -27,7 +29,18 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
             }
           }
         }
-        dj <- apply(dj, 1, paste, sep = "\r", collapse = ";")
+        ## apply(..., 1, paste) constructs and invokes an R closure once per
+        ## row. Preserve its as.matrix() coercion and row-key representation,
+        ## but paste whole columns in one vectorized call.
+        dj <- as.matrix(dj)
+        if(ncol(dj) == 1L) {
+          dj <- as.character(dj[, 1L])
+        } else {
+          dj <- do.call(paste, c(
+            lapply(seq_len(ncol(dj)), function(i) dj[, i]),
+            list(sep = ";")
+          ))
+        }
 
         bn <- list()
         bn$nodups <- which(!duplicated(dj))
@@ -39,7 +52,7 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
       }
 
       ## Change constructor if possible.
-      sjp <- eval(parse(text = paste0("quote(", j, ")")))
+      sjp <- expr
       sjpc <- as.character(sjp[1L])
       changed <- FALSE
       if(sjpc == "pb" & FALSE) {
@@ -48,29 +61,29 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         changed <- TRUE
       }
 
-      sj <- eval(parse(text = j), envir = if(binj) dj else data)
+      sj <- eval(sjp, envir = if(binj) dj else data)
 
       ## For class "smooth", binning is not possible.
       if(inherits(sj, "smooth") & binning) {
         warning(paste0("binning is not possible for 'smooth' term ", j, "!"))
-        sj <- eval(parse(text = j), envir = data)
+        sj <- eval(sjp, envir = data)
         binj <- FALSE
       }
 
       if(any(grepl(".smooth.spec", class(sj)))) {
         stopifnot(requireNamespace("mgcv"))
-        knots <- list(...)$knots
+        knots <- dots$knots
 
         absorb.cons <- if(is.null(sj$xt$absorb.cons)) TRUE else isTRUE(sj$xt$absorb.cons)
         scale.penalty <- if(is.null(sj$xt$scale.penalty)) TRUE else isTRUE(sj$xt$scale.penalty)
 
-        select <- isTRUE(list(...)$select)
+        select <- isTRUE(dots$select)
 
         sj <- mgcv::smoothCon(sj, data = if(binj) dj else data, knots = knots,
           absorb.cons = absorb.cons, scale.penalty = scale.penalty,
           null.space.penalty = select)
 
-        for(i in 1:length(sj)) {
+        for(i in seq_along(sj)) {
           sj[[i]]$orig.label <- j
           if(binj) {
             sj[[i]]$binning <- bn
@@ -94,7 +107,7 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         }
         if(inherits(sj, "matrix")) {
           sj <- list("X" = sj, "S" = list(diag(1, ncol(sj))),
-            "label" = j, "term" = all.vars(parse(text = j)), "dim" = 1L)
+            "label" = j, "term" = all.vars(expr), "dim" = 1L)
         }
         sterms[[j]] <- sj
       }
@@ -195,8 +208,11 @@ calc_XWX <- function(x, w, index = NULL)
 }
 
 ## Fused dense weighted crossproducts.
-calc_XWXz <- function(x, w, z)
+calc_XWXz <- function(x, w, z, XWX = NULL)
 {
+  if(!is.null(XWX))
+    return(.Call("calc_XWXz_cached", x, as.numeric(w), as.numeric(z), XWX,
+      PACKAGE = "gamlss2"))
   .Call("calc_XWXz", x, as.numeric(w), as.numeric(z), PACKAGE = "gamlss2")
 }
 
@@ -266,24 +282,42 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   }
 
   ## Pre compute matrices.
+  cache <- x$.rs_cache
+  reuse <- is.environment(cache) && !is.null(cache$XWX) &&
+    identical(control$binning, cache$binning) &&
+    identical(x$X, cache$X, num.eq = FALSE, single.NA = FALSE) &&
+    identical(w, cache$w, num.eq = FALSE, single.NA = FALSE)
   zWz <- NULL
   if(control$binning) {
     XWz <- crossprod(x$X, rz)
-    XWX <- calc_XWX(x$X, 1/rw, x$sparse_index)
+    reuse <- reuse && identical(x$binning, cache$bins) &&
+      identical(x$sparse_index, cache$sparse_index)
+    XWX <- if(reuse) cache$XWX else calc_XWX(x$X, 1/rw, x$sparse_index)
   } else {
     use.symmetric <- ncol(x$X) >= 40L &&
       all(is.finite(w)) && all(w >= 0)
     if(use.symmetric) {
-      crossproducts <- calc_XWXz(x$X, w, z)
+      ## Keep the native kernel's block sizes and summation order for X'Wz
+      ## and z'Wz exactly unchanged when skipping the cached X'WX calculation.
+      crossproducts <- calc_XWXz(x$X, w, z, if(reuse) cache$XWX else NULL)
       XWX <- crossproducts$XWX
       XWz <- crossproducts$XWz
       zWz <- crossproducts$zWz
     } else {
       ## Preserve the previous behavior for non-finite or negative weights.
-      XW <- x$X * w
-      XWX <- crossprod(XW, x$X)
+      XW <- if(reuse) cache$XW else x$X * w
+      XWX <- if(reuse) cache$XWX else crossprod(XW, x$X)
       XWz <- crossprod(XW, z)
     }
+  }
+  if(is.environment(cache) && !reuse) {
+    cache$X <- x$X
+    cache$w <- w
+    cache$binning <- control$binning
+    cache$XWX <- XWX
+    cache$XW <- if(!control$binning && !use.symmetric) XW else NULL
+    cache$bins <- if(control$binning) x$binning else NULL
+    cache$sparse_index <- if(control$binning) x$sparse_index else NULL
   }
   S <- diag(1e-05, ncol(x$X))
 
@@ -692,4 +726,3 @@ specials <- function(object, model = NULL, terms = NULL, elements = NULL, ...)
 
   return(rval)
 }
-

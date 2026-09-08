@@ -381,6 +381,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## Weights.
         wj <- if(is.null(weights)) hessian else hessian * weights
+        wj_forward <- wj
 
         ## Compute mean and precision.
         Xj <- x[, xterms[[j]], drop = FALSE]
@@ -390,6 +391,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         cholQ <- chol(XWX)
         M <- backsolve(cholQ, forwardsolve(t(cholQ), crossprod(Xj, wj * e)))
         M <- drop(M)
+        cholQ_forward <- cholQ
 
         ## Sample new parameters.
         b1 <- rmvnorm_cholQ(M, cholQ)
@@ -424,10 +426,14 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         e <- z - eta2
 
         ## Compute mean and precision.
-        XW <- Xj * sqrt(wj)
-        XWX <- crossprod(XW)
-        XWX <- XWX + diag(1e-08, ncol(XWX))
-        cholQ <- chol(XWX)
+        if(identical(wj, wj_forward)) {
+          cholQ <- cholQ_forward
+        } else {
+          XW <- Xj * sqrt(wj)
+          XWX <- crossprod(XW)
+          XWX <- XWX + diag(1e-08, ncol(XWX))
+          cholQ <- chol(XWX)
+        }
         M <- backsolve(cholQ, forwardsolve(t(cholQ), crossprod(Xj, wj * e)))
         M <- drop(M)
 

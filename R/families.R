@@ -159,6 +159,8 @@ parse_links <- function(links, default.links, ...)
 ## Function takes a gamlss family and sets it up
 ## a bit different in order to support more than
 ## 4 parameter models.
+.gamlss2_family_cache <- new.env(parent = emptyenv())
+
 tF <- function(x, ...)
 {
   if(is.function(x)) x <- x()
@@ -652,6 +654,14 @@ tF <- function(x, ...)
     }
   }
 
+  ## Record the original generated callbacks for RS memoization. Arbitrary
+  ## user callbacks are not opted in, and replacing any recorded function
+  ## invalidates reuse of that function. These wrappers bind the standard
+  ## gamlss.dist density and construct their links from character names.
+  if(identical(environment(dfun), asNamespace("gamlss.dist")) &&
+      all(vapply(x[paste(nx, "link", sep = ".")], is.character, logical(1L))))
+    attr(rval, "rs.cache") <- rval[c("map2par", "pdf", "log_likelihood")]
+
   class(rval) <- "gamlss2.family"
   rval
 }
@@ -750,12 +760,48 @@ complete_family <- function(family, .links = NULL)
     family <- get(family)
   }
     
+  family_constructor <- NULL
   if(is.function(family)) {
+    family_constructor <- family
     family <- family()
   }
 
   if(inherits(family, "gamlss.family")) {
-    return(tF(family))
+    ## The generated family functions are costly to byte-compile. Cache only
+    ## zero-argument constructors bound under their family name in a locked
+    ## package namespace; user closures and modified family objects must retain
+    ## their existing per-call semantics.
+    cache_key <- NULL
+    if(!is.null(family_constructor)) {
+      constructor_env <- environment(family_constructor)
+      family_name <- family$family[1L]
+      if(isNamespace(constructor_env) &&
+          exists(family_name, envir = constructor_env, inherits = FALSE) &&
+          bindingIsLocked(family_name, constructor_env) &&
+          identical(get(family_name, envir = constructor_env, inherits = FALSE),
+            family_constructor)) {
+        cache_key <- paste0(environmentName(constructor_env), "::", family_name)
+      }
+    }
+
+    family_signature <- if(is.null(cache_key)) NULL else
+      try(serialize(family, connection = NULL, version = 3L), silent = TRUE)
+    if(inherits(family_signature, "try-error")) {
+      cache_key <- NULL
+      family_signature <- NULL
+    }
+    if(!is.null(cache_key) &&
+        exists(cache_key, envir = .gamlss2_family_cache, inherits = FALSE)) {
+      cached <- get(cache_key, envir = .gamlss2_family_cache, inherits = FALSE)
+      if(identical(cached$signature, family_signature))
+        return(cached$family)
+    }
+
+    family <- tF(family)
+    if(!is.null(cache_key))
+      assign(cache_key, list(signature = family_signature, family = family),
+        envir = .gamlss2_family_cache)
+    return(family)
   }
 
   if(is.null(family$family)) {
@@ -828,12 +874,16 @@ complete_family <- function(family, .links = NULL)
   if(is.null(family$map2par)) {
     family$map2par <- function(eta) {
       for(j in names(eta)) {
-        eta[[j]] <- linkinv[[j]](eta[[j]])
-        eta[[j]][is.na(eta[[j]])] <- 0
-        if(any(jj <- eta[[j]] == Inf))
-          eta[[j]][jj] <- 10
-        if(any(jj <- eta[[j]] == -Inf))
-          eta[[j]][jj] <- -10
+        z <- linkinv[[j]](eta[[j]])
+        if(any(!is.finite(z))) {
+          if(any(jj <- is.na(z)))
+            z[jj] <- 0
+          if(any(jj <- z == Inf))
+            z[jj] <- 10
+          if(any(jj <- z == -Inf))
+            z[jj] <- -10
+        }
+        eta[[j]] <- z
       }
       return(eta)
     }

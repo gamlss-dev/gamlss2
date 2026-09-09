@@ -101,7 +101,8 @@ a reference to the fitted model; reuse it only with that unchanged model.
 }
 
 \seealso{
-\code{\link[stats]{predict}}, \code{\link{prodist.gamlss2}}, \code{\link{quantile.gamlss2}}
+\code{\link[stats]{predict}}, \code{\link{marginal_predict}},
+\code{\link{prodist.gamlss2}}, \code{\link{quantile.gamlss2}}
 }
 
 \examples{

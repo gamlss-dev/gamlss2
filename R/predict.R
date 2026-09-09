@@ -370,18 +370,18 @@ fitted.gamlss2 <- function(object, newdata = NULL,
   return(fit[, model])
 }
 
-## Function to compute marginal predictions
-## for each covariate.
-## Compute marginal predictions for each covariate.
+## Compute marginal prediction profiles for each covariate.
 marginal_predict <- function(object, newdata = NULL, variables = NULL,
   n = 100L, continuous = median, at = NULL, values = NULL, ...)
 {
   if(!inherits(object, c("gamlss2", "bamlss2")))
-    stop("this is not a gamlss2 object!")
+    stop("'object' must inherit from class 'gamlss2' or 'bamlss2'.")
 
   if(is.null(newdata))
     newdata <- model.frame(object)
   newdata <- as.data.frame(newdata)
+  if(!nrow(newdata))
+    stop("'newdata' must contain at least one row.")
 
   ## Covariates used by the model, excluding the response.
   tt <- try(terms(object$fake_formula), silent = TRUE)
@@ -390,46 +390,67 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
   } else {
     all.vars(delete.response(tt))
   }
-  vars <- unique(vars[vars %in% names(newdata)])
+  vars <- unique(vars)
+
+  missing_vars <- setdiff(vars, names(newdata))
+  if(length(missing_vars)) {
+    stop("variable(s) not found in 'newdata': ",
+      paste(missing_vars, collapse = ", "))
+  }
+  if(!length(vars))
+    stop("the model does not contain any covariates.")
 
   if(is.null(variables)) {
     variables <- vars
   } else {
     variables <- as.character(variables)
+    if(!length(variables) || anyNA(variables) || any(!nzchar(variables)))
+      stop("'variables' must contain at least one non-missing variable name.")
+    variables <- unique(variables)
     bad <- setdiff(variables, vars)
     if(length(bad))
       stop("unknown variable(s): ", paste(bad, collapse = ", "))
   }
 
-  n <- as.integer(n)[1L]
-  if(is.na(n) || n < 2L)
-    stop("'n' must be an integer greater than 1.")
+  if(length(n) != 1L || is.na(n) || !is.numeric(n) || !is.finite(n) ||
+      n < 2L || n > .Machine$integer.max || n != floor(n))
+    stop("'n' must be a single integer greater than 1.")
+  n <- as.integer(n)
 
-  if(is.character(continuous))
+  if(is.character(continuous) && length(continuous) == 1L)
     continuous <- match.fun(continuous)
   if(!is.function(continuous))
     stop("'continuous' must be a function, e.g. median or mean.")
 
-  if(is.null(at))
-    at <- list()
-  if(!is.list(at) || (length(at) && is.null(names(at))))
-    stop("'at' must be a named list.")
+  check_named_list <- function(x, name, allowed) {
+    if(is.null(x))
+      return(list())
+    if(!is.list(x) || is.null(names(x)) ||
+        anyNA(names(x)) || any(!nzchar(names(x))) || anyDuplicated(names(x)))
+      stop("'", name, "' must be a named list with unique, non-empty names.")
+    bad <- setdiff(names(x), allowed)
+    if(length(bad))
+      stop("unknown variable(s) in '", name, "': ",
+        paste(bad, collapse = ", "))
+    x
+  }
 
-  if(is.null(values))
-    values <- list()
-  if(!is.list(values) || (length(values) && is.null(names(values))))
-    stop("'values' must be a named list.")
+  at <- check_named_list(at, "at", vars)
+  values <- check_named_list(values, "values", variables)
 
   ## Keep factor levels/classes intact.
   coerce_value <- function(value, x, name) {
     if(is.factor(x)) {
       value <- as.character(value)
-      if(any(!value %in% levels(x)))
+      if(anyNA(value) || any(!value %in% levels(x)))
         stop("invalid level for '", name, "'.")
       return(factor(value,
         levels = levels(x),
         ordered = is.ordered(x)))
     }
+
+    if(is.character(x))
+      return(as.character(value))
 
     if(inherits(x, "Date"))
       return(as.Date(value, origin = "1970-01-01"))
@@ -442,6 +463,22 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
     if(is.logical(x))
       return(as.logical(value))
 
+    if(is.numeric(x) && !is.numeric(value))
+      stop("invalid numeric value for '", name, "'.")
+
+    value
+  }
+
+  check_value <- function(value, name, single = FALSE) {
+    if(!length(value))
+      stop("no values supplied for '", name, "'.")
+    if(single && length(value) != 1L)
+      stop("the value for '", name, "' must have length 1.")
+    if(anyNA(value))
+      stop("missing values are not allowed for '", name, "'.")
+    if((is.numeric(value) || inherits(value, c("Date", "POSIXct"))) &&
+        any(!is.finite(value)))
+      stop("non-finite values are not allowed for '", name, "'.")
     value
   }
 
@@ -451,14 +488,17 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
       z <- at[[name]]
       if(length(z) != 1L)
         stop("'at[[\"", name, "\"]]' must have length 1.")
-      return(coerce_value(z, x, name))
+      z <- coerce_value(z, x, name)
+      return(check_value(z, name, single = TRUE))
     }
 
-    ## First factor level = reference level by default.
-    if(is.factor(x))
-      return(factor(levels(x)[1L],
+    ## First factor level by default.
+    if(is.factor(x)) {
+      z <- factor(levels(x)[1L],
         levels = levels(x),
-        ordered = is.ordered(x)))
+        ordered = is.ordered(x))
+      return(check_value(z, name, single = TRUE))
+    }
 
     if(is.character(x)) {
       z <- unique(x[!is.na(x)])
@@ -482,28 +522,37 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
       stop("could not compute a representative value for '",
         name, "'.")
 
-    coerce_value(z, x, name)
+    z <- coerce_value(z, x, name)
+    check_value(z, name, single = TRUE)
   }
 
   ## Values over which the focal covariate is varied.
   focal_values <- function(x, name) {
-    if(name %in% names(values))
-      return(coerce_value(values[[name]], x, name))
+    if(name %in% names(values)) {
+      z <- coerce_value(values[[name]], x, name)
+      return(check_value(z, name))
+    }
 
-    if(is.factor(x))
-      return(factor(levels(x),
+    if(is.factor(x)) {
+      z <- factor(levels(x),
         levels = levels(x),
-        ordered = is.ordered(x)))
+        ordered = is.ordered(x))
+      return(check_value(z, name))
+    }
 
     if(is.character(x))
-      return(unique(x[!is.na(x)]))
+      return(check_value(unique(x[!is.na(x)]), name))
 
     if(is.logical(x))
-      return(sort(unique(x[!is.na(x)])))
+      return(check_value(sort(unique(x[!is.na(x)])), name))
 
     if(inherits(x, c("Date", "POSIXct"))) {
+      if(all(is.na(x)))
+        stop("no non-missing values available for '", name, "'.")
       r <- range(x, na.rm = TRUE)
-      return(seq(r[1L], r[2L], length.out = n))
+      z <- if(r[1L] == r[2L]) r[1L] else
+        seq(r[1L], r[2L], length.out = n)
+      return(check_value(z, name))
     }
 
     if(is.numeric(x)) {
@@ -518,7 +567,7 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
       return(seq(r[1L], r[2L], length.out = n))
     }
 
-    unique(x[!is.na(x)])
+    check_value(unique(x[!is.na(x)]), name)
   }
 
   ## Construct one representative observation.
@@ -538,6 +587,7 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
 
     nd <- base[rep(1L, length(xi)), , drop = FALSE]
     nd[[i]] <- xi
+    rownames(nd) <- NULL
 
     fit <- predict(object, newdata = nd, ...)
 
@@ -551,8 +601,8 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
       stop("prediction for '", i,
         "' returned an unexpected number of rows.")
 
-    rownames(fit) <- NULL
     res[[i]] <- cbind(nd[i], fit)
+    rownames(res[[i]]) <- NULL
   }
 
   ## Store the conditioning values for reference.
@@ -560,4 +610,3 @@ marginal_predict <- function(object, newdata = NULL, variables = NULL,
 
   res
 }
-

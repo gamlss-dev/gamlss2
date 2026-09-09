@@ -2,7 +2,7 @@ import("Formula")
 import("gamlss.dist")
 import("mgcv")
 
-importFrom("stats", "terms", ".getXlevels", "coef", "dnorm", "lm.wfit",
+importFrom("stats", "terms", "delete.response", ".getXlevels", "coef", "dnorm", "lm.wfit",
   "make.link", "model.frame", "model.matrix", "model.offset",
   "model.response", "model.weights", "nlminb", "pnorm",
   "qnorm", "rnorm", "runif", "sd", "predict", "family",
@@ -75,6 +75,7 @@ export(
   "fk",
   "cv_gamlss2",
   "log_pdf_metric",
+  "marginal_predict",
   "rqres_metric",
   "mse_metric",
   "BS",

@@ -83,8 +83,7 @@ is_continuous.gamlss2 <- function(d, ...) {
 
 support.gamlss2 <- function(d, drop = TRUE, ...) {
   d <- distributions3::prodist(d, ...)
-  s <- quantile(d, probs = c(0, 1), elementwise = FALSE)
-  distributions3::make_support(s[, 1L], s[, 2L], d, drop = drop)
+  distributions3::support(d, drop = drop)
 }
 
 ## Quantiles.

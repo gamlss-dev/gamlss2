@@ -163,6 +163,13 @@ Family objects can also include other functions such as
 
 * `cdf(par, y, ...)`: Cumulative distribution function.
 * `quantile(par, p, ...)`: Quantile function with probability vector `p`.
+* `support(par, ...)`: Lower and upper response support as a numeric matrix
+  with columns `min` and `max`, one row per parameter combination. A constant
+  support can be supplied as `c(min, max)`. If omitted, support is inferred
+  from `quantile(par, 0)` and `quantile(par, 1)` when available. Otherwise,
+  continuous families obtain a parameter-dependent support by probing the
+  log-density. This last fallback is heuristic, so unusual, disconnected, or
+  numerically extreme supports should be supplied explicitly.
 * `random(par, n, ...)`: Random number generation with number of samples `n`.
 * `mean(par, ...)`: Mean function.
 * `variance(par, ...)`: Variance function.
@@ -171,6 +178,9 @@ Family objects can also include other functions such as
 * `valid.response(y)`: Function to check the values of the response.
 
 Note that the `cdf()` function is needed for computing the quantile residuals.
+For a continuous family, `complete_family()` constructs a missing `cdf()` by
+numerically integrating `pdf()` over the family support. Analytical CDFs are
+left unchanged. This fallback is not currently generated for discrete families.
 
 For faster estimation, it can also be useful to provide an optimized
 update function
@@ -351,4 +361,3 @@ such as parameters, link functions, and probability density functions, they prov
 for customizing models to fit specific data. The flexibility to define custom families,
 as demonstrated with the `Normal()` distribution, enables users to extend the package
 beyond its default families, making it adaptable to a wide range of modeling scenarios.
-

@@ -57,8 +57,10 @@ CG(x, y, specials, family, offsets,
     \item \code{step}: Numeric, the step length control parameter. Default is \code{step = 1}.
       Note that if \code{step} is set smaller than 1, it might be appropriate to lower
       the stopping criterion \code{eps}, too.
-    \item \code{CG}: Integer, the number of iterations when to start the CG correction.
-      Default is \code{CG = Inf}.
+    \item \code{CG}: Integer, the outer iteration in which to start the CG
+      correction. Thus, \code{CG = 5} uses RS for the first four outer
+      iterations and CG in the fifth. \code{CG = 0} starts with CG immediately;
+      the default is \code{CG = Inf}.
     \item \code{trace}: Logical, should information be printed while the algorithm is running?
     \item \code{rs.cache}: Logical, reuse unchanged generated family evaluations
       and weighted matrix calculations within a fit? Default is \code{TRUE}.

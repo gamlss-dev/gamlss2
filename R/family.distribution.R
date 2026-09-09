@@ -121,6 +121,10 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     "create_distribution" = d3
   )
 
+  ## Prefer the native distribution support when its class provides one.
+  if(hasS3method("support", distribution))
+    rval$support <- function(par, ...) support(d3(par), drop = FALSE, ...)
+
   ## add score function if desired and available
   has_score <- hasS3method("score", distribution)
   if (score && has_score) rval$score <- structure(lapply(nams, function(n) { ## FIXME: score(par, y, which, ...)

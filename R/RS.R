@@ -318,11 +318,16 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     CGk <- Inf
   if(is.finite(CGk))
     eta_old <- eta
+  ## The third internal sweep limit is used by the CG correction.  Before the
+  ## handoff, retain the ordinary RS limit instead of expanding it merely
+  ## because a future CG iteration was requested.
+  maxit_RS <- if(length(maxit) >= 3L) maxit[3L] else 3L
+  maxit_CG <- if(length(maxit) >= 3L) maxit[3L] else 30L
   if(length(maxit) < 3L) {
     if(is.finite(CGk))
-      maxit <- c(maxit, 30)
+      maxit <- c(maxit, maxit_CG)
     else
-      maxit <- c(maxit, 3)
+      maxit <- c(maxit, maxit_RS)
   }
 
   ## Track iterations
@@ -360,8 +365,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       llo0 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
     }
 
+    ## CG = k means that the kth displayed outer iteration uses CG.  The
+    ## counter itself is zero-based at the top of this loop.
+    use_CG <- iter[1L] + 1L >= CGk
+
     ## For CG.
-    if(iter[1L] >= CGk) {
+    if(use_CG) {
       eta_old <- if(iter[1L] > 0L) eta else etastart
       par <- if(iter[1L] > 0L) {
         map2par(eta)
@@ -379,8 +388,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eps_outer <- 1
     iter_outer <- 0
 
-    while((eps_outer > stop.eps[3L]) && (iter_outer < maxit[3L])) {
-      if(iter[1L] >= CGk) {
+    while((eps_outer > stop.eps[3L]) &&
+        (iter_outer < if(use_CG) maxit_CG else maxit_RS)) {
+      if(use_CG) {
         if(is.null(weights)) {
           outer_ll0 <- log_likelihood(par = map2par(eta), y = y)
         } else {
@@ -402,7 +412,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         ## Compute working response z and weights hessian from family.
         ## Cole and Green adjustment.
-        if(iter[1L] >= CGk) {
+        if(use_CG) {
           h <- grep(paste0(j, ":"), names(family$hessian), value = TRUE)
           if(length(h)) {
             adj <- 0.0
@@ -679,7 +689,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           eps[2L] <- abs(ll1 - ll0) / (abs(ll0) + 1e-08)
 
           ## Update working response.
-          if((eps[2L] > stop.eps[2L]) && (iter[1L] < CGk)) {
+          if((eps[2L] > stop.eps[2L]) && !use_CG) {
             par <- map2par(eta)
             ew <- .update(par = par, y = y,
               eta = if(iter[1L] > 0L) eta[[j]] else etastart[[j]],
@@ -697,7 +707,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
       ## For Cole and Green.
       iter_outer <- iter_outer + 1L
-      if(iter[1L] >= CGk)
+      if(use_CG)
         eps_outer <- abs((ll1 - outer_ll0) / ll1)
     }
 
@@ -726,7 +736,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
           cat('\r')
         }
       }
-      itxt <- paste0(paste0("GAMLSS-", if(iter[1L] >= CGk) "CG" else "RS", " iteration "),
+      itxt <- paste0(paste0("GAMLSS-", if(use_CG) "CG" else "RS", " iteration "),
         fmt(iter[1L], nchar(as.character(maxit[1L])), digits = 0),
         ": Global Deviance = ", round(-2 * llo1, digits = 4),
         " eps = ", fmt(eps[1L], width = 8, digits = 8), "    ")

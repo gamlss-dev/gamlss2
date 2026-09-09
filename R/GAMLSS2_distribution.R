@@ -95,7 +95,15 @@ log_pdf.GAMLSS2 <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 
 cdf.GAMLSS2 <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
   f <- complete_family(d)
-  FUN <- function(at, d) { f$cdf(par = d, y = at) }
+  dots <- list(...)
+  FUN <- function(at, d) {
+    par <- as.list(d)
+    if(!length(dots)) {
+      f$cdf(par = par, y = at)
+    } else {
+      do.call(f$cdf, c(list(par = par, y = at), dots))
+    }
+  }
   distributions3::apply_dpqr(d = d, FUN = FUN, at = x, type = "probability", drop = drop, elementwise = elementwise)
 }
 
@@ -119,8 +127,11 @@ random.GAMLSS2 <- function(x, n = 1L, drop = TRUE, ...) {
 }
 
 support.GAMLSS2 <- function(d, drop = TRUE, ...) {
-  s <- quantile(d, probs = c(0, 1), elementwise = FALSE)
-  distributions3::make_support(s[, 1L], s[, 2L], d, drop = drop)
+  f <- complete_family(d)
+  if(is.null(f$support))
+    stop(sprintf("the support is not implemented for the %s family", f$family[1L]))
+  s <- f$support(as.list(d), ...)
+  if(drop && nrow(s) == 1L) s[1L, , drop = TRUE] else s
 }
 
 is_discrete.GAMLSS2 <- function(d, ...) {
@@ -134,4 +145,3 @@ is_continuous.GAMLSS2 <- function(d, ...) {
   if(is.null(f$type)) stop(sprintf("the type is not implemented for the %s family", attr(d, "family")[1L]))
   setNames(rep.int(tolower(f$type) == "continuous", length(d)), names(d))
 }
-

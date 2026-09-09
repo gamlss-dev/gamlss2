@@ -59,6 +59,15 @@
     \item \code{log_likelihood(par, y, ...)}: a function computing the total log-likelihood.
     \item \code{cdf(par, y, ...)}: cumulative distribution function.
     \item \code{quantile(par, p, ...)}: quantile function.
+    \item \code{support(par, ...)}: lower and upper response support. It must
+      return a numeric matrix with columns \code{min} and \code{max}, with one
+      row per parameter combination. A fixed numeric vector
+      \code{c(min, max)} can be supplied instead. If support is omitted but a
+      quantile function is available, it is inferred from the quantiles at
+      probabilities zero and one. Otherwise, for a continuous family with a
+      density, a parameter-dependent support is inferred heuristically by
+      probing the log-density. Explicit support is recommended for unusual,
+      disconnected, or numerically extreme supports.
     \item \code{random(par, n, ...)}: random number generator.
     \item \code{mean(par, ...)}: mean function.
     \item \code{variance(par, ...)}: variance function.
@@ -72,8 +81,13 @@
   }
 
   If analytical score or Hessian functions are not provided, they are approximated
-  numerically. If quantile residuals are required, a \code{cdf()} function must
-  be available.
+  numerically. If \code{cdf()} is omitted for a continuous family with an
+  available density and support, it is constructed by numerical integration.
+  Analytical CDFs are retained unchanged. Numerical CDFs accept
+  \code{lower.tail}, \code{log.p}, \code{rel.tol}, \code{abs.tol}, and
+  \code{subdivisions} arguments. A CDF is not currently generated for discrete
+  families. If quantile residuals are required, either an analytical or a
+  generated \code{cdf()} function must be available.
 }
 
 \value{
@@ -128,6 +142,7 @@ Normal <- function(...) {
     "quantile" = function(par, p) {
       qnorm(p, mean = par$mu, sd = par$sigma)
     },
+    "support" = c(-Inf, Inf),
     "initialize" = list(
       "mu"    = function(y, ...) { (y + mean(y)) / 2 },
       "sigma" = function(y, ...) { rep(sd(y), length(y)) }

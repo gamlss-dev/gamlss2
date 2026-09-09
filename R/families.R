@@ -533,6 +533,7 @@ tF <- function(x, ...)
   }
 
   quantile_fun <- NULL
+  support_fun <- x[["support"]]
   if(!is.null(qfun)) {
     qcall <- dist_call(qfun, "p", with_log = TRUE, with_dots = TRUE)
     quantile_fun <- mkfun(paste0(
@@ -544,6 +545,22 @@ tF <- function(x, ...)
       "if(length(q__) < n__) { p <- rep(p, length.out=n__); q__ <- ", qcall, " }\n",
       "q__\n}"
     ), list(.fun = qfun))
+
+    ## The prediction quantile wrapper clips probabilities away from zero and
+    ## one. Use the original distribution function for support endpoints so
+    ## that unbounded supports remain infinite.
+    if(is.null(support_fun)) {
+      qcall_support <- dist_call(qfun, "p", with_log = FALSE,
+        with_dots = TRUE)
+      support_fun <- mkfun(paste0(
+        "function(par, ...) {\n",
+        "n__ <- length(par[[1L]])\n",
+        "p <- rep(0, length.out=n__); lo__ <- ", qcall_support, "\n",
+        "p <- rep(1, length.out=n__); hi__ <- ", qcall_support, "\n",
+        "cbind(min=lo__, max=hi__)\n}"
+      ), list(.fun = qfun))
+      attr(support_fun, "inferred") <- "quantile"
+    }
   }
 
   random_fun <- NULL
@@ -565,7 +582,8 @@ tF <- function(x, ...)
     pdf = pdf_fun,
     cdf = cdf_fun,
     quantile = quantile_fun,
-    random = random_fun
+    random = random_fun,
+    support = support_fun
   )
   names(rval$links) <- nx
   rval$valid.response <- x$y.valid
@@ -662,6 +680,8 @@ tF <- function(x, ...)
       all(vapply(x[paste(nx, "link", sep = ".")], is.character, logical(1L))))
     attr(rval, "rs.cache") <- rval[c("map2par", "pdf", "log_likelihood")]
 
+  rval <- complete_family_support(rval)
+  rval <- complete_family_cdf(rval)
   class(rval) <- "gamlss2.family"
   rval
 }
@@ -745,6 +765,437 @@ make_numeric_update <- function(pdf, linkinv,
       weights = hessian
     )
   }
+}
+
+## Number of elementwise distributions represented by a parameter object.
+family_parameter_rows <- function(par)
+{
+  if(is.data.frame(par) || is.matrix(par))
+    return(nrow(par))
+  if(is.list(par)) {
+    n <- lengths(par)
+    if(!length(n)) return(0L)
+    nr <- max(n)
+    if(any(!n %in% c(1L, nr)))
+      stop("family parameters have incompatible lengths.")
+    return(nr)
+  }
+  1L
+}
+
+## Normalize the family-level support contract to a two-column matrix.
+normalize_family_support <- function(value, par)
+{
+  nr <- family_parameter_rows(par)
+  if(is.list(value) && !is.data.frame(value)) {
+    nms <- names(value)
+    lower <- if("min" %in% nms) value[["min"]] else
+      if("lower" %in% nms) value[["lower"]] else NULL
+    upper <- if("max" %in% nms) value[["max"]] else
+      if("upper" %in% nms) value[["upper"]] else NULL
+    if(is.null(lower) || is.null(upper))
+      stop("family support must contain 'min' and 'max' endpoints.")
+    value <- cbind(min = lower, max = upper)
+  } else if(is.null(dim(value))) {
+    if(!is.numeric(value) || length(value) != 2L)
+      stop("family support must be two numeric endpoints or a two-column matrix.")
+    value <- matrix(rep(value, each = nr), nrow = nr, ncol = 2L)
+  } else {
+    value <- as.matrix(value)
+  }
+
+  if(!is.numeric(value) || ncol(value) != 2L)
+    stop("family support must be a numeric matrix with two columns.")
+  if(nrow(value) == 1L && nr != 1L)
+    value <- value[rep.int(1L, nr), , drop = FALSE]
+  if(nrow(value) != nr)
+    stop("family support must provide one row per parameter combination.")
+  colnames(value) <- c("min", "max")
+  if(anyNA(value))
+    stop("family support endpoints must not be missing.")
+  if(any(value[, "min"] > value[, "max"]))
+    stop("family support lower endpoint exceeds its upper endpoint.")
+
+  rn <- if(is.data.frame(par) || is.matrix(par)) rownames(par) else NULL
+  if(length(rn) == nr) rownames(value) <- rn
+  value
+}
+
+## Infer the interval containing a continuous density's positive mass. Using
+## log-densities avoids mistaking ordinary floating-point underflow in the
+## tails for a finite endpoint. This remains a heuristic for arbitrary user
+## densities; an explicit support specification is always authoritative.
+make_density_support <- function(pdf, max_steps = 20L, refine = 64L)
+{
+  force(pdf)
+  force(max_steps)
+  force(refine)
+
+  support <- function(par, ...) {
+    nr <- family_parameter_rows(par)
+    if(!nr) stop("family parameters must not be empty.")
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    parameters <- lapply(parameters, rep, length.out = nr)
+    dots <- list(...)
+    bounds <- matrix(NA_real_, nrow = nr, ncol = 2L,
+      dimnames = list(NULL, c("min", "max")))
+
+    for(i in seq_len(nr)) {
+      pari <- lapply(parameters, function(z) z[i])
+      evaluate <- function(y) {
+        ans <- tryCatch(
+          suppressWarnings(if(!length(dots)) {
+            pdf(par = pari, y = y, log = TRUE)
+          } else {
+            do.call(pdf, c(list(par = pari, y = y, log = TRUE), dots))
+          }),
+          error = function(e) NA_real_
+        )
+        if(length(ans) != 1L) return(NA_real_)
+        as.numeric(ans)
+      }
+      inside <- function(y) {
+        z <- evaluate(y)
+        !is.na(z) && z > -Inf
+      }
+
+      ## Include conventional response-scale anchors, parameter values, their
+      ## midpoints, and local offsets around the first parameter (usually a
+      ## location or mean). These find common fixed and parameter-dependent
+      ## boundaries before the outward search is needed.
+      pv <- suppressWarnings(as.numeric(unlist(pari, use.names = FALSE)))
+      pv <- pv[is.finite(pv)]
+      anchors <- unique(c(0, pv))
+      midpoints <- numeric()
+      if(length(anchors) > 1L) {
+        pairs <- utils::combn(anchors, 2L)
+        midpoints <- pairs[1L, ] / 2 + pairs[2L, ] / 2
+      }
+      local <- numeric()
+      if(length(pv)) {
+        scales <- unique(c(0.5, 1, abs(pv[-1L]),
+          abs(pv[-1L] - pv[1L])))
+        scales <- scales[is.finite(scales) & scales > 0]
+        local <- c(pv[1L] - scales, pv[1L] + scales)
+      }
+      candidates <- unique(c(-1, -0.5, 0, 0.5, 1, pv,
+        midpoints, local))
+      candidates <- sort(candidates[is.finite(candidates)])
+      log_density <- vapply(candidates, evaluate, numeric(1L))
+      in_support <- !is.na(log_density) & log_density > -Inf
+      if(!any(in_support))
+        stop("could not infer support from the family density at row ", i,
+          "; please supply 'family$support'.", call. = FALSE)
+
+      ## Start near the mode among the probed points. Positive infinity is a
+      ## valid log-density at an integrable boundary singularity.
+      x0 <- candidates[which.max(replace(log_density, !in_support, -Inf))]
+      distances <- abs(candidates - x0)
+      distances <- distances[is.finite(distances) & distances > 0]
+      step <- if(length(distances)) min(distances) else max(1, abs(x0))
+      step <- max(step, 16 * .Machine$double.eps * max(1, abs(x0)))
+
+      refine_boundary <- function(xin, xout) {
+        for(k in seq_len(refine)) {
+          midpoint <- xin / 2 + xout / 2
+          if(!is.finite(midpoint) || midpoint == xin || midpoint == xout)
+            break
+          if(inside(midpoint)) xin <- midpoint else xout <- midpoint
+        }
+        endpoint <- xin / 2 + xout / 2
+
+        ## Recover exact, meaningful endpoints such as zero or a parameter
+        ## value when bisection has converged to one of the probe anchors.
+        nearest <- candidates[which.min(abs(candidates - endpoint))]
+        tolerance <- 128 * .Machine$double.eps *
+          max(1, abs(endpoint), abs(nearest))
+        if(abs(nearest - endpoint) <= tolerance) endpoint <- nearest
+        endpoint
+      }
+
+      find_boundary <- function(direction) {
+        side <- if(direction < 0) {
+          which(candidates < x0)
+        } else {
+          which(candidates > x0)
+        }
+        if(length(side)) {
+          side <- side[order(candidates[side], decreasing = direction < 0)]
+          terminal <- vapply(seq_along(side), function(k) {
+            !in_support[side[k]] && all(!in_support[side[k:length(side)]])
+          }, logical(1L))
+          if(any(terminal))
+            return(refine_boundary(x0,
+              candidates[side[which(terminal)[1L]]]))
+        }
+
+        ## No nearby zero-density region was found. Expand geometrically; a
+        ## density that stays positive over this wide range is treated as
+        ## having an infinite endpoint.
+        last_inside <- x0
+        for(k in 0:(max_steps - 1L)) {
+          probe <- x0 + direction * step * 2^k
+          if(!is.finite(probe)) return(direction * Inf)
+          if(inside(probe)) {
+            last_inside <- probe
+          } else {
+            farther <- x0 + direction * step * 2^(k + 1L)
+            if(!is.finite(farther) || !inside(farther))
+              return(refine_boundary(last_inside, probe))
+            last_inside <- farther
+          }
+        }
+        direction * Inf
+      }
+
+      bounds[i, ] <- c(find_boundary(-1), find_boundary(1))
+
+      ## Most distribution families have parameter-independent support. After
+      ## inferring the first row, verify its boundary pattern for every row in
+      ## a few vectorized log-density evaluations. This avoids repeating the
+      ## search for large prediction vectors. If the density is not vectorized
+      ## or any pattern differs, continue with row-wise inference.
+      if(i == 1L && nr > 1L) {
+        scale <- max(1, abs(x0), abs(bounds[i, is.finite(bounds[i, ])]))
+        delta <- 128 * .Machine$double.eps * scale
+        probes <- expected <- numeric()
+        if(is.finite(bounds[i, "min"])) {
+          probes <- c(probes, bounds[i, "min"] - delta,
+            bounds[i, "min"] + delta)
+          expected <- c(expected, 0, 1)
+        } else {
+          probes <- c(probes, x0 - step * 2^(max_steps - 1L))
+          expected <- c(expected, 1)
+        }
+        if(is.finite(bounds[i, "max"])) {
+          probes <- c(probes, bounds[i, "max"] - delta,
+            bounds[i, "max"] + delta)
+          expected <- c(expected, 1, 0)
+        } else {
+          probes <- c(probes, x0 + step * 2^(max_steps - 1L))
+          expected <- c(expected, 1)
+        }
+
+        same_support <- TRUE
+        for(k in seq_along(probes)) {
+          ans <- tryCatch(
+            suppressWarnings(if(!length(dots)) {
+              pdf(par = parameters, y = rep.int(probes[k], nr), log = TRUE)
+            } else {
+              do.call(pdf, c(list(par = parameters,
+                y = rep.int(probes[k], nr), log = TRUE), dots))
+            }),
+            error = function(e) NULL
+          )
+          if(is.null(ans) || length(ans) != nr) {
+            same_support <- FALSE
+            break
+          }
+          observed <- !is.na(ans) & as.numeric(ans) > -Inf
+          if(any(observed != as.logical(expected[k]))) {
+            same_support <- FALSE
+            break
+          }
+        }
+        if(same_support) {
+          bounds[-1L, ] <- bounds[rep.int(1L, nr - 1L), , drop = FALSE]
+          break
+        }
+      }
+    }
+    bounds
+  }
+  attr(support, "inferred") <- "density"
+  support
+}
+
+## Preserve explicit support specifications and otherwise infer endpoints from
+## an existing quantile function, followed by log-density probing for a
+## continuous family.
+complete_family_support <- function(family)
+{
+  support <- family[["support"]]
+  if(is.function(support) &&
+      isTRUE(attr(support, "gamlss2.normalized", exact = TRUE)))
+    return(family)
+  inferred <- NULL
+  if(is.null(support)) {
+    quantile <- family[["quantile"]]
+    if(is.function(quantile)) {
+      support <- function(par, ...) {
+        cbind(
+          min = quantile(par = par, p = 0),
+          max = quantile(par = par, p = 1)
+        )
+      }
+      inferred <- "quantile"
+    } else {
+      type <- family[["type"]]
+      if(is.null(type)) type <- "continuous"
+      if(!identical(tolower(type[1L]), "continuous") ||
+          !is.function(family[["pdf"]]))
+        return(family)
+      support <- make_density_support(family[["pdf"]])
+      inferred <- "density"
+    }
+  } else if(!is.function(support)) {
+    if(!is.numeric(support) || length(support) != 2L || anyNA(support) ||
+        support[1L] > support[2L])
+      stop("'family$support' must be a function or two ordered numeric endpoints.")
+    endpoints <- unname(support)
+    support <- function(par, ...) endpoints
+  }
+
+  support0 <- support
+  support <- function(par, ...) {
+    normalize_family_support(support0(par, ...), par)
+  }
+  if(is.null(inferred)) inferred <- attr(support0, "inferred", exact = TRUE)
+  if(!is.null(inferred)) attr(support, "inferred") <- inferred
+  attr(support, "gamlss2.normalized") <- TRUE
+  family$support <- support
+  family
+}
+
+## Numerically integrate a continuous density over its declared support.
+make_numeric_cdf <- function(pdf, support)
+{
+  cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE,
+    rel.tol = 1e-8, abs.tol = 0, subdivisions = 100L, ...)
+  {
+    if(!is.logical(lower.tail) || length(lower.tail) != 1L || is.na(lower.tail))
+      stop("'lower.tail' must be TRUE or FALSE.")
+    if(!is.logical(log.p) || length(log.p) != 1L || is.na(log.p))
+      stop("'log.p' must be TRUE or FALSE.")
+    if(!is.numeric(y)) stop("'y' must be numeric.")
+    if(!length(y)) return(numeric())
+    if(!is.numeric(rel.tol) || length(rel.tol) != 1L ||
+        !is.finite(rel.tol) || rel.tol <= 0)
+      stop("'rel.tol' must be a positive finite number.")
+    if(!is.numeric(abs.tol) || length(abs.tol) != 1L ||
+        !is.finite(abs.tol) || abs.tol < 0)
+      stop("'abs.tol' must be a nonnegative finite number.")
+    if(!is.numeric(subdivisions) || length(subdivisions) != 1L ||
+        !is.finite(subdivisions) || subdivisions < 1 ||
+        subdivisions != floor(subdivisions))
+      stop("'subdivisions' must be a positive integer.")
+    subdivisions <- as.integer(subdivisions)
+
+    nr <- family_parameter_rows(par)
+    ny <- length(y)
+    if(!nr) stop("family parameters must not be empty.")
+    n <- max(nr, ny)
+    if(!nr %in% c(1L, n) || !ny %in% c(1L, n))
+      stop("lengths of family parameters and 'y' are incompatible.")
+
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    parameters <- lapply(parameters, rep, length.out = n)
+    yy <- rep(y, length.out = n)
+    dots <- list(...)
+    bounds <- if(!length(dots)) {
+      support(parameters)
+    } else {
+      do.call(support, c(list(par = parameters), dots))
+    }
+    value <- rep(NA_real_, n)
+
+    for(i in seq_len(n)) {
+      if(is.na(yy[i])) next
+      lo <- bounds[i, "min"]
+      hi <- bounds[i, "max"]
+      if(lower.tail && yy[i] <= lo || !lower.tail && yy[i] >= hi) {
+        value[i] <- 0
+        next
+      }
+      if(lower.tail && yy[i] >= hi || !lower.tail && yy[i] <= lo) {
+        value[i] <- 1
+        next
+      }
+
+      pari <- lapply(parameters, function(z) z[i])
+      evaluate <- function(z) {
+        if(!length(dots)) {
+          pdf(par = pari, y = z, log = FALSE)
+        } else {
+          do.call(pdf, c(list(par = pari, y = z, log = FALSE), dots))
+        }
+      }
+
+      ## stats::integrate() supplies vector-valued batches of abscissae. Most
+      ## family densities are vectorized; retain a scalar fallback for custom
+      ## densities that are not.
+      vectorized <- TRUE
+      integrand <- function(z) {
+        density <- NULL
+        if(vectorized) {
+          density <- try(evaluate(z), silent = TRUE)
+          if(inherits(density, "try-error") || length(density) != length(z)) {
+            vectorized <<- FALSE
+            density <- NULL
+          }
+        }
+        if(is.null(density)) {
+          density <- vapply(z, function(zz) {
+            ans <- evaluate(zz)
+            if(length(ans) != 1L)
+              stop("the family density must return one value per response.")
+            as.numeric(ans)
+          }, numeric(1L))
+        }
+        density <- as.numeric(density)
+        if(anyNA(density) || any(!is.finite(density)))
+          stop("the family density returned non-finite values during integration.")
+        if(any(density < 0))
+          stop("the family density returned negative values during integration.")
+        density
+      }
+
+      limits <- if(lower.tail) c(lo, yy[i]) else c(yy[i], hi)
+      result <- tryCatch(
+        stats::integrate(integrand, lower = limits[1L], upper = limits[2L],
+          subdivisions = subdivisions, rel.tol = rel.tol,
+          abs.tol = abs.tol, stop.on.error = FALSE),
+        error = function(e) e
+      )
+      if(inherits(result, "error"))
+        stop("numerical CDF integration failed at row ", i, ": ",
+          conditionMessage(result), call. = FALSE)
+      if(!identical(result$message, "OK"))
+        stop("numerical CDF integration failed at row ", i, ": ",
+          result$message, call. = FALSE)
+
+      probability <- result$value
+      tolerance <- max(10 * rel.tol, 10 * abs.tol,
+        100 * .Machine$double.eps)
+      if(!is.finite(probability) || probability < -tolerance ||
+          probability > 1 + tolerance)
+        stop("numerical CDF integration produced a value outside [0, 1] at row ",
+          i, ".", call. = FALSE)
+      value[i] <- min(max(probability, 0), 1)
+    }
+
+    if(log.p) value <- log(value)
+    value
+  }
+  attr(cdf, "dnum") <- TRUE
+  cdf
+}
+
+## Add a deterministic numerical CDF only for continuous families whose
+## density and support are both available.
+complete_family_cdf <- function(family)
+{
+  if(is.function(family[["cdf"]])) return(family)
+  type <- family[["type"]]
+  if(is.null(type)) type <- "continuous"
+  if(!identical(tolower(type[1L]), "continuous") ||
+      !is.function(family[["pdf"]]) ||
+      !is.function(family[["support"]]))
+    return(family)
+  family$cdf <- make_numeric_cdf(family$pdf, family$support)
+  family
 }
 
 ## Complete a family object, e.g.,
@@ -835,8 +1286,12 @@ complete_family <- function(family, .links = NULL)
   }
   family[c("d", "p", "q", "r")] <- NULL
 
+  family <- complete_family_support(family)
+
   if(is.null(family$pdf))
     stop("the family needs a $pdf() function!")
+
+  family <- complete_family_cdf(family)
 
   use_numeric_update <-
     is.null(family[["update"]]) &&
@@ -972,9 +1427,10 @@ complete_family <- function(family, .links = NULL)
             linkinv = linkinv[[ni]],
             step = err01
           )
-          hji <- paste0(family$names[j], ".", family$names[i])
-          family$hessian[[hji]] <- family$hessian[[hij]]
         }
+        hji <- paste0(family$names[j], ":", family$names[i])
+        if(is.null(family$hessian[[hji]]))
+          family$hessian[[hji]] <- family$hessian[[hij]]
       }
     }
   }

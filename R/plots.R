@@ -404,8 +404,11 @@ plot_factor_effect <- function(x, col = NULL, ncol = -1L, width = 0.6,
   xlab = NULL, ylab = NULL, main = NULL,
   xlim = NULL, ylim = NULL, ...)
 {
+  if(is.null(ncol)) {
+    ncol <- if(nrow(x) > 10L) 1L else 7L
+  }
   if(ncol < 0L) {
-    ncol <- if(nrow(x) > 10L) 1L else 50L
+    ncol <- if(nrow(x) > 10L) 1L else 7L
   }
   if(is.null(col)) {
     col <- gray.colors(ncol, start = 0.3, end = 1)

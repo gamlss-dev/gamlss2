@@ -125,9 +125,9 @@ print.gamlss2.interval.cache <- function(x, ...)
 predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   level, cache)
 {
-  if(!is.numeric(level) || length(level) != 1L || !is.finite(level) ||
-      level <= 0 || level >= 1)
-    stop("'level' must be a number strictly between zero and one.")
+  if(!is.numeric(level) || !length(level) || any(!is.finite(level)) ||
+      any(level <= 0 | level >= 1))
+    stop("'level' must contain numbers strictly between zero and one.")
   if(any(c("FUN", "R", "seed", "burnin") %in% names(dots)))
     stop("Do not combine interval = 'wald' with FUN, R, seed, or burnin; these select simulation summaries.")
   if(inherits(object, "bamlss2"))
@@ -198,24 +198,22 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
     }
     matrices[[j]] <- A
   }
-  critical <- qnorm((1 + level) / 2)
-  se <- lower <- upper <- fit
+  se <- fit
+  transformed <- list()
   if(type == "terms") {
     for(j in model) {
       values <- if(length(model) == 1L && drop) fit else fit[[j]]
-      sj <- lj <- uj <- values
+      sj <- values
       for(term in colnames(values)) {
         block <- term.matrices[[j]][[term]]
         A <- matrix(0, n, p)
         if(length(block$index)) A[, block$index] <- block$X
         sj[, term] <- sqrt(wald_variance(A, cache$R))
-        lj[, term] <- values[, term] - critical * sj[, term]
-        uj[, term] <- values[, term] + critical * sj[, term]
       }
       if(length(model) == 1L && drop) {
-        se <- sj; lower <- lj; upper <- uj
+        se <- sj
       } else {
-        se[[j]] <- sj; lower[[j]] <- lj; upper[[j]] <- uj
+        se[[j]] <- sj
       }
     }
   } else {
@@ -244,7 +242,6 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
         A <- A + matrices[[j]] * as.numeric(derivatives[[target]][[j]])
       sj <- values
       sj[] <- sqrt(wald_variance(A, cache$R))
-      lj <- values - critical * sj; uj <- values + critical * sj
       if(type == "parameter") {
         link <- family$links[[target]]
         others <- setdiff(parameters, target)
@@ -256,17 +253,55 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
           if(isTRUE(all.equal(as.numeric(link$linkinv(eta[[target]])),
               as.numeric(values), tolerance = 1e-12))) {
             s <- sqrt(wald_variance(matrices[[target]], cache$R))
-            lj <- link$linkinv(eta[[target]] - critical * s)
-            uj <- link$linkinv(eta[[target]] + critical * s)
+            transformed[[target]] <- list(link = link, eta = eta[[target]], se = s)
           }
         }
       }
       if(type == "response" || (length(model) == 1L && drop)) {
-        se <- sj; lower <- lj; upper <- uj
+        se <- sj
       } else {
-        se[[target]] <- sj; lower[[target]] <- lj; upper[[target]] <- uj
+        se[[target]] <- sj
       }
     }
+  }
+
+  ## Construct every requested interval from the common point estimates and
+  ## standard errors. Plain lists arise for multi-parameter term predictions;
+  ## data frames and matrices support arithmetic directly and keep their shape.
+  shift <- function(x, s, multiplier) {
+    if(is.list(x) && !is.data.frame(x))
+      return(Map(shift, x, s, MoreArgs = list(multiplier = multiplier)))
+    x + multiplier * s
+  }
+  set_target <- function(x, target, value) {
+    if(length(model) == 1L && drop) {
+      x[] <- value
+      x
+    } else {
+      x[[target]][] <- value
+      x
+    }
+  }
+  bounds <- lapply(qnorm((1 + level) / 2), function(critical) {
+    lower <- shift(fit, se, -critical)
+    upper <- shift(fit, se, critical)
+    for(target in names(transformed)) {
+      z <- transformed[[target]]
+      lower <- set_target(lower, target,
+        z$link$linkinv(z$eta - critical * z$se))
+      upper <- set_target(upper, target,
+        z$link$linkinv(z$eta + critical * z$se))
+    }
+    list(lower = lower, upper = upper)
+  })
+  if(length(level) == 1L) {
+    lower <- bounds[[1L]]$lower
+    upper <- bounds[[1L]]$upper
+  } else {
+    interval.names <- paste0(format(100 * level, trim = TRUE,
+      scientific = FALSE, digits = 15L), "%")
+    lower <- setNames(lapply(bounds, `[[`, "lower"), interval.names)
+    upper <- setNames(lapply(bounds, `[[`, "upper"), interval.names)
   }
   structure(list(fit = fit, se.fit = se, lower = lower, upper = upper),
     level = level, interval = "wald", interval.cache = cache)

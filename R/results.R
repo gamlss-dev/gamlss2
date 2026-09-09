@@ -386,7 +386,9 @@ results_linear <- function(x, parameter = NULL, data, ...)
 
       nd <- make_newdata(grid, model_variables)
       xlev <- if(length(x$xlevels) >= k) x$xlevels[[k]] else NULL
-      X <- model.matrix(mt, data = nd, contrasts.arg = x$contrasts,
+      contrasts <- if(!is.null(x$parameter.contrasts))
+        x$parameter.contrasts[[k]] else x$contrasts
+      X <- model.matrix(mt, data = nd, contrasts.arg = contrasts,
         xlev = xlev)
       ii <- colnames(X)[attr(X, "assign") == i]
       ii <- ii[ii %in% intersect(names(cj), colnames(V))]

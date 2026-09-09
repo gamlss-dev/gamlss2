@@ -13,8 +13,8 @@ of the response distribution.
 \usage{
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, ..., interval = c("none", "wald"),
-  level = 0.95, interval.cache = NULL)
+  se.fit = FALSE, drop = TRUE, ...,
+  level = NULL, interval.cache = NULL)
 }
 \arguments{
   \item{object}{A model object of class \code{\link{gamlss2}}.}
@@ -37,10 +37,8 @@ of the response distribution.
     by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
   \item{drop}{Logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data frame (\code{FALSE})?}
-  \item{interval}{\code{"none"} retains the existing prediction behavior.
-    \code{"wald"} requests analytical, approximate pointwise confidence
-    bands without generating coefficient samples or calling \code{vcov()}.}
-  \item{level}{Confidence level for Wald bands, strictly between zero and one.}
+  \item{level}{\code{NULL}, or a numeric vector of confidence levels for
+    Wald bands, with every value strictly between zero and one.}
   \item{interval.cache}{Optional information factor obtained from the
     \code{"interval.cache"} attribute of a previous Wald prediction for the
     same, unchanged model. Reusing it avoids rebuilding the joint information
@@ -60,7 +58,7 @@ If \code{se.fit = TRUE}, standard errors are obtained from coefficient draws.
 Existing draws stored in the fitted object are used when available; otherwise,
 draws are generated from the approximate distribution of the fitted coefficients.
 
-With \code{interval = "wald"}, approximate pointwise confidence intervals and
+If \code{level} is specified, approximate pointwise confidence intervals and
 standard errors are computed analytically, without simulation. Intervals on
 transformed parameter or response scales are transformed as needed and may be
 asymmetric. These are confidence intervals for the fitted model, not prediction
@@ -90,13 +88,16 @@ Multi-parameter models return a list of term matrices.
 For \code{se.fit = TRUE}, the returned object contains fitted values and
 corresponding simulation-based standard errors.
 
-With \code{interval = "wald"}, a list with elements \code{fit}, \code{se.fit},
-\code{lower}, and \code{upper} is returned. Each element follows the structure
-of the ordinary point prediction, including \code{model}, \code{terms}, and
-\code{drop} selection. The \code{fit} element is the ordinary, non-simulated
-prediction. Attributes record the confidence level, method, and reusable
-\code{interval.cache}. The cache retains a reference to the fitted model;
-reuse it only with that unchanged model.
+When \code{level} is specified, a list with elements \code{fit}, \code{se.fit},
+\code{lower}, and \code{upper} is returned. For one confidence level,
+\code{lower} and \code{upper} follow the structure of the ordinary point
+prediction, including \code{model}, \code{terms}, and \code{drop} selection.
+For multiple confidence levels, each is a list named by confidence percentage
+(for example, \code{"80\%"} and \code{"95\%"}), whose elements have that same
+prediction structure. The \code{fit} element is the ordinary, non-simulated
+prediction and \code{se.fit} is shared by all intervals. Attributes record the
+confidence levels, method, and reusable \code{interval.cache}. The cache retains
+a reference to the fitted model; reuse it only with that unchanged model.
 }
 
 \seealso{
@@ -136,9 +137,9 @@ quantile(m, newdata = nd, probs = c(0.1, 0.5, 0.9))
 predict(m, newdata = nd, se.fit = TRUE, R = 200)
 
 ## fast pointwise confidence bands, without sampling
-bands <- predict(m, newdata = nd, interval = "wald", level = 0.95)
-bands$lower
-bands$upper
+bands <- predict(m, newdata = nd, level = c(0.8, 0.95))
+bands$lower[["80\%"]]
+bands$upper[["95\%"]]
 }
 
 \keyword{regression}

@@ -123,6 +123,14 @@ gamlss2.formula <- function(formula, data, family = NO,
     X[[j]] <- model.matrix(mt[[j]], mf)
   }
 
+  ## cbind() drops the contrasts attributes of the individual parameter
+  ## matrices. Retain them for prediction, as lm() and glm() do.
+  parameter.contrasts <- lapply(X, attr, which = "contrasts")
+  names(parameter.contrasts) <- family$names[seq_along(parameter.contrasts)]
+  xcontrasts <- do.call("c", unname(parameter.contrasts))
+  if(length(xcontrasts))
+    xcontrasts <- xcontrasts[!duplicated(names(xcontrasts))]
+
   xnames <- unlist(lapply(X, colnames), use.names = FALSE)
   unique_xnames <- sort(unique(xnames))
   first_xnames <- colnames(X[[1L]])
@@ -270,6 +278,10 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Process factors and other linear model terms.
   xlev <- lapply(mt, function(x) .getXlevels(x, mf))
 
+  ## Preserve levels for factors used only inside special terms, such as the
+  ## grouping factor in s(x, by = group).
+  mf.xlevels <- .getXlevels(delete.response(attr(mf, "terms")), mf)
+
   for(i in names(Xterms)) {
     ## Factors.
     for(j in names(xlev[[i]])) {
@@ -356,7 +368,9 @@ gamlss2.formula <- function(formula, data, family = NO,
   environment(rval$terms) <- menv
   rval$family <- family
   rval$xlevels <- xlev
-  rval$contrasts <- attr(X, "contrasts")
+  rval$mf.xlevels <- mf.xlevels
+  rval$contrasts <- xcontrasts
+  rval$parameter.contrasts <- parameter.contrasts
   rval$na.action <- attr(mf, "na.action")
   attr(Xterms, "terms") <- mt
   if(is.null(rval$selection) | isTRUE(rval$selection$select)) {
@@ -461,12 +475,17 @@ model.frame.gamlss2 <- function(formula, ...)
       drop.unused.levels <- FALSE
     fcall$drop.unused.levels <- drop.unused.levels
     fcall[[1L]] <- quote(model.frame)
-    xlev <- list()
-    for(j in seq_along(formula$xlevels)) {
-      for(i in names(formula$xlevels[[j]]))
-        xlev[[i]] <- formula$xlevels[[j]][[i]]
+    xlev <- formula$mf.xlevels
+    if(is.null(xlev)) {
+      ## Compatibility with fitted objects created before full model-frame
+      ## factor levels were retained.
+      xlev <- list()
+      for(j in seq_along(formula$xlevels)) {
+        for(i in names(formula$xlevels[[j]]))
+          xlev[[i]] <- formula$xlevels[[j]][[i]]
+      }
+      xlev <- xlev[unique(names(xlev))]
     }
-    xlev <- xlev[unique(names(xlev))]
     fcall$xlev <- xlev
     fcall$formula <- formula$fake_formula
     if(!dots$keepresponse) {
@@ -508,8 +527,10 @@ model.matrix.gamlss2 <- function(object, data = NULL, ...)
     mt <- object$terms
     X <- list()
     for(j in names(mt)) {
+      contrasts <- if(!is.null(object$parameter.contrasts))
+        object$parameter.contrasts[[j]] else object$contrasts
       X[[j]] <- do.call(stats::model.matrix.default, c(list(object = list("terms" = mt[[j]]), 
-        data = data, contrasts.arg = object$contrasts), dots))
+        data = data, contrasts.arg = contrasts), dots))
     }
     X <- do.call("cbind", X)
     X <- X[, sort(unique(colnames(X))), drop = FALSE]

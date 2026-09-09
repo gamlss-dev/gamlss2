@@ -127,11 +127,16 @@ random.GAMLSS2 <- function(x, n = 1L, drop = TRUE, ...) {
 }
 
 support.GAMLSS2 <- function(d, drop = TRUE, ...) {
-  f <- complete_family(d)
-  if(is.null(f$support))
-    stop(sprintf("the support is not implemented for the %s family", f$family[1L]))
-  s <- f$support(as.list(d), ...)
-  if(drop && nrow(s) == 1L) s[1L, , drop = TRUE] else s
+## FIXME?!
+##  f <- complete_family(d)
+##  if(is.null(f$support))
+##    stop(sprintf("the support is not implemented for the %s family", f$family[1L]))
+##  s <- try(f$support(as.list(d), ...), silent = TRUE)
+##  if(drop && nrow(s) == 1L) s[1L, , drop = TRUE] else s
+    s <- quantile(d, probs = c(0, 1), elementwise = FALSE)
+    distributions3::make_support(
+      s[, 1L], s[, 2L], d, drop = drop
+    )
 }
 
 is_discrete.GAMLSS2 <- function(d, ...) {

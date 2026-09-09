@@ -117,7 +117,7 @@ ms(x, mono = c("up", "down"), k = 10,
   Bollaerts, K., Eilers, P. H. C. and van Mechelen, I. (2006).
   \dQuote{Simple and Multiple P-splines Regression with Shape Constraints.}
   \emph{British Journal of Mathematical and Statistical Psychology},
-  59(2), 451--469. \doi{10.1348/00071105X84293}
+  59(2), 451--469. \doi{10.1348/000711005X84293}
 }
 
 \seealso{

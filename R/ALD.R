@@ -565,17 +565,17 @@ print.ALDfit <- function(x, ...)
   invisible(x)
 }
 
-if(FALSE) {
-  library("gamlss2")
-  data("mcycle", package = "MASS")
+## if(FALSE) {
+##   library("gamlss2")
+##   data("mcycle", package = "MASS")
 
-  qu <- c(0.1, 0.5, 0.9)
-  m <- fit_ALD(
-    accel ~ s(times, k = 40, bs = "ad"), data = mcycle, tau = qu,
-    monotone = TRUE, verbose = FALSE
-  )
-  p <- fitted(m)
+##   qu <- c(0.1, 0.5, 0.9)
+##   m <- fit_ALD(
+##     accel ~ s(times, k = 40, bs = "ad"), data = mcycle, tau = qu,
+##     monotone = TRUE, verbose = FALSE
+##   )
+##   p <- fitted(m)
 
-  plot(accel ~ times, data = mcycle, ylim = range(mcycle$accel, p))
-  matlines(mcycle$times, p, col = 4, lty = 1, lwd = 2)
-}
+##   plot(accel ~ times, data = mcycle, ylim = range(mcycle$accel, p))
+##   matlines(mcycle$times, p, col = 4, lty = 1, lwd = 2)
+## }

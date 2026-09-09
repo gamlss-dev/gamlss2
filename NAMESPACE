@@ -20,7 +20,7 @@ importFrom("grDevices", "gray.colors", "n2mfrow", "rgb", "contourLines", "trans3
 
 importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
-  "points", "legend", "mtext")
+  "points", "legend", "mtext", "strheight")
 
 importFrom("parallel", "mclapply")
 

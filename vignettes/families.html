@@ -329,6 +329,7 @@ div.csl-indent {
 <ul>
 <li><code>cdf(par, y, ...)</code>: Cumulative distribution function.</li>
 <li><code>quantile(par, p, ...)</code>: Quantile function with probability vector <code>p</code>.</li>
+<li><code>support(par, ...)</code>: Lower and upper response support as a numeric matrix with columns <code>min</code> and <code>max</code>, one row per parameter combination. A constant support can be supplied as <code>c(min, max)</code>. If omitted, support is inferred from <code>quantile(par, 0)</code> and <code>quantile(par, 1)</code> when available. Otherwise, continuous families obtain a parameter-dependent support by probing the log-density. This last fallback is heuristic, so unusual, disconnected, or numerically extreme supports should be supplied explicitly.</li>
 <li><code>random(par, n, ...)</code>: Random number generation with number of samples <code>n</code>.</li>
 <li><code>mean(par, ...)</code>: Mean function.</li>
 <li><code>variance(par, ...)</code>: Variance function.</li>
@@ -336,7 +337,7 @@ div.csl-indent {
 <li><code>kurtosis(par, ...)</code>: Kurtosis function.</li>
 <li><code>valid.response(y)</code>: Function to check the values of the response.</li>
 </ul>
-<p>Note that the <code>cdf()</code> function is needed for computing the quantile residuals.</p>
+<p>Note that the <code>cdf()</code> function is needed for computing the quantile residuals. For a continuous family, <code>complete_family()</code> constructs a missing <code>cdf()</code> by numerically integrating <code>pdf()</code> over the family support. Analytical CDFs are left unchanged. This fallback is not currently generated for discrete families.</p>
 <p>For faster estimation, it can also be useful to provide an optimized update function</p>
 <ul>
 <li><code>update(par, y, eta, which)</code></li>

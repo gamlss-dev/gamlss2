@@ -733,7 +733,7 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. Note that if <code>step</code> is set smaller than 1, it might be appropriate to lower the stopping criterion <code>eps</code>, too.</p>
 </li>
 <li>
-<p><code>CG</code>: Integer, the number of iterations when to start the CG correction. Default is <code>CG = Inf</code>.</p>
+<p><code>CG</code>: Integer, the outer iteration in which to start the CG correction. Thus, <code>CG = 5</code> uses RS for the first four outer iterations and CG in the fifth. <code>CG = 0</code> starts with CG immediately; the default is <code>CG = Inf</code>.</p>
 </li>
 <li>
 <p><code>trace</code>: Logical, should information be printed while the algorithm is running?</p>

@@ -261,6 +261,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">cv_gamlss2</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">bamlss2</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -282,12 +288,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/BS.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">BS</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/bamlss2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">bamlss2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -703,7 +703,7 @@ Not used currently.
 <p><code>quantile(par, p, …)</code>: quantile function.</p>
 </li>
 <li>
-<p><code>support(par, …)</code>: lower and upper response support. It must return a numeric matrix with columns <code>min</code> and <code>max</code>, with one row per parameter combination. A fixed numeric vector <code>c(min, max)</code> can be supplied instead. If support is omitted but a quantile function is available, it is inferred from the quantiles at probabilities zero and one. Otherwise, for a continuous family with a density, a parameter-dependent support is inferred heuristically by probing the log-density. Explicit support is recommended for unusual, disconnected, or numerically extreme supports.</p>
+<p><code>support(par, …)</code>: lower and upper response support. It must return a numeric matrix with columns <code>min</code> and <code>max</code>, with one row per parameter combination. A fixed numeric vector <code>c(min, max)</code> can be supplied instead. If support is omitted but a quantile function is available, it is inferred from the quantiles at probabilities zero and one. Without either, a discrete family is assumed to be a count distribution on the nonnegative integers. For a continuous family with a density, a parameter-dependent support is inferred heuristically by probing the log-density. Explicit support is recommended for shifted or truncated counts and for unusual, disconnected, or numerically extreme continuous supports.</p>
 </li>
 <li>
 <p><code>random(par, n, …)</code>: random number generator.</p>
@@ -727,7 +727,10 @@ Not used currently.
 <p><code>optimizer()</code>: an optional function defining a custom optimization method for use with <code>gamlss2</code>, see also <code>RS</code>.</p>
 </li>
 </ul>
-<p>If analytical score or Hessian functions are not provided, they are approximated numerically. If <code>cdf()</code> is omitted for a continuous family with an available density and support, it is constructed by numerical integration. Analytical CDFs are retained unchanged. Numerical CDFs accept <code>lower.tail</code>, <code>log.p</code>, <code>rel.tol</code>, <code>abs.tol</code>, and <code>subdivisions</code> arguments. A CDF is not currently generated for discrete families. If quantile residuals are required, either an analytical or a generated <code>cdf()</code> function must be available.</p>
+<p>If analytical score or Hessian functions are not provided, they are approximated numerically. If <code>cdf()</code> is omitted for a family with an available density and support, it is constructed by numerical integration for a continuous family or by summing the probability mass over the integer support for a discrete family. Analytical CDFs are retained unchanged. Numerical CDFs accept <code>lower.tail</code>, <code>log.p</code>, <code>rel.tol</code>, and <code>abs.tol</code>; continuous CDFs additionally accept <code>subdivisions</code>, while discrete CDFs accept <code>max.terms</code>.</p>
+<p>If <code>quantile()</code> is omitted but a CDF and support are available, it is constructed by numerical inversion. Continuous CDFs are inverted by bracketing and bisection. For discrete families, the generated function returns the smallest integer whose CDF is at least the requested probability. Numerical quantiles accept <code>lower.tail</code>, <code>log.p</code>, <code>tol</code>, and <code>maxiter</code>; quantiles generated directly from a count PMF additionally accept <code>max.terms</code>. Analytical quantile functions are retained unchanged.</p>
+<p>If <code>mean()</code> or <code>variance()</code> is omitted for a family with a density and support, the missing functions are constructed numerically. Continuous moments use adaptive integration; the variance is integrated as a centered second moment. Discrete moments are obtained by batched summation over the integer support. Numerical moments accept <code>rel.tol</code> and <code>abs.tol</code>; continuous moments additionally accept <code>subdivisions</code>, while discrete moments accept <code>max.terms</code>. A failure to establish a finite moment is reported as an error. Analytical moment functions are retained unchanged.</p>
+<p>If <code>random()</code> is omitted but a quantile function is available, random values are generated by inverse transform sampling. Its <code>…</code> arguments are forwarded to the quantile function. Existing random-number generators are retained unchanged.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

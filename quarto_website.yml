@@ -61,14 +61,14 @@ website:
               file: man/stepwise.qmd
             - text: cv_gamlss2
               file: man/cv_gamlss2.qmd
+            - text: bamlss2
+              file: man/bamlss2.qmd
         - section: Optimization and sampling
           contents:
             - text: RS / CG
               file: man/RS_CG.qmd
             - text: BS
               file: man/BS.qmd
-            - text: bamlss2
-              file: man/bamlss2.qmd
             - text: mcmc
               file: man/mcmc.qmd
         - section: Special model terms

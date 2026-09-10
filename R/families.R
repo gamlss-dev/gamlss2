@@ -682,6 +682,9 @@ tF <- function(x, ...)
 
   rval <- complete_family_support(rval)
   rval <- complete_family_cdf(rval)
+  rval <- complete_family_quantile(rval)
+  rval <- complete_family_moments(rval)
+  rval <- complete_family_random(rval)
   class(rval) <- "gamlss2.family"
   rval
 }
@@ -1011,8 +1014,9 @@ make_density_support <- function(pdf, max_steps = 20L, refine = 64L)
 }
 
 ## Preserve explicit support specifications and otherwise infer endpoints from
-## an existing quantile function, followed by log-density probing for a
-## continuous family.
+## an existing quantile function. Without a quantile, use the canonical
+## nonnegative-integer support for a count family or probe the log-density for
+## a continuous family.
 complete_family_support <- function(family)
 {
   support <- family[["support"]]
@@ -1033,11 +1037,18 @@ complete_family_support <- function(family)
     } else {
       type <- family[["type"]]
       if(is.null(type)) type <- "continuous"
-      if(!identical(tolower(type[1L]), "continuous") ||
-          !is.function(family[["pdf"]]))
-        return(family)
-      support <- make_density_support(family[["pdf"]])
-      inferred <- "density"
+      type <- tolower(type[1L])
+      if(identical(type, "discrete")) {
+        endpoints <- c(0, Inf)
+        support <- function(par, ...) endpoints
+        inferred <- "count"
+      } else {
+        if(!identical(type, "continuous") ||
+            !is.function(family[["pdf"]]))
+          return(family)
+        support <- make_density_support(family[["pdf"]])
+        inferred <- "density"
+      }
     }
   } else if(!is.function(support)) {
     if(!is.numeric(support) || length(support) != 2L || anyNA(support) ||
@@ -1183,18 +1194,1162 @@ make_numeric_cdf <- function(pdf, support)
   cdf
 }
 
-## Add a deterministic numerical CDF only for continuous families whose
-## density and support are both available.
+## Numerically sum a count density over its declared integer support.
+make_numeric_count_cdf <- function(pdf, support)
+{
+  cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE,
+    rel.tol = 1e-8, abs.tol = 0, max.terms = 1e6L, ...)
+  {
+    if(!is.logical(lower.tail) || length(lower.tail) != 1L || is.na(lower.tail))
+      stop("'lower.tail' must be TRUE or FALSE.")
+    if(!is.logical(log.p) || length(log.p) != 1L || is.na(log.p))
+      stop("'log.p' must be TRUE or FALSE.")
+    if(!is.numeric(y)) stop("'y' must be numeric.")
+    if(!length(y)) return(numeric())
+    if(!is.numeric(rel.tol) || length(rel.tol) != 1L ||
+        !is.finite(rel.tol) || rel.tol <= 0)
+      stop("'rel.tol' must be a positive finite number.")
+    if(!is.numeric(abs.tol) || length(abs.tol) != 1L ||
+        !is.finite(abs.tol) || abs.tol < 0)
+      stop("'abs.tol' must be a nonnegative finite number.")
+    if(!is.numeric(max.terms) || length(max.terms) != 1L ||
+        !is.finite(max.terms) || max.terms < 1 ||
+        max.terms != floor(max.terms))
+      stop("'max.terms' must be a positive integer.")
+    max.terms <- as.double(max.terms)
+
+    nr <- family_parameter_rows(par)
+    ny <- length(y)
+    if(!nr) stop("family parameters must not be empty.")
+    n <- max(nr, ny)
+    if(!nr %in% c(1L, n) || !ny %in% c(1L, n))
+      stop("lengths of family parameters and 'y' are incompatible.")
+
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    parameters <- lapply(parameters, rep, length.out = n)
+    yy <- rep(y, length.out = n)
+    dots <- list(...)
+    bounds <- if(!length(dots)) {
+      support(parameters)
+    } else {
+      do.call(support, c(list(par = parameters), dots))
+    }
+    value <- rep(NA_real_, n)
+    batch.size <- 256L
+    probability.tolerance <- max(10 * rel.tol, 10 * abs.tol,
+      100 * .Machine$double.eps)
+
+    for(i in seq_len(n)) {
+      if(is.na(yy[i])) next
+
+      lo <- ceiling(bounds[i, "min"])
+      hi <- floor(bounds[i, "max"])
+      if(!is.finite(lo))
+        stop("count-family support must have a finite lower endpoint at row ",
+          i, ".", call. = FALSE)
+      if(lo > hi)
+        stop("count-family support contains no integers at row ", i, ".",
+          call. = FALSE)
+
+      if(yy[i] < lo) {
+        value[i] <- if(lower.tail) 0 else 1
+        next
+      }
+      if(is.finite(hi) && yy[i] >= hi) {
+        value[i] <- if(lower.tail) 1 else 0
+        next
+      }
+      if(yy[i] == Inf) {
+        value[i] <- if(lower.tail) 1 else 0
+        next
+      }
+
+      pari <- lapply(parameters, function(z) z[i])
+      evaluate <- function(z) {
+        ans <- try(if(!length(dots)) {
+          pdf(par = pari, y = z, log = FALSE)
+        } else {
+          do.call(pdf, c(list(par = pari, y = z, log = FALSE), dots))
+        }, silent = TRUE)
+        if(inherits(ans, "try-error") || length(ans) != length(z)) {
+          ans <- vapply(z, function(zz) {
+            zz <- if(!length(dots)) {
+              pdf(par = pari, y = zz, log = FALSE)
+            } else {
+              do.call(pdf, c(list(par = pari, y = zz, log = FALSE), dots))
+            }
+            if(length(zz) != 1L)
+              stop("the family density must return one value per response.")
+            as.numeric(zz)
+          }, numeric(1L))
+        }
+        ans <- as.numeric(ans)
+        if(anyNA(ans) || any(!is.finite(ans)))
+          stop("the family density returned non-finite values during summation.")
+        if(any(ans < 0))
+          stop("the family density returned negative values during summation.")
+        ans
+      }
+
+      ## Sum in modest batches so very large thresholds do not require a huge
+      ## temporary integer vector. On an infinite upper support, convergence
+      ## is assessed only after two decreasing batches. This direct upper-tail
+      ## sum avoids cancellation when the requested tail is small.
+      sum_mass <- function(from, to, infinite = FALSE) {
+        total <- 0
+        used <- 0
+        previous <- Inf
+        current <- from
+        repeat {
+          remaining <- if(infinite) Inf else to - current + 1
+          if(remaining <= 0) break
+          take <- min(batch.size, remaining, max.terms - used)
+          if(take < 1)
+            stop("numerical CDF summation exceeded 'max.terms' at row ", i,
+              ".", call. = FALSE)
+          take <- as.integer(take)
+          points <- current + seq_len(take) - 1L
+          chunk <- sum(evaluate(points))
+          total <- total + chunk
+          used <- used + take
+
+          if(!is.finite(total) || total > 1 + probability.tolerance)
+            stop("numerical CDF summation produced a value outside [0, 1] at row ",
+              i, ".", call. = FALSE)
+
+          tolerance <- max(abs.tol, rel.tol * total)
+          if(1 - total <= tolerance) break
+          if(infinite && used >= 2L * batch.size && chunk <= previous &&
+              chunk <= tolerance)
+            break
+          if(!infinite && take >= remaining) break
+
+          next.current <- points[take] + 1
+          if(!is.finite(next.current) || next.current == current)
+            stop("integer support is too large to enumerate at row ", i, ".",
+              call. = FALSE)
+          current <- next.current
+          previous <- chunk
+        }
+        min(max(total, 0), 1)
+      }
+
+      cutoff <- floor(yy[i])
+      if(lower.tail) {
+        probability <- sum_mass(lo, min(cutoff, hi))
+      } else if(is.finite(hi)) {
+        probability <- sum_mass(cutoff + 1, hi)
+      } else {
+        lower.probability <- sum_mass(lo, cutoff)
+        probability <- if(lower.probability <= 0.5) {
+          1 - lower.probability
+        } else {
+          sum_mass(cutoff + 1, Inf, infinite = TRUE)
+        }
+      }
+      value[i] <- probability
+    }
+
+    if(log.p) value <- log(value)
+    value
+  }
+  attr(cdf, "dnum") <- TRUE
+  cdf
+}
+
+## Add a deterministic numerical CDF only when a family has a density and
+## support. Continuous densities are integrated; discrete densities are
+## summed over the integer support.
 complete_family_cdf <- function(family)
 {
   if(is.function(family[["cdf"]])) return(family)
   type <- family[["type"]]
   if(is.null(type)) type <- "continuous"
-  if(!identical(tolower(type[1L]), "continuous") ||
+  type <- tolower(type[1L])
+  if(is.na(type) || !type %in% c("continuous", "discrete") ||
       !is.function(family[["pdf"]]) ||
       !is.function(family[["support"]]))
     return(family)
-  family$cdf <- make_numeric_cdf(family$pdf, family$support)
+  family$cdf <- if(type == "continuous") {
+    make_numeric_cdf(family$pdf, family$support)
+  } else {
+    make_numeric_count_cdf(family$pdf, family$support)
+  }
+  family
+}
+
+## Numerically invert a CDF over the declared family support.
+make_numeric_quantile <- function(cdf, support, type, pdf = NULL)
+{
+  type <- tolower(type[1L])
+  force(cdf)
+  force(support)
+  force(type)
+  force(pdf)
+
+  quantile <- function(par, p, lower.tail = TRUE, log.p = FALSE,
+    tol = sqrt(.Machine$double.eps), maxiter = 1000L,
+    max.terms = 1e6L, ...)
+  {
+    if(!is.logical(lower.tail) || length(lower.tail) != 1L || is.na(lower.tail))
+      stop("'lower.tail' must be TRUE or FALSE.")
+    if(!is.logical(log.p) || length(log.p) != 1L || is.na(log.p))
+      stop("'log.p' must be TRUE or FALSE.")
+    if(!is.numeric(p)) stop("'p' must be numeric.")
+    if(!length(p)) return(numeric())
+    if(!is.numeric(tol) || length(tol) != 1L ||
+        !is.finite(tol) || tol <= 0)
+      stop("'tol' must be a positive finite number.")
+    if(!is.numeric(maxiter) || length(maxiter) != 1L ||
+        !is.finite(maxiter) || maxiter < 1 ||
+        maxiter != floor(maxiter))
+      stop("'maxiter' must be a positive integer.")
+    maxiter <- as.integer(maxiter)
+    if(!is.numeric(max.terms) || length(max.terms) != 1L ||
+        !is.finite(max.terms) || max.terms < 1 ||
+        max.terms != floor(max.terms))
+      stop("'max.terms' must be a positive integer.")
+    max.terms <- as.double(max.terms)
+
+    probability <- p
+    if(log.p) {
+      if(any(probability > 0, na.rm = TRUE))
+        stop("log probabilities must not be greater than zero.")
+      probability <- if(lower.tail) {
+        exp(probability)
+      } else {
+        -expm1(probability)
+      }
+    } else {
+      if(any(probability < 0 | probability > 1, na.rm = TRUE))
+        stop("'p' must contain probabilities in [0, 1].")
+      if(!lower.tail) probability <- 1 - probability
+    }
+
+    nr <- family_parameter_rows(par)
+    np <- length(probability)
+    if(!nr) stop("family parameters must not be empty.")
+    n <- max(nr, np)
+    if(!nr %in% c(1L, n) || !np %in% c(1L, n))
+      stop("lengths of family parameters and 'p' are incompatible.")
+
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    parameters <- lapply(parameters, rep, length.out = n)
+    probability <- rep(probability, length.out = n)
+    dots <- list(...)
+    bounds <- if(!length(dots)) {
+      support(parameters)
+    } else {
+      do.call(support, c(list(par = parameters), dots))
+    }
+    value <- rep(NA_real_, n)
+
+    lo <- bounds[, "min"]
+    hi <- bounds[, "max"]
+    if(identical(type, "discrete")) {
+      lo <- ceiling(lo)
+      hi <- floor(hi)
+    }
+    relevant <- which(!is.na(probability))
+    empty <- relevant[lo[relevant] > hi[relevant]]
+    if(length(empty))
+      stop("family support is empty at row ", empty[1L], ".", call. = FALSE)
+
+    at.zero <- relevant[probability[relevant] <= 0]
+    at.one <- relevant[probability[relevant] >= 1]
+    value[at.zero] <- lo[at.zero]
+    value[at.one] <- hi[at.one]
+    interior <- relevant[
+      probability[relevant] > 0 & probability[relevant] < 1
+    ]
+    if(!length(interior)) return(value)
+
+    ## When the CDF itself was generated from a count PMF, invert that PMF in
+    ## one forward pass. Repeated CDF bisection would rescan the same mass many
+    ## times and is substantially slower.
+    if(identical(type, "discrete") &&
+        isTRUE(attr(cdf, "dnum")) && is.function(pdf)) {
+      bad <- interior[!is.finite(lo[interior])]
+      if(length(bad))
+        stop("count-family support must have a finite lower endpoint at row ",
+          bad[1L], ".", call. = FALSE)
+
+      pdf.dots <- dots
+      pdf.dots[c("par", "y", "log", "lower.tail", "log.p")] <- NULL
+      batch.size <- 64L
+      probability.tolerance <- 100 * .Machine$double.eps
+
+      for(i in interior) {
+        pari <- lapply(parameters, function(z) z[i])
+        evaluate <- function(y) {
+          args <- c(list(par = pari, y = y, log = FALSE), pdf.dots)
+          mass <- try(do.call(pdf, args), silent = TRUE)
+          if(inherits(mass, "try-error") || length(mass) != length(y)) {
+            mass <- vapply(y, function(yy) {
+              args$y <- yy
+              ans <- tryCatch(
+                do.call(pdf, args),
+                error = function(e) e
+              )
+              if(inherits(ans, "error"))
+                stop("numerical quantile inversion failed at row ", i, ": ",
+                  conditionMessage(ans), call. = FALSE)
+              if(!is.numeric(ans) || length(ans) != 1L)
+                stop("the family density must return one value per response.")
+              as.numeric(ans)
+            }, numeric(1L))
+          } else {
+            mass <- as.numeric(mass)
+          }
+          if(anyNA(mass) || any(!is.finite(mass)))
+            stop("the family density returned non-finite values during ",
+              "quantile inversion at row ", i, ".", call. = FALSE)
+          if(any(mass < 0))
+            stop("the family density returned negative values during ",
+              "quantile inversion at row ", i, ".", call. = FALSE)
+          mass
+        }
+
+        current <- lo[i]
+        cumulative <- 0
+        used <- 0
+        repeat {
+          remaining <- if(is.finite(hi[i])) hi[i] - current + 1 else Inf
+          if(remaining <= 0)
+            stop("the family density and support do not reach probability at row ",
+              i, ".", call. = FALSE)
+          take <- min(batch.size, remaining, max.terms - used)
+          if(take < 1)
+            stop("numerical quantile inversion exceeded 'max.terms' at row ",
+              i, ".", call. = FALSE)
+          take <- as.integer(take)
+          points <- current + seq_len(take) - 1L
+          cumulative.mass <- cumulative + cumsum(evaluate(points))
+          hit <- which(cumulative.mass >= probability[i])[1L]
+          if(!is.na(hit)) {
+            value[i] <- points[hit]
+            break
+          }
+
+          cumulative <- cumulative.mass[take]
+          if(!is.finite(cumulative) ||
+              cumulative > 1 + probability.tolerance)
+            stop("numerical quantile inversion produced cumulative mass ",
+              "outside [0, 1] at row ", i, ".", call. = FALSE)
+          used <- used + take
+          if(take >= remaining)
+            stop("the family density and support do not reach probability at row ",
+              i, ".", call. = FALSE)
+
+          next.current <- points[take] + 1
+          if(!is.finite(next.current) || next.current == current)
+            stop("integer support is too large to enumerate at row ", i, ".",
+              call. = FALSE)
+          current <- next.current
+        }
+      }
+      return(value)
+    }
+
+    ## Start bracketing near the first finite parameter, which is generally a
+    ## location or mean. Construct this without a row-wise list conversion.
+    center <- rep(NA_real_, n)
+    for(parameter in parameters) {
+      candidate <- suppressWarnings(as.numeric(parameter))
+      replace <- !is.finite(center) & is.finite(candidate)
+      center[replace] <- candidate[replace]
+    }
+    center[!is.finite(center)] <- 0
+    finite.lower <- is.finite(lo)
+    finite.upper <- is.finite(hi)
+    center[finite.lower] <- pmax(center[finite.lower], lo[finite.lower])
+    center[finite.upper] <- pmin(center[finite.upper], hi[finite.upper])
+
+    ## Evaluate all active rows in one CDF call. If an arbitrary user CDF is
+    ## scalar-only, remember that fact and retain the compatible row fallback.
+    cdf.formals <- names(formals(cdf))
+    cdf.dots <- dots
+    cdf.dots[c("par", "y", "lower.tail", "log.p", "log")] <- NULL
+    vectorized <- TRUE
+
+    cdf_call <- function(index, y) {
+      args <- list(
+        par = lapply(parameters, function(z) z[index]),
+        y = y
+      )
+      if("lower.tail" %in% cdf.formals) args$lower.tail <- TRUE
+      if("log.p" %in% cdf.formals) {
+        args$log.p <- FALSE
+      } else if("log" %in% cdf.formals) {
+        args$log <- FALSE
+      }
+      do.call(cdf, c(args, cdf.dots))
+    }
+
+    cdf_values <- function(index, y) {
+      if(!length(index)) return(numeric())
+      ans <- NULL
+      if(vectorized) {
+        ans <- try(cdf_call(index, y), silent = TRUE)
+        if(inherits(ans, "try-error") || length(ans) != length(index)) {
+          vectorized <<- FALSE
+          ans <- NULL
+        }
+      }
+      if(is.null(ans)) {
+        ans <- vapply(seq_along(index), function(k) {
+          row <- index[k]
+          out <- tryCatch(
+            cdf_call(row, y[k]),
+            error = function(e) e
+          )
+          if(inherits(out, "error"))
+            stop("numerical quantile inversion failed at row ", row, ": ",
+              conditionMessage(out), call. = FALSE)
+          if(!is.numeric(out) || length(out) != 1L)
+            stop("the family CDF must return one value per response.")
+          as.numeric(out)
+        }, numeric(1L))
+      } else {
+        ans <- as.numeric(ans)
+      }
+
+      bad <- which(is.na(ans) | !is.finite(ans))
+      if(length(bad))
+        stop("the family CDF returned a non-finite value at row ",
+          index[bad[1L]], ".", call. = FALSE)
+      cdf.tolerance <- 100 * .Machine$double.eps
+      bad <- which(ans < -cdf.tolerance | ans > 1 + cdf.tolerance)
+      if(length(bad))
+        stop("the family CDF returned a value outside [0, 1] at row ",
+          index[bad[1L]], ".", call. = FALSE)
+      pmin(pmax(ans, 0), 1)
+    }
+
+    if(identical(type, "discrete")) {
+      bad <- interior[!is.finite(lo[interior])]
+      if(length(bad))
+        stop("count-family support must have a finite lower endpoint at row ",
+          bad[1L], ".", call. = FALSE)
+
+      center <- floor(center)
+      center <- pmax(center, lo)
+      center[finite.upper] <- pmin(center[finite.upper], hi[finite.upper])
+      distribution <- cdf_values(interior, center[interior])
+      left <- right <- rep(NA_real_, n)
+      step <- rep(1, n)
+
+      ## Search downward together for rows whose starting CDF is already above
+      ## the target.
+      pending <- interior[distribution >= probability[interior]]
+      right[pending] <- center[pending]
+      for(iteration in seq_len(maxiter)) {
+        if(!length(pending)) break
+        candidate <- pmax(lo[pending], center[pending] - step[pending])
+        candidate.distribution <- cdf_values(pending, candidate)
+        below <- candidate.distribution < probability[pending]
+
+        if(any(below)) {
+          found <- pending[below]
+          left[found] <- candidate[below] + 1
+        }
+        stay <- pending[!below]
+        if(length(stay)) {
+          stay.candidate <- candidate[!below]
+          right[stay] <- stay.candidate
+          at.lower <- stay.candidate <= lo[stay]
+          if(any(at.lower)) {
+            found <- stay[at.lower]
+            left[found] <- right[found]
+          }
+          stay <- stay[!at.lower]
+        }
+        pending <- stay
+        step[pending] <- step[pending] * 2
+      }
+      if(length(pending))
+        stop("could not bracket the requested quantile at row ",
+          pending[1L], ".", call. = FALSE)
+
+      ## Search upward together for rows whose starting CDF is below target.
+      pending <- interior[distribution < probability[interior]]
+      left[pending] <- center[pending] + 1
+      step[pending] <- 1
+      for(iteration in seq_len(maxiter)) {
+        if(!length(pending)) break
+        candidate <- center[pending] + step[pending]
+        candidate[!is.finite(candidate)] <- .Machine$double.xmax
+        bounded <- is.finite(hi[pending])
+        candidate[bounded] <- pmin(
+          candidate[bounded], hi[pending][bounded]
+        )
+        candidate.distribution <- cdf_values(pending, candidate)
+        above <- candidate.distribution >= probability[pending]
+
+        if(any(above)) {
+          found <- pending[above]
+          right[found] <- candidate[above]
+        }
+        stay <- pending[!above]
+        if(length(stay)) {
+          stay.candidate <- candidate[!above]
+          next.left <- stay.candidate + 1
+          stuck <- stay.candidate >= hi[stay] |
+            !is.finite(next.left) | next.left <= stay.candidate
+          if(any(stuck))
+            stop("could not bracket the requested quantile at row ",
+              stay[which(stuck)[1L]], ".", call. = FALSE)
+          left[stay] <- next.left
+        }
+        pending <- stay
+        step[pending] <- step[pending] * 2
+      }
+      if(length(pending))
+        stop("could not bracket the requested quantile at row ",
+          pending[1L], ".", call. = FALSE)
+
+      ## Batched integer binary search for the generalized inverse.
+      pending <- interior[left[interior] < right[interior]]
+      for(iteration in seq_len(maxiter)) {
+        if(!length(pending)) break
+        midpoint <- floor(left[pending] / 2 + right[pending] / 2)
+        adjacent <- midpoint <= left[pending]
+
+        if(any(adjacent)) {
+          rows <- pending[adjacent]
+          distribution <- cdf_values(rows, left[rows])
+          use.left <- distribution >= probability[rows]
+          right[rows[use.left]] <- left[rows[use.left]]
+          left[rows[!use.left]] <- right[rows[!use.left]]
+        }
+
+        rows <- pending[!adjacent]
+        if(length(rows)) {
+          distribution <- cdf_values(rows, midpoint[!adjacent])
+          move.right <- distribution >= probability[rows]
+          right[rows[move.right]] <- midpoint[!adjacent][move.right]
+          left[rows[!move.right]] <- midpoint[!adjacent][!move.right] + 1
+        }
+        pending <- pending[left[pending] < right[pending]]
+      }
+      if(length(pending))
+        stop("numerical quantile inversion did not converge at row ",
+          pending[1L], ".", call. = FALSE)
+      value[interior] <- left[interior]
+    } else {
+      lower <- lo
+      upper <- hi
+      unbounded <- interior[
+        !is.finite(lo[interior]) | !is.finite(hi[interior])
+      ]
+      center.distribution <- rep(NA_real_, n)
+      center.distribution[unbounded] <- cdf_values(
+        unbounded, center[unbounded]
+      )
+      initial.step <- pmax(1, abs(center))
+
+      ## Batch the geometric search for all unbounded lower endpoints.
+      pending <- unbounded[
+        !is.finite(lo[unbounded]) &
+          center.distribution[unbounded] >= probability[unbounded]
+      ]
+      upper[pending] <- center[pending]
+      step <- initial.step
+      previous <- center
+      for(iteration in seq_len(maxiter)) {
+        if(!length(pending)) break
+        candidate <- center[pending] - step[pending]
+        candidate[!is.finite(candidate)] <- -.Machine$double.xmax
+        stuck <- candidate == previous[pending]
+        if(any(stuck))
+          stop("could not bracket the requested quantile at row ",
+            pending[which(stuck)[1L]], ".", call. = FALSE)
+        candidate.distribution <- cdf_values(pending, candidate)
+        below <- candidate.distribution < probability[pending]
+        if(any(below)) {
+          found <- pending[below]
+          lower[found] <- candidate[below]
+        }
+        stay <- pending[!below]
+        if(length(stay)) {
+          upper[stay] <- candidate[!below]
+          previous[stay] <- candidate[!below]
+          step[stay] <- step[stay] * 2
+        }
+        pending <- stay
+      }
+      if(length(pending))
+        stop("could not bracket the requested quantile at row ",
+          pending[1L], ".", call. = FALSE)
+      rows <- unbounded[
+        !is.finite(lo[unbounded]) &
+          center.distribution[unbounded] < probability[unbounded]
+      ]
+      lower[rows] <- center[rows]
+
+      ## Batch the corresponding search for unbounded upper endpoints.
+      pending <- unbounded[
+        !is.finite(hi[unbounded]) &
+          center.distribution[unbounded] < probability[unbounded]
+      ]
+      lower[pending] <- center[pending]
+      step <- initial.step
+      previous <- center
+      for(iteration in seq_len(maxiter)) {
+        if(!length(pending)) break
+        candidate <- center[pending] + step[pending]
+        candidate[!is.finite(candidate)] <- .Machine$double.xmax
+        stuck <- candidate == previous[pending]
+        if(any(stuck))
+          stop("could not bracket the requested quantile at row ",
+            pending[which(stuck)[1L]], ".", call. = FALSE)
+        candidate.distribution <- cdf_values(pending, candidate)
+        above <- candidate.distribution >= probability[pending]
+        if(any(above)) {
+          found <- pending[above]
+          upper[found] <- candidate[above]
+        }
+        stay <- pending[!above]
+        if(length(stay)) {
+          lower[stay] <- candidate[!above]
+          previous[stay] <- candidate[!above]
+          step[stay] <- step[stay] * 2
+        }
+        pending <- stay
+      }
+      if(length(pending))
+        stop("could not bracket the requested quantile at row ",
+          pending[1L], ".", call. = FALSE)
+      rows <- unbounded[
+        !is.finite(hi[unbounded]) &
+          center.distribution[unbounded] >= probability[unbounded]
+      ]
+      upper[rows] <- center[rows]
+
+      lower.distribution <- cdf_values(interior, lower[interior])
+      at.lower <- interior[
+        lower.distribution >= probability[interior]
+      ]
+      value[at.lower] <- lower[at.lower]
+      bracket <- setdiff(interior, at.lower)
+      if(length(bracket)) {
+        upper.distribution <- cdf_values(bracket, upper[bracket])
+        bad <- bracket[upper.distribution < probability[bracket]]
+        if(length(bad))
+          stop("the family CDF and support do not bracket probability at row ",
+            bad[1L], ".", call. = FALSE)
+
+        bracket.width <- upper - lower
+        bracket.scale <- ifelse(
+          is.finite(bracket.width),
+          pmax(1, bracket.width),
+          pmax(1, abs(lower), abs(upper))
+        )
+        pending <- bracket
+        for(iteration in seq_len(maxiter)) {
+          if(!length(pending)) break
+          width <- upper[pending] - lower[pending]
+          rounding.tolerance <- 4 * .Machine$double.eps *
+            pmax(1, abs(lower[pending]), abs(upper[pending]))
+          converged <- width <= pmax(
+            tol * bracket.scale[pending], rounding.tolerance
+          )
+          pending <- pending[!converged]
+          if(!length(pending)) break
+
+          midpoint <- lower[pending] / 2 + upper[pending] / 2
+          stuck <- midpoint == lower[pending] |
+            midpoint == upper[pending]
+          pending <- pending[!stuck]
+          midpoint <- midpoint[!stuck]
+          if(!length(pending)) break
+
+          distribution <- cdf_values(pending, midpoint)
+          move.upper <- distribution >= probability[pending]
+          upper[pending[move.upper]] <- midpoint[move.upper]
+          lower[pending[!move.upper]] <- midpoint[!move.upper]
+        }
+
+        if(length(pending)) {
+          width <- upper[pending] - lower[pending]
+          rounding.tolerance <- 4 * .Machine$double.eps *
+            pmax(1, abs(lower[pending]), abs(upper[pending]))
+          midpoint <- lower[pending] / 2 + upper[pending] / 2
+          converged <- width <= pmax(
+            tol * bracket.scale[pending], rounding.tolerance
+          ) | midpoint == lower[pending] | midpoint == upper[pending]
+          pending <- pending[!converged]
+        }
+        if(length(pending))
+          stop("numerical quantile inversion did not converge at row ",
+            pending[1L], ".", call. = FALSE)
+        value[bracket] <- lower[bracket] / 2 + upper[bracket] / 2
+      }
+    }
+
+    value
+  }
+  attr(quantile, "qnum") <- TRUE
+  quantile
+}
+## Add a deterministic numerical quantile when the CDF and support are
+## available. Existing analytical quantile functions are retained.
+complete_family_quantile <- function(family)
+{
+  if(is.function(family[["quantile"]])) return(family)
+  type <- family[["type"]]
+  if(is.null(type)) type <- "continuous"
+  type <- tolower(type[1L])
+  if(is.na(type) || !type %in% c("continuous", "discrete") ||
+      !is.function(family[["cdf"]]) ||
+      !is.function(family[["support"]]))
+    return(family)
+  family$quantile <- make_numeric_quantile(
+    family$cdf, family$support, type, family$pdf
+  )
+  family
+}
+
+## Numerically integrate the mean or centered second moment of a continuous
+## density. The scalar-density fallback mirrors make_numeric_cdf().
+make_numeric_continuous_moment <- function(pdf, support, center = NULL,
+  quantile = NULL)
+{
+  force(pdf)
+  force(support)
+  force(center)
+  force(quantile)
+
+  moment <- function(par, rel.tol = 1e-8, abs.tol = 0,
+    subdivisions = 100L, ...)
+  {
+    if(!is.numeric(rel.tol) || length(rel.tol) != 1L ||
+        !is.finite(rel.tol) || rel.tol <= 0)
+      stop("'rel.tol' must be a positive finite number.")
+    if(!is.numeric(abs.tol) || length(abs.tol) != 1L ||
+        !is.finite(abs.tol) || abs.tol < 0)
+      stop("'abs.tol' must be a nonnegative finite number.")
+    if(!is.numeric(subdivisions) || length(subdivisions) != 1L ||
+        !is.finite(subdivisions) || subdivisions < 1 ||
+        subdivisions != floor(subdivisions))
+      stop("'subdivisions' must be a positive integer.")
+    subdivisions <- as.integer(subdivisions)
+
+    nr <- family_parameter_rows(par)
+    if(!nr) stop("family parameters must not be empty.")
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    parameters <- lapply(parameters, rep, length.out = nr)
+    dots <- list(...)
+    bounds <- if(!length(dots)) {
+      support(parameters)
+    } else {
+      do.call(support, c(list(par = parameters), dots))
+    }
+
+    centers <- NULL
+    if(is.function(center)) {
+      center.dots <- dots
+      center.dots[c("par", "rel.tol", "abs.tol", "subdivisions")] <- NULL
+      if(isTRUE(attr(center, "mnum", exact = TRUE))) {
+        centers <- do.call(center, c(list(par = parameters,
+          rel.tol = rel.tol, abs.tol = abs.tol,
+          subdivisions = subdivisions), center.dots))
+      } else {
+        centers <- do.call(center, c(list(par = parameters), center.dots))
+      }
+      centers <- as.numeric(centers)
+      if(length(centers) != nr || anyNA(centers) || any(!is.finite(centers)))
+        stop("the family mean must return one finite value per parameter row.")
+    }
+
+    value <- numeric(nr)
+    for(i in seq_len(nr)) {
+      lo <- bounds[i, "min"]
+      hi <- bounds[i, "max"]
+      if(lo >= hi) {
+        value[i] <- if(is.null(centers)) lo else 0
+        next
+      }
+
+      pari <- lapply(parameters, function(z) z[i])
+      evaluate <- function(z) {
+        if(!length(dots)) {
+          pdf(par = pari, y = z, log = FALSE)
+        } else {
+          do.call(pdf, c(list(par = pari, y = z, log = FALSE), dots))
+        }
+      }
+      vectorized <- TRUE
+      density <- function(z) {
+        ans <- NULL
+        if(vectorized) {
+          ans <- try(evaluate(z), silent = TRUE)
+          if(inherits(ans, "try-error") || length(ans) != length(z)) {
+            vectorized <<- FALSE
+            ans <- NULL
+          }
+        }
+        if(is.null(ans)) {
+          ans <- vapply(z, function(zz) {
+            res <- evaluate(zz)
+            if(length(res) != 1L)
+              stop("the family density must return one value per response.")
+            as.numeric(res)
+          }, numeric(1L))
+        }
+        ans <- as.numeric(ans)
+        if(anyNA(ans) || any(!is.finite(ans)))
+          stop("the family density returned non-finite values during integration.")
+        if(any(ans < 0))
+          stop("the family density returned negative values during integration.")
+        ans
+      }
+
+      ## Splitting an infinite interval near its probability mass prevents
+      ## integrate() from missing a density located far from zero. Prefer an
+      ## analytical median, then a known mean, and finally ordinary support
+      ## and parameter anchors.
+      anchor <- NA_real_
+      if(is.function(quantile) &&
+          !isTRUE(attr(quantile, "qnum", exact = TRUE))) {
+        qdots <- dots
+        qdots[c("par", "p", "lower.tail", "log.p")] <- NULL
+        median <- try(do.call(quantile,
+          c(list(par = pari, p = 0.5), qdots)), silent = TRUE)
+        if(!inherits(median, "try-error") && length(median) == 1L &&
+            is.finite(median) && median >= lo && median <= hi)
+          anchor <- as.numeric(median)
+      }
+      if(!is.finite(anchor) && !is.null(centers) &&
+          centers[i] >= lo && centers[i] <= hi)
+        anchor <- centers[i]
+      if(!is.finite(anchor)) {
+        pv <- suppressWarnings(as.numeric(unlist(pari, use.names = FALSE)))
+        midpoint <- if(is.finite(lo) && is.finite(hi)) lo / 2 + hi / 2 else
+          numeric()
+        candidates <- unique(c(midpoint, 0, pv))
+        candidates <- candidates[
+          is.finite(candidates) & candidates >= lo & candidates <= hi
+        ]
+        if(length(candidates)) {
+          log_density <- vapply(candidates, function(z) {
+            ans <- try(suppressWarnings(if(!length(dots)) {
+              pdf(par = pari, y = z, log = TRUE)
+            } else {
+              do.call(pdf, c(list(par = pari, y = z, log = TRUE), dots))
+            }), silent = TRUE)
+            if(inherits(ans, "try-error") || length(ans) != 1L || is.na(ans))
+              return(-Inf)
+            as.numeric(ans)
+          }, numeric(1L))
+          if(any(log_density > -Inf))
+            anchor <- candidates[which.max(log_density)]
+        }
+      }
+
+      transform <- if(is.null(centers)) {
+        function(z) z
+      } else {
+        centeri <- centers[i]
+        function(z) (z - centeri)^2
+      }
+      integrand <- function(z) {
+        ans <- transform(z) * density(z)
+        if(anyNA(ans) || any(!is.finite(ans)))
+          stop("the requested numerical moment is not finite.")
+        ans
+      }
+      integrate_one <- function(fun) {
+        label <- if(is.null(centers)) "mean" else "variance"
+        limits <- list(c(lo, hi))
+        if(is.finite(anchor) && anchor > lo && anchor < hi)
+          limits <- list(c(lo, anchor), c(anchor, hi))
+        values <- vapply(limits, function(limitsi) {
+          result <- tryCatch(
+            stats::integrate(fun, lower = limitsi[1L], upper = limitsi[2L],
+              subdivisions = subdivisions, rel.tol = rel.tol,
+              abs.tol = abs.tol, stop.on.error = FALSE),
+            error = function(e) e
+          )
+          if(inherits(result, "error"))
+            stop("numerical ", label, " integration failed at row ", i,
+              ": ", conditionMessage(result), call. = FALSE)
+          if(!identical(result$message, "OK"))
+            stop("numerical ", label, " integration failed at row ", i,
+              ": ", result$message, call. = FALSE)
+          if(!is.finite(result$value))
+            stop("numerical ", label, " is not finite at row ", i, ".",
+              call. = FALSE)
+          result$value
+        }, numeric(1L))
+        sum(values)
+      }
+
+      value[i] <- integrate_one(integrand)
+
+      ## A signed first-moment integral can appear finite through cancellation
+      ## even when the expectation does not exist (for example, a Cauchy
+      ## density). Verify absolute integrability whenever support crosses zero.
+      if(is.null(centers) && lo < 0 && hi > 0)
+        integrate_one(function(z) abs(z) * density(z))
+    }
+
+    if(!is.null(centers)) {
+      tolerance <- max(10 * abs.tol, 100 * .Machine$double.eps)
+      if(any(value < -tolerance))
+        stop("numerical variance is negative.", call. = FALSE)
+      value <- pmax(value, 0)
+    }
+    value
+  }
+  attr(moment, if(is.null(center)) "mnum" else "vnum") <- TRUE
+  moment
+}
+
+## Numerically sum count moments in batches. Variance uses a weighted online
+## update, avoiding cancellation in E[X^2] - E[X]^2.
+make_numeric_count_moment <- function(pdf, support, second = FALSE)
+{
+  force(pdf)
+  force(support)
+  force(second)
+
+  moment <- function(par, rel.tol = 1e-8, abs.tol = 0,
+    max.terms = 1e6L, ...)
+  {
+    if(!is.numeric(rel.tol) || length(rel.tol) != 1L ||
+        !is.finite(rel.tol) || rel.tol <= 0)
+      stop("'rel.tol' must be a positive finite number.")
+    if(!is.numeric(abs.tol) || length(abs.tol) != 1L ||
+        !is.finite(abs.tol) || abs.tol < 0)
+      stop("'abs.tol' must be a nonnegative finite number.")
+    if(!is.numeric(max.terms) || length(max.terms) != 1L ||
+        !is.finite(max.terms) || max.terms < 1 ||
+        max.terms != floor(max.terms))
+      stop("'max.terms' must be a positive integer.")
+    max.terms <- as.double(max.terms)
+
+    nr <- family_parameter_rows(par)
+    if(!nr) stop("family parameters must not be empty.")
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    parameters <- lapply(parameters, rep, length.out = nr)
+    dots <- list(...)
+    bounds <- if(!length(dots)) {
+      support(parameters)
+    } else {
+      do.call(support, c(list(par = parameters), dots))
+    }
+    value <- numeric(nr)
+    batch.size <- 256L
+    probability.tolerance <- max(10 * rel.tol, 10 * abs.tol,
+      100 * .Machine$double.eps)
+
+    for(i in seq_len(nr)) {
+      lo <- ceiling(bounds[i, "min"])
+      hi <- floor(bounds[i, "max"])
+      if(!is.finite(lo))
+        stop("count-family support must have a finite lower endpoint at row ",
+          i, ".", call. = FALSE)
+      if(lo > hi)
+        stop("count-family support contains no integers at row ", i, ".",
+          call. = FALSE)
+
+      pari <- lapply(parameters, function(z) z[i])
+      evaluate <- function(z) {
+        ans <- try(if(!length(dots)) {
+          pdf(par = pari, y = z, log = FALSE)
+        } else {
+          do.call(pdf, c(list(par = pari, y = z, log = FALSE), dots))
+        }, silent = TRUE)
+        if(inherits(ans, "try-error") || length(ans) != length(z)) {
+          ans <- vapply(z, function(zz) {
+            res <- if(!length(dots)) {
+              pdf(par = pari, y = zz, log = FALSE)
+            } else {
+              do.call(pdf, c(list(par = pari, y = zz, log = FALSE), dots))
+            }
+            if(length(res) != 1L)
+              stop("the family density must return one value per response.")
+            as.numeric(res)
+          }, numeric(1L))
+        }
+        ans <- as.numeric(ans)
+        if(anyNA(ans) || any(!is.finite(ans)))
+          stop("the family density returned non-finite values during summation.")
+        if(any(ans < 0))
+          stop("the family density returned negative values during summation.")
+        ans
+      }
+
+      mass <- mean.value <- m2 <- absolute.first <- raw.second <- 0
+      previous <- c(mass = Inf, first = Inf, second = Inf)
+      used <- 0
+      current <- lo
+      converged <- FALSE
+      repeat {
+        remaining <- if(is.finite(hi)) hi - current + 1 else Inf
+        if(remaining <= 0) {
+          converged <- TRUE
+          break
+        }
+        take <- min(batch.size, remaining, max.terms - used)
+        if(take < 1) break
+        take <- as.integer(take)
+        points <- current + seq_len(take) - 1L
+        probabilities <- evaluate(points)
+        chunk.mass <- sum(probabilities)
+        chunk.first <- sum(abs(points) * probabilities)
+        chunk.second <- if(second) sum(points^2 * probabilities) else 0
+        if(any(!is.finite(c(chunk.mass, chunk.first, chunk.second))))
+          stop("the requested numerical moment is not finite at row ", i,
+            ".", call. = FALSE)
+
+        if(chunk.mass > 0) {
+          chunk.mean <- sum(points * probabilities) / chunk.mass
+          chunk.m2 <- if(second)
+            sum((points - chunk.mean)^2 * probabilities) else 0
+          combined.mass <- mass + chunk.mass
+          delta <- chunk.mean - mean.value
+          if(second)
+            m2 <- m2 + chunk.m2 + delta^2 * mass * chunk.mass / combined.mass
+          mean.value <- mean.value + delta * chunk.mass / combined.mass
+          mass <- combined.mass
+        }
+        absolute.first <- absolute.first + chunk.first
+        raw.second <- raw.second + chunk.second
+        used <- used + take
+
+        if(!is.finite(mean.value) || !is.finite(absolute.first) ||
+            (second && (!is.finite(m2) || !is.finite(raw.second))))
+          stop("the requested numerical moment is not finite at row ", i,
+            ".", call. = FALSE)
+        if(!is.finite(mass) || mass > 1 + probability.tolerance)
+          stop("numerical moment summation produced probability mass outside ",
+            "[0, 1] at row ", i, ".", call. = FALSE)
+
+        if(is.finite(hi) && take >= remaining) {
+          converged <- TRUE
+          break
+        }
+        mass.tol <- max(abs.tol, rel.tol)
+        first.tol <- max(abs.tol,
+          rel.tol * max(1, absolute.first))
+        second.tol <- max(abs.tol,
+          rel.tol * max(1, raw.second))
+        if(used >= 2L * batch.size && chunk.mass <= previous["mass"] &&
+            chunk.first <= previous["first"] &&
+            (!second || chunk.second <= previous["second"]) &&
+            abs(1 - mass) <= mass.tol && chunk.first <= first.tol &&
+            (!second || chunk.second <= second.tol)) {
+          converged <- TRUE
+          break
+        }
+
+        next.current <- points[take] + 1
+        if(!is.finite(next.current) || next.current == current)
+          stop("integer support is too large to enumerate at row ", i, ".",
+            call. = FALSE)
+        current <- next.current
+        previous <- c(mass = chunk.mass, first = chunk.first,
+          second = chunk.second)
+      }
+
+      label <- if(second) "variance" else "mean"
+      if(!converged)
+        stop("numerical ", label, " summation exceeded 'max.terms' at row ",
+          i, ".", call. = FALSE)
+      if(mass <= 0 || abs(1 - mass) > probability.tolerance)
+        stop("numerical ", label, " summation did not recover unit ",
+          "probability mass at row ", i, ".", call. = FALSE)
+      value[i] <- if(second) m2 / mass else mean.value
+    }
+    value
+  }
+  attr(moment, if(second) "vnum" else "mnum") <- TRUE
+  moment
+}
+
+## Add numerical mean and variance functions without replacing analytical
+## implementations.
+complete_family_moments <- function(family)
+{
+  type <- family[["type"]]
+  if(is.null(type)) type <- "continuous"
+  type <- tolower(type[1L])
+  if(is.na(type) || !type %in% c("continuous", "discrete") ||
+      !is.function(family[["pdf"]]) ||
+      !is.function(family[["support"]]))
+    return(family)
+
+  if(!is.function(family[["mean"]])) {
+    family$mean <- if(type == "continuous") {
+      make_numeric_continuous_moment(
+        family$pdf, family$support, quantile = family$quantile
+      )
+    } else {
+      make_numeric_count_moment(family$pdf, family$support)
+    }
+  }
+  if(!is.function(family[["variance"]])) {
+    family$variance <- if(type == "continuous") {
+      make_numeric_continuous_moment(
+        family$pdf, family$support, center = family$mean,
+        quantile = family$quantile
+      )
+    } else {
+      make_numeric_count_moment(family$pdf, family$support, second = TRUE)
+    }
+  }
+  family
+}
+
+## Generate random values by inverse transform when a quantile function is
+## available. One vectorized quantile call handles every requested draw.
+make_numeric_random <- function(quantile)
+{
+  force(quantile)
+  random <- function(par, n, ...)
+  {
+    if(!is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 0 ||
+        n != floor(n) || n > .Machine$integer.max)
+      stop("'n' must be a nonnegative integer.", call. = FALSE)
+    n <- as.integer(n)
+    if(n == 0L) return(numeric())
+
+    parameters <- if(is.matrix(par)) as.list(as.data.frame(par)) else
+      as.list(par)
+    nr <- family_parameter_rows(parameters)
+    if(!nr) stop("family parameters must not be empty.")
+    parameters <- lapply(parameters, function(z) {
+      rep(rep(z, length.out = nr), times = n)
+    })
+    probability <- stats::runif(nr * n)
+    dots <- list(...)
+    dots[c("par", "p", "lower.tail", "log.p")] <- NULL
+    value <- as.numeric(do.call(quantile,
+      c(list(par = parameters, p = probability), dots)))
+    if(length(value) != nr * n)
+      stop("the family quantile must return one value per probability.")
+
+    value <- matrix(value, nrow = nr, ncol = n)
+    if(nr == 1L) return(as.vector(value))
+    if(n == 1L) return(value[, 1L])
+    colnames(value) <- paste0("r_", seq_len(n))
+    value
+  }
+  attr(random, "rnum") <- TRUE
+  random
+}
+
+complete_family_random <- function(family)
+{
+  if(!is.function(family[["random"]]) &&
+      is.function(family[["quantile"]]))
+    family$random <- make_numeric_random(family$quantile)
   family
 }
 
@@ -1292,6 +2447,9 @@ complete_family <- function(family, .links = NULL)
     stop("the family needs a $pdf() function!")
 
   family <- complete_family_cdf(family)
+  family <- complete_family_quantile(family)
+  family <- complete_family_moments(family)
+  family <- complete_family_random(family)
 
   use_numeric_update <-
     is.null(family[["update"]]) &&

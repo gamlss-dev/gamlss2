@@ -2602,6 +2602,10 @@ complete_family <- function(family, .links = NULL)
   return(family)
 }
 
+family.gamlss2.family <- function(object, ...) {
+  complete_family(object, ...)
+}
+
 ## A simple print method.
 print.gamlss2.family <- function(x, full = TRUE, ...)
 {

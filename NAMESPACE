@@ -154,6 +154,7 @@ S3method(print, drop1.gamlss2)
 S3method(family, distribution)
 S3method(family, GAMLSS)
 S3method(family, gamlss.family)
+S3method(family, gamlss2.family)
 
 ## distributions3 class GAMLSS2, encapsulating gamlss2 families
 export(GAMLSS2)

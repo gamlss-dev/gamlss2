@@ -1117,7 +1117,7 @@ uni.slice <- function(g, x, family, response, eta, id, j, ...,
     if(control$trace[1L])
       cat(".. backfitting step\n")
     m <- RS(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
-    start <- coef(m, full = TRUE, lambdas = TRUE)
+    start <- coef(m, full = TRUE, lambdas = TRUE, dropall = FALSE)
   } else {
     stop("argument maxit must be > 1 for finding appropriate starting values!")
   }
@@ -1161,7 +1161,8 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
   object$control$trace <- trace
 
   ## Starting values (incl. lambdas).
-  object$start <- coef(object, full = TRUE, lambdas = TRUE)
+  object$start <- coef(object, full = TRUE, lambdas = TRUE,
+    dropall = FALSE)
 
   ## Keep old samples (if any).
   samples0 <- object$samples
@@ -1274,4 +1275,3 @@ if(FALSE) {
   matplot(d$x, fit, type = "l", lty = 1, col = 4, lwd = 2, add = TRUE)
   matplot(b$samples, type = "l", lty = 1)
 }
-

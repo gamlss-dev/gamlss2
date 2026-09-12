@@ -323,7 +323,7 @@ ridge <- function(...)
 smooth.construct.lin.smooth.spec <- function(object, data, knots)
 {
   if(is.null(object$formula)) {
-    object$formula <- as.formula(paste("~", paste(object$term, collapse = "+")))
+    object$formula <- as.formula(paste("~0+", paste(object$term, collapse = "+")))
     object$ridge <- TRUE
     object$scale <- TRUE
   }

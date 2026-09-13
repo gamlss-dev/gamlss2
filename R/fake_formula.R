@@ -7,7 +7,7 @@
   "s", "te", "t2", "sx", "s2", "rs", "ti", "tx", "tx2", "tx3", "tx4",
   "la", "gnet", "n", "lin", "pb", "pbc", "nn", "fk", "re", "ps",
   "pbz", "ga", "random", "ra", "lo", "tr", "tree", "ct", "cf", "NN",
-  "pb2", "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms"
+  "pb2", "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms", "im"
 ))
 
 fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspecials = FALSE)

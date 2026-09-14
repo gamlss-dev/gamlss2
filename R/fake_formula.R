@@ -7,7 +7,7 @@
   "s", "te", "t2", "sx", "s2", "rs", "ti", "tx", "tx2", "tx3", "tx4",
   "la", "gnet", "n", "lin", "pb", "pbc", "nn", "fk", "re", "ps",
   "pbz", "ga", "random", "ra", "lo", "tr", "tree", "ct", "cf", "NN",
-  "pb2", "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms", "im"
+  "pb2", "st", "ps2", "pdDiag", "user", "ridge", "elm", "ms", "im", "si"
 ))
 
 fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspecials = FALSE)
@@ -62,7 +62,7 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       ff <- NULL
       for(j in tls) {
         p <- parse(text = j)
-        if(as.character(p[[1]][[1]]) %in% c("la", "gnet", "elm")) {
+        if(as.character(p[[1]][[1]]) %in% c("la", "gnet", "elm", "im", "si")) {
           p <- p[[1]][1:2]
         }
         v <- all.vars(p)

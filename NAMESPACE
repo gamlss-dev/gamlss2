@@ -84,7 +84,8 @@ export(
   "distributions3_family",
   "ms",
   "lo",
-  "n"
+  "n",
+  "si"
 )
 
 S3method(gamlss2, formula)
@@ -107,6 +108,7 @@ S3method(special_fit, cf)
 S3method(special_predict, cf.fitted)
 S3method(special_fit, elm)
 S3method(special_predict, elm.fitted)
+S3method(predict, base_cnn)
 S3method(special_fit, fk)
 S3method(special_predict, fk.fitted)
 S3method(special_fit, ms)
@@ -141,6 +143,8 @@ S3method(c, "link-gamlss2")
 S3method(quantile, gamlss2)
 S3method(smooth.construct, lin.smooth.spec)
 S3method(Predict.matrix, lin.effect)
+S3method(smooth.construct, si.smooth.spec)
+S3method(Predict.matrix, si.effect)
 S3method(new_formula, default)
 S3method(new_formula, select)
 S3method(deviance, gamlss2)

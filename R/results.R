@@ -153,6 +153,11 @@ results.gamlss2 <- function(x, data = NULL, ...)
 
           ## special terms.
           if(("special" %in% class(x$specials[[i]])) & (i %in% names(x$fitted.specials[[j]]))) {
+            ## An image term has no meaningful one- or two-dimensional effect
+            ## grid. Its fitted effect is available through predict(...,
+            ## type = "terms") without copying every pixel into results().
+            if(inherits(x$specials[[i]], "im"))
+              next
             ## Free-knot terms use the evaluated expression as their column
             ## name. Explicitly supplied data can still contain the raw variable.
             if(inherits(x$specials[[i]], "fk") &&

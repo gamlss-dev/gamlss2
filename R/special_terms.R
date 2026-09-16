@@ -223,7 +223,11 @@ special_fit.n <- function(x, z, w, control, ...)
   rval <- list("model" = eval(nnc))
 
   ## Get the fitted.values.
-  rval$fitted.values <- predict(rval$model)
+  ## nnet returns a one-column matrix for a scalar response.  A special term
+  ## contributes one vector to the additive predictor; retaining that matrix
+  ## turns the working response into a matrix and can break a following
+  ## special fitter (notably partykit::ctree()).
+  rval$fitted.values <- drop(predict(rval$model))
 
   ## Transferring the weights for the next backfitting iteration.
   ## Note, "transfer" can be used to transfer anything from one
@@ -254,7 +258,7 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
       data[[j]] <- (data[[j]] - x$scalex[[j]][1]) / diff(x$scalex[[j]])
     }
   }
-  p <- predict(x$model, newdata = data, type = "raw")
+  p <- drop(predict(x$model, newdata = data, type = "raw"))
   p <- p - x$shift
   if(se.fit)
     p <- data.frame("fit" = p)

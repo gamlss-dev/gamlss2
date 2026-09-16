@@ -42,17 +42,35 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   For the \code{RS} and \code{CG} optimizers, argument
   \code{demmler.reinsch} controls the use of a weighted Demmler--Reinsch
   reparameterization when selecting the smoothing parameter of an eligible
-  univariate, single-penalty smooth. The default, \code{"auto"}, starts with
-  the direct solver and switches only when the current smoothing-parameter
-  search reaches the edge of its one-decade search window. This indicates that
-  another costly optimizer restart is needed and amortizes the setup of the
-  reparameterization. Set \code{demmler.reinsch = TRUE} to force it for eligible
-  updates, or \code{FALSE} to disable it. To preserve the numerical trajectory of
-  nonlinear distributional models, the initial outer iteration continues to use the
-  direct solver.
+  single-penalty smooth, including multivariate smooths. The default,
+  \code{"auto"}, uses the native reparameterization for quadratic criteria
+  after the initial outer iteration. Set \code{demmler.reinsch = TRUE} to
+  force it for eligible updates, or \code{FALSE} to disable it. The initial
+  outer iteration continues to use the direct solver. With numerical gradients
+  or \code{native.wfit = FALSE}, automatic reparameterization is delayed until
+  the current search reaches the edge of its one-decade search window.
+
+  Within an \code{RS} or \code{CG} fit, the reparameterization is cached
+  while the design matrix, weights, penalty, and binning are unchanged. A new
+  working response only requires updating its projection into the cached basis.
+  The declared penalty rank keeps the null space unpenalized even at large
+  smoothing parameters.
+
+  Analytic gradients are used by default for quadratic smoothing criteria
+  (GCV, AIC, GAIC, AICc, and BIC), including smooths with multiple penalties.
+  Set \code{analytic.gradient = FALSE} to use numerical gradients. Criteria
+  using \code{logLik = TRUE} continue to use numerical gradients, with native
+  direct solves and family likelihood evaluation in R. Nearly exact fits use
+  observation-space residuals to avoid cancellation in the quadratic RSS.
 
   Smooths with fixed smoothing parameters or multiple penalties, including
-  adaptive and tensor-product smooths, always use the direct solver.
+  adaptive and tensor-product smooths, use the direct solver. For larger
+  multiple-penalty smooths, a cached factor of the weighted crossproduct
+  reduces the cost of EDF derivatives. Local ML updates use the constrained
+  penalty null space and return coefficients and covariance at the reported
+  smoothing parameter. Native single-penalty ML updates compute RSS and the
+  penalty quadratic in the DR basis, with observation-space residuals for
+  nearly exact fits.
 } 
 
 \value{

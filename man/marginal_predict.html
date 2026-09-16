@@ -321,23 +321,15 @@ Further arguments passed to <code>predict.gamlss2</code>, such as <code>type</co
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 909.151 eps = 0.173776     
-GAMLSS-RS iteration  2: Global Deviance = 901.5501 eps = 0.008360     
-GAMLSS-RS iteration  3: Global Deviance = 901.1446 eps = 0.000449     
-GAMLSS-RS iteration  4: Global Deviance = 901.1033 eps = 0.000045     
-GAMLSS-RS iteration  5: Global Deviance = 901.0673 eps = 0.000039     
-GAMLSS-RS iteration  6: Global Deviance = 901.036 eps = 0.000034     
-GAMLSS-RS iteration  7: Global Deviance = 901.0085 eps = 0.000030     
-GAMLSS-RS iteration  8: Global Deviance = 900.9843 eps = 0.000026     
-GAMLSS-RS iteration  9: Global Deviance = 900.963 eps = 0.000023     
-GAMLSS-RS iteration 10: Global Deviance = 900.9442 eps = 0.000020     
-GAMLSS-RS iteration 11: Global Deviance = 900.9275 eps = 0.000018     
-GAMLSS-RS iteration 12: Global Deviance = 900.9126 eps = 0.000016     
-GAMLSS-RS iteration 13: Global Deviance = 900.8994 eps = 0.000014     
-GAMLSS-RS iteration 14: Global Deviance = 900.8875 eps = 0.000013     
-GAMLSS-RS iteration 15: Global Deviance = 900.8768 eps = 0.000011     
-GAMLSS-RS iteration 16: Global Deviance = 900.8672 eps = 0.000010     
-GAMLSS-RS iteration 17: Global Deviance = 900.8585 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 906.1982 eps = 0.176460     
+GAMLSS-RS iteration  2: Global Deviance = 899.9294 eps = 0.006917     
+GAMLSS-RS iteration  3: Global Deviance = 899.8272 eps = 0.000113     
+GAMLSS-RS iteration  4: Global Deviance = 899.7914 eps = 0.000039     
+GAMLSS-RS iteration  5: Global Deviance = 899.7641 eps = 0.000030     
+GAMLSS-RS iteration  6: Global Deviance = 899.7434 eps = 0.000022     
+GAMLSS-RS iteration  7: Global Deviance = 899.7278 eps = 0.000017     
+GAMLSS-RS iteration  8: Global Deviance = 899.7161 eps = 0.000013     
+GAMLSS-RS iteration  9: Global Deviance = 899.7073 eps = 0.000009     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Conditional mean profiles for temperature and wind.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mp <span class="ot">&lt;-</span> <span class="fu">marginal_predict</span>(</span>
@@ -349,12 +341,12 @@ GAMLSS-RS iteration 17: Global Deviance = 900.8585 eps = 0.000009     </code></p
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mp<span class="sc">$</span>Temp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      Temp     .fit
-1 57.00000 11.13310
-2 57.81633 11.91212
-3 58.63265 12.73052
-4 59.44898 13.57826
-5 60.26531 14.45842
-6 61.08163 15.38759</code></pre>
+1 57.00000 10.98877
+2 57.81633 11.76393
+3 58.63265 12.58190
+4 59.44898 13.43635
+5 60.26531 14.33256
+6 61.08163 15.28787</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(mp, <span class="st">"fixed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -384,14 +376,14 @@ $Wind
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>mp2<span class="sc">$</span>Temp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Temp      .fit
-1   60  20.23739
-2   65  30.48996
-3   70  30.02915
-4   75  25.36423
-5   80  58.10935
-6   85  70.60352
-7   90 105.85481
-8   95  92.20342</code></pre>
+1   60  19.55593
+2   65  29.78898
+3   70  28.90666
+4   75  24.68280
+5   80  56.92617
+6   85  69.44758
+7   90 104.83775
+8   95  91.88225</code></pre>
 </div>
 </div>
 

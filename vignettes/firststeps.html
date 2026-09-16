@@ -161,7 +161,7 @@ window.Quarto = {
 
 <meta property="og:title" content="First Steps – gamlss2">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/firststeps_files/figure-html/unnamed-chunk-10-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/firststeps_files/figure-html/unnamed-chunk-8-1.png">
 <meta property="og:site_name" content="gamlss2">
 <meta property="og:image:height" content="1920">
 <meta property="og:image:width" content="1536">
@@ -292,7 +292,7 @@ window.Quarto = {
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ga</span>(<span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>)))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(f1, <span class="at">family =</span> SEP,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(f1, <span class="at">family =</span> SEP,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> MUC[, <span class="fu">c</span>(<span class="st">"Tmax"</span>, <span class="st">"year"</span>, <span class="st">"yday"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration 1: Global Deviance = 65112.38 
@@ -324,7 +324,7 @@ GAMLSS-RS iteration 20: Global Deviance = 64842.89 </code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>))</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 65324.4363 eps = 0.572869     
 GAMLSS-RS iteration  2: Global Deviance = 64896.6812 eps = 0.006548     
@@ -343,18 +343,11 @@ GAMLSS-RS iteration 14: Global Deviance = 64837.1843 eps = 0.000010
 GAMLSS-RS iteration 15: Global Deviance = 64836.5691 eps = 0.000009     </code></pre>
 </div>
 </div>
-<p>This model converges in 15 iterations and requires only about</p>
+<p>This model converges in 15 iterations and requires only about 3 seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(b2<span class="sc">$</span>elapsed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 3</code></pre>
-</div>
-</div>
-<p>seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>)) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>b3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>)) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 64641.6339 eps = 0.577334     
 GAMLSS-RS iteration  2: Global Deviance = 64585.0937 eps = 0.000874     
@@ -371,32 +364,51 @@ GAMLSS-RS iteration 12: Global Deviance = 64564.5154 eps = 0.000010
 GAMLSS-RS iteration 13: Global Deviance = 64563.9166 eps = 0.000009     </code></pre>
 </div>
 </div>
-<p>This model converges in 15 iterations in about</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(b3<span class="sc">$</span>elapsed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 5</code></pre>
-</div>
-</div>
-<p>seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
+<p>This model converges in 13 iterations in about 5 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>displays all estimated covariate effects. For residual diagnostics, <code>gamlss2</code> leverages the <code>topmodels</code> package, which provides infrastructures for probabilistic model assessment. E.g., a PIT histogram can be created by</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(b3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="firststeps_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>showing good model calibration. Next, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from <code>topmodels</code> predicts the fitted distributions</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">procast</span>(m3, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This yields a distribution vector <code>pf</code> using the infrastructure from the <code>distributions3</code> package. Probabilities of a heat day can then be calculated with the corresponding <code>cdf()</code> method.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"distributions3"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"distributions3"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"distributions3"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>and visualized, for example, by</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(probs, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Day of Year"</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Prob(Tmax &gt; 30)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -405,24 +417,28 @@ GAMLSS-RS iteration 13: Global Deviance = 64563.9166 eps = 0.000009     </code><
 </div>
 </div>
 </div>
-<p>showing good model calibration. Finally, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from <code>topmodels</code> predicts the fitted distributions</p>
+<p>Note that a <code>predict()</code> method is available for both <code>gamlss</code> and <code>gamlss2</code>, allowing direct prediction of distribution parameters. However, in <code>gamlss</code>, <code>predict()</code> may not fully support new data in all cases.</p>
+<p>Finally, estimated quantiles can be computed, e.g., with</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">procast</span>(b3, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(pf,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span>, <span class="fl">0.99</span>))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pq))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     q_0.01   q_0.025      q_0.1    q_0.5    q_0.9  q_0.975   q_0.99
+1 -4.013263 -2.862673 -0.6746903 3.740794 8.193136 10.39904 11.55767
+2 -4.046118 -2.890264 -0.6931970 3.735963 8.201558 10.41629 11.58000
+3 -4.077026 -2.915931 -0.7097702 3.733382 8.212588 10.43636 11.60526
+4 -4.105946 -2.939638 -0.7243808 3.733071 8.226230 10.45892 11.63296
+5 -4.132836 -2.961349 -0.7369978 3.735053 8.242485 10.48409 11.66339
+6 -4.157656 -2.981026 -0.7475909 3.739342 8.261383 10.51194 11.69579</code></pre>
 </div>
-<p>This yields a distribution vector <code>pf</code> using the infrastructure from the <code>distributions3</code> package. Probabilities of a heat day can then be calculated with the corresponding <code>cdf()</code> method.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"distributions3"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"distributions3"</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"distributions3"</span>)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>and visualized, for example, by</p>
+<p>and visualized by</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(probs, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Day of Year"</span>,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Prob(Tmax &gt; 30)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Tmax <span class="sc">~</span> yday, <span class="at">data =</span> MUC,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.1</span>))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday, pq, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -431,7 +447,6 @@ GAMLSS-RS iteration 13: Global Deviance = 64563.9166 eps = 0.000009     </code><
 </div>
 </div>
 </div>
-<p>Note that a <code>predict()</code> method is available for both <code>gamlss</code> and <code>gamlss2</code>, allowing direct prediction of distribution parameters. However, in <code>gamlss</code>, <code>predict()</code> may not fully support new data in all cases.</p>
 
 
 

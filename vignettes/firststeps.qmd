@@ -80,12 +80,12 @@ library("gamlss.add")
 ```{r}
 f1 <- Tmax ~ ga(~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
   ti(year, yday, bs = c("cr", "cc"), k = c(5, 5)))
-b1 <- gamlss(f1, family = SEP,
+m1 <- gamlss(f1, family = SEP,
   data = MUC[, c("Tmax", "year", "yday")])
 ```
 
 This setup requires loading the `gamlss.add` package to access `mgcv`-based
-smooth terms. Estimation takes 20 iterations of the backfitting algorithm (without full convergence) 
+smooth terms. Estimation takes `r m1$iter` iterations of the backfitting algorithm (without full convergence) 
 and about 62 seconds on a 64-bit Linux system. Moreover, `gamlss()` requires that the
 input data contains no `NA` values. In `gamlss2` the model can be
 specified directly, following `mgcv` syntax
@@ -93,16 +93,11 @@ specified directly, following `mgcv` syntax
 ```{r}
 f2 <- Tmax ~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
   ti(year, yday, bs = c("cr", "cc"), k = c(5, 5))
-b2 <- gamlss2(f2, family = SEP, data = MUC)
+m2 <- gamlss2(f2, family = SEP, data = MUC)
 ```
 
-This model converges in 15 iterations and requires only about
-
-```{r}
-round(b2$elapsed)
-```
-
-seconds of computation time, 
+This model converges in `r m2$iterations` iterations and requires only about
+`r round(m2$elapsed)` seconds of computation time, 
 yielding a similar deviance (small differences arise due to differences in smoothing
 parameter optimization). In many applications, it is desirable to use the same predictor
 structure for all distribution parameters. In `gamlss`, this requires specifying
@@ -112,16 +107,11 @@ identical formulas separately via `sigma.formula`, `nu.formula`, and
 ```{r}
 f3 <- Tmax ~ ti(year, k = 10) + ti(yday, bs = "cc", k = 10) +
   ti(year, yday, bs = c("cr", "cc"), k = c(5, 5)) | . | . | .
-b3 <- gamlss2(f3, family = SEP, data = MUC)
+m3 <- gamlss2(f3, family = SEP, data = MUC)
 ```
 
-This model converges in 15 iterations in about
-
-```{r}
-round(b3$elapsed)
-```
-
-seconds. After estimation, results can be
+This model converges in `r m3$iterations` iterations in about
+`r round(m3$elapsed)` seconds. After estimation, results can be
 inspected using the `summary()` method for both packages. Using `plot()` in
 `gamlss` produces standard residual diagnostic plots, whereas in `gamlss2`
 
@@ -131,7 +121,7 @@ inspected using the `summary()` method for both packages. Using `plot()` in
 #| fig-align: center
 #| out-width: 80%
 
-plot(b3)
+plot(m3)
 ```
 
 displays all estimated covariate effects. For residual diagnostics, `gamlss2` leverages
@@ -149,15 +139,15 @@ if(!("topmodels" %in% installed.packages())) {
 }
 library("topmodels")
 
-pithist(b3)
+pithist(m3)
 ```
 
-showing good model calibration. Finally, we compute the probability of a heat day for 2025.
+showing good model calibration. Next, we compute the probability of a heat day for 2025.
 First, the `procast()` function from `topmodels` predicts the fitted distributions
 
 ```{r}
 nd <- data.frame("year" = 2025, "yday" = 0:365)
-pf <- procast(b3, newdata = nd, drop = TRUE)
+pf <- procast(m3, newdata = nd, drop = TRUE)
 ```
 
 This yields a distribution vector `pf` using the infrastructure from the
@@ -186,4 +176,24 @@ plot(probs, type = "l", xlab = "Day of Year",
 Note that a `predict()` method is available for both `gamlss` and `gamlss2`,
 allowing direct prediction of distribution parameters. However, in `gamlss`,
 `predict()` may not fully support new data in all cases.
+
+Finally, estimated quantiles can be computed, e.g., with
+
+```{r}
+pq <- quantile(pf,
+  probs = c(0.01, 0.025, 0.1, 0.5, 0.9, 0.975, 0.99))
+print(head(pq))
+```
+
+and visualized by
+
+```{r}
+#| fig-height: 4
+#| fig-width: 5
+#| fig-align: center
+par(mar = c(4, 4, 1, 1))
+plot(Tmax ~ yday, data = MUC,
+  pch = 16, col = adjustcolor(1, 0.1))
+matlines(nd$yday, pq, lwd = 2, lty = 1, col = 4)
+```
 

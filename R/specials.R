@@ -491,6 +491,62 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   if(is.null(control$criterion))
     control$criterion <- "aicc"
   control$criterion <- tolower(control$criterion)
+  ncv <- identical(control$criterion, "ncv")
+
+  ## NCV neighbourhoods are term-local metadata. A scalar specifies an
+  ## ordered lag; a list supplies one deletion neighbourhood per observation.
+  ncv.neighbourhood <- NULL
+  ncv.target <- NULL
+  ncv.singleton <- TRUE
+  if(ncv) {
+    ncv.config <- if(is.list(x$xt)) x$xt$ncv else NULL
+    if(is.null(ncv.config))
+      ncv.config <- control$ncv
+
+    if(!is.null(ncv.config)) {
+      if(is.numeric(ncv.config) && !is.list(ncv.config)) {
+        if(length(ncv.config) != 1L || !is.finite(ncv.config) ||
+            ncv.config < 0 || ncv.config != floor(ncv.config))
+          stop("NCV lag must be one non-negative integer")
+        lag <- as.integer(min(ncv.config, n))
+        if(lag > 0L) {
+          ncv.neighbourhood <- lapply(seq_len(n), function(i)
+            seq.int(max(1L, i - lag), min(n, i + lag)))
+          ncv.target <- pmin(lag + 1L, seq_len(n))
+          ncv.singleton <- FALSE
+        }
+      } else if(is.list(ncv.config)) {
+        if(length(ncv.config) != n)
+          stop("NCV neighbourhood list must have length ", n)
+        ncv.neighbourhood <- vector("list", n)
+        ncv.target <- integer(n)
+        for(i in seq_len(n)) {
+          a <- ncv.config[[i]]
+          if(!is.numeric(a) || !length(a) || any(!is.finite(a)) ||
+              any(a != floor(a)) || any(a < 1) || any(a > n))
+            stop("invalid NCV neighbourhood for observation ", i)
+          a <- unique(as.integer(a))
+          target <- match(i, a)
+          if(is.na(target))
+            stop("NCV neighbourhood for observation ", i,
+              " does not contain its target")
+          ncv.neighbourhood[[i]] <- a
+          ncv.target[i] <- target
+        }
+        ncv.singleton <- all(lengths(ncv.neighbourhood) == 1L)
+      } else {
+        stop("NCV neighbourhoods must be a list or a non-negative lag")
+      }
+    }
+
+    if(any(!is.finite(w)) || any(w < 0))
+      stop("NCV requires finite non-negative weights")
+    ncv.sqrt.w <- sqrt(w)
+    ncv.Xw <- if(control$binning)
+      x$X[x$binning$match.index, , drop = FALSE] * ncv.sqrt.w else
+      x$X * ncv.sqrt.w
+    ncv.zw <- ncv.sqrt.w * z
+  }
 
   ## Extra penalty for selection.
   if(isTRUE(control$termselect)) {
@@ -854,10 +910,65 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       quadratic.state
     }
 
+    ncv_score <- function(b, Q) {
+      e <- ncv.zw - drop(ncv.Xw %*% b)
+      if(any(!is.finite(e)) || any(!is.finite(Q)))
+        return(Inf)
+
+      if(ncv.singleton) {
+        den <- 1 - rowSums(Q^2)
+        if(any(!is.finite(den)) || any(den <= sqrt(.Machine$double.eps)))
+          return(Inf)
+        e <- e / den
+        return(if(all(is.finite(e))) sum(e^2) else Inf)
+      }
+
+      ## For penalized WLS, deleted residuals are exactly
+      ## (I - H[a, a])^-1 e[a], with H = Q Q'.
+      value <- 0
+      for(i in seq_len(n)) {
+        a <- ncv.neighbourhood[[i]]
+        Qa <- Q[a, , drop = FALSE]
+        Ra <- try(chol(diag(length(a)) - tcrossprod(Qa)), silent = TRUE)
+        if(inherits(Ra, "try-error") || any(!is.finite(Ra)) ||
+            any(diag(Ra)^2 <= sqrt(.Machine$double.eps)))
+          return(Inf)
+        u <- backsolve(Ra, forwardsolve(t(Ra), e[a]))
+        target <- u[ncv.target[i]]
+        if(!is.finite(target))
+          return(Inf)
+        value <- value + target^2
+      }
+      if(is.finite(value)) value else Inf
+    }
+
+    ncv_eval <- function(l) {
+      if(!is.null(dr)) {
+        q <- 1 / (1 + as.numeric(l[1L]) * dr$d)
+        if(any(!is.finite(q)) || any(q <= 0))
+          return(Inf)
+        alpha <- dr$g * q
+        b <- drop(dr$T %*% alpha)
+        Q <- ncv.Xw %*% sweep(dr$T, 2L, sqrt(q), "*")
+      } else {
+        Sl <- S
+        for(k in seq_along(x$S))
+          Sl <- Sl + l[k] * x$S[[k]]
+        R <- try(chol(XWX + Sl), silent = TRUE)
+        if(inherits(R, "try-error"))
+          return(Inf)
+        b <- drop(backsolve(R, forwardsolve(t(R), XWz)))
+        Q <- t(forwardsolve(t(R), t(ncv.Xw)))
+      }
+      ncv_score(b, Q)
+    }
+
     ## Function to search for smoothing parameters using GCV etc.
     fl <- function(l, rf = FALSE) {
       if(!rf)
         criterion.evaluations <<- criterion.evaluations + 1L
+      if(ncv && !rf)
+        return(ncv_eval(l))
       if(!isTRUE(control$logLik) && !is.na(criterion.code) && !rf)
         return(quadratic_eval(l)$value)
       if(rf && !is.null(dr)) {

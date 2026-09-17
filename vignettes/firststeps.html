@@ -161,10 +161,10 @@ window.Quarto = {
 
 <meta property="og:title" content="First Steps – gamlss2">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/firststeps_files/figure-html/unnamed-chunk-8-1.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/firststeps_files/figure-html/unnamed-chunk-2-1.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="1920">
-<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="864">
+<meta property="og:image:width" content="1152">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -238,8 +238,19 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data"><span class="header-section-number">1</span> Data</a></li>
+  <li><a href="#a-first-model" id="toc-a-first-model" class="nav-link" data-scroll-target="#a-first-model"><span class="header-section-number">2</span> A first model</a></li>
+  <li><a href="#inspecting-the-fitted-model" id="toc-inspecting-the-fitted-model" class="nav-link" data-scroll-target="#inspecting-the-fitted-model"><span class="header-section-number">3</span> Inspecting the fitted model</a></li>
+  <li><a href="#distributional-predictions" id="toc-distributional-predictions" class="nav-link" data-scroll-target="#distributional-predictions"><span class="header-section-number">4</span> Distributional predictions</a></li>
+  <li><a href="#relation-to-gamlss" id="toc-relation-to-gamlss" class="nav-link" data-scroll-target="#relation-to-gamlss"><span class="header-section-number">5</span> Relation to <code>gamlss</code></a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps"><span class="header-section-number">6</span> Next steps</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><h1 class="title display-7">First Steps</h1></header>
@@ -250,206 +261,210 @@ window.Quarto = {
 </header>
 
 
-<p>The package is designed to follow the workflow of well-established model fitting functions like <code>lm()</code> or <code>glm()</code>, i.e., the step of estimating full distributional regression models is actually not very difficult.</p>
-<p>We illustrate how <code>gamlss2</code> builds on the established <code>gamlss</code> framework by modeling daily maximum temperature (<code>Tmax</code>) at Munich Airport (MUC) to estimate the probability of “heat days” (<code>Tmax</code> <span class="math inline">\(\geq 30^\circ\text{C}\)</span>). Heat days can have serious impacts by stressing highways and railways, increasing the load on healthcare facilities, and affecting airport operations. Using 30 years of historical <code>Tmax</code> data, we fit a flexible distributional regression model that captures the full conditional distribution of daily temperatures. By evaluating this fitted distribution at the <span class="math inline">\(30^\circ\text{C}\)</span> threshold, we obtain heat-day probabilities. Required packages can be loaded by</p>
+<p>Generalized additive models for location, scale, and shape (GAMLSS) model all parameters of a response distribution rather than only its mean <span class="citation" data-cites="Rigby+Stasinopoulos:2005">(<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">Rigby and Stasinopoulos 2005</a>)</span>. The <code>gamlss2</code> package provides a workflow similar to <code>lm()</code> and <code>glm()</code>, while allowing a separate additive predictor for every distribution parameter.</p>
+<p>This vignette illustrates the basic workflow:</p>
+<ol type="1">
+<li>specify and fit a distributional regression model,</li>
+<li>inspect its estimated effects and residuals, and</li>
+<li>obtain distribution parameters, probabilities, and quantiles.</li>
+</ol>
+<section id="data" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="data"><span class="header-section-number">1</span> Data</h2>
+<p>We use the <code>HarzTraffic</code> data included in the package. They contain daily traffic counts and weather measurements near Sonnenberg in the Harz region of Germany. Motorcycle traffic has a pronounced annual cycle, so we model the number of motorcycles (<code>bikes</code>) as a smooth function of the day of the year (<code>yday</code>).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"gamlss"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"gamlss"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The data comes from the same R-universe as <code>gamlss2</code> and is loaded with</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"WeatherGermany"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">'WeatherGermany'</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">"https://gamlss-dev.r-universe.dev"</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"https://cloud.r-project.org"</span>))</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Installing package into '/usr/local/lib/R/site-library'
-(as 'lib' is unspecified)</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"WeatherGermany"</span>, <span class="at">package =</span> <span class="st">"WeatherGermany"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>MUC <span class="ot">&lt;-</span> <span class="fu">subset</span>(WeatherGermany, id <span class="sc">==</span> <span class="dv">1262</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>We find that the four-parameter <code>SEP</code> family fits the marginal distribution of <code>Tmax</code> quite well. To estimate a full distributional model, we specify the following additive predictor</p>
-<p><span class="math inline">\(\eta = \beta_0 + f_1(\texttt{year}) + f_2(\texttt{yday}) + f_3(\texttt{year}, \texttt{yday})\)</span></p>
-<p>for each parameter. Here, <span class="math inline">\(f_1( \cdot )\)</span> captures the long-term trend, <span class="math inline">\(f_2( \cdot )\)</span> models seasonal variation, and <span class="math inline">\(f_3( \cdot, \cdot )\)</span> represents a time-varying seasonal effect. The required variables can be added to the data by</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>MUC<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(MUC<span class="sc">$</span>date)<span class="sc">$</span>year <span class="sc">+</span> <span class="dv">1900</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>MUC<span class="sc">$</span>yday <span class="ot">&lt;-</span> <span class="fu">as.POSIXlt</span>(MUC<span class="sc">$</span>date)<span class="sc">$</span>yday</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>In <code>gamlss</code>, model estimation is performed via</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"gamlss.add"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"gamlss.add"</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">"https://gamlss-dev.r-universe.dev"</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"https://cloud.r-project.org"</span>))</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss.add"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ga</span>(<span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>)))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(f1, <span class="at">family =</span> SEP,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> MUC[, <span class="fu">c</span>(<span class="st">"Tmax"</span>, <span class="st">"year"</span>, <span class="st">"yday"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration 1: Global Deviance = 65112.38 
-GAMLSS-RS iteration 2: Global Deviance = 64951.9 
-GAMLSS-RS iteration 3: Global Deviance = 64891.39 
-GAMLSS-RS iteration 4: Global Deviance = 64867.03 
-GAMLSS-RS iteration 5: Global Deviance = 64856.67 
-GAMLSS-RS iteration 6: Global Deviance = 64852 
-GAMLSS-RS iteration 7: Global Deviance = 64849.7 
-GAMLSS-RS iteration 8: Global Deviance = 64848.44 
-GAMLSS-RS iteration 9: Global Deviance = 64847.61 
-GAMLSS-RS iteration 10: Global Deviance = 64847 
-GAMLSS-RS iteration 11: Global Deviance = 64846.49 
-GAMLSS-RS iteration 12: Global Deviance = 64846.02 
-GAMLSS-RS iteration 13: Global Deviance = 64845.56 
-GAMLSS-RS iteration 14: Global Deviance = 64845.16 
-GAMLSS-RS iteration 15: Global Deviance = 64844.75 
-GAMLSS-RS iteration 16: Global Deviance = 64844.36 
-GAMLSS-RS iteration 17: Global Deviance = 64843.98 
-GAMLSS-RS iteration 18: Global Deviance = 64843.61 
-GAMLSS-RS iteration 19: Global Deviance = 64843.25 
-GAMLSS-RS iteration 20: Global Deviance = 64842.89 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in RS(): Algorithm RS has not yet converged</code></pre>
-</div>
-</div>
-<p>This setup requires loading the <code>gamlss.add</code> package to access <code>mgcv</code>-based smooth terms. Estimation takes 20 iterations of the backfitting algorithm (without full convergence) and about 62 seconds on a 64-bit Linux system. Moreover, <code>gamlss()</code> requires that the input data contains no <code>NA</code> values. In <code>gamlss2</code> the model can be specified directly, following <code>mgcv</code> syntax</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>))</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f2, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 65324.4363 eps = 0.572869     
-GAMLSS-RS iteration  2: Global Deviance = 64896.6812 eps = 0.006548     
-GAMLSS-RS iteration  3: Global Deviance = 64855.0023 eps = 0.000642     
-GAMLSS-RS iteration  4: Global Deviance = 64849.2502 eps = 0.000088     
-GAMLSS-RS iteration  5: Global Deviance = 64846.9835 eps = 0.000034     
-GAMLSS-RS iteration  6: Global Deviance = 64845.2559 eps = 0.000026     
-GAMLSS-RS iteration  7: Global Deviance = 64843.7846 eps = 0.000022     
-GAMLSS-RS iteration  8: Global Deviance = 64842.4982 eps = 0.000019     
-GAMLSS-RS iteration  9: Global Deviance = 64841.3637 eps = 0.000017     
-GAMLSS-RS iteration 10: Global Deviance = 64840.3461 eps = 0.000015     
-GAMLSS-RS iteration 11: Global Deviance = 64839.4332 eps = 0.000014     
-GAMLSS-RS iteration 12: Global Deviance = 64838.6089 eps = 0.000012     
-GAMLSS-RS iteration 13: Global Deviance = 64837.8622 eps = 0.000011     
-GAMLSS-RS iteration 14: Global Deviance = 64837.1843 eps = 0.000010     
-GAMLSS-RS iteration 15: Global Deviance = 64836.5691 eps = 0.000009     </code></pre>
-</div>
-</div>
-<p>This model converges in 15 iterations and requires only about 3 seconds of computation time, yielding a similar deviance (small differences arise due to differences in smoothing parameter optimization). In many applications, it is desirable to use the same predictor structure for all distribution parameters. In <code>gamlss</code>, this requires specifying identical formulas separately via <code>sigma.formula</code>, <code>nu.formula</code>, and <code>tau.formula</code>, which can be tedious. In <code>gamlss2</code>, this is simplified using “<code>.</code>”</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> Tmax <span class="sc">~</span> <span class="fu">ti</span>(year, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">ti</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ti</span>(year, yday, <span class="at">bs =</span> <span class="fu">c</span>(<span class="st">"cr"</span>, <span class="st">"cc"</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>)) <span class="sc">|</span> . <span class="sc">|</span> . <span class="sc">|</span> .</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f3, <span class="at">family =</span> SEP, <span class="at">data =</span> MUC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 64641.6339 eps = 0.577334     
-GAMLSS-RS iteration  2: Global Deviance = 64585.0937 eps = 0.000874     
-GAMLSS-RS iteration  3: Global Deviance = 64577.6263 eps = 0.000115     
-GAMLSS-RS iteration  4: Global Deviance = 64574.7542 eps = 0.000044     
-GAMLSS-RS iteration  5: Global Deviance = 64572.6647 eps = 0.000032     
-GAMLSS-RS iteration  6: Global Deviance = 64570.9062 eps = 0.000027     
-GAMLSS-RS iteration  7: Global Deviance = 64569.3997 eps = 0.000023     
-GAMLSS-RS iteration  8: Global Deviance = 64568.1052 eps = 0.000020     
-GAMLSS-RS iteration  9: Global Deviance = 64566.9913 eps = 0.000017     
-GAMLSS-RS iteration 10: Global Deviance = 64566.0337 eps = 0.000014     
-GAMLSS-RS iteration 11: Global Deviance = 64565.2153 eps = 0.000012     
-GAMLSS-RS iteration 12: Global Deviance = 64564.5154 eps = 0.000010     
-GAMLSS-RS iteration 13: Global Deviance = 64563.9166 eps = 0.000009     </code></pre>
-</div>
-</div>
-<p>This model converges in 13 iterations in about 5 seconds. After estimation, results can be inspected using the <code>summary()</code> method for both packages. Using <code>plot()</code> in <code>gamlss</code> produces standard residual diagnostic plots, whereas in <code>gamlss2</code></p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.25</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Motorcycles"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>displays all estimated covariate effects. For residual diagnostics, <code>gamlss2</code> leverages the <code>topmodels</code> package, which provides infrastructures for probabilistic model assessment. E.g., a PIT histogram can be created by</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"topmodels"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"topmodels"</span>, <span class="at">repos =</span> <span class="st">"https://zeileis.R-universe.dev"</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"topmodels"</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>showing good model calibration. Next, we compute the probability of a heat day for 2025. First, the <code>procast()</code> function from <code>topmodels</code> predicts the fitted distributions</p>
+<p>The response is a count and its variance is much larger than its mean. We therefore use the negative binomial <code>NBI</code> family. It has two parameters: <code>mu</code>, the conditional mean, and <code>sigma</code>, a dispersion parameter. Both use a log link.</p>
+</section>
+<section id="a-first-model" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="a-first-model"><span class="header-section-number">2</span> A first model</h2>
+<p>The first model lets the mean motorcycle count vary smoothly over the year. The cyclic cubic spline (<code>bs = "cc"</code>) joins smoothly at the beginning and end of the annual cycle.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"year"</span> <span class="ot">=</span> <span class="dv">2025</span>, <span class="st">"yday"</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">procast</span>(m3, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>This yields a distribution vector <code>pf</code> using the infrastructure from the <code>distributions3</code> package. Probabilities of a heat day can then be calculated with the corresponding <code>cdf()</code> method.</p>
+<p>Only one right-hand side is supplied, so it is used for the first family parameter, <code>mu</code>. The remaining parameter, <code>sigma</code>, receives an intercept-only predictor. More generally, the right-hand sides separated by <code>|</code> correspond to the family parameters in their displayed order:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Formula</th>
+<th>Interpretation for <code>NBI</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bikes ~ x</code></td>
+<td>model <code>mu</code> with <code>x</code>; keep <code>sigma</code> constant</td>
+</tr>
+<tr class="even">
+<td><code>bikes ~ x | z</code></td>
+<td>model <code>mu</code> with <code>x</code> and <code>sigma</code> with <code>z</code></td>
+</tr>
+<tr class="odd">
+<td><code>bikes ~ x | .</code></td>
+<td>use the predictor <code>x</code> for both parameters</td>
+</tr>
+</tbody>
+</table>
+<p>Thus, a model in which both the mean and dispersion vary seasonally can be specified compactly as follows.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span>(<span class="st">"distributions3"</span> <span class="sc">%in%</span> <span class="fu">installed.packages</span>())) {</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"distributions3"</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"distributions3"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>) <span class="sc">|</span> .,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>and visualized, for example, by</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(probs, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Day of Year"</span>,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Prob(Tmax &gt; 30)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Note that a <code>predict()</code> method is available for both <code>gamlss</code> and <code>gamlss2</code>, allowing direct prediction of distribution parameters. However, in <code>gamlss</code>, <code>predict()</code> may not fully support new data in all cases.</p>
-<p>Finally, estimated quantiles can be computed, e.g., with</p>
+<p>For families with more parameters, further right-hand sides can be appended. For example, <code>y ~ x | . | . | .</code> repeats the predictor for all four parameters of a four-parameter family. Omitting right-hand sides instead gives the remaining parameters intercept-only predictors.</p>
+</section>
+<section id="inspecting-the-fitted-model" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="inspecting-the-fitted-model"><span class="header-section-number">3</span> Inspecting the fitted model</h2>
+<p>The model summary reports the family and links, linear coefficients, effective degrees of freedom of the smooth terms, and model-fit information.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(pf,</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span>, <span class="fl">0.99</span>))</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(pq))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>     q_0.01   q_0.025      q_0.1    q_0.5    q_0.9  q_0.975   q_0.99
-1 -4.013263 -2.862673 -0.6746903 3.740794 8.193136 10.39904 11.55767
-2 -4.046118 -2.890264 -0.6931970 3.735963 8.201558 10.41629 11.58000
-3 -4.077026 -2.915931 -0.7097702 3.733382 8.212588 10.43636 11.60526
-4 -4.105946 -2.939638 -0.7243808 3.733071 8.226230 10.45892 11.63296
-5 -4.132836 -2.961349 -0.7369978 3.735053 8.242485 10.48409 11.66339
-6 -4.157656 -2.981026 -0.7475909 3.739342 8.261383 10.51194 11.69579</code></pre>
+<pre><code>Call:
+gamlss2(formula = bikes ~ s(yday, bs = "cc", k = 20) | ., data = HarzTraffic, 
+    family = NBI, trace = FALSE)
+---
+Family: NBI 
+Link functions: log, log
+*--------
+Coefficients:
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+mu.(Intercept)     3.87922    0.03045 127.385   &lt;2e-16 ***
+sigma.(Intercept)  0.38247    0.04460   8.576   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+---
+Smooth terms:
+                 edf
+mu.s(yday)    16.116
+sigma.s(yday)  5.092
+*--------
+n = 1057 df =  23.21 res.df =  1033.79
+Deviance = 10101.1641 Null Dev. Red. = 13.05%
+AIC = 10147.5794 elapsed =  0.10sec</code></pre>
 </div>
 </div>
-<p>and visualized by</p>
+<p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Tmax <span class="sc">~</span> yday, <span class="at">data =</span> MUC,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.1</span>))</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday, pq, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>Normalized quantile residuals should be approximately standard normal when the conditional distribution is well calibrated. Because randomized quantile residuals are used for discrete distributions, we set a seed to make the plots reproducible.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="firststeps_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These are in-sample diagnostics. They can reveal important model deficiencies, but do not by themselves establish out-of-sample calibration.</p>
+</section>
+<section id="distributional-predictions" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="distributional-predictions"><span class="header-section-number">4</span> Distributional predictions</h2>
+<p>We now evaluate the fitted seasonal cycle on each day of a non-leap year. The data encode day of year starting at zero, so plotting uses <code>yday + 1</code> for the more familiar range from 1 to 365.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">364</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>By default, <code>predict()</code> returns the fitted distribution parameters on their natural scales. Setting <code>drop = FALSE</code> keeps the result as a data frame (which is the default).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>parameters <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(parameters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        mu    sigma
+1 2.035082 4.871688
+2 2.085890 4.892004
+3 2.106884 4.911077
+4 2.099899 4.928900
+5 2.067920 4.945468
+6 2.014722 4.960777</code></pre>
+</div>
+</div>
+<p>For probabilities and other distributional summaries, <code>prodist()</code> returns one <a href="https://cran.r-project.org/package=distributions3"><code>distributions3</code></a> distribution object for each row of <code>newdata</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">prodist</span>(m2, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For example, the fitted probability of more than 500 motorcycles on a day is <span class="math inline">\(1 - F(500)\)</span>.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>prob_high <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">500</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span>, prob_high, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Pr(Motorcycles &gt; 500)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="firststeps_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Conditional quantiles can be computed directly from the fitted model. Here we calculate the 5%, 50%, and 95% quantiles and add them to the observed counts.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m2, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Motorcycles"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span>, pq,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">col =</span> <span class="dv">4</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"5%"</span>, <span class="st">"50%"</span>, <span class="st">"95%"</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">col =</span> <span class="dv">4</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="firststeps_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These fitted distributions describe response variation conditional on the estimated model. They do not include uncertainty from estimating coefficients, smoothing parameters, or selecting the model.</p>
+</section>
+<section id="relation-to-gamlss" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="relation-to-gamlss"><span class="header-section-number">5</span> Relation to <code>gamlss</code></h2>
+<p><code>gamlss2</code> is a fresh implementation of the GAMLSS framework, but it can use the family objects from <code>gamlss.dist</code>. Unlike the classic <code>gamlss()</code> workflow, <code>gamlss2()</code> supports <code>mgcv</code> smooth terms directly and uses the <code>|</code> notation to place the predictors for all distribution parameters in a single formula.</p>
+</section>
+<section id="next-steps" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="next-steps"><span class="header-section-number">6</span> Next steps</h2>
+<p>The <a href="https://gamlss-dev.github.io/gamlss2/vignettes/families.html">Family Objects</a> vignette explains available and custom response distributions. The <a href="https://gamlss-dev.github.io/gamlss2/vignettes/specials.html">Special Model Terms</a> vignette covers terms beyond standard <a href="https://cran.r-project.org/package=mgcv"><code>mgcv</code></a> smooths.</p>
 
 
 
+</section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">

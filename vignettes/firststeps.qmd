@@ -203,8 +203,11 @@ smoothing parameters, or selecting the model.
 ## Relation to `gamlss`
 
 `gamlss2` is a fresh implementation of the GAMLSS framework, but it can use the
-family objects from `gamlss.dist`. Unlike the classic `gamlss()` workflow,
-`gamlss2()` supports `mgcv` smooth terms directly and uses the `|` notation to
+family objects from
+[`gamlss.dist`](https://cran.r-project.org/package=gamlss.dist).
+Unlike the classic [`gamlss`](https://cran.r-project.org/package=gamlss) workflow,
+`gamlss2()` supports [`mgcv`](https://cran.r-project.org/package=mgcv)
+smooth terms directly and uses the `|` notation to
 place the predictors for all distribution parameters in a single formula.
 
 ## Next steps

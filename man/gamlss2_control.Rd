@@ -63,6 +63,19 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   direct solves and family likelihood evaluation in R. Nearly exact fits use
   observation-space residuals to avoid cancellation in the quadratic RSS.
 
+  Neighbourhood cross-validation can be selected with \code{criterion = "ncv"}.
+  If \code{ncv} is omitted, singleton neighbourhoods are used, corresponding to
+  leave-one-observation-out cross-validation. For ordered data, a numeric
+  \code{ncv = k} uses the observation together with up to \code{k} neighbours
+  on either side. Larger neighbourhoods generally provide more smoothing and
+  can account for short-range dependence, at increased computational cost.
+  For ordered data, small values such as \code{ncv = 1} or \code{ncv = 2}
+  are often preferable to the singleton default. Custom neighbourhoods can
+  also be supplied as a list through a smooth term's code{xt} argument, for
+  example \code{s(x, xt = list(ncv = neighbourhoods))}, where
+  code{neighbourhoods} has one integer index vector per observation and each
+  vector contains its target observation.
+
   Smooths with fixed smoothing parameters or multiple penalties, including
   adaptive and tensor-product smooths, use the direct solver. For larger
   multiple-penalty smooths, a cached factor of the weighted crossproduct
@@ -72,6 +85,15 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   penalty quadratic in the DR basis, with observation-space residuals for
   nearly exact fits.
 } 
+
+\references{
+  Demmler, A. and Reinsch, C. (1975). Oscillation Matrices with Spline
+  Smoothing. \emph{Numerische Mathematik}, 24(5), 375--382.
+  \doi{10.1007/BF01437406}
+
+  Wood, S. N. (2026). On Neighbourhood Cross Validation. \emph{Statistical
+  Science}, in press. \doi{10.48550/arXiv.2404.16490}
+}
 
 \value{
   A list with the arguments specified.
@@ -84,10 +106,13 @@ gamlss2_control(optimizer = RS, trace = TRUE,
 \examples{\dontrun{## specify the model formula
 f <- dist ~ s(speed) | s(speed)
 
-## estimate model with different step length
-## control in the RS algorithm
-m1 <- gamlss2(f, data = cars, family = GA, step = 1)
-m2 <- gamlss2(f, data = cars, family = GA, step = 0.1)
+## estimate models with different information criteria
+m1 <- gamlss2(f, data = cars, family = GA, criterion = "aic")
+m2 <- gamlss2(f, data = cars, family = GA, criterion = "bic")
+m3 <- gamlss2(f, data = cars, family = GA, criterion = "gaic")
+m4 <- gamlss2(f, data = cars, family = GA, criterion = "gaic", K = 4)
+m5 <- gamlss2(f, data = cars, family = GA, criterion = "ncv")
+m6 <- gamlss2(f, data = cars, family = GA, criterion = "ncv", ncv = 2)
 }}
 
 \keyword{models}

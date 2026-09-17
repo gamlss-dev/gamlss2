@@ -1,13 +1,11 @@
 ---
 title: "Family Objects"
-format: 
+format:
   html:
     html-math-method: mathjax
     toc: true
     number-sections: true
 bibliography: gamlss2.bib
-nocite: |
-  @Rigby+Stasinopoulos:2005
 vignette: >
   %\VignetteIndexEntry{Family Objects}
   %\VignetteEngine{quarto::html}
@@ -16,360 +14,305 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
+Family objects connect a response distribution with the predictors and
+optimization machinery used by `gamlss2`. There are two complementary ways
+to define a family:
+
+1. bridge an existing [`distributions3`](https://cran.r-project.org/package=distributions3)
+   distribution, or
+2. construct a `gamlss2.family` list directly for a distribution that needs
+   custom behavior.
+
+The first route should usually be preferred. It gives the fitted model the
+same distribution interface used by
+`distributions3` for densities,
+probabilities, quantiles, moments, and simulation.
+
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
+library("distributions3")
 ```
 
-All family objects of the `gamlss.dist` package, see @Rigbyetal2019, can be used for modelling in `gamlss2`. However, for users wanting to specify their own (new) distribution model, this document provides a guide
-on how to define custom family objects within the `gamlss2` framework.
+## The family interface
 
-Family objects in the `gamlss2` package play an essential role in defining the models used for
-fitting data to distributions. These objects encapsulate the necessary details about the
-distribution and the parameters, such as:
+A `gamlss2.family` object contains the distribution-specific information needed
+by the fitting algorithm. The required components are:
 
-* The names of the parameters.
-* The link functions that map the parameters to the predictor.
-* Functions for the density, log-likelihood, and their derivatives.
+| Component | Purpose |
+|---|---|
+| `family` | Distribution name |
+| `names` | Names of the distribution parameters |
+| `links` | One link function for each parameter |
+| `pdf(par, y, log = FALSE, ...)` | Log-density or density evaluation |
 
-This document provides an overview of how to construct and use family objects within `gamlss2`.
-By the end, you should have a good understanding of how to implement a custom family for
-use in statistical models.
+Useful additional components are `cdf()`, `quantile()`, `random()`,
+`support()`, `mean()`, `variance()`, `score()`, `hessian()`, `update()`,
+`initialize()`, and `valid.response()`. Missing probability, quantile, moment,
+and random-number methods can often be constructed numerically from the
+density and support, but analytical methods are preferable when they are available.
 
-## Defining Family Objects
+The two distribution interfaces use slightly different conventions. A family
+callback receives a named parameter list, for example `par$mu` and
+`par$sigma`, while a `distributions3` method receives an object inheriting from
+`distribution`. The bridge described below translates between these forms.
 
-A family object in `gamlss2` is a list that must meet the following minimum criteria:
+Callback arguments have consistent meanings throughout a family: `par` is a
+named list of distribution parameters on the response scale, `y` contains the
+observed response values, and `eta` contains linear-predictor values used by an
+update method. The `p` argument denotes probabilities for quantiles, `n` is the
+requested number of random draws, and `log = TRUE` asks `pdf()` for log-densities.
+Additional arguments are passed through `...`.
 
-* Family Name: The object must contain the family name as a character string.
-* Parameters: The object must list the parameters of the distribution (e.g., `"mu"` and `"sigma"`
-  for a normal distribution).
-* Link Functions: It must specify the link functions associated with each parameter.
-* Probability Density Function: A `pdf()` function must be provided to evaluate the (log-)density of the
-  distribution.
+## Bridging a `distributions3` distribution
 
-Optionally, a family object can include functions to calculate the log-likelihood,
-random number generation, cumulative distribution function (CDF), and quantile function.
-
-Here's an example of a minimal family object for the normal distribution.
+The `family()` method turns a `distributions3` object into a
+`gamlss2.family`. The names in `links` select the parameters to model and the
+values specify their links.
 
 ```{r}
-Normal <- function(...) {
+fNormal <- family(
+  Normal(),
+  links = c(mu = "identity", sigma = "log")
+)
+
+fNormal
+```
+
+The resulting object contains the family metadata as well as wrappers for
+`pdf()`, `cdf()`, `quantile()`, `random()`, the moments, and the log-likelihood.
+The distribution constructor is retained in `create_distribution`, which is
+used later when a fitted model is converted back to a `distributions3` object.
+
+```{r}
+names(fNormal)
+fNormal$names
+vapply(fNormal$links, function(x) x$name, character(1))
+```
+
+The bridge result can now be used like any other family. This example uses the
+`cars` data from base R and allows both the normal mean and standard deviation
+to vary with speed.
+
+```{r}
+m <- gamlss2(
+  dist ~ s(speed) | s(speed),
+  data = cars,
+  family = fNormal,
+  trace = FALSE
+)
+
+summary(m)
+```
+
+`prodist()` performs the reverse operation: it extracts the fitted parameters
+and returns a vector of `distributions3` objects.
+
+```{r}
+nd <- data.frame(speed = c(10, 20, 30))
+d <- prodist(m, newdata = nd)
+d
+```
+
+All ordinary `distributions3` methods can then be used. The `elementwise`
+argument controls whether a vector of probabilities is paired with the
+distribution vector or expanded to all distribution-probability combinations.
+
+```{r}
+mean(d)
+variance(d)
+cdf(d, 50)
+quantile(d, c(0.1, 0.5, 0.9), elementwise = FALSE)
+quantile(d, c(0.1, 0.5, 0.9), elementwise = TRUE)
+random(d, 2)
+```
+
+This gives the complete workflow:
+
+```text
+distributions3 object -> family() -> gamlss2.family
+        -> gamlss2() -> fitted model -> prodist() -> distributions3 object
+```
+
+## Constructor arguments and `distributions3_family()`
+
+The lower-level `distributions3_family()` function is useful when a
+distribution constructor has fixed arguments that are not model parameters.
+For example, a binomial distribution can have a fixed number of trials while
+its probability is modeled.
+
+```{r}
+fBinomial <- distributions3_family(
+  "Binomial",
+  links = c(p = "logit"),
+  create_distribution = "do.call",
+  size = 10
+)
+
+binomial_distribution <- fBinomial$create_distribution(
+  list(p = rep(0.5, 3))
+)
+binomial_distribution
+distributions3::pdf(binomial_distribution, 1:3)
+```
+
+With `create_distribution = "do.call"`, the fixed `size` argument is passed to
+the constructor every time a distribution object is created. The default
+`"structure"` strategy is faster, but is appropriate only when adding the
+class to the parameter object is sufficient.
+
+The workhorse also accepts a custom `create_distribution` function when a
+distribution needs a specialized construction step. In all cases, the
+returned object must inherit from `gamlss2.family` and its parameter names must
+match the supplied links.
+
+## Scores, Hessians, and updates
+
+For a `gamlss2.family` written by hand, `score()` and `hessian()` are functions
+on the linear-predictor scale. A `distributions3` score or Hessian is generally
+provided with respect to a distribution parameter. The bridge applies the
+link-function chain rule when `score = TRUE` or `hessian = TRUE`.
+
+```{r}
+fNormal <- family(
+  Normal(),
+  links = c(mu = "identity", sigma = "log"),
+  score = TRUE,
+  hessian = TRUE,
+  update = TRUE
+)
+
+names(fNormal[c("score", "hessian", "update")])
+```
+
+Analytical derivatives can improve speed and numerical stability. If they are
+not available, `gamlss2` approximates the required derivatives numerically.
+Cross-derivatives can be supplied by the underlying distribution when a
+second-order optimizer such as `CG` can benefit from them.
+
+Flexible links are represented by `link-gamlss2` objects. When analytical
+score and Hessian callbacks are requested, the bridge uses derivatives from
+the link object. For example, the `softplus` link can be passed to the bridge
+after construction with `make.link2()`. In this example the derivative flags
+are left at their defaults, so numerical derivatives are used.
+
+
+```{r}
+fNormal <- family(
+  Normal(),
+  links = list(mu = make.link2(softplus), sigma = "log")
+)
+
+## The softplus link does not provide all second-link derivatives needed by
+## the analytic update path, so the bridge uses numerical derivatives here.
+m_softplus <- gamlss2(
+  dist ~ s(speed) | s(speed),
+  data = cars,
+  family = fNormal,
+  trace = FALSE
+)
+AIC(m, m_softplus)
+```
+
+## Numerical completion and support
+
+Families do not need to implement every distributional method. Given a density
+and a valid support, `gamlss2` can construct a missing CDF by
+integration or summation, invert a CDF to obtain quantiles, calculate moments,
+and generate random values by inverse transform sampling.
+
+These fallbacks are convenient for prototypes, but they may be expensive and
+need a trustworthy support. In particular, provide `support()` explicitly for
+shifted or truncated distributions, unusual continuous supports, and discrete
+families that are not counts on the nonnegative integers. Analytical CDFs and
+quantiles should be retained whenever possible.
+
+The `type` component should be either `"continuous"` or `"discrete"`, and
+`valid.response()` should reject invalid response values. The type and support
+are used by residual diagnostics, numerical completion, and the
+`distributions3` methods.
+
+## Writing a family directly
+
+When no suitable `distributions3` distribution exists, a family can be written
+as a classed list. The following is a compact normal family with analytical
+probability and moment methods. The `random()` signature is
+`random(par, n)`, matching the `gamlss2.family` interface.
+
+```{r}
+fNormal <- function(mu.link = "identity", sigma.link = "log") {
   fam <- list(
-    "family" = "Normal",
-    "names" = c("mu", "sigma"),
-    "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(par, y, log = FALSE, ...) {
+    family = "fNormal",
+    names = c("mu", "sigma"),
+    links = list(mu = mu.link, sigma = sigma.link),
+    pdf = function(par, y, log = FALSE, ...) {
       dnorm(y, mean = par$mu, sd = par$sigma, log = log)
     },
-    "type" = "continuous"
-  )
-  class(fam) <- "gamlss2.family"
-  return(fam)
-}
-```
-
-In this example, we define a normal distribution with two parameters: `"mu"` (mean) and `"sigma"`
-(standard deviation). The link function for `"mu"` is the identity, and for `"sigma"`,
-it is the log function. The probability density function (`pdf()`) must accept the following arguments:
-
-```{r, eval=FALSE}
-pdf(par, y, log = FALSE, ...)
-```
-
-* `y`: The response variable.
-* `par`: A named list of parameters (e.g., `"mu"`, `"sigma"` for the normal distribution).
-* `log`: A logical value indicating whether to return the log-density.
-
-Here, the `pdf()` function uses the standard `dnorm()` function to calculate the normal density.
-
-## Optional Derivatives
-
-Family objects can optionally include functions to compute the first and second derivatives of the 
-log-likelihood with respect to the predictors (or the expected values of those derivatives). These 
-functions are used during model fitting to improve optimization efficiency and accuracy.
-
-All derivative functions must follow the structure:
-
-```r
-function(par, y, ...)
-```
-
-First-order derivatives must be provided as a named list called `"score"`, with one function per 
-distribution parameter. Second-order derivatives must be provided in a list named `"hessian"`. Each 
-function in `"hessian"` must return the **negative (expected)** second derivative with respect to the 
-predictor.
-
-The following code illustrates how to provide both `"score"` and `"hessian"` functions for
-a normal distribution:
-
-```r
-Normal <- function(...) {
-  fam <- list(
-    "family" = "Normal",
-    "names" = c("mu", "sigma"),
-    "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(par, y, log = FALSE, ...) {
-      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
-    },
-    "type" = "continuous",
-    "initialize" = list(
-      "mu"    = function(y, ...) { (y + mean(y)) / 2 },
-      "sigma" = function(y, ...) { rep(sd(y), length(y)) }
-    ),
-    "score" = list(
-      "mu" = function(par, y, ...) {
-        (y - par$mu) / (par$sigma^2)
-      },
-      "sigma" = function(par, y, ...) {
-        -1 + (y - par$mu)^2 / (par$sigma^2)
-      }
-    ),
-    "hessian" = list(
-      "mu" = function(par, y, ...) {
-        1 / (par$sigma^2)
-      },
-      "sigma" = function(par, y, ...) {
-        rep(2, length(y))
-      },
-      "mu:sigma" = function(par, y, ...) {
-        rep(0, length(y)) ## example cross-derivative
-      }
-    )
-  )
-  class(fam) <- "gamlss2.family"
-  return(fam)
-}
-```
-
-If no derivative functions are provided, all necessary derivatives will be
-approximated numerically. In addition to derivatives with respect to single parameters,
-**cross-derivatives** (i.e., second-order derivatives involving two different parameters)
-can also be specified. These should be added to the `"hessian"` list and named using the
-format `"param1:param2"`, for example `"mu:sigma"`. They must use the same function
-arguments as the other derivative functions.
-
-Cross-derivatives can be beneficial when using second-order optimization
-algorithms such as Cole and Green (CG) flavor implemented in the default backfitting algorithm
-[RS](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html) in `gamlss2`.
-Supplying analytical expressions for these derivatives can significantly
-improve convergence speed and numerical stability in such settings.
-
-Note that the family object may also include a list of
-initialization functions for the model parameters. Providing suitable starting values can
-significantly improve the stability and speed of the estimation process.
-
-## Additional Functions
-
-Family objects can also include other functions such as
-
-* `cdf(par, y, ...)`: Cumulative distribution function.
-* `quantile(par, p, ...)`: Quantile function with probability vector `p`.
-* `support(par, ...)`: Lower and upper response support as a numeric matrix
-  with columns `min` and `max`, one row per parameter combination. A constant
-  support can be supplied as `c(min, max)`. If omitted, support is inferred
-  from `quantile(par, 0)` and `quantile(par, 1)` when available. Without
-  either, discrete families are assumed to be count distributions on the
-  nonnegative integers, while continuous families obtain a
-  parameter-dependent support by probing the log-density. The continuous
-  fallback is heuristic; shifted or truncated counts and unusual,
-  disconnected, or numerically extreme continuous supports should be supplied
-  explicitly.
-* `random(par, n, ...)`: Random number generation with number of samples `n`.
-* `mean(par, ...)`: Mean function.
-* `variance(par, ...)`: Variance function.
-* `skewness(par, ...)`: Skewness function.
-* `kurtosis(par, ...)`: Kurtosis function.
-* `valid.response(y)`: Function to check the values of the response.
-
-Note that the `cdf()` function is needed for computing the quantile residuals.
-For a family with a `pdf()` and support, `complete_family()` constructs a
-missing `cdf()` by numerically integrating a continuous density or summing a
-discrete probability mass function over its integer support. Analytical CDFs
-are left unchanged. If `quantile()` is missing but a CDF and support are
-available, `complete_family()` constructs it by numerical inversion. For a
-discrete family, this returns the smallest integer whose CDF reaches the
-requested probability. Analytical quantile functions are left unchanged.
-Missing `mean()` and `variance()` functions are computed from the density by
-adaptive integration for continuous families and batched PMF summation for
-discrete families. A missing `random()` function is generated by applying the
-quantile function to uniform random probabilities. Existing analytical
-functions are always retained.
-
-For faster estimation, it can also be useful to provide an optimized
-update function
-
-* `update(par, y, eta, which)`
-
-where `eta` denotes the predictor and `which` is a character string 
-identifying the parameter to be updated, as specified in the family's
-"names" component.
-
-The function must return a named list of the form `list(eta, weights)`,
-where `eta` is the updated predictor after one Newton–Raphson or
-Fisher-scoring iteration, and `weights` contains the corresponding working 
-weights used in subsequent fitting steps, such as IWLS updates.
-
-The main benefit of implementing this function arises
-when an optimized C implementation is provided for updating the predictor 
-within the package's default backfitting or MCMC algorithms.
-
-A complete version of the `Normal()` family is given below:
-
-```r
-Normal <- function(...) {
-  fam <- list(
-    "family" = "Normal",
-    "names" = c("mu", "sigma"),
-    "links" = c("mu" = "identity", "sigma" = "log"),
-    "pdf" = function(par, y, log = FALSE, ...) {
-      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
-    },
-    "cdf" = function(par, y, ...) {
+    cdf = function(par, y, ...) {
       pnorm(y, mean = par$mu, sd = par$sigma, ...)
     },
-    "random" = function(n, par) {
-      rnorm(n, mean = par$mu, sd = par$sigma)
-    },
-    "quantile" = function(p, par) {
+    quantile = function(par, p, ...) {
       qnorm(p, mean = par$mu, sd = par$sigma)
     },
-    "mean" = function(par) { par$mu },
-    "variance"  = function(par) { par$sigma^2 },
-    "skewness" = function(par) { rep(0, length(par$mu)) },
-    "kurtosis" = function(par) { rep(3, length(par$mu)) },
-    "type" = "continuous",
-    "initialize" = list(
-      "mu"    = function(y, ...) { (y + mean(y)) / 2 },
-      "sigma" = function(y, ...) { rep(sd(y), length(y)) }
-    ),
-    "valid.response" = function(y) {
-      if(is.factor(y) | is.character(y))
-        stop("the response should be numeric!")
-      return(TRUE)
+    random = function(par, n, ...) {
+      rnorm(n, mean = par$mu, sd = par$sigma)
     },
-    "score" = list(
-      "mu" = function(par, y, ...) {
-        (y - par$mu) / (par$sigma^2)
-      },
-      "sigma" = function(par, y, ...) {
-        -1 + (y - par$mu)^2 / (par$sigma^2)
-      }
-    ),
-    "hessian" = list(
-      "mu" = function(par, y, ...) {
-        1 / (par$sigma^2)
-      },
-      "sigma" = function(par, y, ...) {
-        rep(2, length(y))
-      },
-      "mu:sigma" = function(par, y, ...) {
-        rep(0, length(y)) ## example cross-derivative
-      }
-    )
+    mean = function(par, ...) par$mu,
+    variance = function(par, ...) par$sigma^2,
+    support = c(-Inf, Inf),
+    type = "continuous",
+    valid.response = function(y) is.numeric(y)
   )
-  fam$update <- function(par, y, eta, which) {
-    score <- fam$score[[which]](par, y)
-    hessian <- fam$hessian[[which]](par, y)
-    z <- eta + 1 / hessian * score
-    return(list("eta" = z, "weights" = hessian))
+  class(fam) <- "gamlss2.family"
+  fam
+}
+
+m <- gamlss2(
+  dist ~ s(speed) | s(speed),
+  data = cars,
+  family = fNormal,
+  trace = FALSE
+)
+
+summary(m)
+```
+
+For a manually defined family, the minimum required interface is `family`,
+`names`, `links`, and `pdf()`. Derivative callbacks have the following shape:
+
+```r
+score = list(
+  mu = function(par, y, ...) {
+    (y - par$mu) / par$sigma^2
+  },
+  sigma = function(par, y, ...) {
+    -1 + (y - par$mu)^2 / par$sigma^2
   }
-  class(fam) <- "gamlss2.family"
-  return(fam)
-}
+)
+
+hessian = list(
+  mu = function(par, y, ...) 1 / par$sigma^2,
+  sigma = function(par, y, ...) rep(2, length(y)),
+  "mu:sigma" = function(par, y, ...) rep(0, length(y))
+)
 ```
 
-## Flexible Links
+The Hessian entries are the negative of the expected second derivatives on
+the predictor scale.
+An optional `update(par, y, eta, which)` function can provide a specialized
+Newton/Fisher-scoring update returning `list(eta, weights)`.
 
-The example above used static link functions to define the family object. However, `gamlss2`
-also allows users to define families with flexible link functions.
-To support this, the helper function `make.link2()` is used. The only nontrivial part is
-adapting the `score` and `hessian` functions to work on the linear predictor scale.
-This is not done automatically in `gamlss2` for performance reasons - users may even
-write these functions in C for speed. Below is a minimal example of implementing the
-`Normal` family with flexible link functions:
+## Optional scoring rules
 
-```{r}
-Normal <- function(mu.link = "identity", sigma.link = "log", ...) {
-  mu.link <- make.link2(mu.link)
-  sigma.link <- make.link2(sigma.link)
-
-  fam <- list(
-    "family" = "Normal",
-    "names" = c("mu", "sigma"),
-    "links" = c("mu" = mu.link, "sigma" = sigma.link),
-    "pdf" = function(par, y, log = FALSE, ...) {
-      dnorm(y, mean = par$mu, sd = par$sigma, log = log)
-    },
-    "cdf" = function(par, y, ...) {
-      pnorm(y, mean = par$mu, sd = par$sigma, ...)
-    },
-    "quantile" = function(p, par) {
-      qnorm(p, mean = par$mu, sd = par$sigma)
-    },
-    "random" = function(n, par) {
-      rnorm(n, mean = par$mu, sd = par$sigma)
-    },
-    "type" = "continuous"
-  )
-
-  class(fam) <- "gamlss2.family"
-  return(fam)
-}
-```
-
-Note that the `score` and `hessian` elements are omitted and approximated
-numerically during estimation.
-
-The following is a small example using the new `Normal` family with different link functions.
-We now compare two models, one using an identity link (default) and one using a
-flexible `softplus` link.
-
-```{r}
-## load data
-data("SpirometryUS")
-     
-## subset for female
-d <- subset(SpirometryUS, gender == "female")
-
-## specify the model Formula
-f <- fev1 ~ s(age) | s(age)
-     
-## estimate models
-m1 <- gamlss2(f, data = d, family = Normal(mu.link = "identity"))
-m2 <- gamlss2(f, data = d, family = Normal(mu.link = softplus))
-```
-
-The fitted quantiles are visualized with
-
-```{r}
-#| fig-height: 5
-#| fig-width: 8
-#| fig-align: center
-#| out-width: 90%
-par(mar = c(4, 4, 1, 1))
-
-plot(fev1 ~ age, data = d, pch = 19,
-  col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
-
-q1 <- quantile(m1, probs = c(0.025, 0.5, 0.975))
-q2 <- quantile(m2, probs = c(0.025, 0.5, 0.975))
-
-i <- order(d$age)
-matlines(d$age[i], q1[i, ], col = 2, lwd = 5)
-matlines(d$age[i], q2[i, ], col = 4, lwd = 2)
-
-legend("topright",
-  legend = c("Identity", "Softplus"),
-  col = c(2, 4), lwd = 2, bty = "n")
-```
-
-Both models yield identical fits in this case, however, in practice, flexible links
-can help stabilize estimation or improve fit in more complex scenarios.
+The distributions3 bridge also exposes a `crps()` callback when the optional
+`scoringRules` package is available. This is useful for probabilistic forecast
+evaluation, but it is not needed for fitting, prediction, or the basic family
 
 ## Summary
 
-Family objects in the `gamlss2` package are a fundamental component for defining flexible,
-distributional regression models, and beyond. By encapsulating the necessary elements,
-such as parameters, link functions, and probability density functions, they provide a powerful framework
-for customizing models to fit specific data. The flexibility to define custom families,
-as demonstrated with the `Normal()` distribution, enables users to extend the package
-beyond its default families, making it adaptable to a wide range of modeling scenarios.
+Use the `distributions3` bridge when the response distribution already has a
+`distributions3` implementation. It provides a consistent probability and
+moment interface and handles link-scale derivative transformations. Use a
+manual `gamlss2.family` when a distribution needs custom density, derivative,
+support, initialization, or optimization logic. In either case, a good family
+should provide reliable support information and analytical distributional
+methods whenever practical.

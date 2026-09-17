@@ -197,13 +197,12 @@ legend("topright", c("5%", "50%", "95%"),
 ```
 
 These fitted distributions describe response variation conditional on the
-estimated model. They do not include uncertainty from estimating coefficients,
-smoothing parameters, or selecting the model.
+estimated model.
 
 ## Relation to `gamlss`
 
-`gamlss2` is a fresh implementation of the GAMLSS framework, but it can use the
-family objects from
+`gamlss2` is a fresh implementation of the GAMLSS framework, but it can also
+use the family objects from
 [`gamlss.dist`](https://cran.r-project.org/package=gamlss.dist).
 Unlike the classic [`gamlss`](https://cran.r-project.org/package=gamlss) workflow,
 `gamlss2()` supports [`mgcv`](https://cran.r-project.org/package=mgcv)
@@ -212,11 +211,10 @@ place the predictors for all distribution parameters in a single formula.
 
 ## Next steps
 
-The [Family Objects](https://gamlss-dev.github.io/gamlss2/vignettes/families.html) 
+The [Family Objects](https://gamlss-dev.github.io/gamlss2/vignettes/families.html)
 vignette explains available and custom
 response distributions. The
-[Special Model Terms](https://gamlss-dev.github.io/gamlss2/vignettes/specials.html) 
+[Special Model Terms](https://gamlss-dev.github.io/gamlss2/vignettes/specials.html)
 vignette covers terms beyond standard
-[`mgcv`](https://cran.r-project.org/package=mgcv)
+`mgcv`
 smooths.
-

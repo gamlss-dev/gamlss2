@@ -332,9 +332,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   ## Track iterations
   iter <- c(0, 0)
-  deviance.warning.count <- 0L
-  deviance.warning.max <- 0
-  penalized.increase.run <- 0L
+  dev.warn <- 0L
+  dev.warn.max <- 0
+  pen.run <- 0L
 
   ## For printing.
   if(control$flush) {
@@ -361,7 +361,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   ## Start outer loop.
   while((eps[1L] > stop.eps[1L]) && (iter[1L] < maxit[1L])) {
-    penalized.update.accepted <- FALSE
+    pen.accepted <- FALSE
 
     ## Old log-likelihood.
     if(is.null(weights)) {
@@ -612,7 +612,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               ## The default mgcv fitter consumes this private cache. Do not
               ## attach it to the stored special or expose it to user fitters.
               sk <- specials[[k]]
-              default.smooth.fitter <- inherits(sk, "mgcv.smooth") &&
+              default.fitter <- inherits(sk, "mgcv.smooth") &&
                 !inherits(sk, c("smooth", "special")) &&
                 is.null(sk$special.wfit)
               ## Local-ML smooths such as pb()/ps() rely on the RS
@@ -624,11 +624,11 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 smooth.criterion <- "aicc"
               smooth.criterion <- tolower(smooth.criterion)
               smooth.K <- if(is.null(control$K)) 2 else control$K
-              penalized.smooth.update <- default.smooth.fitter &&
+              pen.update <- default.fitter &&
                 !isTRUE(sk$localML) &&
                 (smooth.criterion == "ncv" ||
                   (smooth.criterion == "gaic" && smooth.K > 2))
-              if(use.cache && default.smooth.fitter)
+              if(use.cache && default.fitter)
                 sk$.rs_cache <- smooth.cache[[j]][[k]]
 
               ## Additive model term fit.
@@ -639,10 +639,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 special.wfit(sk, e, ew$weights * weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               }
-
-              ## NCV and strongly penalized GAIC updates use penalized likelihood.
-              ## Keep coefficients, smoothing parameters, EDF, covariance, and
-              ## transfer state synchronized.
 
               ## Step length control.
               if(step[[j]]$sterms[k] < 1) {
@@ -659,7 +655,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                   }
                 }
               }
-              if(penalized.smooth.update && !is.null(fs$transfer))
+              if(pen.update && !is.null(fs$transfer))
                 fs$transfer$coefficients <- fs$coefficients
 
               etai <- eta
@@ -671,8 +667,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
               }
 
-              accept.penalized.update <- FALSE
-              if(penalized.smooth.update && is.finite(ll1)) {
+              accept.pen <- FALSE
+              if(pen.update && is.finite(ll1)) {
                 smooth.penalty <- function(b) {
                   if(is.null(b) || !length(sk$S) || is.null(fs$lambdas))
                     return(0)
@@ -683,17 +679,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 }
                 old.penalty <- smooth.penalty(sfit[[j]][[k]]$coefficients)
                 new.penalty <- smooth.penalty(fs$coefficients)
-                old.objective <- ll02 - 0.5 * old.penalty
-                new.objective <- ll1 - 0.5 * new.penalty
+                old.obj <- ll02 - 0.5 * old.penalty
+                new.obj <- ll1 - 0.5 * new.penalty
                 tolerance <- sqrt(.Machine$double.eps) *
-                  (1 + abs(old.objective))
-                accept.penalized.update <- is.finite(old.objective) &&
-                  is.finite(new.objective) &&
-                  new.objective >= old.objective - tolerance
+                  (1 + abs(old.obj))
+                accept.pen <- is.finite(old.obj) &&
+                  is.finite(new.obj) &&
+                  new.obj >= old.obj - tolerance
               }
 
-              accept.update <- if(penalized.smooth.update) {
-                accept.penalized.update
+              accept.update <- if(pen.update) {
+                accept.pen
               } else {
                 is.finite(ll1) && ll1 > ll02
               }
@@ -701,15 +697,15 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 ## Update predictor.
                 sfit[[j]][[k]] <- fs
                 sfit[[j]][[k]]$selected <- TRUE
-                if(default.smooth.fitter && length(sk$S))
-                  penalized.update.accepted <- TRUE
+                if(default.fitter && length(sk$S))
+                  pen.accepted <- TRUE
                 ll02 <- ll1
                 ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
               } else {
                 ## Preserve the established warm-start handling for local-ML
                 ## and custom specials. Safeguarded smooths instead keep their
                 ## complete old state when a candidate is rejected.
-                if(!penalized.smooth.update &&
+                if(!pen.update &&
                     isTRUE(sfit[[j]][[k]]$.from_start)) {
                   old <- sfit[[j]][[k]]
                   fs$fitted.values <- old$fitted.values
@@ -775,23 +771,22 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     eps[1L] <- abs((llo1 - llo0) / llo0)
 
     ## Raw deviance need not decrease after an accepted penalized update.
-    ## Still retain a diagnostic for material or persistent deterioration.
     if(iter[1L] > 0L && is.finite(llo0) && is.finite(llo1) && llo1 < llo0) {
-      relative.increase <- (llo0 - llo1) / (abs(llo0) + 1e-08)
-      if(penalized.update.accepted) {
-        penalized.increase.run <- penalized.increase.run + 1L
-        concerning.increase <- relative.increase > sqrt(stop.eps[1L]) ||
-          penalized.increase.run >= 3L
+      rel.inc <- (llo0 - llo1) / (abs(llo0) + 1e-08)
+      if(pen.accepted) {
+        pen.run <- pen.run + 1L
+        concerning.increase <- rel.inc > sqrt(stop.eps[1L]) ||
+          pen.run >= 3L
       } else {
-        penalized.increase.run <- 0L
-        concerning.increase <- relative.increase > stop.eps[1L]
+        pen.run <- 0L
+        concerning.increase <- rel.inc > stop.eps[1L]
       }
       if(concerning.increase) {
-        deviance.warning.count <- deviance.warning.count + 1L
-        deviance.warning.max <- max(deviance.warning.max, relative.increase)
+        dev.warn <- dev.warn + 1L
+        dev.warn.max <- max(dev.warn.max, rel.inc)
       }
     } else {
-      penalized.increase.run <- 0L
+      pen.run <- 0L
     }
 
     ## Update outer iterator.
@@ -815,12 +810,12 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(control$trace & control$flush)
     cat("\n")
 
-  if(deviance.warning.count > 0L) {
+  if(dev.warn > 0L) {
     warning(sprintf(
       paste0("Global deviance increased materially or persistently in ",
         "%d outer iteration(s) (maximum relative increase %.3g); ",
         "check convergence or reduce the step length."),
-      deviance.warning.count, deviance.warning.max
+      dev.warn, dev.warn.max
     ))
   }
 

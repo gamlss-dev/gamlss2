@@ -26,6 +26,173 @@
 # define FCONE
 #endif
 
+/* Fast NCV score for ordered, symmetric lag neighborhoods. */
+SEXP calc_ncv_lag(SEXP Q, SEXP e, SEXP lag_, SEXP target_)
+{
+  if(!isReal(Q) || !isMatrix(Q) || !isReal(e) || !isInteger(lag_) ||
+     length(lag_) != 1 || !isInteger(target_) || length(target_) != 1)
+    error("invalid arguments to calc_ncv_lag");
+  const int n = nrows(Q), p = ncols(Q), lag = INTEGER(lag_)[0];
+  if(length(e) != n || lag < 0 || INTEGER(target_)[0] < 0)
+    error("incompatible arguments to calc_ncv_lag");
+  const double *q = REAL(Q), *ep = REAL(e);
+  if(lag == 0) {
+    double value = 0.0;
+    for(int i = 0; i < n; i++) {
+      double h = 0.0;
+      for(int j = 0; j < p; j++) {
+        const double v = q[i + (R_xlen_t)j * n];
+        h += v * v;
+      }
+      const double den = 1.0 - h;
+      if(!R_FINITE(ep[i]) || !R_FINITE(den) || den <= sqrt(DBL_EPSILON))
+        return ScalarReal(R_PosInf);
+      value += (ep[i] / den) * (ep[i] / den);
+    }
+    return ScalarReal(R_FINITE(value) ? value : R_PosInf);
+  }
+  double value = 0.0;
+  const char upper = 'U';
+  const int one = 1;
+  int info;
+  for(int i = 0; i < n; i++) {
+    const int first = i > lag ? i - lag : 0;
+    const int last = i + lag < n - 1 ? i + lag : n - 1;
+    const int m = last - first + 1;
+    const int target = i - first;
+    double *a = (double *) R_alloc((size_t)m * (size_t)m, sizeof(double));
+    double *rhs = (double *) R_alloc((size_t)m, sizeof(double));
+    for(int col = 0; col < m; col++) {
+      const int row_obs = first + col;
+      for(int row = 0; row <= col; row++) {
+        const int col_obs = first + row;
+        double h = 0.0;
+        for(int j = 0; j < p; j++)
+          h += q[row_obs + (R_xlen_t)j * n] * q[col_obs + (R_xlen_t)j * n];
+        a[row + (R_xlen_t)col * m] = (row == col ? 1.0 : 0.0) - h;
+      }
+    }
+    for(int row = 0; row < m; row++) {
+      rhs[row] = ep[first + row];
+      if(!R_FINITE(rhs[row])) return ScalarReal(R_PosInf);
+    }
+    F77_CALL(dpotrf)(&upper, &m, a, &m, &info FCONE);
+    if(info != 0 || !R_FINITE(a[0])) return ScalarReal(R_PosInf);
+    F77_CALL(dpotrs)(&upper, &m, &one, a, &m, rhs, &m, &info FCONE);
+    if(info != 0 || !R_FINITE(rhs[target])) return ScalarReal(R_PosInf);
+    value += rhs[target] * rhs[target];
+    if(!R_FINITE(value)) return ScalarReal(R_PosInf);
+  }
+  return ScalarReal(value);
+}
+
+/* NCV score and exact derivatives with respect to log(lambda). */
+SEXP calc_ncv_lag_gradient(SEXP Q, SEXP e, SEXP Xw, SEXP b, SEXP P,
+                           SEXP penalties, SEXP lag_)
+{
+  if(!isReal(Q) || !isMatrix(Q) || !isReal(e) || !isReal(Xw) ||
+     !isMatrix(Xw) || !isReal(b) || !isReal(P) || !isMatrix(P) ||
+     !isNewList(penalties) || !isInteger(lag_) || length(lag_) != 1)
+    error("invalid arguments to calc_ncv_lag_gradient");
+  const int n = nrows(Q), p = ncols(Q), lag = INTEGER(lag_)[0];
+  if(n <= 0 || nrows(Xw) != n || ncols(Xw) != p || length(b) != p ||
+     nrows(P) != p || ncols(P) != p || lag < 1)
+    error("incompatible arguments to calc_ncv_lag_gradient");
+  const int K = length(penalties);
+  const double *q = REAL(Q), *ep = REAL(e), *xp = REAL(Xw);
+  const double *bp = REAL(b), *pptr = REAL(P);
+  for(int k = 0; k < K; k++) {
+    SEXP sk = VECTOR_ELT(penalties, k);
+    if(!isReal(sk) || !isMatrix(sk) || nrows(sk) != p || ncols(sk) != p)
+      error("invalid penalty in calc_ncv_lag_gradient");
+  }
+  SEXP ans, grad;
+  PROTECT(ans = allocVector(VECSXP, 2));
+  PROTECT(grad = allocVector(REALSXP, K));
+  double *gp = REAL(grad), value = 0.0;
+  for(int k = 0; k < K; k++) gp[k] = 0.0;
+  double **wks = (double **) R_alloc((size_t)K, sizeof(double *));
+  double **vks = (double **) R_alloc((size_t)K, sizeof(double *));
+  for(int k = 0; k < K; k++) {
+    const double *sk = REAL(VECTOR_ELT(penalties, k));
+    double *w = (double *) R_alloc((size_t)p * (size_t)p, sizeof(double));
+    double *v = (double *) R_alloc((size_t)p, sizeof(double));
+    wks[k] = w; vks[k] = v;
+    for(int col = 0; col < p; col++) for(int row = 0; row < p; row++) {
+      double z = 0.0;
+      for(int a1 = 0; a1 < p; a1++) {
+        double t = 0.0;
+        for(int a2 = 0; a2 < p; a2++)
+          t += sk[a1 + (R_xlen_t)a2 * p] * pptr[a2 + (R_xlen_t)col * p];
+        z += pptr[row + (R_xlen_t)a1 * p] * t;
+      }
+      w[row + (R_xlen_t)col * p] = z;
+    }
+    for(int row = 0; row < p; row++) {
+      double z = 0.0;
+      for(int col = 0; col < p; col++) z += w[row + (R_xlen_t)col * p] * bp[col];
+      v[row] = z;
+    }
+  }
+  const char upper = 'U';
+  const int one = 1;
+  int info;
+  for(int i = 0; i < n; i++) {
+    const int first = i > lag ? i - lag : 0;
+    const int last = i + lag < n - 1 ? i + lag : n - 1;
+    const int m = last - first + 1, target = i - first;
+    double *a = (double *) R_alloc((size_t)m * (size_t)m, sizeof(double));
+    double *u = (double *) R_alloc((size_t)m, sizeof(double));
+    for(int col = 0; col < m; col++) {
+      const int row_obs = first + col;
+      for(int row = 0; row <= col; row++) {
+        const int col_obs = first + row;
+        double h = 0.0;
+        for(int j = 0; j < p; j++)
+          h += q[row_obs + (R_xlen_t)j * n] * q[col_obs + (R_xlen_t)j * n];
+        a[row + (R_xlen_t)col * m] = (row == col ? 1.0 : 0.0) - h;
+      }
+    }
+    for(int row = 0; row < m; row++) {
+      u[row] = ep[first + row];
+      if(!R_FINITE(u[row])) { UNPROTECT(2); return ScalarReal(R_PosInf); }
+    }
+    F77_CALL(dpotrf)(&upper, &m, a, &m, &info FCONE);
+    if(info != 0) { UNPROTECT(2); return ScalarReal(R_PosInf); }
+    F77_CALL(dpotrs)(&upper, &m, &one, a, &m, u, &m, &info FCONE);
+    if(info != 0 || !R_FINITE(u[target])) { UNPROTECT(2); return ScalarReal(R_PosInf); }
+    value += u[target] * u[target];
+    for(int k = 0; k < K; k++) {
+      const double *w = wks[k], *v = vks[k];
+      double *rhs = (double *) R_alloc((size_t)m, sizeof(double));
+      for(int row = 0; row < m; row++) {
+        const int obs = first + row;
+        double de = 0.0, dh = 0.0;
+        for(int col = 0; col < p; col++) {
+          de += xp[obs + (R_xlen_t)col * n] * v[col];
+          double qv = 0.0;
+          for(int jj = 0; jj < m; jj++) {
+            const int obs2 = first + jj;
+            double wx = 0.0;
+            for(int cc = 0; cc < p; cc++)
+              wx += w[col + (R_xlen_t)cc * p] * xp[obs2 + (R_xlen_t)cc * n];
+            qv += wx * u[jj];
+          }
+          dh -= xp[obs + (R_xlen_t)col * n] * qv;
+        }
+        rhs[row] = de + dh;
+      }
+      F77_CALL(dpotrs)(&upper, &m, &one, a, &m, rhs, &m, &info FCONE);
+      if(info != 0 || !R_FINITE(rhs[target])) { UNPROTECT(2); return ScalarReal(R_PosInf); }
+      gp[k] += 2.0 * u[target] * rhs[target];
+    }
+  }
+  SET_VECTOR_ELT(ans, 0, ScalarReal(value));
+  SET_VECTOR_ELT(ans, 1, grad);
+  UNPROTECT(2);
+  return ans;
+}
+
 /* Compute reduced weights and residuals. */
 SEXP calc_Xe(SEXP ind, SEXP weights, SEXP e, SEXP xweights, SEXP xrres, SEXP order)
 {

@@ -495,9 +495,10 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   ncv <- identical(control$criterion, "ncv")
   ## NCV neighbourhoods are term-local metadata. A scalar specifies an
   ## ordered lag; a list supplies one deletion neighbourhood per observation.
-  ncv.neighbourhood <- NULL
+  ncv.neigh <- NULL
   ncv.target <- NULL
-  ncv.singleton <- TRUE
+  ncv.one <- TRUE
+  ncv.lag <- NULL
   if(ncv) {
     ncv.config <- if(is.list(x$xt)) x$xt$ncv else NULL
     if(is.null(ncv.config))
@@ -509,16 +510,17 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
             ncv.config < 0 || ncv.config != floor(ncv.config))
           stop("NCV lag must be one non-negative integer")
         lag <- as.integer(min(ncv.config, n))
+        ncv.lag <- lag
         if(lag > 0L) {
-          ncv.neighbourhood <- lapply(seq_len(n), function(i)
+          ncv.neigh <- lapply(seq_len(n), function(i)
             seq.int(max(1L, i - lag), min(n, i + lag)))
           ncv.target <- pmin(lag + 1L, seq_len(n))
-          ncv.singleton <- FALSE
+          ncv.one <- FALSE
         }
       } else if(is.list(ncv.config)) {
         if(length(ncv.config) != n)
           stop("NCV neighbourhood list must have length ", n)
-        ncv.neighbourhood <- vector("list", n)
+        ncv.neigh <- vector("list", n)
         ncv.target <- integer(n)
         for(i in seq_len(n)) {
           a <- ncv.config[[i]]
@@ -530,10 +532,10 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
           if(is.na(target))
             stop("NCV neighbourhood for observation ", i,
               " does not contain its target")
-          ncv.neighbourhood[[i]] <- a
+          ncv.neigh[[i]] <- a
           ncv.target[i] <- target
         }
-        ncv.singleton <- all(lengths(ncv.neighbourhood) == 1L)
+        ncv.one <- all(lengths(ncv.neigh) == 1L)
       } else {
         stop("NCV neighbourhoods must be a list or a non-negative lag")
       }
@@ -910,12 +912,19 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       quadratic.state
     }
 
-    ncv_score <- function(b, Q) {
+    ncv_score <- function(b, Q, gradient = FALSE, P = NULL) {
       e <- ncv.zw - drop(ncv.Xw %*% b)
       if(any(!is.finite(e)) || any(!is.finite(Q)))
         return(Inf)
 
-      if(ncv.singleton) {
+      if(!is.null(ncv.lag) && ncv.lag > 0L && gradient)
+        return(.Call(C_calc_ncv_lag_gradient, Q, e, ncv.Xw, b, P,
+          x$S, ncv.lag, PACKAGE = "gamlss2"))
+      if(!is.null(ncv.lag))
+        return(.Call(C_calc_ncv_lag, Q, e, ncv.lag, 0L,
+          PACKAGE = "gamlss2"))
+
+      if(ncv.one) {
         den <- 1 - rowSums(Q^2)
         if(any(!is.finite(den)) || any(den <= sqrt(.Machine$double.eps)))
           return(Inf)
@@ -927,7 +936,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       ## (I - H[a, a])^-1 e[a], with H = Q Q'.
       value <- 0
       for(i in seq_len(n)) {
-        a <- ncv.neighbourhood[[i]]
+        a <- ncv.neigh[[i]]
         Qa <- Q[a, , drop = FALSE]
         Ra <- try(chol(diag(length(a)) - tcrossprod(Qa)), silent = TRUE)
         if(inherits(Ra, "try-error") || any(!is.finite(Ra)) ||
@@ -942,7 +951,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       if(is.finite(value)) value else Inf
     }
 
-    ncv_eval <- function(l) {
+    ncv_eval <- function(l, gradient = FALSE) {
       if(!is.null(dr)) {
         q <- 1 / (1 + as.numeric(l[1L]) * dr$d)
         if(any(!is.finite(q)) || any(q <= 0))
@@ -950,6 +959,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         alpha <- dr$g * q
         b <- drop(dr$T %*% alpha)
         Q <- ncv.Xw %*% sweep(dr$T, 2L, sqrt(q), "*")
+        P <- dr$T %*% (q * t(dr$T))
       } else {
         Sl <- S
         for(k in seq_along(x$S))
@@ -959,8 +969,9 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
           return(Inf)
         b <- drop(backsolve(R, forwardsolve(t(R), XWz)))
         Q <- t(forwardsolve(t(R), t(ncv.Xw)))
+        P <- chol2inv(R)
       }
-      ncv_score(b, Q)
+      ncv_score(b, Q, gradient = gradient, P = P)
     }
 
     ## Function to search for smoothing parameters using GCV etc.
@@ -1090,8 +1101,12 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         opt <- nlminb(
           rho,
           objective = function(rho) fl(exp(rho)),
-          gradient = if(use.gradient) function(rho)
-            quadratic_eval(exp(rho), gradient = TRUE)$gradient else NULL,
+          gradient = if(use.gradient && !ncv) function(rho)
+            quadratic_eval(exp(rho), gradient = TRUE)$gradient else
+            if(ncv && !is.null(ncv.lag) && length(x$S)) function(rho) {
+              out <- ncv_eval(exp(rho), gradient = TRUE)
+              as.numeric(out[[2L]]) * exp(rho)
+            } else NULL,
           lower = pmax(rho - log(10), log(1e-10)),
           upper = pmin(rho + log(10), log(1e+10))
         )

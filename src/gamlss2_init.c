@@ -17,6 +17,8 @@ SEXP calc_smooth_wfit_gradient_root(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SE
 SEXP calc_smooth_residual(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_smooth_dr_fit(SEXP, SEXP);
 SEXP update_Gaussian(SEXP, SEXP, SEXP, SEXP);
+SEXP calc_ncv_lag(SEXP, SEXP, SEXP, SEXP);
+SEXP calc_ncv_lag_gradient(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static R_CallMethodDef callMethods[] = {
   {"calc_Xe", (DL_FUNC) &calc_Xe, 6},
@@ -32,6 +34,8 @@ static R_CallMethodDef callMethods[] = {
   {"calc_smooth_residual", (DL_FUNC) &calc_smooth_residual, 6},
   {"calc_smooth_dr_fit", (DL_FUNC) &calc_smooth_dr_fit, 2},
   {"update_Gaussian", (DL_FUNC) &update_Gaussian, 4},
+  {"calc_ncv_lag", (DL_FUNC) &calc_ncv_lag, 4},
+  {"calc_ncv_lag_gradient", (DL_FUNC) &calc_ncv_lag_gradient, 7},
   {NULL, NULL, 0}
 };
 

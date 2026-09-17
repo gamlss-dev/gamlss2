@@ -609,6 +609,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -726,11 +727,17 @@ Further control parameters to be included in the return value, for example param
 <p>For the <code>RS</code> and <code>CG</code> optimizers, argument <code>demmler.reinsch</code> controls the use of a weighted Demmler–Reinsch reparameterization when selecting the smoothing parameter of an eligible single-penalty smooth, including multivariate smooths. The default, <code>“auto”</code>, uses the native reparameterization for quadratic criteria after the initial outer iteration. Set <code>demmler.reinsch = TRUE</code> to force it for eligible updates, or <code>FALSE</code> to disable it. The initial outer iteration continues to use the direct solver. With numerical gradients or <code>native.wfit = FALSE</code>, automatic reparameterization is delayed until the current search reaches the edge of its one-decade search window.</p>
 <p>Within an <code>RS</code> or <code>CG</code> fit, the reparameterization is cached while the design matrix, weights, penalty, and binning are unchanged. A new working response only requires updating its projection into the cached basis. The declared penalty rank keeps the null space unpenalized even at large smoothing parameters.</p>
 <p>Analytic gradients are used by default for quadratic smoothing criteria (GCV, AIC, GAIC, AICc, and BIC), including smooths with multiple penalties. Set <code>analytic.gradient = FALSE</code> to use numerical gradients. Criteria using <code>logLik = TRUE</code> continue to use numerical gradients, with native direct solves and family likelihood evaluation in R. Nearly exact fits use observation-space residuals to avoid cancellation in the quadratic RSS.</p>
+<p>Neighbourhood cross-validation can be selected with <code>criterion = “ncv”</code>. If <code>ncv</code> is omitted, singleton neighbourhoods are used, corresponding to leave-one-observation-out cross-validation. For ordered data, a numeric <code>ncv = k</code> uses the observation together with up to <code>k</code> neighbours on either side. Larger neighbourhoods generally provide more smoothing and can account for short-range dependence, at increased computational cost. For ordered data, small values such as <code>ncv = 1</code> or <code>ncv = 2</code> are often preferable to the singleton default. Custom neighbourhoods can also be supplied as a list through a smooth term’s codext argument, for example <code>s(x, xt = list(ncv = neighbourhoods))</code>, where codeneighbourhoods has one integer index vector per observation and each vector contains its target observation.</p>
 <p>Smooths with fixed smoothing parameters or multiple penalties, including adaptive and tensor-product smooths, use the direct solver. For larger multiple-penalty smooths, a cached factor of the weighted crossproduct reduces the cost of EDF derivatives. Local ML updates use the constrained penalty null space and return coefficients and covariance at the reported smoothing parameter. Native single-penalty ML updates compute RSS and the penalty quadratic in the DR basis, with observation-space residuals for nearly exact fits.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>A list with the arguments specified.</p>
+</section>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Demmler, A. and Reinsch, C. (1975). Oscillation Matrices with Spline Smoothing. <em>Numerische Mathematik</em>, 24(5), 375–382. <a href="https://doi.org/10.1007/BF01437406">doi:10.1007/BF01437406</a></p>
+<p>Wood, S. N. (2026). On Neighbourhood Cross Validation. <em>Statistical Science</em>, in press. <a href="https://doi.org/10.48550/arXiv.2404.16490">doi:10.48550/arXiv.2404.16490</a></p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -743,10 +750,13 @@ Further control parameters to be included in the return value, for example param
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model with different step length</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## control in the RS algorithm</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">step =</span> <span class="dv">1</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">step =</span> <span class="fl">0.1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate models with different information criteria</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">criterion =</span> <span class="st">"aic"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">criterion =</span> <span class="st">"bic"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">criterion =</span> <span class="st">"gaic"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>m4 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">criterion =</span> <span class="st">"gaic"</span>, <span class="at">K =</span> <span class="dv">4</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>m5 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">criterion =</span> <span class="st">"ncv"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>m6 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> cars, <span class="at">family =</span> GA, <span class="at">criterion =</span> <span class="st">"ncv"</span>, <span class="at">ncv =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

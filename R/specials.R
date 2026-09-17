@@ -488,13 +488,9 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     if(!is.null(control$method))
       control$criterion <- tolower(control$method)
   }
-  if(iter[1L] > 0) {
-    if(is.null(control$criterion))
-      control$criterion <- "aicc"
-  } else {
-    control$criterion <- "gaic"
-    control$K <- 10
-  }
+  if(is.null(control$criterion))
+    control$criterion <- "aicc"
+
   control$criterion <- tolower(control$criterion)
   ncv <- identical(control$criterion, "ncv")
   ## NCV neighbourhoods are term-local metadata. A scalar specifies an

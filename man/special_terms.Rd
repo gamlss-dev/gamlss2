@@ -211,7 +211,7 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
 data("HarzTraffic", package = "gamlss2")
 
 ## specify the model formula
-f <- bikes ~ n(~yday,decay=0.01) | .
+f <- bikes ~ n(yday,decay=0.01) | .
 
 ## estimate model,
 ## set the seed for reproducibility
@@ -236,7 +236,7 @@ matlines(nd$yday, pq, lwd = 2,
   lty = 1, col = 4)
 
 ## include another covariate
-f <- bikes ~ n(~yday+rain,size=100,decay=0.3) | .
+f <- bikes ~ n(~yday+rain,size=100,decay=0.1) | .
 
 ## estimate model
 set.seed(456)

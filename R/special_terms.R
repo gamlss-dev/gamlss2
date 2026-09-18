@@ -2,6 +2,11 @@
 tree <- function(formula, ...)
 {
   stopifnot(requireNamespace("rpart"))
+  if(!inherits(formula, "formula")) {
+    formula <- as.character(substitute(formula))
+    formula <- as.formula(paste("~", formula))
+    environment(formula) <- sys.frame(-1)
+  }
   st <- list()
   ctr <- list(...)
   st$control <- do.call(rpart::rpart.control, ctr)
@@ -47,6 +52,11 @@ special_predict.tree.fitted <- function(x, data, ...)
 cf <- function(formula, ...)
 {
   stopifnot(requireNamespace("partykit"))
+  if(!inherits(formula, "formula")) {
+    formula <- as.character(substitute(formula))
+    formula <- as.formula(paste("~", formula))
+    environment(formula) <- sys.frame(-1)
+  }
   st <- list()
   ctr <- list(...)
   ntree <- ctr$ntree
@@ -106,6 +116,11 @@ special_predict.cf.fitted <- function(x, data, se.fit = FALSE, ...)
 ct <- function(formula, ...)
 {
   stopifnot(requireNamespace("partykit"))
+  if(!inherits(formula, "formula")) {
+    formula <- as.character(substitute(formula))
+    formula <- as.formula(paste("~", formula))
+    environment(formula) <- sys.frame(-1)
+  }
   st <- list()
   ctr <- list(...)
   st$control <- do.call(partykit::ctree_control, ctr)
@@ -156,6 +171,12 @@ ps <- pb <- function(x, k = 20, ...)
 ## when calling gamlss2().
 n <- function(formula, ...)
 {
+  if(!inherits(formula, "formula")) {
+    formula <- as.character(substitute(formula))
+    formula <- as.formula(paste("~", formula))
+    environment(formula) <- sys.frame(-1)
+  }
+
   stopifnot(requireNamespace("nnet"))
 
   ## List for setting up the special model term.
@@ -690,6 +711,7 @@ gnet <- function(formula, ...)
   ## Ensure it's a formula.
   if(inherits(formula, "matrix"))
     stop("only formulas are allowed!")
+
   if(!inherits(formula, "formula")) {
     formula <- as.character(substitute(formula))
     formula <- as.formula(paste("~", formula))

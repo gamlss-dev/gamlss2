@@ -25,6 +25,7 @@ distributions3_family(
   score = TRUE,
   hessian = FALSE,
   update = FALSE,
+  expected = FALSE,
   create_distribution = "structure",
   type = NULL,
   valid.response = NULL,

@@ -260,8 +260,13 @@ gamma2_base <- function(object) {
          rate = 1 / (object$mu * object$sigma^2))
 }
 
-pdf.Gamma2 <- function(object, y, log = FALSE, ...) {
-  pdf(gamma2_base(object), y, log = log, ...)
+pdf.Gamma2 <- function(object, y, log = FALSE, elementwise = FALSE, ...) {
+  dgamma(y, shape = 1 / object$sigma^2,
+         rate = 1 / (object$mu * object$sigma^2), log = log)
+}
+log_pdf.Gamma2 <- function(object, y, elementwise = FALSE, ...) {
+  dgamma(y, shape = 1 / object$sigma^2,
+         rate = 1 / (object$mu * object$sigma^2), log = TRUE)
 }
 cdf.Gamma2 <- function(object, y, ...) {
   cdf(gamma2_base(object), y, ...)
@@ -290,9 +295,9 @@ hessian.Gamma2 <- function(object, y, which, expected = TRUE, ...) {
   mu <- object$mu
   sigma <- object$sigma
   if(which == "mu")
-    1 / (mu^2 * sigma^2)
+    -1 / (mu^2 * sigma^2)
   else if(which == "sigma")
-    4 / sigma^6 * (trigamma(1 / sigma^2) - sigma^2)
+    4 / sigma^4 - 4 / sigma^6 * trigamma(1 / sigma^2)
   else
     rep(0, length(y))
 }
@@ -300,17 +305,25 @@ hessian.Gamma2 <- function(object, y, which, expected = TRUE, ...) {
 fGA2 <- family(
   Gamma2(),
   links = c(mu = "log", sigma = "log"),
-  score = TRUE, hessian = TRUE
+  score = TRUE, hessian = TRUE, expected = TRUE,
+  initialize = list(
+    mu = function(y, ...) (y + mean(y)) / 2,
+    sigma = function(y, ...) rep(1, length(y))
+  )
 )
-fGA2
 
-m2 <- gamlss2(
-  dist ~ s(speed) | s(speed),
-  data = cars,
+print(fGA2)
+
+air <- subset(airquality, !is.na(Ozone))
+
+m <- gamlss2(
+  Ozone ~ s(Temp) + s(Wind) | s(Temp),
+  data = air,
   family = fGA2,
   trace = FALSE
 )
-summary(m2)
+
+summary(m)
 ```
 
 This pattern is useful when an existing distribution has the right likelihood

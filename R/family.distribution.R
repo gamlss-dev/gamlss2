@@ -6,7 +6,7 @@ hasS3method <- function (method, classes) {
 }
 
 ## S3 method for generating a gamlss2.family from a distribution object (from distributions3)
-family.distribution <- function(object, links, score = TRUE, hessian = FALSE, update = FALSE, ...) {
+family.distribution <- function(object, links, score = TRUE, hessian = FALSE, update = FALSE, expected = FALSE, ...) {
   ## distributions3 class
   d <- setdiff(class(object), "distribution")
   create_distribution <- function(par) structure(par, class = class(object))
@@ -20,6 +20,7 @@ family.distribution <- function(object, links, score = TRUE, hessian = FALSE, up
     score = score && has_score,
     hessian = hessian && has_hessian,
     update = update && has_score && has_hessian,
+    expected = expected,
     create_distribution = create_distribution,
     ...)
 }
@@ -51,7 +52,7 @@ family.gamlss.family <- function(object, score = TRUE, hessian = FALSE, update =
 }
 
 ## workhorse function
-distributions3_family <- function(distribution, links, score = TRUE, hessian = FALSE, update = FALSE, create_distribution = "structure",
+distributions3_family <- function(distribution, links, score = TRUE, hessian = FALSE, update = FALSE, expected = FALSE, create_distribution = "structure",
   type = NULL, valid.response = NULL, initialize = NULL, ...) {
   ## distribution must be a character,
   ## corresponding to a distribution generator
@@ -137,8 +138,13 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
 
   ## add hessian function if desired and available
   has_hessian <- hasS3method("hessian", distribution)
-  if (hessian && has_hessian) rval$hessian <- structure(lapply(nams, function(n) { ## FIXME: hessian(par, y, which, ...)
-    function(par, y, ...) {
+  if (hessian && has_hessian) rval$hessian <- structure(lapply(nams, function(n) {
+    if (expected) function(par, y, ...) {
+      lnk <- links[[n]]
+      eta <- lnk$linkfun(par[[n]])
+      h <- hessian(d3(par), y, which = n, expected = TRUE, ...)
+      h * lnk$mu.eta(eta)^2
+    } else function(par, y, ...) {
       lnk <- links[[n]]
       eta <- lnk$linkfun(par[[n]])
       par <- d3(par)
@@ -149,7 +155,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   }), names = nams)
 
   ## add Newton/Fisher update function if desired and available
-  if (update && has_score && has_hessian) rval$update <- function(par, y, eta, which) { ## FIXME: update(par, y, eta, which) -> list(eta, weights)
+  if (update && has_score && has_hessian && expected) rval$update <- function(par, y, eta, which) { ## FIXME: update(par, y, eta, which) -> list(eta, weights)
     lnk <- links[[which]]
     mu.eta <- lnk$mu.eta(eta)
     par <- d3(par)
@@ -158,8 +164,8 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     score <- s * mu.eta
     score <- deriv_checks(score, is.weight = FALSE)
 
-    h <- hessian(par, y, which = which)
-    hessian <- h * mu.eta^2 + s * lnk$mu.eta2(eta)
+    h <- hessian(par, y, which = which, expected = TRUE)
+    hessian <- h * mu.eta^2
     hessian <- deriv_checks(hessian, is.weight = TRUE)
 
     list(
@@ -168,6 +174,16 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     )
   }
 
+  if (update && has_score && has_hessian && !expected) rval$update <- function(par, y, eta, which) {
+    lnk <- links[[which]]
+    mu.eta <- lnk$mu.eta(eta)
+    par <- d3(par)
+    s <- score(par, y, which = which)
+    score <- deriv_checks(s * mu.eta, is.weight = FALSE)
+    h <- hessian(par, y, which = which)
+    hessian <- deriv_checks(h * mu.eta^2 + s * lnk$mu.eta2(eta), is.weight = TRUE)
+    list(eta = eta + 1 / hessian * score, weights = hessian)
+  }
   ## family elements that are difficult to infer automatically
   rval$valid.response <- if (is.null(valid.response)) function(x) TRUE else valid.response
   if (!is.null(type)) rval$type <- match.arg(type, c("continuous", "discrete")) ## FIXME: further types allowed?

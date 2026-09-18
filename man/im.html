@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -75,6 +110,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <meta property="og:title" content="gamlss2">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
@@ -157,7 +221,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#interaction-model-terms" id="toc-interaction-model-terms" class="nav-link active" data-scroll-target="#interaction-model-terms">Interaction Model Terms</a>
+  <li><a href="#convolutional-image-model-terms-for-gamlss" id="toc-convolutional-image-model-terms-for-gamlss" class="nav-link active" data-scroll-target="#convolutional-image-model-terms-for-gamlss">Convolutional Image Model Terms for GAMLSS</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
@@ -165,6 +229,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -175,15 +240,16 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="interaction-model-terms" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="interaction-model-terms">Interaction Model Terms</h2>
+<section id="convolutional-image-model-terms-for-gamlss" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="convolutional-image-model-terms-for-gamlss">Convolutional Image Model Terms for GAMLSS</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Constructs an interaction model term for use with <code>gamlss2</code>.</p>
+<p>Constructs a convolutional neural-network image model term for use with <code>gamlss2</code>. The term learns convolutional filters, applies a ReLU activation and spatial-pyramid pooling, and fits a penalized linear output layer to the current working response.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">im(x, dim = NULL, ...)</code></pre>
+<pre><code class="language-R">im(x, dim = NULL, ...)
+</code></pre>
 </section>
 <section id="arguments" class="level3">
 <h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
@@ -193,7 +259,7 @@ ul.task-list li input[type="checkbox"] {
 <code id="x">x</code>
 </td>
 <td>
-A model term specifying the variables entering the interaction.
+A single image variable. Images can be supplied as an <span class="math inline">\(n\)</span> by <span class="math inline">\(p\)</span> matrix of flattened images, an <span class="math inline">\(n\)</span> by height by width (optionally by channel) array, or a list of equally sized image matrices or arrays.
 </td>
 </tr>
 <tr>
@@ -201,7 +267,111 @@ A model term specifying the variables entering the interaction.
 <code id="dim">dim</code>
 </td>
 <td>
-Optional dimension of the interaction representation.
+Optional integer vector <code>c(height, width)</code> for grayscale images or <code>c(height, width, channels)</code> for multi-channel images. It is required for flattened matrix input and can otherwise be inferred from the data.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="filters">filters</code>
+</td>
+<td>
+Integer number of convolutional filters. The default is 4.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="kernel">kernel</code>
+</td>
+<td>
+One integer or two integers giving the convolutional kernel height and width. The default is <code>c(3, 3)</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="pool">pool</code>
+</td>
+<td>
+Positive integer spatial-pyramid pooling levels. The default is <code>c(1, 2, 4)</code>, truncated to the image dimensions.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="epochs">epochs</code>
+</td>
+<td>
+Number of optimization epochs for the first backfitting update. The default is 8.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="warm_epochs">warm_epochs</code>
+</td>
+<td>
+Number of optimization epochs for subsequent updates. The default is 3.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="learning_rate">learning_rate</code>
+</td>
+<td>
+Positive Adam learning rate. The default is 0.003.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="decay">decay</code>
+</td>
+<td>
+Non-negative ridge penalty for the convolutional and output parameters. The default is 0.001.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="beta1">beta1</code>, <code id="beta2">beta2</code>
+</td>
+<td>
+Adam exponential-decay parameters in <code>[0, 1)</code>. Their defaults are 0.9 and 0.999.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="eps">eps</code>
+</td>
+<td>
+Positive numerical stabilization constant for Adam. The default is <code>1e-8</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="clip">clip</code>
+</td>
+<td>
+Optional positive bound for gradient clipping. The default is 5.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="scale">scale</code>
+</td>
+<td>
+Logical; should each image channel be centered and scaled using the training images? The default is <code>TRUE</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="seed">seed</code>
+</td>
+<td>
+Optional finite numeric seed used when initializing the filters.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="trace">trace</code>
+</td>
+<td>
+Logical; should the CNN optimization progress be printed? The default is <code>FALSE</code>.
 </td>
 </tr>
 <tr>
@@ -209,22 +379,102 @@ Optional dimension of the interaction representation.
 <code id="...">…</code>
 </td>
 <td>
-Additional arguments passed to the interaction-term implementation.
+Additional named CNN controls listed above. Unknown controls are rejected.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The term is fitted and predicted through the special-term backfitting interface. See <code>special_terms</code> for the common fitting and prediction contract.</p>
+<p>The image term is intended for images stored as one observation per row. For a flattened matrix, use <code>dim</code> to specify the image dimensions; for an array or image list, the dimensions are checked and retained. The same image representation and dimensions must be supplied when predicting on new data.</p>
+<p>The model applies a same-padded convolution, a rectified-linear activation, and spatial-pyramid pooling. The pooled features are mapped to the current working response by a penalized linear output layer. Convolutional parameters are initialized on the first update and warm-started on later backfitting updates. The fitted contribution is centered before it is added to the distributional predictor.</p>
+<p>This term is a CNN-based alternative to <code>si</code>, which represents images through a penalized tensor-product coefficient surface. The fitted model can be inspected with <code>plot.gamlss2</code> and used for new images with <code>predict.gamlss2</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>An object representing an interaction special term.</p>
+<p>An object of classes <code>“special”</code> and <code>“im”</code>. During fitting, the corresponding <code>special_fit.im()</code> method returns the fitted CNN, centered fitted values, transfer information for warm starts, and an effective degrees-of-freedom estimate.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>special_terms</code></p>
+<p><code>si</code>, <code>special_terms</code>, <code>gamlss2</code></p>
+</section>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>nr <span class="ot">&lt;-</span> <span class="dv">16</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>nc <span class="ot">&lt;-</span> <span class="dv">16</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## images with a three-by-three pattern at random locations</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>images <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> nr <span class="sc">*</span> nc, <span class="at">sd =</span> <span class="fl">0.25</span>), <span class="fu">c</span>(n, nr, nc))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>locations <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">row =</span> <span class="fu">sample</span>(<span class="dv">2</span><span class="sc">:</span>(nr <span class="sc">-</span> <span class="dv">2</span>), n, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">sample</span>(<span class="dv">2</span><span class="sc">:</span>(nc <span class="sc">-</span> <span class="dv">2</span>), n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>amplitude <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="fl">0.5</span>, <span class="fl">1.5</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) {</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  images[i, locations<span class="sc">$</span>row[i]<span class="sc">:</span>(locations<span class="sc">$</span>row[i] <span class="sc">+</span> <span class="dv">2</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    locations<span class="sc">$</span>col[i]<span class="sc">:</span>(locations<span class="sc">$</span>col[i] <span class="sc">+</span> <span class="dv">2</span>)] <span class="ot">&lt;-</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    images[i, locations<span class="sc">$</span>row[i]<span class="sc">:</span>(locations<span class="sc">$</span>row[i] <span class="sc">+</span> <span class="dv">2</span>),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>      locations<span class="sc">$</span>col[i]<span class="sc">:</span>(locations<span class="sc">$</span>col[i] <span class="sc">+</span> <span class="dv">2</span>)] <span class="sc">+</span> amplitude[i]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="do">## known spatial response surface</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>truth <span class="ot">&lt;-</span> <span class="fu">outer</span>(<span class="fu">seq_len</span>(nr), <span class="fu">seq_len</span>(nc), <span class="cf">function</span>(row, col)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp</span>(<span class="sc">-</span>((row <span class="sc">-</span> <span class="dv">5</span>) <span class="sc">/</span> <span class="dv">3</span>)<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> ((col <span class="sc">-</span> <span class="dv">11</span>) <span class="sc">/</span> <span class="dv">4</span>)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>truth <span class="ot">&lt;-</span> truth <span class="sc">/</span> <span class="fu">max</span>(truth)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> <span class="fu">vapply</span>(<span class="fu">seq_len</span>(n), <span class="cf">function</span>(i) {</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  amplitude[i] <span class="sc">*</span> <span class="fu">mean</span>(truth[locations<span class="sc">$</span>row[i]<span class="sc">:</span>(locations<span class="sc">$</span>row[i] <span class="sc">+</span> <span class="dv">2</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    locations<span class="sc">$</span>col[i]<span class="sc">:</span>(locations<span class="sc">$</span>col[i] <span class="sc">+</span> <span class="dv">2</span>)])</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">1</span>)) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.2</span>))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">image</span>(images[<span class="dv">1</span>, , ], <span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">20</span>, <span class="st">"Inferno"</span>),</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Example image"</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>image <span class="ot">&lt;-</span> <span class="fu">I</span>(<span class="fu">matrix</span>(images, <span class="at">nrow =</span> n))</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> <span class="fu">im</span>(image, <span class="at">dim =</span> <span class="fu">c</span>(nr, nc), <span class="at">filters =</span> <span class="dv">3</span>, <span class="at">epochs =</span> <span class="dv">15</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">warm_epochs =</span> <span class="dv">2</span>, <span class="at">seed =</span> <span class="dv">1904</span>) <span class="sc">|</span> <span class="dv">1</span>,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> d,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NO</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> d[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted response map for a moving image pattern</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>map.grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">row =</span> <span class="dv">2</span><span class="sc">:</span>(nr <span class="sc">-</span> <span class="dv">2</span>), <span class="at">col =</span> <span class="dv">2</span><span class="sc">:</span>(nc <span class="sc">-</span> <span class="dv">2</span>))</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>map.images <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="fu">c</span>(<span class="fu">nrow</span>(map.grid), nr, nc))</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(map.grid))) {</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  map.images[i, map.grid<span class="sc">$</span>row[i]<span class="sc">:</span>(map.grid<span class="sc">$</span>row[i] <span class="sc">+</span> <span class="dv">2</span>),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    map.grid<span class="sc">$</span>col[i]<span class="sc">:</span>(map.grid<span class="sc">$</span>col[i] <span class="sc">+</span> <span class="dv">2</span>)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>map.data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(map.grid)))</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>map.data<span class="sc">$</span>image <span class="ot">&lt;-</span> <span class="fu">I</span>(<span class="fu">matrix</span>(map.images, <span class="at">nrow =</span> <span class="fu">nrow</span>(map.grid)))</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>map.pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">newdata =</span> map.data)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>true.map <span class="ot">&lt;-</span> <span class="fu">vapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(map.grid)), <span class="cf">function</span>(i) {</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(truth[map.grid<span class="sc">$</span>row[i]<span class="sc">:</span>(map.grid<span class="sc">$</span>row[i] <span class="sc">+</span> <span class="dv">2</span>),</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    map.grid<span class="sc">$</span>col[i]<span class="sc">:</span>(map.grid<span class="sc">$</span>col[i] <span class="sc">+</span> <span class="dv">2</span>)]) <span class="sc">/</span> <span class="dv">9</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>true.map <span class="ot">&lt;-</span> <span class="fu">matrix</span>(true.map,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="fu">length</span>(<span class="fu">unique</span>(map.grid<span class="sc">$</span>row)))</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>pred.map <span class="ot">&lt;-</span> <span class="fu">matrix</span>(map.pred,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="fu">length</span>(<span class="fu">unique</span>(map.grid<span class="sc">$</span>row)))</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="fu">image</span>(<span class="fu">unique</span>(map.grid<span class="sc">$</span>row), <span class="fu">unique</span>(map.grid<span class="sc">$</span>col), true.map,</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">20</span>, <span class="st">"Inferno"</span>),</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"image row"</span>, <span class="at">ylab =</span> <span class="st">"image column"</span>,</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"True response map"</span>)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">image</span>(<span class="fu">unique</span>(map.grid<span class="sc">$</span>row), <span class="fu">unique</span>(map.grid<span class="sc">$</span>col), pred.map,</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">20</span>, <span class="st">"Inferno"</span>),</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>  <span class="at">zlim =</span> <span class="fu">range</span>(true.map, pred.map),</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"image row"</span>, <span class="at">ylab =</span> <span class="st">"image column"</span>,</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Predicted response map"</span>)</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 
 
 </section>

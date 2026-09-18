@@ -19,6 +19,8 @@ SEXP calc_smooth_dr_fit(SEXP, SEXP);
 SEXP update_Gaussian(SEXP, SEXP, SEXP, SEXP);
 SEXP calc_ncv_lag(SEXP, SEXP, SEXP, SEXP);
 SEXP calc_ncv_lag_gradient(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP im_conv_same(SEXP, SEXP, SEXP);
+SEXP im_conv_gradient(SEXP, SEXP, SEXP, SEXP);
 
 static R_CallMethodDef callMethods[] = {
   {"calc_Xe", (DL_FUNC) &calc_Xe, 6},
@@ -36,6 +38,8 @@ static R_CallMethodDef callMethods[] = {
   {"update_Gaussian", (DL_FUNC) &update_Gaussian, 4},
   {"calc_ncv_lag", (DL_FUNC) &calc_ncv_lag, 4},
   {"calc_ncv_lag_gradient", (DL_FUNC) &calc_ncv_lag_gradient, 7},
+  {"im_conv_same", (DL_FUNC) &im_conv_same, 3},
+  {"im_conv_gradient", (DL_FUNC) &im_conv_gradient, 4},
   {NULL, NULL, 0}
 };
 

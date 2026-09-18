@@ -1443,3 +1443,167 @@ SEXP update_Gaussian(SEXP peta, SEXP y, SEXP eta, SEXP j)
 
   return rval;
 }
+
+
+/* Same-size zero-padded convolution for the image model. */
+SEXP im_conv_same(SEXP X, SEXP K, SEXP bias)
+{
+  SEXP xd = getAttrib(X, R_DimSymbol);
+  SEXP kd = getAttrib(K, R_DimSymbol);
+  int n = INTEGER(xd)[0];
+  int H = INTEGER(xd)[1];
+  int W = INTEGER(xd)[2];
+  int C = INTEGER(xd)[3];
+  int kh = INTEGER(kd)[0];
+  int kw = INTEGER(kd)[1];
+  int F = INTEGER(kd)[3];
+  int ph1 = (kh - 1) / 2;
+  int pw1 = (kw - 1) / 2;
+  int ph2 = kh - 1 - ph1;
+  int pw2 = kw - 1 - pw1;
+  int Hp = H + ph1 + ph2;
+  int Wp = W + pw1 + pw2;
+  R_xlen_t nxp = (R_xlen_t)n * Hp * Wp * C;
+  R_xlen_t nz = (R_xlen_t)n * H * W * F;
+  SEXP XP, Z, ans, names;
+  PROTECT(XP = allocVector(REALSXP, nxp));
+  PROTECT(Z = allocVector(REALSXP, nz));
+  double *xp = REAL(XP);
+  double *x = REAL(X);
+  double *k = REAL(K);
+  double *b = REAL(bias);
+  double *z = REAL(Z);
+  memset(xp, 0, sizeof(double) * nxp);
+
+  for(int cc = 0; cc < C; ++cc) {
+    for(int ww = 0; ww < W; ++ww) {
+      for(int hh = 0; hh < H; ++hh) {
+        for(int ii = 0; ii < n; ++ii) {
+          R_xlen_t src = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * cc));
+          R_xlen_t dst = ii + (R_xlen_t)n * ((hh + ph1) + (R_xlen_t)Hp * ((ww + pw1) + (R_xlen_t)Wp * cc));
+          xp[dst] = x[src];
+        }
+      }
+    }
+  }
+
+  for(int ff = 0; ff < F; ++ff) {
+    for(int ww = 0; ww < W; ++ww) {
+      for(int hh = 0; hh < H; ++hh) {
+        for(int ii = 0; ii < n; ++ii) {
+          R_xlen_t out = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * ff));
+          z[out] = b[ff];
+        }
+      }
+    }
+    for(int cc = 0; cc < C; ++cc) {
+      for(int aa = 0; aa < kh; ++aa) {
+        for(int bb = 0; bb < kw; ++bb) {
+          R_xlen_t koff = aa + (R_xlen_t)kh * (bb + (R_xlen_t)kw * (cc + (R_xlen_t)C * ff));
+          double kval = k[koff];
+          if(kval == 0.0) continue;
+          for(int ww = 0; ww < W; ++ww) {
+            for(int hh = 0; hh < H; ++hh) {
+              int hp = hh + aa;
+              int wp = ww + bb;
+              for(int ii = 0; ii < n; ++ii) {
+                R_xlen_t src = ii + (R_xlen_t)n * (hp + (R_xlen_t)Hp * (wp + (R_xlen_t)Wp * cc));
+                R_xlen_t out = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * ff));
+                z[out] += kval * xp[src];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  SEXP xdim = PROTECT(allocVector(INTSXP, 4));
+  SEXP zdim = PROTECT(allocVector(INTSXP, 4));
+  INTEGER(xdim)[0] = n; INTEGER(xdim)[1] = Hp; INTEGER(xdim)[2] = Wp; INTEGER(xdim)[3] = C;
+  INTEGER(zdim)[0] = n; INTEGER(zdim)[1] = H; INTEGER(zdim)[2] = W; INTEGER(zdim)[3] = F;
+  setAttrib(XP, R_DimSymbol, xdim);
+  setAttrib(Z, R_DimSymbol, zdim);
+  PROTECT(ans = allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(ans, 0, Z);
+  SET_VECTOR_ELT(ans, 1, XP);
+  PROTECT(names = allocVector(STRSXP, 2));
+  SET_STRING_ELT(names, 0, mkChar("value"));
+  SET_STRING_ELT(names, 1, mkChar("padded"));
+  setAttrib(ans, R_NamesSymbol, names);
+  UNPROTECT(6);
+  return ans;
+}
+
+
+/* Accumulate convolutional filter and bias gradients. */
+SEXP im_conv_gradient(SEXP XP, SEXP dZ, SEXP K, SEXP decay)
+{
+  SEXP xd = getAttrib(XP, R_DimSymbol);
+  SEXP zd = getAttrib(dZ, R_DimSymbol);
+  SEXP kd = getAttrib(K, R_DimSymbol);
+  int n = INTEGER(xd)[0];
+  int Hp = INTEGER(xd)[1];
+  int Wp = INTEGER(xd)[2];
+  int C = INTEGER(xd)[3];
+  int H = INTEGER(zd)[1];
+  int W = INTEGER(zd)[2];
+  int F = INTEGER(zd)[3];
+  int kh = INTEGER(kd)[0];
+  int kw = INTEGER(kd)[1];
+  int ph1 = (kh - 1) / 2;
+  int pw1 = (kw - 1) / 2;
+  double lambda = REAL(decay)[0];
+  double *xp = REAL(XP);
+  double *dz = REAL(dZ);
+  double *k = REAL(K);
+  SEXP gK, gb, ans, names, kdim;
+  PROTECT(gK = allocVector(REALSXP, (R_xlen_t)kh * kw * C * F));
+  PROTECT(gb = allocVector(REALSXP, F));
+  double *gk = REAL(gK);
+  double *gbp = REAL(gb);
+  for(int ff = 0; ff < F; ++ff) {
+    double bsum = 0.0;
+    for(int ww = 0; ww < W; ++ww) {
+      for(int hh = 0; hh < H; ++hh) {
+        for(int ii = 0; ii < n; ++ii) {
+          R_xlen_t zi = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * ff));
+          bsum += dz[zi];
+        }
+      }
+    }
+    gbp[ff] = bsum;
+    for(int cc = 0; cc < C; ++cc) {
+      for(int aa = 0; aa < kh; ++aa) {
+        for(int bb = 0; bb < kw; ++bb) {
+          double sum = 0.0;
+          for(int ww = 0; ww < W; ++ww) {
+            for(int hh = 0; hh < H; ++hh) {
+              int hp = hh + aa;
+              int wp = ww + bb;
+              for(int ii = 0; ii < n; ++ii) {
+                R_xlen_t zi = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * ff));
+                R_xlen_t xi = ii + (R_xlen_t)n * (hp + (R_xlen_t)Hp * (wp + (R_xlen_t)Wp * cc));
+                sum += dz[zi] * xp[xi];
+              }
+            }
+          }
+          R_xlen_t ki = aa + (R_xlen_t)kh * (bb + (R_xlen_t)kw * (cc + (R_xlen_t)C * ff));
+          gk[ki] = sum + lambda * k[ki];
+        }
+      }
+    }
+  }
+  PROTECT(kdim = allocVector(INTSXP, 4));
+  INTEGER(kdim)[0] = kh; INTEGER(kdim)[1] = kw; INTEGER(kdim)[2] = C; INTEGER(kdim)[3] = F;
+  setAttrib(gK, R_DimSymbol, kdim);
+  PROTECT(ans = allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(ans, 0, gK);
+  SET_VECTOR_ELT(ans, 1, gb);
+  PROTECT(names = allocVector(STRSXP, 2));
+  SET_STRING_ELT(names, 0, mkChar("K"));
+  SET_STRING_ELT(names, 1, mkChar("b"));
+  setAttrib(ans, R_NamesSymbol, names);
+  UNPROTECT(5);
+  return ans;
+}

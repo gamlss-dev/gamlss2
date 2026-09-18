@@ -145,6 +145,11 @@
   kw <- dk[2L]
   F <- dk[4L]
 
+  if(is.loaded("im_conv_same", PACKAGE = "gamlss2")) {
+    rval <- .Call(C_im_conv_same, X, K, bias)
+    return(if(isTRUE(cache)) rval else rval$value)
+  }
+
   ph1 <- floor((kh - 1L) / 2L)
   ph2 <- kh - 1L - ph1
   pw1 <- floor((kw - 1L) / 2L)
@@ -482,24 +487,31 @@ CNNfit <- function(x, z, w = rep(1, length(z)), model = NULL,
     dA <- .im_pool_back(dP, dim(A), pool)
     dZ <- dA * (Z > 0)
 
-    dk <- dim(par$K)
-    kh <- dk[1L]
-    kw <- dk[2L]
-    C <- dk[3L]
-    F <- dk[4L]
-    gK <- array(0, dim = dk)
-    gb <- numeric(F)
-    for(f in seq_len(F)) {
-      dZf <- array(dZ[, , , f, drop = FALSE], dim = c(n, H, W))
-      gb[f] <- sum(dZf)
-      for(cc in seq_len(C)) {
-        for(a in seq_len(kh)) {
-          rr <- a:(a + H - 1L)
-          for(b in seq_len(kw)) {
-            ss <- b:(b + W - 1L)
-            Xslice <- array(XP[, rr, ss, cc, drop = FALSE], dim = c(n, H, W))
-            gK[a, b, cc, f] <- sum(dZf * Xslice) +
-              decay * par$K[a, b, cc, f]
+    if(is.loaded("im_conv_gradient", PACKAGE = "gamlss2")) {
+      gradient <- .Call(C_im_conv_gradient, XP, dZ, par$K,
+        as.numeric(decay))
+      gK <- gradient$K
+      gb <- gradient$b
+    } else {
+      dk <- dim(par$K)
+      kh <- dk[1L]
+      kw <- dk[2L]
+      C <- dk[3L]
+      F <- dk[4L]
+      gK <- array(0, dim = dk)
+      gb <- numeric(F)
+      for(f in seq_len(F)) {
+        dZf <- array(dZ[, , , f, drop = FALSE], dim = c(n, H, W))
+        gb[f] <- sum(dZf)
+        for(cc in seq_len(C)) {
+          for(a in seq_len(kh)) {
+            rr <- a:(a + H - 1L)
+            for(b in seq_len(kw)) {
+              ss <- b:(b + W - 1L)
+              Xslice <- array(XP[, rr, ss, cc, drop = FALSE], dim = c(n, H, W))
+              gK[a, b, cc, f] <- sum(dZf * Xslice) +
+                decay * par$K[a, b, cc, f]
+            }
           }
         }
       }

@@ -70,12 +70,12 @@ The `family()` method turns a `distributions3` object into a
 values specify their links.
 
 ```{r}
-fNO <- family(
+normal_family <- family(
   Normal(),
   links = c(mu = "identity", sigma = "log")
 )
 
-fNO
+normal_family
 ```
 
 The resulting object contains the family metadata as well as wrappers for
@@ -84,9 +84,9 @@ The distribution constructor is retained in `create_distribution`, which is
 used later when a fitted model is converted back to a `distributions3` object.
 
 ```{r}
-names(fNO)
-fNO$names
-vapply(fNO$links, function(x) x$name, character(1))
+names(normal_family)
+normal_family$names
+vapply(normal_family$links, function(x) x$name, character(1))
 ```
 
 The bridge result can now be used like any other family. This example uses the
@@ -97,7 +97,7 @@ to vary with speed.
 m <- gamlss2(
   dist ~ s(speed) | s(speed),
   data = cars,
-  family = fNO,
+  family = normal_family,
   trace = FALSE
 )
 
@@ -141,14 +141,14 @@ For example, a binomial distribution can have a fixed number of trials while
 its probability is modeled.
 
 ```{r}
-fBI <- distributions3_family(
+binomial_family <- distributions3_family(
   "Binomial",
   links = c(p = "logit"),
   create_distribution = "do.call",
   size = 10
 )
 
-binomial_distribution <- fBI$create_distribution(
+binomial_distribution <- binomial_family$create_distribution(
   list(p = rep(0.5, 3))
 )
 binomial_distribution
@@ -173,7 +173,7 @@ provided with respect to a distribution parameter. The bridge applies the
 link-function chain rule when `score = TRUE` or `hessian = TRUE`.
 
 ```{r}
-fNO <- family(
+normal_family <- family(
   Normal(),
   links = c(mu = "identity", sigma = "log"),
   score = TRUE,
@@ -181,7 +181,7 @@ fNO <- family(
   update = TRUE
 )
 
-names(fNO[c("score", "hessian", "update")])
+names(normal_family[c("score", "hessian", "update")])
 ```
 
 Analytical derivatives can improve speed and numerical stability. If they are
@@ -197,7 +197,7 @@ are left at their defaults, so numerical derivatives are used.
 
 
 ```{r}
-fNO <- family(
+normal_family <- family(
   Normal(),
   links = list(mu = make.link2(softplus), sigma = "log")
 )
@@ -207,7 +207,7 @@ fNO <- family(
 m_softplus <- gamlss2(
   dist ~ s(speed) | s(speed),
   data = cars,
-  family = fNO,
+  family = normal_family,
   trace = FALSE
 )
 
@@ -232,21 +232,90 @@ The `type` component should be either `"continuous"` or `"discrete"`, and
 are used by residual diagnostics, numerical completion, and the
 `distributions3` methods.
 
-## Standard and user-defined families
+## A reparameterized distribution from scratch
 
-The package is being extended with distributions3-backed versions of the
-standard `gamlss.dist` families. These will use the familiar `f*` names, such
-as `fNO`, `fGA`, `fBI`, and `fNBI`, while exposing the same probability,
-quantile, moment, simulation, and derivative infrastructure. For these standard
-families, users should normally select the supplied family rather than rewrite
-the distribution callbacks themselves.
+Suppose we want a Gamma distribution with the GAMLSS parameterization
+`(mu, sigma)`, where `mu` is the mean and `sigma` controls dispersion. The
+ordinary `distributions3::Gamma()` uses shape and rate instead. We can define a
+small distributions3 class that translates between the two parameterizations:
 
-A user-defined family is still useful for a new distribution, a modified
-parameterization, or specialized initialization and updating. The next section
-shows the minimal pattern; `?gamlss2.family` documents the family components,
-and `?family.distribution` documents the distributions3 bridge. In particular,
-the `score`, `hessian`, and optional `update` callbacks are the extension points
-for custom fitting behavior.
+$$
+\text{shape}=1/\sigma^2, \qquad
+\text{rate}=1/(\mu\sigma^2).
+$$
+
+The following example implements the distribution methods needed by the bridge,
+including an expected Hessian. The Hessian is supplied on the `(mu, sigma)`
+scale; `family()` then applies the link-function transformation.
+
+```{r}
+Gamma2 <- function(mu = 1, sigma = 1) {
+  stopifnot(all(mu > 0), all(sigma > 0))
+  structure(list(mu = mu, sigma = sigma),
+            class = c("Gamma2", "distribution"))
+}
+
+gamma2_base <- function(object) {
+  Gamma(shape = 1 / object$sigma^2,
+         rate = 1 / (object$mu * object$sigma^2))
+}
+
+pdf.Gamma2 <- function(object, y, log = FALSE, ...) {
+  pdf(gamma2_base(object), y, log = log, ...)
+}
+cdf.Gamma2 <- function(object, y, ...) {
+  cdf(gamma2_base(object), y, ...)
+}
+quantile.Gamma2 <- function(object, p, ...) {
+  quantile(gamma2_base(object), p, ...)
+}
+random.Gamma2 <- function(object, n, ...) {
+  random(gamma2_base(object), n, ...)
+}
+mean.Gamma2 <- function(object, ...) object$mu
+variance.Gamma2 <- function(object, ...) object$mu^2 * object$sigma^2
+support.Gamma2 <- function(object, ...) c(0, Inf)
+
+score.Gamma2 <- function(object, y, which, ...) {
+  mu <- object$mu
+  sigma <- object$sigma
+  if(which == "mu")
+    (y - mu) / (mu^2 * sigma^2)
+  else
+    2 / sigma^3 * (y / mu - 1 - log(y / (mu * sigma^2)) +
+                 digamma(1 / sigma^2))
+}
+
+hessian.Gamma2 <- function(object, y, which, expected = TRUE, ...) {
+  mu <- object$mu
+  sigma <- object$sigma
+  if(which == "mu")
+    1 / (mu^2 * sigma^2)
+  else if(which == "sigma")
+    4 / sigma^6 * (trigamma(1 / sigma^2) - sigma^2)
+  else
+    rep(0, length(y))
+}
+
+fGA2 <- family(
+  Gamma2(),
+  links = c(mu = "log", sigma = "log"),
+  score = TRUE, hessian = TRUE
+)
+fGA2
+
+m2 <- gamlss2(
+  dist ~ s(speed) | s(speed),
+  data = cars,
+  family = fGA2,
+  trace = FALSE
+)
+summary(m2)
+```
+
+This pattern is useful when an existing distribution has the right likelihood
+but the wrong parameterization. A user-defined family can also be assembled
+directly as a `gamlss2.family`, as shown next.
 
 ## Writing a family directly
 

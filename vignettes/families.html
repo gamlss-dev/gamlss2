@@ -355,7 +355,7 @@ sigma.s(speed) 1.1500
 *--------
 n = 50 df =  4.59 res.df =  45.41
 Deviance = 395.9946 Null Dev. Red. = 14.99%
-AIC = 405.1673 elapsed =  0.17sec</code></pre>
+AIC = 405.1673 elapsed =  0.16sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -401,10 +401,10 @@ AIC = 405.1673 elapsed =  0.17sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        r_1       r_2
-1  26.92410  32.05721
-2  31.60866  43.35895
-3 118.59085 108.43578</code></pre>
+<pre><code>       r_1      r_2
+1  26.0913 20.66053
+2  38.4059 47.41951
+3 124.7346 87.37035</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -604,7 +604,7 @@ sigma.s(Temp) 7.4967
 *--------
 n = 116 df =  20.63 res.df =  95.37
 Deviance = 899.7073 Null Dev. Red. = 16.93%
-AIC = 940.9758 elapsed =  0.50sec</code></pre>
+AIC = 940.9758 elapsed =  0.46sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -672,7 +672,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.44 res.df =  45.56
 Deviance = 396.3302 Null Dev. Red. = 14.92%
-AIC = 405.203 elapsed =  0.04sec</code></pre>
+AIC = 405.203 elapsed =  0.03sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>

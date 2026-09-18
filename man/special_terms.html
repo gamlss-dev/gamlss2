@@ -882,7 +882,7 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span>
 <span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a><span class="do">## specify the model formula</span></span>
-<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> bikes <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>yday,<span class="at">decay=</span><span class="fl">0.01</span>) <span class="sc">|</span> .</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> bikes <span class="sc">~</span> <span class="fu">n</span>(yday,<span class="at">decay=</span><span class="fl">0.01</span>) <span class="sc">|</span> .</span>
 <span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model,</span></span>
 <span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="do">## set the seed for reproducibility</span></span>
@@ -907,7 +907,7 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">4</span>)</span>
 <span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="do">## include another covariate</span></span>
-<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> bikes <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>yday<span class="sc">+</span>rain,<span class="at">size=</span><span class="dv">100</span>,<span class="at">decay=</span><span class="fl">0.3</span>) <span class="sc">|</span> .</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> bikes <span class="sc">~</span> <span class="fu">n</span>(<span class="sc">~</span>yday<span class="sc">+</span>rain,<span class="at">size=</span><span class="dv">100</span>,<span class="at">decay=</span><span class="fl">0.1</span>) <span class="sc">|</span> .</span>
 <span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>

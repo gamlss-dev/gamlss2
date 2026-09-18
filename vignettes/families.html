@@ -355,7 +355,7 @@ sigma.s(speed) 1.1500
 *--------
 n = 50 df =  4.59 res.df =  45.41
 Deviance = 395.9946 Null Dev. Red. = 14.99%
-AIC = 405.1673 elapsed =  0.13sec</code></pre>
+AIC = 405.1673 elapsed =  0.08sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -402,9 +402,9 @@ AIC = 405.1673 elapsed =  0.13sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        r_1       r_2
-1  15.39372  22.32749
-2  30.88334  45.32575
-3 110.28696 134.15888</code></pre>
+1  9.974337  23.18529
+2 65.095484  49.64292
+3 98.700462 138.58317</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -506,49 +506,59 @@ m          405.1673 4.586393</code></pre>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">rate =</span> <span class="dv">1</span> <span class="sc">/</span> (object<span class="sc">$</span>mu <span class="sc">*</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>))</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>pdf.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pdf</span>(<span class="fu">gamma2_base</span>(object), y, <span class="at">log =</span> log, ...)</span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>cdf.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, ...) {</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cdf</span>(<span class="fu">gamma2_base</span>(object), y, ...)</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>quantile.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, p, ...) {</span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quantile</span>(<span class="fu">gamma2_base</span>(object), p, ...)</span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>random.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, n, ...) {</span>
-<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">random</span>(<span class="fu">gamma2_base</span>(object), n, ...)</span>
-<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>mean.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, ...) object<span class="sc">$</span>mu</span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>variance.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, ...) object<span class="sc">$</span>mu<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>support.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, ...) <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">Inf</span>)</span>
-<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>score.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, which, ...) {</span>
-<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> object<span class="sc">$</span>mu</span>
-<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> object<span class="sc">$</span>sigma</span>
-<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(which <span class="sc">==</span> <span class="st">"mu"</span>)</span>
-<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>    (y <span class="sc">-</span> mu) <span class="sc">/</span> (mu<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
-<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">3</span> <span class="sc">*</span> (y <span class="sc">/</span> mu <span class="sc">-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">log</span>(y <span class="sc">/</span> (mu <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">+</span></span>
-<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">digamma</span>(<span class="dv">1</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a>hessian.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, which, <span class="at">expected =</span> <span class="cn">TRUE</span>, ...) {</span>
-<span id="cb34-39"><a href="#cb34-39" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> object<span class="sc">$</span>mu</span>
-<span id="cb34-40"><a href="#cb34-40" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> object<span class="sc">$</span>sigma</span>
-<span id="cb34-41"><a href="#cb34-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(which <span class="sc">==</span> <span class="st">"mu"</span>)</span>
-<span id="cb34-42"><a href="#cb34-42" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="sc">/</span> (mu<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb34-43"><a href="#cb34-43" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(which <span class="sc">==</span> <span class="st">"sigma"</span>)</span>
-<span id="cb34-44"><a href="#cb34-44" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">6</span> <span class="sc">*</span> (<span class="fu">trigamma</span>(<span class="dv">1</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> sigma<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb34-45"><a href="#cb34-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
-<span id="cb34-46"><a href="#cb34-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(y))</span>
-<span id="cb34-47"><a href="#cb34-47" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb34-48"><a href="#cb34-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-49"><a href="#cb34-49" aria-hidden="true" tabindex="-1"></a>fGA2 <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
-<span id="cb34-50"><a href="#cb34-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Gamma2</span>(),</span>
-<span id="cb34-51"><a href="#cb34-51" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">c</span>(<span class="at">mu =</span> <span class="st">"log"</span>, <span class="at">sigma =</span> <span class="st">"log"</span>),</span>
-<span id="cb34-52"><a href="#cb34-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">score =</span> <span class="cn">TRUE</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span></span>
-<span id="cb34-53"><a href="#cb34-53" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-54"><a href="#cb34-54" aria-hidden="true" tabindex="-1"></a>fGA2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>pdf.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, <span class="at">log =</span> <span class="cn">FALSE</span>, <span class="at">elementwise =</span> <span class="cn">FALSE</span>, ...) {</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dgamma</span>(y, <span class="at">shape =</span> <span class="dv">1</span> <span class="sc">/</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">rate =</span> <span class="dv">1</span> <span class="sc">/</span> (object<span class="sc">$</span>mu <span class="sc">*</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>), <span class="at">log =</span> log)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>log_pdf.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, <span class="at">elementwise =</span> <span class="cn">FALSE</span>, ...) {</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dgamma</span>(y, <span class="at">shape =</span> <span class="dv">1</span> <span class="sc">/</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">rate =</span> <span class="dv">1</span> <span class="sc">/</span> (object<span class="sc">$</span>mu <span class="sc">*</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>), <span class="at">log =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>cdf.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, ...) {</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cdf</span>(<span class="fu">gamma2_base</span>(object), y, ...)</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>quantile.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, p, ...) {</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quantile</span>(<span class="fu">gamma2_base</span>(object), p, ...)</span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>random.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, n, ...) {</span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">random</span>(<span class="fu">gamma2_base</span>(object), n, ...)</span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>mean.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, ...) object<span class="sc">$</span>mu</span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>variance.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, ...) object<span class="sc">$</span>mu<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> object<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>support.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, ...) <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">Inf</span>)</span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>score.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, which, ...) {</span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> object<span class="sc">$</span>mu</span>
+<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> object<span class="sc">$</span>sigma</span>
+<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(which <span class="sc">==</span> <span class="st">"mu"</span>)</span>
+<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a>    (y <span class="sc">-</span> mu) <span class="sc">/</span> (mu<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb34-39"><a href="#cb34-39" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">3</span> <span class="sc">*</span> (y <span class="sc">/</span> mu <span class="sc">-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">log</span>(y <span class="sc">/</span> (mu <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">+</span></span>
+<span id="cb34-40"><a href="#cb34-40" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">digamma</span>(<span class="dv">1</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb34-41"><a href="#cb34-41" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-42"><a href="#cb34-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-43"><a href="#cb34-43" aria-hidden="true" tabindex="-1"></a>hessian.Gamma2 <span class="ot">&lt;-</span> <span class="cf">function</span>(object, y, which, <span class="at">expected =</span> <span class="cn">TRUE</span>, ...) {</span>
+<span id="cb34-44"><a href="#cb34-44" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> object<span class="sc">$</span>mu</span>
+<span id="cb34-45"><a href="#cb34-45" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> object<span class="sc">$</span>sigma</span>
+<span id="cb34-46"><a href="#cb34-46" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(which <span class="sc">==</span> <span class="st">"mu"</span>)</span>
+<span id="cb34-47"><a href="#cb34-47" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span> <span class="sc">/</span> (mu<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb34-48"><a href="#cb34-48" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(which <span class="sc">==</span> <span class="st">"sigma"</span>)</span>
+<span id="cb34-49"><a href="#cb34-49" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">4</span> <span class="sc">-</span> <span class="dv">4</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">6</span> <span class="sc">*</span> <span class="fu">trigamma</span>(<span class="dv">1</span> <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb34-50"><a href="#cb34-50" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb34-51"><a href="#cb34-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(y))</span>
+<span id="cb34-52"><a href="#cb34-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-53"><a href="#cb34-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-54"><a href="#cb34-54" aria-hidden="true" tabindex="-1"></a>fGA2 <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
+<span id="cb34-55"><a href="#cb34-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Gamma2</span>(),</span>
+<span id="cb34-56"><a href="#cb34-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">c</span>(<span class="at">mu =</span> <span class="st">"log"</span>, <span class="at">sigma =</span> <span class="st">"log"</span>),</span>
+<span id="cb34-57"><a href="#cb34-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">score =</span> <span class="cn">TRUE</span>, <span class="at">hessian =</span> <span class="cn">TRUE</span>, <span class="at">expected =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb34-58"><a href="#cb34-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">initialize =</span> <span class="fu">list</span>(</span>
+<span id="cb34-59"><a href="#cb34-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">mu =</span> <span class="cf">function</span>(y, ...) (y <span class="sc">+</span> <span class="fu">mean</span>(y)) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb34-60"><a href="#cb34-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma =</span> <span class="cf">function</span>(y, ...) <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(y))</span>
+<span id="cb34-61"><a href="#cb34-61" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb34-62"><a href="#cb34-62" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-63"><a href="#cb34-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-64"><a href="#cb34-64" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fGA2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Family: Gamma2 
 Link functions: log, log
@@ -561,36 +571,40 @@ Derivative functions:
  .. ..$ mu
  .. ..$ sigma</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fGA2,</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">subset</span>(airquality, <span class="sc">!</span><span class="fu">is.na</span>(Ozone))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">s</span>(Temp) <span class="sc">+</span> <span class="fu">s</span>(Wind) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fGA2,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
-gamlss2(formula = dist ~ s(speed) | s(speed), data = cars, family = fGA2, 
-    trace = FALSE)
+gamlss2(formula = Ozone ~ s(Temp) + s(Wind) | s(Temp), data = air, 
+    family = fGA2, trace = FALSE)
 ---
 Family: Gamma2 
 Link functions: log, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.61983    0.04512   80.23  &lt; 2e-16 ***
-sigma.(Intercept) -1.05044    0.09764  -10.76 5.61e-14 ***
+mu.(Intercept)     3.53026    0.02105   167.7   &lt;2e-16 ***
+sigma.(Intercept) -0.99253    0.06362   -15.6   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                  edf
-mu.s(speed)    2.3912
-sigma.s(speed) 1.0000
+                 edf
+mu.s(Temp)    7.8814
+mu.s(Wind)    3.2562
+sigma.s(Temp) 7.4967
 *--------
-n = 50 df =  5.39 res.df =  44.61
-Deviance = 392.9035 Null Dev. Red. = 14.42%
-AIC = 403.6859 elapsed =  0.16sec</code></pre>
+n = 116 df =  20.63 res.df =  95.37
+Deviance = 899.7073 Null Dev. Red. = 16.93%
+AIC = 940.9758 elapsed =  0.25sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -658,7 +672,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.44 res.df =  45.56
 Deviance = 396.3302 Null Dev. Red. = 14.92%
-AIC = 405.203 elapsed =  0.03sec</code></pre>
+AIC = 405.203 elapsed =  0.02sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>

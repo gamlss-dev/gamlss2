@@ -198,9 +198,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#constructor-arguments-and-distributions3_family" id="toc-constructor-arguments-and-distributions3_family" class="nav-link" data-scroll-target="#constructor-arguments-and-distributions3_family"><span class="header-section-number">3</span> Constructor arguments and <code>distributions3_family()</code></a></li>
   <li><a href="#scores-hessians-and-updates" id="toc-scores-hessians-and-updates" class="nav-link" data-scroll-target="#scores-hessians-and-updates"><span class="header-section-number">4</span> Scores, Hessians, and updates</a></li>
   <li><a href="#numerical-completion-and-support" id="toc-numerical-completion-and-support" class="nav-link" data-scroll-target="#numerical-completion-and-support"><span class="header-section-number">5</span> Numerical completion and support</a></li>
-  <li><a href="#writing-a-family-directly" id="toc-writing-a-family-directly" class="nav-link" data-scroll-target="#writing-a-family-directly"><span class="header-section-number">6</span> Writing a family directly</a></li>
-  <li><a href="#optional-scoring-rules" id="toc-optional-scoring-rules" class="nav-link" data-scroll-target="#optional-scoring-rules"><span class="header-section-number">7</span> Optional scoring rules</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">8</span> Summary</a></li>
+  <li><a href="#standard-and-user-defined-families" id="toc-standard-and-user-defined-families" class="nav-link" data-scroll-target="#standard-and-user-defined-families"><span class="header-section-number">6</span> Standard and user-defined families</a></li>
+  <li><a href="#writing-a-family-directly" id="toc-writing-a-family-directly" class="nav-link" data-scroll-target="#writing-a-family-directly"><span class="header-section-number">7</span> Writing a family directly</a></li>
+  <li><a href="#optional-scoring-rules" id="toc-optional-scoring-rules" class="nav-link" data-scroll-target="#optional-scoring-rules"><span class="header-section-number">8</span> Optional scoring rules</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">9</span> Summary</a></li>
   </ul>
 </nav>
     </div>
@@ -256,12 +257,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2" class="anchored" data-anchor-id="bridging-a-distributions3-distribution"><span class="header-section-number">2</span> Bridging a <code>distributions3</code> distribution</h2>
 <p>The <code>family()</code> method turns a <code>distributions3</code> object into a <code>gamlss2.family</code>. The names in <code>links</code> select the parameters to model and the values specify their links.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fNormal <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fNO <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Normal</span>(),</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">c</span>(<span class="at">mu =</span> <span class="st">"identity"</span>, <span class="at">sigma =</span> <span class="st">"log"</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>fNormal</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>fNO</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Family: Normal 
 Link functions: identity, log
@@ -274,7 +275,7 @@ Derivative functions:
 </div>
 <p>The resulting object contains the family metadata as well as wrappers for <code>pdf()</code>, <code>cdf()</code>, <code>quantile()</code>, <code>random()</code>, the moments, and the log-likelihood. The distribution constructor is retained in <code>create_distribution</code>, which is used later when a fitted model is converted back to a <code>distributions3</code> object.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fNormal)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fNO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "family"              "names"               "links"              
  [4] "log_likelihood"      "mu"                  "pdf"                
@@ -283,11 +284,11 @@ Derivative functions:
 [13] "skewness"            "kurtosis"            "create_distribution"
 [16] "support"             "score"               "valid.response"     </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fNormal<span class="sc">$</span>names</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fNO<span class="sc">$</span>names</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "mu"    "sigma"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vapply</span>(fNormal<span class="sc">$</span>links, <span class="cf">function</span>(x) x<span class="sc">$</span>name, <span class="fu">character</span>(<span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vapply</span>(fNO<span class="sc">$</span>links, <span class="cf">function</span>(x) x<span class="sc">$</span>name, <span class="fu">character</span>(<span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu      sigma 
 "identity"      "log" </code></pre>
@@ -298,14 +299,14 @@ Derivative functions:
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fNormal,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fNO,</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
-gamlss2(formula = dist ~ s(speed) | s(speed), data = cars, family = fNormal, 
+gamlss2(formula = dist ~ s(speed) | s(speed), data = cars, family = fNO, 
     trace = FALSE)
 ---
 Family: Normal 
@@ -325,7 +326,7 @@ sigma.s(speed) 1.1500
 *--------
 n = 50 df =  4.59 res.df =  45.41
 Deviance = 395.9946 Null Dev. Red. = 14.99%
-AIC = 405.1673 elapsed =  0.16sec</code></pre>
+AIC = 405.1673 elapsed =  0.13sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -371,10 +372,10 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1       r_2
-1 50.08218  33.32053
-2 57.13043  50.09756
-3 98.80383 113.46189</code></pre>
+<pre><code>       r_1      r_2
+1 32.68918 25.31288
+2 60.40364 52.28658
+3 85.62922 98.97260</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -385,14 +386,14 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <h2 data-number="3" class="anchored" data-anchor-id="constructor-arguments-and-distributions3_family"><span class="header-section-number">3</span> Constructor arguments and <code>distributions3_family()</code></h2>
 <p>The lower-level <code>distributions3_family()</code> function is useful when a distribution constructor has fixed arguments that are not model parameters. For example, a binomial distribution can have a fixed number of trials while its probability is modeled.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fBinomial <span class="ot">&lt;-</span> <span class="fu">distributions3_family</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fBI <span class="ot">&lt;-</span> <span class="fu">distributions3_family</span>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Binomial"</span>,</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">c</span>(<span class="at">p =</span> <span class="st">"logit"</span>),</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">create_distribution =</span> <span class="st">"do.call"</span>,</span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">10</span></span>
 <span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>binomial_distribution <span class="ot">&lt;-</span> fBinomial<span class="sc">$</span><span class="fu">create_distribution</span>(</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>binomial_distribution <span class="ot">&lt;-</span> fBI<span class="sc">$</span><span class="fu">create_distribution</span>(</span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">p =</span> <span class="fu">rep</span>(<span class="fl">0.5</span>, <span class="dv">3</span>))</span>
 <span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>binomial_distribution</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -412,7 +413,7 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <h2 data-number="4" class="anchored" data-anchor-id="scores-hessians-and-updates"><span class="header-section-number">4</span> Scores, Hessians, and updates</h2>
 <p>For a <code>gamlss2.family</code> written by hand, <code>score()</code> and <code>hessian()</code> are functions on the linear-predictor scale. A <code>distributions3</code> score or Hessian is generally provided with respect to a distribution parameter. The bridge applies the link-function chain rule when <code>score = TRUE</code> or <code>hessian = TRUE</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fNormal <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fNO <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Normal</span>(),</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">c</span>(<span class="at">mu =</span> <span class="st">"identity"</span>, <span class="at">sigma =</span> <span class="st">"log"</span>),</span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">score =</span> <span class="cn">TRUE</span>,</span>
@@ -420,7 +421,7 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">update =</span> <span class="cn">TRUE</span></span>
 <span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fNormal[<span class="fu">c</span>(<span class="st">"score"</span>, <span class="st">"hessian"</span>, <span class="st">"update"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fNO[<span class="fu">c</span>(<span class="st">"score"</span>, <span class="st">"hessian"</span>, <span class="st">"update"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "score"   "hessian" "update" </code></pre>
 </div>
@@ -428,7 +429,7 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <p>Analytical derivatives can improve speed and numerical stability. If they are not available, <code>gamlss2</code> approximates the required derivatives numerically. Cross-derivatives can be supplied by the underlying distribution when a second-order optimizer such as <code>CG</code> can benefit from them.</p>
 <p>Flexible links are represented by <code>link-gamlss2</code> objects. When analytical score and Hessian callbacks are requested, the bridge uses derivatives from the link object. For example, the <code>softplus</code> link can be passed to the bridge after construction with <code>make.link2()</code>. In this example the derivative flags are left at their defaults, so numerical derivatives are used.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fNormal <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fNO <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Normal</span>(),</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">make.link2</span>(softplus), <span class="at">sigma =</span> <span class="st">"log"</span>)</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -438,10 +439,11 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>m_softplus <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fNormal,</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fNO,</span>
 <span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
 <span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m, m_softplus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m, m_softplus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                AIC       df
 m_softplus 405.1665 4.423648
@@ -455,13 +457,18 @@ m          405.1673 4.586393</code></pre>
 <p>These fallbacks are convenient for prototypes, but they may be expensive and need a trustworthy support. In particular, provide <code>support()</code> explicitly for shifted or truncated distributions, unusual continuous supports, and discrete families that are not counts on the nonnegative integers. Analytical CDFs and quantiles should be retained whenever possible.</p>
 <p>The <code>type</code> component should be either <code>"continuous"</code> or <code>"discrete"</code>, and <code>valid.response()</code> should reject invalid response values. The type and support are used by residual diagnostics, numerical completion, and the <code>distributions3</code> methods.</p>
 </section>
-<section id="writing-a-family-directly" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="writing-a-family-directly"><span class="header-section-number">6</span> Writing a family directly</h2>
+<section id="standard-and-user-defined-families" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="standard-and-user-defined-families"><span class="header-section-number">6</span> Standard and user-defined families</h2>
+<p>The package is being extended with distributions3-backed versions of the standard <code>gamlss.dist</code> families. These will use the familiar <code>f*</code> names, such as <code>fNO</code>, <code>fGA</code>, <code>fBI</code>, and <code>fNBI</code>, while exposing the same probability, quantile, moment, simulation, and derivative infrastructure. For these standard families, users should normally select the supplied family rather than rewrite the distribution callbacks themselves.</p>
+<p>A user-defined family is still useful for a new distribution, a modified parameterization, or specialized initialization and updating. The next section shows the minimal pattern; <code>?gamlss2.family</code> documents the family components, and <code>?family.distribution</code> documents the distributions3 bridge. In particular, the <code>score</code>, <code>hessian</code>, and optional <code>update</code> callbacks are the extension points for custom fitting behavior.</p>
+</section>
+<section id="writing-a-family-directly" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="writing-a-family-directly"><span class="header-section-number">7</span> Writing a family directly</h2>
 <p>When no suitable <code>distributions3</code> distribution exists, a family can be written as a classed list. The following is a compact normal family with analytical probability and moment methods. The <code>random()</code> signature is <code>random(par, n)</code>, matching the <code>gamlss2.family</code> interface.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fNormal <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>, <span class="at">sigma.link =</span> <span class="st">"log"</span>) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>my_normal_family <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>, <span class="at">sigma.link =</span> <span class="st">"log"</span>) {</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="st">"fNormal"</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="st">"my_normal_family"</span>,</span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>),</span>
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">links =</span> <span class="fu">list</span>(<span class="at">mu =</span> mu.link, <span class="at">sigma =</span> sigma.link),</span>
 <span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pdf =</span> <span class="cf">function</span>(par, y, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
@@ -486,20 +493,22 @@ m          405.1673 4.586393</code></pre>
 <span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>  fam</span>
 <span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
-<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
-<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fNormal,</span>
-<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>my_family <span class="ot">&lt;-</span> <span class="fu">my_normal_family</span>()</span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> my_family,</span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
-gamlss2(formula = dist ~ s(speed) | s(speed), data = cars, family = fNormal, 
+gamlss2(formula = dist ~ s(speed) | s(speed), data = cars, family = my_family, 
     trace = FALSE)
 ---
-Family: fNormal 
+Family: my_normal_family 
 Link functions: identity, log
 *--------
 Coefficients:
@@ -536,12 +545,12 @@ AIC = 405.203 elapsed =  0.08sec</code></pre>
 <span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The Hessian entries are the negative of the expected second derivatives on the predictor scale. An optional <code>update(par, y, eta, which)</code> function can provide a specialized Newton/Fisher-scoring update returning <code>list(eta, weights)</code>.</p>
 </section>
-<section id="optional-scoring-rules" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="optional-scoring-rules"><span class="header-section-number">7</span> Optional scoring rules</h2>
+<section id="optional-scoring-rules" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="optional-scoring-rules"><span class="header-section-number">8</span> Optional scoring rules</h2>
 <p>The distributions3 bridge also exposes a <code>crps()</code> callback when the optional <code>scoringRules</code> package is available. This is useful for probabilistic forecast evaluation, but it is not needed for fitting, prediction, or the basic family</p>
 </section>
-<section id="summary" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="summary"><span class="header-section-number">8</span> Summary</h2>
+<section id="summary" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="summary"><span class="header-section-number">9</span> Summary</h2>
 <p>Use the <code>distributions3</code> bridge when the response distribution already has a <code>distributions3</code> implementation. It provides a consistent probability and moment interface and handles link-scale derivative transformations. Use a manual <code>gamlss2.family</code> when a distribution needs custom density, derivative, support, initialization, or optimization logic. In either case, a good family should provide reliable support information and analytical distributional methods whenever practical.</p>
 
 

@@ -21,6 +21,9 @@ tree <- function(formula, ...)
 ## tree fitting function for the backfitting algorithm.
 special_fit.tree <- function(x, z, w, y, eta, j, family, control, ...)
 {
+  wscale <- mean(w, na.rm = TRUE)
+  if(is.finite(wscale) && wscale > 0)
+    w <- w / wscale
   f <- update(x$formula, response_z ~ .)
   x$data$response_z <- z
   x$data$w <- w
@@ -76,6 +79,9 @@ cf <- function(formula, ...)
 ## The fitting function for the backfitting algorithm.
 special_fit.cf <- function(x, z, w, y, eta, j, family, control, ...)
 {
+  wscale <- mean(w, na.rm = TRUE)
+  if(is.finite(wscale) && wscale > 0)
+    w <- w / wscale
   f <- update(x$formula, response_z ~ .)
   x$data$response_z <- z
   rval <- list(
@@ -134,6 +140,9 @@ ct <- function(formula, ...)
 
 special_fit.ct <- function(x, z, w, y, eta, j, family, control, ...)
 {
+  wscale <- mean(w, na.rm = TRUE)
+  if(is.finite(wscale) && wscale > 0)
+    w <- w / wscale
   f <- update(x$formula, response_z ~ .)
   x$data$response_z <- z
   x$data$w <- w

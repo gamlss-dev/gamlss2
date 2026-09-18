@@ -640,6 +640,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               }
 
+              first.special <- !isTRUE(sfit[[j]][[k]]$selected)
               ## Step length control.
               if(step[[j]]$sterms[k] < 1) {
                 if(iter[1L] > 0 | iter[2L] > 0) {
@@ -690,8 +691,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
               accept.update <- if(pen.update) {
                 accept.pen
+              } else if(first.special) {
+                ## Keep the first valid special fit as the starting value.
+                is.finite(ll1) && all(is.finite(fs$fitted.values))
               } else {
-                is.finite(ll1) && ll1 > ll02
+                tolerance <- sqrt(.Machine$double.eps) *
+                  (1 + abs(ll02))
+                is.finite(ll1) && ll1 >= ll02 - tolerance
               }
               if(accept.update) {
                 ## Update predictor.

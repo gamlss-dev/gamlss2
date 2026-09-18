@@ -70,12 +70,12 @@ The `family()` method turns a `distributions3` object into a
 values specify their links.
 
 ```{r}
-fNormal <- family(
+fNO <- family(
   Normal(),
   links = c(mu = "identity", sigma = "log")
 )
 
-fNormal
+fNO
 ```
 
 The resulting object contains the family metadata as well as wrappers for
@@ -84,9 +84,9 @@ The distribution constructor is retained in `create_distribution`, which is
 used later when a fitted model is converted back to a `distributions3` object.
 
 ```{r}
-names(fNormal)
-fNormal$names
-vapply(fNormal$links, function(x) x$name, character(1))
+names(fNO)
+fNO$names
+vapply(fNO$links, function(x) x$name, character(1))
 ```
 
 The bridge result can now be used like any other family. This example uses the
@@ -97,7 +97,7 @@ to vary with speed.
 m <- gamlss2(
   dist ~ s(speed) | s(speed),
   data = cars,
-  family = fNormal,
+  family = fNO,
   trace = FALSE
 )
 
@@ -141,14 +141,14 @@ For example, a binomial distribution can have a fixed number of trials while
 its probability is modeled.
 
 ```{r}
-fBinomial <- distributions3_family(
+fBI <- distributions3_family(
   "Binomial",
   links = c(p = "logit"),
   create_distribution = "do.call",
   size = 10
 )
 
-binomial_distribution <- fBinomial$create_distribution(
+binomial_distribution <- fBI$create_distribution(
   list(p = rep(0.5, 3))
 )
 binomial_distribution
@@ -173,7 +173,7 @@ provided with respect to a distribution parameter. The bridge applies the
 link-function chain rule when `score = TRUE` or `hessian = TRUE`.
 
 ```{r}
-fNormal <- family(
+fNO <- family(
   Normal(),
   links = c(mu = "identity", sigma = "log"),
   score = TRUE,
@@ -181,7 +181,7 @@ fNormal <- family(
   update = TRUE
 )
 
-names(fNormal[c("score", "hessian", "update")])
+names(fNO[c("score", "hessian", "update")])
 ```
 
 Analytical derivatives can improve speed and numerical stability. If they are
@@ -197,7 +197,7 @@ are left at their defaults, so numerical derivatives are used.
 
 
 ```{r}
-fNormal <- family(
+fNO <- family(
   Normal(),
   links = list(mu = make.link2(softplus), sigma = "log")
 )
@@ -207,9 +207,10 @@ fNormal <- family(
 m_softplus <- gamlss2(
   dist ~ s(speed) | s(speed),
   data = cars,
-  family = fNormal,
+  family = fNO,
   trace = FALSE
 )
+
 AIC(m, m_softplus)
 ```
 
@@ -231,6 +232,22 @@ The `type` component should be either `"continuous"` or `"discrete"`, and
 are used by residual diagnostics, numerical completion, and the
 `distributions3` methods.
 
+## Standard and user-defined families
+
+The package is being extended with distributions3-backed versions of the
+standard `gamlss.dist` families. These will use the familiar `f*` names, such
+as `fNO`, `fGA`, `fBI`, and `fNBI`, while exposing the same probability,
+quantile, moment, simulation, and derivative infrastructure. For these standard
+families, users should normally select the supplied family rather than rewrite
+the distribution callbacks themselves.
+
+A user-defined family is still useful for a new distribution, a modified
+parameterization, or specialized initialization and updating. The next section
+shows the minimal pattern; `?gamlss2.family` documents the family components,
+and `?family.distribution` documents the distributions3 bridge. In particular,
+the `score`, `hessian`, and optional `update` callbacks are the extension points
+for custom fitting behavior.
+
 ## Writing a family directly
 
 When no suitable `distributions3` distribution exists, a family can be written
@@ -239,9 +256,9 @@ probability and moment methods. The `random()` signature is
 `random(par, n)`, matching the `gamlss2.family` interface.
 
 ```{r}
-fNormal <- function(mu.link = "identity", sigma.link = "log") {
+my_normal_family <- function(mu.link = "identity", sigma.link = "log") {
   fam <- list(
-    family = "fNormal",
+    family = "my_normal_family",
     names = c("mu", "sigma"),
     links = list(mu = mu.link, sigma = sigma.link),
     pdf = function(par, y, log = FALSE, ...) {
@@ -266,10 +283,12 @@ fNormal <- function(mu.link = "identity", sigma.link = "log") {
   fam
 }
 
+my_family <- my_normal_family()
+
 m <- gamlss2(
   dist ~ s(speed) | s(speed),
   data = cars,
-  family = fNormal,
+  family = my_family,
   trace = FALSE
 )
 
@@ -316,3 +335,4 @@ manual `gamlss2.family` when a distribution needs custom density, derivative,
 support, initialization, or optimization logic. In either case, a good family
 should provide reliable support information and analytical distributional
 methods whenever practical.
+

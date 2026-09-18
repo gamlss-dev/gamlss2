@@ -21,6 +21,8 @@ SEXP calc_ncv_lag(SEXP, SEXP, SEXP, SEXP);
 SEXP calc_ncv_lag_gradient(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP im_conv_same(SEXP, SEXP, SEXP);
 SEXP im_conv_gradient(SEXP, SEXP, SEXP, SEXP);
+SEXP im_pool(SEXP, SEXP);
+SEXP im_pool_back(SEXP, SEXP, SEXP);
 
 static R_CallMethodDef callMethods[] = {
   {"calc_Xe", (DL_FUNC) &calc_Xe, 6},
@@ -40,6 +42,8 @@ static R_CallMethodDef callMethods[] = {
   {"calc_ncv_lag_gradient", (DL_FUNC) &calc_ncv_lag_gradient, 7},
   {"im_conv_same", (DL_FUNC) &im_conv_same, 3},
   {"im_conv_gradient", (DL_FUNC) &im_conv_gradient, 4},
+  {"im_pool", (DL_FUNC) &im_pool, 2},
+  {"im_pool_back", (DL_FUNC) &im_pool_back, 3},
   {NULL, NULL, 0}
 };
 

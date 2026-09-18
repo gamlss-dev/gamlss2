@@ -1607,3 +1607,84 @@ SEXP im_conv_gradient(SEXP XP, SEXP dZ, SEXP K, SEXP decay)
   UNPROTECT(5);
   return ans;
 }
+
+
+/* Spatial-pyramid mean pooling. */
+SEXP im_pool(SEXP A, SEXP pool)
+{
+  SEXP ad = getAttrib(A, R_DimSymbol);
+  int n = INTEGER(ad)[0], H = INTEGER(ad)[1], W = INTEGER(ad)[2], F = INTEGER(ad)[3];
+  int ng = length(pool), regions = 0;
+  int *pg = INTEGER(pool);
+  for(int q = 0; q < ng; ++q) regions += pg[q] * pg[q];
+  SEXP P;
+  PROTECT(P = allocMatrix(REALSXP, n, regions * F));
+  double *a = REAL(A), *p = REAL(P);
+  int col = 0;
+  for(int q = 0; q < ng; ++q) {
+    int g = pg[q];
+    for(int ir = 0; ir < g; ++ir) {
+      int rs = (int) floor((double)ir * H / g);
+      int re = (int) floor((double)(ir + 1) * H / g) - 1;
+      for(int ic = 0; ic < g; ++ic) {
+        int cs = (int) floor((double)ic * W / g);
+        int ce = (int) floor((double)(ic + 1) * W / g) - 1;
+        int area = (re - rs + 1) * (ce - cs + 1);
+        for(int ff = 0; ff < F; ++ff) {
+          for(int ii = 0; ii < n; ++ii) {
+            double sum = 0.0;
+            for(int ww = cs; ww <= ce; ++ww)
+              for(int hh = rs; hh <= re; ++hh) {
+                R_xlen_t ai = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * ff));
+                sum += a[ai];
+              }
+            p[ii + (R_xlen_t)n * col] = sum / area;
+          }
+          ++col;
+        }
+      }
+    }
+  }
+  UNPROTECT(1);
+  return P;
+}
+
+/* Backpropagation through spatial-pyramid mean pooling. */
+SEXP im_pool_back(SEXP dP, SEXP activation_dim, SEXP pool)
+{
+  int n = INTEGER(activation_dim)[0], H = INTEGER(activation_dim)[1];
+  int W = INTEGER(activation_dim)[2], F = INTEGER(activation_dim)[3];
+  int ng = length(pool);
+  int *pg = INTEGER(pool);
+  SEXP dA, adim;
+  PROTECT(dA = allocVector(REALSXP, (R_xlen_t)n * H * W * F));
+  PROTECT(adim = allocVector(INTSXP, 4));
+  INTEGER(adim)[0] = n; INTEGER(adim)[1] = H; INTEGER(adim)[2] = W; INTEGER(adim)[3] = F;
+  setAttrib(dA, R_DimSymbol, adim);
+  double *out = REAL(dA), *dp = REAL(dP);
+  memset(out, 0, sizeof(double) * (R_xlen_t)n * H * W * F);
+  int col = 0;
+  for(int q = 0; q < ng; ++q) {
+    int g = pg[q];
+    for(int ir = 0; ir < g; ++ir) {
+      int rs = (int) floor((double)ir * H / g);
+      int re = (int) floor((double)(ir + 1) * H / g) - 1;
+      for(int ic = 0; ic < g; ++ic) {
+        int cs = (int) floor((double)ic * W / g);
+        int ce = (int) floor((double)(ic + 1) * W / g) - 1;
+        int area = (re - rs + 1) * (ce - cs + 1);
+        for(int ff = 0; ff < F; ++ff) {
+          for(int ww = cs; ww <= ce; ++ww)
+            for(int hh = rs; hh <= re; ++hh)
+              for(int ii = 0; ii < n; ++ii) {
+                R_xlen_t oi = ii + (R_xlen_t)n * (hh + (R_xlen_t)H * (ww + (R_xlen_t)W * ff));
+                out[oi] += dp[ii + (R_xlen_t)n * col] / area;
+              }
+          ++col;
+        }
+      }
+    }
+  }
+  UNPROTECT(2);
+  return dA;
+}

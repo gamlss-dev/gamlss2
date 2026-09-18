@@ -343,19 +343,19 @@ Link functions: identity, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      42.962      1.699   25.28   &lt;2e-16 ***
-sigma.(Intercept)    2.541      0.100   25.41   &lt;2e-16 ***
+mu.(Intercept)      42.956      1.710   25.12   &lt;2e-16 ***
+sigma.(Intercept)    2.544      0.100   25.44   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                   edf
 mu.s(speed)    1.4364
-sigma.s(speed) 1.1500
+sigma.s(speed) 1.0000
 *--------
-n = 50 df =  4.59 res.df =  45.41
-Deviance = 395.9946 Null Dev. Red. = 14.99%
-AIC = 405.1673 elapsed =  0.16sec</code></pre>
+n = 50 df =  4.44 res.df =  45.56
+Deviance = 396.3244 Null Dev. Red. = 14.92%
+AIC = 405.1972 elapsed =  0.07sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -365,9 +365,9 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>d</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                   1                                    2 
-"Normal(mu =  21.28, sigma = 10.02)" "Normal(mu =  50.62, sigma = 15.50)" 
+"Normal(mu =  21.27, sigma = 10.08)" "Normal(mu =  50.61, sigma = 15.54)" 
                                    3 
-"Normal(mu = 100.84, sigma = 22.67)" </code></pre>
+"Normal(mu = 100.84, sigma = 23.97)" </code></pre>
 </div>
 </div>
 <p>All ordinary <code>distributions3</code> methods can then be used. The <code>elementwise</code> argument controls whether a vector of probabilities is paired with the distribution vector or expanded to all distribution-probability combinations.</p>
@@ -375,36 +375,36 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3 
- 21.27702  50.61954 100.84188 </code></pre>
+ 21.27111  50.61364 100.83597 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">variance</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
-100.3364 240.2381 514.0178 </code></pre>
+101.5666 241.5775 574.5950 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cdf</span>(d, <span class="dv">50</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3 
-0.99793122 0.48405794 0.01246453 </code></pre>
+0.99781848 0.48425362 0.01697128 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>), <span class="at">elementwise =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      q_0.1     q_0.5     q_0.9
-1  8.439964  21.27702  34.11407
-2 30.755986  50.61954  70.48310
-3 71.786589 100.84188 129.89716</code></pre>
+1  8.355606  21.27111  34.18662
+2 30.694785  50.61364  70.53249
+3 70.116267 100.83597 131.55567</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>), <span class="at">elementwise =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3 
-  8.439964  50.619542 129.897162 </code></pre>
+  8.355606  50.613637 131.555670 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1      r_2
-1  26.0913 20.66053
-2  38.4059 47.41951
-3 124.7346 87.37035</code></pre>
+<pre><code>        r_1      r_2
+1  27.90773 16.84153
+2  49.89774 52.01643
+3 122.58989 97.46479</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -475,8 +475,8 @@ AIC = 405.1673 elapsed =  0.16sec</code></pre>
 <span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m, m_softplus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                AIC       df
-m_softplus 405.1665 4.423648
-m          405.1673 4.586393</code></pre>
+m_softplus 405.1959 4.435505
+m          405.1972 4.436367</code></pre>
 </div>
 </div>
 </section>
@@ -592,19 +592,19 @@ Link functions: log, log
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
 mu.(Intercept)     3.53026    0.02105   167.7   &lt;2e-16 ***
-sigma.(Intercept) -0.99253    0.06362   -15.6   &lt;2e-16 ***
+sigma.(Intercept) -0.99255    0.06362   -15.6   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                  edf
 mu.s(Temp)    7.8814
-mu.s(Wind)    3.2562
-sigma.s(Temp) 7.4967
+mu.s(Wind)    3.2564
+sigma.s(Temp) 7.4969
 *--------
 n = 116 df =  20.63 res.df =  95.37
-Deviance = 899.7073 Null Dev. Red. = 16.93%
-AIC = 940.9758 elapsed =  0.46sec</code></pre>
+Deviance = 899.7046 Null Dev. Red. = 16.93%
+AIC = 940.974 elapsed =  0.48sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -660,7 +660,7 @@ Link functions: identity, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      42.956      1.717   25.02   &lt;2e-16 ***
+mu.(Intercept)      42.956      1.710   25.12   &lt;2e-16 ***
 sigma.(Intercept)    2.544      0.100   25.44   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -671,8 +671,8 @@ mu.s(speed)    1.4364
 sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.44 res.df =  45.56
-Deviance = 396.3302 Null Dev. Red. = 14.92%
-AIC = 405.203 elapsed =  0.03sec</code></pre>
+Deviance = 396.3244 Null Dev. Red. = 14.92%
+AIC = 405.1972 elapsed =  0.04sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>

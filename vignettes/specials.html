@@ -234,20 +234,20 @@ Link functions: log, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.53962    0.06069   58.32   &lt;2e-16 ***
+mu.(Intercept)     3.53961    0.06070   58.32   &lt;2e-16 ***
 sigma.(Intercept) -0.90892    0.07013  -12.96   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                          edf
-mu.s(Wind)            2.6569
-mu.lo(~Temp,span=0.7) 5.7278
-sigma.s(Temp)         6.3893
+mu.s(Wind)            2.6570
+mu.lo(~Temp,span=0.7) 5.7304
+sigma.s(Temp)         6.3894
 *--------
-n = 116 df =  16.77 res.df =  99.23
-Deviance = 919.5897 Null Dev. Red. = 15.09%
-AIC = 953.1376 elapsed =  0.24sec</code></pre>
+n = 116 df =  16.78 res.df =  99.22
+Deviance = 919.5898 Null Dev. Red. = 15.09%
+AIC = 953.1434 elapsed =  0.24sec</code></pre>
 </div>
 </div>
 <p>Specials can occur in any distributional parameter formula. They are refitted from the current working response and weights at each backfitting iteration, then centered before being added to the additive predictor. Centering keeps the intercept and the special term identifiable.</p>
@@ -338,28 +338,28 @@ Link functions: log, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      3.5583     0.1316  27.037  &lt; 2e-16 ***
-sigma.(Intercept)  -0.8380     0.1329  -6.304 7.34e-09 ***
+mu.(Intercept)      3.5583     0.1318  26.991  &lt; 2e-16 ***
+sigma.(Intercept)  -0.8380     0.1332  -6.293 7.72e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                            edf
 mu.user(~Temp,span=0.7) 5.7744
-sigma.s(Temp)           5.3134
+sigma.s(Temp)           5.3016
 *--------
-n = 116 df =  13.09 res.df =  102.91
+n = 116 df =  13.08 res.df =  102.92
 Deviance = 937.2835 Null Dev. Red. = 13.46%
-AIC = 963.4592 elapsed =  0.07sec</code></pre>
+AIC = 963.4356 elapsed =  0.08sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 19.02713 0.4428808
-2 18.90507 0.4778669
-3 19.69725 0.4732566
-4 16.36870 0.5741117
-6 18.99758 0.4413062</code></pre>
+1 19.02713 0.4428853
+2 18.90507 0.4778664
+3 19.69725 0.4732645
+4 16.36870 0.5741229
+6 18.99758 0.4413144</code></pre>
 </div>
 </div>
 </section>

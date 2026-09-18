@@ -750,12 +750,12 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration  1: Global Deviance = 405.1865 eps = 0.130151     
-GAMLSS-RS iteration  2: Global Deviance = 405.1651 eps = 0.000052     
-GAMLSS-RS iteration  3: Global Deviance = 405.1589 eps = 0.000015     
-GAMLSS-RS iteration  4: Global Deviance = 405.1536 eps = 0.000013     
-GAMLSS-RS iteration  5: Global Deviance = 405.1488 eps = 0.000011     
-GAMLSS-RS iteration  6: Global Deviance = 405.1445 eps = 0.000010     
-GAMLSS-RS iteration  7: Global Deviance = 405.1413 eps = 0.000007     </code></pre>
+GAMLSS-RS iteration  2: Global Deviance = 405.1583 eps = 0.000069     
+GAMLSS-RS iteration  3: Global Deviance = 405.1483 eps = 0.000024     
+GAMLSS-RS iteration  4: Global Deviance = 405.1402 eps = 0.000020     
+GAMLSS-RS iteration  5: Global Deviance = 405.1339 eps = 0.000015     
+GAMLSS-RS iteration  6: Global Deviance = 405.129 eps = 0.000011     
+GAMLSS-RS iteration  7: Global Deviance = 405.1254 eps = 0.000008     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## new data for predictions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
@@ -764,83 +764,83 @@ GAMLSS-RS iteration  7: Global Deviance = 405.1413 eps = 0.000007     </code></p
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 23.00866  9.965766
-2 59.23724 18.418432
-3 97.32174 31.940801</code></pre>
+1 23.03061  9.952436
+2 59.15801 18.432353
+3 97.13012 31.980156</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
-1 23.00866 2.299156
-2 59.23724 2.913352
-3 97.32174 3.463884</code></pre>
+1 23.03061 2.297817
+2 59.15801 2.914107
+3 97.13012 3.465116</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
-23.00866 59.23724 97.32174 </code></pre>
+23.03061 59.15801 97.13012 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3 
- 9.965766 18.418432 31.940801 </code></pre>
+ 9.952436 18.432353 31.980156 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      sigma
-1  9.965766
-2 18.418432
-3 31.940801</code></pre>
+1  9.952436
+2 18.432353
+3 31.980156</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  (Intercept)   s(speed)
-1    2.632477 -0.3333216
-2    2.632477  0.2808746
-3    2.632477  0.8314069</code></pre>
+1    2.632325 -0.3345073
+2    2.632325  0.2817828
+3    2.632325  0.8327909</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    s(speed)
-1 -0.3333216
-2  0.2808746
-3  0.8314069</code></pre>
+1 -0.3345073
+2  0.2817828
+3  0.8327909</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict quantiles</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       10%      50%       90%
-1 10.23702 23.00866  35.78031
-2 35.63307 59.23724  82.84141
-3 56.38796 97.32174 138.25552</code></pre>
+1 10.27605 23.03061  35.78517
+2 35.53600 59.15801  82.78002
+3 56.14590 97.13012 138.11434</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    mu.fit    mu.se sigma.fit  sigma.se
-1 23.00866 1.910886  10.08677  1.585793
-2 59.23724 3.446881  18.66670  3.093204
-3 97.32174 9.563979  34.39599 13.650238</code></pre>
+1 23.03061 1.905441  10.07295  1.581378
+2 59.15801 3.448490  18.68117  3.097985
+3 97.13012 9.551415  34.44905 13.699669</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fast pointwise confidence bands, without sampling</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">level =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.95</span>))</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>lower[[<span class="st">"80%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 20.43551  8.100358
-2 54.77453 15.269989
-3 85.84821 19.149647</code></pre>
+1 20.46452  8.091853
+2 54.69199 15.279556
+3 85.66850 19.141138</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>upper[[<span class="st">"95%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mu    sigma
-1  26.94397 13.68244
-2  66.06236 24.53378
-3 114.86899 69.84712</code></pre>
+1  26.95511 13.65813
+2  65.98819 24.55718
+3 114.65916 70.11264</code></pre>
 </div>
 </div>
 

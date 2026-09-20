@@ -123,6 +123,8 @@ website:
               file: man/ALD.qmd
             - text: discretize
               file: man/discretize.qmd
+            - text: distribution_modifiers
+              file: man/distribution_modifiers.qmd
             - text: family.distribution
               file: man/family.distribution.qmd
             - text: find_family

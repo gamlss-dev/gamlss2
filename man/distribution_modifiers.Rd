@@ -101,14 +101,14 @@ round_family(family = NO, digits = 0L)
 \details{
   For a fixed monotone transformation \eqn{Y = g(X)},
   \code{transform_family} uses
-  \deqn{\log f_Y(y) = \log f_X(g^{-1}(y)) +
-    \log |d g^{-1}(y) / dy|.}
+  \deqn{\log f_Y(y) = \log f_X(g^{-1}(y)) + \log |d g^{-1}(y) / dy|.}
   Base-family parameter scores, Hessians, and optimized updates can therefore
   be evaluated directly at the inverse-transformed response. Increasing and
   decreasing transformations are supported. The convenience function
-  \code{logit_family} constructs the logistic push-forward, which has strict
-  support \eqn{0 < Y < 1}. Exact zeros and ones are not valid observations for
-  this continuous transformation.
+  \code{logit_family} constructs the logistic push-forward,
+  which has strict support \eqn{0 < Y < 1}.
+  Exact zeros and ones are not valid observations for this
+  continuous transformation.
 
   The function \code{truncate_family} conditions the base distribution on
   the interval selected by \code{lower}, \code{upper}, and \code{include}.
@@ -124,14 +124,12 @@ round_family(family = NO, digits = 0L)
   Natural base-distribution mass at an inflation point is retained. The
   appended parameters \code{pi1}, \code{pi2}, and so on have log links and
   represent positive odds \eqn{w_j} relative to the base component. Thus,
-  \deqn{\pi_0 = \frac{1}{1 + \sum_j w_j}, \qquad
-    \pi_j = \frac{w_j}{1 + \sum_\ell w_\ell}.}
+  \deqn{\pi_0 = \frac{1}{1 + \sum_j w_j}, \qquad \pi_j = \frac{w_j}{1 + \sum_\ell w_\ell}.}
   This is the baseline-odds parameterization also used by
   \code{\link{mixture_family}}. Quantiles account for every probability jump.
 
   The function \code{hurdle_family} instead constructs
-  \deqn{F(y) = \pi_1 I(c \le y) +
-    \pi_0 F_0(y \mid X \ne c).}
+  \deqn{F(y) = \pi_1 I(c \le y) + \pi_0 F_0(y \mid X \ne c).}
   Hence, the hurdle probability is the complete mass at \eqn{c}, including
   when the base distribution already assigns positive mass to that point.
 
@@ -170,8 +168,7 @@ round_family(family = NO, digits = 0L)
   \code{\link{mixture_family}}, \code{\link{distributions3_family}}
 }
 
-\examples{
-## simulate data
+\examples{\dontrun{## simulate data
 set.seed(6020)
 n <- 300
 x <- sort(runif(n, -3, 3))
@@ -240,7 +237,7 @@ y <- fam$random(list(mu = sin(x), sigma = exp(-1 + cos(x))), n)
 m <- gamlss2(y ~ s(x) | s(x), family = fam)
 plot(m)
 plot(m, which = "resid")
-}
+}}
 
 \keyword{distribution}
 \keyword{models}

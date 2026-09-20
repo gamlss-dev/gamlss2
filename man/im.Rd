@@ -106,7 +106,7 @@ truth <- truth / max(truth)
 d <- data.frame(y = vapply(seq_len(n), function(i) {
   amplitude[i] * mean(truth[locations$row[i]:(locations$row[i] + 2),
     locations$col[i]:(locations$col[i] + 2)])
-}, numeric(1)) + rnorm(n, sd = 0.2))
+}, 0) + rnorm(n, sd = 0.2))
 image(images[1, , ], col = hcl.colors(20, "Inferno"),
   main = "Example image")
 d$image <- I(matrix(images, nrow = n))

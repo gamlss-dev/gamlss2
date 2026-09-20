@@ -1894,7 +1894,7 @@ make_numeric_quantile <- function(cdf, support, type, pdf = NULL)
   attr(quantile, "qnum") <- TRUE
   quantile
 }
-## Add a deterministic numerical quantile when the CDF and support are
+## Deterministic numerical quantile when the CDF and support are
 ## available. Existing analytical quantile functions are retained.
 complete_family_quantile <- function(family)
 {
@@ -2008,10 +2008,6 @@ make_numeric_continuous_moment <- function(pdf, support, center = NULL,
         ans
       }
 
-      ## Splitting an infinite interval near its probability mass prevents
-      ## integrate() from missing a density located far from zero. Prefer an
-      ## analytical median, then a known mean, and finally ordinary support
-      ## and parameter anchors.
       anchor <- NA_real_
       if(is.function(quantile) &&
           !isTRUE(attr(quantile, "qnum", exact = TRUE))) {
@@ -2090,9 +2086,6 @@ make_numeric_continuous_moment <- function(pdf, support, center = NULL,
 
       value[i] <- integrate_one(integrand)
 
-      ## A signed first-moment integral can appear finite through cancellation
-      ## even when the expectation does not exist (for example, a Cauchy
-      ## density). Verify absolute integrability whenever support crosses zero.
       if(is.null(centers) && lo < 0 && hi > 0)
         integrate_one(function(z) abs(z) * density(z))
     }
@@ -2109,8 +2102,7 @@ make_numeric_continuous_moment <- function(pdf, support, center = NULL,
   moment
 }
 
-## Numerically sum count moments in batches. Variance uses a weighted online
-## update, avoiding cancellation in E[X^2] - E[X]^2.
+## Numerically sum count moments in batches.
 make_numeric_count_moment <- function(pdf, support, second = FALSE)
 {
   force(pdf)
@@ -2273,7 +2265,7 @@ make_numeric_count_moment <- function(pdf, support, second = FALSE)
   moment
 }
 
-## Add numerical mean and variance functions without replacing analytical
+## Numerical mean and variance functions without replacing analytical
 ## implementations.
 complete_family_moments <- function(family)
 {
@@ -2375,7 +2367,7 @@ complete_family <- function(family, .links = NULL)
   if(inherits(family, "gamlss.family")) {
     ## The generated family functions are costly to byte-compile. Cache only
     ## zero-argument constructors bound under their family name in a locked
-    ## package namespace; user closures and modified family objects must retain
+    ## package namespace, user closures and modified family objects must retain
     ## their existing per-call semantics.
     cache_key <- NULL
     if(!is.null(family_constructor)) {
@@ -2804,9 +2796,9 @@ Weibull <- function(...)
 
 ## From VGAM.
 is.Numeric <- function (x, length.arg = Inf, integer.valued = FALSE, positive = FALSE) {
-  if (all(is.numeric(x)) && all(is.finite(x)) && (if (is.finite(length.arg)) length(x) == 
-    length.arg else TRUE) && (if (integer.valued) all(x == round(x)) else TRUE) && 
-    (if (positive) all(x > 0) else TRUE)) TRUE else FALSE
+  if(all(is.numeric(x)) && all(is.finite(x)) && (if(is.finite(length.arg)) length(x) == 
+    length.arg else TRUE) && (if(integer.valued) all(x == round(x)) else TRUE) && 
+    (if(positive) all(x > 0) else TRUE)) TRUE else FALSE
 }
 
 ## Yeo-Johnson transform family. From VGAM.
@@ -2938,7 +2930,7 @@ get_y_bd <- function(Y) {
     }
     bd <- Y[,1] + Y[,2]
     y <-  Y[,1]
-    if (any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
+    if(any(y < 0 | y > bd)) stop("y values must be 0 <= y <= N") # MS Monday, October 17, 2005 
   } else {
     stop(paste("For the binomial family, Y must be", 
       "a vector of 0 and 1's or a 2 column", "matrix where col 1 is no. successes", 
@@ -3955,3 +3947,4 @@ rqres_mn <- function(object, ...) {
   u <- stats::runif(n, min = lower, max = upper)
   stats::qnorm(u)
 }
+

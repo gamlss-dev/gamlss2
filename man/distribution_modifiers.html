@@ -181,6 +181,10 @@ window.Quarto = {
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/modifiers.html">
+ <span class="dropdown-text">Distribution modifiers</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
  <span class="dropdown-text">Specials</span></a>
   </li>  
@@ -757,7 +761,7 @@ round_family(family = NO, digits = 0L)
 <code id="lower">lower</code>, <code id="upper">upper</code>
 </td>
 <td>
-<p>Fixed scalar lower and upper truncation or censoring boundaries.</p>
+<p>Fixed scalar lower and upper truncation or censoring boundaries. For <code>censor_family()</code>, leaving both at their infinite defaults constructs an observation-specific right-censored family for a <code>Surv</code> response.</p>
 </td>
 </tr>
 <tr>
@@ -816,10 +820,10 @@ round_family(family = NO, digits = 0L)
 <p style="text-align: center;">
 </p><p><span class="math inline">\(\log f_Y(y) = \log f_X(g^{-1}(y)) + \log |d g^{-1}(y) / dy|.\)</span></p>
 <p>Base-family parameter scores, Hessians, and optimized updates can therefore be evaluated directly at the inverse-transformed response. Increasing and decreasing transformations are supported. The convenience function <code>logit_family</code> constructs the logistic push-forward, which has strict support <span class="math inline">\(0 &amp;lt; Y &lt; 1\)</span>. Exact zeros and ones are not valid observations for this continuous transformation.</p>
-<p>The function <code>truncate_family</code> conditions the base distribution on the interval selected by <code>lower</code>, <code>upper</code>, and <code>include</code>. Its density or probability mass is divided by the probability of the retained interval. In contrast, <code>censor_family</code> observes</p>
+<p>The function <code>truncate_family</code> conditions the base distribution on the interval selected by <code>lower</code>, <code>upper</code>, and <code>include</code>. Its density or probability mass is divided by the probability of the retained interval. With at least one finite boundary, <code>censor_family</code> observes</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(Y = \min(\max(X, lower), upper)\)</span></p>
-<p>and consequently creates point masses at finite censoring boundaries. Truncation and censoring reuse base-family derivatives where possible and differentiate only the additional probability terms.</p>
+<p>and consequently creates point masses at finite censoring boundaries. With both boundaries left infinite, it instead accepts a right-censored <code>survival::Surv(time, status)</code> response. An observed event contributes the base density or mass at <code>time</code>; a censored observation contributes the base survival probability beyond <code>time</code>. Truncation and censoring reuse base-family derivatives where possible and differentiate only the additional probability terms.</p>
 <p>For inflation points <span class="math inline">\(c_j\)</span>, <code>inflate_family</code> constructs</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(F(y) = \pi_0 F_0(y) + \sum_j \pi_j I(c_j \le y).\)</span></p>

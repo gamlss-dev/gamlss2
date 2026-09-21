@@ -203,6 +203,10 @@ window.Quarto = {
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/modifiers.html">
+ <span class="dropdown-text">Distribution modifiers</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
  <span class="dropdown-text">Specials</span></a>
   </li>  
@@ -362,7 +366,7 @@ sigma.s(yday)  5.092
 *--------
 n = 1057 df =  23.21 res.df =  1033.79
 Deviance = 10101.1641 Null Dev. Red. = 13.05%
-AIC = 10147.5794 elapsed =  0.10sec</code></pre>
+AIC = 10147.5794 elapsed =  0.08sec</code></pre>
 </div>
 </div>
 <p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>
@@ -393,7 +397,7 @@ AIC = 10147.5794 elapsed =  0.10sec</code></pre>
 </section>
 <section id="distributional-predictions" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="distributional-predictions"><span class="header-section-number">4</span> Distributional predictions</h2>
-<p>We now evaluate the fitted seasonal cycle on each day of a non-leap year. The data encode day of year starting at zero, so plotting uses <code>yday + 1</code> for the more familiar range from 1 to 365.</p>
+<p>We now evaluate the fitted seasonal cycle on each day of the year.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">364</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -437,7 +441,7 @@ AIC = 10147.5794 elapsed =  0.10sec</code></pre>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic,</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Motorcycles"</span>)</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span>, pq,</span>

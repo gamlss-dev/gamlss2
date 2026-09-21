@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>First Steps – gamlss2</title>
+<title>vcov.gamlss2 – gamlss2</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -61,26 +61,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -159,12 +140,9 @@ window.Quarto = {
 };
 </script>
 
-<meta property="og:title" content="First Steps – gamlss2">
-<meta property="og:description" content="">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/firststeps_files/figure-html/unnamed-chunk-2-1.png">
+<meta property="og:title" content="gamlss2">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="864">
-<meta property="og:image:width" content="1152">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -247,234 +225,121 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data"><span class="header-section-number">1</span> Data</a></li>
-  <li><a href="#a-first-model" id="toc-a-first-model" class="nav-link" data-scroll-target="#a-first-model"><span class="header-section-number">2</span> A first model</a></li>
-  <li><a href="#inspecting-the-fitted-model" id="toc-inspecting-the-fitted-model" class="nav-link" data-scroll-target="#inspecting-the-fitted-model"><span class="header-section-number">3</span> Inspecting the fitted model</a></li>
-  <li><a href="#distributional-predictions" id="toc-distributional-predictions" class="nav-link" data-scroll-target="#distributional-predictions"><span class="header-section-number">4</span> Distributional predictions</a></li>
-  <li><a href="#relation-to-gamlss" id="toc-relation-to-gamlss" class="nav-link" data-scroll-target="#relation-to-gamlss"><span class="header-section-number">5</span> Relation to <code>gamlss</code></a></li>
-  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps"><span class="header-section-number">6</span> Next steps</a></li>
+  <li><a href="#joint-covariance-matrix-for-gamlss2-models" id="toc-joint-covariance-matrix-for-gamlss2-models" class="nav-link active" data-scroll-target="#joint-covariance-matrix-for-gamlss2-models">Joint Covariance Matrix for gamlss2 Models</a>
+  <ul class="collapse">
+  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
+  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><h1 class="title display-7">First Steps</h1></header>
-
-<header id="title-block-header">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
-</header>
 
 
-<p>Generalized additive models for location, scale, and shape (GAMLSS) model all parameters of a response distribution rather than only its mean <span class="citation" data-cites="Rigby+Stasinopoulos:2005">(<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">Rigby and Stasinopoulos 2005</a>)</span>. The <code>gamlss2</code> package provides a workflow similar to <code>lm()</code> and <code>glm()</code>, while allowing a separate additive predictor for every distribution parameter.</p>
-<p>This vignette illustrates the basic workflow:</p>
-<ol type="1">
-<li>specify and fit a distributional regression model,</li>
-<li>inspect its estimated effects and residuals, and</li>
-<li>obtain distribution parameters, probabilities, and quantiles.</li>
-</ol>
-<section id="data" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="data"><span class="header-section-number">1</span> Data</h2>
-<p>We use the <code>HarzTraffic</code> data included in the package. They contain daily traffic counts and weather measurements near Sonnenberg in the Harz region of Germany. Motorcycle traffic has a pronounced annual cycle, so we model the number of motorcycles (<code>bikes</code>) as a smooth function of the day of the year (<code>yday</code>).</p>
+<section id="joint-covariance-matrix-for-gamlss2-models" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="joint-covariance-matrix-for-gamlss2-models">Joint Covariance Matrix for gamlss2 Models</h2>
+<section id="description" class="level3">
+<h3 class="anchored" data-anchor-id="description">Description</h3>
+<p>Computes coefficient covariance from the joint penalized information of a fitted <code>gamlss2</code> model.</p>
+</section>
+<section id="usage" class="level3">
+<h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<pre><code class="language-R">## S3 method for class 'gamlss2'
+vcov(object,
+  type = c("vcov", "cor", "se", "coef"), full = FALSE,
+  method = c("joint", "working", "numeric"), ...)
+</code></pre>
+</section>
+<section id="arguments" class="level3">
+<h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
+<table role="presentation">
+<tbody><tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="object">object</code>
+</td>
+<td>
+A fitted <code>gamlss2</code> model.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="type">type</code>
+</td>
+<td>
+The covariance matrix, correlation matrix, standard errors, or corresponding coefficient vector to return.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="full">full</code>
+</td>
+<td>
+Logical. If <code>FALSE</code>, return ordinary linear coefficients. Their covariance is still extracted from the complete joint inverse. If <code>TRUE</code>, include supported smooth coefficients.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="method">method</code>
+</td>
+<td>
+Information calculation. <code>“joint”</code> uses the raw joint observed information, <code>“working”</code> uses the final family working curvature with zero cross-parameter blocks, and <code>“numeric”</code> uses a slow coefficient-dimensional numerical Hessian for validation.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="...">…</code>
+</td>
+<td>
+Control arguments passed to the numerical Hessian when <code>method = “numeric”</code>.
+</td>
+</tr>
+</tbody></table>
+</section>
+<section id="details" class="level3">
+<h3 class="anchored" data-anchor-id="details">Details</h3>
+<p>The default covariance is the inverse of <span class="math inline">\(H + P\)</span>, where <span class="math inline">\(H\)</span> is the joint likelihood information for every supported distributional predictor and <span class="math inline">\(P\)</span> is the complete penalty at the fitted smoothing and regularization parameters. Thus it retains covariance among linear and smooth terms and among distributional parameters. Prior observation weights and offsets in the final linear predictors are included.</p>
+<p>The result is conditional on the fitted smoothing parameters. It does not include smoothing-parameter or model-selection uncertainty. Information and its factorization are built lazily and cached for an unchanged fitted state.</p>
+<p>Nonlinear special terms that have no coefficient-linear design are rejected explicitly. Objects fitted with <code>light = TRUE</code> do not retain the final predictors and must be refitted for joint covariance. Aliased or numerically unidentified coefficient variances are returned as <code>NA</code>; no arbitrary inferential ridge is added.</p>
+<p>Effect plots and Wald predictions require a positive precision factor. If the observed joint information is indefinite, Wald prediction warns and falls back to <code>method = “working”</code>. Effect plots silently use the covariance stored with each fitted term. Calling <code>vcov()</code> itself does not silently apply either approximation.</p>
+</section>
+<section id="value" class="level3">
+<h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>A matrix for <code>type = “vcov”</code> or <code>“cor”</code>; a named numeric vector for <code>type = “se”</code> or <code>“coef”</code>.</p>
+</section>
+<section id="see-also" class="level3">
+<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
+<p><code>gamlss2</code>, <code>predict.gamlss2</code></p>
+</section>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"cars"</span>, <span class="at">package =</span> <span class="st">"datasets"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## linear-coefficient covariance,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## marginalized over smooth coefficients.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">vcov</span>(m)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## complete linear and smooth covariance</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>V <span class="ot">&lt;-</span> <span class="fu">vcov</span>(m, <span class="at">full =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">diag</span>(V))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.25</span>),</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Motorcycles"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The response is a count and its variance is much larger than its mean. We therefore use the negative binomial <code>NBI</code> family. It has two parameters: <code>mu</code>, the conditional mean, and <code>sigma</code>, a dispersion parameter. Both use a log link.</p>
-</section>
-<section id="a-first-model" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="a-first-model"><span class="header-section-number">2</span> A first model</h2>
-<p>The first model lets the mean motorcycle count vary smoothly over the year. The cyclic cubic spline (<code>bs = "cc"</code>) joins smoothly at the beginning and end of the annual cycle.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Only one right-hand side is supplied, so it is used for the first family parameter, <code>mu</code>. The remaining parameter, <code>sigma</code>, receives an intercept-only predictor. More generally, the right-hand sides separated by <code>|</code> correspond to the family parameters in their displayed order:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Formula</th>
-<th>Interpretation for <code>NBI</code></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>bikes ~ x</code></td>
-<td>model <code>mu</code> with <code>x</code>; keep <code>sigma</code> constant</td>
-</tr>
-<tr class="even">
-<td><code>bikes ~ x | z</code></td>
-<td>model <code>mu</code> with <code>x</code> and <code>sigma</code> with <code>z</code></td>
-</tr>
-<tr class="odd">
-<td><code>bikes ~ x | .</code></td>
-<td>use the predictor <code>x</code> for both parameters</td>
-</tr>
-</tbody>
-</table>
-<p>Thus, a model in which both the mean and dispersion vary seasonally can be specified compactly as follows.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>, <span class="at">k =</span> <span class="dv">20</span>) <span class="sc">|</span> .,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>For families with more parameters, further right-hand sides can be appended. For example, <code>y ~ x | . | . | .</code> repeats the predictor for all four parameters of a four-parameter family. Omitting right-hand sides instead gives the remaining parameters intercept-only predictors.</p>
-</section>
-<section id="inspecting-the-fitted-model" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="inspecting-the-fitted-model"><span class="header-section-number">3</span> Inspecting the fitted model</h2>
-<p>The model summary reports the family and links, linear coefficients, effective degrees of freedom of the smooth terms, and model-fit information.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Call:
-gamlss2(formula = bikes ~ s(yday, bs = "cc", k = 20) | ., data = HarzTraffic, 
-    family = NBI, trace = FALSE)
----
-Family: NBI 
-Link functions: log, log
-*--------
-Coefficients:
-                  Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.87922    0.04834   80.25  &lt; 2e-16 ***
-sigma.(Intercept)  0.38247    0.05006    7.64 4.94e-14 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
----
-Smooth terms:
-                 edf
-mu.s(yday)    16.116
-sigma.s(yday)  5.092
-*--------
-n = 1057 df =  23.21 res.df =  1033.79
-Deviance = 10101.1641 Null Dev. Red. = 13.05%
-AIC = 10147.5794 elapsed =  0.07sec</code></pre>
-</div>
-</div>
-<p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Normalized quantile residuals should be approximately standard normal when the conditional distribution is well calibrated. Because randomized quantile residuals are used for discrete distributions, we set a seed to make the plots reproducible.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>These are in-sample diagnostics. They can reveal important model deficiencies, but do not by themselves establish out-of-sample calibration.</p>
-</section>
-<section id="distributional-predictions" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="distributional-predictions"><span class="header-section-number">4</span> Distributional predictions</h2>
-<p>We now evaluate the fitted seasonal cycle on each day of the year.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">364</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>By default, <code>predict()</code> returns the fitted distribution parameters on their natural scales. Setting <code>drop = FALSE</code> keeps the result as a data frame (which is the default).</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>parameters <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(parameters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        mu    sigma
-1 2.035082 4.871688
-2 2.085890 4.892004
-3 2.106884 4.911077
-4 2.099899 4.928900
-5 2.067920 4.945468
-6 2.014722 4.960777</code></pre>
-</div>
-</div>
-<p>For probabilities and other distributional summaries, <code>prodist()</code> returns one <a href="https://cran.r-project.org/package=distributions3"><code>distributions3</code></a> distribution object for each row of <code>newdata</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">prodist</span>(m2, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>For example, the fitted probability of more than 500 motorcycles on a day is <span class="math inline">\(1 - F(500)\)</span>.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>prob_high <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(pf, <span class="dv">500</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span>, prob_high, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Pr(Motorcycles &gt; 500)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Conditional quantiles can be computed directly from the fitted model. Here we calculate the 5%, 50%, and 95% quantiles and add them to the observed counts.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m2, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Motorcycles"</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span>, pq,</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">col =</span> <span class="dv">4</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"5%"</span>, <span class="st">"50%"</span>, <span class="st">"95%"</span>),</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">col =</span> <span class="dv">4</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>These fitted distributions describe response variation conditional on the estimated model.</p>
-</section>
-<section id="relation-to-gamlss" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="relation-to-gamlss"><span class="header-section-number">5</span> Relation to <code>gamlss</code></h2>
-<p><code>gamlss2</code> is a fresh implementation of the GAMLSS framework, but it can also use the family objects from <a href="https://cran.r-project.org/package=gamlss.dist"><code>gamlss.dist</code></a>. Unlike the classic <a href="https://cran.r-project.org/package=gamlss"><code>gamlss</code></a> workflow, <code>gamlss2()</code> supports <a href="https://cran.r-project.org/package=mgcv"><code>mgcv</code></a> smooth terms directly and uses the <code>|</code> notation to place the predictors for all distribution parameters in a single formula.</p>
-</section>
-<section id="next-steps" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="next-steps"><span class="header-section-number">6</span> Next steps</h2>
-<p>The <a href="https://gamlss-dev.github.io/gamlss2/vignettes/families.html">Family Objects</a> vignette explains available and custom response distributions. The <a href="https://gamlss-dev.github.io/gamlss2/vignettes/specials.html">Special Model Terms</a> vignette covers terms beyond standard <code>mgcv</code> smooths.</p>
-
 
 
 </section>
+</section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-Rigby+Stasinopoulos:2005" class="csl-entry" role="listitem">
-Rigby, R. A., and D. M. Stasinopoulos. 2005. <span>“Generalized Additive Models for Location, Scale and Shape.”</span> <em>Journal of the Royal Statistical Society C</em> 54 (3): 507–54. <a href="https://doi.org/10.1111/j.1467-9876.2005.00510.x">https://doi.org/10.1111/j.1467-9876.2005.00510.x</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

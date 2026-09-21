@@ -767,20 +767,22 @@ Family: Ordered Logit (3 categories)
 Link functions: identity, identity, identity
 *--------
 Coefficients:
-                       Estimate Std. Error t value Pr(&gt;|t|)
-location.(Intercept)    -0.1969         NA      NA       NA
-location.InflMedium      0.5665         NA      NA       NA
-location.InflHigh        1.2889         NA      NA       NA
-location.TypeApartment  -0.5724         NA      NA       NA
-location.TypeAtrium     -0.3662         NA      NA       NA
-location.TypeTerrace    -1.0911         NA      NA       NA
-location.ContHigh        0.3603         NA      NA       NA
-theta1.(Intercept)      -0.6932         NA      NA       NA
-delta2.(Intercept)       0.1714         NA      NA       NA
+                        Estimate Std. Error t value Pr(&gt;|t|)    
+location.(Intercept)    -0.19685  143.25479  -0.001 0.998908    
+location.InflMedium      0.56645    0.10465   5.413 1.03e-06 ***
+location.InflHigh        1.28895    0.12716  10.137 7.36e-15 ***
+location.TypeApartment  -0.57241    0.11924  -4.800 1.01e-05 ***
+location.TypeAtrium     -0.36622    0.15518  -2.360 0.021383 *  
+location.TypeTerrace    -1.09113    0.15149  -7.203 8.85e-10 ***
+location.ContHigh        0.36032    0.09554   3.772 0.000361 ***
+theta1.(Intercept)      -0.69316  143.25530  -0.005 0.996155    
+delta2.(Intercept)       0.17138    0.04292   3.993 0.000173 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 72 df =  9 res.df =  63
 Deviance = 3479.1493 Null Dev. Red. = -2099.21%
-AIC = 3497.1493 elapsed =  0.03sec</code></pre>
+AIC = 3497.1493 elapsed =  0.02sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare coefficients</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

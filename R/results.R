@@ -21,9 +21,20 @@ results.gamlss2 <- function(x, data = NULL, ...)
   inference.warn <- dots$.inference.warn %||% TRUE
   local.fallback <- dots$.local.fallback %||% FALSE
   information <- draws <- NULL
-  if(!inherits(x, "bamlss2") && !interval %in% c("none", "local"))
-    information <- interval_information(x, method = method,
-      warn = inference.warn)
+  if(!inherits(x, "bamlss2") && !interval %in% c("none", "local")) {
+    information <- if(isTRUE(local.fallback) && interval == "wald") {
+      tryCatch(
+        interval_information(x, method = method, warn = inference.warn),
+        error = function(e) {
+          if(startsWith(conditionMessage(e), "joint covariance: unsupported"))
+            return(NULL)
+          stop(e)
+        }
+      )
+    } else {
+      interval_information(x, method = method, warn = inference.warn)
+    }
+  }
   calculation <- interval
   if(isTRUE(local.fallback) && interval == "wald" &&
       (is.null(information) || information$method != "joint" ||

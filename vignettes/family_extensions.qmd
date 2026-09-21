@@ -1,12 +1,12 @@
 ---
-title: "Distribution Modifiers"
+title: "Family Extensions"
 format:
   html:
     html-math-method: mathjax
     toc: true
     number-sections: true
 vignette: >
-  %\VignetteIndexEntry{Distribution Modifiers}
+  %\VignetteIndexEntry{Family Extensions}
   %\VignetteEngine{quarto::html}
   %\VignetteDepends{gamlss2}
   %\VignetteKeywords{distributional regression, family objects, truncation, censoring, inflation}
@@ -19,7 +19,7 @@ at a fixed limit, and a proportion may include exact zeros and ones. In each
 case, a familiar distribution can be a useful starting point, but its support
 or probabilities need to change before it describes the recorded data.
 
-Distribution modifiers make these changes to an existing family. The result
+Family extensions make these changes to an existing family. The result
 is another `gamlss2.family`, ready to use in `fit_family()` or `gamlss2()`.
 We begin with earthquake magnitudes and use them to distinguish selection
 from rounding and grouping. We then consider recording limits, extra point
@@ -35,8 +35,8 @@ control <- gamlss2_control(trace = FALSE, maxit = 100)
 
 ## Choosing an observation model
 
-A modifier specifies how a base distribution becomes the distribution of
-the response we observe. Several modifiers can be combined when more than
+A family extension specifies how a base distribution becomes the
+the response we observe. Several extensions can be combined when more than
 one mechanism is involved.
 
 For example, earthquake magnitude can be viewed as a latent continuous
@@ -757,21 +757,22 @@ mechanism, such as the inflated endpoint family above.
 
 ## Practical guidance
 
-The modifier should describe how a latent response becomes an observed
+The family extension should describe how a latent response becomes an observed
 response. In practice:
 
 1. Start with the family for the latent response.
-2. Apply modifiers from the inside out in the order the mechanisms occur.
+2. Apply extensions from the inside out in the order the mechanisms occur.
 3. Use `fit_family()` to inspect marginal fit. Compare AIC only for models
    fitted to the same response with compatible likelihoods.
 4. Add covariates with `gamlss2()`, using `s()` for nonlinear effects, and
-   check whether the modified family remains useful conditionally.
+   check whether the extended family remains useful conditionally.
 5. Interpret `predict()` parameters on the base-family scale, but interpret
    probabilities, quantiles, simulations, and residuals under the fully
-   modified family.
+   extended family.
 
 A few boundaries of the infrastructure are intentional. Constants passed to
-the modifiers are fixed. `censor_family()` also accepts observation-specific
+the extension constructors are fixed. `censor_family()` also accepts
+observation-specific
 right-censoring times through a `Surv()` response; other censoring types need
 a specialized family. Estimated transformation parameters require a family
 that explicitly includes them. Generic censored and rounded means and
@@ -786,6 +787,6 @@ truncation; extra and natural zeros together imply inflation; and a separate
 zero-generating process suggests a hurdle. These choices are scientifically
 different even when the observed histograms look similar.
 
-See `?distribution_modifiers` for the complete argument and return-value
+See `?family_extensions` for the complete argument and return-value
 reference for all constructors.
 

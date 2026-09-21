@@ -1,4 +1,5 @@
-\name{distribution_modifiers}
+\name{family_extensions}
+\alias{family_extensions}
 \alias{distribution_modifiers}
 \alias{transform_family}
 \alias{logit_family}
@@ -9,13 +10,14 @@
 \alias{discretize_family}
 \alias{round_family}
 
-\title{Construct Modified Distribution Families}
+\title{Extend Distribution Families}
 
 \description{
-  Constructs \code{"gamlss2.family"} objects by transforming, conditioning,
-  coarsening, or adding point masses to an existing distribution family.
-  Modified families can be used directly in \code{\link{gamlss2}} models and
-  can be nested to compose several operations.
+  Extends an existing distribution family by transforming, conditioning,
+  coarsening, or adding point masses. The resulting
+  \code{"gamlss2.family"} objects can be used directly in
+  \code{\link{gamlss2}} models, and family extensions can be nested to
+  compose several operations.
 }
 
 \usage{
@@ -69,7 +71,7 @@ round_family(family = NO, digits = 0L)
     observations lie in the transformed support.
   }
   \item{name}{
-    Optional character string used as the modified family label.
+    Optional character string used as the extended family label.
   }
   \item{lower, upper}{
     Fixed scalar lower and upper truncation or censoring boundaries. For

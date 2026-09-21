@@ -1236,12 +1236,11 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
   }
 
   ## Update derived summaries (these rely on terms being present).
+  class(object) <- unique(c("bamlss2", class(object)))
   object$results <- results(object)
   object$df <- object$dic$pD
   object$elapsed <- elapsed
   object$call <- match.call()
-
-  class(object) <- unique(c("bamlss2", class(object)))
 
   return(object)
 }

@@ -153,8 +153,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/family_extensions.html">
- <span class="dropdown-text">Family extensions</span></a>
+    <a class="dropdown-item" href="../vignettes/modifiers.qmd">
+ <span class="dropdown-text">Distribution modifiers</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
@@ -198,7 +198,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#built-in-special-terms" id="toc-built-in-special-terms" class="nav-link active" data-scroll-target="#built-in-special-terms"><span class="header-section-number">1</span> Built-in special terms</a></li>
-  <li><a href="#defining-a-custom-special" id="toc-defining-a-custom-special" class="nav-link" data-scroll-target="#defining-a-custom-special"><span class="header-section-number">2</span> Defining a custom special</a></li>
+  <li><a href="#the-special-extension" id="toc-the-special-extension" class="nav-link" data-scroll-target="#the-special-extension"><span class="header-section-number">2</span> The special extension</a></li>
   <li><a href="#a-custom-weighted-local-smoother" id="toc-a-custom-weighted-local-smoother" class="nav-link" data-scroll-target="#a-custom-weighted-local-smoother"><span class="header-section-number">3</span> A custom weighted local smoother</a></li>
   <li><a href="#practical-guidance" id="toc-practical-guidance" class="nav-link" data-scroll-target="#practical-guidance"><span class="header-section-number">4</span> Practical guidance</a></li>
   </ul>
@@ -251,13 +251,13 @@ sigma.s(Temp)         6.3894
 *--------
 n = 116 df =  16.78 res.df =  99.22
 Deviance = 919.5898 Null Dev. Red. = 15.09%
-AIC = 953.1434 elapsed =  0.18sec</code></pre>
+AIC = 953.1434 elapsed =  0.23sec</code></pre>
 </div>
 </div>
 <p>Specials can occur in any distributional parameter formula. They are refitted from the current working response and weights at each backfitting iteration, then centered before being added to the additive predictor. Centering keeps the intercept and the special term identifiable.</p>
 </section>
-<section id="defining-a-custom-special" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="defining-a-custom-special"><span class="header-section-number">2</span> Defining a custom special</h2>
+<section id="the-special-extension" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-special-extension"><span class="header-section-number">2</span> The special extension</h2>
 <p>A custom special consists of three pieces:</p>
 <ol type="1">
 <li>a constructor used in the formula;</li>
@@ -354,7 +354,7 @@ sigma.s(Temp)           5.3016
 *--------
 n = 116 df =  13.08 res.df =  102.92
 Deviance = 937.2835 Null Dev. Red. = 13.46%
-AIC = 963.4356 elapsed =  0.06sec</code></pre>
+AIC = 963.4356 elapsed =  0.07sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">

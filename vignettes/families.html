@@ -182,8 +182,8 @@ window.Quarto = {
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/family_extensions.html">
- <span class="dropdown-text">Family extensions</span></a>
+    <a class="dropdown-item" href="../vignettes/modifiers.qmd">
+ <span class="dropdown-text">Distribution modifiers</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
@@ -359,7 +359,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.44 res.df =  45.56
 Deviance = 396.3244 Null Dev. Red. = 14.92%
-AIC = 405.1972 elapsed =  0.05sec</code></pre>
+AIC = 405.1972 elapsed =  0.06sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -405,10 +405,10 @@ AIC = 405.1972 elapsed =  0.05sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1      r_2
-1 18.51061 14.58841
-2 54.04100 60.52938
-3 98.30115 85.35429</code></pre>
+<pre><code>       r_1       r_2
+1  7.28536  31.55159
+2 33.74751  46.34305
+3 97.40617 125.19083</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -608,7 +608,7 @@ sigma.s(Temp) 7.4969
 *--------
 n = 116 df =  20.63 res.df =  95.37
 Deviance = 899.7046 Null Dev. Red. = 16.93%
-AIC = 940.974 elapsed =  0.36sec</code></pre>
+AIC = 940.974 elapsed =  0.45sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -676,7 +676,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.44 res.df =  45.56
 Deviance = 396.3244 Null Dev. Red. = 14.92%
-AIC = 405.1972 elapsed =  0.02sec</code></pre>
+AIC = 405.1972 elapsed =  0.03sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>

@@ -17,9 +17,21 @@ results.gamlss2 <- function(x, data = NULL, ...)
   interval <- dots$interval %||% "wald"
   level <- dots$level %||% 0.95
   nsim <- dots$nsim %||% 2000L
+  method <- dots$method %||% "joint"
+  inference.warn <- dots$.inference.warn %||% TRUE
+  local.fallback <- dots$.local.fallback %||% FALSE
   information <- draws <- NULL
   if(!inherits(x, "bamlss2") && !interval %in% c("none", "local"))
-    information <- joint_information(x)
+    information <- gamlss2_interval_information(x, method = method,
+      warn = inference.warn)
+  calculation <- interval
+  if(isTRUE(local.fallback) && interval == "wald" &&
+      (is.null(information) || information$method != "joint" ||
+        is.null(information$factor) ||
+        information$rank != information$dimension)) {
+    information <- NULL
+    calculation <- "local"
+  }
   information_block <- function(parameter, term)
     information$blocks[[parameter]][[which(vapply(information$blocks[[parameter]],
       function(z) identical(z$label, term), logical(1L)))[1L]]]
@@ -94,19 +106,23 @@ results.gamlss2 <- function(x, data = NULL, ...)
                 if(!is.null(A) && length(block$index))
                   A[, block$index] <- X[, block$active, drop = FALSE]
 
-                if(interval == "none") {
+                if(calculation == "none") {
                   nd$lower <- NA_real_
                   nd$upper <- NA_real_
 
-                } else if(interval == "local") {
+                } else if(calculation == "local") {
                   V <- x$fitted.specials[[j]][[i]]$vcov
-                  v <- rowSums((X %*% V) * X)
-                  se <- sqrt(pmax(v, 0))
-                  z <- qnorm(1 - (1 - level) / 2)
-                  nd$lower <- nd$fit - z * se
-                  nd$upper <- nd$fit + z * se
+                  if(is.null(V)) {
+                    nd$lower <- nd$upper <- nd$fit
+                  } else {
+                    v <- rowSums((X %*% V) * X)
+                    se <- sqrt(pmax(v, 0))
+                    z <- qnorm(1 - (1 - level) / 2)
+                    nd$lower <- nd$fit - z * se
+                    nd$upper <- nd$fit + z * se
+                  }
 
-                } else if(interval == "wald") {
+                } else if(calculation == "wald") {
                   ## Pointwise Wald band.
                   v <- gamlss2_information_variance(A, information)
                   se <- sqrt(v)
@@ -114,7 +130,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
                   nd$lower <- nd$fit - z * se
                   nd$upper <- nd$fit + z * se
 
-                } else if(interval %in% c("bayes", "simultaneous")) {
+                } else if(calculation %in% c("bayes", "simultaneous")) {
                   ## Draw through the joint precision factor, retaining
                   ## covariance with every other fitted coefficient.
                   if(is.null(draws))
@@ -124,7 +140,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
                       draws[block$index, , drop = FALSE] else
                     matrix(nd$fit, nrow(X), nsim)
 
-                  if(interval == "bayes") {
+                  if(calculation == "bayes") {
                     alpha <- (1 - level) / 2
                     nd$lower <- apply(f_draw, 1, quantile, probs = alpha)
                     nd$upper <- apply(f_draw, 1, quantile, probs = 1 - alpha)
@@ -264,11 +280,13 @@ results.gamlss2 <- function(x, data = NULL, ...)
   }
   if(length(x$xterms)) {
     xe <- results_linear(x, data = data, information = information,
-      interval = interval, level = level)
+      interval = calculation, level = level)
     res$effects[names(xe)] <- xe
   }
 
   attr(res, "interval") <- if(inherits(x, "bamlss2")) "posterior" else interval
+  attr(res, "information.method") <- if(is.null(information)) calculation else
+    information$method
   return(res)
 }
 

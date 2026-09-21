@@ -16,6 +16,7 @@ of the response distribution.
   se.fit = FALSE, drop = TRUE, ...,
   level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 }
+
 \arguments{
   \item{object}{A model object of class \code{\link{gamlss2}}.}
   \item{model}{Character. Which distribution parameter(s) should be predicted?
@@ -102,6 +103,13 @@ prediction structure. The \code{fit} element is the ordinary, non-simulated
 prediction and \code{se.fit} is shared by all intervals. Attributes record the
 confidence levels, method, and reusable \code{interval.cache}. The cache stores
 the fitted inferential state and can be reused only with that unchanged model.
+
+If the joint observed information is not positive definite, Wald prediction
+issues a warning and uses the positive working-information approximation.
+Effect plots instead use the covariance stored with each fitted model term
+silently, because this fallback is only used to draw uncertainty bands. The
+default \code{vcov()} method remains observed-information based and reports
+the identification problem.
 }
 
 \seealso{

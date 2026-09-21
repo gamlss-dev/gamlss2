@@ -34,7 +34,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(which == "effects" && (is.null(x$results) ||
         (!inherits(x, "bamlss2") &&
           !identical(attr(x$results, "interval"), "wald"))))
-      x$results <- results(x)
+      x$results <- results(x, ..., .inference.warn = FALSE,
+        .local.fallback = TRUE)
     if(which == "effects" & length(x$results$effects) < 1L)
       which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
@@ -57,7 +58,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
   if("effects" %in% which) {
     if(is.null(x$results) || (!inherits(x, "bamlss2") &&
         !identical(attr(x$results, "interval"), "wald")))
-      x$results <- results(x)
+      x$results <- results(x, ..., .inference.warn = FALSE,
+        .local.fallback = TRUE)
 
     en <- grep2(parameter, names(x$results$effects), fixed = TRUE, value = TRUE)
 
@@ -97,7 +99,11 @@ plot.gamlss2 <- function(x, parameter = NULL,
           gok <- grep(i, en, fixed = TRUE, value = TRUE)
           for(j in gok) {
             if("lower" %in% colnames(x$results$effects[[j]])) {
-              ylim[[i]] <- c(ylim[[i]], range(x$results$effects[[j]][, c("lower", "upper")]))
+              yr <- unlist(x$results$effects[[j]][, c("lower", "upper")])
+              yr <- yr[is.finite(yr)]
+              if(!length(yr))
+                yr <- x$results$effects[[j]][, "fit"]
+              ylim[[i]] <- c(ylim[[i]], range(yr, finite = TRUE))
             } else {
               ylim[[i]] <- c(ylim[[i]], range(x$results$effects[[j]][, "fit"]))
             }
@@ -286,6 +292,11 @@ plot_smooth_effect <- function(x, col = NULL, ncol = 20L,
   xlab = NULL, ylab = NULL, main = NULL,
   xlim = NULL, ylim = NULL, ...)
 {
+  if(all(c("lower", "upper") %in% names(x))) {
+    bad <- !is.finite(x$lower) | !is.finite(x$upper)
+    x$lower[bad] <- x$fit[bad]
+    x$upper[bad] <- x$fit[bad]
+  }
   if(is.null(col)) {
     col <- gray.colors(ncol, start = 0.3, end = 1)
   } else {

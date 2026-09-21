@@ -106,7 +106,7 @@ wald_information <- function(object)
 {
   if(inherits(object, "bamlss2"))
     stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
-  info <- joint_information(object)
+  info <- gamlss2_interval_information(object)
   if(any(info$map$reason == "aliased", na.rm = TRUE))
     stop("Wald intervals require estimable coefficients; aliased coefficients were found.")
   if(is.null(info$factor) || info$rank != info$dimension)

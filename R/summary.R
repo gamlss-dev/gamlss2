@@ -455,7 +455,8 @@ summary.gamlss2 <- function(object, ...)
 {
   df.res <- object$nobs - object$df
   par <- coef(object, full = FALSE, dropall = FALSE)
-  se <- vcov(object, type = "se", full = FALSE)
+  method <- list(...)$method %||% "joint"
+  se <- vcov(object, type = "se", full = FALSE, method = method)
   tvalue <- par / se
   if(length(df.res) == 1L && !is.na(df.res) && df.res > 0) {
     pvalue <- 2 * pt(-abs(tvalue), df.res)
@@ -650,7 +651,8 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
   co <- coef(object, full = FALSE, drop = TRUE)
   a <- (1 - level)/2
   a <- c(a, 1 - a)
-  se <- vcov(object, type = "se", full = FALSE)
+  method <- list(...)$method %||% "joint"
+  se <- vcov(object, type = "se", full = FALSE, method = method)
   ci <- co + se %o% qnorm(a)
   colnames(ci) <- paste0(round(a * 100, 3), "%")
   rownames(ci) <- gsub(".p.", ".", rownames(ci), fixed = TRUE)

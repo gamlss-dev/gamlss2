@@ -236,50 +236,131 @@ gamlss2_curvature <- function(family, eta, par, y, a, b,
 }
 
 ## Symmetric factorization with explicit handling of unidentified directions.
-gamlss2_factor_information <- function(A)
-{
+gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
   p <- ncol(A)
-  if(!p)
-    return(list(factor = A, covariance = A, rank = 0L,
-      nonestimable = logical()))
+
+  if(!p) {
+    return(list(
+      factor = A,
+      covariance = A,
+      rank = 0L,
+      nonestimable = logical()
+    ))
+  }
+
+  if(nrow(A) != p)
+    stop("'A' must be square", call. = FALSE)
+
+  if(!all(is.finite(A)))
+    stop("'A' contains non-finite values", call. = FALSE)
+
+  if(!is.finite(ridge) || ridge <= 0)
+    stop("'ridge' must be a positive finite number", call. = FALSE)
+
+  ## Enforce symmetry against small numerical asymmetries
   A <- 0.5 * (A + t(A))
+
+  ## 1. Fast path: well-conditioned positive-definite information
   R <- tryCatch(chol(A), error = function(e) NULL)
+
   if(!is.null(R)) {
-    tolerance <- max(p, 1L) * .Machine$double.eps
-    if(rcond(R)^2 > tolerance)
-      return(list(factor = R, covariance = NULL, rank = p,
-        nonestimable = rep(FALSE, p)))
+    rc <- rcond(R)
+
+    ## rcond(R)^2 approximates the reciprocal condition number of A.
+    ## If sufficiently well conditioned, retain the exact factor.
+    if(is.finite(rc) && rc^2 > ridge) {
+      return(list(
+        factor = R,
+        covariance = NULL,
+        rank = p,
+        nonestimable = rep(FALSE, p)
+      ))
+    }
   }
 
+  ## 2. Spectral fallback
   ev <- eigen(A, symmetric = TRUE)
-  scale <- max(1, abs(ev$values))
-  tolerance <- max(p, 1L) * .Machine$double.eps * scale
-  if(any(ev$values < -tolerance)) {
-    warning("joint penalized information is materially indefinite; covariance is unavailable",
-      call. = FALSE)
-    V <- matrix(NA_real_, p, p, dimnames = dimnames(A))
-    return(list(factor = NULL, covariance = V,
-      rank = sum(ev$values > tolerance), nonestimable = rep(TRUE, p)))
-  }
-  positive <- ev$values > tolerance
-  if(!any(positive)) {
-    warning("joint penalized information has rank zero", call. = FALSE)
-    V <- matrix(NA_real_, p, p, dimnames = dimnames(A))
-    return(list(factor = NULL, covariance = V,
-      rank = 0L, nonestimable = rep(TRUE, p)))
+
+  lambda <- ev$values
+  Q <- ev$vectors
+
+  scale <- max(1, max(abs(lambda)))
+
+  ## Tolerance used to determine the numerical rank of the
+  ## *original* information matrix.
+  rank_tol <- max(p, 1L) * .Machine$double.eps * scale
+
+  positive <- lambda > rank_tol
+  rank <- sum(positive)
+
+  ## Directions that are not estimable from the original matrix.
+  null <- Q[, !positive, drop = FALSE]
+
+  nonestimable <- if(ncol(null)) {
+    rowSums(null^2) > sqrt(.Machine$double.eps)
+  } else {
+    rep(FALSE, p)
   }
 
-  V <- tcrossprod(sweep(ev$vectors[, positive, drop = FALSE], 2L,
-    sqrt(ev$values[positive]), "/"))
-  null <- ev$vectors[, !positive, drop = FALSE]
-  nonestimable <- if(ncol(null))
-    rowSums(null^2) > sqrt(.Machine$double.eps) else rep(FALSE, p)
-  V[nonestimable, ] <- V[, nonestimable] <- NA_real_
+  ## 3. Stabilize the inverse
+  eigen_floor <- max(ridge * scale, rank_tol)
+
+  lambda_stable <- pmax(lambda, eigen_floor)
+
+  V <- tcrossprod(
+    sweep(
+      Q,
+      2L,
+      sqrt(lambda_stable),
+      "/"
+    )
+  )
+
   dimnames(V) <- dimnames(A)
-  warning("joint penalized information is rank deficient; non-estimable coefficient variances are NA",
-    call. = FALSE)
-  list(factor = NULL, covariance = V, rank = sum(positive),
-    nonestimable = nonestimable)
+
+  ## 4. Diagnostics
+  if(any(lambda < -rank_tol)) {
+    warning(
+      paste0(
+        "joint penalized information is materially indefinite; ",
+        "small/negative eigenvalues were regularized to produce ",
+        "a finite covariance matrix"
+      ),
+      call. = FALSE
+    )
+  } else if(rank == 0L) {
+    warning(
+      paste0(
+        "joint penalized information has numerical rank zero; ",
+        "returning a ridge-regularized covariance matrix"
+      ),
+      call. = FALSE
+    )
+  } else if(rank < p) {
+    warning(
+      paste0(
+        "joint penalized information is rank deficient; ",
+        "non-estimable directions were regularized to produce ",
+        "finite coefficient variances"
+      ),
+      call. = FALSE
+    )
+  } else {
+    warning(
+      paste0(
+        "joint penalized information is poorly conditioned; ",
+        "small eigenvalues were regularized"
+      ),
+      call. = FALSE
+    )
+  }
+
+  list(
+    factor = NULL,
+    covariance = V,
+    rank = rank,
+    nonestimable = nonestimable
+  )
 }
 
 ## Build and cache joint penalized information at the final predictors.
@@ -388,6 +469,27 @@ joint_information <- function(object, method = c("joint", "working", "numeric"),
   if(isTRUE(cache) && is.environment(cache.env))
     cache.env[[method]] <- list(state = state, control = control, value = rval)
   rval
+}
+
+## Effect and prediction intervals need a positive precision factor. Preserve
+## the observed covariance API, but use the explicit working approximation
+## when observed curvature is indefinite.
+gamlss2_interval_information <- function(object, method = "joint", warn = TRUE)
+{
+  info <- if(method == "joint")
+    suppressWarnings(joint_information(object, method = method)) else
+    joint_information(object, method = method)
+  if(method == "joint" &&
+      (is.null(info$factor) || info$rank != info$dimension)) {
+    if(isTRUE(warn))
+      warning(paste0("joint observed information is not positive definite; ",
+        "using the working-information approximation for intervals"),
+        call. = FALSE)
+    info <- if(isTRUE(warn))
+      joint_information(object, method = "working") else
+      suppressWarnings(joint_information(object, method = "working"))
+  }
+  info
 }
 
 gamlss2_information_vcov <- function(info)

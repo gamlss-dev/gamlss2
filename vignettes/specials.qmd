@@ -48,7 +48,7 @@ from the current working response and weights at each backfitting iteration,
 then centered before being added to the additive predictor. Centering keeps the
 intercept and the special term identifiable.
 
-## The special extension
+## Defining a custom special
 
 A custom special consists of three pieces:
 

@@ -13,6 +13,16 @@ results.gamlss2 <- function(x, data = NULL, ...)
     data <- model.frame(x, keepresponse = TRUE)
 
   res <- list()
+  dots <- list(...)
+  interval <- dots$interval %||% "wald"
+  level <- dots$level %||% 0.95
+  nsim <- dots$nsim %||% 2000L
+  information <- draws <- NULL
+  if(!inherits(x, "bamlss2") && !interval %in% c("none", "local"))
+    information <- joint_information(x)
+  information_block <- function(parameter, term)
+    information$blocks[[parameter]][[which(vapply(information$blocks[[parameter]],
+      function(z) identical(z$label, term), logical(1L)))[1L]]]
   np <- x$family$names
 
   if(length(x$sterms)) {
@@ -75,32 +85,44 @@ results.gamlss2 <- function(x, data = NULL, ...)
                 nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
                 nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
               } else {
-                dots <- list(...)
-                interval <- dots$interval %||% "wald"
-                level <- dots$level %||% 0.95
-                nsim <- dots$nsim %||% 2000L
-
                 bhat <- as.numeric(coef(x$fitted.specials[[j]][[i]]))
-                V <- x$fitted.specials[[j]][[i]]$vcov
-
                 nd$fit <- drop(X %*% bhat)
+                block <- if(is.null(information)) NULL else
+                  information_block(j, i)
+                A <- if(is.null(information)) NULL else
+                  matrix(0, nrow(X), information$dimension)
+                if(!is.null(A) && length(block$index))
+                  A[, block$index] <- X[, block$active, drop = FALSE]
 
                 if(interval == "none") {
                   nd$lower <- NA_real_
                   nd$upper <- NA_real_
 
-                } else if(interval == "wald") {
-                  ## Pointwise Wald band.
+                } else if(interval == "local") {
+                  V <- x$fitted.specials[[j]][[i]]$vcov
                   v <- rowSums((X %*% V) * X)
                   se <- sqrt(pmax(v, 0))
                   z <- qnorm(1 - (1 - level) / 2)
                   nd$lower <- nd$fit - z * se
                   nd$upper <- nd$fit + z * se
 
+                } else if(interval == "wald") {
+                  ## Pointwise Wald band.
+                  v <- gamlss2_information_variance(A, information)
+                  se <- sqrt(v)
+                  z <- qnorm(1 - (1 - level) / 2)
+                  nd$lower <- nd$fit - z * se
+                  nd$upper <- nd$fit + z * se
+
                 } else if(interval %in% c("bayes", "simultaneous")) {
-                  ## Simulation from approx posterior beta | y ~ N(bhat, V).
-                  B <- MASS::mvrnorm(n = nsim, mu = bhat, Sigma = V)
-                  f_draw <- X %*% t(B)
+                  ## Draw through the joint precision factor, retaining
+                  ## covariance with every other fitted coefficient.
+                  if(is.null(draws))
+                    draws <- gamlss2_information_draws(information, nsim)
+                  f_draw <- if(length(block$index))
+                    X[, block$active, drop = FALSE] %*%
+                      draws[block$index, , drop = FALSE] else
+                    matrix(nd$fit, nrow(X), nsim)
 
                   if(interval == "bayes") {
                     alpha <- (1 - level) / 2
@@ -241,10 +263,12 @@ results.gamlss2 <- function(x, data = NULL, ...)
     }
   }
   if(length(x$xterms)) {
-    xe <- results_linear(x, data = data)
+    xe <- results_linear(x, data = data, information = information,
+      interval = interval, level = level)
     res$effects[names(xe)] <- xe
   }
 
+  attr(res, "interval") <- if(inherits(x, "bamlss2")) "posterior" else interval
   return(res)
 }
 
@@ -283,7 +307,8 @@ remove_offset <- function(f) {
   )
 }
 
-results_linear <- function(x, parameter = NULL, data, ...)
+results_linear <- function(x, parameter = NULL, data,
+  information = NULL, interval = "wald", level = 0.95, ...)
 {
   if(is.null(parameter)) {
     parameter <- list(...)$what
@@ -372,11 +397,25 @@ results_linear <- function(x, parameter = NULL, data, ...)
   p <- list()
   for(j in seq_along(parameter)) {
     k <- match(parameter[j], x$family$names)
-    V <- x$fitted.linear[[k]]$vcov
     cj <- x$fitted.linear[[k]]$coefficients
-    if(is.null(V) || is.null(cj))
+    if(is.null(cj))
       next
-
+    if(is.null(information) &&
+        (inherits(x, "bamlss2") || interval == "local")) {
+      Vj <- x$fitted.linear[[k]]$vcov
+      block.index <- seq_along(cj)
+      names(block.index) <- names(cj)
+    } else if(is.null(information)) {
+      Vj <- NULL
+      block.index <- seq_along(cj)
+      names(block.index) <- names(cj)
+    } else {
+      Vj <- NULL
+      block <- information$blocks[[parameter[j]]][[1L]]
+      block.index <- rep(NA_integer_, block$size)
+      block.index[block$active] <- block$index
+      names(block.index) <- block$names
+    }
     fj <- remove_offset(formula(ff, lhs = 0, rhs = k))
     mt <- terms(fj, data = data)
     labels <- attr(mt, "term.labels")
@@ -396,18 +435,30 @@ results_linear <- function(x, parameter = NULL, data, ...)
       X <- model.matrix(mt, data = nd, contrasts.arg = contrasts,
         xlev = xlev)
       ii <- colnames(X)[attr(X, "assign") == i]
-      ii <- ii[ii %in% intersect(names(cj), colnames(V))]
+      ii <- ii[ii %in% names(cj)]
+      ii <- ii[!is.na(block.index[ii])]
       if(!length(ii))
         next
 
       Xj <- X[, ii, drop = FALSE]
       Xjc <- sweep(Xj, 2L, colMeans(Xj), FUN = "-")
-      Vsub <- V[ii, ii, drop = FALSE]
+      ind <- block.index[ii]
       bsub <- cj[ii]
       fit <- as.vector(Xjc %*% bsub)
-      vj <- rowSums((Xjc %*% Vsub) * Xjc)
-      sj <- sqrt(pmax(vj, 0))
-      z <- qnorm(0.975)
+      if(interval == "none") {
+        sj <- rep(NA_real_, length(fit))
+      } else if(!is.null(information)) {
+        A <- matrix(0, nrow(Xjc), information$dimension)
+        A[, ind] <- Xjc
+        sj <- sqrt(gamlss2_information_variance(A, information))
+      } else if(is.null(Vj)) {
+        sj <- rep(NA_real_, length(fit))
+      } else {
+        Vsub <- Vj[ind, ind, drop = FALSE]
+        vj <- rowSums((Xjc %*% Vsub) * Xjc)
+        sj <- sqrt(vj)
+      }
+      z <- qnorm(1 - (1 - level) / 2)
 
       ji <- paste0(parameter[j], ".", labels[i])
       p[[ji]] <- data.frame(grid, "fit" = fit,

@@ -14,7 +14,7 @@ of the response distribution.
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval.cache = NULL)
+  level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 }
 \arguments{
   \item{object}{A model object of class \code{\link{gamlss2}}.}
@@ -39,6 +39,10 @@ of the response distribution.
     if possible (\code{TRUE}) or always returned as a data frame (\code{FALSE})?}
   \item{level}{\code{NULL}, or a numeric vector of confidence levels for
     Wald bands, with every value strictly between zero and one.}
+  \item{interval}{Character. Use \code{"wald"} for fast confidence bands
+    from the joint penalized information. The default \code{"none"} retains
+    ordinary prediction behavior. Supplying \code{level} also selects Wald
+    bands.}
   \item{interval.cache}{Optional information factor obtained from the
     \code{"interval.cache"} attribute of a previous Wald prediction for the
     same, unchanged model. Reusing it avoids rebuilding the joint information
@@ -66,8 +70,8 @@ intervals for future observations, and they do not include smoothing-parameter
 or model-selection uncertainty.
 
 Wald intervals currently support maximum-likelihood fits with linear terms and
-standard \pkg{mgcv} smooths. They are not available for Bayesian fits, custom
-special terms, or automatic term-selection penalties. Wald intervals cannot be
+coefficient-linear \pkg{mgcv} smooths. They are not available for Bayesian fits
+or nonlinear custom special terms. Wald intervals cannot be
 combined with simulation controls such as \code{FUN}, \code{R}, \code{seed}, or
 \code{burnin}. The optional \code{interval.cache} can be reused for repeated
 predictions from the same unchanged model.
@@ -96,8 +100,8 @@ For multiple confidence levels, each is a list named by confidence percentage
 (for example, \code{"80\%"} and \code{"95\%"}), whose elements have that same
 prediction structure. The \code{fit} element is the ordinary, non-simulated
 prediction and \code{se.fit} is shared by all intervals. Attributes record the
-confidence levels, method, and reusable \code{interval.cache}. The cache retains
-a reference to the fitted model; reuse it only with that unchanged model.
+confidence levels, method, and reusable \code{interval.cache}. The cache stores
+the fitted inferential state and can be reused only with that unchanged model.
 }
 
 \seealso{

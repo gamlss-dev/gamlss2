@@ -1,4 +1,4 @@
-wald_information <- function(object)
+wald_information_legacy <- function(object)
 {
   if(inherits(object, "bamlss2"))
     stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
@@ -102,6 +102,28 @@ wald_information <- function(object)
     class = "gamlss2.interval.cache")
 }
 
+wald_information <- function(object)
+{
+  if(inherits(object, "bamlss2"))
+    stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
+  info <- joint_information(object)
+  if(any(info$map$reason == "aliased", na.rm = TRUE))
+    stop("Wald intervals require estimable coefficients; aliased coefficients were found.")
+  if(is.null(info$factor) || info$rank != info$dimension)
+    stop(paste0("The joint information matrix is not positive definite; ",
+      "Wald intervals are unavailable. Check convergence/identifiability."))
+  blocks <- lapply(info$blocks, function(x) lapply(x, function(z) {
+    list(label = z$label, names = z$names, index = z$index, size = z$size)
+  }))
+  structure(list(
+    R = info$factor,
+    blocks = blocks,
+    indices = info$indices,
+    information = info,
+    state = info$state
+  ), class = "gamlss2.interval.cache")
+}
+
 ## Only solve for the requested prediction variances, in bounded row chunks.
 wald_variance <- function(A, R)
 {
@@ -135,7 +157,8 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   if(is.null(cache)) {
     cache <- wald_information(object)
   } else if(!inherits(cache, "gamlss2.interval.cache") ||
-      !identical(cache$object, object)) {
+      !identical(cache$state, gamlss2_inference_state(object),
+        num.eq = FALSE, single.NA = FALSE)) {
     stop("'interval.cache' must come from the same, unchanged fitted model.")
   }
   family <- object$family

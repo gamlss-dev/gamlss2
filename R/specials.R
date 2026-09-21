@@ -1129,6 +1129,15 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
   rval <- fl(opt$par, rf = TRUE)
 
+  ## Adaptive term selection changes the penalty during fitting. Retain only
+  ## this otherwise unrecoverable final effective penalty.
+  if(isTRUE(control$termselect)) {
+    rval$penalty <- matrix(0, ncol(x$X), ncol(x$X))
+    for(k in seq_along(x$S))
+      rval$penalty <- rval$penalty +
+        rval$lambdas[k] * x$S[[k]]
+  }
+
   rval$transfer <- list(
     "lambdas" = rval$lambdas,
     "coefficients" = rval$coefficients,

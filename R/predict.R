@@ -3,9 +3,11 @@ predict.gamlss2 <- function(object,
   model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), 
   terms = NULL, se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval.cache = NULL)
+  level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 {
-  if(!is.null(level)) {
+  interval <- match.arg(interval)
+  if(!is.null(level) || interval == "wald") {
+    if(is.null(level)) level <- 0.95
     return(predict_wald(object, model, newdata, match.arg(type), terms,
       drop, list(...), level, interval.cache))
   }

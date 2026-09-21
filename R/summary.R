@@ -85,7 +85,7 @@ print.coef.gamlss2 <- function(x, ...)
 }
 
 ## Variance-covariance matrix.
-vcov.gamlss2 <- function(object, type = c("vcov", "cor", "se", "coef"), full = FALSE, ...)
+vcov_numeric_legacy <- function(object, type = c("vcov", "cor", "se", "coef"), full = FALSE, ...)
 {
   type <- match.arg(type)
 
@@ -454,9 +454,8 @@ par2list <- function(par)
 summary.gamlss2 <- function(object, ...)
 {
   df.res <- object$nobs - object$df
-  v <- vcov(object, full = FALSE)
   par <- coef(object, full = FALSE, dropall = FALSE)
-  se <- sqrt(abs(diag(v)))
+  se <- vcov(object, type = "se", full = FALSE)
   tvalue <- par / se
   if(length(df.res) == 1L && !is.na(df.res) && df.res > 0) {
     pvalue <- 2 * pt(-abs(tvalue), df.res)
@@ -649,10 +648,9 @@ print.summary.gamlss2 <- function(x,
 confint.gamlss2 <- function(object, parm, level = 0.95, ...)
 {
   co <- coef(object, full = FALSE, drop = TRUE)
-  v <- vcov(object, full = FALSE)
   a <- (1 - level)/2
   a <- c(a, 1 - a)
-  se <- sqrt(abs(diag(v)))
+  se <- vcov(object, type = "se", full = FALSE)
   ci <- co + se %o% qnorm(a)
   colnames(ci) <- paste0(round(a * 100, 3), "%")
   rownames(ci) <- gsub(".p.", ".", rownames(ci), fixed = TRUE)

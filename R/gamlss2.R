@@ -384,6 +384,9 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$weights <- weights
   rval$elapsed <- elapsed
 
+  ## Mutable cache permits lazy reuse without changing the fitted model state.
+  attr(rval, ".inference.cache") <- new.env(parent = emptyenv())
+
   ## Return model.frame, X and y.
   if(!control$light) {
     if(control$model) {
@@ -395,7 +398,9 @@ gamlss2.formula <- function(formula, data, family = NO,
     if(control$x) {
       rval$x <- X
     }
-    rval$results <- results(rval, data = mf)
+    ## Basic effect grids remain part of fitted objects. Joint information is
+    ## constructed only when intervals or another inferential extractor asks.
+    rval$results <- results(rval, data = mf, interval = "local")
   } else {
     rval$fitted.values <- NULL
     rval$weights <- NULL

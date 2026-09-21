@@ -556,6 +556,9 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               fit[[j]]$fitted.values <- m$fitted.values
               fit[[j]]$coefficients <- m$coefficients
 
+              if(ridge)
+                fit[[j]]$penalty <- m$penalty
+
               if(!is.null(m$edf))
                 fit[[j]]$edf <- m$edf
 

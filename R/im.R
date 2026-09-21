@@ -1,12 +1,5 @@
-## Image model term for gamlss2.
-##
-##   image -> same convolution -> ReLU -> spatial-pyramid pooling ->
-##   penalized linear output
-##
-## Spatial-pyramid pooling retains coarse location information (unlike global
-## average pooling alone), while keeping the number of output weights modest.
-## The output layer is solved exactly by weighted ridge regression at every
-## epoch.
+## Image model term using convolution, ReLU, spatial-pyramid pooling and a
+## weighted ridge output layer.
 
 ## Normalize c(height, width[, channels]).
 .im_image_dim <- function(image_dim, what = "dim")
@@ -34,8 +27,6 @@
     image_dim <- attr(x, "image_dim", exact = TRUE)
   image_dim <- .im_image_dim(image_dim)
 
-  ## A list is convenient in CNNfit() when images are already stored as
-  ## individual matrices or arrays.
   if(is.list(x) && !is.data.frame(x) && is.null(dim(x))) {
     if(!length(x))
       stop("im(): the image list is empty")
@@ -101,9 +92,7 @@
   stop("im(): image input must have dimensions n x p, n x H x W, or n x H x W x C")
 }
 
-## Scale each channel using training-data statistics. Channel-wise scaling
-## prevents, for example, one RGB channel with a large numerical range from
-## dominating all convolutional gradients.
+## Scale channels separately using training-data statistics.
 .im_scale_fit <- function(X, scale = TRUE)
 {
   C <- dim(X)[4L]
@@ -580,16 +569,7 @@ predict.base_cnn <- function(object, newdata, image_dim = NULL, ...)
   drop(object$par$a + P %*% object$par$v)
 }
 
-## gamlss2 image special constructor.
-##
-## The most compact data representation is a matrix-valued data-frame column:
-##
-##   dat$image <- I(X)       # X is n x (height * width * channels)
-##   gamlss2(y ~ im(image, dim = c(height, width, channels)), data = dat)
-##
-## CNNfit() also accepts a list of H x W matrices (or H x W x C arrays),
-## but gamlss2 model frames require the matrix-valued representation shown
-## above.
+## Image special constructor.
 im <- function(x, dim = NULL, ...)
 {
   expr <- substitute(x)

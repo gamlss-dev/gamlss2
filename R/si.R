@@ -1,19 +1,5 @@
-## Smooth image term.
-##
-## The image coefficient surface is represented by a tensor product
-## of marginal B-spline bases:
-##
-##   beta(h, w) = sum_j sum_k theta_jk Bh_j(h) Bw_k(w)
-##
-## and the image contribution is
-##
-##   f_i = sum_h sum_w x_i(h, w) beta(h, w).
-##
-## Hence the model matrix contains the projections of every image
-## onto the tensor-product basis.
-##
-## For multiple channels, one coefficient surface is fitted per
-## channel, with common smoothing parameters.
+## Smooth image term using tensor-product B-spline coefficient surfaces.
+## Multichannel surfaces share the two smoothing parameters.
 
 si <- function(x, dim = NULL, k = c(8L, 8L),
   degree = c(3L, 3L), m = c(2L, 2L), sp = NULL, ...)
@@ -81,7 +67,6 @@ si <- function(x, dim = NULL, k = c(8L, 8L),
     label = paste0("si(", term.label, ")"),
     by = "NA",
 
-    ## This is a two-dimensional smooth over the image domain.
     dim = 2L,
 
     image_dim = image_dim,
@@ -89,8 +74,7 @@ si <- function(x, dim = NULL, k = c(8L, 8L),
     degree = degree,
     m = m,
 
-    ## Important: x itself is matrix-valued, but si() handles the
-    ## image summation internally.
+    ## Image summation is handled internally.
     sumConv = FALSE
   )
 
@@ -106,8 +90,7 @@ si <- function(x, dim = NULL, k = c(8L, 8L),
 }
 
 
-## Extract the matrix-valued image variable from the data supplied by
-## smoothCon() or PredictMat().
+## Extract image data for smoothCon() or PredictMat().
 .si_data_image <- function(data, term)
 {
   if(!is.list(data) || is.null(data[[term]]))
@@ -117,22 +100,11 @@ si <- function(x, dim = NULL, k = c(8L, 8L),
 }
 
 
-## Project n images onto Bh(h) %*% Bw(w).
-##
-## This deliberately avoids explicitly constructing the large
-##
-##   (H * W) x (kh * kw)
-##
-## Kronecker basis matrix. Algebraically this is exactly the same as
-##
-##   X %*% kronecker(Bw, Bh),
-##
-## but requires much less memory for large images.
+## Project images without forming the full Kronecker basis matrix.
+## Equivalent to X %*% kronecker(Bw, Bh).
 .si_project <- function(x, image_dim, Bh, Bw)
 {
-  ## model.frame() may drop the dimensions of an AsIs matrix column and
-  ## provide its values as one flattened vector. Restore the n x p matrix
-  ## before handing it to the common image conversion routine.
+  ## Restore matrix dimensions dropped by model.frame().
   if(is.null(dim(x)) && (is.numeric(x) || is.logical(x))) {
     npix <- prod(image_dim)
     if(length(x) %% npix != 0L)
@@ -160,11 +132,7 @@ si <- function(x, dim = NULL, k = c(8L, 8L),
       dim = c(n, H, W)
     )
 
-    ## First contract the H dimension:
-    ##
-    ##   n x W x H  ->  (n W) x H
-    ##
-    ## then multiply by Bh.
+    ## Contract the image-height dimension with Bh.
     Xh <- matrix(
       aperm(Xi, c(1L, 3L, 2L)),
       nrow = n * W,
@@ -193,7 +161,7 @@ si <- function(x, dim = NULL, k = c(8L, 8L),
     Z[, jj] <- Xw
   }
 
-  ## Helpful column names for debugging / coefficient extraction.
+  ## Basis coefficient names.
   nm <- as.vector(
     outer(
       seq_len(kh),
@@ -249,7 +217,7 @@ smooth.construct.si.smooth.spec <- function(object, data, knots)
     intercept = TRUE
   )
 
-  ## Store these: prediction uses exactly the training image basis.
+  ## Retain the training bases for prediction.
   object$Bh <- Bh
   object$Bw <- Bw
 
@@ -268,12 +236,7 @@ smooth.construct.si.smooth.spec <- function(object, data, knots)
   Ph <- crossprod(Dh)
   Pw <- crossprod(Dw)
 
-  ## Coefficients are ordered:
-  ##
-  ##   h1.w1, h2.w1, ..., hkh.w1,
-  ##   h1.w2, ...
-  ##
-  ## which matches kronecker(Bw, Bh).
+  ## Coefficient order matches kronecker(Bw, Bh).
   Sh <- kronecker(diag(kw), Ph)
   Sw <- kronecker(Pw, diag(kh))
 
@@ -318,10 +281,7 @@ smooth.construct.si.smooth.spec <- function(object, data, knots)
 }
 
 
-## Prediction matrix.
-##
-## mgcv::PredictMat() will subsequently apply exactly the same
-## identifiability transformation that smoothCon() applied during fitting.
+## PredictMat() applies the identifiability constraint used for fitting.
 Predict.matrix.si.effect <- function(object, data)
 {
   x <- .si_data_image(data, object$term)

@@ -1167,9 +1167,7 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
   ## Keep old samples (if any).
   samples0 <- object$samples
 
-  ## Ensure x/y exist (works if model stored; like gamlss()).
-  ## NOTE: if the object was fitted with control$light = TRUE and no model stored,
-  ## you cannot reconstruct specials$X for MCMC. In that case, stop with message.
+  ## Reconstruct x and y from the stored model frame when needed.
   if(is.null(object$y) || is.null(object$x)) {
     mf <- model.frame(object, keepresponse = TRUE)
 

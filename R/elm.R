@@ -12,10 +12,8 @@ elm_normal_scale <- function(X) {
   p <- ncol(X)
   if(is.null(p) || p == 0L) stop("X must have at least one column")
 
-  ## Columns to scale: those that are NOT constant (intercept columns stay untouched).
   j <- !apply(X, 2, is_constant_col)
 
-  ## If nothing to scale, return identity.
   if(!any(j)) {
     return(function(X) {
       as.matrix(X)
@@ -24,7 +22,6 @@ elm_normal_scale <- function(X) {
 
   Xj <- X[, j, drop = FALSE]
 
-  ## Center + scale (protect against NA/0/near-0 sd).
   mX <- colMeans(Xj, na.rm = TRUE)
   sdX <- apply(Xj, 2, sd, na.rm = TRUE)
   sdX[!is.finite(sdX) | sdX < 1e-12] <- 1

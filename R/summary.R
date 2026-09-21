@@ -106,10 +106,7 @@ vcov_numeric_legacy <- function(object, type = c("vcov", "cor", "se", "coef"), f
   family <- object$family
   nx <- family$names
 
-  ## Helper: compute fitted special terms as fixed offsets.
-  ## This is used when full = FALSE, i.e. when only the linear
-  ## coefficients are varied but fitted smooth/special terms should
-  ## still enter the predictor.
+  ## Fitted special terms used as fixed offsets when full = FALSE.
   special_offset <- function(i)
   {
     off <- rep(0.0, n)
@@ -301,11 +298,8 @@ vcov_numeric_legacy <- function(object, type = c("vcov", "cor", "se", "coef"), f
   ## Convert Hessian of log-likelihood to negative Hessian.
   H <- -1 * H
 
-  ## Add smoothing penalty to the precision matrix for full = TRUE.
-  ## Penalized log-likelihood:
-  ##   l_p(theta) = l(theta) - 0.5 * theta' P theta
-  ## Therefore:
-  ##   -d2 l_p(theta) = -d2 l(theta) + P
+  ## Add P to the full precision matrix since
+  ## l_p(theta) = l(theta) - theta' P theta / 2.
   if(full) {
     P <- penalty_matrix(object, par)
     H <- H + P

@@ -1,5 +1,5 @@
 ## State used to validate the lazy inference cache.
-gamlss2_inference_state <- function(object)
+inference_state <- function(object)
 {
   linear.penalties <- lapply(object$fitted.linear, function(x) x$penalty)
   penalties <- lapply(object$fitted.specials, function(x) {
@@ -16,7 +16,7 @@ gamlss2_inference_state <- function(object)
 
 ## Construct coefficient blocks directly from the fitted model structure.
 ## Qualified coefficient names are output labels only and are never parsed.
-gamlss2_coefficient_structure <- function(object)
+coefficient_structure <- function(object)
 {
   if(is.null(object$fitted.values))
     stop("joint covariance requires retained fitted values; refit with light = FALSE")
@@ -192,7 +192,7 @@ gamlss2_coefficient_structure <- function(object)
 }
 
 ## Observation-wise negative Hessian on the linked predictor scale.
-gamlss2_curvature <- function(family, eta, par, y, a, b,
+curvature <- function(family, eta, par, y, a, b,
   method = c("joint", "working"))
 {
   method <- match.arg(method)
@@ -236,7 +236,7 @@ gamlss2_curvature <- function(family, eta, par, y, a, b,
 }
 
 ## Symmetric factorization with explicit handling of unidentified directions.
-gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
+factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
   p <- ncol(A)
 
   if(!p) {
@@ -257,10 +257,10 @@ gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
   if(!is.finite(ridge) || ridge <= 0)
     stop("'ridge' must be a positive finite number", call. = FALSE)
 
-  ## Enforce symmetry against small numerical asymmetries
+  ## Remove numerical asymmetry.
   A <- 0.5 * (A + t(A))
 
-  ## 1. Fast path: well-conditioned positive-definite information
+  ## Cholesky factor for well-conditioned information.
   R <- tryCatch(chol(A), error = function(e) NULL)
 
   if(!is.null(R)) {
@@ -278,7 +278,7 @@ gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
     }
   }
 
-  ## 2. Spectral fallback
+  ## Spectral fallback.
   ev <- eigen(A, symmetric = TRUE)
 
   lambda <- ev$values
@@ -286,8 +286,7 @@ gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
 
   scale <- max(1, max(abs(lambda)))
 
-  ## Tolerance used to determine the numerical rank of the
-  ## *original* information matrix.
+  ## Numerical-rank tolerance for the original information matrix.
   rank_tol <- max(p, 1L) * .Machine$double.eps * scale
 
   positive <- lambda > rank_tol
@@ -302,7 +301,7 @@ gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
     rep(FALSE, p)
   }
 
-  ## 3. Stabilize the inverse
+  ## Regularize small eigenvalues in rank-deficient fits.
   eigen_floor <- max(ridge * scale, rank_tol)
 
   lambda_stable <- pmax(lambda, eigen_floor)
@@ -318,7 +317,6 @@ gamlss2_factor_information <- function(A, ridge = sqrt(.Machine$double.eps)) {
 
   dimnames(V) <- dimnames(A)
 
-  ## 4. Diagnostics
   if(any(lambda < -rank_tol)) {
     warning(
       paste0(
@@ -369,7 +367,7 @@ joint_information <- function(object, method = c("joint", "working", "numeric"),
 {
   method <- match.arg(method)
   control <- list(...)
-  state <- gamlss2_inference_state(object)
+  state <- inference_state(object)
   cache.env <- attr(object, ".inference.cache", exact = TRUE)
   if(isTRUE(cache) && is.environment(cache.env)) {
     cached <- cache.env[[method]]
@@ -379,7 +377,7 @@ joint_information <- function(object, method = c("joint", "working", "numeric"),
       return(cached$value)
   }
 
-  z <- gamlss2_coefficient_structure(object)
+  z <- coefficient_structure(object)
   family <- object$family
   parameters <- family$names
   weights <- object$weights
@@ -443,7 +441,7 @@ joint_information <- function(object, method = c("joint", "working", "numeric"),
       for(jj in seq.int(ii, length(active))) {
         b <- active[jj]
         ib <- z$indices[[b]]
-        h <- gamlss2_curvature(family, z$eta, par, z$y, a, b, method)
+        h <- curvature(family, z$eta, par, z$y, a, b, method)
         if(length(h) != z$n || any(!is.finite(h)))
           stop("non-finite family curvature for parameters '", a,
             "' and '", b, "'")
@@ -457,7 +455,7 @@ joint_information <- function(object, method = c("joint", "working", "numeric"),
   }
   precision <- 0.5 * (precision + t(precision))
   dimnames(information) <- dimnames(precision) <- dimnames(z$penalty)
-  factor <- gamlss2_factor_information(precision)
+  factor <- factor_information(precision)
   rval <- c(z[c("blocks", "designs", "indices", "map", "coefficients",
     "active.coefficients", "dimension")], list(
       information = information, penalty = z$penalty, precision = precision,
@@ -474,7 +472,7 @@ joint_information <- function(object, method = c("joint", "working", "numeric"),
 ## Effect and prediction intervals need a positive precision factor. Preserve
 ## the observed covariance API, but use the explicit working approximation
 ## when observed curvature is indefinite.
-gamlss2_interval_information <- function(object, method = "joint", warn = TRUE)
+interval_information <- function(object, method = "joint", warn = TRUE)
 {
   info <- if(method == "joint")
     suppressWarnings(joint_information(object, method = method)) else
@@ -492,7 +490,7 @@ gamlss2_interval_information <- function(object, method = "joint", warn = TRUE)
   info
 }
 
-gamlss2_information_vcov <- function(info)
+information_vcov <- function(info)
 {
   if(!is.null(info$covariance)) return(info$covariance)
   if(is.null(info$factor))
@@ -503,19 +501,19 @@ gamlss2_information_vcov <- function(info)
 }
 
 ## Expand active covariance to the complete external coefficient ordering.
-gamlss2_expand_vcov <- function(info)
+expand_vcov <- function(info)
 {
   p <- nrow(info$map)
   V <- matrix(0, p, p, dimnames = list(info$map$name, info$map$name))
   active <- which(info$map$active)
-  if(length(active)) V[active, active] <- gamlss2_information_vcov(info)
+  if(length(active)) V[active, active] <- information_vcov(info)
   aliased <- which(info$map$reason == "aliased")
   if(length(aliased)) V[aliased, ] <- V[, aliased] <- NA_real_
   V
 }
 
 ## Prediction variances without constructing a dense inverse on the full-rank path.
-gamlss2_information_variance <- function(A, info)
+information_variance <- function(A, info)
 {
   n <- nrow(A)
   variance <- numeric(n)
@@ -527,14 +525,14 @@ gamlss2_information_variance <- function(A, info)
       variance[rows] <- colSums(B * B)
     }
   } else {
-    V <- gamlss2_information_vcov(info)
+    V <- information_vcov(info)
     variance <- rowSums((A %*% V) * A)
   }
   variance
 }
 
 ## Draw from N(beta, A^-1) using the precision factor directly.
-gamlss2_information_draws <- function(info, R)
+information_draws <- function(info, R)
 {
   if(is.null(info$factor) || info$rank != info$dimension)
     stop("Gaussian coefficient draws require full-rank positive definite information")

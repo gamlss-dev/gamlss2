@@ -11,7 +11,7 @@ vcov.gamlss2 <- function(object,
 
   info <- joint_information(object, method = method, ...)
   keep <- if(full) seq_len(nrow(info$map)) else which(info$map$type == "linear")
-  Vfull <- gamlss2_expand_vcov(info)
+  Vfull <- expand_vcov(info)
   V <- Vfull[keep, keep, drop = FALSE]
   if(type == "cor") {
     se <- sqrt(diag(V))

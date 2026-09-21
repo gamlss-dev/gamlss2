@@ -22,7 +22,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
   local.fallback <- dots$.local.fallback %||% FALSE
   information <- draws <- NULL
   if(!inherits(x, "bamlss2") && !interval %in% c("none", "local"))
-    information <- gamlss2_interval_information(x, method = method,
+    information <- interval_information(x, method = method,
       warn = inference.warn)
   calculation <- interval
   if(isTRUE(local.fallback) && interval == "wald" &&
@@ -124,7 +124,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
 
                 } else if(calculation == "wald") {
                   ## Pointwise Wald band.
-                  v <- gamlss2_information_variance(A, information)
+                  v <- information_variance(A, information)
                   se <- sqrt(v)
                   z <- qnorm(1 - (1 - level) / 2)
                   nd$lower <- nd$fit - z * se
@@ -134,7 +134,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
                   ## Draw through the joint precision factor, retaining
                   ## covariance with every other fitted coefficient.
                   if(is.null(draws))
-                    draws <- gamlss2_information_draws(information, nsim)
+                    draws <- information_draws(information, nsim)
                   f_draw <- if(length(block$index))
                     X[, block$active, drop = FALSE] %*%
                       draws[block$index, , drop = FALSE] else
@@ -468,7 +468,7 @@ results_linear <- function(x, parameter = NULL, data,
       } else if(!is.null(information)) {
         A <- matrix(0, nrow(Xjc), information$dimension)
         A[, ind] <- Xjc
-        sj <- sqrt(gamlss2_information_variance(A, information))
+        sj <- sqrt(information_variance(A, information))
       } else if(is.null(Vj)) {
         sj <- rep(NA_real_, length(fit))
       } else {

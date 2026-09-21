@@ -106,7 +106,7 @@ wald_information <- function(object)
 {
   if(inherits(object, "bamlss2"))
     stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
-  info <- gamlss2_interval_information(object)
+  info <- interval_information(object)
   if(any(info$map$reason == "aliased", na.rm = TRUE))
     stop("Wald intervals require estimable coefficients; aliased coefficients were found.")
   if(is.null(info$factor) || info$rank != info$dimension)
@@ -157,7 +157,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   if(is.null(cache)) {
     cache <- wald_information(object)
   } else if(!inherits(cache, "gamlss2.interval.cache") ||
-      !identical(cache$state, gamlss2_inference_state(object),
+      !identical(cache$state, inference_state(object),
         num.eq = FALSE, single.NA = FALSE)) {
     stop("'interval.cache' must come from the same, unchanged fitted model.")
   }

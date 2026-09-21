@@ -27,6 +27,8 @@ website:
           file: vignettes/families.qmd
         - text: "Family extensions"
           file: vignettes/family_extensions.qmd
+        - text: "Bayesian GAMLSS"
+          file: vignettes/bayesian.qmd
         - text: "Specials"
           file: vignettes/specials.qmd
         - text: "Evaluation"

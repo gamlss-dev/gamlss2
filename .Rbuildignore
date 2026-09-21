@@ -32,4 +32,5 @@ README.qmd
 ^vignettes/s_pb\.qmd$
 ^vignettes/topmodels\.qmd$
 ^vignettes/modifiers\.qmd$
+^vignettes/bayesian\.qmd$
 LICENSE

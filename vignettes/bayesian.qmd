@@ -1,0 +1,268 @@
+---
+title: "Bayesian GAMLSS with `gamlss2`"
+format:
+  html:
+    html-math-method: mathjax
+    toc: true
+    number-sections: true
+bibliography: gamlss2.bib
+vignette: >
+  %\VignetteIndexEntry{Bayesian GAMLSS with gamlss2}
+  %\VignetteEngine{quarto::html}
+  %\VignetteDepends{gamlss2}
+  %\VignetteKeywords{Bayesian distributional regression, MCMC}
+  %\VignettePackage{gamlss2}
+---
+
+Generalized additive models for location, scale, and shape can be estimated by
+penalized likelihood or by Bayesian sampling. In `gamlss2`, Bayesian estimation
+uses the same distributional formulas, family objects, and smooth terms as the
+usual fitting functions. The sampler follows the Bayesian additive model
+framework described by @bamlss2018.
+
+There are two convenient ways to run the sampler. Function `bamlss2()` fits a
+model directly by MCMC, whereas `mcmc()` starts from an already fitted
+`gamlss2` model. This vignette illustrates both workflows and shows how to
+inspect posterior effects, samples, and predictions.
+
+## Data and model
+
+We use the `airquality` data and model daily ozone concentration. Ozone is
+positive and right-skewed, so a Gamma distribution is a useful starting point.
+The location parameter `mu` is modeled as a smooth function of temperature and
+wind speed, while the scale parameter `sigma` varies smoothly with
+temperature.
+
+```{r}
+#| message: false
+library("gamlss2")
+
+air <- subset(airquality, !is.na(Ozone))
+```
+
+```{r}
+#| fig-height: 4.5
+#| fig-width: 6
+#| fig-align: center
+par(mar = c(4, 4, 1, 1))
+plot(Ozone ~ Temp, data = air,
+  pch = 16, col = adjustcolor(1, 0.3),
+  xlab = "Temperature (F)", ylab = "Ozone")
+```
+
+The distributional formula is
+
+```{r}
+f <- Ozone ~ s(Temp) + s(Wind) | s(Temp)
+```
+
+The first right-hand side specifies the predictor for `mu`; the second specifies
+the predictor for `sigma`. The same formula can therefore be used for
+likelihood-based and Bayesian estimation.
+
+## Bayesian estimation
+
+The convenience function `bamlss2()` sets up the model and runs the Bayesian
+sampler. By default, a small number of backfitting iterations is performed
+first to obtain starting values before MCMC sampling begins.
+
+```{r}
+set.seed(1328)
+m <- bamlss2(
+  f,
+  data = air,
+  family = GA,
+  n.iter = 1200,
+  burnin = 200,
+  thin = 1,
+  trace = FALSE
+)
+```
+
+The returned object inherits from class `gamlss2`, so the usual extractor and
+plotting methods remain available. In addition, it contains the retained MCMC
+samples.
+
+```{r}
+summary(m)
+```
+
+The sampler uses block Metropolis-Hastings updates for linear and smooth
+coefficients. Smooth terms are updated using penalized weighted least squares
+proposals, while smoothing variances are sampled by inverse Gamma or slice sampling.
+See `?BS` for details of the sampler.
+
+## Posterior effects
+
+Calling `plot()` displays the fitted additive effects. For a Bayesian fit these
+are obtained from the posterior samples stored in the fitted object.
+
+```{r}
+#| fig-height: 4
+#| fig-width: 9
+#| fig-align: center
+par(mar = c(4, 4, 1, 1))
+plot(m)
+```
+
+The MCMC draws are available in the `samples` component. For example, the
+intercept draws for the distribution parameters can be inspected directly.
+
+```{r}
+cn <- grep("(Intercept)", colnames(m$samples),
+  fixed = TRUE, value = TRUE)
+head(m$samples[, cn, drop = FALSE])
+```
+
+## MCMC diagnostics
+
+Posterior summaries are only useful if the sampler has explored the relevant
+part of the parameter space adequately. Trace plots and autocorrelation plots
+can be obtained with `which = "samples"`. Here we inspect the intercept in the
+`mu` model.
+
+```{r}
+#| fig-height: 4
+#| fig-width: 8
+#| fig-align: center
+plot(m, which = "samples", model = "mu",
+  terms = "(Intercept)", lag.max = 60)
+```
+
+The `model` and `terms` arguments can be used to select other coefficients.
+Smooth terms contain several basis coefficients, so inspecting a smooth can
+produce several trace and autocorrelation plots.
+
+The values of `n.iter`, `burnin`, and `thin` used above are suitable for a
+compact example, but they are not a general convergence rule. For an applied
+analysis the chains should be inspected and the number of iterations increased
+when necessary.
+
+Sampling can be extended by calling `mcmc()` again on the fitted object. The
+existing draws are retained and the newly retained draws are appended to
+`samples`, so the call can be repeated as necessary. The `burnin` argument
+applies to each additional run.
+
+```{r}
+#| eval: false
+m <- mcmc(m,
+  n.iter = 1200,
+  burnin = 200,
+  thin = 1,
+  trace = FALSE
+)
+```
+
+## Posterior predictions
+
+For an object returned by `bamlss2()`, `predict()` uses the stored posterior
+samples when a summary function is supplied with `FUN`. We evaluate the model
+over the observed temperature range and keep wind speed fixed at its median.
+
+```{r}
+nd <- data.frame(
+  Temp = seq(min(air$Temp), max(air$Temp), length.out = 100),
+  Wind = median(air$Wind)
+)
+
+post_interval <- function(x) {
+  q <- quantile(x, probs = c(0.025, 0.5, 0.975), na.rm = TRUE)
+  setNames(q, c("lower", "fit", "upper"))
+}
+
+pmu <- predict(m, newdata = nd, model = "mu",
+  FUN = post_interval)
+psigma <- predict(m, newdata = nd, model = "sigma",
+  FUN = post_interval)
+
+head(pmu)
+```
+
+The resulting intervals describe posterior uncertainty in the distribution
+parameters. They are not prediction intervals for a future ozone observation.
+
+```{r}
+#| fig-height: 4
+#| fig-width: 9
+#| fig-align: center
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1))
+
+plot(Ozone ~ Temp, data = air,
+  pch = 16, col = adjustcolor(1, 0.2),
+  xlab = "Temperature (F)", ylab = expression(mu))
+polygon(c(nd$Temp, rev(nd$Temp)),
+  c(pmu$lower, rev(pmu$upper)),
+  border = NA, col = adjustcolor(4, 0.15))
+lines(nd$Temp, pmu$fit, col = 4, lwd = 2)
+
+plot(nd$Temp, psigma$fit, type = "n",
+  ylim = range(psigma[, c("lower", "upper")]),
+  xlab = "Temperature (F)", ylab = expression(sigma))
+polygon(c(nd$Temp, rev(nd$Temp)),
+  c(psigma$lower, rev(psigma$upper)),
+  border = NA, col = adjustcolor(4, 0.15))
+lines(nd$Temp, psigma$fit, col = 4, lwd = 2)
+
+par(op)
+```
+
+Other posterior summaries can be obtained by changing `FUN`. For example,
+posterior means and standard deviations are returned with
+
+```{r}
+head(predict(m, newdata = nd, FUN = mean))
+head(predict(m, newdata = nd, FUN = sd))
+```
+
+## Starting from a fitted `gamlss2` model
+
+Bayesian sampling can also be started from an existing likelihood-based fit.
+This is useful when a model has already been developed with `gamlss2()` and the
+same specification should subsequently be sampled. Function `mcmc()` uses the
+fitted coefficients and smoothing parameters as starting values and merges the
+posterior output back into the model object.
+
+```{r}
+m <- gamlss2(f, data = air, family = GA, trace = FALSE)
+```
+
+The corresponding MCMC fit is obtained with
+
+```{r}
+#| eval: false
+set.seed(1328)
+m2 <- mcmc(m,
+  n.iter = 1200,
+  burnin = 200,
+  thin = 1,
+  trace = FALSE
+)
+```
+
+Once fitted, `m2` supports the same posterior summaries and plots as the object
+returned by `bamlss2()`.
+
+The fitted model supplied to `mcmc()` must retain the design information needed
+by the sampler. In particular, reduced model objects that discard this
+information cannot be used to restart sampling.
+
+## Practical remarks
+
+The Bayesian and likelihood-based interfaces deliberately share the same model
+specification. This makes it possible to develop a distributional model with
+`gamlss2()` and switch to MCMC without rewriting its formula or family.
+For Bayesian fits, a few points are especially useful:
+
+1. set a seed when reproducible posterior draws are required;
+2. inspect trace and autocorrelation plots rather than relying only on posterior
+   summaries;
+3. increase `n.iter` when the retained draws do not provide adequate mixing;
+4. use `predict(..., FUN = ...)` to summarize uncertainty from the stored
+   posterior samples; and
+5. distinguish posterior uncertainty in distribution parameters from
+   predictive variation in the response.
+
+The general GAMLSS formulation is described in @Rigby+Stasinopoulos:2005. For
+the Bayesian additive distributional framework and the MCMC methodology, see
+@bamlss2018.
+

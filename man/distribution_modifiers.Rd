@@ -72,7 +72,9 @@ round_family(family = NO, digits = 0L)
     Optional character string used as the modified family label.
   }
   \item{lower, upper}{
-    Fixed scalar lower and upper truncation or censoring boundaries.
+    Fixed scalar lower and upper truncation or censoring boundaries. For
+    \code{censor_family()}, leaving both at their infinite defaults constructs
+    an observation-specific right-censored family for a \code{Surv} response.
   }
   \item{include}{
     Logical vector of length two indicating whether the lower and upper
@@ -113,9 +115,14 @@ round_family(family = NO, digits = 0L)
   The function \code{truncate_family} conditions the base distribution on
   the interval selected by \code{lower}, \code{upper}, and \code{include}.
   Its density or probability mass is divided by the probability of the
-  retained interval. In contrast, \code{censor_family} observes
+  retained interval. With at least one finite boundary,
+  \code{censor_family} observes
   \deqn{Y = \min(\max(X, lower), upper)}
   and consequently creates point masses at finite censoring boundaries.
+  With both boundaries left infinite, it instead accepts a right-censored
+  \code{survival::Surv(time, status)} response. An observed event contributes
+  the base density or mass at \code{time}; a censored observation contributes
+  the base survival probability beyond \code{time}.
   Truncation and censoring reuse base-family derivatives where possible and
   differentiate only the additional probability terms.
 

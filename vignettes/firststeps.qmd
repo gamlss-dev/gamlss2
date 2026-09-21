@@ -136,9 +136,7 @@ but do not by themselves establish out-of-sample calibration.
 
 ## Distributional predictions
 
-We now evaluate the fitted seasonal cycle on each day of a non-leap year. The
-data encode day of year starting at zero, so plotting uses `yday + 1` for the
-more familiar range from 1 to 365.
+We now evaluate the fitted seasonal cycle on each day of the year.
 
 ```{r}
 nd <- data.frame(yday = 0:364)
@@ -187,7 +185,7 @@ pq <- quantile(m2, newdata = nd, probs = c(0.05, 0.5, 0.95))
 #| fig-width: 6
 #| fig-align: center
 par(mar = c(4, 4, 1, 1))
-plot(bikes ~ I(yday + 1), data = HarzTraffic,
+plot(bikes ~ yday, data = HarzTraffic,
   pch = 16, col = adjustcolor(1, 0.2),
   xlab = "Day of year", ylab = "Motorcycles")
 matlines(nd$yday + 1, pq,
@@ -218,3 +216,4 @@ response distributions. The
 vignette covers terms beyond standard
 `mgcv`
 smooths.
+

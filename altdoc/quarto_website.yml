@@ -25,6 +25,8 @@ website:
           file: vignettes/firststeps.qmd
         - text: "Families"
           file: vignettes/families.qmd
+        - text: "Distribution modifiers"
+          file: vignettes/modifiers.qmd
         - text: "Specials"
           file: vignettes/specials.qmd
         - text: "Evaluation"

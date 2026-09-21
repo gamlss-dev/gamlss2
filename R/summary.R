@@ -423,10 +423,11 @@ penalty_matrix <- function(object, par)
 par2list <- function(par)
 {
   np <- names(par)
-  pn <- strsplit(np, ".", fixed = TRUE)
-  nx <- sapply(pn, function(x) x[1])
-  ps <- sapply(pn, function(x) x[2])
-  lab <- sapply(pn, function(x) x[3])
+  pn <- regexpr("\\.[ps]\\.", np)
+  nx <- substring(np, 1L, pn - 1L)
+  ps <- substring(np, pn + 1L, pn + 1L)
+  lab <- substring(np, pn + 3L)
+  lab <- sapply(strsplit(lab, ".", fixed = TRUE), function(x) x[1L])
   lab[ps == "p"] <- ""
   pl <- list()
   for(i in unique(nx)) {
@@ -471,8 +472,7 @@ summary.gamlss2 <- function(object, ...)
     c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
   ctl <- NULL
   if(nrow(ct) > 0L) {
-    nx <- unique(sapply(strsplit(names(par), ".", fixed = TRUE),
-      function(x) x[1L]))
+    nx <- object$family$names
     ctl <- list()
     for(i in nx) {
       pj <- paste0(i, ".p.")
@@ -509,10 +509,7 @@ summary.bamlss2 <- function(object, thres = 0.01, ...)
     }))
     colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
   } else ct <- matrix(numeric(0L), nrow = 0L, ncol = 0L)
-  nx <- if(length(par)) {
-    unique(sapply(strsplit(names(par), ".", fixed = TRUE),
-      function(x) x[1L]))
-  } else character(0L)
+  nx <- if(length(par)) object$family$names else character(0L)
   ctl <- list()
   for(i in nx) {
     pj <- paste0(i, ".p.")
@@ -553,10 +550,7 @@ summary.gamlss2.mcmc <- function(object, thres = 0.01, ...)
     }))
     colnames(ct)[ncol(ct)] <- paste0("Pr(<|", thres, "|)")
   } else ct <- matrix(numeric(0L), nrow = 0L, ncol = 0L)
-  nx <- if(length(par)) {
-    unique(sapply(strsplit(names(par), ".", fixed = TRUE),
-      function(x) x[1L]))
-  } else character(0L)
+  nx <- if(length(par)) object$family$names else character(0L)
   ctl <- list()
   for(i in nx) {
     pj <- paste0(i, ".p.")

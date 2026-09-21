@@ -561,7 +561,7 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
   fam
 }
 
-## Construct the observed law after deterministic boundary censoring.
+## Construct the observed law after fixed-boundary or right censoring.
 censor_family <- function(family = NO, lower = -Inf, upper = Inf)
 {
   family <- complete_family(family)
@@ -570,7 +570,7 @@ censor_family <- function(family = NO, lower = -Inf, upper = Inf)
     stop("'lower' and 'upper' must define a nonempty fixed interval",
       call. = FALSE)
   if(!is.finite(lower) && !is.finite(upper))
-    stop("at least one censoring boundary must be finite", call. = FALSE)
+    return(.right_censor_family(family))
 
   lower.logprob <- function(par, n) {
     if(!is.finite(lower)) return(rep.int(-Inf, n))
@@ -670,6 +670,99 @@ censor_family <- function(family = NO, lower = -Inf, upper = Inf)
   fam$support <- NULL
   fam$mean <- .modifier_no_moment("the censored mean")
   fam$variance <- .modifier_no_moment("the censored variance")
+  class(fam) <- "gamlss2.family"
+  fam
+}
+
+## Construct a family for observation-specific right censoring. The response
+## is survival::Surv(time, status), with status equal to one for an event.
+.right_censor_family <- function(family)
+{
+  response <- function(y) {
+    if(!inherits(y, "Surv") || !identical(attr(y, "type"), "right"))
+      stop("the response must be a right-censored 'Surv' object",
+        call. = FALSE)
+    list(time = as.numeric(y[, "time"]), status = as.numeric(y[, "status"]))
+  }
+  log_survival <- function(par, time)
+    .modifier_call_cdf(
+      family, par, time, lower.tail = FALSE, log.p = TRUE
+    )
+
+  fam <- .modifier_family(
+    family, paste0("RightCensored(", family$family[1L], ")"), family$type
+  )
+  fam$pdf <- function(par, y, log = FALSE, ...) {
+    yy <- response(y)
+    value <- family$pdf(par = par, y = yy$time, log = TRUE, ...)
+    censored <- yy$status == 0
+    if(any(censored)) {
+      n <- length(yy$time)
+      value[censored] <- log_survival(
+        .modifier_subset(par, censored, n), yy$time[censored]
+      )
+    }
+    if(log) value else exp(value)
+  }
+  fam$cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE, ...)
+    .modifier_call_cdf(
+      family, par, y, lower.tail = lower.tail, log.p = log.p, ...
+    )
+  fam$quantile <- function(par, p, lower.tail = TRUE, log.p = FALSE, ...)
+    .modifier_call_quantile(
+      family, par, p, lower.tail = lower.tail, log.p = log.p, ...
+    )
+  fam$random <- function(par, n, ...)
+    family$random(par = par, n = n, ...)
+
+  links <- .modifier_links(family)
+  fam$score <- list()
+  for(parameter in family$names) {
+    base.score <- family$score[[parameter]]
+    fam$score[[parameter]] <- local({
+      id <- parameter
+      score <- base.score
+      link <- links[[parameter]]
+      function(par, y, ...) {
+        yy <- response(y)
+        n <- length(yy$time)
+        value <- .modifier_recycle(
+          score(par = par, y = yy$time, ...), n
+        )
+        censored <- yy$status == 0
+        if(any(censored)) {
+          pp <- .modifier_subset(par, censored, n)
+          fun <- function(p)
+            log_survival(p, yy$time[censored])
+          value[censored] <- .modifier_fd_score(fun, pp, id, link)
+        }
+        value
+      }
+    })
+  }
+  fam$hessian <- .modifier_score_hessians(fam$score, family)
+  fam$update <- NULL
+  fam$log_likelihood <- function(par, y, ...)
+    sum(fam$pdf(par = par, y = y, log = TRUE, ...), na.rm = TRUE)
+  fam$valid.response <- function(y) {
+    yy <- response(y)
+    all(yy$status %in% 0:1) && family$valid.response(yy$time)
+  }
+  fam$rqres <- function(par, y, ...) {
+    yy <- response(y)
+    probability <- .modifier_call_cdf(family, par, yy$time, ...)
+    censored <- yy$status == 0
+    probability[censored] <- stats::runif(
+      sum(censored), probability[censored], 1
+    )
+    stats::qnorm(probability)
+  }
+  if(!is.null(family$initialize)) {
+    fam$initialize <- lapply(family$initialize, function(initialize) {
+      if(!is.function(initialize)) return(initialize)
+      function(y, ...) initialize(response(y)$time, ...)
+    })
+  }
   class(fam) <- "gamlss2.family"
   fam
 }

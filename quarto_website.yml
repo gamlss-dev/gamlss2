@@ -25,8 +25,8 @@ website:
           file: vignettes/firststeps.qmd
         - text: "Families"
           file: vignettes/families.qmd
-        - text: "Distribution modifiers"
-          file: vignettes/modifiers.qmd
+        - text: "Family extensions"
+          file: vignettes/family_extensions.qmd
         - text: "Specials"
           file: vignettes/specials.qmd
         - text: "Evaluation"
@@ -125,8 +125,8 @@ website:
               file: man/ALD.qmd
             - text: discretize
               file: man/discretize.qmd
-            - text: distribution_modifiers
-              file: man/distribution_modifiers.qmd
+            - text: family_extensions
+              file: man/family_extensions.qmd
             - text: family.distribution
               file: man/family.distribution.qmd
             - text: find_family

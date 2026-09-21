@@ -182,8 +182,8 @@ window.Quarto = {
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/modifiers.qmd">
- <span class="dropdown-text">Distribution modifiers</span></a>
+    <a class="dropdown-item" href="../vignettes/family_extensions.html">
+ <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
@@ -347,7 +347,7 @@ Link functions: identity, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      42.956      1.710   25.12   &lt;2e-16 ***
+mu.(Intercept)      42.956      1.885   22.79   &lt;2e-16 ***
 sigma.(Intercept)    2.544      0.100   25.44   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -359,7 +359,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.44 res.df =  45.56
 Deviance = 396.3244 Null Dev. Red. = 14.92%
-AIC = 405.1972 elapsed =  0.06sec</code></pre>
+AIC = 405.1972 elapsed =  0.07sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -406,9 +406,9 @@ AIC = 405.1972 elapsed =  0.06sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       r_1       r_2
-1  7.28536  31.55159
-2 33.74751  46.34305
-3 97.40617 125.19083</code></pre>
+1 18.49213  26.29771
+2 59.48556  69.63300
+3 91.47299 103.72111</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -595,8 +595,8 @@ Link functions: log, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.53026    0.02105   167.7   &lt;2e-16 ***
-sigma.(Intercept) -0.99255    0.06362   -15.6   &lt;2e-16 ***
+mu.(Intercept)     3.53026    0.04085   86.41   &lt;2e-16 ***
+sigma.(Intercept) -0.99255    0.06660  -14.90   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
@@ -608,7 +608,7 @@ sigma.s(Temp) 7.4969
 *--------
 n = 116 df =  20.63 res.df =  95.37
 Deviance = 899.7046 Null Dev. Red. = 16.93%
-AIC = 940.974 elapsed =  0.45sec</code></pre>
+AIC = 940.974 elapsed =  0.48sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -664,7 +664,7 @@ Link functions: identity, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      42.956      1.710   25.12   &lt;2e-16 ***
+mu.(Intercept)      42.956      1.885   22.79   &lt;2e-16 ***
 sigma.(Intercept)    2.544      0.100   25.44   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

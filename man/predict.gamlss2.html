@@ -152,8 +152,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/modifiers.qmd">
- <span class="dropdown-text">Distribution modifiers</span></a>
+    <a class="dropdown-item" href="../vignettes/family_extensions.html">
+ <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
@@ -473,8 +473,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/distribution_modifiers.qmd" class="sidebar-item-text sidebar-link">
- <span class="menu-text">distribution_modifiers</span></a>
+  <a href="../man/family_extensions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">family_extensions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -643,7 +643,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 predict(object, model = NULL, newdata = NULL,
   type = c("parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval.cache = NULL)
+  level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -715,6 +715,14 @@ Logical. Should the predictions be simplified to a vector if possible (<code>TRU
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="interval">interval</code>
+</td>
+<td>
+Character. Use <code>“wald”</code> for fast confidence bands from the joint penalized information. The default <code>“none”</code> retains ordinary prediction behavior. Supplying <code>level</code> also selects Wald bands.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="interval.cache">interval.cache</code>
 </td>
 <td>
@@ -736,14 +744,14 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 <p>Predictions can be computed for the original observations or for <code>newdata</code>. Depending on <code>type</code>, results are returned on the link scale, as distribution parameters, as individual model terms, or as the fitted response mean.</p>
 <p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the approximate distribution of the fitted coefficients.</p>
 <p>If <code>level</code> is specified, approximate pointwise confidence intervals and standard errors are computed analytically, without simulation. Intervals on transformed parameter or response scales are transformed as needed and may be asymmetric. These are confidence intervals for the fitted model, not prediction intervals for future observations, and they do not include smoothing-parameter or model-selection uncertainty.</p>
-<p>Wald intervals currently support maximum-likelihood fits with linear terms and standard <span class="pkg">mgcv</span> smooths. They are not available for Bayesian fits, custom special terms, or automatic term-selection penalties. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>. The optional <code>interval.cache</code> can be reused for repeated predictions from the same unchanged model.</p>
+<p>Wald intervals currently support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths. They are not available for Bayesian fits or nonlinear custom special terms. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>. The optional <code>interval.cache</code> can be reused for repeated predictions from the same unchanged model.</p>
 <p>For <code>type = “terms”</code>, term names are partially matched by default. Use <code>nogrep = TRUE</code> in <code>…</code> for exact matching.</p>
 <p>See also <code>prodist.gamlss2</code> for creating a full <span class="pkg">distributions3</span> object for moments, probabilities, quantiles, and random numbers.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>If <code>drop = FALSE</code>, a data frame is returned. If <code>drop = TRUE</code> (the default), the result may be simplified to a numeric vector when possible. For <code>type = “terms”</code>, a data frame is returned with one column per selected term. Multi-parameter models return a list of term matrices. For <code>se.fit = TRUE</code>, the returned object contains fitted values and corresponding simulation-based standard errors.</p>
-<p>When <code>level</code> is specified, a list with elements <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code> is returned. For one confidence level, <code>lower</code> and <code>upper</code> follow the structure of the ordinary point prediction, including <code>model</code>, <code>terms</code>, and <code>drop</code> selection. For multiple confidence levels, each is a list named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>), whose elements have that same prediction structure. The <code>fit</code> element is the ordinary, non-simulated prediction and <code>se.fit</code> is shared by all intervals. Attributes record the confidence levels, method, and reusable <code>interval.cache</code>. The cache retains a reference to the fitted model; reuse it only with that unchanged model.</p>
+<p>When <code>level</code> is specified, a list with elements <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code> is returned. For one confidence level, <code>lower</code> and <code>upper</code> follow the structure of the ordinary point prediction, including <code>model</code>, <code>terms</code>, and <code>drop</code> selection. For multiple confidence levels, each is a list named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>), whose elements have that same prediction structure. The <code>fit</code> element is the ordinary, non-simulated prediction and <code>se.fit</code> is shared by all intervals. Attributes record the confidence levels, method, and reusable <code>interval.cache</code>. The cache stores the fitted inferential state and can be reused only with that unchanged model.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -832,9 +840,9 @@ GAMLSS-RS iteration  7: Global Deviance = 405.1254 eps = 0.000008     </code></p
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    mu.fit    mu.se sigma.fit  sigma.se
-1 23.03061 1.905441  10.07295  1.581378
-2 59.15801 3.448490  18.68117  3.097985
-3 97.13012 9.551415  34.44905 13.699669</code></pre>
+1 23.03061 1.853903  10.08226  1.633621
+2 59.15801 3.530757  18.71825  3.326540
+3 97.13012 9.255354  34.98770 16.460509</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fast pointwise confidence bands, without sampling</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">level =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.95</span>))</span>

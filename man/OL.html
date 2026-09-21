@@ -181,8 +181,8 @@ window.Quarto = {
  <span class="dropdown-text">Families</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/modifiers.qmd">
- <span class="dropdown-text">Distribution modifiers</span></a>
+    <a class="dropdown-item" href="../vignettes/family_extensions.html">
+ <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/specials.html">
@@ -502,8 +502,8 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/distribution_modifiers.qmd" class="sidebar-item-text sidebar-link">
- <span class="menu-text">distribution_modifiers</span></a>
+  <a href="../man/family_extensions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">family_extensions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -767,22 +767,20 @@ Family: Ordered Logit (3 categories)
 Link functions: identity, identity, identity
 *--------
 Coefficients:
-                       Estimate Std. Error t value Pr(&gt;|t|)  
-location.(Intercept)    -0.1969   223.6070  -0.001   0.9993  
-location.InflMedium      0.5665     0.5366   1.056   0.2952  
-location.InflHigh        1.2889     0.5570   2.314   0.0239 *
-location.TypeApartment  -0.5724     0.6343  -0.902   0.3703  
-location.TypeAtrium     -0.3662     0.6362  -0.576   0.5669  
-location.TypeTerrace    -1.0911     0.6400  -1.705   0.0931 .
-location.ContHigh        0.3603     0.4461   0.808   0.4223  
-theta1.(Intercept)      -0.6932   223.6070  -0.003   0.9975  
-delta2.(Intercept)       0.1714     0.2191   0.782   0.4371  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+                       Estimate Std. Error t value Pr(&gt;|t|)
+location.(Intercept)    -0.1969         NA      NA       NA
+location.InflMedium      0.5665         NA      NA       NA
+location.InflHigh        1.2889         NA      NA       NA
+location.TypeApartment  -0.5724         NA      NA       NA
+location.TypeAtrium     -0.3662         NA      NA       NA
+location.TypeTerrace    -1.0911         NA      NA       NA
+location.ContHigh        0.3603         NA      NA       NA
+theta1.(Intercept)      -0.6932         NA      NA       NA
+delta2.(Intercept)       0.1714         NA      NA       NA
 *--------
 n = 72 df =  9 res.df =  63
 Deviance = 3479.1493 Null Dev. Red. = -2099.21%
-AIC = 3497.1493 elapsed =  0.02sec</code></pre>
+AIC = 3497.1493 elapsed =  0.03sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare coefficients</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

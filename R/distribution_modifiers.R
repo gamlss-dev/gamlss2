@@ -31,6 +31,26 @@
   if(!is.function(cdf))
     stop("the base family needs a $cdf() function", call. = FALSE)
 
+  ## A CDF has exact values at infinite boundaries.  Avoid delegating those
+  ## values to legacy wrappers, some of which return a rounded probability
+  ## outside [0, 1] and hence NaN for its logarithm.
+  n <- max(length(y), .modifier_rows(par))
+  y <- .modifier_recycle(y, n)
+  infinite <- is.infinite(y)
+  if(any(infinite)) {
+    value <- rep.int(NA_real_, n)
+    probability <- if(lower.tail) y[infinite] > 0 else y[infinite] < 0
+    value[infinite] <- if(log.p) log(as.numeric(probability)) else
+      as.numeric(probability)
+    finite <- !infinite
+    if(any(finite)) {
+      value[finite] <- .modifier_call_cdf(
+        family, .modifier_subset(par, finite, n), y[finite],
+        lower.tail = lower.tail, log.p = log.p, ...
+      )
+    }
+    return(value)
+  }
   fml <- names(formals(cdf))
   args <- list(par = par, y = y)
   direct.tail <- "lower.tail" %in% fml || "..." %in% fml
@@ -121,10 +141,16 @@
   value <- rep.int(-Inf, max(length(a), length(b)))
   a <- .modifier_recycle(a, length(value))
   b <- .modifier_recycle(b, length(value))
-  ok <- is.finite(a) & (b == -Inf | b <= a)
+  ## Some legacy CDFs return NaN for a logged zero tail probability (for
+  ## example pBCT(Inf, lower.tail = FALSE, log.p = TRUE)).  Keep that
+  ## representation unavailable so that callers can use the opposite tail,
+  ## rather than allowing NA logical indices to fail the assignment below.
+  ok <- is.finite(a) & !is.na(b) & (b == -Inf | b <= a)
   value[ok] <- a[ok] + log1p(-exp(b[ok] - a[ok]))
-  value[a == b] <- -Inf
-  value[a == 0 & b == -Inf] <- 0
+  equal <- !is.na(a) & !is.na(b) & a == b
+  whole <- !is.na(a) & !is.na(b) & a == 0 & b == -Inf
+  value[equal] <- -Inf
+  value[whole] <- 0
   value
 }
 
@@ -554,6 +580,7 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
   fam$log_likelihood <- function(par, y, ...)
     sum(fam$pdf(par = par, y = y, log = TRUE, ...), na.rm = TRUE)
   fam$valid.response <- function(y) all(is.na(y) | inside(y))
+  fam$initialize <- family$initialize
   fam$rqres <- NULL
   fam$support <- NULL
   fam$mean <- fam$variance <- NULL

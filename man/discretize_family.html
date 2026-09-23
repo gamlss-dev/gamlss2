@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>gamlss2_distribution – gamlss2</title>
+<title>discretize_family – gamlss2</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -110,6 +110,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <meta property="og:title" content="gamlss2">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
@@ -199,7 +228,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/ALD.html">Families and distributions</a></li><li class="breadcrumb-item"><a href="../man/GAMLSS2_distribution.html">GAMLSS2</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/ALD.html">Families and distributions</a></li><li class="breadcrumb-item"><a href="../man/discretize_family.html">discretize_family</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -493,7 +522,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/discretize_family.html" class="sidebar-item-text sidebar-link">
+  <a href="../man/discretize_family.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">discretize_family</span></a>
   </div>
 </li>
@@ -523,7 +552,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/GAMLSS2_distribution.html" class="sidebar-item-text sidebar-link active">
+  <a href="../man/GAMLSS2_distribution.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">GAMLSS2</span></a>
   </div>
 </li>
@@ -638,14 +667,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#create-a-gamlss2-distribution" id="toc-create-a-gamlss2-distribution" class="nav-link active" data-scroll-target="#create-a-gamlss2-distribution">Create a GAMLSS2 Distribution</a>
+  <li><a href="#discretize-a-distribution-family-into-fixed-bins" id="toc-discretize-a-distribution-family-into-fixed-bins" class="nav-link active" data-scroll-target="#discretize-a-distribution-family-into-fixed-bins">Discretize a Distribution Family into Fixed Bins</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
   <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
@@ -653,20 +681,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/ALD.html">Families and distributions</a></li><li class="breadcrumb-item"><a href="../man/GAMLSS2_distribution.html">GAMLSS2</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/ALD.html">Families and distributions</a></li><li class="breadcrumb-item"><a href="../man/discretize_family.html">discretize_family</a></li></ol></nav></header>
 
 
 
 
-<section id="create-a-gamlss2-distribution" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="create-a-gamlss2-distribution">Create a GAMLSS2 Distribution</h2>
+<section id="discretize-a-distribution-family-into-fixed-bins" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="discretize-a-distribution-family-into-fixed-bins">Discretize a Distribution Family into Fixed Bins</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The GAMLSS2 family is a unified class with corresponding methods that represent all distributional families supported by the <span class="pkg">gamlss2</span> package. It enables seamless integration with the <span class="pkg">distributions3</span> workflow and provides a consistent interface for model fitting and distributional computations.</p>
+<p>Constructs a discrete distribution family by assigning the probability of each fixed interval of a base distribution to a corresponding response value.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">GAMLSS2(family, parameters)
+<pre><code class="language-R">discretize_family(family = NO, breaks,
+  values = seq_len(length(breaks) - 1L), right = TRUE)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -677,65 +706,78 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="family">family</code>
 </td>
 <td>
-character. Name of a <code>gamlss2.family</code> or a family provided by the <span class="pkg">gamlss.dist</span> package, e.g, <code>NO</code> or <code>BI</code> for the normal or binomial distribution, respectively.
+A distribution family accepted by the <span class="pkg">gamlss2</span> family infrastructure, such as <code>NO</code>, or another modified family.
 </td>
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="parameters">parameters</code>
+<code id="breaks">breaks</code>
 </td>
 <td>
-numeric, matrix, list or data frame, see the examples.
+A strictly increasing numeric vector of interval boundaries. The first and last elements must be <code>-Inf</code> and <code>Inf</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="values">values</code>
+</td>
+<td>
+A strictly increasing vector of finite numeric response values, one for each interval defined by <code>breaks</code>. By default, the intervals are labeled consecutively starting at one.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="right">right</code>
+</td>
+<td>
+Logical. Should the intervals be right-closed, <span class="math inline">\((a, b]\)</span>, rather than left-closed, <span class="math inline">\([a, b)\)</span>?
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The S3 class <code>GAMLSS2</code> is a slightly more general implementation of the S3 class <code>GAMLSS</code> tailored for <span class="pkg">gamlss2</span>. For details please see the documentation of <code>GAMLSS</code></p>
+<p>For each interval defined by adjacent elements of <code>breaks</code>, <code>discretize_family()</code> assigns the interval probability under the base distribution to the corresponding element of <code>values</code>. Thus, with <code>right = TRUE</code>, response value <span class="math inline">\(v_j\)</span> has probability</p>
+<p style="text-align: center;">
+</p><p><span class="math inline">\(P(X \in (b_j, b_{j+1}])\)</span></p>
+<p>under the base distribution. With <code>right = FALSE</code>, the intervals are left-closed instead.</p>
+<p>The returned family provides probability mass, cumulative distribution, quantile, random-number, mean, and variance functions. Its distributional parameters and link functions are inherited from the base family.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A <code>GAMLSS2</code> object, inheriting from <code>distribution</code>.</p>
-</section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Zeileis A, Lang MN, Hayes A (2022). “distributions3: From Basic Probability to Probabilistic Regression.” Presented at <em>useR! 2022 - The R User Conference</em>. Slides, video, vignette, code at <a href="https://www.zeileis.org/news/user2022/">https://www.zeileis.org/news/user2022/</a>.</p>
+<p>An object of class <code>“gamlss2.family”</code> representing the discretized distribution.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2.family</code></p>
+<p><code>family_extensions</code>, <code>round_family</code>, <code>gamlss2</code>, <code>gamlss2.family</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## package and random seed</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"distributions3"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6020</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## one normal distribution</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">GAMLSS2</span>(<span class="st">"NO"</span>, <span class="fu">c</span>(<span class="at">mu =</span> <span class="dv">1</span>, <span class="at">sigma =</span> <span class="dv">2</span>))</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>X</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "GAMLSS2 NO(mu = 1, sigma = 2)"</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## two normal distributions</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">GAMLSS2</span>(<span class="st">"NO"</span>, <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.5</span>), <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.2</span>)))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>X</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "GAMLSS2 NO(mu = 1.0, sigma = 0.6)" "GAMLSS2 NO(mu = 1.5, sigma = 1.2)"</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## three Weibull distributions</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">GAMLSS2</span>(<span class="st">"WEI"</span>, <span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">sigma =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>X</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "GAMLSS2 WEI(mu = 1, sigma = 1)" "GAMLSS2 WEI(mu = 1, sigma = 2)"
-[3] "GAMLSS2 WEI(mu = 2, sigma = 2)"</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## see ?gamlss.dist::GAMLSS for the remainder of this example</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## fixed intervals and their observed values</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>breaks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="cn">Inf</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>values <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## discretize a normal family</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">discretize_family</span>(NO, <span class="at">breaks =</span> breaks, <span class="at">values =</span> values)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate data whose location depends on x</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">111</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">mu =</span> <span class="fu">sin</span>(x), <span class="at">sigma =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">0.5</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(par, n)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x =</span> x)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## fit a regression model using the discretized family</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x), <span class="at">data =</span> d, <span class="at">family =</span> fam)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## inspect the estimated effect and fitted probabilities</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>fitted_par <span class="ot">&lt;-</span> <span class="fu">predict</span>(m)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fam<span class="sc">$</span><span class="fu">pdf</span>(fitted_par, y))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

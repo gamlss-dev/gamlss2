@@ -7,7 +7,6 @@
 \alias{censor_family}
 \alias{inflate_family}
 \alias{hurdle_family}
-\alias{discretize_family}
 \alias{round_family}
 
 \title{Extend Distribution Families}
@@ -35,9 +34,6 @@ censor_family(family = NO, lower = -Inf, upper = Inf)
 inflate_family(family = NO, at = 0)
 
 hurdle_family(family = PO, at = 0)
-
-discretize_family(family = NO, breaks,
-  values = seq_len(length(breaks) - 1L), right = TRUE)
 
 round_family(family = NO, digits = 0L)
 }
@@ -86,17 +82,6 @@ round_family(family = NO, digits = 0L)
   \item{at}{
     One or more fixed inflation points, or one fixed hurdle point.
   }
-  \item{breaks}{
-    Strictly increasing numeric bin boundaries beginning at \code{-Inf} and
-    ending at \code{Inf}.
-  }
-  \item{values}{
-    Strictly increasing, finite values assigned to the bins.
-  }
-  \item{right}{
-    Logical. Should bins be right-closed intervals \eqn{(a, b]} rather than
-    left-closed intervals \eqn{[a, b)}?
-  }
   \item{digits}{
     Integer number of decimal places retained by rounding.
   }
@@ -142,11 +127,10 @@ round_family(family = NO, digits = 0L)
   Hence, the hurdle probability is the complete mass at \eqn{c}, including
   when the base distribution already assigns positive mass to that point.
 
-  The function \code{discretize_family} assigns the probability of every
-  latent interval defined by \code{breaks} to the corresponding element of
-  \code{values}. The function \code{round_family} uses intervals centered on
-  a decimal grid and is restricted to continuous base distributions. Its
-  quantile and random-number functions follow R's \code{round()} convention.
+  The function \code{round_family} uses intervals centered on a decimal grid
+  and is restricted to continuous base distributions. Its quantile and
+  random-number functions follow R's \code{round()} convention. For fixed,
+  user-defined intervals, see \code{\link{discretize_family}}.
 
   Inflated, hurdle, and fixed-bin families provide exact means and variances
   when the required base-family moments are available. Generic censored and
@@ -174,7 +158,8 @@ round_family(family = NO, digits = 0L)
 
 \seealso{
   \code{\link{gamlss2}}, \code{\link{gamlss2.family}},
-  \code{\link{mixture_family}}, \code{\link{distributions3_family}}
+  \code{\link{discretize_family}}, \code{\link{mixture_family}},
+  \code{\link{distributions3_family}}
 }
 
 \examples{\dontrun{## simulate data
@@ -232,15 +217,7 @@ plot(m)
 plot(x, y)
 fq(m)
 
-## fixed-bin discretization and decimal rounding
-fam <- discretize_family(NO, breaks = c(-Inf, -2, -1, 0, 1, 2, Inf))
-y <- fam$random(list(mu = sin(x), sigma = exp(-1 + cos(x))), n)
-barplot(table(y))
-m <- gamlss2(y ~ s(x) | s(x), family = fam)
-plot(m)
-plot(x, y)
-fq(m)
-
+## decimal rounding
 fam <- round_family(NO, digits = 1)
 y <- fam$random(list(mu = sin(x), sigma = exp(-1 + cos(x))), n)
 m <- gamlss2(y ~ s(x) | s(x), family = fam)
@@ -251,4 +228,3 @@ plot(m, which = "resid")
 \keyword{distribution}
 \keyword{models}
 \keyword{regression}
-

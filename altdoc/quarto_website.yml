@@ -23,6 +23,8 @@ website:
         menu:
         - text: "First steps"
           file: vignettes/firststeps.qmd
+        - text: "Prediction and uncertainty"
+          file: vignettes/prediction.qmd
         - text: "Families"
           file: vignettes/families.qmd
         - text: "Family extensions"
@@ -105,6 +107,8 @@ website:
           contents:
             - text: modelstats
               file: man/modelstats.qmd
+            - text: vcov.gamlss2
+              file: man/vcov.gamlss2.qmd
             - text: logLik.gamlss2
               file: man/logLik.gamlss2.qmd
             - text: deviance.gamlss2
@@ -115,8 +119,12 @@ website:
               file: man/calibration.qmd
             - text: plots
               file: man/plots.qmd
+            - text: results.gamlss2
+              file: man/results.gamlss2.qmd
             - text: predict.gamlss2
               file: man/predict.gamlss2.qmd
+            - text: marginal_predict
+              file: man/marginal_predict.qmd
             - text: prodist.gamlss2
               file: man/prodist.gamlss2.qmd
             - text: quantiles
@@ -125,8 +133,8 @@ website:
           contents:
             - text: ALD / fit_ALD
               file: man/ALD.qmd
-            - text: discretize
-              file: man/discretize.qmd
+            - text: discretize_family
+              file: man/discretize_family.qmd
             - text: family_extensions
               file: man/family_extensions.qmd
             - text: family.distribution

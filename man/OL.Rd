@@ -6,7 +6,7 @@
 
 \description{
   Defines the ordered logistic (cumulative logit) family for modeling ordinal
-  response variables within the \code{gamlss2} framework. The location and
+  response variables using \code{gamlss2}. The location and
   ordered cutpoints can be modeled as functions of covariates.
 }
 

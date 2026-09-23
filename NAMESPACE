@@ -41,7 +41,6 @@ export(
   "RS",
   "CG",
   "calibration",
-  "discretize",
   "transform_family",
   "logit_family",
   "truncate_family",

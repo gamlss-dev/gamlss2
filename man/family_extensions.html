@@ -81,7 +81,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-699cf49c163a99d1cda6a4e8046bfde9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5e2e99434c0e7b777765b56d93c8cf14.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -175,6 +175,10 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+ <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/families.html">
@@ -435,6 +439,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/vcov.gamlss2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">vcov.gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/logLik.gamlss2.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">logLik.gamlss2</span></a>
   </div>
@@ -465,8 +475,20 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/results.gamlss2.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">results.gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/predict.gamlss2.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">predict.gamlss2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/marginal_predict.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">marginal_predict</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -500,8 +522,8 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/discretize.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">discretize</span></a>
+  <a href="../man/discretize_family.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">discretize_family</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -687,9 +709,6 @@ inflate_family(family = NO, at = 0)
 
 hurdle_family(family = PO, at = 0)
 
-discretize_family(family = NO, breaks,
-  values = seq_len(length(breaks) - 1L), right = TRUE)
-
 round_family(family = NO, digits = 0L)
 </code></pre>
 </section>
@@ -786,30 +805,6 @@ round_family(family = NO, digits = 0L)
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="breaks">breaks</code>
-</td>
-<td>
-<p>Strictly increasing numeric bin boundaries beginning at <code>-Inf</code> and ending at <code>Inf</code>.</p>
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="values">values</code>
-</td>
-<td>
-<p>Strictly increasing, finite values assigned to the bins.</p>
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="right">right</code>
-</td>
-<td>
-<p>Logical. Should bins be right-closed intervals <span class="math inline">\((a, b]\)</span> rather than left-closed intervals <span class="math inline">\([a, b)\)</span>?</p>
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="digits">digits</code>
 </td>
 <td>
@@ -839,7 +834,7 @@ round_family(family = NO, digits = 0L)
 <p style="text-align: center;">
 </p><p><span class="math inline">\(F(y) = \pi_1 I(c \le y) + \pi_0 F_0(y \mid X \ne c).\)</span></p>
 <p>Hence, the hurdle probability is the complete mass at <span class="math inline">\(c\)</span>, including when the base distribution already assigns positive mass to that point.</p>
-<p>The function <code>discretize_family</code> assigns the probability of every latent interval defined by <code>breaks</code> to the corresponding element of <code>values</code>. The function <code>round_family</code> uses intervals centered on a decimal grid and is restricted to continuous base distributions. Its quantile and random-number functions follow R’s <code>round()</code> convention.</p>
+<p>The function <code>round_family</code> uses intervals centered on a decimal grid and is restricted to continuous base distributions. Its quantile and random-number functions follow R’s <code>round()</code> convention. For fixed, user-defined intervals, see <code>discretize_family</code>.</p>
 <p>Inflated, hurdle, and fixed-bin families provide exact means and variances when the required base-family moments are available. Generic censored and rounded moments require partial moments, which are not part of the family interface, and therefore report an informative error rather than applying an incorrect numerical approximation.</p>
 <p>Modified continuous distributions containing explicit point masses are treated as mixed distributions and provide randomized quantile residuals. Bounds, atom locations, breaks, and transformations are fixed when the family is constructed; they are not modeled distributional parameters.</p>
 <p>Arbitrary weighted distributions, splices, non-monotone transformations, order-statistic distributions, convolutions, and compound distributions are not provided. Generic implementations would require numerical normalization or derivatives inside fitting iterations and could not be supplied reliably by the existing family interface.</p>
@@ -850,7 +845,7 @@ round_family(family = NO, digits = 0L)
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>gamlss2</code>, <code>gamlss2.family</code>, <code>mixture_family</code>, <code>distributions3_family</code></p>
+<p><code>gamlss2</code>, <code>gamlss2.family</code>, <code>discretize_family</code>, <code>mixture_family</code>, <code>distributions3_family</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
@@ -911,20 +906,12 @@ round_family(family = NO, digits = 0L)
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="fu">fq</span>(m)</span>
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="do">## fixed-bin discretization and decimal rounding</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">discretize_family</span>(NO, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">Inf</span>))</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="do">## decimal rounding</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">round_family</span>(NO, <span class="at">digits =</span> <span class="dv">1</span>)</span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">sin</span>(x), <span class="at">sigma =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> <span class="fu">cos</span>(x))), n)</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(y))</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="fu">fq</span>(m)</span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">round_family</span>(NO, <span class="at">digits =</span> <span class="dv">1</span>)</span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">sin</span>(x), <span class="at">sigma =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> <span class="fu">cos</span>(x))), n)</span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
-<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
-<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

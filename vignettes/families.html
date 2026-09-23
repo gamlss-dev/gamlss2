@@ -81,7 +81,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-699cf49c163a99d1cda6a4e8046bfde9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5e2e99434c0e7b777765b56d93c8cf14.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -176,6 +176,10 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+ <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/families.html">
@@ -363,7 +367,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.92%
-AIC = 414.0972 elapsed =  0.05sec</code></pre>
+AIC = 414.0972 elapsed =  0.04sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -410,9 +414,9 @@ AIC = 414.0972 elapsed =  0.05sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       r_1       r_2
-1 31.63939  28.79532
-2 63.98723  62.69185
-3 90.03874 111.04878</code></pre>
+1 22.19825  7.596069
+2 70.70957 45.878210
+3 66.20873 20.538245</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -612,7 +616,7 @@ sigma.s(Temp) 3.9513
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.25sec</code></pre>
+AIC = 952.263 elapsed =  0.20sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>

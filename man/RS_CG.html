@@ -744,13 +744,19 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p>The functions use the following control arguments:</p>
 <ul>
 <li>
-<p><code>eps</code>: Numeric vector of length 2, the stopping criterion. Default is <code>eps = c(1e-05, 1e-05)</code> for the outer and the inner backfitting loop.</p>
+<p><code>eps</code>: Numeric vector of length 1 to 3, the stopping criterion for the global, per-parameter, and CG correction loops. The CG tolerance defaults to the per-parameter tolerance.</p>
 </li>
 <li>
-<p><code>maxit</code>: Integer vector of length 2, the maximum number of iterations of the outer and inner backfitting loop. Default is <code>maxit = c(20, 20)</code>.</p>
+<p><code>maxit</code>: Integer vector of length 1 to 3, the maximum number of global parameter sweeps and per-parameter IRLS/backfitting iterations. Default is <code>maxit = c(20, 50)</code>. For the CG algorithm, an optional third element limits the internal correction sweeps and defaults to the second element. Plain RS always performs one parameter sweep before checking global convergence; a third element is therefore ignored by RS.</p>
 </li>
 <li>
-<p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. Note that if <code>step</code> is set smaller than 1, it might be appropriate to lower the stopping criterion <code>eps</code>, too.</p>
+<p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. After the first update and with fixed smoothing parameters, the step is applied to a complete parameter update in RS and to a complete correction sweep in CG. A smoothing-parameter change and its coefficients are instead accepted or rejected as one state. If <code>step</code> is set smaller than 1, it might be appropriate to lower the stopping criterion <code>eps</code>, too.</p>
+</li>
+<li>
+<p><code>autostep</code>: Logical, should an update that decreases its objective be halved automatically? Default is <code>TRUE</code>. The objective is the likelihood for unpenalized updates and the penalized likelihood when smoothing parameters are fixed. Smoothing-parameter changes use the specified smoothing criterion or the term-specific local ML update.</p>
+</li>
+<li>
+<p><code>sigma.tol</code>: Numeric between zero and one. If a model contains a smooth for <code>sigma</code>, warn when its smallest fitted value divided by its median is less than <code>sigma.tol</code>. The default is <code>0.001</code>; use zero or <code>FALSE</code> to disable the diagnostic. This diagnostic does not constrain the fitted values.</p>
 </li>
 <li>
 <p><code>CG</code>: Integer, the outer iteration in which to start the CG correction. Thus, <code>CG = 5</code> uses RS for the first four outer iterations and CG in the fifth. <code>CG = 0</code> starts with CG immediately; the default is <code>CG = Inf</code>.</p>
@@ -824,6 +830,14 @@ How many iterations the algorithm performed.
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code>converged</code>
+</td>
+<td>
+Logical, did the global iteration satisfy the stopping criterion?
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code>logLik</code>
 </td>
 <td>
@@ -835,7 +849,7 @@ The final value of the log-likelihood of the model.
 <code>control</code>
 </td>
 <td>
-All control arguments used as supplied from function <code>gamlss2_control</code>.
+All effective control arguments used by the optimizer.
 </td>
 </tr>
 </tbody></table>
@@ -865,7 +879,7 @@ All control arguments used as supplied from function <code>gamlss2_control</code
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI, <span class="at">optimizer =</span> CG)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## first 2 RS iterations and afterwards switch to CG</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI, <span class="at">CG =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI, <span class="at">CG =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

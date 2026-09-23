@@ -358,19 +358,19 @@ Link functions: log, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.87922    0.04834   80.25  &lt; 2e-16 ***
-sigma.(Intercept)  0.38247    0.05006    7.64 4.94e-14 ***
+mu.(Intercept)     3.87932    0.03051  127.15  &lt; 2e-16 ***
+sigma.(Intercept)  0.38112    0.05041    7.56 8.85e-14 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                 edf
-mu.s(yday)    16.116
-sigma.s(yday)  5.092
+                  edf
+mu.s(yday)    16.5615
+sigma.s(yday)  4.9504
 *--------
-n = 1057 df =  23.21 res.df =  1033.79
-Deviance = 10101.1641 Null Dev. Red. = 13.05%
-AIC = 10147.5794 elapsed =  0.09sec</code></pre>
+n = 1057 df =  23.51 res.df =  1033.49
+Deviance = 10101.8789 Null Dev. Red. = 13.04%
+AIC = 10148.9027 elapsed =  0.10sec</code></pre>
 </div>
 </div>
 <p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>
@@ -411,12 +411,12 @@ AIC = 10147.5794 elapsed =  0.09sec</code></pre>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(parameters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
-1 2.035082 4.871688
-2 2.085890 4.892004
-3 2.106884 4.911077
-4 2.099899 4.928900
-5 2.067920 4.945468
-6 2.014722 4.960777</code></pre>
+1 1.901138 4.817168
+2 1.955163 4.837471
+3 1.983296 4.856509
+4 1.986788 4.874280
+5 1.967885 4.890784
+6 1.929550 4.906021</code></pre>
 </div>
 </div>
 <p>For probabilities and other distributional summaries, <code>prodist()</code> returns one <a href="https://cran.r-project.org/package=distributions3"><code>distributions3</code></a> distribution object for each row of <code>newdata</code>.</p>

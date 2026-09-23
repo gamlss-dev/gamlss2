@@ -698,7 +698,7 @@ Character. Which of the terms in the additive predictor(s) should be included? B
 <code id="se.fit">se.fit</code>
 </td>
 <td>
-Logical. Should standard errors for the predictions be included? Standard errors are computed by simulating from the approximate multivariate normal distribution of the maximum likelihood estimates. The number of simulations is controlled by the argument <code>R</code>, which defaults to <code>R = 200</code>, and can be passed via <code>…</code>.
+Logical. Should standard errors for the predictions be included? Standard errors are computed by simulating from the approximate multivariate normal distribution defined by the complete joint covariance of the maximum likelihood estimates. Local term-wise covariance is never used for these draws. The number of simulations is controlled by the argument <code>R</code>, which defaults to <code>R = 200</code>, and can be passed via <code>…</code>.
 </td>
 </tr>
 <tr>
@@ -730,7 +730,7 @@ Character. Use <code>“wald”</code> for fast confidence bands from the joint 
 <code id="interval.cache">interval.cache</code>
 </td>
 <td>
-Optional information factor obtained from the <code>“interval.cache”</code> attribute of a previous Wald prediction for the same, unchanged model. Reusing it avoids rebuilding the joint information matrix for subsequent predictions.
+Optional joint covariance cache obtained from the <code>“interval.cache”</code> attribute of a previous Wald prediction for the same, unchanged model. Reusing it avoids rebuilding the joint covariance for subsequent predictions.
 </td>
 </tr>
 <tr>
@@ -746,7 +746,7 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>Predictions can be computed for the original observations or for <code>newdata</code>. Depending on <code>type</code>, results are returned on the link scale, as distribution parameters, as individual model terms, or as the fitted response mean.</p>
-<p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the approximate distribution of the fitted coefficients.</p>
+<p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the complete joint covariance of the fitted coefficients, including cross-term and cross-parameter dependence.</p>
 <p>If <code>level</code> is specified, approximate pointwise confidence intervals and standard errors are computed analytically, without simulation. Intervals on transformed parameter or response scales are transformed as needed and may be asymmetric. These are confidence intervals for the fitted model, not prediction intervals for future observations, and they do not include smoothing-parameter or model-selection uncertainty.</p>
 <p>Wald intervals currently support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths. They are not available for Bayesian fits or nonlinear custom special terms. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>. The optional <code>interval.cache</code> can be reused for repeated predictions from the same unchanged model.</p>
 <p>For <code>type = “terms”</code>, term names are partially matched by default. Use <code>nogrep = TRUE</code> in <code>…</code> for exact matching.</p>
@@ -755,8 +755,8 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>If <code>drop = FALSE</code>, a data frame is returned. If <code>drop = TRUE</code> (the default), the result may be simplified to a numeric vector when possible. For <code>type = “terms”</code>, a data frame is returned with one column per selected term. Multi-parameter models return a list of term matrices. For <code>se.fit = TRUE</code>, the returned object contains fitted values and corresponding simulation-based standard errors.</p>
-<p>When <code>level</code> is specified, a list with elements <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code> is returned. For one confidence level, <code>lower</code> and <code>upper</code> follow the structure of the ordinary point prediction, including <code>model</code>, <code>terms</code>, and <code>drop</code> selection. For multiple confidence levels, each is a list named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>), whose elements have that same prediction structure. The <code>fit</code> element is the ordinary, non-simulated prediction and <code>se.fit</code> is shared by all intervals. Attributes record the confidence levels, method, and reusable <code>interval.cache</code>. The cache stores the fitted inferential state and can be reused only with that unchanged model.</p>
-<p>If the joint observed information is not positive definite, Wald prediction issues a warning and uses the positive working-information approximation. Effect plots instead use the covariance stored with each fitted model term silently, because this fallback is only used to draw uncertainty bands. The default <code>vcov()</code> method remains observed-information based and reports the identification problem.</p>
+<p>When <code>level</code> is specified, a list with elements <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code> is returned. For one confidence level, <code>lower</code> and <code>upper</code> follow the structure of the ordinary point prediction, including <code>model</code>, <code>terms</code>, and <code>drop</code> selection. For multiple confidence levels, each is a list named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>), whose elements have that same prediction structure. The <code>fit</code> element is the ordinary, non-simulated prediction and <code>se.fit</code> is shared by all intervals. Attributes record the confidence levels, method, and reusable <code>interval.cache</code>. The cache stores the full joint covariance and fitted inferential state and can be reused only with that unchanged model.</p>
+<p>If the joint observed information is indefinite or a required coefficient is not estimable, Wald prediction and coefficient simulation report the problem; they do not silently substitute a working-information approximation.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -772,13 +772,17 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"cars"</span>, <span class="at">package =</span> <span class="st">"datasets"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 405.1865 eps = 0.130151     
-GAMLSS-RS iteration  2: Global Deviance = 405.1583 eps = 0.000069     
-GAMLSS-RS iteration  3: Global Deviance = 405.1483 eps = 0.000024     
-GAMLSS-RS iteration  4: Global Deviance = 405.1402 eps = 0.000020     
-GAMLSS-RS iteration  5: Global Deviance = 405.1339 eps = 0.000015     
-GAMLSS-RS iteration  6: Global Deviance = 405.129 eps = 0.000011     
-GAMLSS-RS iteration  7: Global Deviance = 405.1254 eps = 0.000008     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 407.3659 eps = 0.125472     
+GAMLSS-RS iteration  2: Global Deviance = 405.7659 eps = 0.003927     
+GAMLSS-RS iteration  3: Global Deviance = 405.5983 eps = 0.000412     
+GAMLSS-RS iteration  4: Global Deviance = 405.4041 eps = 0.000478     
+GAMLSS-RS iteration  5: Global Deviance = 405.2929 eps = 0.000274     
+GAMLSS-RS iteration  6: Global Deviance = 405.2343 eps = 0.000144     
+GAMLSS-RS iteration  7: Global Deviance = 405.2022 eps = 0.000079     
+GAMLSS-RS iteration  8: Global Deviance = 405.1839 eps = 0.000045     
+GAMLSS-RS iteration  9: Global Deviance = 405.1732 eps = 0.000026     
+GAMLSS-RS iteration 10: Global Deviance = 405.1669 eps = 0.000015     
+GAMLSS-RS iteration 11: Global Deviance = 405.1637 eps = 0.000007     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## new data for predictions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
@@ -787,83 +791,83 @@ GAMLSS-RS iteration  7: Global Deviance = 405.1254 eps = 0.000008     </code></p
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 23.03061  9.952436
-2 59.15801 18.432353
-3 97.13012 31.980156</code></pre>
+1 23.08768  9.932323
+2 58.93797 18.478257
+3 96.49957 32.268495</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
-1 23.03061 2.297817
-2 59.15801 2.914107
-3 97.13012 3.465116</code></pre>
+1 23.08768 2.295794
+2 58.93797 2.916595
+3 96.49957 3.474091</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
-23.03061 59.15801 97.13012 </code></pre>
+23.08768 58.93797 96.49957 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3 
- 9.952436 18.432353 31.980156 </code></pre>
+ 9.932323 18.478257 32.268495 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      sigma
-1  9.952436
-2 18.432353
-3 31.980156</code></pre>
+1  9.932323
+2 18.478257
+3 32.268495</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  (Intercept)   s(speed)
-1    2.632325 -0.3345073
-2    2.632325  0.2817828
-3    2.632325  0.8327909</code></pre>
+1    2.632714 -0.3369199
+2    2.632714  0.2838805
+3    2.632714  0.8413772</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    s(speed)
-1 -0.3345073
-2  0.2817828
-3  0.8327909</code></pre>
+1 -0.3369199
+2  0.2838805
+3  0.8413772</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict quantiles</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       10%      50%       90%
-1 10.27605 23.03061  35.78517
-2 35.53600 59.15801  82.78002
-3 56.14590 97.13012 138.11434</code></pre>
+1 10.35890 23.08768  35.81646
+2 35.25713 58.93797  82.61881
+3 55.14583 96.49957 137.85331</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    mu.fit    mu.se sigma.fit  sigma.se
-1 23.03061 1.853903  10.08226  1.633621
-2 59.15801 3.530757  18.71825  3.326540
-3 97.13012 9.255354  34.98770 16.460509</code></pre>
+1 23.08768 1.892538  10.05196  1.573832
+2 58.93797 3.455129  18.72811  3.108460
+3 96.49957 9.458467  34.74499 13.770776</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fast pointwise confidence bands, without sampling</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">level =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.95</span>))</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>lower[[<span class="st">"80%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 20.46452  8.091853
-2 54.69199 15.279556
-3 85.66850 19.141138</code></pre>
+1 20.53748  8.080967
+2 54.46142 15.312954
+3 85.13582 19.332721</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>upper[[<span class="st">"95%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mu    sigma
-1  26.95511 13.65813
-2  65.98819 24.55718
-3 114.65916 70.11264</code></pre>
+1  26.98787 13.61642
+2  65.78426 24.62978
+3 113.87893 70.63847</code></pre>
 </div>
 </div>
 

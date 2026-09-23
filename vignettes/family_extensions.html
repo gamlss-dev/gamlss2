@@ -262,7 +262,7 @@ window.Quarto = {
 <p>Family extensions make these changes to an existing family. The result is another <code>gamlss2.family</code>, ready to use in <code>fit_family()</code> or <code>gamlss2()</code>. We begin with earthquake magnitudes and use them to distinguish selection from rounding and grouping. We then consider recording limits, extra point masses, and transformations. Each example connects the observation mechanism to a fitted model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>control <span class="ot">&lt;-</span> <span class="fu">gamlss2_control</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>, <span class="at">maxit =</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">gamlss2_control</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>, <span class="at">maxit =</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="choosing-an-observation-model" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="choosing-an-observation-model"><span class="header-section-number">1</span> Choosing an observation model</h2>
@@ -373,10 +373,10 @@ window.Quarto = {
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mf_norm <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(quakes<span class="sc">$</span>mag, <span class="at">family =</span> NO,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control, <span class="at">main =</span> <span class="st">"Normal"</span>, <span class="at">xlab =</span> <span class="st">"Magnitude"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Normal"</span>, <span class="at">xlab =</span> <span class="st">"Magnitude"</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>mf_trunc <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(quakes<span class="sc">$</span>mag,</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_trunc,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control, <span class="at">main =</span> <span class="st">"Truncated normal"</span>, <span class="at">xlab =</span> <span class="st">"Magnitude"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Truncated normal"</span>, <span class="at">xlab =</span> <span class="st">"Magnitude"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -388,7 +388,7 @@ window.Quarto = {
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(mf_norm, mf_trunc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               AIC df
-mf_trunc  810.1839  2
+mf_trunc  810.1865  2
 mf_norm  1022.1121  2</code></pre>
 </div>
 </div>
@@ -399,21 +399,21 @@ mf_norm  1022.1121  2</code></pre>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  mag <span class="sc">~</span> <span class="fu">s</span>(depth) <span class="sc">+</span> <span class="fu">s</span>(long, lat, <span class="at">k =</span> <span class="dv">30</span>) <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes,</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_norm,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>m_trunc <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  mag <span class="sc">~</span> <span class="fu">s</span>(depth) <span class="sc">+</span> <span class="fu">s</span>(long, lat, <span class="at">k =</span> <span class="dv">30</span>) <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes,</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_trunc,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m_norm, m_trunc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             AIC       df
-m_trunc 694.3331 18.33206
-m_norm  901.2255 18.72640</code></pre>
+m_trunc 694.9878 18.87251
+m_norm  900.8832 19.16964</code></pre>
 </div>
 </div>
 <p>The truncated family also has lower AIC after including the smooth depth and spatial effects. Thus its marginal advantage was not simply a consequence of pooling events from different depths and locations.</p>
@@ -432,21 +432,21 @@ m_norm  901.2255 18.72640</code></pre>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  mag <span class="sc">~</span> <span class="fu">s</span>(depth) <span class="sc">+</span> <span class="fu">s</span>(long, lat, <span class="at">k =</span> <span class="dv">30</span>) <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes,</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_round,</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>m_both <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  mag <span class="sc">~</span> <span class="fu">s</span>(depth) <span class="sc">+</span> <span class="fu">s</span>(long, lat, <span class="at">k =</span> <span class="dv">30</span>) <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes,</span>
 <span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_both,</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m_round, m_both)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>             AIC       df
-m_both  5372.380 21.57954
-m_round 5506.369 18.62693</code></pre>
+<pre><code>             AIC        df
+m_both  5368.182  6.847109
+m_round 5506.053 19.165027</code></pre>
 </div>
 </div>
 <p>This second AIC comparison is valid because both models assign probability mass to the same one-decimal values. In contrast, neither rounded model should be compared by log-likelihood or AIC with <code>m_norm</code> or <code>m_trunc</code>: probability densities and probability masses are defined with respect to different measures and have different units.</p>
@@ -463,12 +463,12 @@ m_round 5506.369 18.62693</code></pre>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_both, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 4.282162 0.4704031
-2 4.269835 0.4704031
-3 4.257512 0.4704031
-4 4.245204 0.4704031
-5 4.232925 0.4704031
-6 4.220694 0.4704031</code></pre>
+1 4.720596 0.4772607
+2 4.709836 0.4772607
+3 4.699078 0.4772607
+4 4.688325 0.4772607
+5 4.677581 0.4772607
+6 4.666852 0.4772607</code></pre>
 </div>
 </div>
 <p>These curves hold longitude and latitude at their sample medians. The points include all locations, so they show the overall data cloud rather than a sample drawn at that fixed location.</p>
@@ -522,18 +522,18 @@ m_round 5506.369 18.62693</code></pre>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  depth_released <span class="sc">~</span> <span class="fu">s</span>(mag) <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes,</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_group,</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_group, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        mu    sigma
-1 195.3319 346.3051
-2 427.7000 346.3051
-3 138.3320 346.3051
-4 465.7060 346.3051
-5 510.4815 346.3051
-6 510.4815 346.3051</code></pre>
+<pre><code>        mu   sigma
+1 195.3411 346.305
+2 427.6958 346.305
+3 138.3732 346.305
+4 465.7018 346.305
+5 510.4842 346.305
+6 510.4842 346.305</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m_group,</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">mag =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>)),</span>
@@ -586,26 +586,26 @@ FALSE  TRUE
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  dist80 <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> .,</span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NO,</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>m_cens <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
 <span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  dist80 <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> .,</span>
 <span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
 <span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_cens,</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control,</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl,</span>
 <span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">coef</span>(m_start)</span>
 <span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_cens, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mu    sigma
-1  4.010917 5.157633
-2  4.010917 5.157633
-3 13.298768 7.186209
-4 13.298768 7.186209
-5 16.465205 8.011225
-6 19.686107 8.913596</code></pre>
+1  4.064648 5.143565
+2  4.064648 5.143565
+3 13.324179 7.175613
+4 13.324179 7.175613
+5 16.481863 8.002279
+6 19.694531 8.906418</code></pre>
 </div>
 </div>
 <p>The fitted quantiles show how the conditional distribution changes with speed. Because the recorded response cannot exceed 80, upper quantiles flatten at the censoring limit when enough fitted probability lies above it.</p>
@@ -639,10 +639,10 @@ FALSE  TRUE
 <span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower.tail =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  speed probability_at_limit
-1    10         4.173852e-09
-2    15         4.858400e-03
-3    20         1.137521e-01
-4    25         4.993057e-01</code></pre>
+1    10         4.099847e-09
+2    15         4.837909e-03
+3    20         1.131728e-01
+4    25         4.981259e-01</code></pre>
 </div>
 </div>
 <p>Unlike censoring, upper truncation would remove cars whose stopping distance exceeds 80 and renormalize the density among those that remain. For two-sided mechanisms, supply both <code>lower</code> and <code>upper</code>. <code>truncate_family()</code> additionally accepts <code>include</code>, which controls inclusion of each endpoint and matters for discrete base families.</p>
@@ -672,22 +672,22 @@ FALSE  TRUE
 <span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  survival<span class="sc">::</span><span class="fu">Surv</span>(time, event) <span class="sc">~</span> <span class="fu">s</span>(age) <span class="sc">+</span> sex <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lung,</span>
 <span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_surv,</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="fu">logLik</span>(m_surv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>'log Lik.' -1147.054 (df=4.000092)</code></pre>
+<pre><code>'log Lik.' -1147.054 (df=4.000069)</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_surv, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
-1 314.1642 1.326171
-2 338.1407 1.326171
-3 391.7190 1.326171
-4 386.9472 1.326171
-5 372.9776 1.326171
-6 314.1642 1.326171</code></pre>
+1 314.1689 1.326179
+2 338.1418 1.326179
+3 391.7120 1.326179
+4 386.9409 1.326179
+5 372.9735 1.326179
+6 314.1689 1.326179</code></pre>
 </div>
 </div>
 <p>The likelihood contribution is a density when <code>event</code> is true and a survival probability when it is false. Thus the censoring information remains attached to every observation instead of being encoded by replacing time with one fixed boundary value.</p>
@@ -756,13 +756,13 @@ FALSE  TRUE
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>fits <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">names</span>(ys), <span class="cf">function</span>(label) {</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> ys[[label]]</span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  fits <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Poisson =</span> <span class="fu">fit_family</span>(y, <span class="at">family =</span> PO, <span class="at">control =</span> control,</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Poisson =</span> <span class="fu">fit_family</span>(y, <span class="at">family =</span> PO, <span class="at">control =</span> ctrl,</span>
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">main =</span> <span class="fu">paste</span>(label, <span class="st">"Poisson"</span>, <span class="at">sep =</span> <span class="st">": "</span>), <span class="at">xlab =</span> <span class="st">"Count"</span>,</span>
 <span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">8</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.65</span>)),</span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Inflated =</span> <span class="fu">fit_family</span>(y, <span class="at">family =</span> f_infl, <span class="at">control =</span> control,</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Inflated =</span> <span class="fu">fit_family</span>(y, <span class="at">family =</span> f_infl, <span class="at">control =</span> ctrl,</span>
 <span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">main =</span> <span class="fu">paste</span>(label, <span class="st">"Inflated"</span>, <span class="at">sep =</span> <span class="st">": "</span>), <span class="at">xlab =</span> <span class="st">"Count"</span>,</span>
 <span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">8</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.65</span>)),</span>
-<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Hurdle =</span> <span class="fu">fit_family</span>(y, <span class="at">family =</span> f_hurd, <span class="at">control =</span> control,</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Hurdle =</span> <span class="fu">fit_family</span>(y, <span class="at">family =</span> f_hurd, <span class="at">control =</span> ctrl,</span>
 <span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">main =</span> <span class="fu">paste</span>(label, <span class="st">"Hurdle"</span>, <span class="at">sep =</span> <span class="st">": "</span>), <span class="at">xlab =</span> <span class="st">"Count"</span>,</span>
 <span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">8</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.65</span>))</span>
 <span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>  )</span>
@@ -782,14 +782,14 @@ FALSE  TRUE
 <pre><code>$`Excess zeros`
                    AIC df
 fits$Hurdle   2172.577  2
-fits$Inflated 2172.577  2
+fits$Inflated 2172.578  2
 fits$Poisson  2298.596  1
 
 $`Few zeros`
                    AIC df
 fits$Hurdle   2306.951  2
 fits$Poisson  2450.856  1
-fits$Inflated 2452.857  2</code></pre>
+fits$Inflated 2452.863  2</code></pre>
 </div>
 </div>
 <p>For excess zeros, inflation and a hurdle should both follow the data, and can give essentially identical fits. For the second sample, the hurdle can represent the low zero probability while preserving the positive-count shape. The inflated fit approaches ordinary Poisson as its extra-zero odds approach zero, but cannot remove natural Poisson zeros. AIC comparisons here are within each sample, never between the two different samples.</p>
@@ -806,7 +806,7 @@ fits$Inflated 2452.857  2</code></pre>
 <span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>), <span class="fu">nrow</span>(dat))</span>
 <span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>m_hurd <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">data =</span> dat,</span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_hurd, <span class="at">control =</span> control)</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_hurd, <span class="at">control =</span> ctrl)</span>
 <span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">150</span>))</span>
 <span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_hurd, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>p0 <span class="ot">&lt;-</span> p<span class="sc">$</span>pi1 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> p<span class="sc">$</span>pi1)</span>
@@ -860,18 +860,18 @@ fits$Inflated 2452.857  2</code></pre>
 <span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>  proportion <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x),</span>
 <span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
 <span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_01,</span>
-<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_01, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          mu     sigma       pi1        pi2
-1  1.0290549 0.7339341 0.1449275 0.06280193
-2  0.4106343 1.0000281 0.1449275 0.06280193
-3 -0.8475270 0.3945692 0.1449275 0.06280193
-4 -0.9900514 0.7137680 0.1449275 0.06280193
-5  0.4033698 1.0012735 0.1449275 0.06280193
-6 -0.3448160 0.2165351 0.1449275 0.06280193</code></pre>
+1  1.0284365 0.7336841 0.1449275 0.06280193
+2  0.4093979 0.9983521 0.1449275 0.06280193
+3 -0.8475283 0.3949805 0.1449275 0.06280193
+4 -0.9907962 0.7128326 0.1449275 0.06280193
+5  0.4021295 0.9995884 0.1449275 0.06280193
+6 -0.3447094 0.2177213 0.1449275 0.06280193</code></pre>
 </div>
 </div>
 <p>We can now inspect fitted quantiles across <code>x</code>. Because these describe the complete distribution, they include the endpoint masses as well as the continuous interior.</p>
@@ -924,9 +924,9 @@ fits$Inflated 2452.857  2</code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>mf_norm <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(trees<span class="sc">$</span>Volume, <span class="at">family =</span> NO,</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control, <span class="at">main =</span> <span class="st">"Normal"</span>, <span class="at">xlab =</span> <span class="st">"Volume"</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Normal"</span>, <span class="at">xlab =</span> <span class="st">"Volume"</span>)</span>
 <span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>mf_lnorm <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(trees<span class="sc">$</span>Volume, <span class="at">family =</span> f_lnorm,</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control, <span class="at">main =</span> <span class="st">"Lognormal"</span>, <span class="at">xlab =</span> <span class="st">"Volume"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Lognormal"</span>, <span class="at">xlab =</span> <span class="st">"Volume"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -948,7 +948,7 @@ mf_norm  264.5321  2</code></pre>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  Volume <span class="sc">~</span> <span class="fu">s</span>(Girth) <span class="sc">|</span> <span class="dv">1</span>,</span>
 <span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> trees,</span>
 <span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_lnorm,</span>
-<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> control</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">

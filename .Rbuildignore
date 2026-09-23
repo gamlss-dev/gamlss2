@@ -33,4 +33,5 @@ README.qmd
 ^vignettes/topmodels\.qmd$
 ^vignettes/modifiers\.qmd$
 ^vignettes/bayesian\.qmd$
+^vignettes/prediction\.qmd$
 LICENSE

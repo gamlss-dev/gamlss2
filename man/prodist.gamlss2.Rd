@@ -55,7 +55,8 @@ data("cars", package = "datasets")
 
 ## fit heteroscedastic normal GAMLSS model
 ## stopping distance (ft) explained by speed (mph)
-m <- gamlss2(dist ~ s(speed) | s(speed), data = cars, family = NO)
+m <- gamlss2(dist ~ s(speed) | s(speed),
+  data = cars, family = GA)
 
 ## obtain predicted distributions for three levels of speed
 d <- prodist(m, newdata = data.frame(speed = c(10, 20, 30)))
@@ -71,7 +72,7 @@ plot(dist ~ speed, data = cars)
 nd <- data.frame(speed = 0:240/4)
 nd$dist <- prodist(m, newdata = nd)
 nd$fit <- quantile(nd$dist, c(0.05, 0.5, 0.95))
-matplot(nd$speed, nd$fit, type = "l", lty = 1, col = "slategray", add = TRUE)
+matlines(nd$speed, nd$fit, lty = 1, col = 4)
 
 ## moments
 mean(d)
@@ -81,8 +82,8 @@ variance(d)
 random(d, 5)
 
 ## density and distribution
-pdf(d, 50 * -2:2)
-cdf(d, 50 * -2:2)
+pdf(d, c(10, 50, 100))
+cdf(d, c(10, 50, 100))
 
 ## Poisson example
 data("FIFA2018", package = "distributions3")
@@ -97,3 +98,4 @@ logLik(m2)
 }}
 
 \keyword{distribution}
+

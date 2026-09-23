@@ -30,7 +30,7 @@ observation mechanism to a fitted model.
 #| message: false
 #| results: hide
 library("gamlss2")
-control <- gamlss2_control(trace = FALSE, maxit = 100)
+ctrl <- gamlss2_control(trace = FALSE, maxit = 100)
 ```
 
 ## Choosing an observation model
@@ -123,10 +123,10 @@ and overlays its density on a histogram.
 #| fig-height: 4
 op <- par(mfrow = c(1, 2))
 mf_norm <- fit_family(quakes$mag, family = NO,
-  control = control, main = "Normal", xlab = "Magnitude")
+  control = ctrl, main = "Normal", xlab = "Magnitude")
 mf_trunc <- fit_family(quakes$mag,
   family = f_trunc,
-  control = control, main = "Truncated normal", xlab = "Magnitude")
+  control = ctrl, main = "Truncated normal", xlab = "Magnitude")
 par(op)
 AIC(mf_norm, mf_trunc)
 ```
@@ -149,14 +149,14 @@ m_norm <- gamlss2(
   mag ~ s(depth) + s(long, lat, k = 30) | 1,
   data = quakes,
   family = f_norm,
-  control = control
+  control = ctrl
 )
 
 m_trunc <- gamlss2(
   mag ~ s(depth) + s(long, lat, k = 30) | 1,
   data = quakes,
   family = f_trunc,
-  control = control
+  control = ctrl
 )
 
 AIC(m_norm, m_trunc)
@@ -190,14 +190,14 @@ m_round <- gamlss2(
   mag ~ s(depth) + s(long, lat, k = 30) | 1,
   data = quakes,
   family = f_round,
-  control = control
+  control = ctrl
 )
 
 m_both <- gamlss2(
   mag ~ s(depth) + s(long, lat, k = 30) | 1,
   data = quakes,
   family = f_both,
-  control = control
+  control = ctrl
 )
 
 AIC(m_round, m_both)
@@ -289,7 +289,7 @@ m_group <- gamlss2(
   depth_released ~ s(mag) | 1,
   data = quakes,
   family = f_group,
-  control = control
+  control = ctrl
 )
 
 head(predict(m_group, drop = FALSE))
@@ -347,14 +347,14 @@ m_start <- gamlss2(
   dist80 ~ s(speed) | .,
   data = cars,
   family = NO,
-  control = control
+  control = ctrl
 )
 
 m_cens <- gamlss2(
   dist80 ~ s(speed) | .,
   data = cars,
   family = f_cens,
-  control = control,
+  control = ctrl,
   start = coef(m_start)
 )
 
@@ -434,7 +434,7 @@ m_surv <- gamlss2(
   survival::Surv(time, event) ~ s(age) + sex | 1,
   data = lung,
   family = f_surv,
-  control = control
+  control = ctrl
 )
 
 logLik(m_surv)
@@ -534,13 +534,13 @@ op <- par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
 fits <- lapply(names(ys), function(label) {
   y <- ys[[label]]
   fits <- list(
-    Poisson = fit_family(y, family = PO, control = control,
+    Poisson = fit_family(y, family = PO, control = ctrl,
       main = paste(label, "Poisson", sep = ": "), xlab = "Count",
       xlim = c(0, 8), ylim = c(0, 0.65)),
-    Inflated = fit_family(y, family = f_infl, control = control,
+    Inflated = fit_family(y, family = f_infl, control = ctrl,
       main = paste(label, "Inflated", sep = ": "), xlab = "Count",
       xlim = c(0, 8), ylim = c(0, 0.65)),
-    Hurdle = fit_family(y, family = f_hurd, control = control,
+    Hurdle = fit_family(y, family = f_hurd, control = ctrl,
       main = paste(label, "Hurdle", sep = ": "), xlab = "Count",
       xlim = c(0, 8), ylim = c(0, 0.65))
   )
@@ -573,7 +573,7 @@ dat$y <- f_hurd$random(list(
 ), nrow(dat))
 
 m_hurd <- gamlss2(y ~ s(x) | s(x), data = dat,
-  family = f_hurd, control = control)
+  family = f_hurd, control = ctrl)
 nd <- data.frame(x = seq(-2, 2, length.out = 150))
 p <- predict(m_hurd, newdata = nd, drop = FALSE)
 p0 <- p$pi1 / (1 + p$pi1)
@@ -634,7 +634,7 @@ m_01 <- gamlss2(
   proportion ~ s(x) | s(x),
   data = dat,
   family = f_01,
-  control = control
+  control = ctrl
 )
 
 head(predict(m_01, drop = FALSE))
@@ -707,9 +707,9 @@ volume scale, so their AIC values are comparable. A model fitted to
 #| fig-height: 4
 op <- par(mfrow = c(1, 2))
 mf_norm <- fit_family(trees$Volume, family = NO,
-  control = control, main = "Normal", xlab = "Volume")
+  control = ctrl, main = "Normal", xlab = "Volume")
 mf_lnorm <- fit_family(trees$Volume, family = f_lnorm,
-  control = control, main = "Lognormal", xlab = "Volume")
+  control = ctrl, main = "Lognormal", xlab = "Volume")
 par(op)
 AIC(mf_norm, mf_lnorm)
 ```
@@ -725,7 +725,7 @@ m_lnorm <- gamlss2(
   Volume ~ s(Girth) | 1,
   data = trees,
   family = f_lnorm,
-  control = control
+  control = ctrl
 )
 ```
 

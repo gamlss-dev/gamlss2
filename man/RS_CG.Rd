@@ -50,13 +50,33 @@ CG(x, y, specials, family, offsets,
 
   The functions use the following control arguments:
   \itemize{
-    \item \code{eps}: Numeric vector of length 2, the stopping criterion.
-      Default is \code{eps = c(1e-05, 1e-05)} for the outer and the inner backfitting loop.
-    \item \code{maxit}: Integer vector of length 2, the maximum number of iterations of
-      the outer and inner backfitting loop. Default is \code{maxit = c(20, 20)}.
-    \item \code{step}: Numeric, the step length control parameter. Default is \code{step = 1}.
-      Note that if \code{step} is set smaller than 1, it might be appropriate to lower
-      the stopping criterion \code{eps}, too.
+    \item \code{eps}: Numeric vector of length 1 to 3, the stopping criterion
+      for the global, per-parameter, and CG correction loops. The CG tolerance
+      defaults to the per-parameter tolerance.
+    \item \code{maxit}: Integer vector of length 1 to 3, the maximum number of global
+      parameter sweeps and per-parameter IRLS/backfitting iterations. Default is
+      \code{maxit = c(20, 50)}. For the CG algorithm, an optional third element
+      limits the internal correction sweeps and defaults to the second element.
+      Plain RS always performs
+      one parameter sweep before checking global convergence; a third element is
+      therefore ignored by RS.
+    \item \code{step}: Numeric, the step length control parameter. Default is
+      \code{step = 1}. After the first update and with fixed smoothing
+      parameters, the step is applied to a complete parameter update in RS and
+      to a complete correction sweep in CG. A smoothing-parameter change and
+      its coefficients are instead accepted or rejected as one state. If
+      \code{step} is set smaller than 1, it might be appropriate to lower the
+      stopping criterion \code{eps}, too.
+    \item \code{autostep}: Logical, should an update that decreases its
+      objective be halved automatically? Default is \code{TRUE}. The objective
+      is the likelihood for unpenalized updates and the penalized likelihood
+      when smoothing parameters are fixed. Smoothing-parameter changes use the
+      specified smoothing criterion or the term-specific local ML update.
+    \item \code{sigma.tol}: Numeric between zero and one. If a model contains
+      a smooth for \code{sigma}, warn when its smallest fitted value divided by
+      its median is less than \code{sigma.tol}. The default is \code{0.001};
+      use zero or \code{FALSE} to disable the diagnostic. This diagnostic does
+      not constrain the fitted values.
     \item \code{CG}: Integer, the outer iteration in which to start the CG
       correction. Thus, \code{CG = 5} uses RS for the first four outer
       iterations and CG in the fifth. \code{CG = 0} starts with CG immediately;
@@ -99,8 +119,9 @@ CG(x, y, specials, family, offsets,
     containing the estimated parameters of the linear effects.}
   \item{elapsed}{The elapsed runtime of the algorithm.}
   \item{iterations}{How many iterations the algorithm performed.}
+  \item{converged}{Logical, did the global iteration satisfy the stopping criterion?}
   \item{logLik}{The final value of the log-likelihood of the model.}
-  \item{control}{All control arguments used as supplied from function \code{\link{gamlss2_control}}.}
+  \item{control}{All effective control arguments used by the optimizer.}
 }
 
 \references{
@@ -127,7 +148,7 @@ m1 <- gamlss2(f, data = HarzTraffic, family = NBI, optimizer = RS)
 m2 <- gamlss2(f, data = HarzTraffic, family = NBI, optimizer = CG)
 
 ## first 2 RS iterations and afterwards switch to CG
-m3 <- gamlss2(f, data = HarzTraffic, family = NBI, CG = 2)
+m3 <- gamlss2(f, data = HarzTraffic, family = NBI, CG = 3)
 }}
 
 \keyword{models}

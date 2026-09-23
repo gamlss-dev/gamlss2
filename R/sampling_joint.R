@@ -1,32 +1,19 @@
-## Gaussian coefficient simulation from the cached joint precision.
+## Gaussian coefficient simulation from the full covariance.
 sampling <- function(object, R = 100, antithetic = TRUE, ...)
 {
   dots <- list(...)
   method <- dots$method %||% "joint"
+  method <- match.arg(method, c("joint", "working", "numeric"))
   full <- isTRUE(dots$full)
-  info <- joint_information(object, method = method)
-  if(any(info$map$reason == "aliased", na.rm = TRUE))
-    stop("Gaussian coefficient draws are unavailable with aliased coefficients")
-
-  p <- info$dimension
-  if(antithetic) {
-    R0 <- ceiling(R / 2)
-    Z <- matrix(rnorm(R0 * p), nrow = p, ncol = R0)
-    Z <- cbind(Z, -Z)[, seq_len(R), drop = FALSE]
-  } else {
-    Z <- matrix(rnorm(R * p), nrow = p, ncol = R)
-  }
-  if(is.null(info$factor) || info$rank != p)
-    stop("Gaussian coefficient draws require full-rank positive definite information")
-  draws <- backsolve(info$factor, Z)
-  draws <- sweep(draws, 1L, rowMeans(draws), "-")
-
-  complete <- matrix(info$coefficients, nrow = length(info$coefficients),
-    ncol = R)
-  active <- which(info$map$active)
-  complete[active, ] <- sweep(draws, 1L, info$active.coefficients, "+")
-  keep <- if(full) seq_len(nrow(info$map)) else which(info$map$type == "linear")
-  complete <- t(complete[keep, , drop = FALSE])
-  colnames(complete) <- info$map$name[keep]
-  complete
+  info <- vcov_information(object, method = method)
+  draws <- vcov_draws(info, R, antithetic = antithetic, center = TRUE)
+  blocks <- info$blocks
+  linear <- unlist(lapply(blocks, function(z) {
+    k <- which(vapply(z, function(x) identical(x$type, "linear"), logical(1L)))
+    if(!length(k)) integer() else z[[k[1L]]]$index
+  }), use.names = FALSE)
+  keep <- if(full) seq_len(info$dimension) else linear
+  answer <- t(draws[keep, , drop = FALSE])
+  colnames(answer) <- names(info$coefficients)[keep]
+  answer
 }

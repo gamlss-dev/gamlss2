@@ -5,13 +5,26 @@
 
 \title{Conditional Inference Forest Model Terms}
 
-\description{Constructs a conditional inference forest model term using \pkg{partykit}.}
+\description{
+  Constructs a conditional inference forest model term using \pkg{partykit}.
+}
+
 \usage{cf(formula, ...)}
 
-\details{
-The forest is refitted with the current working response and weights during backfitting. The fitted contribution is centered for identifiability.}
+\arguments{
+  \item{formula}{A vector or formula specifiyng the covariates that should
+    be used for modeling.}
+  \item{\dots}{Control arguments passed to \code{\link[partykit]{cforest}}.}
+}
 
-\value{An object of classes \code{"special"} and \code{"cf"}.}
+\details{
+  The forest is refitted with the current working response and weights
+  during backfitting. The fitted contribution is centered for identifiability.
+}
+
+\value{
+  An object of classes \code{"special"} and \code{"cf"}.
+}
 
 \seealso{
   \code{\link{special_terms}}

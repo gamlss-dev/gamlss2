@@ -54,7 +54,10 @@
 \details{
   For objects of class \code{"gamlss2"}, \code{which = "effects"} is the default
   and plots the partial effects stored in \code{results(object)}. If no effect
-  information is available, residual diagnostics are shown instead.
+  information is available, residual diagnostics are shown instead. Effect
+  uncertainty uses fast term-local covariance by default. Pass
+  \code{method = "joint"} through \code{...} to rebuild effects from the full
+  joint covariance.
 
   Linear effects are constructed separately for each formula term, so a main
   effect does not include columns belonging to an interaction. A linear
@@ -72,10 +75,10 @@
 }
 
 \examples{\dontrun{## model formula
-f <- Ozone ~ s(Temp) + s(Wind) + s(Solar.R) | . | 1 | 1
+f <- Ozone ~ s(Temp) + s(Wind) + s(Solar.R) | .
 
 ## estimate model
-m1 <- gamlss2(f, data = airquality, family = BCCG)
+m1 <- gamlss2(f, data = airquality, family = GA)
 
 ## plot effects (default)
 plot(m1)
@@ -99,19 +102,7 @@ plot(m1, which = "scatter-resid")
 
 ## if available, plot stored step_gamlss2()-selection path
 ## plot(m1, which = "selection")
-
-## estimate another model
-m2 <- gamlss2(f, data = airquality, family = BCPE)
-
-## compare estimated effects
-plot(c(m1, m2))
-plot(c(m1, m2), terms = "Wind",
-  col = c(1, 4), lwd = 3, lty = 1,
-  pos = c("topright", "bottomleft"))
-plot(c(m1, m2), model = "sigma")
-plot(c(m1, m2), model = "sigma", terms = 2)
-plot(c(m1, m2), model = c("mu", "sigma"))
-}
-}
+}}
 
 \keyword{aplot}
+

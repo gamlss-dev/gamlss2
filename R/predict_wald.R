@@ -106,41 +106,27 @@ wald_information <- function(object)
 {
   if(inherits(object, "bamlss2"))
     stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
-  info <- interval_information(object)
-  if(any(info$map$reason == "aliased", na.rm = TRUE))
-    stop("Wald intervals require estimable coefficients; aliased coefficients were found.")
-  if(is.null(info$factor) || info$rank != info$dimension)
-    stop(paste0("The joint information matrix is not positive definite; ",
-      "Wald intervals are unavailable. Check convergence/identifiability."))
-  blocks <- lapply(info$blocks, function(x) lapply(x, function(z) {
-    list(label = z$label, names = z$names, index = z$index, size = z$size)
-  }))
+  info <- vcov_information(object, method = "joint")
+  if(any(!is.finite(diag(info$covariance))))
+    stop("Wald intervals require estimable coefficients; non-estimable coefficients were found.")
   structure(list(
-    R = info$factor,
-    blocks = blocks,
+    V = info$covariance,
+    blocks = info$blocks,
     indices = info$indices,
     information = info,
     state = info$state
   ), class = "gamlss2.interval.cache")
 }
 
-## Only solve for the requested prediction variances, in bounded row chunks.
-wald_variance <- function(A, R)
+## Compute only the requested prediction variances.
+wald_variance <- function(A, V)
 {
-  n <- nrow(A)
-  variance <- numeric(n)
-  if(!n || !ncol(A)) return(variance)
-  for(first in seq.int(1L, n, by = 1024L)) {
-    rows <- seq.int(first, min(n, first + 1023L))
-    B <- backsolve(R, t(A[rows, , drop = FALSE]), transpose = TRUE)
-    variance[rows] <- colSums(B * B)
-  }
-  variance
+  vcov_variance(A, V)
 }
 
 print.gamlss2.interval.cache <- function(x, ...)
 {
-  cat("Reusable Wald information factor:", ncol(x$R), "coefficients\n")
+  cat("Reusable joint Wald covariance:", ncol(x$V), "coefficients\n")
   invisible(x)
 }
 
@@ -157,7 +143,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   if(is.null(cache)) {
     cache <- wald_information(object)
   } else if(!inherits(cache, "gamlss2.interval.cache") ||
-      !identical(cache$state, inference_state(object),
+      !identical(cache$state, vcov_state_signature(object),
         num.eq = FALSE, single.NA = FALSE)) {
     stop("'interval.cache' must come from the same, unchanged fitted model.")
   }
@@ -185,7 +171,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   mf <- do.call(model.frame.gamlss2, mf.args)
   X <- model.matrix(object, data = mf)
   n <- nrow(X)
-  p <- ncol(cache$R)
+  p <- ncol(cache$V)
   matrices <- term.matrices <- setNames(vector("list", length(parameters)), parameters)
   terms <- gsub(" ", "", terms)
   if(!length(terms)) terms <- NULL
@@ -231,7 +217,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
         block <- term.matrices[[j]][[term]]
         A <- matrix(0, n, p)
         if(length(block$index)) A[, block$index] <- block$X
-        sj[, term] <- sqrt(wald_variance(A, cache$R))
+        sj[, term] <- sqrt(wald_variance(A, cache$V))
       }
       if(length(model) == 1L && drop) {
         se <- sj
@@ -264,7 +250,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
       if(type != "link") for(j in parameters)
         A <- A + matrices[[j]] * as.numeric(derivatives[[target]][[j]])
       sj <- values
-      sj[] <- sqrt(wald_variance(A, cache$R))
+      sj[] <- sqrt(wald_variance(A, cache$V))
       if(type == "parameter") {
         link <- family$links[[target]]
         others <- setdiff(parameters, target)
@@ -275,7 +261,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
           link <- make.link2(link)
           if(isTRUE(all.equal(as.numeric(link$linkinv(eta[[target]])),
               as.numeric(values), tolerance = 1e-12))) {
-            s <- sqrt(wald_variance(matrices[[target]], cache$R))
+            s <- sqrt(wald_variance(matrices[[target]], cache$V))
             transformed[[target]] <- list(link = link, eta = eta[[target]], se = s)
           }
         }

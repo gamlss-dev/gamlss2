@@ -71,10 +71,18 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   can account for short-range dependence, at increased computational cost.
   For ordered data, small values such as \code{ncv = 1} or \code{ncv = 2}
   are often preferable to the singleton default. Custom neighbourhoods can
-  also be supplied as a list through a smooth term's code{xt} argument, for
+  also be supplied as a list through a smooth term's \code{xt} argument, for
   example \code{s(x, xt = list(ncv = neighbourhoods))}, where
-  code{neighbourhoods} has one integer index vector per observation and each
+  \code{neighbourhoods} has one integer index vector per observation and each
   vector contains its target observation.
+
+
+  The RS and CG optimizers use \code{sigma.tol = 0.001} by default. If a
+  model contains a smooth for \code{sigma}, a warning is issued when the
+  smallest fitted sigma divided by its median is below this value. Such a fit
+  can indicate a near-singular likelihood and unstable smooth functions. The
+  check is diagnostic only and does not impose a lower bound; set
+  \code{sigma.tol = FALSE} to disable it.
 
   Smooths with fixed smoothing parameters or multiple penalties, including
   adaptive and tensor-product smooths, use the direct solver. For larger

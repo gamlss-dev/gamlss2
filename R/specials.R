@@ -569,14 +569,15 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   }
 
   ## Set up smoothing parameters.
+  previous.lambdas <- transfer$lambdas
   if(iter[1L] > -1) {
     lambdas <- transfer$lambdas
   } else {
-    lambdas <- 1.0
+    lambdas <- 1.0 * 10000
   }
   if(is.null(lambdas)) {
     if(is.null(control$start)) {
-      lambdas <- 1.0
+      lambdas <- 1.0 * 10000
       ## Small one-dimensional bases benefit from a scale-aware start in
       ## the full likelihood optimizer. Larger bases and multiple penalties
       ## are normally reached with warm starts from the outer RS iterations.
@@ -721,8 +722,14 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         XWX, as.numeric(XWz), x$S[[1L]], as.numeric(lambdas),
         as.numeric(null.dim), if(control$binning) x$binning$match.index else NULL,
         dr, penalty.root, PACKAGE = "gamlss2"), silent = TRUE)
-      if(!inherits(rval, "try-error"))
+      if(!inherits(rval, "try-error")) {
+        changed <- !is.null(previous.lambdas) &&
+          length(previous.lambdas) == length(rval$lambdas) &&
+          any(abs(log(rval$lambdas) - log(previous.lambdas)) >
+            sqrt(.Machine$double.eps))
+        rval$.rs_smoothing <- list("changed" = changed, "scored" = FALSE)
         return(rval)
+      }
     }
 
     N <- sum(w != 0)
@@ -781,8 +788,13 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     if(control$binning)
       fit <- fit[x$binning$match.index]
 
+    changed <- !is.null(previous.lambdas) &&
+      length(previous.lambdas) == length(lambdas) &&
+      any(abs(log(lambdas) - log(previous.lambdas)) >
+        sqrt(.Machine$double.eps))
     return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-      "lambdas" = lambdas, "vcov" = P, "df" = n - edf))
+      "lambdas" = lambdas, "vcov" = P, "df" = n - edf,
+      ".rs_smoothing" = list("changed" = changed, "scored" = FALSE)))
   } else {
     if(is.null(zWz))
       zWz <- sum(w * z^2)
@@ -975,8 +987,8 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     }
 
     ## Function to search for smoothing parameters using GCV etc.
-    fl <- function(l, rf = FALSE) {
-      if(!rf)
+    fl <- function(l, rf = FALSE, count = TRUE) {
+      if(!rf && count)
         criterion.evaluations <<- criterion.evaluations + 1L
       if(ncv && !rf)
         return(ncv_eval(l))
@@ -1128,6 +1140,34 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   }
 
   rval <- fl(opt$par, rf = TRUE)
+
+  ## The RS safeguard must distinguish an ordinary coefficient update from
+  ## a change selected by the smoothing criterion. Compare both criteria for
+  ## the same working response; these bookkeeping evaluations are not part of
+  ## the smoothing search count.
+  changed <- !is.null(previous.lambdas) &&
+    length(previous.lambdas) == length(rval$lambdas) &&
+    all(previous.lambdas > 0) && all(rval$lambdas > 0) &&
+    any(abs(log(rval$lambdas) - log(previous.lambdas)) >
+      sqrt(.Machine$double.eps))
+  scored <- FALSE
+  improved <- FALSE
+  old.criterion <- new.criterion <- NA_real_
+  if(changed && is.null(x$sp)) {
+    old.criterion <- try(fl(previous.lambdas, count = FALSE), silent = TRUE)
+    new.criterion <- try(fl(rval$lambdas, count = FALSE), silent = TRUE)
+    scored <- is.numeric(old.criterion) && length(old.criterion) == 1L &&
+      is.finite(old.criterion) && is.numeric(new.criterion) &&
+      length(new.criterion) == 1L && is.finite(new.criterion)
+    if(scored) {
+      tolerance <- sqrt(.Machine$double.eps) *
+        (1 + abs(old.criterion))
+      improved <- new.criterion <= old.criterion + tolerance
+    }
+  }
+  rval$.rs_smoothing <- list("changed" = changed, "scored" = scored,
+    "improved" = improved, "old" = old.criterion,
+    "new" = new.criterion, "criterion" = control$criterion)
 
   ## Adaptive term selection changes the penalty during fitting. Retain only
   ## this otherwise unrecoverable final effective penalty.

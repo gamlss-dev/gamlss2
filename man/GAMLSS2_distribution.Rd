@@ -44,7 +44,7 @@ GAMLSS2(family, parameters)
 \arguments{
   \item{family}{character. Name of a \code{\link{gamlss2.family}} or a family provided
     by the \pkg{gamlss.dist} package, e.g,
-    \code{\link{NO}} or \code{\link{BI}} for the normal or
+    \code{\link[gamlss.dist]{NO}} or \code{\link[gamlss.dist]{BI}} for the normal or
     binomial distribution, respectively.}
   \item{parameters}{numeric, matrix, list or data frame, see the examples.}
 }

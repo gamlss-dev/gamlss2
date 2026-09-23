@@ -34,7 +34,8 @@ of the response distribution.
     should be included? By default all terms are included.}
   \item{se.fit}{Logical. Should standard errors for the predictions be included?
     Standard errors are computed by simulating from the approximate multivariate normal
-    distribution of the maximum likelihood estimates. The number of simulations is controlled
+    distribution defined by the complete joint covariance of the maximum likelihood estimates.
+    Local term-wise covariance is never used for these draws. The number of simulations is controlled
     by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
   \item{drop}{Logical. Should the predictions be simplified to a vector
     if possible (\code{TRUE}) or always returned as a data frame (\code{FALSE})?}
@@ -44,10 +45,10 @@ of the response distribution.
     from the joint penalized information. The default \code{"none"} retains
     ordinary prediction behavior. Supplying \code{level} also selects Wald
     bands.}
-  \item{interval.cache}{Optional information factor obtained from the
+  \item{interval.cache}{Optional joint covariance cache obtained from the
     \code{"interval.cache"} attribute of a previous Wald prediction for the
-    same, unchanged model. Reusing it avoids rebuilding the joint information
-    matrix for subsequent predictions.}
+    same, unchanged model. Reusing it avoids rebuilding the joint covariance
+    for subsequent predictions.}
   \item{...}{Further control arguments. Supported aliases are \code{what} and
     \code{parameter} for \code{model}. Additional arguments are used for
     simulation-based summaries, including \code{FUN}, \code{R}, \code{seed},
@@ -61,7 +62,8 @@ parameters, as individual model terms, or as the fitted response mean.
 
 If \code{se.fit = TRUE}, standard errors are obtained from coefficient draws.
 Existing draws stored in the fitted object are used when available; otherwise,
-draws are generated from the approximate distribution of the fitted coefficients.
+draws are generated from the complete joint covariance of the fitted
+coefficients, including cross-term and cross-parameter dependence.
 
 If \code{level} is specified, approximate pointwise confidence intervals and
 standard errors are computed analytically, without simulation. Intervals on
@@ -102,14 +104,12 @@ For multiple confidence levels, each is a list named by confidence percentage
 prediction structure. The \code{fit} element is the ordinary, non-simulated
 prediction and \code{se.fit} is shared by all intervals. Attributes record the
 confidence levels, method, and reusable \code{interval.cache}. The cache stores
-the fitted inferential state and can be reused only with that unchanged model.
+the full joint covariance and fitted inferential state and can be reused only
+with that unchanged model.
 
-If the joint observed information is not positive definite, Wald prediction
-issues a warning and uses the positive working-information approximation.
-Effect plots instead use the covariance stored with each fitted model term
-silently, because this fallback is only used to draw uncertainty bands. The
-default \code{vcov()} method remains observed-information based and reports
-the identification problem.
+If the joint observed information is indefinite or a required coefficient is
+not estimable, Wald prediction and coefficient simulation report the problem;
+they do not silently substitute a working-information approximation.
 }
 
 \seealso{

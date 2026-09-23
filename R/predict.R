@@ -27,7 +27,9 @@ predict.gamlss2 <- function(object,
       }
       if(!is.null(seed))
         set.seed(seed)
-      samples <- sampling(object, R = R, full = TRUE)
+      ## Any coefficient simulation must retain the complete joint covariance;
+      ## local term-wise covariances cannot reproduce cross-term dependence.
+      samples <- sampling(object, R = R, full = TRUE, method = "joint")
     } else {
       samples <- object$samples
     }

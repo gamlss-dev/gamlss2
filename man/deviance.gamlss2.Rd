@@ -52,10 +52,10 @@
 \examples{\dontrun{## specify a distributional model:
 ## location and scale vary with x,
 ## shape parameters remain constant
-f <- dist ~ s(speed) | s(speed) | 1 | 1
+f <- dist ~ s(speed) | 1 | 1
 
 ## estimate model
-m1 <- gamlss2(f, data = cars, family = BCT)
+m1 <- gamlss2(f, data = cars, family = GA)
 
 ## total deviance
 deviance(m1)
@@ -68,7 +68,7 @@ sum(di)
 deviance(m1)
 
 ## compare two models
-m2 <- gamlss2(dist ~ s(speed) | 1 | 1 | 1, data = cars, family = BCT)
+m2 <- gamlss2(dist ~ s(speed) | s(speed), data = cars, family = GA)
 deviance(m1, m2)
 
 ## compare observation-wise deviance contributions

@@ -93,20 +93,44 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(!is.null(weights))
     weights <- as.numeric(weights)
 
+  ## Trial updates can temporarily leave the parameter space, especially for
+  ## positive parameters fitted with an identity link.  Such a trial has
+  ## likelihood -Inf and must be rejected by the existing step-length logic;
+  ## it is not a fatal family error.  Likelihood evaluations of the current
+  ## accepted fit remain unprotected so genuine family errors are visible.
+  candidate_log_likelihood <- function(eta) {
+    tryCatch({
+      par <- map2par(eta)
+      if(is.null(weights)) {
+        log_likelihood(par = par, y = y)
+      } else {
+        sum(pdf(par = par, y = y, log = TRUE) * weights, na.rm = TRUE)
+      }
+    }, error = function(e) -Inf)
+  }
+
   ## Set control parameters.
   ## Stopping criterion.
   eps <- control$eps
   if(is.null(eps))
     eps <- 0.00001 ## sqrt(.Machine$double.eps)
-  if(length(eps) < 2)
+  if(!is.numeric(eps) || !length(eps) || length(eps) > 3L ||
+      any(!is.finite(eps)) || any(eps <= 0))
+    stop("argument eps must contain one to three positive finite values!")
+  if(length(eps) < 2L)
     eps <- c(eps, eps)
-  eps <- rep(eps, length.out = 3)
+  if(length(eps) < 3L)
+    eps <- c(eps, eps[2L])
   stop.eps <- eps
+  control$eps <- stop.eps
   eps <- eps + 1
 
   ## The step length control.
   if(is.null(control$step))
     control$step <- 1
+  if(!is.numeric(control$step) || length(control$step) != 1L ||
+      !is.finite(control$step))
+    stop("argument step must be one finite value!")
   if((control$step > 1) | (control$step < 0))
     control$step <- 1
   if(is.null(control$autostep))
@@ -114,12 +138,29 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   else
     control$autostep <- isTRUE(control$autostep)
 
+  if(is.null(control$sigma.tol))
+    control$sigma.tol <- 0.001
+  if(identical(control$sigma.tol, FALSE))
+    control$sigma.tol <- 0
+  if(!is.numeric(control$sigma.tol) || length(control$sigma.tol) != 1L ||
+      !is.finite(control$sigma.tol) || control$sigma.tol < 0 ||
+      control$sigma.tol >= 1)
+    stop("argument sigma.tol must be one number between zero and one!")
+
   ## Maximum number of backfitting iterations.
   maxit <- control$maxit
   if(is.null(maxit))
     maxit <- 20L
+  if(!is.numeric(maxit) || !length(maxit) || length(maxit) > 3L ||
+      any(!is.finite(maxit)) || any(maxit < 1) ||
+      any(maxit != floor(maxit)) || any(maxit > .Machine$integer.max))
+    stop("argument maxit must contain one to three positive integers!")
+  maxit <- as.integer(maxit)
   if(length(maxit) < 2L)
-    maxit <- c(maxit, 20L)
+    maxit <- c(maxit, 50L)
+  if(length(maxit) < 3L)
+    maxit <- c(maxit, maxit[2L])
+  control$maxit <- maxit
 
   ## Fix some parameters?
   if(is.null(control$fixed)) {
@@ -231,7 +272,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   if(!is.null(control$fixed)) {
     for(j in np) {
-      if(control$fixed[[j]]) {
+      if(control$fixed[[j]] && is.null(start[[j]])) {
         link <- make.link2(family$links[[j]])
         fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
         eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
@@ -318,23 +359,17 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     CGk <- Inf
   if(is.finite(CGk))
     eta_old <- eta
-  ## The third internal sweep limit is used by the CG correction.  Before the
-  ## handoff, retain the ordinary RS limit instead of expanding it merely
-  ## because a future CG iteration was requested.
-  maxit_RS <- if(length(maxit) >= 3L) maxit[3L] else 3L
-  maxit_CG <- if(length(maxit) >= 3L) maxit[3L] else 30L
-  if(length(maxit) < 3L) {
-    if(is.finite(CGk))
-      maxit <- c(maxit, maxit_CG)
-    else
-      maxit <- c(maxit, maxit_RS)
-  }
+  ## A global RS iteration is already one complete sweep over all parameters.
+  ## Repeating that sweep here bypasses the global convergence check and keeps
+  ## the outer iteration counter fixed.  Only CG needs internal sweeps because
+  ## its working quantities are held fixed while solving the coupled system.
+  maxit_RS <- 1L
+  maxit_CG <- maxit[3L]
 
   ## Track iterations
-  iter <- c(0, 0)
+  iter <- c(0L, 0L)
   dev.warn <- 0L
   dev.warn.max <- 0
-  pen.run <- 0L
 
   ## For printing.
   if(control$flush) {
@@ -359,10 +394,160 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     rval
   }, simplify = FALSE)
 
+  ## Interpolate a fitted term contribution.  For fixed-design terms automatic
+  ## step length control must not leave the fitted values, coefficients, and
+  ## the warm start at different points.
+  blend_fit <- function(old, new, alpha, coefficients = TRUE) {
+    rval <- new
+    if(coefficients && !is.null(new$coefficients)) {
+      b0 <- old$coefficients
+      if(is.null(b0))
+        b0 <- rep(0, length(new$coefficients))
+      if(length(b0) != length(new$coefficients) ||
+          !identical(dim(b0), dim(new$coefficients)))
+        stop("cannot interpolate fitted term coefficients!")
+      rval$coefficients <- alpha * new$coefficients + (1 - alpha) * b0
+      if(!is.null(rval$transfer))
+        rval$transfer$coefficients <- rval$coefficients
+    }
+    if(!is.null(new$fitted.values)) {
+      f0 <- old$fitted.values
+      if(is.null(f0))
+        f0 <- rep(0, length(new$fitted.values))
+      rval$fitted.values <- alpha * new$fitted.values + (1 - alpha) * f0
+    }
+    rval
+  }
+
+  blend_parameter <- function(old.fit, new.fit, old.sfit, new.sfit, alpha) {
+    rval <- list("fit" = blend_fit(old.fit, new.fit, alpha), "sfit" = new.sfit)
+    if(length(new.sfit)) {
+      for(k in names(new.sfit)) {
+        sk <- specials[[k]]
+        fixed.design <- inherits(sk, c("mgcv.smooth", "X %*% b")) ||
+          (!inherits(sk, c("smooth", "special")) &&
+            is.null(sk$special.wfit))
+        rval$sfit[[k]] <- blend_fit(old.sfit[[k]], new.sfit[[k]], alpha,
+          fixed.design)
+      }
+    }
+    rval
+  }
+
+  ## Smoothing parameters and coefficients form one state. If a criterion
+  ## selects a new smoothing parameter, accept or reject that state as a
+  ## whole; interpolating only its coefficients leaves an invalid warm start.
+  smoothing_update <- function(sfit) {
+    if(length(intersect(names(sfit), np)))
+      sfit <- unlist(sfit, recursive = FALSE)
+    state <- unlist(lapply(sfit, function(x) list(x$.rs_smoothing)),
+      recursive = FALSE)
+    state <- Filter(function(x) is.list(x) && isTRUE(x$changed), state)
+    if(!length(state))
+      return(list("changed" = FALSE, "scored" = FALSE,
+        "improved" = FALSE))
+    scored <- all(vapply(state, function(x) isTRUE(x$scored), logical(1L)))
+    improved <- scored &&
+      all(vapply(state, function(x) isTRUE(x$improved), logical(1L)))
+    list("changed" = TRUE, "scored" = scored, "improved" = improved)
+  }
+
+  smooth_penalty <- function(old, new, alpha) {
+    if(!length(new))
+      return(0)
+    if(length(intersect(names(new), np))) {
+      return(sum(vapply(names(new), function(j)
+        smooth_penalty(old[[j]], new[[j]], alpha), numeric(1L))))
+    }
+
+    value <- 0
+    for(k in names(new)) {
+      b1 <- new[[k]]$coefficients
+      if(is.null(b1))
+        next
+      b0 <- old[[k]]$coefficients
+      if(is.null(b0))
+        b0 <- rep(0, length(b1))
+      if(length(b0) != length(b1))
+        return(Inf)
+      b <- alpha * b1 + (1 - alpha) * b0
+      P <- new[[k]]$penalty
+      if(is.null(P)) {
+        S <- specials[[k]][["S", exact = TRUE]]
+        if(is.null(S) || !length(S) || is.null(new[[k]]$lambdas))
+          next
+        P <- matrix(0, length(b), length(b))
+        lambda <- rep(new[[k]]$lambdas, length.out = length(S))
+        for(i in seq_along(S))
+          P <- P + lambda[i] * S[[i]]
+      }
+      if(!identical(dim(P), c(length(b), length(b))))
+        next
+      value <- value + drop(crossprod(b, P %*% b))
+    }
+    value
+  }
+
+  ## Backtrack a complete RS parameter update or a complete CG correction
+  ## sweep.  A trial outside the parameter space has likelihood -Inf.
+  find_step <- function(eta0, eta1, ll0, initial, old.sfit, new.sfit) {
+    if(initial <= 0)
+      return(list("eta" = eta0, "logLik" = ll0, "step" = 0, "accepted" = FALSE))
+    alpha <- initial
+    penalty0 <- smooth_penalty(old.sfit, new.sfit, 0)
+    objective0 <- ll0 - 0.5 * penalty0
+    tolerance <- sqrt(.Machine$double.eps) * (1 + abs(objective0))
+    repeat {
+      etai <- Map(function(a, b) a + alpha * (b - a), eta0, eta1)
+      names(etai) <- names(eta0)
+      ll1 <- candidate_log_likelihood(etai)
+      penalty1 <- smooth_penalty(old.sfit, new.sfit, alpha)
+      objective1 <- ll1 - 0.5 * penalty1
+      if(is.finite(objective1) && objective1 >= objective0 - tolerance) {
+        return(list("eta" = etai, "logLik" = ll1,
+          "step" = alpha, "accepted" = TRUE,
+          "objective" = penalty0 != 0 || penalty1 != 0))
+      }
+      if(!control$autostep || alpha <= sqrt(.Machine$double.eps))
+        break
+      alpha <- alpha * 0.5
+    }
+    list("eta" = eta0, "logLik" = ll0, "step" = 0, "accepted" = FALSE)
+  }
+
+  safeguard <- function(eta0, eta1, ll0, initial, old.sfit, new.sfit) {
+    smoothing <- smoothing_update(new.sfit)
+    if(!smoothing$changed)
+      return(find_step(eta0, eta1, ll0, initial, old.sfit, new.sfit))
+
+    ll1 <- candidate_log_likelihood(eta1)
+    accept <- is.finite(ll1) && if(smoothing$scored)
+      smoothing$improved else TRUE
+    if(accept) {
+      return(list("eta" = eta1, "logLik" = ll1, "step" = 1,
+        "accepted" = TRUE, "objective" = TRUE))
+    }
+    list("eta" = eta0, "logLik" = ll0, "step" = 0,
+      "accepted" = FALSE, "objective" = FALSE)
+  }
+
+  set_step <- function(j, alpha) {
+    if(length(xterms[[j]]))
+      step[[j]]$xterms <<- alpha
+    if(length(sterms[[j]]))
+      step[[j]]$sterms[] <<- alpha
+  }
+
+  set_all_steps <- function(alpha) {
+    for(j in np)
+      if(!control$fixed[[j]])
+        set_step(j, alpha)
+  }
+
   ## Start outer loop.
   while((eps[1L] > stop.eps[1L]) && (iter[1L] < maxit[1L])) {
-    pen.accepted <- FALSE
-
+    objective.accepted <- FALSE
+    safeguard.failed <- FALSE
     ## Old log-likelihood.
     if(is.null(weights)) {
       llo0 <- log_likelihood(par = map2par(eta), y = y)
@@ -401,6 +586,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         } else {
           outer_ll0 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
         }
+        eta_sweep <- eta
+        fit_sweep <- fit
+        sfit_sweep <- sfit
+        penalty_sweep <- penalty
       }
 
       for(j in np) {
@@ -442,7 +631,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         }
 
         ## Start inner loop.
-        while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit[2L])) {
+        maxit_parameter <- if(use_CG) 1L else maxit[2L]
+        while((eps[2L] > stop.eps[2L]) && (iter[2L] < maxit_parameter)) {
           ## Current log-likelihood.
           if(is.null(weights)) {
             ll0 <- log_likelihood(par = map2par(eta), y = y)
@@ -450,6 +640,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             ll0 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
           }
           ll02 <- ll0
+          eta_parameter <- eta
+          fit_parameter <- fit[[j]]
+          sfit_parameter <- sfit[[j]]
+          penalty_parameter <- penalty[j]
 
           ## Fit linear part.
           if(length(xterms[[j]])) {
@@ -479,18 +673,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             etai <- eta
             etai[[j]] <- etai[[j]] + m$fitted.values
 
-            if(is.null(weights)) {
-              ll1 <- log_likelihood(par = map2par(etai), y = y)
-            } else {
-              ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
-            }
-            reuse_ll1 <- ll1 >= ll02
+            ll1 <- candidate_log_likelihood(etai)
 
             if(ll1 < ll02 && isTRUE(control$backup)) {
               ll <- function(par) {
                 etai <- eta
                 etai[[j]] <- etai[[j]] + drop(Xj %*% par)
-                -log_likelihood(par = map2par(etai), y = y) + lambda * sum(par^2)
+                -candidate_log_likelihood(etai) + lambda * sum(par^2)
               }
               warn <- getOption("warn")
               options("warn" = -1)
@@ -509,100 +698,58 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               if(!inherits(opt, "try-error")) {
                 m$coefficients <- opt$par
                 m$fitted.values <- drop(Xj %*% opt$par)
+                etai <- eta
                 etai[[j]] <- etai[[j]] + m$fitted.values
-                if(is.null(weights)) {
-                  ll1 <- log_likelihood(par = map2par(etai), y = y)
-                } else {
-                  ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
-                }
-              }
-            }
-          
-            ## Step length control.
-            if((step[[j]]$xterms < 1 || control$autostep) && (ll1 < ll02)) {
-              if(iter[1L] > 0 | iter[2L] > 0) {
-                if(control$autostep) {
-                  stepfun <- function(nu) {
-                    b <- nu * m$coefficients + (1 - nu) * fit[[j]]$coefficients
-                    f <- drop(Xj %*% b)
-                    etai <- eta
-                    etai[[j]] <- etai[[j]] + f
-                    -log_likelihood(par = map2par(etai), y = y)
-                  }
-                  s <- try(optimize(stepfun, lower = -1, upper = 1, tol = .Machine$double.eps^0.5), silent = TRUE)
-                  if(-s$objective > ll02) {
-                    step[[j]]$xterms <- s$minimum
-                  }
-                }
-                m$coefficients <- step[[j]]$xterms * m$coefficients +
-                  (1- step[[j]]$xterms) * fit[[j]]$coefficients
-                m$fitted.values <- drop(Xj %*% m$coefficients)
+                ll1 <- candidate_log_likelihood(etai)
               }
             }
 
-            etai <- eta
-            etai[[j]] <- etai[[j]] + m$fitted.values
+            ## Update predictor.
+            fit[[j]]$fitted.values <- m$fitted.values
+            fit[[j]]$coefficients <- m$coefficients
 
-            if(!reuse_ll1) {
-              if(is.null(weights)) {
-                ll1 <- log_likelihood(par = map2par(etai), y = y)
+            if(ridge)
+              fit[[j]]$penalty <- m$penalty
+
+            if(!is.null(m$edf))
+              fit[[j]]$edf <- m$edf
+
+            if(!stepwise_candidate) {
+              if(!is.null(m$vcov)) {
+                fit[[j]]$vcov <- m$vcov
               } else {
-                ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
-              }
-            }
+                Xw <- Xj * sqrt(pmax(wj, 0))
+                XWX <- crossprod(Xw)
 
-            if(ll1 > ll02) {
-              ## Update predictor.
-              fit[[j]]$fitted.values <- m$fitted.values
-              fit[[j]]$coefficients <- m$coefficients
+                ridge.eps <- 1e-8 * mean(diag(XWX))
+                if(!is.finite(ridge.eps) || ridge.eps <= 0) ridge.eps <- 1e-8
+                diag(XWX) <- diag(XWX) + ridge.eps
 
-              if(ridge)
-                fit[[j]]$penalty <- m$penalty
+                R <- tryCatch(chol(XWX), error = function(e) NULL)
 
-              if(!is.null(m$edf))
-                fit[[j]]$edf <- m$edf
-
-              if(!stepwise_candidate) {
-                if(!is.null(m$vcov)) {
-                  fit[[j]]$vcov <- m$vcov
-                } else {
-                  Xw <- Xj * sqrt(pmax(wj, 0))
-                  XWX <- crossprod(Xw)
-
-                  eps <- 1e-8 * mean(diag(XWX))
-                  if(!is.finite(eps) || eps <= 0) eps <- 1e-8
-                  diag(XWX) <- diag(XWX) + eps
-
-                  R <- tryCatch(chol(XWX), error = function(e) NULL)
-
-                  if(is.null(R)) {
-                    lambda <- eps
-                    for(k in 1:6) {
-                      Xt <- XWX + diag(lambda, ncol(XWX))
-                      R <- tryCatch(chol(Xt), error = function(e) NULL)
-                      if(!is.null(R)) {
-                        XWX <- Xt
-                        break
-                      }
-                      lambda <- lambda * 10
+                if(is.null(R)) {
+                  ridge.lambda <- ridge.eps
+                  for(k in 1:6) {
+                    Xt <- XWX + diag(ridge.lambda, ncol(XWX))
+                    R <- tryCatch(chol(Xt), error = function(e) NULL)
+                    if(!is.null(R)) {
+                      XWX <- Xt
+                      break
                     }
-                  }
-                  if(is.null(R)) {
-                    fit[[j]]$vcov <- MASS::ginv(XWX)
-                  } else {
-                    fit[[j]]$vcov <- chol2inv(R)
+                    ridge.lambda <- ridge.lambda * 10
                   }
                 }
-
-                colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
+                if(is.null(R)) {
+                  fit[[j]]$vcov <- MASS::ginv(XWX)
+                } else {
+                  fit[[j]]$vcov <- chol2inv(R)
+                }
               }
-              ll02 <- ll1
+
+              colnames(fit[[j]]$vcov) <- rownames(fit[[j]]$vcov) <- colnames(Xj)
             }
 
             eta[[j]] <- eta[[j]] + fit[[j]]$fitted.values
-
-            if(iter[1L] < 1L)
-              etastart[[j]] <- eta[[j]]
           }
 
           ## Fit specials part.
@@ -618,19 +765,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               default.fitter <- inherits(sk, "mgcv.smooth") &&
                 !inherits(sk, c("smooth", "special")) &&
                 is.null(sk$special.wfit)
-              ## Local-ML smooths such as pb()/ps() rely on the RS
-              ## likelihood safeguard and its adaptive step length.
-              smooth.criterion <- control$criterion
-              if(!is.null(control$method))
-                smooth.criterion <- control$method
-              if(is.null(smooth.criterion))
-                smooth.criterion <- "aicc"
-              smooth.criterion <- tolower(smooth.criterion)
-              smooth.K <- if(is.null(control$K)) 2 else control$K
-              pen.update <- default.fitter &&
-                !isTRUE(sk$localML) &&
-                (smooth.criterion == "ncv" ||
-                  (smooth.criterion == "gaic" && smooth.K > 2))
               if(use.cache && default.fitter)
                 sk$.rs_cache <- smooth.cache[[j]][[k]]
 
@@ -643,104 +777,40 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)
               }
 
-              first.special <- !isTRUE(sfit[[j]][[k]]$selected)
-              ## Step length control.
-              if(step[[j]]$sterms[k] < 1) {
-                if(iter[1L] > 0 | iter[2L] > 0) {
-                  if(inherits(specials[[k]], c("mgcv.smooth", "X %*% b"))) {
-                    fs$coefficients <- step[[j]]$sterms[k] * fs$coefficients +
-                      (1 - step[[j]]$sterms[k]) * if(is.null(sfit[[j]][[k]]$coefficients)) 0 else sfit[[j]][[k]]$coefficients
-                    fs$fitted.values <- drop(specials[[k]]$X %*% fs$coefficients)
-                    if(control$binning)
-                      fs$fitted.values <- fs$fitted.values[specials[[k]]$binning$match.index]
-                  } else {
-                    fs$fitted.values <- step[[j]]$sterms[k] * fs$fitted.values +
-                      (1 - step[[j]]$sterms[k]) * sfit[[j]][[k]]$fitted.values
-                  }
-                }
-              }
-              if(pen.update && !is.null(fs$transfer))
-                fs$transfer$coefficients <- fs$coefficients
-
-              etai <- eta
-              etai[[j]] <- etai[[j]] + fs$fitted.values
-
-              if(is.null(weights)) {
-                ll1 <- log_likelihood(par = map2par(etai), y = y)
-              } else {
-                ll1 <- sum(pdf(par = map2par(etai), y = y, log = TRUE) * weights, na.rm = TRUE)
-              }
-
-              accept.pen <- FALSE
-              if(pen.update && is.finite(ll1)) {
-                smooth.penalty <- function(b) {
-                  if(is.null(b) || !length(sk$S) || is.null(fs$lambdas))
-                    return(0)
-                  lambda <- rep(fs$lambdas, length.out = length(sk$S))
-                  sum(vapply(seq_along(sk$S), function(i) {
-                    lambda[i] * drop(crossprod(b, sk$S[[i]] %*% b))
-                  }, numeric(1L)))
-                }
-                old.penalty <- smooth.penalty(sfit[[j]][[k]]$coefficients)
-                new.penalty <- smooth.penalty(fs$coefficients)
-                old.obj <- ll02 - 0.5 * old.penalty
-                new.obj <- ll1 - 0.5 * new.penalty
-                tolerance <- sqrt(.Machine$double.eps) *
-                  (1 + abs(old.obj))
-                accept.pen <- is.finite(old.obj) &&
-                  is.finite(new.obj) &&
-                  new.obj >= old.obj - tolerance
-              }
-
-              accept.update <- if(pen.update) {
-                accept.pen
-              } else if(first.special) {
-                ## Keep the first valid special fit as the starting value.
-                is.finite(ll1) && all(is.finite(fs$fitted.values))
-              } else {
-                tolerance <- sqrt(.Machine$double.eps) *
-                  (1 + abs(ll02))
-                is.finite(ll1) && ll1 >= ll02 - tolerance
-              }
-              if(accept.update) {
-                ## Update predictor.
-                sfit[[j]][[k]] <- fs
-                sfit[[j]][[k]]$selected <- TRUE
-                if(default.fitter && length(sk$S))
-                  pen.accepted <- TRUE
-                ll02 <- ll1
-                ## sfit[[j]][[k]]$residuals <- z - etai[[j]] + fs$fitted.values ## FIXME: do we need this?
-              } else {
-                ## Preserve the established warm-start handling for local-ML
-                ## and custom specials. Safeguarded smooths instead keep their
-                ## complete old state when a candidate is rejected.
-                if(!pen.update &&
-                    isTRUE(sfit[[j]][[k]]$.from_start)) {
-                  old <- sfit[[j]][[k]]
-                  fs$fitted.values <- old$fitted.values
-                  fs$coefficients <- old$coefficients
-                  fs$selected <- TRUE
-                  if(!is.null(fs$transfer))
-                    fs$transfer$coefficients <- old$coefficients
-                  sfit[[j]][[k]] <- fs
-                }
-                if(control$autostep) {
-                  step[[j]]$sterms[k] <- step[[j]]$sterms[k] * 0.5
-                }
-              }
-
-              eta[[j]] <- eta[[j]] + sfit[[j]][[k]]$fitted.values
-
-              if(iter[1L] < 1L)
-                etastart[[j]] <- eta[[j]]
+              sfit[[j]][[k]] <- fs
+              sfit[[j]][[k]]$selected <- TRUE
+              eta[[j]] <- eta[[j]] + fs$fitted.values
             }
           }
 
-          ## New log-likelihood.
-          if(is.null(weights)) {
-            ll1 <- log_likelihood(par = map2par(eta), y = y)
-          } else {
-            ll1 <- sum(pdf(par = map2par(eta), y = y, log = TRUE) * weights, na.rm = TRUE)
+          ## Safeguard a complete parameter update.  Smooth and linear terms
+          ## can compensate for each other and must be accepted together.
+          ll1 <- candidate_log_likelihood(eta)
+          if(!use_CG) {
+            initial.step <- if(iter[1L] > 0L || iter[2L] > 0L)
+              control$step else 1
+            accepted <- safeguard(eta_parameter, eta, ll0, initial.step,
+              sfit_parameter, sfit[[j]])
+            if(accepted$step < 1) {
+              if(accepted$accepted) {
+                state <- blend_parameter(fit_parameter, fit[[j]],
+                  sfit_parameter, sfit[[j]], accepted$step)
+                fit[[j]] <- state$fit
+                sfit[[j]] <- state$sfit
+              } else {
+                fit[[j]] <- fit_parameter
+                sfit[[j]] <- sfit_parameter
+                penalty[j] <- penalty_parameter
+              }
+            }
+            eta <- accepted$eta
+            ll1 <- accepted$logLik
+            objective.accepted <- objective.accepted ||
+              isTRUE(accepted$objective)
+            safeguard.failed <- safeguard.failed || !accepted$accepted
+            set_step(j, accepted$step)
+            if(iter[1L] < 1L)
+              etastart[[j]] <- eta[[j]]
           }
 
           ## Stopping criterion.
@@ -759,14 +829,46 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         }
 
         ## Reset inner iterator and stopping criterion.
-        iter[2L] <- 0
+        iter[2L] <- 0L
         eps[2L] <- stop.eps[2L] + 1
+      }
+
+      ## The CG correction is coupled across parameters.  Safeguard the whole
+      ## sweep rather than its individual parameter updates.
+      if(use_CG) {
+        ll1 <- candidate_log_likelihood(eta)
+        initial.step <- if(iter[1L] > 0L || iter_outer > 0L)
+          control$step else 1
+        accepted <- safeguard(eta_sweep, eta, outer_ll0, initial.step,
+          sfit_sweep, sfit)
+        if(accepted$step < 1) {
+          if(accepted$accepted) {
+            for(j in np) {
+              if(control$fixed[[j]])
+                next
+              state <- blend_parameter(fit_sweep[[j]], fit[[j]],
+                sfit_sweep[[j]], sfit[[j]], accepted$step)
+              fit[[j]] <- state$fit
+              sfit[[j]] <- state$sfit
+            }
+          } else {
+            fit <- fit_sweep
+            sfit <- sfit_sweep
+            penalty <- penalty_sweep
+          }
+        }
+        eta <- accepted$eta
+        ll1 <- accepted$logLik
+        objective.accepted <- objective.accepted ||
+          isTRUE(accepted$objective)
+        safeguard.failed <- safeguard.failed || !accepted$accepted
+        set_all_steps(accepted$step)
       }
 
       ## For Cole and Green.
       iter_outer <- iter_outer + 1L
       if(use_CG)
-        eps_outer <- abs((ll1 - outer_ll0) / ll1)
+        eps_outer <- abs(ll1 - outer_ll0) / (abs(outer_ll0) + 1e-08)
     }
 
     ## New log-likelihood.
@@ -777,25 +879,16 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     }
 
     ## Stopping criterion.
-    eps[1L] <- abs((llo1 - llo0) / llo0)
+    eps[1L] <- abs(llo1 - llo0) / (abs(llo0) + 1e-08)
 
-    ## Raw deviance need not decrease after an accepted penalized update.
-    if(iter[1L] > 0L && is.finite(llo0) && is.finite(llo1) && llo1 < llo0) {
+    ## A material decrease should have been prevented by the safeguard.
+    if(!objective.accepted && iter[1L] > 0L && is.finite(llo0) &&
+        is.finite(llo1) && llo1 < llo0) {
       rel.inc <- (llo0 - llo1) / (abs(llo0) + 1e-08)
-      if(pen.accepted) {
-        pen.run <- pen.run + 1L
-        concerning.increase <- rel.inc > sqrt(stop.eps[1L]) ||
-          pen.run >= 3L
-      } else {
-        pen.run <- 0L
-        concerning.increase <- rel.inc > stop.eps[1L]
-      }
-      if(concerning.increase) {
+      if(rel.inc > stop.eps[1L]) {
         dev.warn <- dev.warn + 1L
         dev.warn.max <- max(dev.warn.max, rel.inc)
       }
-    } else {
-      pen.run <- 0L
     }
 
     ## Update outer iterator.
@@ -821,7 +914,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   if(dev.warn > 0L) {
     warning(sprintf(
-      paste0("Global deviance increased materially or persistently in ",
+      paste0("Global deviance increased materially in ",
         "%d outer iteration(s) (maximum relative increase %.3g); ",
         "check convergence or reduce the step length."),
       dev.warn, dev.warn.max
@@ -846,6 +939,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         drop <- NULL
         for(i in names(sfit[[j]])) {
           sfit[[j]][[i]]$.from_start <- NULL
+          sfit[[j]][[i]]$.rs_smoothing <- NULL
           if(isTRUE(control$light) || stepwise_candidate) {
             sfit[[j]][[i]]$fitted.values <- NULL
           }
@@ -884,7 +978,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   ## Message if not converged due to NAs or Inf!
-  d <- pdf(par = map2par(eta), y = y, log = TRUE)
+  par <- map2par(eta)
+  d <- pdf(par = par, y = y, log = TRUE)
   if(!is.null(weights))
     d <- d * weights
   if(any(is.na(d))) {
@@ -894,12 +989,36 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     warning("non-finite log-density values in the last iteration of the RS algorithm!")
   }
 
+  ## A scale smooth can expose an unbounded likelihood by approaching zero at
+  ## one or a few observations. Warn about the fitted function without imposing
+  ## a distribution-independent lower bound on sigma.
+  if(control$sigma.tol > 0 && "sigma" %in% names(par) &&
+      length(sterms[["sigma"]])) {
+    sigma <- par[["sigma"]]
+    sigma <- sigma[is.finite(sigma) & sigma > 0]
+    if(length(sigma)) {
+      reference <- median(sigma)
+      ratio <- min(sigma) / reference
+      if(is.finite(ratio) && ratio < control$sigma.tol) {
+        warning(sprintf(paste0(
+          "fitted sigma approaches zero relative to its median ",
+          "(minimum/median = %.3g); the likelihood may be near-singular ",
+          "and smooth estimates unstable. Consider a stronger smoothing ",
+          "criterion or a smaller basis dimension."), ratio))
+      }
+    }
+  }
+
+  converged <- is.finite(eps[1L]) && eps[1L] <= stop.eps[1L] &&
+    !safeguard.failed
+
   rval <- list(
     "fitted.values" = if(stepwise_candidate) NULL else as.data.frame(eta),
     "fitted.specials" = sfit,
     "fitted.linear" = fit,
     "coefficients" = coef_lin,
     "iterations" = iter[1L],
+    "converged" = converged,
     "logLik" = llo1, "control" = control,
     "nobs" = length(eta[[1L]]),
     "deviance" = -2 * llo1,

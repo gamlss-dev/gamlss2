@@ -15,37 +15,33 @@ results.gamlss2 <- function(x, data = NULL, ...)
   res <- list()
   dots <- list(...)
   interval <- dots$interval %||% "wald"
+  interval <- match.arg(interval,
+    c("wald", "local", "none", "bayes", "simultaneous"))
   level <- dots$level %||% 0.95
   nsim <- dots$nsim %||% 2000L
-  method <- dots$method %||% "joint"
-  inference.warn <- dots$.inference.warn %||% TRUE
-  local.fallback <- dots$.local.fallback %||% FALSE
+  method <- dots$method %||% "local"
+  method <- match.arg(method, c("local", "joint", "working", "numeric"))
   information <- draws <- NULL
-  if(!inherits(x, "bamlss2") && !interval %in% c("none", "local")) {
-    information <- if(isTRUE(local.fallback) && interval == "wald") {
-      tryCatch(
-        interval_information(x, method = method, warn = inference.warn),
-        error = function(e) {
-          if(startsWith(conditionMessage(e), "joint covariance: unsupported"))
-            return(NULL)
-          stop(e)
-        }
-      )
-    } else {
-      interval_information(x, method = method, warn = inference.warn)
-    }
+  if(!inherits(x, "bamlss2") && method == "local" &&
+      interval %in% c("bayes", "simultaneous"))
+    stop("'interval = \"", interval,
+      "\"' requires method = \"joint\", \"working\", or \"numeric\"",
+      call. = FALSE)
+  calculation <- if(interval == "local" ||
+      (!inherits(x, "bamlss2") && method == "local" && interval == "wald"))
+    "local" else interval
+  if(!inherits(x, "bamlss2") &&
+      !calculation %in% c("none", "local")) {
+    information <- vcov_information(x, method = method)
   }
-  calculation <- interval
-  if(isTRUE(local.fallback) && interval == "wald" &&
-      (is.null(information) || information$method != "joint" ||
-        is.null(information$factor) ||
-        information$rank != information$dimension)) {
-    information <- NULL
-    calculation <- "local"
+  information_block <- function(parameter, term) {
+    z <- information$blocks[[parameter]]
+    k <- which(vapply(z, function(x) identical(x$label, term), logical(1L)))
+    if(!length(k))
+      stop("coefficient block is unavailable for term '", term, "'",
+        call. = FALSE)
+    z[[k[1L]]]
   }
-  information_block <- function(parameter, term)
-    information$blocks[[parameter]][[which(vapply(information$blocks[[parameter]],
-      function(z) identical(z$label, term), logical(1L)))[1L]]]
   np <- x$family$names
 
   if(length(x$sterms)) {
@@ -135,7 +131,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
 
                 } else if(calculation == "wald") {
                   ## Pointwise Wald band.
-                  v <- information_variance(A, information)
+                  v <- vcov_variance(A, information)
                   se <- sqrt(v)
                   z <- qnorm(1 - (1 - level) / 2)
                   nd$lower <- nd$fit - z * se
@@ -145,7 +141,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
                   ## Draw through the joint precision factor, retaining
                   ## covariance with every other fitted coefficient.
                   if(is.null(draws))
-                    draws <- information_draws(information, nsim)
+                    draws <- vcov_draws(information, nsim)
                   f_draw <- if(length(block$index))
                     X[, block$active, drop = FALSE] %*%
                       draws[block$index, , drop = FALSE] else
@@ -268,15 +264,49 @@ results.gamlss2 <- function(x, data = NULL, ...)
               nd$lower <- apply(fiti, 1, quantile, probs = 0.025)
               nd$upper <- apply(fiti, 1, quantile, probs = 1 - 0.025)
             } else {
-              p <- special_predict(x$fitted.specials[[j]][[i]], data = nd, se.fit = TRUE)
-            }
-            if(is.null(dim(p))) {
-              nd$fit <- as.numeric(p)
-            } else {
-              if(is.matrix(p))
-                p <- as.data.frame(p)
-              if(is.null(x$samples))
-                nd <- cbind(nd, p)
+              fitted.special <- x$fitted.specials[[j]][[i]]
+              block <- if(is.null(information)) NULL else
+                information_block(j, i)
+              if(calculation == "wald") {
+                fitted.special$vcov <- information$covariance[
+                  block$index, block$index, drop = FALSE]
+              }
+
+              if(calculation %in% c("bayes", "simultaneous")) {
+                if(is.null(draws))
+                  draws <- vcov_draws(information, nsim)
+                fiti <- special_predict(fitted.special, data = nd,
+                  samples = t(draws[block$index, , drop = FALSE]))
+                if(!is.matrix(fiti) || nrow(fiti) != NROW(nd) ||
+                    ncol(fiti) != nsim)
+                  stop("special term '", i,
+                    "' does not support joint coefficient simulations",
+                    call. = FALSE)
+                nd$fit <- rowMeans(fiti)
+                if(calculation == "bayes") {
+                  alpha <- (1 - level) / 2
+                  nd$lower <- apply(fiti, 1, quantile, probs = alpha)
+                  nd$upper <- apply(fiti, 1, quantile, probs = 1 - alpha)
+                } else {
+                  se <- apply(fiti, 1, sd)
+                  safe <- pmax(se, 1e-12)
+                  critical <- unname(quantile(apply(
+                    abs((fiti - nd$fit) / safe), 2, max), probs = level))
+                  nd$lower <- nd$fit - critical * se
+                  nd$upper <- nd$fit + critical * se
+                }
+              } else {
+                p <- special_predict(fitted.special, data = nd,
+                  se.fit = calculation != "none", alpha = 1 - level)
+                if(is.null(dim(p))) {
+                  nd$fit <- as.numeric(p)
+                } else {
+                  if(is.matrix(p)) p <- as.data.frame(p)
+                  nd <- cbind(nd, p)
+                }
+                if(calculation == "none")
+                  nd$lower <- nd$upper <- NA_real_
+              }
             }
             lab <- strsplit(x$specials[[i]]$label, "")[[1L]]
             lab <- paste0(lab[-length(lab)], collapse = "")
@@ -479,7 +509,7 @@ results_linear <- function(x, parameter = NULL, data,
       } else if(!is.null(information)) {
         A <- matrix(0, nrow(Xjc), information$dimension)
         A[, ind] <- Xjc
-        sj <- sqrt(information_variance(A, information))
+        sj <- sqrt(vcov_variance(A, information))
       } else if(is.null(Vj)) {
         sj <- rep(NA_real_, length(fit))
       } else {

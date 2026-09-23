@@ -34,8 +34,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
     if(which == "effects" && (is.null(x$results) ||
         (!inherits(x, "bamlss2") &&
           !identical(attr(x$results, "interval"), "wald"))))
-      x$results <- results(x, ..., .inference.warn = FALSE,
-        .local.fallback = TRUE)
+      x$results <- results(x, ...)
     if(which == "effects" & length(x$results$effects) < 1L)
       which  <- c("hist-resid", "qq-resid", "wp-resid", "scatter-resid")
   }
@@ -58,8 +57,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
   if("effects" %in% which) {
     if(is.null(x$results) || (!inherits(x, "bamlss2") &&
         !identical(attr(x$results, "interval"), "wald")))
-      x$results <- results(x, ..., .inference.warn = FALSE,
-        .local.fallback = TRUE)
+      x$results <- results(x, ...)
 
     en <- grep2(parameter, names(x$results$effects), fixed = TRUE, value = TRUE)
 

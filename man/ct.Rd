@@ -12,8 +12,22 @@
 \usage{
 ct(formula, ...)
 }
-\details{The tree is refitted with the current working response and weights during backfitting. The fitted contribution is centered for identifiability.}
-\value{An object of classes \code{"special"} and \code{"ct"}.}
+
+\arguments{
+  \item{formula}{A vector or formula specifiyng the covariates that should
+    be used for modeling.}
+  \item{\dots}{Control arguments passed to \code{\link[partykit]{ctree}}.}
+}
+
+\details{
+  The tree is refitted with the current working response and weights during 
+  backfitting. The fitted contribution is centered for identifiability.
+}
+
+\value{
+  An object of classes \code{"special"} and \code{"ct"}.
+}
+
 \seealso{
   \code{\link{special_terms}}
 }

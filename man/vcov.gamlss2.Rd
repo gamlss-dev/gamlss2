@@ -37,20 +37,21 @@ distributional parameters. Prior observation weights and offsets in the final
 linear predictors are included.
 
 The result is conditional on the fitted smoothing parameters. It does not
-include smoothing-parameter or model-selection uncertainty. Information and
-its factorization are built lazily and cached for an unchanged fitted state.
+include smoothing-parameter or model-selection uncertainty.
 
-Nonlinear special terms that have no coefficient-linear design are rejected
+Special terms that have no verifiable coefficient-linear design are rejected
 explicitly. Objects fitted with \code{light = TRUE} do not retain the final
 predictors and must be refitted for joint covariance. Aliased or numerically
 unidentified coefficient variances are returned as \code{NA}; no arbitrary
 inferential ridge is added.
 
-Effect plots and Wald predictions require a positive precision factor. If the
-observed joint information is indefinite, Wald prediction warns and falls back
-to \code{method = "working"}. Effect plots silently use the covariance stored
-with each fitted term. Calling \code{vcov()} itself does not silently apply
-either approximation.
+The ordinary \code{summary()} and effect-result paths use the covariance stored
+with each fitted model term by default, which is substantially faster for large
+models. Use \code{summary(object, method = "joint")} or
+\code{results(object, method = "joint")} to request the complete joint
+information. Simulation-based \code{predict()} calls always use the complete
+joint covariance. No consumer silently substitutes \code{method = "working"}
+when observed joint information is indefinite.
 }
 
 \value{

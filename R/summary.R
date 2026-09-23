@@ -449,9 +449,13 @@ summary.gamlss2 <- function(object, ...)
 {
   df.res <- object$nobs - object$df
   par <- coef(object, full = FALSE, dropall = FALSE)
-  method <- list(...)$method %||% "joint"
-  se <- vcov(object, type = "se", full = FALSE, method = method)
+  method <- list(...)$method %||% "local"
+  method <- match.arg(method, c("local", "joint", "working", "numeric"))
+  se <- if(method == "local")
+    vcov_local(object, type = "se", full = FALSE) else
+    vcov(object, type = "se", full = FALSE, method = method)
   tvalue <- par / se
+  tvalue[se < .Machine$double.eps^(1/2)] <- Inf
   if(length(df.res) == 1L && !is.na(df.res) && df.res > 0) {
     pvalue <- 2 * pt(-abs(tvalue), df.res)
   } else {
@@ -645,8 +649,11 @@ confint.gamlss2 <- function(object, parm, level = 0.95, ...)
   co <- coef(object, full = FALSE, drop = TRUE)
   a <- (1 - level)/2
   a <- c(a, 1 - a)
-  method <- list(...)$method %||% "joint"
-  se <- vcov(object, type = "se", full = FALSE, method = method)
+  method <- list(...)$method %||% "local"
+  method <- match.arg(method, c("local", "joint", "working", "numeric"))
+  se <- if(method == "local")
+    vcov_local(object, type = "se", full = FALSE) else
+    vcov(object, type = "se", full = FALSE, method = method)
   ci <- co + se %o% qnorm(a)
   colnames(ci) <- paste0(round(a * 100, 3), "%")
   rownames(ci) <- gsub(".p.", ".", rownames(ci), fixed = TRUE)

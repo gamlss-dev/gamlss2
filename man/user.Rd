@@ -4,16 +4,8 @@
 \title{Reserved User Special Model Term}
 
 \description{
-Documents the reserved \code{user} name for defining a custom special model term.
-}
-
-\usage{
-user(formula, ...)
-}
-
-\arguments{
-  \item{formula}{A one-sided formula supplied to the user-defined constructor.}
-  \item{...}{Arguments accepted by the user-defined constructor.}
+  The model term constructor \code{user()} in \code{\link{gamlss2}} formulae
+  may be used to set up user-defined model terms. See the example below.
 }
 
 \value{

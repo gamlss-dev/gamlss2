@@ -94,15 +94,12 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
 
 \seealso{
   \code{\link{gamlss2}},
-  \code{\link{fake_formula}},
-  \code{\link{gamlss2_control}},
-  \code{\link{RS}},
   \code{\link{cf}}, \code{\link{ct}}, \code{\link{elm}},
   \code{\link{fk}}, \code{\link{gnet}}, \code{\link{im}},
   \code{\link{la}}, \code{\link{lin}}, \code{\link{lo}},
   \code{\link{ms}}, \code{\link{n}}, \code{\link{pb}},
-  \code{\link{random}}, \code{\link{si}}, \code{\link{tree}},
-  \code{\link{user}}, \code{\link{gamlss2.family}}
+  \code{\link{re}}, \code{\link{si}}, \code{\link{tree}},
+  \code{\link{user}}
 }
 
 \examples{

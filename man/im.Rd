@@ -23,30 +23,36 @@ im(x, dim = NULL, ...)
   \item{dim}{Optional integer vector \code{c(height, width)} for grayscale images or
     \code{c(height, width, channels)} for multi-channel images. It is required
     for flattened matrix input and can otherwise be inferred from the data.}
-  \item{filters}{Integer number of convolutional filters. The default is 4.}
-  \item{kernel}{One integer or two integers giving the convolutional kernel
-    height and width. The default is \code{c(3, 3)}.}
-  \item{pool}{Positive integer spatial-pyramid pooling levels. The default is
-    \code{c(1, 2, 4)}, truncated to the image dimensions.}
-  \item{epochs}{Number of optimization epochs for the first backfitting update.
-    The default is 8.}
-  \item{warm_epochs}{Number of optimization epochs for subsequent updates.
-    The default is 3.}
-  \item{learning_rate}{Positive Adam learning rate. The default is 0.003.}
-  \item{decay}{Non-negative ridge penalty for the convolutional and output
-    parameters. The default is 0.001.}
-  \item{beta1,beta2}{Adam exponential-decay parameters in \code{[0, 1)}.
-    Their defaults are 0.9 and 0.999.}
-  \item{eps}{Positive numerical stabilization constant for Adam. The default
-    is \code{1e-8}.}
-  \item{clip}{Optional positive bound for gradient clipping. The default is 5.}
-  \item{scale}{Logical; should each image channel be centered and scaled using
-    the training images? The default is \code{TRUE}.}
-  \item{seed}{Optional finite numeric seed used when initializing the filters.}
-  \item{trace}{Logical; should the CNN optimization progress be printed? The
-    default is \code{FALSE}.}
-  \item{...}{Additional named CNN controls listed above. Unknown controls are
-    rejected.}
+  \item{...}{Additional named CNN controls. Unknown controls are rejected:
+    \describe{
+      \item{\code{filters}}{Integer number of convolutional filters. The default
+        is 4.}
+      \item{\code{kernel}}{One integer or two integers giving the convolutional
+        kernel height and width. The default is \code{c(3, 3)}.}
+      \item{\code{pool}}{Positive integer spatial-pyramid pooling levels. The
+        default is \code{c(1, 2, 4)}, truncated to the image dimensions.}
+      \item{\code{epochs}}{Number of optimization epochs for the first
+        backfitting update. The default is 8.}
+      \item{\code{warm_epochs}}{Number of optimization epochs for subsequent
+        updates. The default is 3.}
+      \item{\code{learning_rate}}{Positive Adam learning rate. The default is
+        0.003.}
+      \item{\code{decay}}{Non-negative ridge penalty for the convolutional and
+        output parameters. The default is 0.001.}
+      \item{\code{beta1}, \code{beta2}}{Adam exponential-decay parameters in
+        \code{[0, 1)}. Their defaults are 0.9 and 0.999.}
+      \item{\code{eps}}{Positive numerical stabilization constant for Adam. The
+        default is \code{1e-8}.}
+      \item{\code{clip}}{Optional positive bound for gradient clipping. The
+        default is 5.}
+      \item{\code{scale}}{Logical; should each image channel be centered and
+        scaled using the training images? The default is \code{TRUE}.}
+      \item{\code{seed}}{Optional finite numeric seed used when initializing the
+        filters.}
+      \item{\code{trace}}{Logical; should the CNN optimization progress be
+        printed? The default is \code{FALSE}.}
+    }
+  }
 }
 
 \details{

@@ -13,7 +13,15 @@ package).
 }
 
 \usage{
-\method{family}{distribution}(object, links, score = TRUE, hessian = FALSE, update = FALSE, ...)
+\method{family}{distribution}(
+  object,
+  links,
+  score = TRUE,
+  hessian = FALSE,
+  update = FALSE,
+  expected = FALSE,
+  ...
+)
 
 \method{family}{GAMLSS}(object, ...)
 
@@ -57,6 +65,9 @@ approximated numerically.}
 \code{\link[distributions3]{hessian}} methods for the distribution object be used
 to compute the updates of the linear predictor and the corresponding weights?
 If set to \code{FALSE} they are approximated numerically.}
+
+\item{expected}{logical. Should the expected rather than the observed Hessian
+be used?}
 
 \item{...}{arguments passed from the methods to the workhorse function
 \code{distributions3_family}.}

@@ -280,114 +280,90 @@ Optional integer vector <code>c(height, width)</code> for grayscale images or <c
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="filters">filters</code>
-</td>
-<td>
-Integer number of convolutional filters. The default is 4.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="kernel">kernel</code>
-</td>
-<td>
-One integer or two integers giving the convolutional kernel height and width. The default is <code>c(3, 3)</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="pool">pool</code>
-</td>
-<td>
-Positive integer spatial-pyramid pooling levels. The default is <code>c(1, 2, 4)</code>, truncated to the image dimensions.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="epochs">epochs</code>
-</td>
-<td>
-Number of optimization epochs for the first backfitting update. The default is 8.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="warm_epochs">warm_epochs</code>
-</td>
-<td>
-Number of optimization epochs for subsequent updates. The default is 3.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="learning_rate">learning_rate</code>
-</td>
-<td>
-Positive Adam learning rate. The default is 0.003.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="decay">decay</code>
-</td>
-<td>
-Non-negative ridge penalty for the convolutional and output parameters. The default is 0.001.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="beta1">beta1</code>, <code id="beta2">beta2</code>
-</td>
-<td>
-Adam exponential-decay parameters in <code>[0, 1)</code>. Their defaults are 0.9 and 0.999.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="eps">eps</code>
-</td>
-<td>
-Positive numerical stabilization constant for Adam. The default is <code>1e-8</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="clip">clip</code>
-</td>
-<td>
-Optional positive bound for gradient clipping. The default is 5.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="scale">scale</code>
-</td>
-<td>
-Logical; should each image channel be centered and scaled using the training images? The default is <code>TRUE</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="seed">seed</code>
-</td>
-<td>
-Optional finite numeric seed used when initializing the filters.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="trace">trace</code>
-</td>
-<td>
-Logical; should the CNN optimization progress be printed? The default is <code>FALSE</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
-Additional named CNN controls listed above. Unknown controls are rejected.
+<p>Additional named CNN controls. Unknown controls are rejected:</p>
+<dl>
+<dt>
+<code>filters</code>
+</dt>
+<dd>
+Integer number of convolutional filters. The default is 4.
+</dd>
+<dt>
+<code>kernel</code>
+</dt>
+<dd>
+One integer or two integers giving the convolutional kernel height and width. The default is <code>c(3, 3)</code>.
+</dd>
+<dt>
+<code>pool</code>
+</dt>
+<dd>
+Positive integer spatial-pyramid pooling levels. The default is <code>c(1, 2, 4)</code>, truncated to the image dimensions.
+</dd>
+<dt>
+<code>epochs</code>
+</dt>
+<dd>
+Number of optimization epochs for the first backfitting update. The default is 8.
+</dd>
+<dt>
+<code>warm_epochs</code>
+</dt>
+<dd>
+Number of optimization epochs for subsequent updates. The default is 3.
+</dd>
+<dt>
+<code>learning_rate</code>
+</dt>
+<dd>
+Positive Adam learning rate. The default is 0.003.
+</dd>
+<dt>
+<code>decay</code>
+</dt>
+<dd>
+Non-negative ridge penalty for the convolutional and output parameters. The default is 0.001.
+</dd>
+<dt>
+<code>beta1</code>, <code>beta2</code>
+</dt>
+<dd>
+Adam exponential-decay parameters in <code>[0, 1)</code>. Their defaults are 0.9 and 0.999.
+</dd>
+<dt>
+<code>eps</code>
+</dt>
+<dd>
+Positive numerical stabilization constant for Adam. The default is <code>1e-8</code>.
+</dd>
+<dt>
+<code>clip</code>
+</dt>
+<dd>
+Optional positive bound for gradient clipping. The default is 5.
+</dd>
+<dt>
+<code>scale</code>
+</dt>
+<dd>
+Logical; should each image channel be centered and scaled using the training images? The default is <code>TRUE</code>.
+</dd>
+<dt>
+<code>seed</code>
+</dt>
+<dd>
+Optional finite numeric seed used when initializing the filters.
+</dd>
+<dt>
+<code>trace</code>
+</dt>
+<dd>
+Logical; should the CNN optimization progress be printed? The default is <code>FALSE</code>.
+</dd>
+</dl>
 </td>
 </tr>
 </tbody></table>

@@ -643,7 +643,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'distribution'
-family(object, links, score = TRUE, hessian = FALSE, update = FALSE, ...)
+family(
+  object,
+  links,
+  score = TRUE,
+  hessian = FALSE,
+  update = FALSE,
+  expected = FALSE,
+  ...
+)
 
 ## S3 method for class 'GAMLSS'
 family(object, ...)
@@ -707,6 +715,14 @@ logical. Should the <code>hessian</code> method for the distribution object be u
 </td>
 <td>
 logical. Should the <code>score</code> and <code>hessian</code> methods for the distribution object be used to compute the updates of the linear predictor and the corresponding weights? If set to <code>FALSE</code> they are approximated numerically.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="expected">expected</code>
+</td>
+<td>
+logical. Should the expected rather than the observed Hessian be used?
 </td>
 </tr>
 <tr>

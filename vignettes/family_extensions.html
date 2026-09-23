@@ -411,9 +411,9 @@ mf_norm  1022.1121  2</code></pre>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m_norm, m_trunc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>             AIC       df
-m_trunc 694.9878 18.87251
-m_norm  900.8832 19.16964</code></pre>
+<pre><code>             AIC        df
+m_trunc 701.4141  7.306881
+m_norm  904.5419 13.192164</code></pre>
 </div>
 </div>
 <p>The truncated family also has lower AIC after including the smooth depth and spatial effects. Thus its marginal advantage was not simply a consequence of pooling events from different depths and locations.</p>
@@ -445,8 +445,8 @@ m_norm  900.8832 19.16964</code></pre>
 <span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m_round, m_both)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             AIC        df
-m_both  5368.182  6.847109
-m_round 5506.053 19.165027</code></pre>
+m_both  5368.313  7.294337
+m_round 5509.784 13.136685</code></pre>
 </div>
 </div>
 <p>This second AIC comparison is valid because both models assign probability mass to the same one-decimal values. In contrast, neither rounded model should be compared by log-likelihood or AIC with <code>m_norm</code> or <code>m_trunc</code>: probability densities and probability masses are defined with respect to different measures and have different units.</p>
@@ -463,12 +463,12 @@ m_round 5506.053 19.165027</code></pre>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_both, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 4.720596 0.4772607
-2 4.709836 0.4772607
-3 4.699078 0.4772607
-4 4.688325 0.4772607
-5 4.677581 0.4772607
-6 4.666852 0.4772607</code></pre>
+1 4.728629 0.4777519
+2 4.717094 0.4777519
+3 4.705561 0.4777519
+4 4.694034 0.4777519
+5 4.682520 0.4777519
+6 4.671028 0.4777519</code></pre>
 </div>
 </div>
 <p>These curves hold longitude and latitude at their sample medians. The points include all locations, so they show the overall data cloud rather than a sample drawn at that fixed location.</p>
@@ -527,13 +527,13 @@ m_round 5506.053 19.165027</code></pre>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_group, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        mu   sigma
-1 195.3411 346.305
-2 427.6958 346.305
-3 138.3732 346.305
-4 465.7018 346.305
-5 510.4842 346.305
-6 510.4842 346.305</code></pre>
+<pre><code>        mu    sigma
+1 243.4316 348.3439
+2 428.5274 348.3439
+3 187.7934 348.3439
+4 466.9153 348.3439
+5 506.0620 348.3439
+6 506.0620 348.3439</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m_group,</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">mag =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>)),</span>
@@ -599,13 +599,13 @@ FALSE  TRUE
 <span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_cens, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>         mu    sigma
-1  4.064648 5.143565
-2  4.064648 5.143565
-3 13.324179 7.175613
-4 13.324179 7.175613
-5 16.481863 8.002279
-6 19.694531 8.906418</code></pre>
+<pre><code>        mu    sigma
+1  2.49563 7.162719
+2  2.49563 7.162719
+3 12.81035 8.606083
+4 12.81035 8.606083
+5 16.26495 9.149164
+6 19.73242 9.726516</code></pre>
 </div>
 </div>
 <p>The fitted quantiles show how the conditional distribution changes with speed. Because the recorded response cannot exceed 80, upper quantiles flatten at the censoring limit when enough fitted probability lies above it.</p>
@@ -639,10 +639,10 @@ FALSE  TRUE
 <span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower.tail =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  speed probability_at_limit
-1    10         4.099847e-09
-2    15         4.837909e-03
-3    20         1.131728e-01
-4    25         4.981259e-01</code></pre>
+1    10         1.991924e-08
+2    15         2.688637e-03
+3    20         1.353646e-01
+4    25         4.592479e-01</code></pre>
 </div>
 </div>
 <p>Unlike censoring, upper truncation would remove cars whose stopping distance exceeds 80 and renormalize the density among those that remain. For two-sided mechanisms, supply both <code>lower</code> and <code>upper</code>. <code>truncate_family()</code> additionally accepts <code>include</code>, which controls inclusion of each endpoint and matters for discrete base families.</p>
@@ -677,17 +677,17 @@ FALSE  TRUE
 <span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="fu">logLik</span>(m_surv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>'log Lik.' -1147.054 (df=4.000069)</code></pre>
+<pre><code>'log Lik.' -1147.054 (df=4.000001)</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_surv, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
-1 314.1689 1.326179
-2 338.1418 1.326179
+1 314.1695 1.326179
+2 338.1414 1.326179
 3 391.7120 1.326179
-4 386.9409 1.326179
-5 372.9735 1.326179
-6 314.1689 1.326179</code></pre>
+4 386.9408 1.326179
+5 372.9730 1.326179
+6 314.1695 1.326179</code></pre>
 </div>
 </div>
 <p>The likelihood contribution is a density when <code>event</code> is true and a survival probability when it is false. Thus the censoring information remains attached to every observation instead of being encoded by replacing time with one fixed boundary value.</p>
@@ -866,12 +866,12 @@ fits$Inflated 2452.863  2</code></pre>
 <span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_01, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          mu     sigma       pi1        pi2
-1  1.0284365 0.7336841 0.1449275 0.06280193
-2  0.4093979 0.9983521 0.1449275 0.06280193
-3 -0.8475283 0.3949805 0.1449275 0.06280193
-4 -0.9907962 0.7128326 0.1449275 0.06280193
-5  0.4021295 0.9995884 0.1449275 0.06280193
-6 -0.3447094 0.2177213 0.1449275 0.06280193</code></pre>
+1  1.0938435 0.8009455 0.1449275 0.06280193
+2  0.3952639 0.7349777 0.1449275 0.06280193
+3 -0.8509402 0.5713770 0.1449275 0.06280193
+4 -1.0277454 0.6239584 0.1449275 0.06280193
+5  0.3871141 0.7344617 0.1449275 0.06280193
+6 -0.3540189 0.5329903 0.1449275 0.06280193</code></pre>
 </div>
 </div>
 <p>We can now inspect fitted quantiles across <code>x</code>. Because these describe the complete distribution, they include the endpoint masses as well as the continuous interior.</p>

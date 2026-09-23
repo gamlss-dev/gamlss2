@@ -310,8 +310,8 @@ mu.s(Wind)    2.1038 0.9348
 sigma.s(Temp) 3.2250 0.7990
 *--------
 n = 116 df =  14.06 res.df =  101.94
-Deviance = 932.216 DIC = 960.3409 Null Dev. Red. = 1.33%
-AIC = 960.3409 elapsed =  2.64sec</code></pre>
+Deviance = 932.216 DIC = 960.341 Null Dev. Red. = 0.53%
+AIC = 960.341 elapsed =  2.45sec</code></pre>
 </div>
 </div>
 <p>The sampler uses block Metropolis-Hastings updates for linear and smooth coefficients. Smooth terms are updated using penalized weighted least squares proposals, while smoothing variances are sampled by inverse Gamma or slice sampling. See <code>?BS</code> for details of the sampler.</p>
@@ -337,12 +337,12 @@ AIC = 960.3409 elapsed =  2.64sec</code></pre>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(m<span class="sc">$</span>samples[, cn, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     mu.p.(Intercept) sigma.p.(Intercept)
-[1,]         3.609977          -0.8920751
-[2,]         3.591541          -0.9260435
-[3,]         3.579917          -0.9205904
-[4,]         3.629510          -0.8692998
-[5,]         3.622288          -0.7577217
-[6,]         3.607422          -0.7541771</code></pre>
+[1,]         3.610403          -0.8919850
+[2,]         3.591819          -0.9260001
+[3,]         3.580127          -0.9205795
+[4,]         3.629737          -0.8691882
+[5,]         3.622430          -0.7576894
+[6,]         3.607646          -0.7541687</code></pre>
 </div>
 </div>
 </section>
@@ -394,10 +394,10 @@ AIC = 960.3409 elapsed =  2.64sec</code></pre>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pmu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     lower      fit    upper
-1 6.669732 13.69218 30.56270
-2 7.170987 14.04327 29.97311
-3 7.728067 14.29805 29.41617
-4 8.293329 14.55969 28.70628
+1 6.669732 13.69218 30.56273
+2 7.170987 14.04327 29.97314
+3 7.728067 14.30183 29.41617
+4 8.293329 14.55969 28.70630
 5 8.900785 14.84674 28.40491
 6 9.484501 15.13172 27.98030</code></pre>
 </div>
@@ -435,22 +435,22 @@ AIC = 960.3409 elapsed =  2.64sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">FUN =</span> mean))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 15.18094 1.0008724
-2 15.33973 0.9670810
-3 15.51571 0.9355257
-4 15.70832 0.9059321
-5 15.91668 0.8780492
-6 16.13949 0.8516462</code></pre>
+1 15.18102 1.0008783
+2 15.33981 0.9670859
+3 15.51578 0.9355299
+4 15.70839 0.9059356
+5 15.91674 0.8780521
+6 16.13956 0.8516485</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">FUN =</span> sd))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 6.820647 0.3747505
-2 6.308811 0.3278091
-3 5.861135 0.2868242
-4 5.470662 0.2514365
-5 5.131047 0.2213208
-6 4.836518 0.1961386</code></pre>
+1 6.820654 0.3747662
+2 6.308822 0.3278221
+3 5.861150 0.2868348
+4 5.470681 0.2514449
+5 5.131070 0.2213271
+6 4.836545 0.1961433</code></pre>
 </div>
 </div>
 </section>
@@ -459,22 +459,16 @@ AIC = 960.3409 elapsed =  2.64sec</code></pre>
 <p>Bayesian sampling can also be started from an existing likelihood-based fit. This is useful when a model has already been developed with <code>gamlss2()</code> and the same specification should subsequently be sampled. Function <code>mcmc()</code> uses the fitted coefficients and smoothing parameters as starting values and merges the posterior output back into the model object.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> air, <span class="at">family =</span> GA, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in optimizer(x = X, y = Y, specials = Specials, family = family, :
-fitted sigma approaches zero relative to its median (minimum/median =
-4.93e-05); the likelihood may be near-singular and smooth estimates unstable.
-Consider a stronger smoothing criterion or a smaller basis dimension.</code></pre>
-</div>
 </div>
 <p>The corresponding MCMC fit is obtained with</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.iter =</span> <span class="dv">1200</span>,</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">burnin =</span> <span class="dv">200</span>,</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">1</span>,</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.iter =</span> <span class="dv">1200</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">burnin =</span> <span class="dv">200</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">1</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Once fitted, <code>m2</code> supports the same posterior summaries and plots as the object returned by <code>bamlss2()</code>.</p>
 <p>The fitted model supplied to <code>mcmc()</code> must retain the design information needed by the sampler. In particular, reduced model objects that discard this information cannot be used to restart sampling.</p>

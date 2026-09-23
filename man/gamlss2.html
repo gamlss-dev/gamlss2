@@ -796,26 +796,19 @@ Arguments passed to <code>gamlss2_control</code>.
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">## estimate model</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> air, <span class="at">family =</span> GA)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 952.2847 eps = 0.134577     
-GAMLSS-RS iteration  2: Global Deviance = 919.9526 eps = 0.033952     
-GAMLSS-RS iteration  3: Global Deviance = 904.1143 eps = 0.017216     
-GAMLSS-RS iteration  4: Global Deviance = 899.0941 eps = 0.005552     
-GAMLSS-RS iteration  5: Global Deviance = 897.2417 eps = 0.002060     
-GAMLSS-RS iteration  6: Global Deviance = 896.194 eps = 0.001167     
-GAMLSS-RS iteration  7: Global Deviance = 895.323 eps = 0.000971     
-GAMLSS-RS iteration  8: Global Deviance = 894.4464 eps = 0.000979     
-GAMLSS-RS iteration  9: Global Deviance = 893.4341 eps = 0.001131     
-GAMLSS-RS iteration 10: Global Deviance = 892.1411 eps = 0.001447     
-GAMLSS-RS iteration 11: Global Deviance = 890.3454 eps = 0.002012     
-GAMLSS-RS iteration 12: Global Deviance = 887.7675 eps = 0.002895     
-GAMLSS-RS iteration 13: Global Deviance = 884.376 eps = 0.003820     
-GAMLSS-RS iteration 14: Global Deviance = 881.441 eps = 0.003318     
-GAMLSS-RS iteration 15: Global Deviance = 880.4341 eps = 0.001142     
-GAMLSS-RS iteration 16: Global Deviance = 880.1844 eps = 0.000283     
-GAMLSS-RS iteration 17: Global Deviance = 880.1204 eps = 0.000072     
-GAMLSS-RS iteration 18: Global Deviance = 880.0902 eps = 0.000034     
-GAMLSS-RS iteration 19: Global Deviance = 880.0744 eps = 0.000017     
-GAMLSS-RS iteration 20: Global Deviance = 880.0641 eps = 0.000011     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 934.9808 eps = 0.150303     
+GAMLSS-RS iteration  2: Global Deviance = 927.3127 eps = 0.008201     
+GAMLSS-RS iteration  3: Global Deviance = 924.8517 eps = 0.002653     
+GAMLSS-RS iteration  4: Global Deviance = 925.5146 eps = 0.000716     
+GAMLSS-RS iteration  5: Global Deviance = 926.9917 eps = 0.001595     
+GAMLSS-RS iteration  6: Global Deviance = 928.0621 eps = 0.001154     
+GAMLSS-RS iteration  7: Global Deviance = 928.6793 eps = 0.000665     
+GAMLSS-RS iteration  8: Global Deviance = 928.9916 eps = 0.000336     
+GAMLSS-RS iteration  9: Global Deviance = 929.1382 eps = 0.000157     
+GAMLSS-RS iteration 10: Global Deviance = 929.2117 eps = 0.000079     
+GAMLSS-RS iteration 11: Global Deviance = 929.2443 eps = 0.000035     
+GAMLSS-RS iteration 12: Global Deviance = 929.2588 eps = 0.000015     
+GAMLSS-RS iteration 13: Global Deviance = 929.2643 eps = 0.000005     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model summary</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -827,21 +820,21 @@ Family: GA
 Link functions: log, log
 *--------
 Coefficients:
-                    Estimate Std. Error   t value Pr(&gt;|t|)    
-mu.(Intercept)     3.533e+00  1.903e-05 185670.97   &lt;2e-16 ***
-sigma.(Intercept) -1.082e+00  6.334e-02    -17.09   &lt;2e-16 ***
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+mu.(Intercept)     3.55382    0.02682  132.49   &lt;2e-16 ***
+sigma.(Intercept) -0.87025    0.06331  -13.75   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                  edf
-mu.s(Temp)    7.7969
-mu.s(Wind)    4.2977
-sigma.s(Temp) 8.8219
+mu.s(Temp)    4.4762
+mu.s(Wind)    1.0718
+sigma.s(Temp) 3.9513
 *--------
-n = 116 df =  22.92 res.df =  93.08
-Deviance = 880.0641 Null Dev. Red. = 18.74%
-AIC = 925.8971 elapsed =  0.60sec</code></pre>
+n = 116 df =  11.5 res.df =  104.5
+Deviance = 929.2643 Null Dev. Red. = 14.2%
+AIC = 952.263 elapsed =  0.14sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot parameter-specific effects</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -866,12 +859,12 @@ AIC = 925.8971 elapsed =  0.60sec</code></pre>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(par))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
-1 26.60364 0.3573115
-2 17.73456 0.4965573
-3 13.74310 0.3778589
-4 14.72507 0.5865119
-6 19.53866 0.3537713
-7 23.05189 0.3751552</code></pre>
+1 22.86957 0.4849417
+2 23.62326 0.5090063
+3 20.71022 0.5219236
+4 16.65926 0.6021705
+6 16.22035 0.4917132
+7 20.78846 0.5063877</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## create new data:</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="do">## vary temperature while holding wind constant</span></span>
@@ -935,10 +928,10 @@ AIC = 925.8971 elapsed =  0.60sec</code></pre>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> NBI</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 10163.365 eps = 0.148378     
-GAMLSS-RS iteration  2: Global Deviance = 10151.2228 eps = 0.001194     
-GAMLSS-RS iteration  3: Global Deviance = 10151.1142 eps = 0.000010     
-GAMLSS-RS iteration  4: Global Deviance = 10151.1101 eps = 0.000000     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 10163.0634 eps = 0.148403     
+GAMLSS-RS iteration  2: Global Deviance = 10151.0415 eps = 0.001182     
+GAMLSS-RS iteration  3: Global Deviance = 10150.8407 eps = 0.000019     
+GAMLSS-RS iteration  4: Global Deviance = 10150.7454 eps = 0.000009     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## summary</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -952,19 +945,19 @@ Link functions: log, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     4.00960    0.03064 130.858   &lt;2e-16 ***
-sigma.(Intercept)  0.46757    0.04906   9.531   &lt;2e-16 ***
+mu.(Intercept)     3.99888    0.03065 130.452   &lt;2e-16 ***
+sigma.(Intercept)  0.46596    0.04913   9.485   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                  edf
-mu.s(yday)    6.3760
-sigma.s(yday) 6.2108
+mu.s(yday)    7.1494
+sigma.s(yday) 5.9745
 *--------
-n = 1057 df =  14.59 res.df =  1042.41
-Deviance = 10151.1101 Null Dev. Red. = 12.62%
-AIC = 10180.2838 elapsed =  0.11sec</code></pre>
+n = 1057 df =  15.12 res.df =  1041.88
+Deviance = 10150.7454 Null Dev. Red. = 12.62%
+AIC = 10180.9933 elapsed =  0.11sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## effect plots</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

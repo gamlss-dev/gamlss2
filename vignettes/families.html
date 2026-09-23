@@ -351,19 +351,19 @@ Link functions: identity, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      42.391      1.784   23.76   &lt;2e-16 ***
-sigma.(Intercept)    2.639      0.100   26.39   &lt;2e-16 ***
+mu.(Intercept)      42.425      1.782   23.81   &lt;2e-16 ***
+sigma.(Intercept)    2.638      0.100   26.38   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                edf
-mu.s(speed)    1.15
-sigma.s(speed) 1.00
+                  edf
+mu.s(speed)    1.2175
+sigma.s(speed) 1.0000
 *--------
-n = 50 df =  4.15 res.df =  45.85
-Deviance = 405.8029 Null Dev. Red. = 12.89%
-AIC = 414.103 elapsed =  0.08sec</code></pre>
+n = 50 df =  4.22 res.df =  45.78
+Deviance = 405.6622 Null Dev. Red. = 12.92%
+AIC = 414.0972 elapsed =  0.05sec</code></pre>
 </div>
 </div>
 <p><code>prodist()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects.</p>
@@ -373,9 +373,9 @@ AIC = 414.103 elapsed =  0.08sec</code></pre>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>d</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                  1                                   2 
-"Normal(mu = 23.14, sigma = 10.04)" "Normal(mu = 58.77, sigma = 18.58)" 
+"Normal(mu = 23.07, sigma = 10.03)" "Normal(mu = 58.88, sigma = 18.55)" 
                                   3 
-"Normal(mu = 95.41, sigma = 34.36)" </code></pre>
+"Normal(mu = 96.16, sigma = 34.31)" </code></pre>
 </div>
 </div>
 <p>All ordinary <code>distributions3</code> methods can then be used. The <code>elementwise</code> argument controls whether a vector of probabilities is paired with the distribution vector or expanded to all distribution-probability combinations.</p>
@@ -383,36 +383,36 @@ AIC = 414.103 elapsed =  0.08sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
-23.13756 58.76931 95.40856 </code></pre>
+23.06591 58.88142 96.16345 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">variance</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3 
- 100.8818  345.1594 1180.9368 </code></pre>
+ 100.6198  344.1271 1176.9385 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cdf</span>(d, <span class="dv">50</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3 
-0.99625772 0.31845812 0.09318904 </code></pre>
+0.99637459 0.31605261 0.08921306 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>), <span class="at">elementwise =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     q_0.1    q_0.5     q_0.9
-1 10.26566 23.13756  36.00945
-2 34.96005 58.76931  82.57857
-3 51.36834 95.40856 139.44877</code></pre>
+1 10.21074 23.06591  35.92109
+2 35.10779 58.88142  82.65505
+3 52.19786 96.16345 140.12905</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>), <span class="at">elementwise =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3 
- 10.26566  58.76931 139.44877 </code></pre>
+ 10.21074  58.88142 140.12905 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          r_1      r_2
-1  -0.7045234 12.93284
-2  69.0187987 71.00193
-3 109.8424033 47.20829</code></pre>
+<pre><code>        r_1         r_2
+1  33.57929  -0.5764466
+2  63.36154  65.8016595
+3 124.72805 105.3322303</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -483,8 +483,8 @@ AIC = 414.103 elapsed =  0.08sec</code></pre>
 <span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m, m_softplus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                AIC       df
-m_softplus 414.0485 4.180952
-m          414.1030 4.150048</code></pre>
+m_softplus 414.0374 4.228449
+m          414.0972 4.217505</code></pre>
 </div>
 </div>
 </section>
@@ -586,14 +586,9 @@ Derivative functions:
 <span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
 <span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> fGA2,</span>
 <span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in optimizer(x = X, y = Y, specials = Specials, family = family, :
-fitted sigma approaches zero relative to its median (minimum/median =
-4.93e-05); the likelihood may be near-singular and smooth estimates unstable.
-Consider a stronger smoothing criterion or a smaller basis dimension.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = Ozone ~ s(Temp) + s(Wind) | s(Temp), data = air, 
@@ -603,21 +598,21 @@ Family: Gamma2
 Link functions: log, log
 *--------
 Coefficients:
-                    Estimate Std. Error   t value Pr(&gt;|t|)    
-mu.(Intercept)     3.533e+00  1.903e-05 185669.28   &lt;2e-16 ***
-sigma.(Intercept) -1.082e+00  6.334e-02    -17.09   &lt;2e-16 ***
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+mu.(Intercept)     3.55382    0.02682  132.49   &lt;2e-16 ***
+sigma.(Intercept) -0.87025    0.06331  -13.75   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                  edf
-mu.s(Temp)    7.7969
-mu.s(Wind)    4.2977
-sigma.s(Temp) 8.8219
+mu.s(Temp)    4.4762
+mu.s(Wind)    1.0718
+sigma.s(Temp) 3.9513
 *--------
-n = 116 df =  22.92 res.df =  93.08
-Deviance = 880.0642 Null Dev. Red. = 18.74%
-AIC = 925.8971 elapsed =  0.94sec</code></pre>
+n = 116 df =  11.5 res.df =  104.5
+Deviance = 929.2643 Null Dev. Red. = 14.2%
+AIC = 952.263 elapsed =  0.25sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -626,43 +621,43 @@ AIC = 925.8971 elapsed =  0.94sec</code></pre>
 <h2 data-number="7" class="anchored" data-anchor-id="writing-a-family-directly"><span class="header-section-number">7</span> Writing a family directly</h2>
 <p>When no suitable <code>distributions3</code> distribution exists, a family can be written as a classed list. The following is a compact normal family with analytical probability and moment methods. The <code>random()</code> signature is <code>random(par, n)</code>, matching the <code>gamlss2.family</code> interface.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>my_normal_family <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>, <span class="at">sigma.link =</span> <span class="st">"log"</span>) {</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="st">"my_normal_family"</span>,</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>),</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">links =</span> <span class="fu">list</span>(<span class="at">mu =</span> mu.link, <span class="at">sigma =</span> sigma.link),</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pdf =</span> <span class="cf">function</span>(par, y, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, <span class="at">log =</span> log)</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">cdf =</span> <span class="cf">function</span>(par, y, ...) {</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, ...)</span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile =</span> <span class="cf">function</span>(par, p, ...) {</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">qnorm</span>(p, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma)</span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">random =</span> <span class="cf">function</span>(par, n, ...) {</span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rnorm</span>(n, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma)</span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="cf">function</span>(par, ...) par<span class="sc">$</span>mu,</span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">variance =</span> <span class="cf">function</span>(par, ...) par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">support =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="cn">Inf</span>),</span>
-<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"continuous"</span>,</span>
-<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">valid.response =</span> <span class="cf">function</span>(y) <span class="fu">is.numeric</span>(y)</span>
-<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
-<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>  fam</span>
-<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>my_family <span class="ot">&lt;-</span> <span class="fu">my_normal_family</span>()</span>
-<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
-<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
-<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> my_family,</span>
-<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>my_normal_family <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mu.link =</span> <span class="st">"identity"</span>, <span class="at">sigma.link =</span> <span class="st">"log"</span>) {</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  fam <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="st">"my_normal_family"</span>,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"mu"</span>, <span class="st">"sigma"</span>),</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">links =</span> <span class="fu">list</span>(<span class="at">mu =</span> mu.link, <span class="at">sigma =</span> sigma.link),</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pdf =</span> <span class="cf">function</span>(par, y, <span class="at">log =</span> <span class="cn">FALSE</span>, ...) {</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, <span class="at">log =</span> log)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">cdf =</span> <span class="cf">function</span>(par, y, ...) {</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pnorm</span>(y, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma, ...)</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile =</span> <span class="cf">function</span>(par, p, ...) {</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">qnorm</span>(p, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma)</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">random =</span> <span class="cf">function</span>(par, n, ...) {</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rnorm</span>(n, <span class="at">mean =</span> par<span class="sc">$</span>mu, <span class="at">sd =</span> par<span class="sc">$</span>sigma)</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="cf">function</span>(par, ...) par<span class="sc">$</span>mu,</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">variance =</span> <span class="cf">function</span>(par, ...) par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">support =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="cn">Inf</span>),</span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"continuous"</span>,</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">valid.response =</span> <span class="cf">function</span>(y) <span class="fu">is.numeric</span>(y)</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(fam) <span class="ot">&lt;-</span> <span class="st">"gamlss2.family"</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>  fam</span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>my_family <span class="ot">&lt;-</span> <span class="fu">my_normal_family</span>()</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> my_family,</span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = dist ~ s(speed) | s(speed), data = cars, family = my_family, 
@@ -673,36 +668,36 @@ Link functions: identity, log
 *--------
 Coefficients:
                   Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)      42.391      1.784   23.76   &lt;2e-16 ***
-sigma.(Intercept)    2.639      0.100   26.39   &lt;2e-16 ***
+mu.(Intercept)      42.425      1.782   23.81   &lt;2e-16 ***
+sigma.(Intercept)    2.638      0.100   26.38   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                edf
-mu.s(speed)    1.15
-sigma.s(speed) 1.00
+                  edf
+mu.s(speed)    1.2175
+sigma.s(speed) 1.0000
 *--------
-n = 50 df =  4.15 res.df =  45.85
-Deviance = 405.8029 Null Dev. Red. = 12.89%
-AIC = 414.103 elapsed =  0.06sec</code></pre>
+n = 50 df =  4.22 res.df =  45.78
+Deviance = 405.6622 Null Dev. Red. = 12.92%
+AIC = 414.0972 elapsed =  0.03sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>score <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="cf">function</span>(par, y, ...) {</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    (y <span class="sc">-</span> par<span class="sc">$</span>mu) <span class="sc">/</span> par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="cf">function</span>(par, y, ...) {</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> (y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>hessian <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="cf">function</span>(par, y, ...) <span class="dv">1</span> <span class="sc">/</span> par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="cf">function</span>(par, y, ...) <span class="fu">rep</span>(<span class="dv">2</span>, <span class="fu">length</span>(y)),</span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mu:sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(par, y, ...) <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(y))</span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>score <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="cf">function</span>(par, y, ...) {</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    (y <span class="sc">-</span> par<span class="sc">$</span>mu) <span class="sc">/</span> par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="cf">function</span>(par, y, ...) {</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> (y <span class="sc">-</span> par<span class="sc">$</span>mu)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>hessian <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="cf">function</span>(par, y, ...) <span class="dv">1</span> <span class="sc">/</span> par<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="cf">function</span>(par, y, ...) <span class="fu">rep</span>(<span class="dv">2</span>, <span class="fu">length</span>(y)),</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mu:sigma"</span> <span class="ot">=</span> <span class="cf">function</span>(par, y, ...) <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(y))</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The Hessian entries are the negative of the expected second derivatives on the predictor scale. An optional <code>update(par, y, eta, which)</code> function can provide a specialized Newton/Fisher-scoring update returning <code>list(eta, weights)</code>.</p>
 </section>
 <section id="optional-scoring-rules" class="level2" data-number="8">

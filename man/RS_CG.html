@@ -753,7 +753,7 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. After the first update and with fixed smoothing parameters, the step is applied to a complete parameter update in RS and to a complete correction sweep in CG. A smoothing-parameter change and its coefficients are instead accepted or rejected as one state. If <code>step</code> is set smaller than 1, it might be appropriate to lower the stopping criterion <code>eps</code>, too.</p>
 </li>
 <li>
-<p><code>autostep</code>: Logical, should an update that decreases its objective be halved automatically? Default is <code>TRUE</code>. The objective is the likelihood for unpenalized updates and the penalized likelihood when smoothing parameters are fixed. Smoothing-parameter changes use the specified smoothing criterion or the term-specific local ML update.</p>
+<p><code>autostep</code>: Logical, should an update that decreases its objective be halved automatically? Default is <code>TRUE</code>. The objective is the likelihood for unpenalized updates and the penalized likelihood when smoothing parameters are fixed. Smoothing-parameter changes use the specified smoothing criterion, the default local REML update, or the term-specific local ML update.</p>
 </li>
 <li>
 <p><code>sigma.tol</code>: Numeric between zero and one. If a model contains a smooth for <code>sigma</code>, warn when its smallest fitted value divided by its median is less than <code>sigma.tol</code>. The default is <code>0.001</code>; use zero or <code>FALSE</code> to disable the diagnostic. This diagnostic does not constrain the fitted values.</p>

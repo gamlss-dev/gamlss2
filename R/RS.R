@@ -139,7 +139,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     control$autostep <- isTRUE(control$autostep)
 
   if(is.null(control$sigma.tol))
-    control$sigma.tol <- 0.001
+    control$sigma.tol <- FALSE
   if(identical(control$sigma.tol, FALSE))
     control$sigma.tol <- 0
   if(!is.numeric(control$sigma.tol) || length(control$sigma.tol) != 1L ||

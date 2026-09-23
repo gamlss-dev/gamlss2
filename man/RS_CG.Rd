@@ -71,7 +71,8 @@ CG(x, y, specials, family, offsets,
       objective be halved automatically? Default is \code{TRUE}. The objective
       is the likelihood for unpenalized updates and the penalized likelihood
       when smoothing parameters are fixed. Smoothing-parameter changes use the
-      specified smoothing criterion or the term-specific local ML update.
+      specified smoothing criterion, the default local REML update, or the
+      term-specific local ML update.
     \item \code{sigma.tol}: Numeric between zero and one. If a model contains
       a smooth for \code{sigma}, warn when its smallest fitted value divided by
       its median is less than \code{sigma.tol}. The default is \code{0.001};

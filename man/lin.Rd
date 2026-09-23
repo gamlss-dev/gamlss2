@@ -90,10 +90,12 @@ ridge(...)
   interaction columns.
 
   The smoothing parameter \eqn{\lambda} is selected during backfitting using
-  the smooth-term criterion supplied to \code{gamlss2()}. The default is
-  corrected AIC (\code{criterion = "aicc"}); supported alternatives include
-  \code{"gcv"}, \code{"aic"}, \code{"gaic"}, and \code{"bic"}. For
-  example, use \code{gamlss2(..., criterion = "bic")} to select the ridge
+  the smooth-term criterion supplied to \code{gamlss2()}. The default is a
+  local REML update (\code{criterion = "reml"}); supported alternatives
+  include
+  \code{"gcv"}, \code{"aic"}, \code{"gaic"}, \code{"aicc"}, and
+  \code{"bic"}. For example, use
+  \code{gamlss2(..., criterion = "bic")} to select the ridge
   penalty by BIC. The previous estimate is used to warm-start subsequent
   backfitting updates.
 

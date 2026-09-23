@@ -13,6 +13,7 @@ SEXP calc_smooth_wfit_gradient(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, S
 SEXP calc_smooth_dr(SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_smooth_dr_eval(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_smooth_ml(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+SEXP calc_smooth_reml(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_smooth_wfit_gradient_root(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_smooth_residual(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 SEXP calc_smooth_dr_fit(SEXP, SEXP);
@@ -34,6 +35,7 @@ static R_CallMethodDef callMethods[] = {
   {"calc_smooth_dr", (DL_FUNC) &calc_smooth_dr, 5},
   {"calc_smooth_dr_eval", (DL_FUNC) &calc_smooth_dr_eval, 6},
   {"calc_smooth_ml", (DL_FUNC) &calc_smooth_ml, 11},
+  {"calc_smooth_reml", (DL_FUNC) &calc_smooth_reml, 9},
   {"calc_smooth_wfit_gradient_root", (DL_FUNC) &calc_smooth_wfit_gradient_root, 10},
   {"calc_smooth_residual", (DL_FUNC) &calc_smooth_residual, 6},
   {"calc_smooth_dr_fit", (DL_FUNC) &calc_smooth_dr_fit, 2},

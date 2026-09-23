@@ -409,6 +409,49 @@ smooth.construct_start <- function(XWX, penalties)
   pmin(1e+10, pmax(1e-10, lambda))
 }
 
+## Set up the common range of multiple penalty matrices for local REML.
+smooth.construct_reml <- function(penalties, rank = NULL)
+{
+  p <- ncol(penalties[[1L]])
+  scale <- vapply(penalties, function(S) max(abs(S)), numeric(1L))
+  active <- is.finite(scale) & scale > 0
+  if(!any(active))
+    return(NULL)
+
+  S <- matrix(0, p, p)
+  for(i in which(active))
+    S <- S + penalties[[i]] / scale[i]
+  S <- (S + t(S)) / 2
+
+  decomposition <- eigen(S, symmetric = TRUE)
+  tolerance <- sqrt(.Machine$double.eps) *
+    max(1, abs(decomposition$values))
+  if(any(decomposition$values < -tolerance))
+    stop("penalty matrix is not positive semi-definite")
+  if(!is.null(rank) && (length(rank) != 1L || !is.finite(rank) ||
+      rank < 0 || rank > p || rank != as.integer(rank)))
+    stop("invalid combined penalty rank")
+  keep <- if(is.null(rank)) {
+    decomposition$values > tolerance
+  } else {
+    seq_len(rank)
+  }
+  if(!length(keep))
+    return(NULL)
+  if(!is.null(rank) && rank < p &&
+      any(abs(decomposition$values[seq.int(rank + 1L, p)]) > tolerance))
+    stop("combined penalty rank does not match its null space")
+  if(any(decomposition$values[keep] <= 0))
+    stop("combined penalty rank does not match its range")
+
+  U <- decomposition$vectors[, keep, drop = FALSE]
+  penalties <- lapply(penalties, function(S) {
+    St <- crossprod(U, S %*% U)
+    (St + t(St)) / 2
+  })
+  list("penalties" = penalties, "rank" = ncol(U))
+}
+
 ## Fitting function for mgcv smooth terms.
 smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer, iter)
 {
@@ -489,7 +532,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       control$criterion <- tolower(control$method)
   }
   if(is.null(control$criterion))
-    control$criterion <- "aicc"
+    control$criterion <- if(isTRUE(control$logLik)) "aicc" else "reml"
 
   control$criterion <- tolower(control$criterion)
   ncv <- identical(control$criterion, "ncv")
@@ -597,14 +640,20 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   ## Penalty for AIC.
   K <- if(is.null(control$K)) 2 else control$K
 
-  ## Local ML check.
+  ## Local REML check. The term-specific "ml" value is retained for pb().
   localML <- isTRUE(x$localML) && length(x$S) == 1L &&
     !isTRUE(x$fixed) && is.null(x$sp) && any(x$S[[1L]] != 0) &&
     !(length(x$rank) == 1L && x$rank == 0)
+  localREML <- control$criterion == "reml" && length(x$S) > 0L &&
+    !isTRUE(x$fixed) && is.null(x$sp) &&
+    any(vapply(x$S, function(S) any(S != 0), logical(1L)))
   if(!localML) {
     if(control$criterion == "ml")
       control$criterion <- "aicc"
   }
+  if(control$criterion == "reml" && !localREML)
+    control$criterion <- "aicc"
+  local.update <- localML || localREML
 
   ## Choose the direct or Demmler-Reinsch solver. The native quadratic
   ## search amortizes DR setup even for a short, warm-started update.
@@ -620,10 +669,10 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   dr.eligible <- length(x$S) == 1L &&
       is.null(x$sp) &&
       !isTRUE(x$fixed) &&
-      (iter[1L] > 0L || localML)
+      (iter[1L] > 0L || local.update)
 
   dr_setup <- function() {
-    dr.ridge <- if(control$criterion == "ml" && localML) 0 else 1e-05
+    dr.ridge <- if(local.update) 0 else 1e-05
     ## The metric and penalty determine T, d, h and M; the response only
     ## determines g. Crossproduct reuse alone is insufficient if S changes.
     cached <- if(is.environment(cache)) cache$dr else NULL
@@ -655,7 +704,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   dr <- NULL
   dr.attempted <- FALSE
   if(dr.eligible && (identical(dr.mode, TRUE) ||
-      (localML && !identical(dr.mode, FALSE)) ||
+      (local.update && !identical(dr.mode, FALSE)) ||
       (identical(dr.mode, "auto") && !isTRUE(control$logLik) &&
         !identical(control$native.wfit, FALSE) &&
         !identical(control$analytic.gradient, FALSE)))) {
@@ -675,8 +724,8 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     )
   }
 
-  if(control$criterion == "ml" & (length(x$S) < 2L) & localML) {
-    ## Local ML method, only for pb2() yet!
+  if(local.update && length(x$S) == 1L) {
+    ## Local REML update for a single penalty matrix.
     ## Constraints can remove part of the penalty null space: for example,
     ## a centered second-order P-spline has one unpenalized coefficient.
     null.dim <- x$null.space.dim
@@ -715,6 +764,23 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
             decomposition = penalty.root)
       }
     }
+    finish_local <- function(rval) {
+      changed <- !is.null(previous.lambdas) &&
+        length(previous.lambdas) == length(rval$lambdas) &&
+        all(previous.lambdas > 0) &&
+        any(abs(log(rval$lambdas) - log(previous.lambdas)) >
+          sqrt(.Machine$double.eps))
+      rval$.rs_smoothing <- list("changed" = changed, "scored" = FALSE,
+        "criterion" = control$criterion)
+      rval$transfer <- list(
+        "lambdas" = rval$lambdas,
+        "coefficients" = rval$coefficients,
+        "criterion.evaluations" = 0L,
+        "demmler.reinsch" = !is.null(dr),
+        "names" = colnames(x$X)
+      )
+      rval
+    }
 
     if(!identical(control$native.wfit, FALSE) && is.double(x$X) &&
         is.double(XWX) && is.double(x$S[[1L]])) {
@@ -722,14 +788,8 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
         XWX, as.numeric(XWz), x$S[[1L]], as.numeric(lambdas),
         as.numeric(null.dim), if(control$binning) x$binning$match.index else NULL,
         dr, penalty.root, PACKAGE = "gamlss2"), silent = TRUE)
-      if(!inherits(rval, "try-error")) {
-        changed <- !is.null(previous.lambdas) &&
-          length(previous.lambdas) == length(rval$lambdas) &&
-          any(abs(log(rval$lambdas) - log(previous.lambdas)) >
-            sqrt(.Machine$double.eps))
-        rval$.rs_smoothing <- list("changed" = changed, "scored" = FALSE)
-        return(rval)
-      }
+      if(!inherits(rval, "try-error"))
+        return(finish_local(rval))
     }
 
     N <- sum(w != 0)
@@ -788,13 +848,121 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     if(control$binning)
       fit <- fit[x$binning$match.index]
 
-    changed <- !is.null(previous.lambdas) &&
-      length(previous.lambdas) == length(lambdas) &&
-      any(abs(log(lambdas) - log(previous.lambdas)) >
-        sqrt(.Machine$double.eps))
-    return(list("coefficients" = b, "fitted.values" = fit, "edf" = edf,
-      "lambdas" = lambdas, "vcov" = P, "df" = n - edf,
-      ".rs_smoothing" = list("changed" = changed, "scored" = FALSE)))
+    return(finish_local(list("coefficients" = b, "fitted.values" = fit,
+      "edf" = edf, "lambdas" = lambdas, "vcov" = P, "df" = n - edf)))
+  } else if(localREML) {
+    ## The range of the total penalty is unchanged for positive lambdas.
+    ## Cache its basis and update all smoothing parameters together.
+    reml.rank <- if(isTRUE(control$termselect)) {
+      ncol(x$X)
+    } else if(length(x$null.space.dim) == 1L) {
+      ncol(x$X) - x$null.space.dim
+    } else {
+      NULL
+    }
+    cached <- if(is.environment(cache)) cache$reml.penalty else NULL
+    if(!is.null(cached) && identical(cached$S, x$S,
+        num.eq = FALSE, single.NA = FALSE) &&
+        identical(cached$rank, reml.rank)) {
+      penalty.basis <- cached$decomposition
+    } else {
+      penalty.basis <- smooth.construct_reml(x$S, reml.rank)
+      if(is.environment(cache))
+        cache$reml.penalty <- list(S = x$S, rank = reml.rank,
+          decomposition = penalty.basis)
+    }
+    if(is.null(penalty.basis))
+      stop("local REML requires a non-zero penalty matrix")
+
+    finish_reml <- function(rval) {
+      changed <- !is.null(previous.lambdas) &&
+        length(previous.lambdas) == length(rval$lambdas) &&
+        all(previous.lambdas > 0) &&
+        any(abs(log(rval$lambdas) - log(previous.lambdas)) >
+          sqrt(.Machine$double.eps))
+      rval$.rs_smoothing <- list("changed" = changed, "scored" = FALSE,
+        "criterion" = "reml")
+      if(isTRUE(control$termselect)) {
+        rval$penalty <- matrix(0, ncol(x$X), ncol(x$X))
+        for(k in seq_along(x$S))
+          rval$penalty <- rval$penalty + rval$lambdas[k] * x$S[[k]]
+      }
+      rval$transfer <- list(
+        "lambdas" = rval$lambdas,
+        "coefficients" = rval$coefficients,
+        "criterion.evaluations" = 0L,
+        "demmler.reinsch" = FALSE,
+        "names" = colnames(x$X)
+      )
+      rval
+    }
+
+    native.penalties <- all(vapply(c(x$S, penalty.basis$penalties),
+      function(S) is.matrix(S) && is.double(S), logical(1L)))
+    if(!identical(control$native.wfit, FALSE) && is.double(x$X) &&
+        is.double(XWX) && native.penalties) {
+      rval <- try(.Call(C_calc_smooth_reml, x$X, as.numeric(z), as.numeric(w),
+        XWX, as.numeric(XWz), x$S, as.numeric(lambdas),
+        if(control$binning) x$binning$match.index else NULL,
+        penalty.basis$penalties, PACKAGE = "gamlss2"), silent = TRUE)
+      if(!inherits(rval, "try-error"))
+        return(finish_reml(rval))
+    }
+
+    N <- sum(w != 0)
+    for(it in 1:50) {
+      Sl <- matrix(0, ncol(XWX), ncol(XWX))
+      St <- matrix(0, penalty.basis$rank, penalty.basis$rank)
+      for(k in seq_along(x$S)) {
+        Sl <- Sl + lambdas[k] * x$S[[k]]
+        St <- St + lambdas[k] * penalty.basis$penalties[[k]]
+      }
+      P <- chol2inv(chol(XWX + Sl))
+      Ps <- chol2inv(chol(St))
+      b <- drop(P %*% XWz)
+      edf <- sum(XWX * P)
+      fit <- drop(x$X %*% b)
+      if(control$binning)
+        fit <- fit[x$binning$match.index]
+      sig2 <- sum(w * (z - fit)^2) / (N - edf)
+
+      numerator <- vapply(seq_along(x$S), function(k)
+        sum(Ps * penalty.basis$penalties[[k]]) - sum(P * x$S[[k]]),
+        numeric(1L))
+      quadratic <- vapply(x$S, function(S)
+        drop(crossprod(b, S %*% b)), numeric(1L))
+      lambdas.old <- lambdas
+      for(k in seq_along(lambdas)) {
+        q <- quadratic[k]
+        a <- numerator[k]
+        if(q < 0 && q > -sqrt(.Machine$double.eps)) q <- 0
+        if(a < 0 && a > -sqrt(.Machine$double.eps)) a <- 0
+        lambdas[k] <- if(q <= 0) {
+          if(a <= 0) lambdas[k] else 1e+07
+        } else if(a <= 0 || sig2 == 0) {
+          1e-07
+        } else {
+          lambdas[k] * sig2 * a / q
+        }
+      }
+      lambdas[!is.finite(lambdas)] <- 1e+07
+      lambdas <- pmin(1e+07, pmax(1e-07, lambdas))
+      if(max(abs(log(lambdas) - log(lambdas.old))) < 1e-07)
+        break
+    }
+
+    ## Return a complete fit at the smoothing parameters from the last update.
+    Sl <- matrix(0, ncol(XWX), ncol(XWX))
+    for(k in seq_along(x$S))
+      Sl <- Sl + lambdas[k] * x$S[[k]]
+    P <- chol2inv(chol(XWX + Sl))
+    b <- drop(P %*% XWz)
+    edf <- sum(XWX * P)
+    fit <- drop(x$X %*% b)
+    if(control$binning)
+      fit <- fit[x$binning$match.index]
+    return(finish_reml(list("coefficients" = b, "fitted.values" = fit,
+      "edf" = edf, "lambdas" = lambdas, "vcov" = P, "df" = n - edf)))
   } else {
     if(is.null(zWz))
       zWz <- sum(w * z^2)

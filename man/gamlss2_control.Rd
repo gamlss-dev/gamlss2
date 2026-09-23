@@ -39,16 +39,27 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   optimizer is used, newly specified control parameters are passed on to that
   optimizer automatically.
 
+  For \pkg{mgcv}-based smooth terms, smoothing parameters are selected by
+  local REML updates by default (\code{criterion = "reml"}). These updates
+  use the current working response and weights. With one penalty matrix this
+  is the usual Schall update; with multiple penalty matrices all smoothing
+  parameters are updated together using the extended Fellner--Schall trace
+  equations. This is a local working-model REML update. Explicit choices such
+  as \code{"gcv"}, \code{"aic"}, \code{"aicc"}, \code{"bic"}, and
+  \code{"ncv"} retain their respective selection methods.
+
   For the \code{RS} and \code{CG} optimizers, argument
   \code{demmler.reinsch} controls the use of a weighted Demmler--Reinsch
   reparameterization when selecting the smoothing parameter of an eligible
   single-penalty smooth, including multivariate smooths. The default,
-  \code{"auto"}, uses the native reparameterization for quadratic criteria
-  after the initial outer iteration. Set \code{demmler.reinsch = TRUE} to
-  force it for eligible updates, or \code{FALSE} to disable it. The initial
-  outer iteration continues to use the direct solver. With numerical gradients
-  or \code{native.wfit = FALSE}, automatic reparameterization is delayed until
-  the current search reaches the edge of its one-decade search window.
+  \code{"auto"}, uses the native reparameterization for local REML updates,
+  and for quadratic criteria after the initial outer iteration. Set
+  \code{demmler.reinsch = TRUE} to force it for eligible updates, or
+  \code{FALSE} to disable it. For quadratic criteria, the initial outer
+  iteration continues to use the direct
+  solver; with numerical gradients or \code{native.wfit = FALSE}, automatic
+  reparameterization is delayed until the current search reaches the edge of
+  its one-decade search window.
 
   Within an \code{RS} or \code{CG} fit, the reparameterization is cached
   while the design matrix, weights, penalty, and binning are unchanged. A new
@@ -76,22 +87,13 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   \code{neighbourhoods} has one integer index vector per observation and each
   vector contains its target observation.
 
-
-  The RS and CG optimizers use \code{sigma.tol = 0.001} by default. If a
-  model contains a smooth for \code{sigma}, a warning is issued when the
-  smallest fitted sigma divided by its median is below this value. Such a fit
-  can indicate a near-singular likelihood and unstable smooth functions. The
-  check is diagnostic only and does not impose a lower bound; set
-  \code{sigma.tol = FALSE} to disable it.
-
-  Smooths with fixed smoothing parameters or multiple penalties, including
-  adaptive and tensor-product smooths, use the direct solver. For larger
-  multiple-penalty smooths, a cached factor of the weighted crossproduct
-  reduces the cost of EDF derivatives. Local ML updates use the constrained
-  penalty null space and return coefficients and covariance at the reported
-  smoothing parameter. Native single-penalty ML updates compute RSS and the
-  penalty quadratic in the DR basis, with observation-space residuals for
-  nearly exact fits.
+  Smooths with fixed smoothing parameters and multiple-penalty smooths use
+  the direct solver. For local REML, the common range of the penalty matrices
+  is cached and the coupled update is evaluated in native code. Single-penalty
+  updates use the constrained penalty null space and the Demmler--Reinsch basis
+  when available. The term-specific \code{"ml"} method used by \code{pb()}
+  retains its existing update. All methods return coefficients and covariance
+  at the reported smoothing parameters.
 } 
 
 \references{
@@ -115,6 +117,7 @@ gamlss2_control(optimizer = RS, trace = TRUE,
 f <- dist ~ s(speed) | s(speed)
 
 ## estimate models with different information criteria
+m0 <- gamlss2(f, data = cars, family = GA, criterion = "reml")
 m1 <- gamlss2(f, data = cars, family = GA, criterion = "aic")
 m2 <- gamlss2(f, data = cars, family = GA, criterion = "bic")
 m3 <- gamlss2(f, data = cars, family = GA, criterion = "gaic")

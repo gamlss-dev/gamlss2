@@ -719,6 +719,7 @@ Logical. Should progress information be printed while sampling?
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The function sets <code>n.iter</code>, <code>burnin</code>, <code>thin</code>, and <code>trace</code> in the model control list and obtains starting values from the fitted object, including smoothing parameters. The MCMC sampler <code>BS</code> is then called and the resulting samples and posterior summaries are merged into the original model object.</p>
 <p>This approach ensures that the result retains the <code>terms</code>, <code>call</code>, and related components required by extractor and plotting methods. If the fitted model object does not contain the design information required for MCMC sampling, for example because a reduced control setting was used, sampling cannot be performed.</p>
+<p>Applying <code>mcmc()</code> to an object that already contains posterior samples continues from the terminal state of the preceding chain. Stored posterior summaries and DIC are then recomputed from all retained samples.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -726,6 +727,9 @@ Logical. Should progress information be printed while sampling?
 <ul>
 <li>
 <p><code>samples</code>: posterior draws for coefficients and smoothing variances;</p>
+</li>
+<li>
+<p><code>logLik.samples</code>: log-likelihood values for the retained draws;</p>
 </li>
 <li>
 <p><code>results</code>: model results derived from posterior means;</p>

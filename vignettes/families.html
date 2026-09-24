@@ -413,10 +413,10 @@ AIC = 414.0972 elapsed =  0.05sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        r_1      r_2
-1  22.62691 26.15113
-2  69.86366 47.59977
-3 166.76681 93.12962</code></pre>
+<pre><code>       r_1      r_2
+1 31.77068 21.86695
+2 84.15794 47.37244
+3 72.34553 68.87286</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -616,7 +616,7 @@ sigma.s(Temp) 3.9513
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.25sec</code></pre>
+AIC = 952.263 elapsed =  0.26sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -684,7 +684,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.92%
-AIC = 414.0972 elapsed =  0.03sec</code></pre>
+AIC = 414.0972 elapsed =  0.04sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>

@@ -180,7 +180,11 @@ fam <- mixture_family(NO, k = 2)
 fit_family(d$waiting, family = fam)
 
 ## mixture of experts model
-m <- gamlss2(waiting ~ s(eruptions) | . | . | . | ., data = d, family = fam)
+m <- gamlss2(
+  waiting ~ s(eruptions) | . | . | . | .,
+  data = d,
+  family = fam
+)
 
 ## estimated effects
 plot(m)

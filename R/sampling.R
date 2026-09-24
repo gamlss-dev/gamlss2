@@ -43,6 +43,16 @@ sampling <- function(object, R = 100, antithetic = TRUE, ...)
   sc
 }
 
+## Evaluate the likelihood used by the sampler.
+mcmc_log_likelihood <- function(family, par, y, weights = NULL)
+{
+  if(is.null(weights)) {
+    family$log_likelihood(par = par, y = y)
+  } else {
+    sum(family$pdf(par = par, y = y, log = TRUE) * weights, na.rm = TRUE)
+  }
+}
+
 ## Bayesian GAMLSS sampler function. Unbounded slice sampler!?
 BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, control)
 {
@@ -154,6 +164,18 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(!is.null(weights))
     weights <- as.numeric(weights)
 
+  ## Process offsets.
+  if(!is.null(offsets)) {
+    if(is.null(dim(offsets))) {
+      offsets <- data.frame(offsets)
+      names(offsets) <- np[1L]
+    }
+    if(nrow(offsets) < 1L)
+      offsets <- NULL
+    else
+      offsets <- as.data.frame(offsets)
+  }
+
   ## Fix some parameters?
   if(is.null(control$fixed)) {
     control$fixed <- rep(FALSE, length = length(np))
@@ -211,8 +233,15 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
             "coefficients" = setNames(rep(0.0, ncol(specials[[i]]$X)),
               paste0(j, ".s.", i, ".", seq_len(ncol(specials[[i]]$X)))),
             "tau" = setNames(rep(0.001, length(specials[[i]]$S)),
-              paste0(j, ".s.", i, ".tau", seq_along(specials[[i]]$S)))
+              if(length(specials[[i]]$S))
+                paste0(j, ".s.", i, ".tau", seq_along(specials[[i]]$S))
+              else character(0L))
           )
+          if(!is.null(specials[[i]]$keep))
+            sfit[[j]][[i]][specials[[i]]$keep] <- specials[[i]][specials[[i]]$keep]
+          if(!is.null(specials[[i]]$pred_class))
+            class(sfit[[j]][[i]]) <- specials[[i]]$pred_class
+          sfit[[j]][[i]]$selected <- TRUE
           samples[[j]]$s[[i]] <- matrix(NA, nrow = nsave,
             ncol = ncol(specials[[i]]$X) + length(specials[[i]]$S) + 2L)
           if(!is.null(cstart)) {
@@ -231,6 +260,11 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               nes[[j]] <- TRUE
             }
             sjl <- sj[grepl(".lambda", sj, fixed = TRUE)]
+            if(length(specials[[i]]$S)) {
+              sjl <- sjl[seq_len(min(length(sjl), length(specials[[i]]$S)))]
+            } else {
+              sjl <- character(0L)
+            }
             if(length(sjl)) {
               sfit[[j]][[i]]$tau <- 1 / cstart[sjl]
               names(sfit[[j]][[i]]$tau) <- gsub("lambda", "tau", names(sfit[[j]][[i]]$tau))
@@ -249,24 +283,17 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         }
       }
     }
-    if(nes[[j]])
+    if(!is.null(offsets)) {
+      if(!is.null(offsets[[j]]))
+        eta[[j]] <- eta[[j]] + offsets[[j]]
+    }
+    if(nes[[j]] || !is.null(offsets[[j]]))
       etastart[[j]] <- eta[[j]]
   }
 
-  if(!is.null(control$fixed)) {
-    for(j in np) {
-      if(control$fixed[[j]]) {
-        link <- make.link2(family$links[[j]])
-        fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
-        eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
-        fit[[j]]$fitted.values <- eta[[j]]
-        etastart[[j]] <- eta[[j]]
-      }
-    }
-  }
-
   ## Null deviance.
-  dev0 <- -2 * family$log_likelihood(par = family$map2par(etastart), y = y)
+  dev0 <- -2 * mcmc_log_likelihood(family,
+    family$map2par(etastart), y, weights)
 
   ## Estimate intercept only model first.
   if(isTRUE(control$nullmodel) & length(xterms)) {
@@ -274,19 +301,28 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     for(j in np) {
       beta[[j]] <- as.numeric(fit[[j]]$coefficients["(Intercept)"])
       ieta[[j]] <- rep(beta[[j]], n)
+      if(!is.null(offsets)) {
+        if(!is.null(offsets[[j]]))
+          ieta[[j]] <- ieta[[j]] + offsets[[j]]
+      }
     }
     beta <- unlist(beta)
 
     if(!any(is.na(beta))) {
-      lli <- family$log_likelihood(par = family$map2par(ieta), y = y)
+      lli <- mcmc_log_likelihood(family, family$map2par(ieta), y, weights)
 
       fn_ll <- function(par) {
         for(j in np) {
           if(control$fixed[[j]])
             par[j] <- beta[j]
           ieta[[j]] <- rep(par[j], n)
+          if(!is.null(offsets)) {
+            if(!is.null(offsets[[j]]))
+              ieta[[j]] <- ieta[[j]] + offsets[[j]]
+          }
         }
-        ll <- family$log_likelihood(par = family$map2par(ieta), y = y) - 1e-05 * sum(par^2)
+        ll <- mcmc_log_likelihood(family,
+          family$map2par(ieta), y, weights) - 1e-05 * sum(par^2)
         return(-ll)
       }
 
@@ -301,11 +337,16 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
               fit[[j]]$coefficients["(Intercept)"] <- beta[j]
               fit[[j]]$fitted.values <- drop(x[, "(Intercept)"] * fit[[j]]$coefficients["(Intercept)"])
               eta[[j]] <- fit[[j]]$fitted.values
+              if(!is.null(offsets)) {
+                if(!is.null(offsets[[j]]))
+                  eta[[j]] <- eta[[j]] + offsets[[j]]
+              }
             }
           }
         }
         ## Null deviance.
-        dev0 <- -2 * family$log_likelihood(par = family$map2par(eta), y = y)
+        dev0 <- -2 * mcmc_log_likelihood(family,
+          family$map2par(eta), y, weights)
       }
     }
   }
@@ -349,7 +390,19 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
       ## Check if paramater is fixed.
       if(control$fixed[[j]]) {
         if(do_save) {
-          samples[[j]]$p[isave, ] <- c(fit[[j]]$coefficients, 1)
+          if(!is.null(samples[[j]]$p))
+            samples[[j]]$p[isave, ] <- c(fit[[j]]$coefficients, 1)
+          if(!is.null(samples[[j]]$s)) {
+            for(k in names(samples[[j]]$s)) {
+              samples[[j]]$s[[k]][isave, ] <- c(
+                sfit[[j]][[k]]$coefficients,
+                sfit[[j]][[k]]$tau,
+                sfit[[j]][[k]]$edf,
+                1
+              )
+            }
+          }
+          track$eta[[j]] <- track$eta[[j]] + eta[[j]]
         }
         next
       }
@@ -360,7 +413,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         peta <- family$map2par(eta)
 
         ## Compute old log-likelihood.
-        pibeta <- family$log_likelihood(par = peta, y = y)
+        pibeta <- mcmc_log_likelihood(family, peta, y, weights)
 
         ## Old parameters.
         b0 <- fit[[j]]$coefficients
@@ -410,7 +463,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
         peta <- family$map2par(eta)
 
         ## Compute new log likelihood.
-        pibetaprop <- family$log_likelihood(par = peta, y = y)
+        pibetaprop <- mcmc_log_likelihood(family, peta, y, weights)
 
         ## Compute new score and hessian.
         score <- deriv_checks(family$score[[j]](par = peta, y = y, id = j), is.weight = FALSE)
@@ -499,7 +552,8 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
     ## Save global logLik / deviance once per saved iteration.
     if(do_save) {
-      ll_iter <- family$log_likelihood(par = family$map2par(eta), y = y)
+      ll_iter <- mcmc_log_likelihood(family,
+        family$map2par(eta), y, weights)
       track$logLik[isave] <- ll_iter
       track$deviance[isave] <- -2 * ll_iter
       isave <- isave + 1L
@@ -513,13 +567,40 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   if(control$trace && interactive())
     cat("\n")
 
+  ## Keep the terminal state for continuing the chain.
+  mcmc.state <- numeric(0L)
+  for(j in np) {
+    if(length(fit[[j]]$coefficients)) {
+      bj <- fit[[j]]$coefficients
+      names(bj) <- paste0(j, ".p.", names(bj))
+      mcmc.state <- c(mcmc.state, bj)
+    }
+    if(length(sfit[[j]])) {
+      for(k in names(sfit[[j]])) {
+        bj <- as.numeric(sfit[[j]][[k]]$coefficients)
+        names(bj) <- paste0(j, ".s.", k, ".", seq_along(bj))
+        lj <- 1 / sfit[[j]][[k]]$tau
+        names(lj) <- if(length(lj))
+          paste0(j, ".s.", k, ".lambda", seq_along(lj)) else character(0L)
+        mcmc.state <- c(mcmc.state, bj, lj)
+      }
+    }
+  }
+  class(mcmc.state) <- "coef.gamlss2"
+
   ## Get mean coefficients.
   coef_lin <- list()
   for(j in np) {
     track$eta[[j]] <- track$eta[[j]] / nsave
 
     if(!is.null(samples[[j]]$p)) {
-      coef_lin[[j]] <- apply(samples[[j]]$p, 2, mean, na.rm = TRUE)
+      ni <- ncol(samples[[j]]$p) - 1L
+      coef_lin[[j]] <- apply(samples[[j]]$p[, seq_len(ni), drop = FALSE],
+        2, mean, na.rm = TRUE)
+      fit[[j]]$coefficients <- coef_lin[[j]]
+      fit[[j]]$fitted.values <- drop(
+        x[, names(coef_lin[[j]]), drop = FALSE] %*% coef_lin[[j]])
+      fit[[j]]$vcov <- cov(samples[[j]]$p[, seq_len(ni), drop = FALSE])
       colnames(samples[[j]]$p) <- paste0(j, ".p.", colnames(samples[[j]]$p))
     }
 
@@ -529,27 +610,34 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
         colnames(samples[[j]]$s[[k]]) <- c(
           paste0(j, ".s.", k, ".", 1:nc),
-          paste0(j, ".s.", k, ".tau", 1:length(specials[[k]]$S)),
+          if(length(specials[[k]]$S))
+            paste0(j, ".s.", k, ".tau", seq_along(specials[[k]]$S))
+          else character(0L),
           paste0(j, ".s.", k, ".edf"),
           paste0(j, ".s.", k, ".alpha")
         )
 
-        kfit <- apply(samples[[j]]$s[[k]][, 1:nc, drop = FALSE], 1, function(b) {
-          specials[[k]]$X %*% b
-        })
-        kfit <- apply(kfit, 1, mean)
-        sfit[[j]][[k]]$fitted.values <- drop(kfit)
+        coef_samples <- samples[[j]]$s[[k]][, seq_len(nc), drop = FALSE]
+        sfit[[j]][[k]]$coefficients <- apply(coef_samples, 2, mean)
+        names(sfit[[j]][[k]]$coefficients) <-
+          colnames(samples[[j]]$s[[k]])[seq_len(nc)]
+        kfit <- drop(specials[[k]]$X %*% sfit[[j]][[k]]$coefficients)
+        if(isTRUE(control$binning) && !is.null(specials[[k]]$binning))
+          kfit <- kfit[specials[[k]]$binning$match.index]
+        sfit[[j]][[k]]$fitted.values <- kfit
         lj <- grep(".tau", colnames(samples[[j]]$s[[k]]), fixed = TRUE)
-        tau_samples <- samples[[j]]$s[[k]][, lj, drop = FALSE]
-        sfit[[j]][[k]]$tau <- apply(tau_samples, 2, mean)
-        sfit[[j]][[k]]$lambdas <- apply(1 / tau_samples, 2, mean)
-        names(sfit[[j]][[k]]$lambdas) <- sub(
-          ".tau", ".lambda", names(sfit[[j]][[k]]$lambdas), fixed = TRUE)
+        if(length(lj)) {
+          tau_samples <- samples[[j]]$s[[k]][, lj, drop = FALSE]
+          sfit[[j]][[k]]$tau <- apply(tau_samples, 2, mean)
+          sfit[[j]][[k]]$lambdas <- apply(1 / tau_samples, 2, mean)
+          names(sfit[[j]][[k]]$lambdas) <- sub(
+            ".tau", ".lambda", names(sfit[[j]][[k]]$lambdas), fixed = TRUE)
+        }
         lj <- grep(".edf", colnames(samples[[j]]$s[[k]]))
         sfit[[j]][[k]]$edf <- mean(samples[[j]]$s[[k]][, lj])
         lj <- grep(".alpha", colnames(samples[[j]]$s[[k]]))
         sfit[[j]][[k]]$alpha <- mean(samples[[j]]$s[[k]][, lj])
-        sfit[[j]][[k]]$vcov <- cov(samples[[j]]$s[[k]][, 1:nc, drop = FALSE])
+        sfit[[j]][[k]]$vcov <- cov(coef_samples)
       }
 
       samples[[j]] <- cbind(samples[[j]]$p, do.call("cbind", samples[[j]]$s))
@@ -560,7 +648,7 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   samples <- do.call("cbind", samples)
 
-  ll <- family$log_likelihood(par = family$map2par(track$eta), y = y)
+  ll <- mcmc_log_likelihood(family, family$map2par(track$eta), y, weights)
 
   Dbar <- mean(track$deviance, na.rm = TRUE)
   Dhat <- -2 * ll
@@ -582,12 +670,136 @@ BS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     "dev.reduction" = abs((dev0 - (-2 * ll)) / dev0),
     "dic" = dic,
     "nullmodel" = control$nullmodel,
-    "samples" = samples
+    "samples" = samples,
+    "logLik.samples" = track$logLik,
+    "mcmc.state" = mcmc.state
   )
 
   class(rval) <- c("bamlss2", "gamlss2")
 
   return(rval)
+}
+
+## Update posterior summaries from all stored samples.
+mcmc_refresh <- function(object)
+{
+  samples <- object$samples
+  family <- object$family
+  np <- family$names
+  n <- if(is.null(dim(object$y))) length(object$y) else nrow(object$y)
+  offsets <- object$offsets
+  if(!is.null(offsets)) {
+    if(NROW(offsets)) offsets <- as.data.frame(offsets) else offsets <- NULL
+  }
+
+  eta <- list()
+  for(j in np) {
+    eta[[j]] <- rep(0.0, n)
+    if(!is.null(offsets)) {
+      if(!is.null(offsets[[j]]))
+        eta[[j]] <- eta[[j]] + offsets[[j]]
+    }
+
+    if(length(object$xterms[[j]])) {
+      cn <- paste0(j, ".p.", object$xterms[[j]])
+      bj <- apply(samples[, cn, drop = FALSE], 2, mean, na.rm = TRUE)
+      names(bj) <- object$xterms[[j]]
+      object$coefficients[[j]] <- bj
+      object$fitted.linear[[j]]$coefficients <- bj
+      object$fitted.linear[[j]]$fitted.values <- drop(
+        object$x[, object$xterms[[j]], drop = FALSE] %*% bj)
+      object$fitted.linear[[j]]$vcov <- cov(samples[, cn, drop = FALSE])
+      eta[[j]] <- eta[[j]] + object$fitted.linear[[j]]$fitted.values
+    }
+
+    if(length(object$sterms[[j]])) {
+      for(k in object$sterms[[j]]) {
+        nc <- ncol(object$specials[[k]]$X)
+        cn <- paste0(j, ".s.", k, ".", seq_len(nc))
+        coef_samples <- samples[, cn, drop = FALSE]
+        bj <- apply(coef_samples, 2, mean, na.rm = TRUE)
+        names(bj) <- cn
+        object$fitted.specials[[j]][[k]]$coefficients <- bj
+
+        fj <- drop(object$specials[[k]]$X %*% bj)
+        if(isTRUE(object$control$binning) &&
+            !is.null(object$specials[[k]]$binning))
+          fj <- fj[object$specials[[k]]$binning$match.index]
+        object$fitted.specials[[j]][[k]]$fitted.values <- fj
+        object$fitted.specials[[j]][[k]]$vcov <- cov(coef_samples)
+        eta[[j]] <- eta[[j]] + fj
+
+        tn <- if(length(object$specials[[k]]$S)) {
+          paste0(j, ".s.", k, ".tau",
+            seq_along(object$specials[[k]]$S))
+        } else character(0L)
+        if(length(tn)) {
+          tau_samples <- samples[, tn, drop = FALSE]
+          object$fitted.specials[[j]][[k]]$tau <-
+            apply(tau_samples, 2, mean, na.rm = TRUE)
+          object$fitted.specials[[j]][[k]]$lambdas <-
+            apply(1 / tau_samples, 2, mean, na.rm = TRUE)
+          names(object$fitted.specials[[j]][[k]]$lambdas) <-
+            sub(".tau", ".lambda", tn, fixed = TRUE)
+        }
+
+        en <- paste0(j, ".s.", k, ".edf")
+        an <- paste0(j, ".s.", k, ".alpha")
+        object$fitted.specials[[j]][[k]]$edf <- mean(samples[, en], na.rm = TRUE)
+        object$fitted.specials[[j]][[k]]$alpha <- mean(samples[, an], na.rm = TRUE)
+      }
+    }
+  }
+
+  object$fitted.values <- as.data.frame(eta)
+  ll <- mcmc_log_likelihood(family, family$map2par(eta),
+    object$y, object$weights)
+
+  if(is.null(object$logLik.samples) ||
+      length(object$logLik.samples) != nrow(samples)) {
+    eta_samples <- lapply(np, function(j) {
+      z <- matrix(0.0, nrow = n, ncol = nrow(samples))
+      if(!is.null(offsets)) {
+        if(!is.null(offsets[[j]]))
+          z <- z + offsets[[j]]
+      }
+      if(length(object$xterms[[j]])) {
+        cn <- paste0(j, ".p.", object$xterms[[j]])
+        z <- z + object$x[, object$xterms[[j]], drop = FALSE] %*%
+          t(samples[, cn, drop = FALSE])
+      }
+      if(length(object$sterms[[j]])) {
+        for(k in object$sterms[[j]]) {
+          nc <- ncol(object$specials[[k]]$X)
+          cn <- paste0(j, ".s.", k, ".", seq_len(nc))
+          fj <- object$specials[[k]]$X %*% t(samples[, cn, drop = FALSE])
+          if(isTRUE(object$control$binning) &&
+              !is.null(object$specials[[k]]$binning))
+            fj <- fj[object$specials[[k]]$binning$match.index, , drop = FALSE]
+          z <- z + fj
+        }
+      }
+      z
+    })
+    names(eta_samples) <- np
+    object$logLik.samples <- vapply(seq_len(nrow(samples)), function(i) {
+      etai <- lapply(eta_samples, function(z) z[, i])
+      mcmc_log_likelihood(family, family$map2par(etai),
+        object$y, object$weights)
+    }, numeric(1L))
+  }
+
+  Dbar <- mean(-2 * object$logLik.samples, na.rm = TRUE)
+  Dhat <- -2 * ll
+  pD <- Dbar - Dhat
+  object$logLik <- ll
+  object$deviance <- Dhat
+  object$dic <- list("Dbar" = Dbar, "Dhat" = Dhat,
+    "pD" = pD, "DIC" = Dhat + 2 * pD)
+  object$dev.reduction <- abs((object$null.deviance - Dhat) /
+    object$null.deviance)
+
+  object
 }
 
 ## Print info during sampling.
@@ -637,6 +849,13 @@ prior.mgcv.smooth <- function(x, ...)
   penalties <- x$S
   m <- length(penalties)
 
+  ## Unpenalized smooths have a flat coefficient prior.
+  if(m < 1L) {
+    rval <- function(parameters) 0
+    attr(rval, "conjugate") <- FALSE
+    return(rval)
+  }
+
   a <- b <- 0.0001
   igs <- log((b^a)) - log(gamma(a))
   var_prior_fun <- function(tau) {
@@ -664,13 +883,13 @@ prior.mgcv.smooth <- function(x, ...)
     })
 
     rank_aware_logdet <- function(tau) {
-      P <- penalties[[1L]] / tau[1L]
+      P <- reduced_penalties[[1L]] / tau[1L]
       for(j in 2:m)
-        P <- P + penalties[[j]] / tau[j]
+        P <- P + reduced_penalties[[j]] / tau[j]
       ev <- eigen(P, symmetric = TRUE, only.values = TRUE)$values
-      tol <- max(ev) * 1e-12
-      ev_pos <- ev[ev > tol]
-      sum(log(ev_pos))
+      if(any(!is.finite(ev)) || any(ev <= 0))
+        return(-Inf)
+      sum(log(ev))
     }
 
     ## Two penalties admit a one-time Demmler-Reinsch decomposition:
@@ -707,7 +926,7 @@ prior.mgcv.smooth <- function(x, ...)
   cache$gamma <- NULL
   cache$quadratics <- NULL
 
-  function(parameters) {
+  rval <- function(parameters) {
     np <- length(parameters)
     i <- seq.int(np - m + 1L, np)
     nms <- names(parameters)
@@ -791,6 +1010,8 @@ prior.mgcv.smooth <- function(x, ...)
     lp <- 0.5 * logdetP - 0.5 * quad + ld
     lp[1L]
   }
+  attr(rval, "conjugate") <- m == 1L
+  rval
 }
 
 ## Generic propose function.
@@ -881,24 +1102,24 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
   peta <- family$map2par(eta)
 
   ## Compute old log-likelihood.
-  pibeta <- family$log_likelihood(par = peta, y = y)
+  pibeta <- mcmc_log_likelihood(family, peta, y, weights)
 
   ## Old parameters.
   b0 <- fitted$coefficients
   tau <- fitted$tau
 
   ## New shrinkage variance(s).
-  if(!isTRUE(x$fixed)) {
-    if(length(tau) > 1L) {
-      theta <- c(b0, tau)
-      tau_idx <- grep(".tau", names(theta), fixed = TRUE)
-      for(jj in tau_idx) {
-        theta <- uni.slice(theta, x, family,
-          response = NULL, eta = NULL,
-          id = parameter, j = jj,
-          logPost = log_posterior,
-          lower = 1e-08,
-          log_likelihood = pibeta)
+  if(!isTRUE(x$fixed) && length(tau)) {
+    if(length(tau) > 1L || !isTRUE(attr(x$prior, "conjugate"))) {
+        theta <- c(b0, tau)
+        tau_idx <- grep(".tau", names(theta), fixed = TRUE)
+        for(jj in tau_idx) {
+          theta <- uni.slice(theta, x, family,
+            response = NULL, eta = NULL,
+            id = parameter, j = jj,
+            logPost = log_posterior,
+            lower = 1e-08,
+            log_likelihood = pibeta, weights = weights)
       }
       tau <- theta[tau_idx]
     } else {
@@ -955,7 +1176,7 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
 
   ## New parameters and log-likelihood.
   peta <- family$map2par(eta)
-  pibetaprop <- family$log_likelihood(par = peta, y = y)
+  pibetaprop <- mcmc_log_likelihood(family, peta, y, weights)
 
   ## New working response and weights.
   ew <- .update(
@@ -995,11 +1216,12 @@ propose.mgcv.smooth <- function(x, y, family, eta, fitted,
 
 ## Function to compute proportional log-posterior.
 log_posterior <- function(coefficients, x, family, y,
-  eta, parameter, log_likelihood = NULL)
+  eta, parameter, log_likelihood = NULL, weights = NULL)
 {
   if(is.null(log_likelihood)) {
     eta[[parameter]] <- eta[[parameter]] + drop(x$X %*% coefficients[1:ncol(x$X)])
-    log_likelihood <- family$log_likelihood(par = family$map2par(eta), y = y)
+    log_likelihood <- mcmc_log_likelihood(family,
+      family$map2par(eta), y, weights)
   }
 
   log_prior <- x$prior(coefficients)
@@ -1160,15 +1382,22 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
   object$control$thin <- thin
   object$control$trace <- trace
 
-  ## Starting values (incl. lambdas).
-  object$start <- coef(object, full = TRUE, lambdas = TRUE,
-    dropall = FALSE)
+  ## Continue from the terminal state, if available.
+  object$start <- if(is.null(object$mcmc.state)) {
+    coef(object, full = TRUE, lambdas = TRUE, dropall = FALSE)
+  } else {
+    object$mcmc.state
+  }
 
   ## Keep old samples (if any).
   samples0 <- object$samples
+  logLik.samples0 <- object$logLik.samples
+  iterations0 <- if(is.null(samples0)) 0L else object$iterations
+  elapsed0 <- if(is.null(samples0)) 0 else object$elapsed
 
-  ## Reconstruct x and y from the stored model frame when needed.
-  if(is.null(object$y) || is.null(object$x)) {
+  ## Reconstruct model components from the stored model frame when needed.
+  mf <- NULL
+  if(is.null(object$y) || is.null(object$x) || is.null(object$offsets)) {
     mf <- model.frame(object, keepresponse = TRUE)
 
     if(is.null(object$y)) {
@@ -1193,8 +1422,34 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
       }
     }
 
-    if(is.null(object$offsets)) {
+  }
+
+  if(is.null(object$offsets)) {
+    offsets <- list()
+    for(j in names(object$terms)) {
+      mt <- object$terms[[j]]
+      oi <- attr(mt, "offset")
+      offj <- NULL
+      if(length(oi)) {
+        variables <- as.list(attr(mt, "variables"))[-1L]
+        offset_names <- vapply(variables[oi], deparse,
+          character(1L), width.cutoff = 500L)
+        offj <- mf[[offset_names[1L]]]
+        if(length(offset_names) > 1L) {
+          for(k in offset_names[-1L])
+            offj <- offj + mf[[k]]
+        }
+      }
+      offsets[[j]] <- if(length(offj)) offj else numeric(0L)
+    }
+    if(any(lengths(offsets))) {
+      object$offsets <- do.call("cbind", offsets)
+    } else {
       object$offsets <- model.offset(mf)
+      if(!is.null(object$offsets)) {
+        object$offsets <- data.frame(object$offsets)
+        names(object$offsets) <- object$family$names[1L]
+      }
     }
   }
 
@@ -1233,13 +1488,17 @@ mcmc <- function(object, n.iter = 1200, burnin = 200, thin = 1,
   ## Combine samples.
   if(!is.null(samples0) && nrow(samples0) > 0L) {
     object$samples <- rbind(samples0, object$samples)
+    if(length(logLik.samples0))
+      object$logLik.samples <- c(logLik.samples0, object$logLik.samples)
   }
 
   ## Update derived summaries (these rely on terms being present).
   class(object) <- unique(c("bamlss2", class(object)))
+  object <- mcmc_refresh(object)
   object$results <- results(object)
   object$df <- object$dic$pD
-  object$elapsed <- elapsed
+  object$iterations <- iterations0 + bs$iterations
+  object$elapsed <- elapsed0 + elapsed
   object$call <- match.call()
 
   return(object)

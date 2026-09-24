@@ -382,6 +382,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   }
   rval$df <- get_df(rval)
   rval$weights <- weights
+  rval$offsets <- if(!is.null(offsets) && NROW(offsets)) offsets else NULL
   rval$elapsed <- elapsed
 
   ## Return model.frame, X and y.
@@ -401,6 +402,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   } else {
     rval$fitted.values <- NULL
     rval$weights <- NULL
+    rval$offsets <- NULL
     if(!is.null(rval$fitted.linear)) {
       for(j in names(rval$fitted.linear))
         rval$fitted.linear[[j]]$fitted.values <- NULL

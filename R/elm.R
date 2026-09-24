@@ -497,7 +497,7 @@ elm <- function(x, k = 50, a = "tanh", ...)
   st$X_scale[!is.finite(st$X_scale) | st$X_scale < 1e-12] <- 1
   st$X <- sweep(st$X, 2, st$X_scale, "/")
   st$S <- list(diag(ncol(st$X)))
-  st$rank <- qr(st$X)$rank
+  st$rank <- ncol(st$X)
   st$pred_class <- "elm.fitted"
   st$ncol <- ncol(st$X)
   st$keep <- c("formula", "term", "weights", "scale_fun", "control",

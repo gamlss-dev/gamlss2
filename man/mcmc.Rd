@@ -37,6 +37,10 @@ mcmc(object, n.iter = 1200, burnin = 200, thin = 1,
   methods. If the fitted model object does not contain the design information
   required for MCMC sampling, for example because a reduced control setting was
   used, sampling cannot be performed.
+
+  Applying \code{mcmc()} to an object that already contains posterior samples
+  continues from the terminal state of the preceding chain. Stored posterior
+  summaries and DIC are then recomputed from all retained samples.
 }
 
 \value{
@@ -44,6 +48,7 @@ mcmc(object, n.iter = 1200, burnin = 200, thin = 1,
   and summary information. The object also contains:
   \itemize{
     \item \code{samples}: posterior draws for coefficients and smoothing variances;
+    \item \code{logLik.samples}: log-likelihood values for the retained draws;
     \item \code{results}: model results derived from posterior means;
     \item \code{elapsed}: elapsed sampling time.
   }

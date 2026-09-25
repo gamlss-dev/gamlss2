@@ -737,14 +737,14 @@ Should the observation-wise deviance contributions be summed? If <code>TRUE</cod
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The deviance of a fitted <code>gamlss2</code> model is defined as minus twice the fitted log-likelihood,</p>
+The deviance of a fitted <code>gamlss2</code> model is defined as minus twice the fitted log-likelihood,
 <p style="text-align: center;">
-</p><p><span class="math inline">\(-2 \log L.\)</span></p>
-<p>If <code>sum = TRUE</code>, one deviance value is returned for each supplied model. If more than one model is supplied, the deviances are ordered increasingly.</p>
-<p>If <code>sum = FALSE</code>, the function returns the observation-wise deviance contributions,</p>
+</p><p><span class="math inline">\(-2 \log L\)</span></p>
+<p>. If <code>sum = TRUE</code>, one deviance value is returned for each supplied model. If more than one model is supplied, the deviances are ordered increasingly.</p>
+If <code>sum = FALSE</code>, the function returns the observation-wise deviance contributions,
 <p style="text-align: center;">
-</p><p><span class="math inline">\(-2 \log f(y_i | \hat\theta_i),\)</span></p>
-<p>where <span class="math inline">\(f()\)</span> is the fitted probability density or probability mass function and <span class="math inline">\(\hat\theta_i\)</span> denotes the fitted distribution parameters for observation <span class="math inline">\(i\)</span>. These values sum to the total deviance and are useful, for example, in cross-validation.</p>
+</p><p><span class="math inline">\(-2 \log f(y_i | \hat\theta_i)\)</span></p>
+<p>, where <span class="math inline">\(f()\)</span> is the fitted probability density or probability mass function and <span class="math inline">\(\hat\theta_i\)</span> denotes the fitted distribution parameters for observation <span class="math inline">\(i\)</span>. These values sum to the total deviance and are useful, for example, in cross-validation.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

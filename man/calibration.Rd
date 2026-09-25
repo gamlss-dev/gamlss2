@@ -93,3 +93,4 @@ m3 <- gamlss2(y ~ s(x1) + x2, family = BI, data = d)
 calibration(m1, m2, m3)
 head(calibration(m1, m2, m3, plot = FALSE))
 }}
+

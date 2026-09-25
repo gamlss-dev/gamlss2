@@ -6,8 +6,8 @@
 \description{
   The function \code{BS()} implements an MCMC sampler for generalized additive
   models for location, scale, and shape (GAMLSS) as fitted by
-  \code{\link{gamlss2}}. The sampler uses Metropolis-Hastings updates for
-  regression coefficients of linear and smooth terms.
+  \code{\link{gamlss2}}. The sampler uses efficient Metropolis-Hastings
+  updates for regression coefficients of linear and smooth terms.
 }
 
 \usage{
@@ -87,3 +87,4 @@ BS(x, y, specials, family, offsets,
 
 \keyword{models}
 \keyword{regression}
+

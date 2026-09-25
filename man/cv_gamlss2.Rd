@@ -83,7 +83,7 @@ set.seed(123)
 cv1 <- cv_gamlss2(
   Ozone ~ s(Temp),
   data = air,
-  family = GA
+  family = GA, maxit = 100
 )
 
 ## now, add effects
@@ -91,10 +91,11 @@ cv2 <- cv_gamlss2(
   Ozone ~ s(Temp) + s(Wind) | s(Temp),
   data = air,
   family = GA,
-  folds = cv1$fold
+  folds = cv1$fold, maxit = 100
 )
 
 ## evaluate log-likelihood
 sum(cv1$score)
 sum(cv2$score)
 }}
+

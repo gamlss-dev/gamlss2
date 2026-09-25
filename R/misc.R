@@ -364,6 +364,10 @@ calibration <- function(..., newdata = NULL,
     stop("Response 'y' must be 0/1 for 'calibration()'.")
   }
 
+  if(length(breaks) < 2) {
+    breaks <- seq(0, 1, length = breaks)
+  }
+
   if(range(breaks)[1] > 0 || range(breaks)[2] < 1) {
     stop("'breaks' must cover [0, 1].")
   }

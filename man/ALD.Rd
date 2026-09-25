@@ -94,8 +94,8 @@ m <- fit_ALD(fev1 ~ s(age), data = d, tau = qu,
 fit <- predict(m)
 i <- order(d$age)
 plot(fev1 ~ age, data = d)
-matlines(d$age[i], fit[i, ], lty = 1, lwd = 2,
-  col = c(2, 4, 3))
+matlines(d$age[i], fit[i, ],
+  lty = 1, lwd = 2, col = 4)
 
 ## estimate lower limits model using full MCMC
 set.seed(1328)

@@ -33,22 +33,24 @@ ct(formula, ...)
 }
 
 \examples{\dontrun{
-data("mcycle", package = "MASS")
-
 m <- gamlss2(
-  accel ~ ct(times,minsplit=5,alpha=0.9) | .,
-  data = mcycle
+  mag ~ ct(depth) | .,
+  data = quakes,
+  family = truncate_family(NO, lower = 3.99)
 )
 
 plot(m)
 
 ## predicted distributions and quantiles
-predict(m, newdata = mcycle[1:5, , drop = FALSE])
-pq <- quantile(m, probs = c(0.025, 0.5, 0.975))
+d <- predict(m, newdata = quakes)
+pq <- quantile(d, probs = c(0.025, 0.5, 0.975))
 
-plot(accel ~ times, data = mcycle,
-  ylim = range(mcycle$accel, pq))
-matlines(mcycle$times, pq, lty = 1, lwd = 2, col = 4)
+plot(mag ~ depth, data = quakes,
+  ylim = range(quakes$mag, pq),
+  col = adjustcolor(1, 0.3))
+i <- order(quakes$depth)
+matlines(quakes$depth[i], pq[i, ], lty = 1, lwd = 2, col = 4)
 }}
 
 \keyword{models}
+

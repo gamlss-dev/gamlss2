@@ -16,7 +16,7 @@ discretize_family(family = NO, breaks,
 
 \arguments{
   \item{family}{A distribution family accepted by the \pkg{gamlss2} family
-    infrastructure, such as \code{NO}, or another modified family.}
+    infrastructure.}
   \item{breaks}{A strictly increasing numeric vector of interval boundaries.
     The first and last elements must be \code{-Inf} and \code{Inf}.}
   \item{values}{A strictly increasing vector of finite numeric response values,
@@ -59,22 +59,35 @@ values <- 0:3
 fam <- discretize_family(NO, breaks = breaks, values = values)
 
 ## simulate data whose location depends on x
-set.seed(111)
+set.seed(6020)
 n <- 500
 x <- sort(runif(n, -3, 3))
-par <- data.frame(mu = sin(x), sigma = exp(-0.5))
+par <- data.frame(mu = sin(x), sigma = exp(-0.5 + cos(x)))
 y <- fam$random(par, n)
+head(y)
 d <- data.frame(y = y, x = x)
 
+## plot count data
+plot(y ~ x, data = d)
+
+## fitted pdf
+fit_family(d$y, family = fam)
+
 ## fit a regression model using the discretized family
-m <- gamlss2(y ~ s(x), data = d, family = fam)
+m <- gamlss2(y ~ s(x) | ., data = d, family = fam)
 
 ## inspect the estimated effect and fitted probabilities
 plot(m)
-fitted_dist <- predict(m)
-head(pdf(fitted_dist, y))
+d <- predict(m)
+head(pdf(d, y))
+
+## predict median
+p <- quantile(d, probs = 0.5)
+plot(y ~ x, data = d)
+lines(p ~ x, lwd = 2, col = 4)
 }}
 
 \keyword{distribution}
 \keyword{regression}
 \keyword{discretization}
+

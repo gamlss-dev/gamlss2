@@ -24,14 +24,12 @@
 
 \details{
   The deviance of a fitted \code{gamlss2} model is defined as minus twice the
-  fitted log-likelihood,
-  \deqn{-2 \log L.}
+  fitted log-likelihood, \deqn{-2 \log L}.
   If \code{sum = TRUE}, one deviance value is returned for each supplied model.
   If more than one model is supplied, the deviances are ordered increasingly.
 
   If \code{sum = FALSE}, the function returns the observation-wise deviance
-  contributions,
-  \deqn{-2 \log f(y_i | \hat\theta_i),}
+  contributions, \deqn{-2 \log f(y_i | \hat\theta_i)},
   where \eqn{f()} is the fitted probability density or probability mass function
   and \eqn{\hat\theta_i} denotes the fitted distribution parameters for
   observation \eqn{i}. These values sum to the total deviance and are useful, for
@@ -83,5 +81,4 @@ deviance(m1, newdata = nd, sum = FALSE)
 
 \keyword{models}
 \keyword{regression}
-
 

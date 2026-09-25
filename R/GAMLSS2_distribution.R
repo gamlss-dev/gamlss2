@@ -108,6 +108,8 @@ cdf.GAMLSS2 <- function(d, x, drop = TRUE, elementwise = NULL, ...) {
 }
 
 quantile.GAMLSS2 <- function(x, probs, drop = TRUE, elementwise = NULL, ...) {
+  if(missing(probs))
+    probs <- c(0.025, 0.5, 0.975)
   f <- complete_family(x)
   FUN <- function(at, d) { f$quantile(d, at) }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = probs, type = "quantile", drop = drop, elementwise = elementwise)
@@ -118,10 +120,13 @@ random.GAMLSS2 <- function(x, n = 1L, drop = TRUE, ...) {
   n <- distributions3::make_positive_integer(n)
   if (n == 0L) return(numeric(0L))
   FUN <- function(at, d) {
-    ## apply_dpqr() handles replication for vectorized distributions and
-    ## expects one draw per parameter row in that case. For a scalar
-    ## distribution, however, it delegates all requested draws at once.
-    f$random(d, if(length(d) == 1L) at else 1L)
+    if(length(d) == 1L) {
+      f$random(as.list(d), at)
+    } else {
+      vapply(seq_len(length(d)), function(i) {
+        f$random(as.list(d[i]), 1L)
+      }, numeric(1L))
+    }
   }
   distributions3::apply_dpqr(d = x, FUN = FUN, at = n, type = "random", drop = drop)
 }

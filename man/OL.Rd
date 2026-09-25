@@ -90,7 +90,7 @@ coef(m2)
 
 ## predict class probabilities
 pm1 <- predict(m1, type = "p")
-pm2 <- family(m2)$probabilities(predict(m2))
+pm2 <- family(m2)$probabilities(predict(m2, type = "parameter"))
 
 print(head(pm1))
 print(head(pm2))

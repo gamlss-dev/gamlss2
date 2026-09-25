@@ -14,6 +14,13 @@ family.distribution <- function(object, links, score = TRUE, hessian = FALSE, up
   ## score and hessian methods available?
   has_score <- hasS3method("score", d)
   has_hessian <- hasS3method("hessian", d)
+
+  ## process links
+  if(!is.list(links))
+    links <- as.list(links)
+  if(is.null(names(links))) {
+    names(links) <- names(as.list(object))
+  }
   
   distributions3_family(d[1L],
     links = links,
@@ -108,13 +115,15 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     "family"   = distribution,
     "names"    = nams,
     "links"    = links,
-    "log_likelihood"   = function(par, y, ...) sum(log_pdf(d3(par), y, elementwise = TRUE, ...)),
+    "log_likelihood"   = function(par, y, ...) sum(log_pdf(d3(par), y, ...)),
     "mu"       = function(par, ...) mean(d3(par), ...),
-    "pdf"      = function(par, y, log = FALSE) pdf(d3(par), y, elementwise = TRUE, log = log),
-    "cdf"      = function(par, y, ...) cdf(d3(par), y, elementwise = TRUE, ...),
+    "pdf"      = function(par, y, log = FALSE) {
+      if(log) log_pdf(d3(par), y) else pdf(d3(par), y)
+    },
+    "cdf"      = function(par, y, ...) cdf(d3(par), y, ...),
     "random"   = function(par, n) random(d3(par), n),
-    "quantile" = function(par, p) quantile(d3(par), p, elementwise = TRUE),
-    "crps"     = function(par, y, ...) sum(scoringRules::crps(d3(par), y, elementwise = TRUE, ...)),
+    "quantile" = function(par, p) quantile(d3(par), p),
+    "crps"     = function(par, y, ...) sum(scoringRules::crps(d3(par), y, ...)),
     "mean"     = function(par) mean(d3(par)),
     "variance" = function(par) variance(d3(par)),
     "skewness" = function(par) skewness(d3(par)),

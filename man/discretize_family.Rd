@@ -71,8 +71,8 @@ m <- gamlss2(y ~ s(x), data = d, family = fam)
 
 ## inspect the estimated effect and fitted probabilities
 plot(m)
-fitted_par <- predict(m)
-head(fam$pdf(fitted_par, y))
+fitted_dist <- predict(m)
+head(pdf(fitted_dist, y))
 }}
 
 \keyword{distribution}

@@ -3271,7 +3271,7 @@ rqres_ologit <- function(object, ...) {
   mf <- model.frame(object)
   y <- stats::model.response(mf)
 
-  par <- predict(object)
+  par <- predict(object, type = "parameter")
   probs <- fam$probabilities(par)
 
   K <- ncol(probs)
@@ -3916,7 +3916,7 @@ rqres_mn <- function(object, ...) {
     stop("response must be a factor for MN().", call. = FALSE)
 
   y_int <- as.integer(y)
-  par <- predict(object)
+  par <- predict(object, type = "parameter")
   probs <- fam$probabilities(par)
   P <- as.matrix(probs)
 
@@ -3947,4 +3947,3 @@ rqres_mn <- function(object, ...) {
   u <- stats::runif(n, min = lower, max = upper)
   stats::qnorm(u)
 }
-

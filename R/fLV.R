@@ -237,7 +237,7 @@ coef_recovery$error <- coef_recovery$estimate - coef_recovery$true
 print(round(coef_recovery, 4))
 
 ## Compare parameters on their natural scales.
-estimated <- predict(m, newdata = truth["what"])
+estimated <- predict(m, newdata = truth["what"], type = "parameter")
 parameter_recovery <- data.frame(
   what = rep(truth$what, times = ncol(truth) - 1L),
   parameter = rep(names(truth)[-1L], each = nrow(truth)),
@@ -252,4 +252,3 @@ m2 <- mcmc(m, n.iter = 1200, burnin = 200, thin = 1)
 summary(m2)
 predict(m2, newdata = truth["what"])
 }
-

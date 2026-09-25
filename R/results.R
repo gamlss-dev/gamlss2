@@ -328,6 +328,9 @@ results.gamlss2 <- function(x, data = NULL, ...)
   attr(res, "interval") <- if(inherits(x, "bamlss2")) "posterior" else interval
   attr(res, "information.method") <- if(is.null(information)) calculation else
     information$method
+
+  class(res) <- "results"
+
   return(res)
 }
 
@@ -531,3 +534,4 @@ results_linear <- function(x, parameter = NULL, data,
 
   p
 }
+

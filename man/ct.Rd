@@ -42,6 +42,7 @@ m <- gamlss2(
 
 plot(m)
 
+## predicted distributions and quantiles
 predict(m, newdata = mcycle[1:5, , drop = FALSE])
 pq <- quantile(m, probs = c(0.025, 0.5, 0.975))
 
@@ -51,4 +52,3 @@ matlines(mcycle$times, pq, lty = 1, lwd = 2, col = 4)
 }}
 
 \keyword{models}
-

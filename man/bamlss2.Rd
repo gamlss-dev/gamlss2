@@ -77,9 +77,9 @@ plot(m)
 plot(m, which = "samples", ask = TRUE)
 
 ## predict parameters using samples
-pm <- predict(m, FUN = mean)
+pm <- predict(m, type = "parameter", FUN = mean)
 print(head(pm))
-psd <- predict(m, FUN = sd)
+psd <- predict(m, type = "parameter", FUN = sd)
 print(head(psd))
 }}
 

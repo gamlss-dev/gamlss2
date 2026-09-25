@@ -209,11 +209,11 @@ AIC with `m_norm` or `m_trunc`:
 probability densities and probability masses are defined with respect to
 different measures and have different units.
 
-The parameters returned by `predict()` still describe the parent normal
-family, before selection and rounding. In particular, `mu` is not the mean of
-the observed, truncated distribution. Distributional methods, on the other
-hand, operate on the final recorded scale. Thus, the following curves are
-rounded predictive quantiles from the truncated-and-rounded model.
+Parameters returned by `predict(..., type = "parameter")` still describe the
+parent normal family, before selection and rounding. In particular, `mu` is
+not the mean of the observed, truncated distribution. Distributional methods
+operate on the final recorded scale. Thus, the following curves are rounded
+predictive quantiles from the truncated-and-rounded model.
 
 ```{r quakes-prediction}
 nd <- data.frame(
@@ -224,7 +224,7 @@ nd <- data.frame(
 q <- quantile(m_both, newdata = nd,
   probs = c(0.1, 0.5, 0.9))
 
-head(predict(m_both, newdata = nd, drop = FALSE))
+head(predict(m_both, newdata = nd, type = "parameter"))
 ```
 
 These curves hold longitude and latitude at their sample medians. The points
@@ -292,7 +292,7 @@ m_group <- gamlss2(
   control = ctrl
 )
 
-head(predict(m_group, drop = FALSE))
+head(predict(m_group, type = "parameter"))
 quantile(m_group,
   newdata = data.frame(mag = c(4, 5, 6)),
   probs = c(0.1, 0.5, 0.9)
@@ -358,7 +358,7 @@ m_cens <- gamlss2(
   start = coef(m_start)
 )
 
-head(predict(m_cens, drop = FALSE))
+head(predict(m_cens, type = "parameter"))
 ```
 
 The fitted quantiles show how the conditional distribution changes with
@@ -374,7 +374,7 @@ par(mar = c(4, 4, 1, 1))
 plot(dist80 ~ speed, data = cars,
   pch = 16, col = adjustcolor(1, 0.45),
   xlab = "Speed (mph)", ylab = "Recorded stopping distance (ft)",
-  ylim = range(cars$speed80, q))
+  ylim = range(cars$dist80, q))
 matlines(nd$speed, q, lty = c(2, 1, 2), lwd = 2, col = 4)
 abline(h = 80, lty = 3, col = 2)
 legend("left", c("10%", "50%", "90%", "Limit"),
@@ -388,10 +388,9 @@ parameters, and also the point mass assigned to the recorded value 80.
 
 ```{r censoring-prediction}
 at <- data.frame(speed = c(10, 15, 20, 25))
-p <- predict(m_cens, newdata = at, drop = FALSE)
+d <- predict(m_cens, newdata = at)
 data.frame(at,
-  probability_at_limit = pnorm(80, p$mu, p$sigma,
-    lower.tail = FALSE))
+  probability_at_limit = 1 - cdf(d, 80))
 ```
 
 Unlike censoring, upper truncation would remove cars whose stopping distance
@@ -438,7 +437,7 @@ m_surv <- gamlss2(
 )
 
 logLik(m_surv)
-head(predict(m_surv, drop = FALSE))
+head(predict(m_surv, type = "parameter"))
 ```
 
 The likelihood contribution is a density when `event` is true and a survival
@@ -454,10 +453,10 @@ survival. These are model-based conditional associations.
 
 ```{r survival-prediction}
 nd <- expand.grid(age = c(50, 65, 80), sex = c("Male", "Female"))
-p <- predict(m_surv, newdata = nd)
+d <- predict(m_surv, newdata = nd)
 time <- seq(0, max(lung$time), length.out = 200)
 surv <- sapply(seq_len(nrow(nd)), function(j) {
-  1 - family(m_surv)$cdf(p[j, , drop = FALSE], time)
+  1 - cdf(d[j], time)
 })
 ```
 
@@ -575,7 +574,7 @@ dat$y <- f_hurd$random(list(
 m_hurd <- gamlss2(y ~ s(x) | s(x), data = dat,
   family = f_hurd, control = ctrl)
 nd <- data.frame(x = seq(-2, 2, length.out = 150))
-p <- predict(m_hurd, newdata = nd, drop = FALSE)
+p <- predict(m_hurd, newdata = nd, type = "parameter")
 p0 <- p$pi1 / (1 + p$pi1)
 mpos <- p$mu / (-expm1(-p$mu))
 ```
@@ -637,7 +636,7 @@ m_01 <- gamlss2(
   control = ctrl
 )
 
-head(predict(m_01, drop = FALSE))
+head(predict(m_01, type = "parameter"))
 ```
 
 We can now inspect fitted quantiles across `x`. Because these describe the
@@ -767,9 +766,9 @@ response. In practice:
    fitted to the same response with compatible likelihoods.
 4. Add covariates with `gamlss2()`, using `s()` for nonlinear effects, and
    check whether the extended family remains useful conditionally.
-5. Interpret `predict()` parameters on the base-family scale, but interpret
-   probabilities, quantiles, simulations, and residuals under the fully
-   extended family.
+5. Interpret `predict(..., type = "parameter")` on the base-family scale, but
+   interpret probabilities, quantiles, simulations, and residuals under the
+   fully extended family.
 
 A few boundaries of the infrastructure are intentional. Constants passed to
 the extension constructors are fixed. `censor_family()` also accepts
@@ -790,4 +789,3 @@ different even when the observed histograms look similar.
 
 See `?family_extensions` for the complete argument and return-value
 reference for all constructors.
-

@@ -198,13 +198,13 @@ plot(m1, which = "effects")
 ## plot diagnostics
 plot(m1, which = "resid")
 
-## predict parameters
+## predict distributions
 nd <- model.frame(m1)
 nd <- nd[order(nd$Wind), ]
-par <- predict(m1, newdata = nd)
+d <- predict(m1, newdata = nd)
 
 ## predict quantiles
-pq <- quantile(m1, newdata = nd, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(d, probs = c(0.05, 0.5, 0.95), elementwise = FALSE)
 
 ## visualize
 plot(Ozone ~ Wind, data = nd,

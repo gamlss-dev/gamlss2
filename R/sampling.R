@@ -1520,7 +1520,7 @@ if(FALSE) {
   a <- gamlss2(y ~ s(x) | s(x), data = d)
   b <- mcmc(a)
 
-  p <- predict(b)
+  p <- predict(b, type = "parameter")
 
   fit <- NULL
   for(j in c(0.025, 0.5, 0.975))

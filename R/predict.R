@@ -1,22 +1,42 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
   model = NULL, newdata = NULL,
-  type = c("parameter", "link", "response", "terms"), 
+  type = c("distribution", "parameter", "link", "response", "terms"),
   terms = NULL, se.fit = FALSE, drop = TRUE, ...,
   level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 {
+  type_missing <- missing(type)
+  if(is.null(model)) {
+    model <- list(...)$what
+    if(is.null(model))
+      model <- list(...)$parameter
+  }
+  if(type_missing && !is.null(model))
+    type <- "parameter"
+  type <- match.arg(type)
+
+  distribution <- FALSE
+  if(type == "distribution") {
+    distribution <- TRUE
+    type <- "parameter"
+    if(!is.null(model)) {
+      warning('for type = "distribution" model/parameter/what must not be specified, setting model = NULL!')
+      model <- NULL
+    }
+  }
+
   interval <- match.arg(interval)
   if(!is.null(level) || interval == "wald") {
     if(is.null(level)) level <- 0.95
-    return(predict_wald(object, model, newdata, match.arg(type), terms,
+    return(predict_wald(object, model, newdata, type, terms,
       drop, list(...), level, interval.cache))
   }
 
   ## FIXME: se.fit, terms ...
+  R <- list(...)$R
   samples <- NULL
   if(se.fit || !is.null(list(...)$FUN) || inherits(object, "bamlss2")) {
     if(is.null(object$samples)) {
-      R <- list(...)$R
       if(is.null(R))
         R <- 200L
       seed <- list(...)$seed
@@ -41,6 +61,7 @@ predict.gamlss2 <- function(object,
       burnin <- as.integer(burnin)
       samples <- samples[-seq.int(burnin), , drop = FALSE]
     }
+    R <- nrow(samples)
   }
 
   FUN <- list(...)$FUN
@@ -82,15 +103,13 @@ predict.gamlss2 <- function(object,
 
   ## Which parameter model to predict?
   if(is.null(model)) {
-    model <- list(...)$what
-    if(is.null(model))
-      model <- list(...)$parameter
-    if(is.null(model))
-      model <- family$names
+    model <- family$names
   }
   if(!is.character(model))
     model <- family$names[model]
   model <- family$names[pmatch(model, family$names)]
+  if(!length(model) || anyNA(model) || anyDuplicated(model))
+    stop("Unknown or duplicated prediction parameter.")
 
   if((type == "response") && (length(family$names) > 1L)) {
     if(length(model) != length(family$names))
@@ -332,7 +351,14 @@ predict.gamlss2 <- function(object,
     if((length(p) < 2 & drop)) {
       p <- p[[1L]]
     } else {
-      if(!tt)
+      tt_ok <- TRUE
+      if(!is.null(dim(p[[1L]]))) {
+        if(!is.null(R)) {
+          if(R == ncol(p[[1L]]))
+            tt_ok <- FALSE
+        }
+      }
+      if(!tt && tt_ok)
         p <- as.data.frame(p)
     }
   }
@@ -342,7 +368,81 @@ predict.gamlss2 <- function(object,
     }
   }
 
+  if(distribution) {
+    p <- as_distribution(p, family(object))
+  }
+
   return(p)
+}
+
+## create distribution object from parameters
+as_distribution <- function(d, family = NULL, ...)
+{
+  if(inherits(d, "gamlss2")) {
+    family <- family(d)
+    d <- predict(d, type = "parameter", ...)
+  }
+
+  if(is.null(dim(d))) {
+    if(!is.list(d) && (length(family$names) < 2)) {
+      d <- data.frame(d)
+      names(d) <- family$names
+    }
+  }
+
+  if(is.data.frame(d)) {
+    if(ncol(d) > length(family$names)) {
+      d <- lapply(family$names, function(j) {
+        d[, grep(paste0(j, "."), colnames(d), fixed = TRUE)]
+      })
+      names(d) <- family$names
+    }
+  }
+
+  if(is.null(dim(d))) {
+    if(!all(names(d) %in% family$names))
+      stop("family names do not match with predicted parameter names!")
+    d <- lapply(1:ncol(d[[1L]]), function(i) {
+      di <- lapply(family$names, function(j) d[[j]][, i])
+      di <- as.data.frame(di)
+      names(di) <- family$names
+      if(is.null(family$create_distribution)) {
+        class(di) <- c("GAMLSS2", "distribution")
+      } else {
+        di <- family$create_distribution(di)
+      }
+      return(di)
+    })
+    class(d) <- c("GAMLSS2.list", "list")
+  } else {
+    if(is.null(family$create_distribution)) {
+      class(d) <- c("GAMLSS2", "distribution")
+    } else {
+      d <- family$create_distribution(d)
+    }
+  }
+
+  attr(d, "family") <- family
+
+  return(d)
+}
+
+## Extract distribution from list.
+`[[.GAMLSS2.list` <- function(x, ...)
+{
+  d <- NextMethod("[[")
+  attr(d, "family") <- attr(x, "family")
+  return(d)
+}
+
+## Subset list of distributions.
+`[.GAMLSS2.list` <- function(x, ...)
+{
+  family <- attr(x, "family")
+  d <- NextMethod("[")
+  class(d) <- class(x)
+  attr(d, "family") <- family
+  return(d)
 }
 
 ## Multiple grep.

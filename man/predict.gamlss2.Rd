@@ -2,30 +2,33 @@
 
 \alias{predict.gamlss2}
 
-\title{Extracting Fitted or Predicted Parameters or Terms from gamlss2 Models}
+\title{Predictions from gamlss2 Models}
 
 \description{
-Methods for \pkg{gamlss2} model objects that extract fitted values or predictions
-for distribution parameters, additive predictors, individual terms, or the mean
-of the response distribution.
+Methods for \pkg{gamlss2} model objects that predict response distributions,
+their parameters, additive predictors, individual terms, or response means.
 }
 
 \usage{
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
-  type = c("parameter", "link", "response", "terms"), terms = NULL,
+  type = c("distribution", "parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, ...,
   level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 }
 
 \arguments{
   \item{object}{A model object of class \code{\link{gamlss2}}.}
-  \item{model}{Character. Which distribution parameter(s) should be predicted?
-    This can be one or more of \code{"mu"}, \code{"sigma"}, etc. By default,
-    predictions are returned for all model parts.}
+  \item{model}{Character or numeric. Which distribution parameter(s) should be predicted?
+    Names are family-specific, e.g., \code{"mu"}, \code{"sigma"}, or
+    \code{"shape"}, \code{"rate"}. By default, predictions are returned for
+    all model parts.}
   \item{newdata}{Data frame. Optionally, a new data frame in which to
     look for variables with which to predict. If omitted, the original
     observations are used.}
-  \item{type}{Character. Which type of prediction should be computed?
+  \item{type}{Character. Which type of prediction should be computed? The
+    default \code{"distribution"} returns \pkg{distributions3} objects. If
+    \code{type} is omitted and \code{model}, \code{parameter}, or \code{what}
+    is specified, \code{"parameter"} is used.
     Use \code{"link"} for additive predictors on the link scale,
     \code{"parameter"} for distribution parameters on their natural scale,
     \code{"terms"} for individual additive terms, and \code{"response"} for
@@ -37,8 +40,7 @@ of the response distribution.
     distribution defined by the complete joint covariance of the maximum likelihood estimates.
     Local term-wise covariance is never used for these draws. The number of simulations is controlled
     by the argument \code{R}, which defaults to \code{R = 200}, and can be passed via \code{...}.}
-  \item{drop}{Logical. Should the predictions be simplified to a vector
-    if possible (\code{TRUE}) or always returned as a data frame (\code{FALSE})?}
+  \item{drop}{Logical. Should predictions be simplified when possible?}
   \item{level}{\code{NULL}, or a numeric vector of confidence levels for
     Wald bands, with every value strictly between zero and one.}
   \item{interval}{Character. Use \code{"wald"} for fast confidence bands
@@ -57,8 +59,9 @@ of the response distribution.
 
 \details{
 Predictions can be computed for the original observations or for \code{newdata}.
-Depending on \code{type}, results are returned on the link scale, as distribution
-parameters, as individual model terms, or as the fitted response mean.
+By default, response distributions are returned. Depending on \code{type},
+results can instead be returned as distribution parameters, on the link scale,
+as individual model terms, or as the fitted response mean.
 
 If \code{se.fit = TRUE}, standard errors are obtained from coefficient draws.
 Existing draws stored in the fitted object are used when available; otherwise,
@@ -82,18 +85,18 @@ predictions from the same unchanged model.
 For \code{type = "terms"}, term names are partially matched by default. Use
 \code{nogrep = TRUE} in \code{...} for exact matching.
 
-See also \code{\link{prodist.gamlss2}} for creating a full
-\pkg{distributions3} object for moments, probabilities, quantiles, and random
-numbers.
+See also \code{\link{prodist.gamlss2}} for explicitly obtaining
+\pkg{distributions3} objects.
 }
 
 \value{
-If \code{drop = FALSE}, a data frame is returned. If \code{drop = TRUE}
-(the default), the result may be simplified to a numeric vector when possible.
-For \code{type = "terms"}, a data frame is returned with one column per selected term.
-Multi-parameter models return a list of term matrices.
-For \code{se.fit = TRUE}, the returned object contains fitted values and
-corresponding simulation-based standard errors.
+For \code{type = "distribution"}, a distribution object is returned. With
+coefficient draws and \code{FUN = identity}, a list of distribution objects is
+returned; the family is stored once for the complete list and added when an
+element is extracted. For other types, \code{drop = TRUE} simplifies the result
+when possible. Term predictions are data frames or, for multiple parameters,
+lists of matrices. With \code{se.fit = TRUE}, fitted values and simulation-based
+standard errors are returned.
 
 When \code{level} is specified, a list with elements \code{fit}, \code{se.fit},
 \code{lower}, and \code{upper} is returned. For one confidence level,
@@ -126,8 +129,17 @@ m <- gamlss2(dist ~ s(speed) | s(speed), data = cars, family = NO)
 ## new data for predictions
 nd <- data.frame(speed = c(10, 20, 30))
 
-## default: model parameter(s) for all model parts
-predict(m, newdata = nd)
+## default: a "distribution" object
+d <- predict(m, newdata = nd)
+print(d)
+
+## can be used with distributions3 methods
+pdf(d, 20)
+cdf(d, 20)
+quantile(d, 0.8)
+mean(d)
+variance(d)
+random(d, 3)
 
 ## additive predictors on the link scale
 predict(m, newdata = nd, type = "link")
@@ -135,7 +147,13 @@ predict(m, newdata = nd, type = "link")
 ## mean of the response distribution
 predict(m, newdata = nd, type = "response")
 
-## model parameter(s)
+## same as
+mean(d)
+
+## all model parameters
+predict(m, newdata = nd, type = "parameter")
+
+## model selects parameter predictions if type is omitted
 predict(m, newdata = nd, model = "sigma")
 predict(m, newdata = nd, model = "sigma", drop = FALSE)
 
@@ -146,13 +164,36 @@ predict(m, newdata = nd, type = "terms", model = "sigma", terms = "s(speed)")
 ## predict quantiles
 quantile(m, newdata = nd, probs = c(0.1, 0.5, 0.9))
 
+## same as
+quantile(d, probs = c(0.1, 0.5, 0.9), elementwise = FALSE)
+
 ## standard errors
-predict(m, newdata = nd, se.fit = TRUE, R = 200)
+predict(m, type = "parameter", newdata = nd, se.fit = TRUE, R = 200)
 
 ## fast pointwise confidence bands, without sampling
-bands <- predict(m, newdata = nd, level = c(0.8, 0.95))
+bands <- predict(m, type = "parameter", newdata = nd, level = c(0.8, 0.95))
 bands$lower[["80\%"]]
 bands$upper[["95\%"]]
+
+## prediction uncertainty using multiple draws
+d <- predict(m, newdata = cars, R = 1000, FUN = identity)
+
+## predict 1000 quantiles
+q <- sapply(d, quantile, probs = 0.9)
+
+i95 <- function(x) {
+  setNames(quantile(x, c(0.025, 0.5, 0.975), names = FALSE),
+    c("lower", "fit", "upper"))
+}
+
+## quantiles of quantile samples
+q <- t(apply(q, 1, i95))
+
+## plot quantile with uncertainty bands
+plot(dist ~ speed, data = cars,
+  ylim = range(cars$dist, q))
+matlines(cars$speed, q,
+  lty = c(2, 1, 2), col = 4, lwd = 2)
 }
 
 \keyword{regression}

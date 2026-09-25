@@ -136,8 +136,10 @@ nd5 <- with(air, data.frame(
   Temp = seq(min(Temp), max(Temp), length.out = 5),
   Wind = min(Wind)
 ))
-par <- predict(m1, newdata = nd5)
-nd5$Probs <- 1 - family(m1)$cdf(par, 90)
+
+## use distributions3 methods
+d <- predict(m1, newdata = nd5)
+nd5$Probs <- 1 - cdf(d, 90)
 
 barplot(
   nd5$Probs,
@@ -168,7 +170,8 @@ plot(m2, which = "resid")
 
 ## quantiles over the day of the year
 nd <- data.frame(yday = 1:365)
-pq <- quantile(m2, newdata = nd, probs = c(0.05, 0.5, 0.95))
+d <- predict(m2, newdata = nd)
+pq <- quantile(d, probs = c(0.05, 0.5, 0.95))
 
 ## visualize fitted quantiles
 plot(bikes ~ yday, data = HarzTraffic, pch = 19,

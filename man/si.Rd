@@ -153,7 +153,7 @@ image(lon, lat, t(matrix(eff, nr, nc)),
   col = hcl.colors(30, "Inferno", rev = TRUE),
   xlab = "lon", ylab = "lat", main = "Fitted si() image effect")
 
-## predictions
+## predicted distributions and quantiles
 nd <- d[1:5, , drop = FALSE]
 predict(m, newdata = nd)
 quantile(m, newdata = nd)

@@ -125,6 +125,7 @@ m <- gamlss2(
 )
 
 plot(m)
+## predicted distributions
 predict(m, newdata = d[1:5, , drop = FALSE])
 
 ## predicted response map for a moving image pattern

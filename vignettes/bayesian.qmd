@@ -210,8 +210,8 @@ Other posterior summaries can be obtained by changing `FUN`. For example,
 posterior means and standard deviations are returned with
 
 ```{r}
-head(predict(m, newdata = nd, FUN = mean))
-head(predict(m, newdata = nd, FUN = sd))
+head(predict(m, newdata = nd, type = "parameter", FUN = mean))
+head(predict(m, newdata = nd, type = "parameter", FUN = sd))
 ```
 
 ## Starting from a fitted `gamlss2` model
@@ -257,12 +257,11 @@ For Bayesian fits, a few points are especially useful:
 2. inspect trace and autocorrelation plots rather than relying only on posterior
    summaries;
 3. increase `n.iter` when the retained draws do not provide adequate mixing;
-4. use `predict(..., FUN = ...)` to summarize uncertainty from the stored
-   posterior samples; and
+4. use `predict(..., type = "parameter", FUN = ...)` to summarize uncertainty
+   from the stored posterior samples; and
 5. distinguish posterior uncertainty in distribution parameters from
    predictive variation in the response.
 
 The general GAMLSS formulation is described in @Rigby+Stasinopoulos:2005. For
 the Bayesian additive distributional framework and the MCMC methodology, see
 @bamlss2018.
-

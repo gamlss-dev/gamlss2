@@ -142,20 +142,19 @@ We now evaluate the fitted seasonal cycle on each day of the year.
 nd <- data.frame(yday = 0:364)
 ```
 
-By default, `predict()` returns the fitted distribution parameters on their
-natural scales. Setting `drop = FALSE` keeps the result as a data frame (which is the default).
+By default, `predict()` returns one `distributions3` object for each row of
+`newdata`.
 
 ```{r}
-parameters <- predict(m2, newdata = nd, drop = FALSE)
-head(parameters)
+pf <- predict(m2, newdata = nd)
+head(pf)
 ```
 
-For probabilities and other distributional summaries, `prodist()` returns one
-[`distributions3`](https://cran.r-project.org/package=distributions3)
-distribution object for each row of `newdata`.
+Raw distribution parameters can be requested explicitly.
 
 ```{r}
-pf <- prodist(m2, newdata = nd)
+parameters <- predict(m2, newdata = nd, type = "parameter")
+head(parameters)
 ```
 
 For example, the fitted probability of more than 500 motorcycles on a day is
@@ -173,11 +172,11 @@ plot(nd$yday + 1, prob_high, type = "l", lwd = 2,
   ylab = "Pr(Motorcycles > 500)")
 ```
 
-Conditional quantiles can be computed directly from the fitted model. Here we
-calculate the 5%, 50%, and 95% quantiles and add them to the observed counts.
+Conditional quantiles follow directly from the predicted distributions. Here
+we calculate the 5%, 50%, and 95% quantiles and add them to the observed counts.
 
 ```{r}
-pq <- quantile(m2, newdata = nd, probs = c(0.05, 0.5, 0.95))
+pq <- quantile(pf, probs = c(0.05, 0.5, 0.95), elementwise = FALSE)
 ```
 
 ```{r}
@@ -216,4 +215,3 @@ response distributions. The
 vignette covers terms beyond standard
 `mgcv`
 smooths.
-

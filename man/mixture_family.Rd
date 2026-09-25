@@ -190,7 +190,7 @@ m <- gamlss2(
 plot(m)
 
 ## predict parameters
-par <- predict(m)
+par <- predict(m, type = "parameter")
 head(par)
 
 ## prior and posterior component probabilities
@@ -199,12 +199,11 @@ head(prior)
 posterior <- family(m)$responsibilities(par, d$waiting)
 head(posterior)
 
-## classify observations by their largest
-## posterior probability and show estimated quantiles.
-fit <- quantile(m)
-
+## classify observations by their largest posterior probability
+## and show quantiles of the fitted distributions
 pc <- max.col(as.matrix(posterior))
 ccols <- c(2, 4)
+fq <- quantile(m)
 
 plot(
   waiting ~ eruptions,
@@ -213,10 +212,10 @@ plot(
   pch = 19,
   xlab = "Eruption duration (minutes)",
   ylab = "Waiting time (minutes)",
-  ylim = range(d$waiting, fit)
+  ylim = range(d$waiting, fq)
 )
 
-matlines(d$eruptions, fit, col = 1, lty = 1)
+matlines(d$eruptions, fq, col = 1, lty = 1)
 
 legend(
   "topleft", paste("Component", 1:2),
@@ -238,7 +237,7 @@ m <- gamlss2(
   family = fam
 )
 
-cars_par <- predict(m)
+cars_par <- predict(m, type = "parameter")
 cars_posterior <- family(m)$responsibilities(cars_par, cars$mpg)
 cars_component <- max.col(as.matrix(cars_posterior))
 table(cars$am, cars_component)
@@ -249,7 +248,7 @@ table(cars$am, cars_component)
 wt_grid <- seq(min(cars$wt), max(cars$wt), length.out = 100)
 newcars <- expand.grid(wt = wt_grid, am = levels(cars$am))
 newcars$am <- factor(newcars$am, levels = levels(cars$am))
-cars_fit <- predict(m, newdata = newcars)
+fit <- predict(m, newdata = newcars, type = "parameter")
 
 plot(
   mpg ~ wt,
@@ -258,14 +257,14 @@ plot(
   pch = c(1, 16)[cars$am],
   xlab = "Weight (1000 lbs)",
   ylab = "Miles per gallon",
-  ylim = range(cars$mpg, cars_fit)
+  ylim = range(cars$mpg, fit)
 )
 
 for(j in 1:2) {
   for(a in seq_along(levels(cars$am))) {
     keep <- newcars$am == levels(cars$am)[a]
     lines(
-      newcars$wt[keep], cars_fit[keep, paste0("c", j, ".mu")],
+      newcars$wt[keep], fit[keep, paste0("c", j, ".mu")],
       col = ccols[j], lty = a, lwd = 2
     )
   }

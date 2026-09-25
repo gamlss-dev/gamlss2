@@ -142,6 +142,7 @@ m <- gamlss2(
 )
 
 summary(m)
+## predicted distributions
 predict(m, newdata = air[1:5, , drop = FALSE])
 ```
 
@@ -154,4 +155,3 @@ Keep the constructor lightweight, store all information needed for prediction,
 return centered fitted contributions, and test both fitting and `newdata`
 predictions. The help topic `?special_terms` documents the method arguments and
 return-value contract; `?fake_formula` documents special-name registration.
-

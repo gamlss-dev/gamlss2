@@ -104,12 +104,13 @@ m <- gamlss2(
 summary(m)
 ```
 
-`prodist()` performs the reverse operation: it extracts the fitted parameters
-and returns a vector of `distributions3` objects.
+By default, `predict()` performs the reverse operation: it extracts the fitted
+parameters and returns a vector of `distributions3` objects. The explicit
+`prodist()` interface is equivalent.
 
 ```{r}
 nd <- data.frame(speed = c(10, 20, 30))
-d <- prodist(m, newdata = nd)
+d <- predict(m, newdata = nd)
 d
 ```
 
@@ -130,7 +131,7 @@ This gives the complete workflow:
 
 ```text
 distributions3 object -> family() -> gamlss2.family
-        -> gamlss2() -> fitted model -> prodist() -> distributions3 object
+        -> gamlss2() -> fitted model -> predict() -> distributions3 object
 ```
 
 ## Constructor arguments and `distributions3_family()`
@@ -255,35 +256,45 @@ Gamma2 <- function(mu = 1, sigma = 1) {
             class = c("Gamma2", "distribution"))
 }
 
-gamma2_base <- function(object) {
-  Gamma(shape = 1 / object$sigma^2,
-         rate = 1 / (object$mu * object$sigma^2))
+gamma2_base <- function(d) {
+  Gamma(shape = 1 / d$sigma^2, rate = 1 / (d$mu * d$sigma^2))
 }
 
-pdf.Gamma2 <- function(object, y, log = FALSE, elementwise = FALSE, ...) {
-  dgamma(y, shape = 1 / object$sigma^2,
-         rate = 1 / (object$mu * object$sigma^2), log = log)
+pdf.Gamma2 <- function(d, x, log = FALSE, elementwise = FALSE, ...) {
+  dgamma(x, shape = 1 / d$sigma^2,
+         rate = 1 / (d$mu * d$sigma^2), log = log)
 }
-log_pdf.Gamma2 <- function(object, y, elementwise = FALSE, ...) {
-  dgamma(y, shape = 1 / object$sigma^2,
-         rate = 1 / (object$mu * object$sigma^2), log = TRUE)
-}
-cdf.Gamma2 <- function(object, y, ...) {
-  cdf(gamma2_base(object), y, ...)
-}
-quantile.Gamma2 <- function(object, p, ...) {
-  quantile(gamma2_base(object), p, ...)
-}
-random.Gamma2 <- function(object, n, ...) {
-  random(gamma2_base(object), n, ...)
-}
-mean.Gamma2 <- function(object, ...) object$mu
-variance.Gamma2 <- function(object, ...) object$mu^2 * object$sigma^2
-support.Gamma2 <- function(object, ...) c(0, Inf)
 
-score.Gamma2 <- function(object, y, which, ...) {
-  mu <- object$mu
-  sigma <- object$sigma
+log_pdf.Gamma2 <- function(d, x, elementwise = FALSE, ...) {
+  dgamma(x, shape = 1 / d$sigma^2,
+         rate = 1 / (d$mu * d$sigma^2), log = TRUE)
+}
+
+cdf.Gamma2 <- function(d, x, ...) {
+  cdf(gamma2_base(d), x, ...)
+}
+
+quantile.Gamma2 <- function(x, probs, ...) {
+  quantile(gamma2_base(x), probs, ...)
+}
+
+random.Gamma2 <- function(x, n, ...) {
+  random(gamma2_base(x), n, ...)
+}
+
+mean.Gamma2 <- function(x, ...) x$mu
+
+variance.Gamma2 <- function(x, ...) x$mu^2 * x$sigma^2
+
+support.Gamma2 <- function(d, drop = TRUE, ...) {
+  min <- rep(0, length(d))
+  max <- rep(Inf, length(d))
+  make_support(min, max, d, drop = drop)
+}
+
+score.Gamma2 <- function(d, y, which, ...) {
+  mu <- d$mu
+  sigma <- d$sigma
   if(which == "mu")
     (y - mu) / (mu^2 * sigma^2)
   else
@@ -291,9 +302,9 @@ score.Gamma2 <- function(object, y, which, ...) {
                  digamma(1 / sigma^2))
 }
 
-hessian.Gamma2 <- function(object, y, which, expected = TRUE, ...) {
-  mu <- object$mu
-  sigma <- object$sigma
+hessian.Gamma2 <- function(d, y, which, expected = TRUE, ...) {
+  mu <- d$mu
+  sigma <- d$sigma
   if(which == "mu")
     -1 / (mu^2 * sigma^2)
   else if(which == "sigma")
@@ -417,4 +428,3 @@ manual `gamlss2.family` when a distribution needs custom density, derivative,
 support, initialization, or optimization logic. In either case, a good family
 should provide reliable support information and analytical distributional
 methods whenever practical.
-

@@ -45,7 +45,7 @@ m <- gamlss2(mstatus ~ s(age) | . | ., data = marital.nz, family = MN(4))
 plot(m)
 
 ## predict probabilities
-par <- predict(m)
+par <- predict(m, type = "parameter")
 probs <- family(m)$probabilities(par)
 names(probs) <- levels(marital.nz$mstatus)
 

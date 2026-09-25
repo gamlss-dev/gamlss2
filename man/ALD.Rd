@@ -91,7 +91,7 @@ m <- fit_ALD(fev1 ~ s(age), data = d, tau = qu,
   max_step = 0.1, monotone = TRUE, verbose = FALSE)
 
 ## plot fitted quantile curves
-fit <- fitted(m)
+fit <- predict(m)
 i <- order(d$age)
 plot(fev1 ~ age, data = d)
 matlines(d$age[i], fit[i, ], lty = 1, lwd = 2,
@@ -100,18 +100,18 @@ matlines(d$age[i], fit[i, ], lty = 1, lwd = 2,
 ## estimate lower limits model using full MCMC
 set.seed(1328)
 m2.5 <- mcmc(m$models[["tau=0.025"]],
-  n.iter = 12000, burnin = 2000, thin = 10)
+  n.iter = 1200, burnin = 200, thin = 1)
 
 summary(m2.5)
 
 ## predict credible intervals
 nd <- data.frame(age = seq(6, 80, length = 300))
-nd$p <- predict(m2.5, newdata = nd,
-  FUN = function(x) quantile(x, probs = c(0.025, 0.975)))
+nd$p <- predict(m2.5, parameter = "mu", newdata = nd,
+  FUN = function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))
 
 ## plot
-plot(fev1 ~ age, data = d)
-matlines(nd$age, nd$p, lty = 1, lwd = 2, col = 2)
+plot(fev1 ~ age, data = d, col = adjustcolor(1, 0.3))
+matlines(nd$age, nd$p, lty = c(2, 1, 2), lwd = 2, col = 2)
 }}
 
 \keyword{models}

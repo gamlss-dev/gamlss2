@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Special Model Terms – gamlss2</title>
+<title>results – gamlss2</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -111,9 +111,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<meta property="og:title" content="Special Model Terms – gamlss2">
-<meta property="og:description" content="">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/gamlss2.png">
+<meta property="og:title" content="gamlss2">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
 <meta property="og:site_name" content="gamlss2">
 </head>
 
@@ -205,186 +204,89 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#built-in-special-terms" id="toc-built-in-special-terms" class="nav-link active" data-scroll-target="#built-in-special-terms"><span class="header-section-number">1</span> Built-in special terms</a></li>
-  <li><a href="#defining-a-custom-special" id="toc-defining-a-custom-special" class="nav-link" data-scroll-target="#defining-a-custom-special"><span class="header-section-number">2</span> Defining a custom special</a></li>
-  <li><a href="#a-custom-weighted-local-smoother" id="toc-a-custom-weighted-local-smoother" class="nav-link" data-scroll-target="#a-custom-weighted-local-smoother"><span class="header-section-number">3</span> A custom weighted local smoother</a></li>
-  <li><a href="#practical-guidance" id="toc-practical-guidance" class="nav-link" data-scroll-target="#practical-guidance"><span class="header-section-number">4</span> Practical guidance</a></li>
+  <li><a href="#extract-results-from-gamlss-models" id="toc-extract-results-from-gamlss-models" class="nav-link active" data-scroll-target="#extract-results-from-gamlss-models">Extract Results from GAMLSS Models</a>
+  <ul class="collapse">
+  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
+  <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><h1 class="title display-7">Special Model Terms</h1></header>
-
-<header id="title-block-header">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
-</header>
 
 
-<p>Special model terms extend a <code>gamlss2</code> formula with a model component that is fitted inside the backfitting algorithm. Ordinary linear terms and <code>mgcv</code> smooths cover many models; specials are useful when the fitting method needs its own estimator, prediction method, state, or tuning parameters.</p>
-<section id="built-in-special-terms" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="built-in-special-terms"><span class="header-section-number">1</span> Built-in special terms</h2>
-<p>The package already provides several specials. For example, <code>lo()</code> fits a weighted local-polynomial smoother, <code>tree()</code>, <code>ct()</code>, and <code>cf()</code> fit tree-based terms, <code>n()</code> fits a neural-network term, and <code>lin()</code>, <code>re()</code>, <code>random()</code>, and <code>gnet()</code> provide structured linear or grouped effects. The <code>mgcv</code> terms <code>s()</code>, <code>te()</code>, <code>ti()</code>, and <code>t2()</code> are also supported.</p>
+<section id="extract-results-from-gamlss-models" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="extract-results-from-gamlss-models">Extract Results from GAMLSS Models</h2>
+<section id="description" class="level3">
+<h3 class="anchored" data-anchor-id="description">Description</h3>
+<p>Extracts partial effects and corresponding uncertainty intervals from a fitted <code>gamlss2</code> model. The results are mainly used for plotting.</p>
+</section>
+<section id="usage" class="level3">
+<h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<pre><code class="language-R">results(x, data = NULL, ...)
+
+## S3 method for class 'gamlss2'
+results(x, data = NULL, ...)
+</code></pre>
+</section>
+<section id="arguments" class="level3">
+<h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
+<table role="presentation">
+<tbody><tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="x">x</code>
+</td>
+<td>
+An object of class <code>“gamlss2”</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="data">data</code>
+</td>
+<td>
+An optional data frame used to construct the effects. By default, the model frame of <code>x</code> is used.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="...">…</code>
+</td>
+<td>
+Further arguments controlling uncertainty intervals, including <code>interval</code>, <code>level</code>, <code>method</code>, and <code>nsim</code>.
+</td>
+</tr>
+</tbody></table>
+</section>
+<section id="value" class="level3">
+<h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>A list containing the partial effects. Each effect is stored as a data frame with the corresponding covariate values and the columns <code>fit</code>, <code>lower</code>, and <code>upper</code>.</p>
+</section>
+<section id="see-also" class="level3">
+<h3 class="anchored" data-anchor-id="see-also">See Also</h3>
+<p><code>gamlss2</code>, <code>plot.gamlss2</code></p>
+</section>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">subset</span>(airquality, <span class="sc">!</span><span class="fu">is.na</span>(Ozone))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span> Temp, <span class="at">span =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="fu">s</span>(Wind) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Call:
-gamlss2(formula = Ozone ~ lo(~Temp, span = 0.7) + s(Wind) | s(Temp), 
-    data = air, family = GA, trace = FALSE)
----
-Family: GA 
-Link functions: log, log
-*--------
-Coefficients:
-                  Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.54163    0.02714  130.48   &lt;2e-16 ***
-sigma.(Intercept) -0.90192    0.06343  -14.22   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
----
-Smooth terms:
-                         edf
-mu.s(Wind)            3.3464
-mu.lo(~Temp,span=0.7) 5.7708
-sigma.s(Temp)         4.3414
-*--------
-n = 116 df =  15.46 res.df =  100.54
-Deviance = 921.4427 Null Dev. Red. = 14.92%
-AIC = 952.3597 elapsed =  0.95sec</code></pre>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> GA)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## extract results</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">results</span>(m)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(r<span class="sc">$</span>effects)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<p>Specials can occur in any distributional parameter formula. They are refitted from the current working response and weights at each backfitting iteration, then centered before being added to the additive predictor. Centering keeps the intercept and the special term identifiable.</p>
-</section>
-<section id="defining-a-custom-special" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="defining-a-custom-special"><span class="header-section-number">2</span> Defining a custom special</h2>
-<p>A custom special consists of three pieces:</p>
-<ol type="1">
-<li>a constructor used in the formula;</li>
-<li>a <code>special_fit()</code> method that fits the term to the current working response and weights; and</li>
-<li>a <code>special_predict()</code> method for fitted values on new data.</li>
-</ol>
-<p>The constructor should return a list of class <code>c("special", "user")</code> containing the formula, variables, data, controls, and anything else needed by fitting and prediction. The reserved <code>user</code> name is recognized by <code>fake_formula()</code>, so it can be used without changing package internals. For a package-level special, register its name in <code>fake_formula()</code> and use a dedicated class instead.</p>
-<p>A fitting method receives at least <code>x</code>, <code>z</code>, and <code>w</code>. The framework can also supply <code>y</code>, <code>eta</code>, <code>j</code>, <code>family</code>, and <code>control</code>; accepting <code>...</code> keeps a method compatible with these additional arguments. The returned list must contain numeric <code>fitted.values</code>. It should usually also contain:</p>
-<ul>
-<li><code>edf</code>, the effective degrees of freedom;</li>
-<li><code>model</code>, the fitted underlying model;</li>
-<li><code>shift</code>, the centering constant; and</li>
-<li>optionally <code>transfer</code>, for state passed to the next backfitting iteration.</li>
-</ul>
-<p>A prediction method receives the fitted object and <code>data</code>, and returns a numeric vector. If it supports <code>se.fit = TRUE</code>, it should return a data frame with a <code>fit</code> column and, optionally, interval columns.</p>
-</section>
-<section id="a-custom-weighted-local-smoother" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="a-custom-weighted-local-smoother"><span class="header-section-number">3</span> A custom weighted local smoother</h2>
-<p>The following example implements a small <code>user()</code> term around <code>stats::loess()</code>. It is deliberately compact: a production term should validate its controls and handle missing values and extrapolation explicitly.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>user <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, <span class="at">span =</span> <span class="fl">0.75</span>, <span class="at">degree =</span> <span class="dv">2</span>) {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">inherits</span>(formula, <span class="st">"formula"</span>))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"~"</span>, <span class="fu">deparse1</span>(<span class="fu">substitute</span>(formula))))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  st <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> formula,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">model.frame</span>(formula),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">list</span>(<span class="at">span =</span> span, <span class="at">degree =</span> degree),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">term =</span> <span class="fu">all.vars</span>(formula),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"user("</span>, <span class="fu">paste</span>(<span class="fu">all.vars</span>(formula), <span class="at">collapse =</span> <span class="st">"+"</span>), <span class="st">")"</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(st) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"special"</span>, <span class="st">"user"</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  st</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>special_fit.user <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...) {</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  fit_formula <span class="ot">&lt;-</span> <span class="fu">update</span>(x<span class="sc">$</span>formula, response_z <span class="sc">~</span> .)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> x<span class="sc">$</span>data</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>response_z <span class="ot">&lt;-</span> z</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>weights_w <span class="ot">&lt;-</span> w</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">loess</span>(</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    fit_formula,</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">weights =</span> weights_w,</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">span =</span> x<span class="sc">$</span>control<span class="sc">$</span>span,</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">degree =</span> x<span class="sc">$</span>control<span class="sc">$</span>degree</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  fitted <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(fit, <span class="at">newdata =</span> dat))</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(fitted)</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">model =</span> fit,</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">fitted.values =</span> fitted <span class="sc">-</span> shift,</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">shift =</span> shift,</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">edf =</span> fit<span class="sc">$</span>trace.hat</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(out) <span class="ot">&lt;-</span> <span class="st">"user.fitted"</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  out</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>special_predict.user.fitted <span class="ot">&lt;-</span> <span class="cf">function</span>(x, data, <span class="at">se.fit =</span> <span class="cn">FALSE</span>, ...) {</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(x<span class="sc">$</span>model, <span class="at">newdata =</span> data)) <span class="sc">-</span> x<span class="sc">$</span>shift</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(se.fit) <span class="fu">return</span>(<span class="fu">data.frame</span>(<span class="at">fit =</span> fit))</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  fit</span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>The <code>user</code> constructor is available while the formula is parsed because it is one of the reserved special names. The corresponding methods are found by S3 dispatch during fitting and prediction.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">user</span>(<span class="sc">~</span> Temp, <span class="at">span =</span> <span class="fl">0.7</span>) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Call:
-gamlss2(formula = Ozone ~ user(~Temp, span = 0.7) | s(Temp), 
-    data = air, family = GA, trace = FALSE)
----
-Family: GA 
-Link functions: log, log
-*--------
-Coefficients:
-                  Estimate Std. Error t value Pr(&gt;|t|)    
-mu.(Intercept)     3.55870    0.02891  123.08   &lt;2e-16 ***
-sigma.(Intercept) -0.82894    0.06315  -13.13   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
----
-Smooth terms:
-                           edf
-mu.user(~Temp,span=0.7) 5.8084
-sigma.s(Temp)           4.3942
-*--------
-n = 116 df =  12.2 res.df =  103.8
-Deviance = 939.5092 Null Dev. Red. = 13.26%
-AIC = 963.9144 elapsed =  0.05sec</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted distributions</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                       1 
-"GAMLSS2 GA(mu = 18.91, sigma = 0.4630)" 
-                                       2 
-"GAMLSS2 GA(mu = 19.02, sigma = 0.4831)" 
-                                       3 
-"GAMLSS2 GA(mu = 19.89, sigma = 0.5001)" 
-                                       4 
-"GAMLSS2 GA(mu = 16.22, sigma = 0.5930)" 
-                                       6 
-"GAMLSS2 GA(mu = 18.83, sigma = 0.4703)" </code></pre>
-</div>
-</div>
-</section>
-<section id="practical-guidance" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="practical-guidance"><span class="header-section-number">4</span> Practical guidance</h2>
-<p>Use an existing special when it already provides the required estimator and prediction behavior. Write a custom special when the term has a distinct fitting algorithm, needs custom state, or wraps an external modelling method. Keep the constructor lightweight, store all information needed for prediction, return centered fitted contributions, and test both fitting and <code>newdata</code> predictions. The help topic <code>?special_terms</code> documents the method arguments and return-value contract; <code>?fake_formula</code> documents special-name registration.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

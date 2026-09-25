@@ -315,7 +315,7 @@ sigma.s(Temp) 3.2250 0.7990
 *--------
 n = 116 df =  14.06 res.df =  101.94
 Deviance = 932.216 DIC = 960.341 Null Dev. Red. = 0.53%
-AIC = 960.341 elapsed =  1.78sec</code></pre>
+AIC = 960.341 elapsed =  2.42sec</code></pre>
 </div>
 </div>
 <p>The sampler uses block Metropolis-Hastings updates for linear and smooth coefficients. Smooth terms are updated using penalized weighted least squares proposals, while smoothing variances are sampled by inverse Gamma or slice sampling. See <code>?BS</code> for details of the sampler.</p>
@@ -436,7 +436,7 @@ AIC = 960.341 elapsed =  1.78sec</code></pre>
 </div>
 <p>Other posterior summaries can be obtained by changing <code>FUN</code>. For example, posterior means and standard deviations are returned with</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">FUN =</span> mean))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">FUN =</span> mean))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
 1 15.18102 1.0008783
@@ -446,7 +446,7 @@ AIC = 960.341 elapsed =  1.78sec</code></pre>
 5 15.91674 0.8780521
 6 16.13956 0.8516485</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">FUN =</span> sd))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">FUN =</span> sd))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
 1 6.820654 0.3747662
@@ -484,7 +484,7 @@ AIC = 960.341 elapsed =  1.78sec</code></pre>
 <li>set a seed when reproducible posterior draws are required;</li>
 <li>inspect trace and autocorrelation plots rather than relying only on posterior summaries;</li>
 <li>increase <code>n.iter</code> when the retained draws do not provide adequate mixing;</li>
-<li>use <code>predict(..., FUN = ...)</code> to summarize uncertainty from the stored posterior samples; and</li>
+<li>use <code>predict(..., type = "parameter", FUN = ...)</code> to summarize uncertainty from the stored posterior samples; and</li>
 <li>distinguish posterior uncertainty in distribution parameters from predictive variation in the response.</li>
 </ol>
 <p>The general GAMLSS formulation is described in <span class="citation" data-cites="Rigby+Stasinopoulos:2005">Rigby and Stasinopoulos (<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">2005</a>)</span>. For the Bayesian additive distributional framework and the MCMC methodology, see <span class="citation" data-cites="bamlss2018">Umlauf et al. (<a href="#ref-bamlss2018" role="doc-biblioref">2018</a>)</span>.</p>

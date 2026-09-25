@@ -112,8 +112,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <meta property="og:title" content="gamlss2">
-<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2.png">
+<meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2_files/figure-html/unnamed-chunk-1-1.png">
 <meta property="og:site_name" content="gamlss2">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
 </head>
 
 <body class="nav-sidebar floating nav-fixed quarto-light">
@@ -638,7 +640,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#extracting-fitted-or-predicted-parameters-or-terms-from-gamlss2-models" id="toc-extracting-fitted-or-predicted-parameters-or-terms-from-gamlss2-models" class="nav-link active" data-scroll-target="#extracting-fitted-or-predicted-parameters-or-terms-from-gamlss2-models">Extracting Fitted or Predicted Parameters or Terms from gamlss2 Models</a>
+  <li><a href="#predictions-from-gamlss2-models" id="toc-predictions-from-gamlss2-models" class="nav-link active" data-scroll-target="#predictions-from-gamlss2-models">Predictions from gamlss2 Models</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
@@ -657,17 +659,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="extracting-fitted-or-predicted-parameters-or-terms-from-gamlss2-models" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="extracting-fitted-or-predicted-parameters-or-terms-from-gamlss2-models">Extracting Fitted or Predicted Parameters or Terms from gamlss2 Models</h2>
+<section id="predictions-from-gamlss2-models" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="predictions-from-gamlss2-models">Predictions from gamlss2 Models</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Methods for <span class="pkg">gamlss2</span> model objects that extract fitted values or predictions for distribution parameters, additive predictors, individual terms, or the mean of the response distribution.</p>
+<p>Methods for <span class="pkg">gamlss2</span> model objects that predict response distributions, their parameters, additive predictors, individual terms, or response means.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'gamlss2'
 predict(object, model = NULL, newdata = NULL,
-  type = c("parameter", "link", "response", "terms"), terms = NULL,
+  type = c("distribution", "parameter", "link", "response", "terms"), terms = NULL,
   se.fit = FALSE, drop = TRUE, ...,
   level = NULL, interval = c("none", "wald"), interval.cache = NULL)
 </code></pre>
@@ -688,7 +690,7 @@ A model object of class <code>gamlss2</code>.
 <code id="model">model</code>
 </td>
 <td>
-Character. Which distribution parameter(s) should be predicted? This can be one or more of <code>“mu”</code>, <code>“sigma”</code>, etc. By default, predictions are returned for all model parts.
+Character or numeric. Which distribution parameter(s) should be predicted? Names are family-specific, e.g., <code>“mu”</code>, <code>“sigma”</code>, or <code>“shape”</code>, <code>“rate”</code>. By default, predictions are returned for all model parts.
 </td>
 </tr>
 <tr>
@@ -704,7 +706,7 @@ Data frame. Optionally, a new data frame in which to look for variables with whi
 <code id="type">type</code>
 </td>
 <td>
-Character. Which type of prediction should be computed? Use <code>“link”</code> for additive predictors on the link scale, <code>“parameter”</code> for distribution parameters on their natural scale, <code>“terms”</code> for individual additive terms, and <code>“response”</code> for the mean of the fitted response distribution.
+Character. Which type of prediction should be computed? The default <code>“distribution”</code> returns <span class="pkg">distributions3</span> objects. If <code>type</code> is omitted and <code>model</code>, <code>parameter</code>, or <code>what</code> is specified, <code>“parameter”</code> is used. Use <code>“link”</code> for additive predictors on the link scale, <code>“parameter”</code> for distribution parameters on their natural scale, <code>“terms”</code> for individual additive terms, and <code>“response”</code> for the mean of the fitted response distribution.
 </td>
 </tr>
 <tr>
@@ -728,7 +730,7 @@ Logical. Should standard errors for the predictions be included? Standard errors
 <code id="drop">drop</code>
 </td>
 <td>
-Logical. Should the predictions be simplified to a vector if possible (<code>TRUE</code>) or always returned as a data frame (<code>FALSE</code>)?
+Logical. Should predictions be simplified when possible?
 </td>
 </tr>
 <tr>
@@ -767,16 +769,16 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Predictions can be computed for the original observations or for <code>newdata</code>. Depending on <code>type</code>, results are returned on the link scale, as distribution parameters, as individual model terms, or as the fitted response mean.</p>
+<p>Predictions can be computed for the original observations or for <code>newdata</code>. By default, response distributions are returned. Depending on <code>type</code>, results can instead be returned as distribution parameters, on the link scale, as individual model terms, or as the fitted response mean.</p>
 <p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the complete joint covariance of the fitted coefficients, including cross-term and cross-parameter dependence.</p>
 <p>If <code>level</code> is specified, approximate pointwise confidence intervals and standard errors are computed analytically, without simulation. Intervals on transformed parameter or response scales are transformed as needed and may be asymmetric. These are confidence intervals for the fitted model, not prediction intervals for future observations, and they do not include smoothing-parameter or model-selection uncertainty.</p>
 <p>Wald intervals currently support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths. They are not available for Bayesian fits or nonlinear custom special terms. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>. The optional <code>interval.cache</code> can be reused for repeated predictions from the same unchanged model.</p>
 <p>For <code>type = “terms”</code>, term names are partially matched by default. Use <code>nogrep = TRUE</code> in <code>…</code> for exact matching.</p>
-<p>See also <code>prodist.gamlss2</code> for creating a full <span class="pkg">distributions3</span> object for moments, probabilities, quantiles, and random numbers.</p>
+<p>See also <code>prodist.gamlss2</code> for explicitly obtaining <span class="pkg">distributions3</span> objects.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>If <code>drop = FALSE</code>, a data frame is returned. If <code>drop = TRUE</code> (the default), the result may be simplified to a numeric vector when possible. For <code>type = “terms”</code>, a data frame is returned with one column per selected term. Multi-parameter models return a list of term matrices. For <code>se.fit = TRUE</code>, the returned object contains fitted values and corresponding simulation-based standard errors.</p>
+<p>For <code>type = “distribution”</code>, a distribution object is returned. With coefficient draws and <code>FUN = identity</code>, a list of distribution objects is returned; the family is stored once for the complete list and added when an element is extracted. For other types, <code>drop = TRUE</code> simplifies the result when possible. Term predictions are data frames or, for multiple parameters, lists of matrices. With <code>se.fit = TRUE</code>, fitted values and simulation-based standard errors are returned.</p>
 <p>When <code>level</code> is specified, a list with elements <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code> is returned. For one confidence level, <code>lower</code> and <code>upper</code> follow the structure of the ordinary point prediction, including <code>model</code>, <code>terms</code>, and <code>drop</code> selection. For multiple confidence levels, each is a list named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>), whose elements have that same prediction structure. The <code>fit</code> element is the ordinary, non-simulated prediction and <code>se.fit</code> is shared by all intervals. Attributes record the confidence levels, method, and reusable <code>interval.cache</code>. The cache stores the full joint covariance and fitted inferential state and can be reused only with that unchanged model.</p>
 <p>If the joint observed information is indefinite or a required coefficient is not estimable, Wald prediction and coefficient simulation report the problem; they do not silently substitute a working-information approximation.</p>
 </section>
@@ -802,87 +804,169 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6596 eps = 0.000006     </code></p
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## new data for predictions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: model parameter(s) for all model parts</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## default: a "distribution" object</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        mu    sigma
-1 23.06351 10.03495
-2 58.89341 18.54349
-3 96.20125 34.26635</code></pre>
+<pre><code>                                      1                                       2 
+"GAMLSS2 NO(mu = 23.06, sigma = 10.03)" "GAMLSS2 NO(mu = 58.89, sigma = 18.54)" 
+                                      3 
+"GAMLSS2 NO(mu = 96.20, sigma = 34.27)" </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## can be used with distributions3 methods</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(d, <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           1            2            3 
+0.0379452246 0.0023848152 0.0009821864 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cdf</span>(d, <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1         2         3 
+0.3800749 0.0179784 0.0130812 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1         2         3 
+ 31.50914  74.50001 125.04054 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       1        2        3 
+23.06351 58.89341 96.20125 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">variance</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1         2         3 
+ 100.7002  343.8611 1174.1825 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       r_1      r_2      r_3
+1 26.21252 44.06083 10.76774
+2 51.36983 41.25244 62.48060
+3 58.13211 83.24043 77.07924</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
 1 23.06351 2.306074
 2 58.89341 2.920119
 3 96.20125 3.534164</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mean of the response distribution</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
 23.06351 58.89341 96.20125 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model parameter(s)</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## same as</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       1        2        3 
+23.06351 58.89341 96.20125 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## all model parameters</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        mu    sigma
+1 23.06351 10.03495
+2 58.89341 18.54349
+3 96.20125 34.26635</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model selects parameter predictions if type is omitted</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
 10.03495 18.54349 34.26635 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     sigma
 1 10.03495
 2 18.54349
 3 34.26635</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  (Intercept)   s(speed)
 1    2.637658 -0.3315843
 2    2.637658  0.2824607
 3    2.637658  0.8965055</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    s(speed)
 1 -0.3315843
 2  0.2824607
 3  0.8965055</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict quantiles</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predict quantiles</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(m, <span class="at">newdata =</span> nd, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       10%      50%       90%
 1 10.20321 23.06351  35.92381
 2 35.12897 58.89341  82.65786
 3 52.28716 96.20125 140.11535</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="do">## same as</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(d, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>), <span class="at">elementwise =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     q_0.1    q_0.5     q_0.9
+1 10.20321 23.06351  35.92381
+2 35.12897 58.89341  82.65786
+3 52.28716 96.20125 140.11535</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="do">## standard errors</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">newdata =</span> nd, <span class="at">se.fit =</span> <span class="cn">TRUE</span>, <span class="at">R =</span> <span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    mu.fit    mu.se sigma.fit  sigma.se
 1 23.06351 1.917939  10.15932  1.614735
 2 58.89341 3.470156  18.78608  3.064083
 3 96.20125 9.341785  36.40538 13.041566</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fast pointwise confidence bands, without sampling</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">level =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.95</span>))</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>lower[[<span class="st">"80%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fast pointwise confidence bands, without sampling</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">newdata =</span> nd, <span class="at">level =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.95</span>))</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>lower[[<span class="st">"80%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
 1 20.47978  8.16792
 2 54.40545 15.36917
 3 84.96474 21.78597</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>upper[[<span class="st">"95%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>bands<span class="sc">$</span>upper[[<span class="st">"95%"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mu    sigma
 1  27.01499 13.74822
 2  65.75715 24.71144
 3 113.38602 68.49845</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="do">## prediction uncertainty using multiple draws</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> cars, <span class="at">R =</span> <span class="dv">1000</span>, <span class="at">FUN =</span> identity)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="do">## predict 1000 quantiles</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">sapply</span>(d, quantile, <span class="at">probs =</span> <span class="fl">0.9</span>)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>i95 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(<span class="fu">quantile</span>(x, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>), <span class="at">names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"fit"</span>, <span class="st">"upper"</span>))</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="do">## quantiles of quantile samples</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(q, <span class="dv">1</span>, i95))</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantile with uncertainty bands</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars,</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(cars<span class="sc">$</span>dist, q))</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(cars<span class="sc">$</span>speed, q,</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="predict.gamlss2_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 

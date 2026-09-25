@@ -454,7 +454,7 @@ m_round 5509.784 13.136685</code></pre>
 </div>
 </div>
 <p>This second AIC comparison is valid because both models assign probability mass to the same one-decimal values. In contrast, neither rounded model should be compared by log-likelihood or AIC with <code>m_norm</code> or <code>m_trunc</code>: probability densities and probability masses are defined with respect to different measures and have different units.</p>
-<p>The parameters returned by <code>predict()</code> still describe the parent normal family, before selection and rounding. In particular, <code>mu</code> is not the mean of the observed, truncated distribution. Distributional methods, on the other hand, operate on the final recorded scale. Thus, the following curves are rounded predictive quantiles from the truncated-and-rounded model.</p>
+<p>Parameters returned by <code>predict(..., type = "parameter")</code> still describe the parent normal family, before selection and rounding. In particular, <code>mu</code> is not the mean of the observed, truncated distribution. Distributional methods operate on the final recorded scale. Thus, the following curves are rounded predictive quantiles from the truncated-and-rounded model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">depth =</span> <span class="fu">seq</span>(<span class="fu">min</span>(quakes<span class="sc">$</span>depth), <span class="fu">max</span>(quakes<span class="sc">$</span>depth), <span class="at">length.out =</span> <span class="dv">150</span>),</span>
@@ -464,7 +464,7 @@ m_round 5509.784 13.136685</code></pre>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m_both, <span class="at">newdata =</span> nd,</span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_both, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_both, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
 1 4.728629 0.4777519
@@ -529,7 +529,7 @@ m_round 5509.784 13.136685</code></pre>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_group, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_group, <span class="at">type =</span> <span class="st">"parameter"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
 1 243.4316 348.3439
@@ -601,7 +601,7 @@ FALSE  TRUE
 <span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">coef</span>(m_start)</span>
 <span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_cens, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_cens, <span class="at">type =</span> <span class="st">"parameter"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
 1  2.49563 7.162719
@@ -620,7 +620,7 @@ FALSE  TRUE
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist80 <span class="sc">~</span> speed, <span class="at">data =</span> cars,</span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.45</span>),</span>
 <span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Speed (mph)"</span>, <span class="at">ylab =</span> <span class="st">"Recorded stopping distance (ft)"</span>,</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(cars<span class="sc">$</span>speed80, q))</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(cars<span class="sc">$</span>dist80, q))</span>
 <span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>speed, q, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>)</span>
 <span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">80</span>, <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="dv">2</span>)</span>
 <span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"left"</span>, <span class="fu">c</span>(<span class="st">"10%"</span>, <span class="st">"50%"</span>, <span class="st">"90%"</span>, <span class="st">"Limit"</span>),</span>
@@ -637,16 +637,15 @@ FALSE  TRUE
 <p>For this example, the chance of reaching the cap is an interpretable fitted quantity. It is the normal upper-tail probability under the predicted parent parameters, and also the point mass assigned to the recorded value 80.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>at <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">25</span>))</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_cens, <span class="at">newdata =</span> at, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_cens, <span class="at">newdata =</span> at)</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(at,</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">probability_at_limit =</span> <span class="fu">pnorm</span>(<span class="dv">80</span>, p<span class="sc">$</span>mu, p<span class="sc">$</span>sigma,</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower.tail =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">probability_at_limit =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(d, <span class="dv">80</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  speed probability_at_limit
-1    10         1.991924e-08
-2    15         2.688637e-03
-3    20         1.353646e-01
-4    25         4.592479e-01</code></pre>
+1    10                    0
+2    15                    0
+3    20                    0
+4    25                    0</code></pre>
 </div>
 </div>
 <p>Unlike censoring, upper truncation would remove cars whose stopping distance exceeds 80 and renormalize the density among those that remain. For two-sided mechanisms, supply both <code>lower</code> and <code>upper</code>. <code>truncate_family()</code> additionally accepts <code>include</code>, which controls inclusion of each endpoint and matters for discrete base families.</p>
@@ -683,7 +682,7 @@ FALSE  TRUE
 <div class="cell-output cell-output-stdout">
 <pre><code>'log Lik.' -1147.054 (df=4.000001)</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_surv, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_surv, <span class="at">type =</span> <span class="st">"parameter"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu    sigma
 1 314.1695 1.326179
@@ -698,10 +697,10 @@ FALSE  TRUE
 <p>To see the covariate effects on the response scale, predict survival curves for ages 50, 65, and 80, separately for men and women. Predictions use the underlying event-time distribution: <span class="math inline">\(S(t \mid x) = 1-F(t \mid x)\)</span>. The censoring indicator is needed for fitting, but is not a predictor of survival. These are model-based conditional associations.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">age =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">65</span>, <span class="dv">80</span>), <span class="at">sex =</span> <span class="fu">c</span>(<span class="st">"Male"</span>, <span class="st">"Female"</span>))</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_surv, <span class="at">newdata =</span> nd)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_surv, <span class="at">newdata =</span> nd)</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(lung<span class="sc">$</span>time), <span class="at">length.out =</span> <span class="dv">200</span>)</span>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>surv <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(nd)), <span class="cf">function</span>(j) {</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">-</span> <span class="fu">family</span>(m_surv)<span class="sc">$</span><span class="fu">cdf</span>(p[j, , <span class="at">drop =</span> <span class="cn">FALSE</span>], time)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(d[j], time)</span>
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
@@ -812,7 +811,7 @@ fits$Inflated 2452.863  2</code></pre>
 <span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>m_hurd <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">data =</span> dat,</span>
 <span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_hurd, <span class="at">control =</span> ctrl)</span>
 <span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">150</span>))</span>
-<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_hurd, <span class="at">newdata =</span> nd, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_hurd, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>)</span>
 <span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>p0 <span class="ot">&lt;-</span> p<span class="sc">$</span>pi1 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> p<span class="sc">$</span>pi1)</span>
 <span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>mpos <span class="ot">&lt;-</span> p<span class="sc">$</span>mu <span class="sc">/</span> (<span class="sc">-</span><span class="fu">expm1</span>(<span class="sc">-</span>p<span class="sc">$</span>mu))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -867,7 +866,7 @@ fits$Inflated 2452.863  2</code></pre>
 <span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl</span>
 <span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_01, <span class="at">drop =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m_01, <span class="at">type =</span> <span class="st">"parameter"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          mu     sigma       pi1        pi2
 1  1.0938435 0.8009455 0.1449275 0.06280193
@@ -989,7 +988,7 @@ mf_norm  264.5321  2</code></pre>
 <li>Apply extensions from the inside out in the order the mechanisms occur.</li>
 <li>Use <code>fit_family()</code> to inspect marginal fit. Compare AIC only for models fitted to the same response with compatible likelihoods.</li>
 <li>Add covariates with <code>gamlss2()</code>, using <code>s()</code> for nonlinear effects, and check whether the extended family remains useful conditionally.</li>
-<li>Interpret <code>predict()</code> parameters on the base-family scale, but interpret probabilities, quantiles, simulations, and residuals under the fully extended family.</li>
+<li>Interpret <code>predict(..., type = "parameter")</code> on the base-family scale, but interpret probabilities, quantiles, simulations, and residuals under the fully extended family.</li>
 </ol>
 <p>A few boundaries of the infrastructure are intentional. Constants passed to the extension constructors are fixed. <code>censor_family()</code> also accepts observation-specific right-censoring times through a <code>Surv()</code> response; other censoring types need a specialized family. Estimated transformation parameters require a family that explicitly includes them. Generic censored and rounded means and variances are not reported because exact calculation would require partial moments that are not part of the family interface. Arbitrary weighted distributions, splices, non-monotone transformations, convolutions, and compound distributions are likewise outside this infrastructure.</p>
 <p>Finally, match the family to the actual observation process. A pile-up at a detection limit suggests censoring; missing out-of-range cases imply truncation; extra and natural zeros together imply inflation; and a separate zero-generating process suggests a hurdle. These choices are scientifically different even when the observed histograms look similar.</p>

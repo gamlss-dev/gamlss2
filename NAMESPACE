@@ -40,6 +40,8 @@ export(
   "gamlss2_control",
   "RS",
   "CG",
+  "JR",
+  "jr",
   "calibration",
   "transform_family",
   "logit_family",

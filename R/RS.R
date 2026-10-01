@@ -272,7 +272,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   if(!is.null(control$fixed)) {
     for(j in np) {
-      if(control$fixed[[j]] && is.null(start[[j]])) {
+      if(control$fixed[[j]] &&
+          (inherits(start, "coef.gamlss2") || is.null(start[[j]]))) {
         link <- make.link2(family$links[[j]])
         fit[[j]]$coefficients["(Intercept)"] <- link$linkfun(control$fixed[[j]])
         eta[[j]] <- rep(fit[[j]]$coefficients["(Intercept)"], n)
@@ -769,6 +770,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
                 sk$.rs_cache <- smooth.cache[[j]][[k]]
 
               ## Additive model term fit.
+              if(!is.null(control$.jr.sp[[j]][[k]]))
+                sk$sp <- control$.jr.sp[[j]][[k]]
               fs <- if(is.null(weights)) {
                 special.wfit(sk, e, ew$weights, y, eta, j, family, control,
                   transfer = sfit[[j]][[k]]$transfer, iter = iter)

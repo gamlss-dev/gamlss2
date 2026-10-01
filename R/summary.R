@@ -445,15 +445,26 @@ par2list <- function(par)
 }
 
 ## Summary extractor function.
-summary.gamlss2 <- function(object, ...)
+summary.gamlss2 <- function(object, ..., unconditional = FALSE,
+  sandwich = FALSE)
 {
   df.res <- object$nobs - object$df
   par <- coef(object, full = FALSE, dropall = FALSE)
-  method <- list(...)$method %||% "local"
+  if(!is.logical(unconditional) || length(unconditional) != 1L ||
+      is.na(unconditional))
+    stop("'unconditional' must be TRUE or FALSE.", call. = FALSE)
+  if(!is.logical(sandwich) || length(sandwich) != 1L || is.na(sandwich))
+    stop("'sandwich' must be TRUE or FALSE.", call. = FALSE)
+  method <- list(...)$method %||%
+    if(unconditional || sandwich) "joint" else "local"
   method <- match.arg(method, c("local", "joint", "working", "numeric"))
+  if((unconditional || sandwich) && method != "joint")
+    stop("'sandwich' and 'unconditional' require method = 'joint'.",
+      call. = FALSE)
   se <- if(method == "local")
     vcov_local(object, type = "se", full = FALSE) else
-    vcov(object, type = "se", full = FALSE, method = method)
+    vcov(object, type = "se", full = FALSE, method = method,
+      unconditional = unconditional, sandwich = sandwich)
   tvalue <- par / se
   tvalue[se < .Machine$double.eps^(1/2)] <- Inf
   if(length(df.res) == 1L && !is.na(df.res) && df.res > 0) {

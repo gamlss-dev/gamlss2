@@ -15,7 +15,8 @@ gamlss2_control(optimizer = RS, trace = TRUE,
 }
 
 \arguments{
-  \item{optimizer}{Function, the optimizer to be used for fitting.}
+  \item{optimizer}{Function, the optimizer to be used for fitting. Use
+    \code{\link{JR}} for joint REML estimation.}
   \item{trace}{Logical, should information be printed while the algorithm is running?}
   \item{flush}{Logical, whether to use \code{\link[utils]{flush.console}} to display
     current output in the console.}
@@ -38,6 +39,13 @@ gamlss2_control(optimizer = RS, trace = TRUE,
   The set of control parameters can be extended. For example, if a different
   optimizer is used, newly specified control parameters are passed on to that
   optimizer automatically.
+
+  With \code{optimizer = JR}, a direct joint REML solver uses cached designs
+  and penalties for families providing a density and predictor-to-parameter
+  map. The controls
+  \code{jr.inner}, \code{jr.eps}, \code{jr.maxit},
+  \code{jr.outer.maxit}, and \code{jr.outer.maxeval} are documented in
+  \code{\link{JR}}.
 
   For \pkg{mgcv}-based smooth terms, smoothing parameters are selected by
   local REML updates by default (\code{criterion = "reml"}). These updates

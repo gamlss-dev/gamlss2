@@ -142,8 +142,8 @@ We now evaluate the fitted seasonal cycle on each day of the year.
 nd <- data.frame(yday = 0:364)
 ```
 
-By default, `predict()` returns one `distributions3` object for each row of
-`newdata`.
+By default, `predict()` returns a vector of fitted distributions using the
+`distributions3` interface, with one distribution per row of `newdata`.
 
 ```{r}
 pf <- predict(m2, newdata = nd)
@@ -184,7 +184,7 @@ pq <- quantile(pf, probs = c(0.05, 0.5, 0.95), elementwise = FALSE)
 #| fig-width: 6
 #| fig-align: center
 par(mar = c(4, 4, 1, 1))
-plot(bikes ~ yday, data = HarzTraffic,
+plot(bikes ~ I(yday + 1), data = HarzTraffic,
   pch = 16, col = adjustcolor(1, 0.2),
   xlab = "Day of year", ylab = "Motorcycles")
 matlines(nd$yday + 1, pq,
@@ -194,7 +194,9 @@ legend("topright", c("5%", "50%", "95%"),
 ```
 
 These fitted distributions describe response variation conditional on the
-estimated model.
+estimated model. The 5% and 95% quantiles bound a central 90% response interval;
+they do not quantify uncertainty in the estimated mean or median. The
+[Prediction and Uncertainty](prediction.html) vignette develops this distinction.
 
 ## Relation to `gamlss`
 
@@ -208,10 +210,10 @@ place the predictors for all distribution parameters in a single formula.
 
 ## Next steps
 
-The [Family Objects](https://gamlss-dev.github.io/gamlss2/vignettes/families.html)
-vignette explains available and custom
-response distributions. The
-[Special Model Terms](https://gamlss-dev.github.io/gamlss2/vignettes/specials.html)
-vignette covers terms beyond standard
-`mgcv`
-smooths.
+Continue with [Prediction and Uncertainty](prediction.html) to construct and
+assess intervals, or [Forecasting and Assessment](topmodels.html) for calibration
+plots and scoring rules. [Family Objects](families.html) explains distribution
+interfaces and custom families; [Family Extensions](family_extensions.html)
+handles truncation, censoring, rounding, and extra point masses.
+[Special Model Terms](specials.html) covers terms beyond standard `mgcv` smooths,
+and [Bayesian GAMLSS](bayesian.html) uses the same model specification for MCMC.

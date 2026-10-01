@@ -28,6 +28,10 @@ same distribution interface used by
 `distributions3` for densities,
 probabilities, quantiles, moments, and simulation.
 
+For the fitting workflow, start with [First Steps](firststeps.html).
+To modify an existing distribution for an observation mechanism such as
+truncation or censoring, see [Family Extensions](family_extensions.html).
+
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
 library("distributions3")
@@ -194,13 +198,14 @@ Flexible links are represented by `link-gamlss2` objects. When analytical
 score and Hessian callbacks are requested, the bridge uses derivatives from
 the link object. For example, the `softplus` link can be passed to the bridge
 after construction with `make.link2()`. In this example the derivative flags
-are left at their defaults, so numerical derivatives are used.
+are disabled explicitly, so numerical derivatives are used.
 
 
 ```{r}
 normal_family <- family(
   Normal(),
-  links = list(mu = make.link2(softplus), sigma = "log")
+  links = list(mu = make.link2(softplus), sigma = "log"),
+  score = FALSE, hessian = FALSE
 )
 
 ## The softplus link does not provide all second-link derivatives needed by
@@ -338,7 +343,9 @@ summary(m)
 ```
 
 This pattern is useful when an existing distribution has the right likelihood
-but the wrong parameterization. A user-defined family can also be assembled
+but the wrong parameterization. [Prediction and Uncertainty](prediction.html)
+uses this same Gamma family to construct intervals for means, quantiles, and
+future observations. A user-defined family can also be assembled
 directly as a `gamlss2.family`, as shown next.
 
 ## Writing a family directly
@@ -418,6 +425,8 @@ Newton/Fisher-scoring update returning `list(eta, weights)`.
 The distributions3 bridge also exposes a `crps()` callback when the optional
 `scoringRules` package is available. This is useful for probabilistic forecast
 evaluation, but it is not needed for fitting, prediction, or the basic family
+interface. [Forecasting and Assessment](topmodels.html) demonstrates scoring
+rules and graphical diagnostics.
 
 ## Summary
 

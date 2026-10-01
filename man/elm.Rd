@@ -40,24 +40,23 @@ elm(x, k = 50, a = "tanh", ...)
   activation function \code{a} to obtain the hidden-layer design matrix \code{X}. Columns of
   \code{X} are centered before estimation.
 
-  \strong{Internal scaling}. For numerical stability and comparability across terms,
+  For numerical stability and comparability across terms,
   \code{Z} can be scaled internally (\code{scale = TRUE}). Intercept columns are left unchanged.
   If \code{x} is a factor, a QR-based group scaling is applied; otherwise, a column-wise
-  center-and-scale normalization is used. The scaling transformation is stored and is reused
-  automatically during prediction.
+  center-and-scale normalization is used.
 
-  \strong{Activation functions}. The activation is applied element-wise to \code{Z \%*\% W}.
+  The activation is applied element-wise to \code{Z \%*\% W}.
   For numerical stability, bounded activations are evaluated on clipped inputs
   (currently \eqn{[-35, 35]}).
 
-  \strong{Weight sampling}. By default, hidden-unit weights are generated using a
+  By default, hidden-unit weights are generated using a
   low-discrepancy Halton design in a whitened input space. This tends to produce
   more stable and less redundant features than purely random draws in many practical
   applications. With \code{sampler = "pca"}, directions are additionally aligned
   with principal component directions of the scaled design. The historical
   stochastic behavior can be recovered with \code{sampler = "random"}.
 
-  \strong{Reproducibility}. The default \code{sampler = "halton"} is deterministic
+  The default \code{sampler = "halton"} is deterministic
   given the input data. Use \code{\link[base]{set.seed}} only if you explicitly
   request \code{sampler = "random"}.
 }

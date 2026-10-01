@@ -11,9 +11,10 @@ their parameters, additive predictors, individual terms, or response means.
 
 \usage{
 \method{predict}{gamlss2}(object, model = NULL, newdata = NULL,
-  type = c("distribution", "parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval = c("none", "wald"), interval.cache = NULL)
+  type = c("distribution", "parameter", "link", "response", "terms"),
+  terms = NULL, se.fit = FALSE, drop = TRUE, ...,
+  level = NULL, interval = c("none", "wald"), interval.cache = NULL,
+  unconditional = FALSE, sandwich = FALSE)
 }
 
 \arguments{
@@ -51,6 +52,12 @@ their parameters, additive predictors, individual terms, or response means.
     \code{"interval.cache"} attribute of a previous Wald prediction for the
     same, unchanged model. Reusing it avoids rebuilding the joint covariance
     for subsequent predictions.}
+  \item{unconditional}{Logical. If \code{TRUE}, use the smoothing-parameter
+    uncertainty correction in the covariance for Wald intervals and coefficient
+    simulation. For \code{JR} fits this uses joint REML curvature.}
+  \item{sandwich}{Logical. If \code{TRUE}, use the RS/local-REML
+    estimating-equation sandwich covariance for Wald intervals and coefficient
+    simulation. Cannot be combined with \code{unconditional = TRUE}.}
   \item{...}{Further control arguments. Supported aliases are \code{what} and
     \code{parameter} for \code{model}. Additional arguments are used for
     simulation-based summaries, including \code{FUN}, \code{R}, \code{seed},
@@ -66,21 +73,35 @@ as individual model terms, or as the fitted response mean.
 If \code{se.fit = TRUE}, standard errors are obtained from coefficient draws.
 Existing draws stored in the fitted object are used when available; otherwise,
 draws are generated from the complete joint covariance of the fitted
-coefficients, including cross-term and cross-parameter dependence.
+coefficients, including cross-term and cross-parameter dependence. With
+\code{sandwich = TRUE}, coefficient draws use the coefficient block of the
+local RS Godambe covariance. These draws are a Gaussian approximation to the
+coefficient sampling distribution; the covariance alone does not determine
+finite-sample tail probabilities after nonlinear transformations. Simulation
+stops when the marginal 95\% Gaussian interval for an estimated log smoothing
+parameter spans more than a factor of 100 in the smoothing parameter. This
+conservative check catches strongly uncertain smoothing parameters; passing
+it does not guarantee calibrated tail probabilities.
 
 If \code{level} is specified, approximate pointwise confidence intervals and
 standard errors are computed analytically, without simulation. Intervals on
 transformed parameter or response scales are transformed as needed and may be
 asymmetric. These are confidence intervals for the fitted model, not prediction
-intervals for future observations, and they do not include smoothing-parameter
-or model-selection uncertainty.
+intervals for future observations. By default they condition on the fitted
+smoothing parameters. Setting \code{unconditional = TRUE} adds the approximate
+correction described in \code{\link{vcov.gamlss2}}. Model-selection
+uncertainty remains excluded.
+Setting \code{sandwich = TRUE} instead uses the frequentist RS fixed-point
+covariance described there. The two corrections are distinct and cannot be
+combined. A reusable Wald cache records the selected covariance type.
+When an RS smoothing parameter is strictly active at its numerical limit,
+the sandwich calculation holds it fixed.
 
 Wald intervals currently support maximum-likelihood fits with linear terms and
-coefficient-linear \pkg{mgcv} smooths. They are not available for Bayesian fits
-or nonlinear custom special terms. Wald intervals cannot be
+coefficient-linear \pkg{mgcv} smooths. They are not available for
+nonlinear custom special terms. Wald intervals cannot be
 combined with simulation controls such as \code{FUN}, \code{R}, \code{seed}, or
-\code{burnin}. The optional \code{interval.cache} can be reused for repeated
-predictions from the same unchanged model.
+\code{burnin}.
 
 For \code{type = "terms"}, term names are partially matched by default. Use
 \code{nogrep = TRUE} in \code{...} for exact matching.
@@ -179,7 +200,7 @@ bands$upper[["95\%"]]
 d <- predict(m, newdata = cars, R = 1000, FUN = identity)
 
 ## predict 1000 quantiles
-q <- sapply(d, quantile, probs = 0.9)
+q <- sapply(d, quantile, probs = 0.95)
 
 i95 <- function(x) {
   setNames(quantile(x, c(0.025, 0.5, 0.975), names = FALSE),

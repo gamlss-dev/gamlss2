@@ -26,6 +26,9 @@ from rounding and grouping. We then consider recording limits, extra point
 masses, and transformations. Each example connects the
 observation mechanism to a fitted model.
 
+This vignette builds on [First Steps](firststeps.html). The underlying family
+interface is described in [Family Objects](families.html).
+
 ```{r preliminaries}
 #| message: false
 #| results: hide
@@ -36,7 +39,7 @@ ctrl <- gamlss2_control(trace = FALSE, maxit = 100)
 ## Choosing an observation model
 
 A family extension specifies how a base distribution becomes the
-the response we observe. Several extensions can be combined when more than
+response we observe. Several extensions can be combined when more than
 one mechanism is involved.
 
 For example, earthquake magnitude can be viewed as a latent continuous
@@ -388,10 +391,16 @@ parameters, and also the point mass assigned to the recorded value 80.
 
 ```{r censoring-prediction}
 at <- data.frame(speed = c(10, 15, 20, 25))
-d <- predict(m_cens, newdata = at)
+p <- predict(m_cens, newdata = at, type = "parameter")
 data.frame(at,
-  probability_at_limit = 1 - cdf(d, 80))
+  probability_at_limit = pnorm(80, mean = p$mu, sd = p$sigma,
+    lower.tail = FALSE))
 ```
+
+Here we use the parent normal parameters because the event is reaching or
+exceeding the limit before censoring. For the recorded distribution `d`,
+`1 - cdf(d, 80)` would instead be the probability of exceeding 80 after
+censoring, which is zero.
 
 Unlike censoring, upper truncation would remove cars whose stopping distance
 exceeds 80 and renormalize the density among those that remain. For two-sided
@@ -609,8 +618,10 @@ endpoints while otherwise varying continuously. `logit_family(NO)` maps a normal
 function, producing values strictly between 0 and 1. Inflation then adds the
 two endpoints. Here we simulate data with a known mechanism so that the role
 of each component is clear. `mu` and `sigma` govern the latent
-logistic-normal component, while `pi1` and `pi2` are odds for exact zero and
-exact one, respectively.
+logistic-normal component, while `pi1` and `pi2` are weights for exact zero and
+exact one relative to the continuous component. Their probabilities are
+`pi1 / (1 + pi1 + pi2)` and `pi2 / (1 + pi1 + pi2)`; the continuous
+component has probability `1 / (1 + pi1 + pi2)`.
 
 ```{r endpoint-fit}
 set.seed(2026)
@@ -658,10 +669,11 @@ legend("topleft", c("10%", "50%", "90%"),
   lty = c(2, 1, 2), lwd = 2, col = 4, bty = "n")
 ```
 
-The smooth estimates how the interior distribution changes with `x`; the
-endpoint odds are constant in this example. The four right-hand sides
-correspond, in order, to `mu`, `sigma`, `pi1`, and
-`pi2`. Exact endpoints are handled as masses; interior observations retain a
+The two smooths estimate how the interior distribution changes with `x`; the
+endpoint weights are constant in this example. The family parameters are,
+in order, `mu`, `sigma`, `pi1`, and `pi2`. Only two right-hand sides are
+supplied, so the last two parameters receive intercept-only predictors.
+Exact endpoints are handled as masses; interior observations retain a
 continuous density contribution.
 
 ## Transformations: modeling a positive response

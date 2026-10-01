@@ -3,8 +3,16 @@ predict.gamlss2 <- function(object,
   model = NULL, newdata = NULL,
   type = c("distribution", "parameter", "link", "response", "terms"),
   terms = NULL, se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval = c("none", "wald"), interval.cache = NULL)
+  level = NULL, interval = c("none", "wald"), interval.cache = NULL,
+  unconditional = FALSE, sandwich = FALSE)
 {
+  if(!is.logical(unconditional) || length(unconditional) != 1L ||
+      is.na(unconditional))
+    stop("'unconditional' must be TRUE or FALSE.")
+  if(!is.logical(sandwich) || length(sandwich) != 1L || is.na(sandwich))
+    stop("'sandwich' must be TRUE or FALSE.")
+  if(sandwich && unconditional)
+    stop("'sandwich' and 'unconditional' cannot both be TRUE.")
   type_missing <- missing(type)
   if(is.null(model)) {
     model <- list(...)$what
@@ -29,7 +37,7 @@ predict.gamlss2 <- function(object,
   if(!is.null(level) || interval == "wald") {
     if(is.null(level)) level <- 0.95
     return(predict_wald(object, model, newdata, type, terms,
-      drop, list(...), level, interval.cache))
+      drop, list(...), level, interval.cache, unconditional, sandwich))
   }
 
   ## FIXME: se.fit, terms ...
@@ -49,8 +57,13 @@ predict.gamlss2 <- function(object,
         set.seed(seed)
       ## Any coefficient simulation must retain the complete joint covariance;
       ## local term-wise covariances cannot reproduce cross-term dependence.
-      samples <- sampling(object, R = R, full = TRUE, method = "joint")
+      samples <- sampling(object, R = R, full = TRUE, method = "joint",
+        unconditional = unconditional, sandwich = sandwich)
     } else {
+      if(unconditional)
+        stop("'unconditional = TRUE' requires a likelihood fit without stored posterior samples.")
+      if(sandwich)
+        stop("'sandwich = TRUE' requires a likelihood fit without stored posterior samples.")
       samples <- object$samples
     }
   }

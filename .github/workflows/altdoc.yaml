@@ -53,6 +53,16 @@ jobs:
       - name: Dependencies
         run: ./run.sh install_r "future"
 
+      - name: Forecasting vignette dependency
+        run: |
+          if(packageVersion("gamlss.dist") < "6.1-3") {
+            install.packages("gamlss.dist", repos = c(
+              "https://gamlss-dev.R-universe.dev", "https://cloud.R-project.org"))
+          }
+          install.packages("topmodels", repos = c(
+            "https://zeileis.R-universe.dev", "https://cloud.R-project.org"))
+        shell: Rscript {0}
+
       - name: Build site
         run: |
           future::plan(future::multicore)

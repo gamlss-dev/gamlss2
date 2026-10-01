@@ -22,10 +22,21 @@
 
 vcov.gamlss2 <- function(object,
   type = c("vcov", "cor", "se", "coef"), full = FALSE,
-  method = c("joint", "working", "numeric"), ...)
+  method = c("joint", "working", "numeric"), unconditional = FALSE,
+  sandwich = FALSE, .details = FALSE, ...)
 {
   type <- match.arg(type)
   method <- match.arg(method)
+  if(!is.logical(unconditional) || length(unconditional) != 1L ||
+      is.na(unconditional))
+    stop("'unconditional' must be TRUE or FALSE.", call. = FALSE)
+  if(unconditional && method != "joint")
+    stop("'unconditional = TRUE' requires method = 'joint'.", call. = FALSE)
+  if(!is.logical(sandwich) || length(sandwich) != 1L || is.na(sandwich))
+    stop("'sandwich' must be TRUE or FALSE.", call. = FALSE)
+  if(sandwich && (unconditional || method != "joint"))
+    stop("'sandwich = TRUE' requires method = 'joint' and unconditional = FALSE.",
+      call. = FALSE)
 
   ## utilities -----------------------------------------------------------
 
@@ -951,7 +962,8 @@ vcov.gamlss2 <- function(object,
     return(out)
   }
 
-  .invert <- function(K, names, forced.na, fixed, noise = 0)
+  .invert <- function(K, names, forced.na, fixed, noise = 0,
+    return.factor = FALSE)
   {
     K <- .matrix(K)
 
@@ -981,6 +993,8 @@ vcov.gamlss2 <- function(object,
 
     if(!length(active)) {
       dimnames(V) <- list(names, names)
+      if(return.factor)
+        return(list(covariance = V, factor = NULL))
       return(V)
     }
 
@@ -1012,6 +1026,7 @@ vcov.gamlss2 <- function(object,
     }
 
     keep <- active[!nonestimable]
+    R <- NULL
     if(length(keep)) {
       Kg <- K[keep, keep, drop = FALSE]
       Kg <- 0.5 * (Kg + t(Kg))
@@ -1022,6 +1037,8 @@ vcov.gamlss2 <- function(object,
     }
 
     dimnames(V) <- list(names, names)
+    if(return.factor)
+      return(list(covariance = V, factor = R))
     return(V)
   }
 
@@ -1172,13 +1189,16 @@ vcov.gamlss2 <- function(object,
   X <- lapply(blocks, `[[`, "X")
   P <- .block_diag(blocks, "P")
   dimnames(P) <- list(coefficient.names, coefficient.names)
+  direct <- if(method == "joint" && !sandwich &&
+      isTRUE(object$jr$converged))
+    object$jr$coefficient.covariance else NULL
 
   ## likelihood information ---------------------------------------------
 
   H <- matrix(0, length(beta), length(beta),
     dimnames = list(coefficient.names, coefficient.names))
 
-  if(method == "joint") {
+  if(method == "joint" && is.null(direct)) {
     if(is.null(family$score) || !is.list(family$score))
       .stop(paste0(
         "the fitted family has no completed score list. Linked-scale ",
@@ -1305,7 +1325,42 @@ vcov.gamlss2 <- function(object,
   ## by the likelihood information, not by K: a very large smooth penalty must
   ## not erase a smaller but valid likelihood direction.
   noise <- 100 * .Machine$double.eps^(2 / 3) * max(1, max(abs(H)))
-  V <- .invert(K, coefficient.names, forced.na, fixed, noise)
+  need.correction <- (unconditional || sandwich) && type != "coef"
+  if(!is.null(direct)) {
+    if(length(object$jr$rho)) {
+      current <- unclass(coef(object, full = TRUE, lambdas = TRUE,
+        dropall = FALSE))
+      nm <- names(object$jr$rho)
+      if(!all(nm %in% names(current)) ||
+          any(current[nm] <= 0) ||
+          max(abs(log(current[nm]) - object$jr$rho)) > 1e-08)
+        .stop("stored JR coefficient covariance does not match the fitted smoothing parameters.")
+    }
+    if(!identical(dim(direct), dim(K)) ||
+        !identical(rownames(direct), coefficient.names) ||
+        any(!is.finite(direct)) ||
+        !identical(names(object$jr$mode.coefficients),
+          coefficient.names) ||
+        max(abs(beta - object$jr$mode.coefficients)) >
+          1e-08 * max(1, abs(beta)))
+      .stop("stored JR coefficient covariance does not match the fitted model.")
+    inverse <- if(need.correction)
+      list(covariance = direct, factor = chol(solve(direct))) else direct
+  } else {
+    inverse <- .invert(K, coefficient.names, forced.na, fixed, noise,
+      return.factor = need.correction)
+  }
+  V <- if(need.correction) inverse$covariance else inverse
+  if(need.correction) {
+    if(sandwich) {
+      V <- vcov_rs_sandwich(object, beta, V, P, blocks, index, X, eta, y,
+        prior, family, inverse$factor, details = .details)
+      if(.details) return(V)
+    } else {
+      V <- vcov_unconditional(object, beta, V, P, blocks, index,
+        inverse$factor)
+    }
+  }
 
   ## full = FALSE is applied only after inversion, hence the ordinary
   ## linear coefficient covariance is marginalized over smooth coefficients
@@ -1335,6 +1390,233 @@ vcov.gamlss2 <- function(object,
     return(.cor(V))
 
   return(V)
+}
+
+
+## Smoothness correction for the complete joint covariance.
+## JR supplies profiled joint REML curvature and covariance-factor derivatives.
+## Other fits hold the likelihood quadratic at the final coefficients and
+## reconstruct the marginal smoothness curvature without re-fitting. This
+## joint Laplace curvature is an approximation for local RS REML fits: their
+## term-wise working likelihoods do not define a joint REML criterion.
+vcov_unconditional <- function(object, beta, V, P, blocks, index, R,
+  details = FALSE, state = FALSE)
+{
+  result <- function(V, Vr = matrix(0, 0L, 0L), Vu = NULL)
+  {
+    if(!details) return(V)
+    if(is.null(Vu)) Vu <- matrix(0, nrow(V), 0L)
+    cross <- matrix(0, nrow(V), ncol(Vr),
+      dimnames = list(rownames(V), colnames(Vr)))
+    if(ncol(Vr)) cross[active, ] <- -Vu %*% Vr
+    joint <- rbind(cbind(V, cross), cbind(t(cross), Vr))
+    dimnames(joint) <- list(c(rownames(V), colnames(Vr)),
+      c(colnames(V), colnames(Vr)))
+    list(covariance = V, smoothing = Vr, cross = cross, joint = joint)
+  }
+
+  if(isTRUE(object$control$ridge))
+    stop("unconditional covariance does not support selected ridge penalties.",
+      call. = FALSE)
+  if(any(!is.finite(diag(V))))
+    stop("unconditional covariance requires estimable coefficients.",
+      call. = FALSE)
+
+  active <- which(diag(V) > 0)
+  if(!length(active)) {
+    if(state) return(list(active = active, components = list(),
+      u = matrix(0, 0L, 0L)))
+    return(result(V))
+  }
+  lookup <- integer(length(beta))
+  lookup[active] <- seq_along(active)
+  components <- list()
+
+  for(a in seq_along(blocks)) {
+    name <- names(blocks)[a]
+    fitted <- object$fitted.specials[[name]]
+    if(!length(fitted)) next
+
+    for(term in names(fitted)) {
+      source <- object$specials[[term]]
+      if(is.null(source) && !is.null(object$specials[[name]]))
+        source <- object$specials[[name]][[term]]
+      fit <- fitted[[term]]
+      ii <- index[[a]][blocks[[a]]$term == term]
+      if(!length(ii) || is.null(source))
+        stop("cannot recover the smooth penalty for unconditional covariance.",
+          call. = FALSE)
+      if(!is.null(fit$penalty))
+        stop("unconditional covariance does not support adaptive smooth penalties.",
+          call. = FALSE)
+      if(isTRUE(source$fixed)) next
+
+      S <- source[["S", exact = TRUE]]
+      if(is.null(S)) S <- fit$S
+      if(is.matrix(S) || inherits(S, "Matrix")) S <- list(S)
+      lambda <- as.numeric(fit$lambdas)
+      if(!is.list(S) || length(S) != length(lambda) ||
+          !length(S) || any(!is.finite(lambda)) || any(lambda < 0))
+        stop("unconditional covariance requires valid fitted smoothing parameters and their penalty matrices.",
+          call. = FALSE)
+      selected <- if(is.null(source$sp)) {
+        rep(TRUE, length(S))
+      } else {
+        sp <- as.numeric(source$sp)
+        if(length(sp) != length(S) || any(!is.finite(sp)))
+          stop("invalid fixed smoothing parameter specification.",
+            call. = FALSE)
+        sp < 0
+      }
+      if(!any(selected)) next
+      if(any(lambda[selected] <= 0))
+        stop("selected smoothing parameters must be positive for unconditional covariance.",
+          call. = FALSE)
+      if(any(!ii %in% active))
+        stop("unconditional covariance requires estimable smooth coefficients.",
+          call. = FALSE)
+      jj <- lookup[ii]
+      fitted.penalty <- matrix(0, length(ii), length(ii))
+      for(k in seq_along(S)) {
+        Sk <- as.matrix(S[[k]]) * lambda[k]
+        if(!identical(dim(Sk), c(length(ii), length(ii))) ||
+            any(!is.finite(Sk)))
+          stop("invalid smooth penalty in unconditional covariance.",
+            call. = FALSE)
+        Sk <- 0.5 * (Sk + t(Sk))
+        fitted.penalty <- fitted.penalty + Sk
+        if(selected[k])
+          components[[length(components) + 1L]] <- list(index = jj,
+            S = Sk, name = paste0(name, ".s.", term, ".lambda", k),
+            parameter = name, term = term, penalty = k)
+      }
+      actual.penalty <- P[ii, ii, drop = FALSE]
+      scale <- max(1, abs(actual.penalty))
+      if(max(abs(fitted.penalty - actual.penalty)) > 1e-7 * scale)
+        stop("the stored smooth penalty changed after fitting; unconditional covariance is unavailable.",
+          call. = FALSE)
+    }
+  }
+  if(!length(components)) {
+    if(state) return(list(active = active, components = components,
+      u = matrix(0, length(active), 0L)))
+    return(result(V))
+  }
+
+  b <- beta[active]
+  m <- length(components)
+  u <- matrix(0, length(active), m)
+  for(i in seq_len(m)) {
+    z <- components[[i]]
+    ii <- z$index
+    u[ii, i] <- drop(z$S %*% b[ii])
+  }
+  if(state) return(list(active = active, components = components,
+    u = u))
+  V0 <- V[active, active, drop = FALSE]
+  Vu <- V0 %*% u
+  cn <- vapply(components, `[[`, character(1L), "name")
+  if(!is.null(object$jr)) {
+    ## JR stores the curvature of the profiled joint REML criterion.
+    if(!isTRUE(object$jr$converged) || is.null(object$jr$covariance))
+      stop("joint REML curvature is unavailable for unconditional covariance.",
+        call. = FALSE)
+    Vr <- object$jr$covariance[cn, cn, drop = FALSE]
+    if(any(!is.finite(Vr)))
+      stop("invalid joint REML smoothing covariance.", call. = FALSE)
+    if(is.null(object$jr$factor.root))
+      stop("joint REML covariance factor is unavailable.", call. = FALSE)
+    Rr <- object$jr$factor.root[, cn, drop = FALSE]
+    if(any(!is.finite(Rr)) || nrow(Rr) != m || ncol(Rr) != m)
+      stop("invalid joint REML covariance factor.", call. = FALSE)
+  } else {
+    ## The penalty null space is left unpenalized in the Laplace term.
+    P0 <- P[active, active, drop = FALSE]
+    ev <- eigen(P0, symmetric = TRUE)
+    cut <- length(active) * .Machine$double.eps *
+      max(1, max(abs(ev$values)))
+    positive <- ev$values > cut
+    if(!any(positive))
+      stop("unconditional covariance requires a nonzero fitted penalty.",
+        call. = FALSE)
+    Q <- ev$vectors[, positive, drop = FALSE]
+    Pplus <- tcrossprod(sweep(Q, 2L, sqrt(ev$values[positive]), "/"))
+
+    curvature <- matrix(0, m, m)
+    trace_pair <- function(M, i, j) {
+      zi <- components[[i]]
+      zj <- components[[j]]
+      C <- M[zi$index, zj$index, drop = FALSE]
+      sum((zi$S %*% C %*% zj$S) * C)
+    }
+    for(i in seq_len(m)) for(j in i:m) {
+      z <- -sum(u[, i] * Vu[, j]) -
+        0.5 * trace_pair(V0, i, j) +
+        0.5 * trace_pair(Pplus, i, j)
+      if(i == j) {
+        zi <- components[[i]]
+        ii <- zi$index
+        z <- z + 0.5 * (sum(b * u[, i]) +
+          sum(V0[ii, ii, drop = FALSE] * zi$S) -
+          sum(Pplus[ii, ii, drop = FALSE] * zi$S))
+      }
+      curvature[i, j] <- z
+      if(i != j) curvature[j, i] <- z
+    }
+    curvature <- 0.5 * (curvature + t(curvature))
+    ## As in mgcv, use positive curvature for posterior mean variation,
+    ## and regularize the separate covariance-factor variation. This bounds
+    ## the latter when a smoothing parameter is effectively on the boundary.
+    ev <- eigen(curvature, symmetric = TRUE)
+    ## Discard curvature that cannot be distinguished from numerical zero.
+    ## The covariance-factor term below still uses bounded regularization.
+    cut <- length(ev$values) * .Machine$double.eps *
+      max(1, max(abs(ev$values)))
+    positive <- ev$values > cut
+    if(any(positive)) {
+      Q <- sweep(ev$vectors[, positive, drop = FALSE], 2L,
+        sqrt(ev$values[positive]), "/")
+      Vr <- tcrossprod(Q)
+    } else {
+      Vr <- matrix(0, m, m)
+    }
+    regularization <- if(length(object$family$names) > 1L) 1 / 50 else 1 / 10
+    Rr <- t(sweep(ev$vectors, 2L,
+      sqrt(pmax(ev$values, 0) + regularization), "/"))
+  }
+  dimnames(Vr) <- list(cn, cn)
+
+  ## Variation of the posterior mean and of its covariance factor.
+  ## Both additions are positive semidefinite, as in mgcv's Vc construction.
+  correction <- Vu %*% Vr %*% t(Vu)
+  if(!is.null(object$jr)) {
+    dC <- object$jr$factor.derivative[cn]
+    if(length(dC) != m || any(vapply(dC, is.null, logical(1L))))
+      stop("joint REML covariance-factor derivatives are unavailable.",
+        call. = FALSE)
+  } else {
+    C <- backsolve(R, diag(length(active)))
+    dC <- vector("list", m)
+    for(i in seq_len(m)) {
+      z <- components[[i]]
+      A <- crossprod(C[z$index, , drop = FALSE],
+        z$S %*% C[z$index, , drop = FALSE])
+      B <- A
+      B[lower.tri(B)] <- 0
+      diag(B) <- diag(B) / 2
+      dC[[i]] <- -C %*% B
+    }
+  }
+  for(k in seq_len(nrow(Rr))) {
+    D <- matrix(0, length(active), length(active))
+    for(i in seq_len(m)) D <- D + Rr[k, i] * dC[[i]]
+    correction <- correction + tcrossprod(D)
+  }
+
+  V[active, active] <- V0 + correction
+  V[active, active] <- 0.5 *
+    (V[active, active, drop = FALSE] + t(V[active, active, drop = FALSE]))
+  result(V, Vr, Vu)
 }
 
 
@@ -1382,6 +1664,9 @@ vcov_state_signature <- function(object)
     coefficients = unclass(coef(object, full = TRUE, dropall = FALSE)),
     fitted.values = object$fitted.values,
     weights = object$weights,
+    jr = if(is.null(object$jr)) NULL else
+      list(converged = object$jr$converged,
+        covariance = object$jr$covariance),
     linear.penalties = lapply(object$fitted.linear, function(x) x$penalty),
     special.penalties = lapply(object$fitted.specials, function(x)
       lapply(x, function(z) list(lambdas = z$lambdas, penalty = z$penalty)))
@@ -1391,16 +1676,20 @@ vcov_state_signature <- function(object)
 ## A small common representation for consumers that require full joint
 ## covariance.  It is derived exclusively from the new vcov.gamlss2().
 vcov_information <- function(object,
-  method = c("joint", "working", "numeric"), ...)
+  method = c("joint", "working", "numeric"), .details = FALSE, ...)
 {
   method <- match.arg(method)
   beta <- unclass(coef(object, full = TRUE, dropall = FALSE))
-  V <- vcov.gamlss2(object, full = TRUE, method = method, ...)
+  V <- vcov.gamlss2(object, full = TRUE, method = method,
+    .details = .details, ...)
+  details <- if(.details) V else NULL
+  if(.details) V <- details$covariance
   if(!identical(names(beta), rownames(V)))
     stop("internal covariance and coefficient order do not agree", call. = FALSE)
   structure(c(list(coefficients = beta, covariance = V,
     dimension = length(beta), method = method,
     state = vcov_state_signature(object)),
+    if(.details) list(details = details),
     vcov_coefficient_blocks(object, names(beta))),
     class = "gamlss2.vcov.information")
 }

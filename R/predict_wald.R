@@ -102,11 +102,12 @@ wald_information_legacy <- function(object)
     class = "gamlss2.interval.cache")
 }
 
-wald_information <- function(object)
+wald_information <- function(object, unconditional = FALSE, sandwich = FALSE)
 {
   if(inherits(object, "bamlss2"))
     stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
-  info <- vcov_information(object, method = "joint")
+  info <- vcov_information(object, method = "joint",
+    unconditional = unconditional, sandwich = sandwich)
   if(any(!is.finite(diag(info$covariance))))
     stop("Wald intervals require estimable coefficients; non-estimable coefficients were found.")
   structure(list(
@@ -114,7 +115,8 @@ wald_information <- function(object)
     blocks = info$blocks,
     indices = info$indices,
     information = info,
-    state = info$state
+    state = info$state,
+    unconditional = unconditional, sandwich = sandwich
   ), class = "gamlss2.interval.cache")
 }
 
@@ -131,7 +133,7 @@ print.gamlss2.interval.cache <- function(x, ...)
 }
 
 predict_wald <- function(object, model, newdata, type, terms, drop, dots,
-  level, cache)
+  level, cache, unconditional = FALSE, sandwich = FALSE)
 {
   if(!is.numeric(level) || !length(level) || any(!is.finite(level)) ||
       any(level <= 0 | level >= 1))
@@ -141,8 +143,11 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   if(inherits(object, "bamlss2"))
     stop("Wald intervals require an ML fit; use FUN for posterior intervals.")
   if(is.null(cache)) {
-    cache <- wald_information(object)
+    cache <- wald_information(object, unconditional = unconditional,
+      sandwich = sandwich)
   } else if(!inherits(cache, "gamlss2.interval.cache") ||
+      !identical(isTRUE(cache$unconditional), unconditional) ||
+      !identical(isTRUE(cache$sandwich), sandwich) ||
       !identical(cache$state, vcov_state_signature(object),
         num.eq = FALSE, single.NA = FALSE)) {
     stop("'interval.cache' must come from the same, unchanged fitted model.")

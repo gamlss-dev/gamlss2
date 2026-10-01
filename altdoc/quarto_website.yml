@@ -21,20 +21,22 @@ website:
         file: man/gamlss2-package.qmd
       - text: Vignettes
         menu:
+        - text: "Overview and reading guide"
+          file: vignettes/gamlss2.qmd
         - text: "First steps"
           file: vignettes/firststeps.qmd
         - text: "Prediction and uncertainty"
           file: vignettes/prediction.qmd
-        - text: "Families"
+        - text: "Forecasting and assessment"
+          file: vignettes/topmodels.qmd
+        - text: "Family objects"
           file: vignettes/families.qmd
         - text: "Family extensions"
           file: vignettes/family_extensions.qmd
+        - text: "Special model terms"
+          file: vignettes/specials.qmd
         - text: "Bayesian GAMLSS"
           file: vignettes/bayesian.qmd
-        - text: "Specials"
-          file: vignettes/specials.qmd
-        - text: "Evaluation"
-          file: vignettes/topmodels.qmd
       - text: News
         file: $ALTDOC_NEWS
       - text: Citation

@@ -25,6 +25,11 @@ model directly by MCMC, whereas `mcmc()` starts from an already fitted
 `gamlss2` model. This vignette illustrates both workflows and shows how to
 inspect posterior effects, samples, and predictions.
 
+The fitting notation is introduced in [First Steps](firststeps.html).
+[Prediction and Uncertainty](prediction.html) uses the same ozone formula and
+Gamma parameterization for likelihood-based inference, with a training/test
+split. Here we use all complete observations to illustrate posterior inference.
+
 ## Data and model
 
 We use the `airquality` data and model daily ozone concentration. Ozone is
@@ -156,7 +161,7 @@ m <- mcmc(m,
 ## Posterior predictions
 
 For an object returned by `bamlss2()`, `predict()` uses the stored posterior
-samples when a summary function is supplied with `FUN`. We evaluate the model
+samples. Supplying `FUN` selects how they are summarized. We evaluate the model
 over the observed temperature range and keep wind speed fixed at its median.
 
 ```{r}
@@ -178,8 +183,11 @@ psigma <- predict(m, newdata = nd, model = "sigma",
 head(pmu)
 ```
 
-The resulting intervals describe posterior uncertainty in the distribution
-parameters. They are not prediction intervals for a future ozone observation.
+The resulting intervals are 95% pointwise credible intervals for the
+distribution parameters; `fit` is the posterior median. They are not prediction
+intervals for a future ozone observation or simultaneous bands for a whole
+curve. Wind speed is held fixed, while the displayed observations include all
+wind speeds.
 
 ```{r}
 #| fig-height: 4
@@ -213,6 +221,12 @@ posterior means and standard deviations are returned with
 head(predict(m, newdata = nd, type = "parameter", FUN = mean))
 head(predict(m, newdata = nd, type = "parameter", FUN = sd))
 ```
+
+For a quantity that depends on several parameters, retain the joint draws with
+`predict(m, newdata = nd, FUN = identity)`, compute the quantity for each draw,
+and then summarize. [Prediction and Uncertainty](prediction.html#including-coefficient-uncertainty)
+also shows how to generate future responses from these distributions. Using
+posterior draws in that construction gives posterior predictive intervals.
 
 ## Starting from a fitted `gamlss2` model
 

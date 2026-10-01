@@ -18,6 +18,10 @@ fitted inside the backfitting algorithm. Ordinary linear terms and `mgcv`
 smooths cover many models; specials are useful when the fitting method needs its
 own estimator, prediction method, state, or tuning parameters.
 
+The standard fitting workflow is described in [First Steps](firststeps.html).
+This vignette focuses on extending the predictor; [Family Objects](families.html)
+instead extends the response distribution.
+
 ```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
 library("gamlss2")
 ```
@@ -153,5 +157,9 @@ prediction behavior. Write a custom special when the term has a distinct
 fitting algorithm, needs custom state, or wraps an external modelling method.
 Keep the constructor lightweight, store all information needed for prediction,
 return centered fitted contributions, and test both fitting and `newdata`
-predictions. The help topic `?special_terms` documents the method arguments and
+predictions. Prediction support alone does not imply support for joint
+coefficient uncertainty: the Gaussian intervals in
+[Prediction and Uncertainty](prediction.html) require a coefficient-linear
+design and a verifiable quadratic penalty. A custom fitting method may need
+its own uncertainty procedure. The help topic `?special_terms` documents the method arguments and
 return-value contract; `?fake_formula` documents special-name registration.

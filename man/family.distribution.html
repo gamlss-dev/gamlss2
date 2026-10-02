@@ -664,7 +664,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="generate-a-gamlss2-family-from-a-distributions3-object">Generate a ‘gamlss2’ Family from a ‘distributions3’ Object</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Set up a [gamlss2.family] object based on an object inheriting from ‘distribution’ (as provided by the <span class="pkg">distributions3</span> package).</p>
+<p>Set up a <code>gamlss2.family</code> object based on an object inheriting from <code>“distribution”</code> (as provided by the <span class="pkg">distributions3</span> package).</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -772,7 +772,7 @@ character. Name of the class and distribution object creator, e.g., <code>“Nor
 <code id="create_distribution">create_distribution</code>
 </td>
 <td>
-either a function or one of the character strings <code>“structure”</code> or <code>“do.call”</code>. This specifies how to create a distribution object from a (fitted) parameter list (typically from [gamlss2]). Either a dedicated function can be specified or such a function is set up internally. If <code>create_distribution = “structure”</code> then only the class attribute is added in a <code>structure()</code> call. If set to <code>“do.call”</code> then the distribution object is created via <code>do.call()</code> to the class creator (such as <code>Normal</code> etc.). The latter is safer but requires much more overhead.
+either a function or one of the character strings <code>“structure”</code> or <code>“do.call”</code>. This specifies how to create a distribution object from a (fitted) parameter list (typically from <code>gamlss2</code>). Either a dedicated function can be specified or such a function is set up internally. If <code>create_distribution = “structure”</code> then only the class attribute is added in a <code>structure()</code> call. If set to <code>“do.call”</code> then the distribution object is created via <code>do.call()</code> to the class creator (such as <code>Normal</code> etc.). The latter is safer but requires much more overhead.
 </td>
 </tr>
 <tr>
@@ -803,8 +803,7 @@ list of functions. A named list with one <code>function(y, …)</code> per param
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The workhorse function <code>distributions3_family</code> sets up a <code>gamlss2.family</code> list by leveraging the generic functions and methods from the <span class="pkg">distributions3</span> package. The main idea is that <code>gamlss2</code> in each iteration and in the final model fit provides a list of fitted parameters. These can then be mapped to the corresponding distribution class and all the corresponding methods (such as <code>pdf</code> for computing the probability density function) from <span class="pkg">distributions3</span> can be leveraged to compute the building blocks for fitting the model (e.g., <code>pdf</code>, <code>score</code>, <code>hessian</code>, etc.) and for assessing the final model fit.</p>
-<p>The <code>family</code> methods all call <code>distributions3_family</code> internally but help to automatically infer and set up some of the elements of the family.</p>
+<p><code>distributions3_family</code> maps fitted parameter lists to <span class="pkg">distributions3</span> objects and uses their methods for fitting and assessing the model. The <code>family</code> methods call this function and infer some family settings automatically.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

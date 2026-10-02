@@ -667,16 +667,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="predictions-from-gamlss2-models">Predictions from gamlss2 Models</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Methods for <span class="pkg">gamlss2</span> model objects that predict response distributions, their parameters, additive predictors, individual terms, or response means.</p>
+<p>Predict response distributions, parameters, additive predictors, terms, or response means from a <span class="pkg">gamlss2</span> model.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'gamlss2'
-predict(object, model = NULL, newdata = NULL,
+predict(object, parameter = NULL, newdata = NULL,
   type = c("distribution", "parameter", "link", "response", "terms"),
   terms = NULL, se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval = c("none", "wald"), interval.cache = NULL,
-  unconditional = FALSE, sandwich = FALSE)
+  level = NULL, interval = c("none", "wald"), unconditional = FALSE)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -687,15 +686,15 @@ predict(object, model = NULL, newdata = NULL,
 <code id="object">object</code>
 </td>
 <td>
-A model object of class <code>gamlss2</code>.
+A <code>gamlss2</code> model.
 </td>
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="model">model</code>
+<code id="parameter">parameter</code>
 </td>
 <td>
-Character or numeric. Which distribution parameter(s) should be predicted? Names are family-specific, e.g., <code>“mu”</code>, <code>“sigma”</code>, or <code>“shape”</code>, <code>“rate”</code>. By default, predictions are returned for all model parts.
+Distribution parameter name(s) or index(es), such as <code>“mu”</code> or <code>“sigma”</code>; defaults to all parameters.
 </td>
 </tr>
 <tr>
@@ -703,7 +702,7 @@ Character or numeric. Which distribution parameter(s) should be predicted? Names
 <code id="newdata">newdata</code>
 </td>
 <td>
-Data frame. Optionally, a new data frame in which to look for variables with which to predict. If omitted, the original observations are used.
+Data frame for predictions; defaults to the fitted data.
 </td>
 </tr>
 <tr>
@@ -711,7 +710,7 @@ Data frame. Optionally, a new data frame in which to look for variables with whi
 <code id="type">type</code>
 </td>
 <td>
-Character. Which type of prediction should be computed? The default <code>“distribution”</code> returns <span class="pkg">distributions3</span> objects. If <code>type</code> is omitted and <code>model</code>, <code>parameter</code>, or <code>what</code> is specified, <code>“parameter”</code> is used. Use <code>“link”</code> for additive predictors on the link scale, <code>“parameter”</code> for distribution parameters on their natural scale, <code>“terms”</code> for individual additive terms, and <code>“response”</code> for the mean of the fitted response distribution.
+<code>“distribution”</code> (default) returns <span class="pkg">distributions3</span> objects; <code>“parameter”</code> returns parameters on their natural scale; <code>“link”</code> returns additive predictors; <code>“response”</code> returns response means; <code>“terms”</code> returns individual additive terms. Specifying <code>parameter</code> without <code>type</code> selects <code>“parameter”</code>.
 </td>
 </tr>
 <tr>
@@ -719,7 +718,7 @@ Character. Which type of prediction should be computed? The default <code>“dis
 <code id="terms">terms</code>
 </td>
 <td>
-Character. Which of the terms in the additive predictor(s) should be included? By default all terms are included.
+Additive terms to include; defaults to all. Names are partially matched unless <code>nogrep = TRUE</code> is passed in <code>…</code>.
 </td>
 </tr>
 <tr>
@@ -727,7 +726,7 @@ Character. Which of the terms in the additive predictor(s) should be included? B
 <code id="se.fit">se.fit</code>
 </td>
 <td>
-Logical. Should standard errors for the predictions be included? Standard errors are computed by simulating from the approximate multivariate normal distribution defined by the complete joint covariance of the maximum likelihood estimates. Local term-wise covariance is never used for these draws. The number of simulations is controlled by the argument <code>R</code>, which defaults to <code>R = 200</code>, and can be passed via <code>…</code>.
+For ordinary predictions, <code>TRUE</code> computes standard errors from coefficient draws; <code>R</code> in <code>…</code> sets the number of draws (default 200).
 </td>
 </tr>
 <tr>
@@ -735,7 +734,7 @@ Logical. Should standard errors for the predictions be included? Standard errors
 <code id="drop">drop</code>
 </td>
 <td>
-Logical. Should predictions be simplified when possible?
+Simplify the result when possible.
 </td>
 </tr>
 <tr>
@@ -743,7 +742,7 @@ Logical. Should predictions be simplified when possible?
 <code id="level">level</code>
 </td>
 <td>
-<code>NULL</code>, or a numeric vector of confidence levels for Wald bands, with every value strictly between zero and one.
+Numeric confidence level(s) between zero and one; supplying levels selects pointwise Wald intervals.
 </td>
 </tr>
 <tr>
@@ -751,15 +750,7 @@ Logical. Should predictions be simplified when possible?
 <code id="interval">interval</code>
 </td>
 <td>
-Character. Use <code>“wald”</code> for fast confidence bands from the joint penalized information. The default <code>“none”</code> retains ordinary prediction behavior. Supplying <code>level</code> also selects Wald bands.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="interval.cache">interval.cache</code>
-</td>
-<td>
-Optional joint covariance cache obtained from the <code>“interval.cache”</code> attribute of a previous Wald prediction for the same, unchanged model. Reusing it avoids rebuilding the joint covariance for subsequent predictions.
+<code>“none”</code> (default) returns ordinary predictions; <code>“wald”</code> returns analytic pointwise confidence intervals, at the 95% confidence level by default.
 </td>
 </tr>
 <tr>
@@ -767,15 +758,7 @@ Optional joint covariance cache obtained from the <code>“interval.cache”</co
 <code id="unconditional">unconditional</code>
 </td>
 <td>
-Logical. If <code>TRUE</code>, use the smoothing-parameter uncertainty correction in the covariance for Wald intervals and coefficient simulation. For <code>JR</code> fits this uses joint REML curvature.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="sandwich">sandwich</code>
-</td>
-<td>
-Logical. If <code>TRUE</code>, use the RS/local-REML estimating-equation sandwich covariance for Wald intervals and coefficient simulation. Cannot be combined with <code>unconditional = TRUE</code>.
+If <code>TRUE</code>, include approximate smoothing-parameter uncertainty in Wald intervals and coefficient draws.
 </td>
 </tr>
 <tr>
@@ -783,25 +766,21 @@ Logical. If <code>TRUE</code>, use the RS/local-REML estimating-equation sandwic
 <code id="...">…</code>
 </td>
 <td>
-Further control arguments. Supported aliases are <code>what</code> and <code>parameter</code> for <code>model</code>. Additional arguments are used for simulation-based summaries, including <code>FUN</code>, <code>R</code>, <code>seed</code>, <code>burnin</code>, and <code>nogrep</code>.
+Further controls, including <code>FUN</code>, <code>R</code>, <code>seed</code>, and <code>burnin</code> for simulation.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Predictions can be computed for the original observations or for <code>newdata</code>. By default, response distributions are returned. Depending on <code>type</code>, results can instead be returned as distribution parameters, on the link scale, as individual model terms, or as the fitted response mean.</p>
-<p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the complete joint covariance of the fitted coefficients, including cross-term and cross-parameter dependence. With <code>sandwich = TRUE</code>, coefficient draws use the coefficient block of the local RS Godambe covariance. These draws are a Gaussian approximation to the coefficient sampling distribution; the covariance alone does not determine finite-sample tail probabilities after nonlinear transformations. Simulation stops when the marginal 95% Gaussian interval for an estimated log smoothing parameter spans more than a factor of 100 in the smoothing parameter. This conservative check catches strongly uncertain smoothing parameters; passing it does not guarantee calibrated tail probabilities.</p>
-<p>If <code>level</code> is specified, approximate pointwise confidence intervals and standard errors are computed analytically, without simulation. Intervals on transformed parameter or response scales are transformed as needed and may be asymmetric. These are confidence intervals for the fitted model, not prediction intervals for future observations. By default they condition on the fitted smoothing parameters. Setting <code>unconditional = TRUE</code> adds the approximate correction described in <code>vcov.gamlss2</code>. Model-selection uncertainty remains excluded. Setting <code>sandwich = TRUE</code> instead uses the frequentist RS fixed-point covariance described there. The two corrections are distinct and cannot be combined. A reusable Wald cache records the selected covariance type. When an RS smoothing parameter is strictly active at its numerical limit, the sandwich calculation holds it fixed.</p>
-<p>Wald intervals currently support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths. They are not available for nonlinear custom special terms. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>.</p>
-<p>For <code>type = “terms”</code>, term names are partially matched by default. Use <code>nogrep = TRUE</code> in <code>…</code> for exact matching.</p>
-<p>See also <code>prodist.gamlss2</code> for explicitly obtaining <span class="pkg">distributions3</span> objects.</p>
+<p>Coefficient draws stored in the fit are used when available; otherwise, draws use the full joint coefficient covariance. They approximate the coefficient sampling distribution and may give unreliable tails after nonlinear transformations. Simulation stops if a marginal 95% Gaussian interval for a log smoothing parameter spans a factor of 100 on the smoothing-parameter scale.</p>
+<p>Wald intervals are approximate pointwise <em>confidence</em> intervals for fitted values, not <em>prediction</em> intervals for future observations. They are computed without simulation and may be asymmetric on transformed scales. They condition on fitted smoothing parameters by default and exclude model-selection uncertainty; see <code>vcov.gamlss2</code>.</p>
+<p>Wald intervals support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths, but not nonlinear custom special terms. They cannot be combined with <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>. An indefinite joint information matrix or non-estimable coefficient causes an error rather than a working-information approximation.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>For <code>type = “distribution”</code>, a distribution object is returned. With coefficient draws and <code>FUN = identity</code>, a list of distribution objects is returned; the family is stored once for the complete list and added when an element is extracted. For other types, <code>drop = TRUE</code> simplifies the result when possible. Term predictions are data frames or, for multiple parameters, lists of matrices. With <code>se.fit = TRUE</code>, fitted values and simulation-based standard errors are returned.</p>
-<p>When <code>level</code> is specified, a list with elements <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code> is returned. For one confidence level, <code>lower</code> and <code>upper</code> follow the structure of the ordinary point prediction, including <code>model</code>, <code>terms</code>, and <code>drop</code> selection. For multiple confidence levels, each is a list named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>), whose elements have that same prediction structure. The <code>fit</code> element is the ordinary, non-simulated prediction and <code>se.fit</code> is shared by all intervals. Attributes record the confidence levels, method, and reusable <code>interval.cache</code>. The cache stores the full joint covariance and fitted inferential state and can be reused only with that unchanged model.</p>
-<p>If the joint observed information is indefinite or a required coefficient is not estimable, Wald prediction and coefficient simulation report the problem; they do not silently substitute a working-information approximation.</p>
+<p>Ordinary predictions return a distribution object or values in the selected form. Term predictions are data frames or, for multiple parameters, lists of matrices. With <code>se.fit = TRUE</code>, fitted values and standard errors are returned. With <code>FUN = identity</code>, simulated distribution predictions form a list of distribution objects.</p>
+<p>Wald predictions return <code>fit</code>, <code>se.fit</code>, <code>lower</code>, and <code>upper</code>. For multiple levels, <code>lower</code> and <code>upper</code> are lists named by confidence percentage (for example, <code>“80%”</code> and <code>“95%”</code>). <code>fit</code> and each bound retain the structure selected by <code>parameter</code>, <code>terms</code>, and <code>drop</code>; <code>se.fit</code> is shared across levels.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -862,10 +841,10 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6596 eps = 0.000006     </code></p
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1       r_2      r_3
-1 22.66543 27.994810 17.79799
-2 25.56639 72.294607 35.98504
-3 88.78804  2.103183 82.71066</code></pre>
+<pre><code>        r_1      r_2      r_3
+1  10.00569 27.71353 21.94774
+2  92.26723 67.53295 85.12839
+3 111.65311 70.64240 65.92172</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -895,13 +874,13 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6596 eps = 0.000006     </code></p
 2 58.89341 18.54349
 3 96.20125 34.26635</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## model selects parameter predictions if type is omitted</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## parameter selects parameter predictions if type is omitted</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       1        2        3 
 10.03495 18.54349 34.26635 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     sigma
 1 10.03495
@@ -909,14 +888,14 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6596 eps = 0.000006     </code></p
 3 34.26635</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="do">## individual terms in additive predictor(s)</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  (Intercept)   s(speed)
 1    2.637658 -0.3315843
 2    2.637658  0.2824607
 3    2.637658  0.8965055</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"terms"</span>, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">terms =</span> <span class="st">"s(speed)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    s(speed)
 1 -0.3315843

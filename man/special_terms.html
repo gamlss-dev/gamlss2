@@ -675,7 +675,7 @@ special_fit(x, ...)
 special_predict(x, ...)
 
 ## extractor function for fitted special terms
-specials(object, model = NULL, terms = NULL, elements = NULL, ...)
+specials(object, parameter = NULL, terms = NULL, elements = NULL, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -699,10 +699,10 @@ A fitted <code>gamlss2</code> object.
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="model">model</code>
+<code id="parameter">parameter</code>
 </td>
 <td>
-Character or integer, specifies the model for which fitted special terms should be extracted.
+Character or integer selecting the distribution parameter whose fitted special terms should be extracted.
 </td>
 </tr>
 <tr>
@@ -997,13 +997,13 @@ Arguments needed for the <code>special_fit()</code> function to facilitate the f
 <span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a><span class="do">## extract fitted special terms,</span></span>
 <span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a><span class="do">## fitted NN for parameter mu</span></span>
-<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m2, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m2, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
 <span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a><span class="do">## same for sigma</span></span>
-<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m2, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m2, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
 <span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a><span class="do">## return element names of fitted special term list</span></span>
-<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m2, <span class="at">model =</span> <span class="st">"sigma"</span>, <span class="at">elements =</span> <span class="st">"names"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a><span class="fu">specials</span>(m2, <span class="at">parameter =</span> <span class="st">"sigma"</span>, <span class="at">elements =</span> <span class="st">"names"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

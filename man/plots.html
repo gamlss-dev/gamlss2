@@ -694,7 +694,7 @@ An object of class <code>“gamlss2”</code> or <code>“gamlss2.list”</code>
 <code id="parameter">parameter</code>
 </td>
 <td>
-Character or integer specifying for which distribution parameter the plots should be created. The arguments <code>model</code> and <code>what</code>, if supplied through <code>…</code>, are treated as aliases for <code>parameter</code> to support alternative calling styles.
+Character or integer specifying for which distribution parameter the plots should be created. Defaults to all parameters.
 </td>
 </tr>
 <tr>
@@ -742,7 +742,7 @@ Logical. Should a legend be added for plots with multiple models?
 <code id="...">…</code>
 </td>
 <td>
-Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code>col</code>, <code>legend = TRUE</code> (for multiple model plots), among others, depending on the type of plot. Arguments <code>model</code> and <code>what</code> are treated as aliases for <code>parameter</code>.
+Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code>col</code>, <code>legend = TRUE</code> (for multiple model plots), among others, depending on the type of plot.
 </td>
 </tr>
 </tbody></table>
@@ -772,10 +772,10 @@ Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## plot specific effect</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="dv">1</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="dv">2</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">model =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="st">"Solar"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">parameter =</span> <span class="st">"sigma"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="dv">1</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="dv">2</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="st">"Solar"</span>)</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">terms =</span> <span class="st">"Solar.R"</span>)</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="do">## plot all residual diagnostics</span></span>

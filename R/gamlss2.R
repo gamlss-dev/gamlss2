@@ -39,6 +39,11 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## in order to support more than 4 parameter models.
   family <- complete_family(family, .links = control$links)
 
+  ## Infer a family name.
+  if(family$family == "NA") {
+    family$family <- as.character(match.call()["family"])
+  }
+
   ## Use numeric hessian?
   if(isTRUE(control$numhessian)) {
     family$update <- NULL

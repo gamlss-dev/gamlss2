@@ -75,61 +75,24 @@ mixture_family(families = NO, k = NULL, reference = 1L,
   The \code{probabilities()} family function converts these odds to
   normalized probabilities.
 
-  Analytical first derivatives are assembled from the component-family
-  scores. If
-  \deqn{r_{ij} = \frac{\pi_{ij}f_j(y_i)}{\sum_\ell \pi_{i\ell}f_\ell(y_i)}}
-  denotes a posterior responsibility, the score for a component
-  parameter is its component score multiplied by \eqn{r_{ij}}. The
-  mixing-predictor score is \eqn{r_{ij} - \pi_{ij}}. Missing Hessians
-  are supplied numerically by the standard family completion
-  infrastructure.
+  Component scores are weighted by posterior responsibilities; missing
+  Hessians are computed numerically. Working-response updates reuse
+  component densities.
 
-  The family supplies a fused working-response update for estimation. It
-  uses the same finite-difference diagonal Hessian as the standard family
-  completion infrastructure, but shares the component densities at the
-  current parameters. For a component-parameter perturbation, only that
-  component's density is recomputed; mixing-parameter perturbations reuse
-  every component density. Repeated identity and log links are mapped
-  directly, and a single family repeated \code{k} times is completed only
-  once. These optimizations do not change the numerical updates.
+  The default \code{initialize = "separated"} starts recognized locations
+  at ordered empirical midpoint quantiles, uses component initializers for
+  other parameters, and starts with equal mixing probabilities.
+  \code{"cluster"} starts from response-based groups and their proportions;
+  \code{"component"} uses unmodified component initializers and equal
+  probabilities. \code{"modal"} uses separated density modes and their
+  nearest observations, falling back to separated starts if no suitable
+  modes are found.
 
-  The default \code{initialize = "separated"} strategy places recognized
-  component location parameters at ordered empirical midpoint quantiles.
-  Other parameters retain their component-family initializers and mixing
-  probabilities start equally. This deliberately broad initialization is
-  robust for flexible mixture regressions, where response-only clusters do
-  not account for the model's covariates and can select a poor local mode.
-
-  With \code{initialize = "cluster"}, empirical midpoint quantiles first
-  define ordered centers for a finite numeric response. One-dimensional
-  Lloyd updates assign observations to their nearest center; a rank
-  partition is used if tied centers would otherwise produce an empty
-  cluster. Each component family's initialization functions are then
-  evaluated on the response observations assigned to that component, and
-  the resulting values are reduced to component-level starts. Mixing
-  probabilities are initialized from cluster proportions and converted to
-  odds relative to the reference component. This can be useful for
-  intercept-only or otherwise simple mixtures, but is not uniformly better
-  for mixture regression.
-
-  With \code{initialize = "modal"}, sufficiently separated modes of a
-  kernel density estimate initialize continuous component locations and
-  scales, with mixing probabilities based on nearest-mode assignments.
-  If suitable modes cannot be found, this falls back to separated starts.
-  When modes are found, log-linked \code{sigma} parameters use a shifted
-  log link with lower bound 0.8 times the density bandwidth, and log-linked
-  JSU \code{tau} parameters have lower bound one. These bounds remain in
-  effect during fitting: this option changes the admissible parameter
-  space, not just the starting values. Other strategies retain the
-  component-family links without these bounds.
-
-  Every proposed natural-scale value is checked after applying its link.
-  Values on a link boundary are shrunk toward the inverse-link value at
-  zero using one pseudo-observation. If a cluster-specific value remains
-  invalid, initialization falls back to the corresponding full-response
-  component initializer and finally to the inverse-link value at zero.
-  Non-numeric responses or responses that cannot be partitioned use these
-  fallback values and equal mixing probabilities.
+  When modal starts are found, log-linked \code{sigma} has a lower bound of
+  0.8 times the density bandwidth and log-linked JSU \code{tau} has a lower
+  bound of one. These bounds remain in effect during fitting. Invalid or
+  unusable response-based starts fall back to full-response component
+  initializers and then to the inverse-link value at zero.
 
   The returned family includes \code{cdf()}, \code{quantile()},
   \code{random()}, \code{mean()}, and \code{variance()} whenever all

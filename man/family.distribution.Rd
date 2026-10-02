@@ -7,8 +7,8 @@
 \title{Generate a 'gamlss2' Family from a 'distributions3' Object}
 
 \description{
-Set up a [gamlss2.family] object based on an object
-inheriting from `distribution` (as provided by the \pkg{distributions3}
+Set up a \code{\link{gamlss2.family}} object based on an object
+inheriting from \code{"distribution"} (as provided by the \pkg{distributions3}
 package).
 }
 
@@ -77,7 +77,7 @@ e.g., \code{"Normal"} or \code{"Binomial"}.}
 
 \item{create_distribution}{either a function or one of the character strings
 \code{"structure"} or \code{"do.call"}. This specifies how to create a distribution object
-from a (fitted) parameter list (typically from [gamlss2]). Either a dedicated
+from a (fitted) parameter list (typically from \code{\link{gamlss2}}). Either a dedicated
 function can be specified or such a function is set up internally. If
 \code{create_distribution = "structure"} then only the class attribute is added in
 a \code{structure()} call. If set to \code{"do.call"} then the distribution object is
@@ -95,17 +95,10 @@ per parameter to be modeled, returning an initialization for this parameter.}
 }
 
 \details{
-The workhorse function \code{distributions3_family} sets up a \code{\link{gamlss2.family}}
-list by leveraging the generic functions and methods from the \pkg{distributions3}
-package. The main idea is that \code{\link{gamlss2}} in each iteration and in the final
-model fit provides a list of fitted parameters. These can then be mapped to the corresponding
-distribution class and all the corresponding methods (such as \code{\link[distributions3]{pdf}}
-for computing the probability density function) from \pkg{distributions3} can be leveraged
-to compute the building blocks for fitting the model (e.g., \code{pdf}, \code{score},
-\code{hessian}, etc.) and for assessing the final model fit.
-
-The \code{family} methods all call \code{distributions3_family} internally but help
-to automatically infer and set up some of the elements of the family.
+\code{distributions3_family} maps fitted parameter lists to
+\pkg{distributions3} objects and uses their methods for fitting and
+assessing the model. The \code{family} methods call this function and
+infer some family settings automatically.
 }
 
 \value{

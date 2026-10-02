@@ -103,7 +103,10 @@ specials(object, model = NULL, terms = NULL, elements = NULL, ...)
 }
 
 \examples{
-## example special term for neural networks,
+## note: this is a quite long example,
+##       to showcase the complete workflow
+##
+## special term for neural networks,
 ## the constructor function is used in the formula
 ## when calling gamlss2()
 n <- function(formula, ...)
@@ -261,7 +264,7 @@ nd <- with(HarzTraffic, expand.grid(
   "rain" = seq(min(rain), max(rain), length = n)
 ))
 
-## compute median rent R estimate
+## median rent R estimate
 nd$fit <- quantile(m2, newdata = nd, probs = 0.5)
 
 ## visualize

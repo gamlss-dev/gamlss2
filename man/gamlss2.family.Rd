@@ -219,6 +219,7 @@ matlines(nd$Wind, pq, lwd = 2,
 ## the $cdf() and $quantile() functions are needed as well
 Gamma <- function(...) {
   fam <- list(
+    "family" = "Gamma"
     "names" = c("mu", "sigma"),
     "links" = c("mu" = "log", "sigma" = "log"),
     "pdf" = function(par, y, log = FALSE, ...) {

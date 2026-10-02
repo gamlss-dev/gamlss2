@@ -2403,7 +2403,7 @@ complete_family <- function(family, .links = NULL)
   }
 
   if(is.null(family$family)) {
-    family$family <- "No family name supplied!"
+    family$family <- "NA"
   }
 
   if(inherits(family, "distribution")) {
@@ -2601,7 +2601,6 @@ family.gamlss2.family <- function(object, ...) {
 ## A simple print method.
 print.gamlss2.family <- function(x, full = TRUE, ...)
 {
-  cat("Family:", x$family, if(!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL,  "\n")
   if(!is.character(x$links)) {
     if(inherits(x$links, c("link-gamlss2", "link-glm")))
       links <- x$links$name
@@ -2612,11 +2611,25 @@ print.gamlss2.family <- function(x, full = TRUE, ...)
   } else {
     links <- x$links
   }
+
+  fn <- x$family
+  ln <- paste0(links, "(", x$names, ")")
   links <- paste(links, collapse = ", ")
-  if(links != "") {
-    cat(if(length(x$links) > 1) "Link functions:" else "Link function:", links, sep = " ")
-    cat("\n")
-  }
+  fn <- paste0(fn, "(", paste(ln, collapse = ", ") ,")")
+
+  txt <- paste(
+    "Family:",
+    fn,
+    if (!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL
+  )
+
+  cat(paste(strwrap(txt, width = 80, exdent = 10), collapse = "\n"), "\n")
+
+#  cat("Family:", fn, if(!is.null(x$full.name)) paste0("(", x$full.name, ")") else NULL,  "\n")
+#  if(links != "") {
+#    cat(if(length(x$links) > 1) "Link functions:" else "Link function:", links, sep = " ")
+#    cat("\n")
+#  }
   if(full) {
     nfun <- names(x[c("transform", "optimizer", "sampler", "results", "predict")])
     if(!all(is.na(nfun))) {

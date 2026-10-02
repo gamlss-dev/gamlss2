@@ -70,6 +70,7 @@ m1 <- gamlss2(
   family = NBI
 )
 
+## model with additional model term for sigma
 m2 <- gamlss2(
   bikes ~ s(yday, bs = "cc") | .,
   data = HarzTraffic,

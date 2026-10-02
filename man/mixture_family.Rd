@@ -146,7 +146,8 @@ fit_family(d$waiting, family = fam)
 m <- gamlss2(
   waiting ~ s(eruptions) | . | . | . | .,
   data = d,
-  family = fam
+  family = fam,
+  criterion = "aicc"
 )
 
 ## estimated effects
@@ -246,3 +247,4 @@ legend(
 \keyword{distribution}
 \keyword{mixture}
 \keyword{regression}
+

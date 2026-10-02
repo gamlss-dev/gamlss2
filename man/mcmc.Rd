@@ -88,7 +88,7 @@ plot(m2)
 plot(m2, which = "samples")
 plot(m2, which = "samples", ask = TRUE)
 plot(m2, which = "samples", ask = TRUE,
-  model = "mu", lag.max = 120, term = "s(Temp)")
+  parameter = "mu", lag.max = 120, term = "s(Temp)")
 
 ## samples can be extracted for further inspection
 print(head(m2$samples))

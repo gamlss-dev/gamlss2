@@ -22,13 +22,14 @@ special_fit(x, \dots)
 special_predict(x, \dots)
 
 ## extractor function for fitted special terms
-specials(object, model = NULL, terms = NULL, elements = NULL, ...)
+specials(object, parameter = NULL, terms = NULL, elements = NULL, ...)
 }
 
 \arguments{
   \item{x}{A model term object as supplied in the formula in the \code{\link{gamlss2}} call.}
   \item{object}{A fitted \code{\link{gamlss2}} object.}
-  \item{model}{Character or integer, specifies the model for which fitted special terms should be extracted.}
+  \item{parameter}{Character or integer selecting the distribution parameter
+    whose fitted special terms should be extracted.}
   \item{terms}{Character or integer, specifies the special model terms that should be extracted.}
   \item{elements}{Character, specifies which elements of a fitted special term should be
     extracted. If \code{elements = "names"}, the corresponding element names are extracted.}
@@ -292,15 +293,14 @@ print(p2, split = c(2, 1, 2, 1), more = FALSE)
 
 ## extract fitted special terms,
 ## fitted NN for parameter mu
-specials(m2, model = "mu", elements = "model")
+specials(m2, parameter = "mu", elements = "model")
 
 ## same for sigma
-specials(m2, model = "sigma", elements = "model")
+specials(m2, parameter = "sigma", elements = "model")
 
 ## return element names of fitted special term list
-specials(m2, model = "sigma", elements = "names")
+specials(m2, parameter = "sigma", elements = "names")
 }}
 
 \keyword{models}
 \keyword{regression}
-

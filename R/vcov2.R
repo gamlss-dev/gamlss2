@@ -293,8 +293,8 @@ vcov.gamlss2 <- function(object,
 
     if(is.function(mm)) {
       aa <- list(
-        list(object = object, model = name),
         list(object = object, parameter = name),
+        list(object = object, model = name),
         list(object = object)
       )
 

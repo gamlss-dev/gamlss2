@@ -132,7 +132,7 @@ print.gamlss2.interval.cache <- function(x, ...)
   invisible(x)
 }
 
-predict_wald <- function(object, model, newdata, type, terms, drop, dots,
+predict_wald <- function(object, parameter, newdata, type, terms, drop, dots,
   level, cache, unconditional = FALSE, sandwich = FALSE)
 {
   if(!is.numeric(level) || !length(level) || any(!is.finite(level)) ||
@@ -154,23 +154,21 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   }
   family <- object$family
   parameters <- family$names
-  if(is.null(model)) model <- dots$what
-  if(is.null(model)) model <- dots$parameter
-  if(is.null(model)) model <- parameters
-  if(!is.character(model)) model <- parameters[model]
-  model <- parameters[pmatch(model, parameters)]
-  if(!length(model) || anyNA(model) || anyDuplicated(model))
+  if(is.null(parameter)) parameter <- parameters
+  if(!is.character(parameter)) parameter <- parameters[parameter]
+  parameter <- parameters[pmatch(parameter, parameters)]
+  if(!length(parameter) || anyNA(parameter) || anyDuplicated(parameter))
     stop("Unknown or duplicated prediction parameter.")
-  if(type == "response" && !setequal(model, parameters))
+  if(type == "response" && !setequal(parameter, parameters))
     stop("Response intervals require all distributional parameters.")
 
   ## Ordinary predictions remain the source of the point estimates and their
   ## output shape. This call never requests draws or standard errors.
   if(is.null(dots$no_weights)) dots$no_weights <- TRUE
-  point <- function(type, model, drop) do.call(predict.gamlss2,
-    c(list(object = object, model = model, newdata = newdata, type = type,
+  point <- function(type, parameter, drop) do.call(predict.gamlss2,
+    c(list(object = object, parameter = parameter, newdata = newdata, type = type,
       terms = terms, drop = drop), dots))
-  fit <- point(type, model, drop)
+  fit <- point(type, parameter, drop)
   mf.args <- c(list(formula = object), dots)
   if(!is.null(newdata)) mf.args$data <- newdata
   mf <- do.call(model.frame.gamlss2, mf.args)
@@ -215,8 +213,8 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
   se <- fit
   transformed <- list()
   if(type == "terms") {
-    for(j in model) {
-      values <- if(length(model) == 1L && drop) fit else fit[[j]]
+    for(j in parameter) {
+      values <- if(length(parameter) == 1L && drop) fit else fit[[j]]
       sj <- values
       for(term in colnames(values)) {
         block <- term.matrices[[j]][[term]]
@@ -224,7 +222,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
         if(length(block$index)) A[, block$index] <- block$X
         sj[, term] <- sqrt(wald_variance(A, cache$V))
       }
-      if(length(model) == 1L && drop) {
+      if(length(parameter) == 1L && drop) {
         se <- sj
       } else {
         se[[j]] <- sj
@@ -235,7 +233,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
     fm <- family$mean
     if(is.null(fm)) fm <- if(!is.null(family$q))
       function(par) family$quantile(par = par, 0.5) else function(par) par[[1L]]
-    targets <- if(type == "response") "response" else model
+    targets <- if(type == "response") "response" else parameter
     ## Small predictor-space Jacobian for transformed parameters or means.
     derivatives <- setNames(vector("list", length(targets)), targets)
     if(type != "link") {
@@ -250,7 +248,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
       }
     }
     for(target in targets) {
-      values <- if(type == "response" || (length(model) == 1L && drop)) fit else fit[[target]]
+      values <- if(type == "response" || (length(parameter) == 1L && drop)) fit else fit[[target]]
       A <- if(type == "link") matrices[[target]] else matrix(0, n, p)
       if(type != "link") for(j in parameters)
         A <- A + matrices[[j]] * as.numeric(derivatives[[target]][[j]])
@@ -271,7 +269,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
           }
         }
       }
-      if(type == "response" || (length(model) == 1L && drop)) {
+      if(type == "response" || (length(parameter) == 1L && drop)) {
         se <- sj
       } else {
         se[[target]] <- sj
@@ -288,7 +286,7 @@ predict_wald <- function(object, model, newdata, type, terms, drop, dots,
     x + multiplier * s
   }
   set_target <- function(x, target, value) {
-    if(length(model) == 1L && drop) {
+    if(length(parameter) == 1L && drop) {
       x[] <- value
       x
     } else {

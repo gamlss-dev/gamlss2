@@ -143,8 +143,8 @@ summary(m2)
 
 ## extract coefficients
 cm <- cbind(
-  "linear" = specials(m1, model = "mu", elements = "coefficients"),
-  "ridge" = specials(m2, model = "mu", elements = "coefficients")
+  "linear" = specials(m1, parameter = "mu", elements = "coefficients"),
+  "ridge" = specials(m2, parameter = "mu", elements = "coefficients")
 )
 print(cm)
 
@@ -168,10 +168,9 @@ m4 <- gamlss2(
   family = NO
 )
 
-specials(m4, model = "mu", elements = "coefficients")
+specials(m4, parameter = "mu", elements = "coefficients")
 }}
 
 \keyword{models}
 \keyword{regression}
 \keyword{smooth}
-

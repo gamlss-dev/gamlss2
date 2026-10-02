@@ -336,7 +336,7 @@ fit_ALD <- function(formula, data, tau,
 
     ll <- tryCatch(as.numeric(stats::logLik(model)), error = function(e) NA_real_)
     pred <- tryCatch(
-      stats::predict(model, model = "mu"),
+      stats::predict(model, parameter = "mu"),
       error = function(e) e
     )
     valid <- length(ll) == 1L && is.finite(ll) &&
@@ -495,7 +495,7 @@ fit_ALD <- function(formula, data, tau,
 
   raw_fitted_values <- do.call(
     "cbind",
-    lapply(models, stats::predict, model = "mu")
+    lapply(models, stats::predict, parameter = "mu")
   )
   colnames(raw_fitted_values) <- names(models)
   fitted_values <- raw_fitted_values
@@ -532,11 +532,11 @@ fitted.ALDfit <- function(object, ...)
 predict.ALDfit <- function(object, newdata = NULL, ...)
 {
   dots <- list(...)
-  dots[c("object", "model", "newdata")] <- NULL
+  dots[c("object", "model", "parameter", "newdata")] <- NULL
 
   ans <- lapply(object$models, function(model) {
     args <- c(
-      list(object = model, model = "mu"),
+      list(object = model, parameter = "mu"),
       if(is.null(newdata)) list() else list(newdata = newdata),
       dots
     )

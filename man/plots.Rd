@@ -27,8 +27,7 @@
     \code{c()}.
     See the examples.}
   \item{parameter}{Character or integer specifying for which distribution parameter the plots should be created.
-    The arguments \code{model} and \code{what}, if supplied through \code{\dots}, are treated as
-    aliases for \code{parameter} to support alternative calling styles.}
+    Defaults to all parameters.}
   \item{which}{Character or integer selecting the type of plot.
     \code{"effects"} produces effect plots of model terms,
     \code{"resid"} shows the available residual diagnostics,
@@ -47,8 +46,7 @@
   \item{legend}{Logical. Should a legend be added for plots with multiple models?}
   \item{\dots}{Additional graphical arguments such as
     \code{lwd}, \code{lty}, \code{col}, \code{legend = TRUE} (for multiple model plots),
-    among others, depending on the type of plot. Arguments \code{model} and
-    \code{what} are treated as aliases for \code{parameter}.}
+    among others, depending on the type of plot.}
 }
 
 \details{
@@ -85,10 +83,10 @@ plot(m1)
 
 ## plot specific effect
 plot(m1, parameter = "sigma")
-plot(m1, model = "sigma")
-plot(m1, model = "mu", terms = 1)
-plot(m1, model = "mu", terms = 2)
-plot(m1, model = "mu", terms = "Solar")
+plot(m1, parameter = "sigma")
+plot(m1, parameter = "mu", terms = 1)
+plot(m1, parameter = "mu", terms = 2)
+plot(m1, parameter = "mu", terms = "Solar")
 plot(m1, terms = "Solar.R")
 
 ## plot all residual diagnostics
@@ -105,4 +103,3 @@ plot(m1, which = "scatter-resid")
 }}
 
 \keyword{aplot}
-

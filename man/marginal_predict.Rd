@@ -35,7 +35,7 @@ marginal_predict(object, newdata = NULL, variables = NULL,
   \item{values}{An optional named list specifying the prediction grid for one
     or more of the selected \code{variables}.}
   \item{\dots}{Further arguments passed to \code{\link{predict.gamlss2}}, such
-    as \code{type}, \code{model}, \code{terms}, or \code{se.fit}.}
+    as \code{type}, \code{parameter}, \code{terms}, or \code{se.fit}.}
 }
 
 \details{

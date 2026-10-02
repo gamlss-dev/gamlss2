@@ -53,7 +53,7 @@ m <- gamlss2(f, data = air, family = NO)
 summary(m)
 
 ## plot coefficient paths
-sp <- specials(m, model = "mu", term = "gnet(", element = "model")
+sp <- specials(m, parameter = "mu", term = "gnet(", element = "model")
 print(class(sp))
 plot(sp)
 }}

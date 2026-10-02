@@ -1,11 +1,17 @@
 ## Predict method.
 predict.gamlss2 <- function(object, 
-  model = NULL, newdata = NULL,
+  parameter = NULL, newdata = NULL,
   type = c("distribution", "parameter", "link", "response", "terms"),
   terms = NULL, se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval = c("none", "wald"), interval.cache = NULL,
-  unconditional = FALSE, sandwich = FALSE)
+  level = NULL, interval = c("none", "wald"), unconditional = FALSE)
 {
+  dots <- list(...)
+  ## Resolve legacy selectors and keep internal controls out of model.frame calls.
+  interval.cache <- dots[["interval.cache"]]
+  sandwich <- if("sandwich" %in% names(dots)) dots[["sandwich"]] else FALSE
+  if(is.null(parameter)) parameter <- dots[["model"]]
+  if(is.null(parameter)) parameter <- dots[["what"]]
+  dots[c("interval.cache", "sandwich", "model", "what")] <- NULL
   if(!is.logical(unconditional) || length(unconditional) != 1L ||
       is.na(unconditional))
     stop("'unconditional' must be TRUE or FALSE.")
@@ -14,12 +20,7 @@ predict.gamlss2 <- function(object,
   if(sandwich && unconditional)
     stop("'sandwich' and 'unconditional' cannot both be TRUE.")
   type_missing <- missing(type)
-  if(is.null(model)) {
-    model <- list(...)$what
-    if(is.null(model))
-      model <- list(...)$parameter
-  }
-  if(type_missing && !is.null(model))
+  if(type_missing && !is.null(parameter))
     type <- "parameter"
   type <- match.arg(type)
 
@@ -27,27 +28,27 @@ predict.gamlss2 <- function(object,
   if(type == "distribution") {
     distribution <- TRUE
     type <- "parameter"
-    if(!is.null(model)) {
-      warning('for type = "distribution" model/parameter/what must not be specified, setting model = NULL!')
-      model <- NULL
+    if(!is.null(parameter)) {
+      warning('for type = "distribution", parameter must not be specified; using all parameters.')
+      parameter <- NULL
     }
   }
 
   interval <- match.arg(interval)
   if(!is.null(level) || interval == "wald") {
     if(is.null(level)) level <- 0.95
-    return(predict_wald(object, model, newdata, type, terms,
-      drop, list(...), level, interval.cache, unconditional, sandwich))
+    return(predict_wald(object, parameter, newdata, type, terms,
+      drop, dots, level, interval.cache, unconditional, sandwich))
   }
 
   ## FIXME: se.fit, terms ...
-  R <- list(...)$R
+  R <- dots$R
   samples <- NULL
-  if(se.fit || !is.null(list(...)$FUN) || inherits(object, "bamlss2")) {
+  if(se.fit || !is.null(dots$FUN) || inherits(object, "bamlss2")) {
     if(is.null(object$samples)) {
       if(is.null(R))
         R <- 200L
-      seed <- list(...)$seed
+      seed <- dots$seed
       if(is.null(seed))
         seed <- 123
       if(is.logical(seed)) {
@@ -69,7 +70,7 @@ predict.gamlss2 <- function(object,
   }
 
   if(!is.null(samples)) {
-    burnin <- list(...)$burnin
+    burnin <- dots$burnin
     if(!is.null(burnin)) {
       burnin <- as.integer(burnin)
       samples <- samples[-seq.int(burnin), , drop = FALSE]
@@ -77,7 +78,7 @@ predict.gamlss2 <- function(object,
     R <- nrow(samples)
   }
 
-  FUN <- list(...)$FUN
+  FUN <- dots$FUN
   if(is.null(FUN))
     FUN <- mean
   if(se.fit) {
@@ -90,10 +91,10 @@ predict.gamlss2 <- function(object,
 
   ## Extract the model frame.
   if(!is.null(newdata)) {
-    mf <- try(model.frame(object, data = newdata,
-      keepresponse = object$family$family %in% .bi.list, ...), silent = TRUE)
+    mf <- try(do.call(model.frame, c(list(object, data = newdata,
+      keepresponse = object$family$family %in% .bi.list), dots)), silent = TRUE)
     if(inherits(mf, "try-error")) {
-      mf <- model.frame(object, data = newdata, ...)
+      mf <- do.call(model.frame, c(list(object, data = newdata), dots))
     }
   } else {
     mf <- if(is.null(object$model)) {
@@ -114,26 +115,26 @@ predict.gamlss2 <- function(object,
 
   family <- object$family
 
-  ## Which parameter model to predict?
-  if(is.null(model)) {
-    model <- family$names
+  ## Which distribution parameters to predict?
+  if(is.null(parameter)) {
+    parameter <- family$names
   }
-  if(!is.character(model))
-    model <- family$names[model]
-  model <- family$names[pmatch(model, family$names)]
-  if(!length(model) || anyNA(model) || anyDuplicated(model))
+  if(!is.character(parameter))
+    parameter <- family$names[parameter]
+  parameter <- family$names[pmatch(parameter, family$names)]
+  if(!length(parameter) || anyNA(parameter) || anyDuplicated(parameter))
     stop("Unknown or duplicated prediction parameter.")
 
   if((type == "response") && (length(family$names) > 1L)) {
-    if(length(model) != length(family$names))
-      stop('Predictions on the response scale require all distributional parameters. Please omit the "model" argument or specify all parameters.')
+    if(length(parameter) != length(family$names))
+      stop('Predictions on the response scale require all distributional parameters. Please omit the "parameter" argument or specify all parameters.')
   }
 
   tt <- type == "terms"
 
   ## Predict all specified parameters.
   p <- list()
-  for(j in model) {
+  for(j in parameter) {
     p[[j]] <- if(tt) {
       NULL
     } else {
@@ -149,7 +150,7 @@ predict.gamlss2 <- function(object,
     tj <- if(is.null(terms)) {
       c(object$xterms[[j]], object$sterms[[j]])
     } else {
-      if(isTRUE(list(...)$nogrep)) {
+      if(isTRUE(dots$nogrep)) {
         terms
       } else {
         grep2(terms, c(object$xterms[[j]], object$sterms[[j]]), fixed = TRUE, value = TRUE)
@@ -160,7 +161,7 @@ predict.gamlss2 <- function(object,
       ## Linear effects.
       if(length(object$xterms[[j]])) {
         xn <- NULL
-        if(isTRUE(list(...)$nogrep)) {
+        if(isTRUE(dots$nogrep)) {
           xn <- object$xterms[[j]][object$xterms[[j]] %in% tj]
         } else {
           for(i in tj) {
@@ -227,7 +228,7 @@ predict.gamlss2 <- function(object,
       }
       ## Special effects.
       if(length(object$sterms[[j]])) {
-        if(isTRUE(list(...)$nogrep)) {
+        if(isTRUE(dots$nogrep)) {
           xn <- object$sterms[[j]][object$sterms[[j]] %in% tj]
         } else {
           xn <- NULL
@@ -469,7 +470,7 @@ grep2 <- function (pattern, x, ...)
 
 ## Extract fitted values.
 fitted.gamlss2 <- function(object, newdata = NULL,
-  type = c("parameter", "link"), model = NULL, ...)
+  type = c("parameter", "link"), parameter = NULL, ...)
 {
   type <- match.arg(type)
 
@@ -482,18 +483,18 @@ fitted.gamlss2 <- function(object, newdata = NULL,
   if(type == "parameter")
     fit <- family(object)$map2par(fit)
 
-  if(is.null(model)) {
-    model <- list(...)$what
-    if(is.null(model))
-      model <- list(...)$parameter
-    if(is.null(model))
-      model <- object$family$names
+  if(is.null(parameter)) {
+    parameter <- list(...)[["model"]]
+    if(is.null(parameter))
+      parameter <- list(...)[["what"]]
+    if(is.null(parameter))
+      parameter <- object$family$names
   }
-  if(!is.character(model))
-    model <- object$family$names[model]
-  model <- object$family$names[pmatch(model, object$family$names)]
+  if(!is.character(parameter))
+    parameter <- object$family$names[parameter]
+  parameter <- object$family$names[pmatch(parameter, object$family$names)]
 
-  return(fit[, model])
+  return(fit[, parameter])
 }
 
 ## Compute marginal prediction profiles for each covariate.

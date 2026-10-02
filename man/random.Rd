@@ -73,11 +73,11 @@ f <- distance ~ age11 + re(~age11|Subject)
 m1 <- gamlss2(f, data = Orthodont)
 
 ## compare fitted values
-plot(fitted(m1, model = "mu"), fitted(m))
+plot(fitted(m1, parameter = "mu"), fitted(m))
 abline(0, 1, col = 4)
 
 ## extract summary for re() model term
-st <- specials(m1, model = "mu", term = "age11", elements = "model")
+st <- specials(m1, parameter = "mu", term = "age11", elements = "model")
 summary(st)
 
 ## random intercepts and slopes with s() using AIC
@@ -85,8 +85,8 @@ a <- gamlss2(distance ~ s(age,k=3) + s(Subject, bs = "re") + s(Subject, age11, b
   data = Orthodont)
 
 ## compare fitted values
-plot(fitted(m1, model = "mu"), fitted(m))
-points(fitted(a, model = "mu"), fitted(m), col = 2)
+plot(fitted(m1, parameter = "mu"), fitted(m))
+points(fitted(a, parameter = "mu"), fitted(m), col = 2)
 abline(0, 1, col = 4)
 
 ## more complicated correlation structures
@@ -122,10 +122,10 @@ for(j in levels(Ovary$Mare)) {
 
   plot(follicles ~ Time, data = ds)
 
-  f <- fitted(m2, model = "mu")[Ovary$Mare == j]
+  f <- fitted(m2, parameter = "mu")[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 4, lwd = 2)
 
-  f <- fitted(g, model = "mu")[Ovary$Mare == j]
+  f <- fitted(g, parameter = "mu")[Ovary$Mare == j]
   lines(f ~ ds$Time, col = 3, lwd = 2)
 
   f <- fitted(m)[Ovary$Mare == j]

@@ -130,7 +130,7 @@ can be obtained with `which = "samples"`. Here we inspect the intercept in the
 #| fig-height: 4
 #| fig-width: 8
 #| fig-align: center
-plot(m, which = "samples", model = "mu",
+plot(m, which = "samples", parameter = "mu",
   terms = "(Intercept)", lag.max = 60)
 ```
 
@@ -175,9 +175,9 @@ post_interval <- function(x) {
   setNames(q, c("lower", "fit", "upper"))
 }
 
-pmu <- predict(m, newdata = nd, model = "mu",
+pmu <- predict(m, newdata = nd, parameter = "mu",
   FUN = post_interval)
-psigma <- predict(m, newdata = nd, model = "sigma",
+psigma <- predict(m, newdata = nd, parameter = "sigma",
   FUN = post_interval)
 
 head(pmu)

@@ -173,6 +173,10 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -181,24 +185,24 @@ window.Quarto = {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -739,10 +743,10 @@ Further control arguments can be passed: <code>criterion = “bic”</code> (def
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The ELM term constructs a randomized single-hidden-layer representation of the covariate(s) in <code>x</code>. Internally, a design matrix <code>Z</code> is built (including an intercept column), random weights are sampled, and the linear predictors <code>Z %*% W</code> are transformed through the activation function <code>a</code> to obtain the hidden-layer design matrix <code>X</code>. Columns of <code>X</code> are centered before estimation.</p>
-<p><strong>Internal scaling</strong>. For numerical stability and comparability across terms, <code>Z</code> can be scaled internally (<code>scale = TRUE</code>). Intercept columns are left unchanged. If <code>x</code> is a factor, a QR-based group scaling is applied; otherwise, a column-wise center-and-scale normalization is used. The scaling transformation is stored and is reused automatically during prediction.</p>
-<p><strong>Activation functions</strong>. The activation is applied element-wise to <code>Z %*% W</code>. For numerical stability, bounded activations are evaluated on clipped inputs (currently <span class="math inline">\([-35, 35]\)</span>).</p>
-<p><strong>Weight sampling</strong>. By default, hidden-unit weights are generated using a low-discrepancy Halton design in a whitened input space. This tends to produce more stable and less redundant features than purely random draws in many practical applications. With <code>sampler = “pca”</code>, directions are additionally aligned with principal component directions of the scaled design. The historical stochastic behavior can be recovered with <code>sampler = “random”</code>.</p>
-<p><strong>Reproducibility</strong>. The default <code>sampler = “halton”</code> is deterministic given the input data. Use <code>set.seed</code> only if you explicitly request <code>sampler = “random”</code>.</p>
+<p>For numerical stability and comparability across terms, <code>Z</code> can be scaled internally (<code>scale = TRUE</code>). Intercept columns are left unchanged. If <code>x</code> is a factor, a QR-based group scaling is applied; otherwise, a column-wise center-and-scale normalization is used.</p>
+<p>The activation is applied element-wise to <code>Z %*% W</code>. For numerical stability, bounded activations are evaluated on clipped inputs (currently <span class="math inline">\([-35, 35]\)</span>).</p>
+<p>By default, hidden-unit weights are generated using a low-discrepancy Halton design in a whitened input space. This tends to produce more stable and less redundant features than purely random draws in many practical applications. With <code>sampler = “pca”</code>, directions are additionally aligned with principal component directions of the scaled design. The historical stochastic behavior can be recovered with <code>sampler = “random”</code>.</p>
+<p>The default <code>sampler = “halton”</code> is deterministic given the input data. Use <code>set.seed</code> only if you explicitly request <code>sampler = “random”</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

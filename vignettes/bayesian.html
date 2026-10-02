@@ -166,6 +166,10 @@ div.csl-indent {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -174,24 +178,24 @@ div.csl-indent {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -247,6 +251,7 @@ div.csl-indent {
 
 <p>Generalized additive models for location, scale, and shape can be estimated by penalized likelihood or by Bayesian sampling. In <code>gamlss2</code>, Bayesian estimation uses the same distributional formulas, family objects, and smooth terms as the usual fitting functions. The sampler follows the Bayesian additive model framework described by <span class="citation" data-cites="bamlss2018">Umlauf et al. (<a href="#ref-bamlss2018" role="doc-biblioref">2018</a>)</span>.</p>
 <p>There are two convenient ways to run the sampler. Function <code>bamlss2()</code> fits a model directly by MCMC, whereas <code>mcmc()</code> starts from an already fitted <code>gamlss2</code> model. This vignette illustrates both workflows and shows how to inspect posterior effects, samples, and predictions.</p>
+<p>The fitting notation is introduced in <a href="firststeps.html">First Steps</a>. <a href="prediction.html">Prediction and Uncertainty</a> uses the same ozone formula and Gamma parameterization for likelihood-based inference, with a training/test split. Here we use all complete observations to illustrate posterior inference.</p>
 <section id="data-and-model" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="data-and-model"><span class="header-section-number">1</span> Data and model</h2>
 <p>We use the <code>airquality</code> data and model daily ozone concentration. Ozone is positive and right-skewed, so a Gamma distribution is a useful starting point. The location parameter <code>mu</code> is modeled as a smooth function of temperature and wind speed, while the scale parameter <code>sigma</code> varies smoothly with temperature.</p>
@@ -315,7 +320,7 @@ sigma.s(Temp) 3.2250 0.7990
 *--------
 n = 116 df =  14.06 res.df =  101.94
 Deviance = 932.216 DIC = 960.341 Null Dev. Red. = 0.53%
-AIC = 960.341 elapsed =  2.43sec</code></pre>
+AIC = 960.341 elapsed =  2.46sec</code></pre>
 </div>
 </div>
 <p>The sampler uses block Metropolis-Hastings updates for linear and smooth coefficients. Smooth terms are updated using penalized weighted least squares proposals, while smoothing variances are sampled by inverse Gamma or slice sampling. See <code>?BS</code> for details of the sampler.</p>
@@ -378,7 +383,7 @@ AIC = 960.341 elapsed =  2.43sec</code></pre>
 </section>
 <section id="posterior-predictions" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="posterior-predictions"><span class="header-section-number">5</span> Posterior predictions</h2>
-<p>For an object returned by <code>bamlss2()</code>, <code>predict()</code> uses the stored posterior samples when a summary function is supplied with <code>FUN</code>. We evaluate the model over the observed temperature range and keep wind speed fixed at its median.</p>
+<p>For an object returned by <code>bamlss2()</code>, <code>predict()</code> uses the stored posterior samples. Supplying <code>FUN</code> selects how they are summarized. We evaluate the model over the observed temperature range and keep wind speed fixed at its median.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Temp =</span> <span class="fu">seq</span>(<span class="fu">min</span>(air<span class="sc">$</span>Temp), <span class="fu">max</span>(air<span class="sc">$</span>Temp), <span class="at">length.out =</span> <span class="dv">100</span>),</span>
@@ -406,7 +411,7 @@ AIC = 960.341 elapsed =  2.43sec</code></pre>
 6 9.484501 15.13172 27.98030</code></pre>
 </div>
 </div>
-<p>The resulting intervals describe posterior uncertainty in the distribution parameters. They are not prediction intervals for a future ozone observation.</p>
+<p>The resulting intervals are 95% pointwise credible intervals for the distribution parameters; <code>fit</code> is the posterior median. They are not prediction intervals for a future ozone observation or simultaneous bands for a whole curve. Wind speed is held fixed, while the displayed observations include all wind speeds.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -457,6 +462,7 @@ AIC = 960.341 elapsed =  2.43sec</code></pre>
 6 4.836545 0.1961433</code></pre>
 </div>
 </div>
+<p>For a quantity that depends on several parameters, retain the joint draws with <code>predict(m, newdata = nd, FUN = identity)</code>, compute the quantity for each draw, and then summarize. <a href="prediction.html#including-coefficient-uncertainty">Prediction and Uncertainty</a> also shows how to generate future responses from these distributions. Using posterior draws in that construction gives posterior predictive intervals.</p>
 </section>
 <section id="starting-from-a-fitted-gamlss2-model" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="starting-from-a-fitted-gamlss2-model"><span class="header-section-number">6</span> Starting from a fitted <code>gamlss2</code> model</h2>

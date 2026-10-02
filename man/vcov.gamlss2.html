@@ -173,6 +173,10 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -181,24 +185,24 @@ window.Quarto = {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -697,7 +701,8 @@ window.Quarto = {
 <pre><code class="language-R">## S3 method for class 'gamlss2'
 vcov(object,
   type = c("vcov", "cor", "se", "coef"), full = FALSE,
-  method = c("joint", "working", "numeric"), ...)
+  method = c("joint", "working", "numeric"), unconditional = FALSE,
+  sandwich = FALSE, .details = FALSE, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -737,6 +742,30 @@ Information calculation. <code>“joint”</code> uses the raw joint observed in
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="unconditional">unconditional</code>
+</td>
+<td>
+Logical. If <code>TRUE</code>, add a correction for uncertainty in selected smoothness parameters. For <code>JR</code> fits this uses the fitted joint REML curvature. Other fits use a post-fit local approximation. This requires <code>method = “joint”</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="sandwich">sandwich</code>
+</td>
+<td>
+Logical. If <code>TRUE</code>, use the post-fit estimating-equation sandwich covariance for an ordinary RS fit with local REML smooths. This requires <code>method = “joint”</code> and <code>unconditional = FALSE</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id=".details">.details</code>
+</td>
+<td>
+Internal diagnostic for the sandwich calculation. Ordinary calls should leave this at <code>FALSE</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
@@ -748,9 +777,11 @@ Control arguments passed to the numerical Hessian when <code>method = “numeric
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The default covariance is the inverse of <span class="math inline">\(H + P\)</span>, where <span class="math inline">\(H\)</span> is the joint likelihood information for every supported distributional predictor and <span class="math inline">\(P\)</span> is the complete penalty at the fitted smoothing and regularization parameters. Thus it retains covariance among linear and smooth terms and among distributional parameters. Prior observation weights and offsets in the final linear predictors are included.</p>
-<p>The result is conditional on the fitted smoothing parameters. It does not include smoothing-parameter or model-selection uncertainty.</p>
+<p>With <code>sandwich = TRUE</code>, the coefficient score and the actual local REML fixed-point equations form a joint estimating system for coefficients and log smoothing parameters. Its bread uses the same joint penalized coefficient information as the default method. Its meat is the outer product of observation-wise derivatives with respect to case multipliers. Prior weights are treated as fixed multipliers on independent rows; this is not a frequency-replication interpretation. The quadratic penalty is deterministic and is not included in the stochastic meat. The full joint coefficient and smoothing-parameter covariance is assembled internally, while <code>vcov()</code> returns only the coefficient block. No coefficient or smooth refit is performed. This method requires a converged ordinary RS fit and local REML smoothing estimates. An estimated smoothing parameter clipped at an RS limit is held fixed when its local update before clipping points beyond that limit. A single-penalty smooth whose local REML variance floor is active uses the corresponding floored update equation. A user-fixed nonnegative smoothing parameter is held fixed regardless of its size, including values above the RS estimation cap. A stored estimated parameter whose local update points inward is inconsistent with the final fit. Indeterminate transition cases, non-REML smoothing selection, selected ridge or adaptive penalties, and non-estimable coefficients are rejected. It uses the final working equations and is a local fixed-point approximation when RS has stopped at a finite convergence tolerance.</p>
+<p>By default, the result is conditional on the fitted smoothing parameters. For fits estimated with <code>optimizer = JR</code>, <code>unconditional = TRUE</code> uses the Hessian of the profiled joint REML criterion stored by <code>JR</code>. The outer optimization includes coefficient optimization at fixed smoothing parameters; no refits are required when <code>vcov()</code> is called. A successful <code>JR</code> fit also stores the conditional coefficient covariance from its direct likelihood mode. If the joint REML optimum or its curvature cannot be verified, unconditional covariance is unavailable. Curvature directions too flat to distinguish from numerical error are excluded from the inverse for variation of the coefficient mean. Their contribution to variation of the coefficient covariance factor is bounded, as in <span class="pkg">mgcv</span>.</p>
+<p>For other optimizers, <code>unconditional = TRUE</code> uses a local quadratic post-fit approximation to joint marginal smoothness curvature. The current term-wise RS/CG smoothness selection does not provide the global REML Hessian used by <span class="pkg">mgcv</span>, so this post-fit correction is not a validated covariance of the complete RS/CG estimator. Following <span class="pkg">mgcv</span>, nonpositive directions of the local curvature do not contribute to variation in the coefficient mean. A small regularization bounds their contribution to variation in the coefficient covariance factor. Adaptive smooth penalties, selected ridge penalties, and non-estimable coefficients cause an explicit error. Fixed smoothing parameters receive no correction. Model-selection uncertainty is not included.</p>
 <p>Special terms that have no verifiable coefficient-linear design are rejected explicitly. Objects fitted with <code>light = TRUE</code> do not retain the final predictors and must be refitted for joint covariance. Aliased or numerically unidentified coefficient variances are returned as <code>NA</code>; no arbitrary inferential ridge is added.</p>
-<p>The ordinary <code>summary()</code> and effect-result paths use the covariance stored with each fitted model term by default, which is substantially faster for large models. Use <code>summary(object, method = “joint”)</code> or <code>results(object, method = “joint”)</code> to request the complete joint information. Simulation-based <code>predict()</code> calls always use the complete joint covariance. No consumer silently substitutes <code>method = “working”</code> when observed joint information is indefinite.</p>
+<p>The ordinary <code>summary()</code> and effect-result paths use the covariance stored with each fitted model term by default, which is substantially faster for large models. Use <code>summary(object, method = “joint”)</code> or <code>results(object, method = “joint”)</code> to request the complete joint information. Use <code>summary(object, sandwich = TRUE)</code> to report standard errors and coefficient tests from the RS sandwich covariance, or <code>summary(object, unconditional = TRUE)</code> for the existing smoothness correction. These options select the joint method unless another method is specified explicitly. Simulation-based <code>predict()</code> calls always use the complete joint covariance. No consumer silently substitutes <code>method = “working”</code> when observed joint information is indefinite.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -774,7 +805,13 @@ Control arguments passed to the numerical Hessian when <code>method = “numeric
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## complete linear and smooth covariance</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>V <span class="ot">&lt;-</span> <span class="fu">vcov</span>(m, <span class="at">full =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">diag</span>(V))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">diag</span>(V))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## include estimated smoothness uncertainty</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>Vc <span class="ot">&lt;-</span> <span class="fu">vcov</span>(m, <span class="at">full =</span> <span class="cn">TRUE</span>, <span class="at">unconditional =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="do">## frequentist covariance for a regular RS/local-REML fit</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>Vs <span class="ot">&lt;-</span> <span class="fu">vcov</span>(m, <span class="at">full =</span> <span class="cn">TRUE</span>, <span class="at">sandwich =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

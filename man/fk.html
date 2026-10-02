@@ -144,6 +144,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -152,24 +156,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -686,7 +690,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="k">k</code>
 </td>
 <td>
-<p>Integer, the largest number of free interior knots considered when <code>nk = NULL</code>. Candidate models from zero through <code>k</code> interior knots are compared.</p>
+<p>Integer, the largest number of free interior knots considered when <code>nk = NULL</code>. Candidate models from one through <code>k</code> interior knots are compared.</p>
 </td>
 </tr>
 <tr>
@@ -759,7 +763,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>For each candidate number of interior knots, <code>fk()</code> uses a B-spline basis with fixed, repeated boundary knots. Interior knots are represented by positive ordered gaps. This removes permutation ambiguity and prevents knot crossings during optimization.</p>
 <p>Conditional on the knot locations, spline coefficients are profiled out by weighted least squares. Knot optimization therefore only operates on the interior locations. The fitted model term is centered.</p>
-<p>When <code>nk = NULL</code>, models with zero through <code>k</code> interior knots are compared using <code>criterion</code>. Effective degrees of freedom include both the centered spline coefficients and the estimated interior knot locations. Fixed locations supplied through <code>knots</code> do not add knot-location degrees of freedom.</p>
+<p>When <code>nk = NULL</code>, models with one through <code>k</code> interior knots are compared using <code>criterion</code>. Effective degrees of freedom include both the centered spline coefficients and the estimated interior knot locations. Fixed locations supplied through <code>knots</code> do not add knot-location degrees of freedom.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -779,15 +783,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## subset for female</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">subset</span>(SpirometryUS, gender <span class="sc">==</span> <span class="st">"male"</span>)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Automatically select zero through four free interior knots</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(fev1 <span class="sc">~</span> <span class="fu">fk</span>(age, <span class="at">nk =</span> <span class="dv">1</span>) <span class="sc">|</span> ., <span class="at">data =</span> d, <span class="at">family =</span> NO)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Automatically select one free interior knot</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(fev1 <span class="sc">~</span> <span class="fu">fk</span>(age, <span class="at">nk =</span> <span class="dv">1</span>) <span class="sc">|</span> ., <span class="at">data =</span> d, <span class="at">family =</span> NO)</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## estimated effects</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## predict quantiles</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>qu <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fu">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="fl">0.975</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m1, <span class="at">probs =</span> qu)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m, <span class="at">probs =</span> qu)</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## plot</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fev1 <span class="sc">~</span> age, <span class="at">data =</span> d)</span>

@@ -144,6 +144,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -152,24 +156,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -695,7 +699,7 @@ Character, is the response continuous or discrete?
 <code id="families">families</code>
 </td>
 <td>
-Character, the names of the family objects of the <span class="pkg">gamlss.dist</span> package that should be returned.
+Character, the names of the family objects that should be returned.
 </td>
 </tr>
 <tr>
@@ -771,7 +775,9 @@ For function <code>available_families()</code>, arguments passed to the family o
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>Function <code>find_family()</code> returns a vector of <code>GAIC</code> values for the different fitted families. Function <code>fit_family()</code> returns the fitted intercept-only model.</p>
+<p>Function <code>find_family()</code> returns a vector of <code>GAIC</code> values for the different fitted families. The best model is the model with the lowest GAIC.</p>
+<p>Function <code>fit_family()</code> returns the fitted intercept-only model.</p>
+<p>Function <code>find_gamlss2()</code> returns the final selected model.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

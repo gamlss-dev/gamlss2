@@ -144,6 +144,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -152,24 +156,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -680,7 +684,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="optimizer">optimizer</code>
 </td>
 <td>
-Function, the optimizer to be used for fitting.
+Function, the optimizer to be used for fitting. Use <code>JR</code> for joint REML estimation.
 </td>
 </tr>
 <tr>
@@ -760,6 +764,7 @@ Further control parameters to be included in the return value, for example param
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The set of control parameters can be extended. For example, if a different optimizer is used, newly specified control parameters are passed on to that optimizer automatically.</p>
+<p>With <code>optimizer = JR</code>, a direct joint REML solver uses cached designs and penalties for families providing a density and predictor-to-parameter map. The controls <code>jr.inner</code>, <code>jr.eps</code>, <code>jr.maxit</code>, <code>jr.outer.maxit</code>, and <code>jr.outer.maxeval</code> are documented in <code>JR</code>.</p>
 <p>For <span class="pkg">mgcv</span>-based smooth terms, smoothing parameters are selected by local REML updates by default (<code>criterion = “reml”</code>). These updates use the current working response and weights. With one penalty matrix this is the usual Schall update; with multiple penalty matrices all smoothing parameters are updated together using the extended Fellner–Schall trace equations. This is a local working-model REML update. Explicit choices such as <code>“gcv”</code>, <code>“aic”</code>, <code>“aicc”</code>, <code>“bic”</code>, and <code>“ncv”</code> retain their respective selection methods.</p>
 <p>For the <code>RS</code> and <code>CG</code> optimizers, argument <code>demmler.reinsch</code> controls the use of a weighted Demmler–Reinsch reparameterization when selecting the smoothing parameter of an eligible single-penalty smooth, including multivariate smooths. The default, <code>“auto”</code>, uses the native reparameterization for local REML updates, and for quadratic criteria after the initial outer iteration. Set <code>demmler.reinsch = TRUE</code> to force it for eligible updates, or <code>FALSE</code> to disable it. For quadratic criteria, the initial outer iteration continues to use the direct solver; with numerical gradients or <code>native.wfit = FALSE</code>, automatic reparameterization is delayed until the current search reaches the edge of its one-decade search window.</p>
 <p>Within an <code>RS</code> or <code>CG</code> fit, the reparameterization is cached while the design matrix, weights, penalty, and binning are unchanged. A new working response only requires updating its projection into the cached basis. The declared penalty rank keeps the null space unpenalized even at large smoothing parameters.</p>

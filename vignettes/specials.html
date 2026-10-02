@@ -145,6 +145,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -153,24 +157,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -222,6 +226,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Special model terms extend a <code>gamlss2</code> formula with a model component that is fitted inside the backfitting algorithm. Ordinary linear terms and <code>mgcv</code> smooths cover many models; specials are useful when the fitting method needs its own estimator, prediction method, state, or tuning parameters.</p>
+<p>The standard fitting workflow is described in <a href="firststeps.html">First Steps</a>. This vignette focuses on extending the predictor; <a href="families.html">Family Objects</a> instead extends the response distribution.</p>
 <section id="built-in-special-terms" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="built-in-special-terms"><span class="header-section-number">1</span> Built-in special terms</h2>
 <p>The package already provides several specials. For example, <code>lo()</code> fits a weighted local-polynomial smoother, <code>tree()</code>, <code>ct()</code>, and <code>cf()</code> fit tree-based terms, <code>n()</code> fits a neural-network term, and <code>lin()</code>, <code>re()</code>, <code>random()</code>, and <code>gnet()</code> provide structured linear or grouped effects. The <code>mgcv</code> terms <code>s()</code>, <code>te()</code>, <code>ti()</code>, and <code>t2()</code> are also supported.</p>
@@ -362,7 +367,7 @@ sigma.s(Temp)           4.3942
 *--------
 n = 116 df =  12.2 res.df =  103.8
 Deviance = 939.5092 Null Dev. Red. = 13.26%
-AIC = 963.9144 elapsed =  0.05sec</code></pre>
+AIC = 963.9144 elapsed =  0.06sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted distributions</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -382,7 +387,7 @@ AIC = 963.9144 elapsed =  0.05sec</code></pre>
 </section>
 <section id="practical-guidance" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="practical-guidance"><span class="header-section-number">4</span> Practical guidance</h2>
-<p>Use an existing special when it already provides the required estimator and prediction behavior. Write a custom special when the term has a distinct fitting algorithm, needs custom state, or wraps an external modelling method. Keep the constructor lightweight, store all information needed for prediction, return centered fitted contributions, and test both fitting and <code>newdata</code> predictions. The help topic <code>?special_terms</code> documents the method arguments and return-value contract; <code>?fake_formula</code> documents special-name registration.</p>
+<p>Use an existing special when it already provides the required estimator and prediction behavior. Write a custom special when the term has a distinct fitting algorithm, needs custom state, or wraps an external modelling method. Keep the constructor lightweight, store all information needed for prediction, return centered fitted contributions, and test both fitting and <code>newdata</code> predictions. Prediction support alone does not imply support for joint coefficient uncertainty: the Gaussian intervals in <a href="prediction.html">Prediction and Uncertainty</a> require a coefficient-linear design and a verifiable quadratic penalty. A custom fitting method may need its own uncertainty procedure. The help topic <code>?special_terms</code> documents the method arguments and return-value contract; <code>?fake_formula</code> documents special-name registration.</p>
 
 
 </section>

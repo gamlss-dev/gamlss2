@@ -174,6 +174,10 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -182,24 +186,24 @@ window.Quarto = {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -261,6 +265,7 @@ window.Quarto = {
 <li>construct a <code>gamlss2.family</code> list directly for a distribution that needs custom behavior.</li>
 </ol>
 <p>The first route should usually be preferred. It gives the fitted model the same distribution interface used by <code>distributions3</code> for densities, probabilities, quantiles, moments, and simulation.</p>
+<p>For the fitting workflow, start with <a href="firststeps.html">First Steps</a>. To modify an existing distribution for an observation mechanism such as truncation or censoring, see <a href="family_extensions.html">Family Extensions</a>.</p>
 <section id="the-family-interface" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="the-family-interface"><span class="header-section-number">1</span> The family interface</h2>
 <p>A <code>gamlss2.family</code> object contains the distribution-specific information needed by the fitting algorithm. The required components are:</p>
@@ -413,10 +418,10 @@ AIC = 414.0972 elapsed =  0.05sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1      r_2
-1 14.61845 14.60500
-2 32.97611 80.90744
-3 66.71931 96.96441</code></pre>
+<pre><code>       r_1       r_2
+1 26.00365  29.75509
+2 62.89769  65.43801
+3 33.62587 122.27115</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -468,26 +473,27 @@ AIC = 414.0972 elapsed =  0.05sec</code></pre>
 </div>
 </div>
 <p>Analytical derivatives can improve speed and numerical stability. If they are not available, <code>gamlss2</code> approximates the required derivatives numerically. Cross-derivatives can be supplied by the underlying distribution when a second-order optimizer such as <code>CG</code> can benefit from them.</p>
-<p>Flexible links are represented by <code>link-gamlss2</code> objects. When analytical score and Hessian callbacks are requested, the bridge uses derivatives from the link object. For example, the <code>softplus</code> link can be passed to the bridge after construction with <code>make.link2()</code>. In this example the derivative flags are left at their defaults, so numerical derivatives are used.</p>
+<p>Flexible links are represented by <code>link-gamlss2</code> objects. When analytical score and Hessian callbacks are requested, the bridge uses derivatives from the link object. For example, the <code>softplus</code> link can be passed to the bridge after construction with <code>make.link2()</code>. In this example the derivative flags are disabled explicitly, so numerical derivatives are used.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>normal_family <span class="ot">&lt;-</span> <span class="fu">family</span>(</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Normal</span>(),</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">make.link2</span>(softplus), <span class="at">sigma =</span> <span class="st">"log"</span>)</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="do">## The softplus link does not provide all second-link derivatives needed by</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="do">## the analytic update path, so the bridge uses numerical derivatives here.</span></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>m_softplus <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> normal_family,</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m, m_softplus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">links =</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">make.link2</span>(softplus), <span class="at">sigma =</span> <span class="st">"log"</span>),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">score =</span> <span class="cn">FALSE</span>, <span class="at">hessian =</span> <span class="cn">FALSE</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="do">## The softplus link does not provide all second-link derivatives needed by</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="do">## the analytic update path, so the bridge uses numerical derivatives here.</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>m_softplus <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  dist <span class="sc">~</span> <span class="fu">s</span>(speed) <span class="sc">|</span> <span class="fu">s</span>(speed),</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cars,</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> normal_family,</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(m, m_softplus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                AIC       df
-m_softplus 414.0374 4.228449
+m_softplus 414.0374 4.228447
 m          414.0972 4.217505</code></pre>
 </div>
 </div>
@@ -629,7 +635,7 @@ Deviance = 929.2643 Null Dev. Red. = 14.2%
 AIC = 952.263 elapsed =  0.25sec</code></pre>
 </div>
 </div>
-<p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
+<p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. <a href="prediction.html">Prediction and Uncertainty</a> uses this same Gamma family to construct intervals for means, quantiles, and future observations. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
 </section>
 <section id="writing-a-family-directly" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="writing-a-family-directly"><span class="header-section-number">7</span> Writing a family directly</h2>
@@ -694,7 +700,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.92%
-AIC = 414.0972 elapsed =  0.04sec</code></pre>
+AIC = 414.0972 elapsed =  0.03sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>
@@ -716,7 +722,7 @@ AIC = 414.0972 elapsed =  0.04sec</code></pre>
 </section>
 <section id="optional-scoring-rules" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="optional-scoring-rules"><span class="header-section-number">8</span> Optional scoring rules</h2>
-<p>The distributions3 bridge also exposes a <code>crps()</code> callback when the optional <code>scoringRules</code> package is available. This is useful for probabilistic forecast evaluation, but it is not needed for fitting, prediction, or the basic family</p>
+<p>The distributions3 bridge also exposes a <code>crps()</code> callback when the optional <code>scoringRules</code> package is available. This is useful for probabilistic forecast evaluation, but it is not needed for fitting, prediction, or the basic family interface. <a href="topmodels.html">Forecasting and Assessment</a> demonstrates scoring rules and graphical diagnostics.</p>
 </section>
 <section id="summary" class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="summary"><span class="header-section-number">9</span> Summary</h2>

@@ -173,6 +173,10 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -181,24 +185,24 @@ window.Quarto = {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -818,26 +822,25 @@ round_family(family = NO, digits = 0L)
 <p>For a fixed monotone transformation <span class="math inline">\(Y = g(X)\)</span>, <code>transform_family</code> uses</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(\log f_Y(y) = \log f_X(g^{-1}(y)) + \log |d g^{-1}(y) / dy|.\)</span></p>
-<p>Base-family parameter scores, Hessians, and optimized updates can therefore be evaluated directly at the inverse-transformed response. Increasing and decreasing transformations are supported. The convenience function <code>logit_family</code> constructs the logistic push-forward, which has strict support <span class="math inline">\(0 &amp;lt; Y &lt; 1\)</span>. Exact zeros and ones are not valid observations for this continuous transformation.</p>
+<p>Increasing and decreasing transformations are supported. The convenience function <code>logit_family</code> constructs the logistic push-forward, which has strict support <span class="math inline">\(0 &amp;lt; Y &lt; 1\)</span>. Exact zeros and ones are not valid observations for this continuous transformation.</p>
 <p>The function <code>truncate_family</code> conditions the base distribution on the interval selected by <code>lower</code>, <code>upper</code>, and <code>include</code>. Its density or probability mass is divided by the probability of the retained interval. With at least one finite boundary, <code>censor_family</code> observes</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(Y = \min(\max(X, lower), upper)\)</span></p>
-<p>and consequently creates point masses at finite censoring boundaries. With both boundaries left infinite, it instead accepts a right-censored <code>survival::Surv(time, status)</code> response. An observed event contributes the base density or mass at <code>time</code>; a censored observation contributes the base survival probability beyond <code>time</code>. Truncation and censoring reuse base-family derivatives where possible and differentiate only the additional probability terms.</p>
+<p>and consequently creates point masses at finite censoring boundaries. With both boundaries left infinite, it instead accepts a right-censored <code>survival::Surv(time, status)</code> response. An observed event contributes the base density or mass at <code>time</code>; a censored observation contributes the base survival probability beyond <code>time</code>.</p>
 <p>For inflation points <span class="math inline">\(c_j\)</span>, <code>inflate_family</code> constructs</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(F(y) = \pi_0 F_0(y) + \sum_j \pi_j I(c_j \le y).\)</span></p>
-<p>Natural base-distribution mass at an inflation point is retained. The appended parameters <code>pi1</code>, <code>pi2</code>, and so on have log links and represent positive odds <span class="math inline">\(w_j\)</span> relative to the base component. Thus,</p>
+<p>Natural base-distribution mass at an inflation point is retained. The appended parameters <code>pi1</code>, <code>pi2</code>, and so on have log links and represent positive odds <span class="math inline">\(w_j\)</span> relative to the base component, not probabilities. Thus,</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(\pi_0 = \frac{1}{1 + \sum_j w_j}, \qquad \pi_j = \frac{w_j}{1 + \sum_\ell w_\ell}.\)</span></p>
 <p>This is the baseline-odds parameterization also used by <code>mixture_family</code>. Quantiles account for every probability jump.</p>
 <p>The function <code>hurdle_family</code> instead constructs</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(F(y) = \pi_1 I(c \le y) + \pi_0 F_0(y \mid X \ne c).\)</span></p>
-<p>Hence, the hurdle probability is the complete mass at <span class="math inline">\(c\)</span>, including when the base distribution already assigns positive mass to that point.</p>
+<p>Here <code>pi1</code> is also the odds <span class="math inline">\(w_1\)</span>, so the hurdle probability is <span class="math inline">\(w_1/(1 + w_1)\)</span>. This is the complete mass at <span class="math inline">\(c\)</span>, including when the base distribution already assigns positive mass to that point.</p>
 <p>The function <code>round_family</code> uses intervals centered on a decimal grid and is restricted to continuous base distributions. Its quantile and random-number functions follow R’s <code>round()</code> convention. For fixed, user-defined intervals, see <code>discretize_family</code>.</p>
-<p>Inflated, hurdle, and fixed-bin families provide exact means and variances when the required base-family moments are available. Generic censored and rounded moments require partial moments, which are not part of the family interface, and therefore report an informative error rather than applying an incorrect numerical approximation.</p>
-<p>Modified continuous distributions containing explicit point masses are treated as mixed distributions and provide randomized quantile residuals. Bounds, atom locations, breaks, and transformations are fixed when the family is constructed; they are not modeled distributional parameters.</p>
-<p>Arbitrary weighted distributions, splices, non-monotone transformations, order-statistic distributions, convolutions, and compound distributions are not provided. Generic implementations would require numerical normalization or derivatives inside fitting iterations and could not be supplied reliably by the existing family interface.</p>
+<p>Inflated, hurdle, and fixed-bin families provide exact means and variances when the required base-family moments are available. Censored and rounded moments requiring unavailable partial moments report an error.</p>
+<p>Continuous distributions with added point masses provide randomized quantile residuals. Bounds, atom locations, breaks, and transformations are fixed when the family is constructed. Other extensions requiring numerical normalization or derivatives during fitting are not provided.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -873,7 +876,7 @@ round_family(family = NO, digits = 0L)
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>fq <span class="ot">&lt;-</span> <span class="cf">function</span>(model) {</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matlines</span>(x,</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">quantile</span>(model, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>)),</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span></span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
@@ -890,28 +893,30 @@ round_family(family = NO, digits = 0L)
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="do">## zero-inflated Poisson distribution</span></span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">inflate_family</span>(PO, <span class="at">at =</span> <span class="dv">0</span>)</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">exp</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">sin</span>(x)), <span class="at">pi1 =</span> <span class="fu">plogis</span>(<span class="fu">cos</span>(x))), n)</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(y))</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">fq</span>(m)</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="do">## zero-hurdle Poisson distribution</span></span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">hurdle_family</span>(PO, <span class="at">at =</span> <span class="dv">0</span>)</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">exp</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">sin</span>(x)), <span class="at">pi1 =</span> <span class="fu">plogis</span>(<span class="fu">cos</span>(x))), n)</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(y))</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="fu">fq</span>(m)</span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="do">## decimal rounding</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">round_family</span>(NO, <span class="at">digits =</span> <span class="dv">1</span>)</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">sin</span>(x), <span class="at">sigma =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> <span class="fu">cos</span>(x))), n)</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="do">## pi1 is the added-mass odds; its mixture probability is plogis(cos(x))</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">exp</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">sin</span>(x)), <span class="at">pi1 =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> <span class="fu">cos</span>(x))), n)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(y))</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="fu">fq</span>(m)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="do">## zero-hurdle Poisson distribution</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">hurdle_family</span>(PO, <span class="at">at =</span> <span class="dv">0</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="do">## pi1 is the hurdle odds; the probability of zero is plogis(cos(x))</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">exp</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">sin</span>(x)), <span class="at">pi1 =</span> <span class="fu">exp</span>(<span class="fu">cos</span>(x))), n)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">table</span>(y))</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="fu">fq</span>(m)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="do">## decimal rounding</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">round_family</span>(NO, <span class="at">digits =</span> <span class="dv">1</span>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> fam<span class="sc">$</span><span class="fu">random</span>(<span class="fu">list</span>(<span class="at">mu =</span> <span class="fu">sin</span>(x), <span class="at">sigma =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> <span class="fu">cos</span>(x))), n)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(y <span class="sc">~</span> <span class="fu">s</span>(x) <span class="sc">|</span> <span class="fu">s</span>(x), <span class="at">family =</span> fam)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"resid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

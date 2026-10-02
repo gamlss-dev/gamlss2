@@ -146,6 +146,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -154,24 +158,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -669,9 +673,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## S3 method for class 'gamlss2'
 predict(object, model = NULL, newdata = NULL,
-  type = c("distribution", "parameter", "link", "response", "terms"), terms = NULL,
-  se.fit = FALSE, drop = TRUE, ...,
-  level = NULL, interval = c("none", "wald"), interval.cache = NULL)
+  type = c("distribution", "parameter", "link", "response", "terms"),
+  terms = NULL, se.fit = FALSE, drop = TRUE, ...,
+  level = NULL, interval = c("none", "wald"), interval.cache = NULL,
+  unconditional = FALSE, sandwich = FALSE)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -759,6 +764,22 @@ Optional joint covariance cache obtained from the <code>“interval.cache”</co
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="unconditional">unconditional</code>
+</td>
+<td>
+Logical. If <code>TRUE</code>, use the smoothing-parameter uncertainty correction in the covariance for Wald intervals and coefficient simulation. For <code>JR</code> fits this uses joint REML curvature.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="sandwich">sandwich</code>
+</td>
+<td>
+Logical. If <code>TRUE</code>, use the RS/local-REML estimating-equation sandwich covariance for Wald intervals and coefficient simulation. Cannot be combined with <code>unconditional = TRUE</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="...">…</code>
 </td>
 <td>
@@ -770,9 +791,9 @@ Further control arguments. Supported aliases are <code>what</code> and <code>par
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>Predictions can be computed for the original observations or for <code>newdata</code>. By default, response distributions are returned. Depending on <code>type</code>, results can instead be returned as distribution parameters, on the link scale, as individual model terms, or as the fitted response mean.</p>
-<p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the complete joint covariance of the fitted coefficients, including cross-term and cross-parameter dependence.</p>
-<p>If <code>level</code> is specified, approximate pointwise confidence intervals and standard errors are computed analytically, without simulation. Intervals on transformed parameter or response scales are transformed as needed and may be asymmetric. These are confidence intervals for the fitted model, not prediction intervals for future observations, and they do not include smoothing-parameter or model-selection uncertainty.</p>
-<p>Wald intervals currently support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths. They are not available for Bayesian fits or nonlinear custom special terms. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>. The optional <code>interval.cache</code> can be reused for repeated predictions from the same unchanged model.</p>
+<p>If <code>se.fit = TRUE</code>, standard errors are obtained from coefficient draws. Existing draws stored in the fitted object are used when available; otherwise, draws are generated from the complete joint covariance of the fitted coefficients, including cross-term and cross-parameter dependence. With <code>sandwich = TRUE</code>, coefficient draws use the coefficient block of the local RS Godambe covariance. These draws are a Gaussian approximation to the coefficient sampling distribution; the covariance alone does not determine finite-sample tail probabilities after nonlinear transformations. Simulation stops when the marginal 95% Gaussian interval for an estimated log smoothing parameter spans more than a factor of 100 in the smoothing parameter. This conservative check catches strongly uncertain smoothing parameters; passing it does not guarantee calibrated tail probabilities.</p>
+<p>If <code>level</code> is specified, approximate pointwise confidence intervals and standard errors are computed analytically, without simulation. Intervals on transformed parameter or response scales are transformed as needed and may be asymmetric. These are confidence intervals for the fitted model, not prediction intervals for future observations. By default they condition on the fitted smoothing parameters. Setting <code>unconditional = TRUE</code> adds the approximate correction described in <code>vcov.gamlss2</code>. Model-selection uncertainty remains excluded. Setting <code>sandwich = TRUE</code> instead uses the frequentist RS fixed-point covariance described there. The two corrections are distinct and cannot be combined. A reusable Wald cache records the selected covariance type. When an RS smoothing parameter is strictly active at its numerical limit, the sandwich calculation holds it fixed.</p>
+<p>Wald intervals currently support maximum-likelihood fits with linear terms and coefficient-linear <span class="pkg">mgcv</span> smooths. They are not available for nonlinear custom special terms. Wald intervals cannot be combined with simulation controls such as <code>FUN</code>, <code>R</code>, <code>seed</code>, or <code>burnin</code>.</p>
 <p>For <code>type = “terms”</code>, term names are partially matched by default. Use <code>nogrep = TRUE</code> in <code>…</code> for exact matching.</p>
 <p>See also <code>prodist.gamlss2</code> for explicitly obtaining <span class="pkg">distributions3</span> objects.</p>
 </section>
@@ -841,10 +862,10 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6596 eps = 0.000006     </code></p
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1      r_2      r_3
-1 34.06871 10.73729 32.74053
-2 40.52062 83.63119 41.85147
-3 92.17992 64.22787 98.78027</code></pre>
+<pre><code>       r_1       r_2      r_3
+1 46.30916  19.71575 10.83193
+2 55.33174  42.79721 65.63350
+3 73.69786 104.30471 95.09412</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## additive predictors on the link scale</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"link"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -946,7 +967,7 @@ GAMLSS-RS iteration  4: Global Deviance = 405.6596 eps = 0.000006     </code></p
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> cars, <span class="at">R =</span> <span class="dv">1000</span>, <span class="at">FUN =</span> identity)</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="do">## predict 1000 quantiles</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">sapply</span>(d, quantile, <span class="at">probs =</span> <span class="fl">0.9</span>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">sapply</span>(d, quantile, <span class="at">probs =</span> <span class="fl">0.95</span>)</span>
 <span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>i95 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
 <span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(<span class="fu">quantile</span>(x, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>), <span class="at">names =</span> <span class="cn">FALSE</span>),</span>

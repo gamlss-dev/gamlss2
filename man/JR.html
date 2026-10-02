@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>tree – gamlss2</title>
+<title>jr – gamlss2</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -208,7 +208,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#regression-tree-model-terms" id="toc-regression-tree-model-terms" class="nav-link active" data-scroll-target="#regression-tree-model-terms">Regression Tree Model Terms</a>
+  <li><a href="#joint-reml-estimation" id="toc-joint-reml-estimation" class="nav-link active" data-scroll-target="#joint-reml-estimation">Joint REML Estimation</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
@@ -227,15 +227,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="regression-tree-model-terms" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="regression-tree-model-terms">Regression Tree Model Terms</h2>
+<section id="joint-reml-estimation" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="joint-reml-estimation">Joint REML Estimation</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Constructs an <code>rpart</code> regression-tree model term for use with <code>gamlss2</code>.</p>
+<p>Fit a GAMLSS model by joint Laplace approximate REML.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">tree(formula, ...)
+<pre><code class="language-R">## optimzer function
+JR(x, y, specials, family, offsets,
+  weights, start, xterms, sterms, control)
+
+## refit function
+jr(object, trace = TRUE, ...)
 </code></pre>
 </section>
 <section id="arguments" class="level3">
@@ -243,10 +248,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table role="presentation">
 <tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="formula">formula</code>
+<code id="x">x</code>, <code id="y">y</code>, <code id="specials">specials</code>, <code id="family">family</code>, <code id="offsets">offsets</code>, <code id="weights">weights</code>, <code id="start">start</code>, <code id="xterms">xterms</code>, <code id="sterms">sterms</code>, <code id="control">control</code>
 </td>
 <td>
-Vector or one-sided formula specifying the predictors in the tree.
+Model components passed by <code>gamlss2()</code>.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="object">object</code>
+</td>
+<td>
+A fitted <code>gamlss2</code> model retaining its design matrices.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="trace">trace</code>
+</td>
+<td>
+Print the final joint REML result.
 </td>
 </tr>
 <tr>
@@ -254,44 +275,31 @@ Vector or one-sided formula specifying the predictors in the tree.
 <code id="...">…</code>
 </td>
 <td>
-Arguments passed to <code>rpart.control</code>.
+Named joint REML control overrides.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The term is refitted with <code>rpart</code> to the current working response and weights at each backfitting update. Its contribution is centered before being returned to the additive predictor.</p>
+<p>Use <code>optimizer = JR</code> to fit a model or <code>jr(fit)</code> to continue from an existing fit. The direct solver jointly estimates coefficients and smoothing parameters from cached designs and quadratic penalties. It requires a family density and an identifiable finite joint mode. Selected penalties and fixed distributional parameters are unsupported. If joint REML fails, the input fit is retained and <code>reml.failure</code> records the reason. Check <code>isTRUE(fit$jr$converged)</code> before using joint uncertainty estimates.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>An object of classes <code>“special”</code> and <code>“tree”</code>.</p>
+<p>A fitted <code>gamlss2</code> model with joint REML results in <code>fit$jr</code>.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
-<p><code>special_terms</code></p>
+<p><code>RS</code>, <code>vcov.gamlss2</code></p>
 </section>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"mcycle"</span>, <span class="at">package =</span> <span class="st">"MASS"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  accel <span class="sc">~</span> <span class="fu">tree</span>(times,<span class="at">minsplit=</span><span class="dv">5</span>) <span class="sc">|</span> .,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> mcycle</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted distributions and quantiles</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> mcycle[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>pq <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(accel <span class="sc">~</span> times, <span class="at">data =</span> mcycle,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(mcycle<span class="sc">$</span>accel, pq))</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(mcycle<span class="sc">$</span>times, pq, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(dist <span class="sc">~</span> <span class="fu">s</span>(speed), <span class="at">data =</span> cars, <span class="at">family =</span> NO)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">jr</span>(m)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">vcov</span>(m, <span class="at">unconditional =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

@@ -176,6 +176,10 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -184,24 +188,24 @@ window.Quarto = {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -264,13 +268,14 @@ window.Quarto = {
 
 <p>A response distribution should reflect how the observations were obtained. An earthquake sample may exclude small events, a measuring device may stop at a fixed limit, and a proportion may include exact zeros and ones. In each case, a familiar distribution can be a useful starting point, but its support or probabilities need to change before it describes the recorded data.</p>
 <p>Family extensions make these changes to an existing family. The result is another <code>gamlss2.family</code>, ready to use in <code>fit_family()</code> or <code>gamlss2()</code>. We begin with earthquake magnitudes and use them to distinguish selection from rounding and grouping. We then consider recording limits, extra point masses, and transformations. Each example connects the observation mechanism to a fitted model.</p>
+<p>This vignette builds on <a href="firststeps.html">First Steps</a>. The underlying family interface is described in <a href="families.html">Family Objects</a>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">gamlss2_control</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>, <span class="at">maxit =</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="choosing-an-observation-model" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="choosing-an-observation-model"><span class="header-section-number">1</span> Choosing an observation model</h2>
-<p>A family extension specifies how a base distribution becomes the the response we observe. Several extensions can be combined when more than one mechanism is involved.</p>
+<p>A family extension specifies how a base distribution becomes the response we observe. Several extensions can be combined when more than one mechanism is involved.</p>
 <p>For example, earthquake magnitude can be viewed as a latent continuous quantity. If only events above a threshold are retained and magnitude is reported to one decimal place, its observed family is obtained by truncating the continuous family first and rounding second.</p>
 <p>The available constructors cover the following operations.</p>
 <table class="caption-top table">
@@ -637,17 +642,19 @@ FALSE  TRUE
 <p>For this example, the chance of reaching the cap is an interpretable fitted quantity. It is the normal upper-tail probability under the predicted parent parameters, and also the point mass assigned to the recorded value 80.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>at <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">speed =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">25</span>))</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_cens, <span class="at">newdata =</span> at)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m_cens, <span class="at">newdata =</span> at, <span class="at">type =</span> <span class="st">"parameter"</span>)</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(at,</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">probability_at_limit =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">cdf</span>(d, <span class="dv">80</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">probability_at_limit =</span> <span class="fu">pnorm</span>(<span class="dv">80</span>, <span class="at">mean =</span> p<span class="sc">$</span>mu, <span class="at">sd =</span> p<span class="sc">$</span>sigma,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower.tail =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  speed probability_at_limit
-1    10                    0
-2    15                    0
-3    20                    0
-4    25                    0</code></pre>
+1    10         1.991924e-08
+2    15         2.688637e-03
+3    20         1.353646e-01
+4    25         4.592479e-01</code></pre>
 </div>
 </div>
+<p>Here we use the parent normal parameters because the event is reaching or exceeding the limit before censoring. For the recorded distribution <code>d</code>, <code>1 - cdf(d, 80)</code> would instead be the probability of exceeding 80 after censoring, which is zero.</p>
 <p>Unlike censoring, upper truncation would remove cars whose stopping distance exceeds 80 and renormalize the density among those that remain. For two-sided mechanisms, supply both <code>lower</code> and <code>upper</code>. <code>truncate_family()</code> additionally accepts <code>include</code>, which controls inclusion of each endpoint and matters for discrete base families.</p>
 </section>
 <section id="right-censored-survival-responses" class="level2" data-number="6">
@@ -841,7 +848,7 @@ fits$Inflated 2452.863  2</code></pre>
 </section>
 <section id="proportions-with-exact-endpoints" class="level3" data-number="7.3">
 <h3 data-number="7.3" class="anchored" data-anchor-id="proportions-with-exact-endpoints"><span class="header-section-number">7.3</span> Proportions with exact endpoints</h3>
-<p>Point masses are also useful for continuous responses. Several inflation points are allowed, giving a model for proportions that can attain both endpoints while otherwise varying continuously. <code>logit_family(NO)</code> maps a normal variable through the logistic function, producing values strictly between 0 and 1. Inflation then adds the two endpoints. Here we simulate data with a known mechanism so that the role of each component is clear. <code>mu</code> and <code>sigma</code> govern the latent logistic-normal component, while <code>pi1</code> and <code>pi2</code> are odds for exact zero and exact one, respectively.</p>
+<p>Point masses are also useful for continuous responses. Several inflation points are allowed, giving a model for proportions that can attain both endpoints while otherwise varying continuously. <code>logit_family(NO)</code> maps a normal variable through the logistic function, producing values strictly between 0 and 1. Inflation then adds the two endpoints. Here we simulate data with a known mechanism so that the role of each component is clear. <code>mu</code> and <code>sigma</code> govern the latent logistic-normal component, while <code>pi1</code> and <code>pi2</code> are weights for exact zero and exact one relative to the continuous component. Their probabilities are <code>pi1 / (1 + pi1 + pi2)</code> and <code>pi2 / (1 + pi1 + pi2)</code>; the continuous component has probability <code>1 / (1 + pi1 + pi2)</code>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">250</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>))</span>
@@ -897,7 +904,7 @@ fits$Inflated 2452.863  2</code></pre>
 </div>
 </div>
 </div>
-<p>The smooth estimates how the interior distribution changes with <code>x</code>; the endpoint odds are constant in this example. The four right-hand sides correspond, in order, to <code>mu</code>, <code>sigma</code>, <code>pi1</code>, and <code>pi2</code>. Exact endpoints are handled as masses; interior observations retain a continuous density contribution.</p>
+<p>The two smooths estimate how the interior distribution changes with <code>x</code>; the endpoint weights are constant in this example. The family parameters are, in order, <code>mu</code>, <code>sigma</code>, <code>pi1</code>, and <code>pi2</code>. Only two right-hand sides are supplied, so the last two parameters receive intercept-only predictors. Exact endpoints are handled as masses; interior observations retain a continuous density contribution.</p>
 </section>
 </section>
 <section id="transformations-modeling-a-positive-response" class="level2" data-number="8">

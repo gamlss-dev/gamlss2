@@ -195,6 +195,10 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
+    <a class="dropdown-item" href="../vignettes/gamlss2.html">
+ <span class="dropdown-text">Overview and reading guide</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -203,24 +207,24 @@ window.Quarto = {
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/topmodels.html">
+ <span class="dropdown-text">Forecasting and assessment</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/families.html">
- <span class="dropdown-text">Families</span></a>
+ <span class="dropdown-text">Family objects</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../vignettes/family_extensions.html">
  <span class="dropdown-text">Family extensions</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/specials.html">
+ <span class="dropdown-text">Special model terms</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../vignettes/bayesian.html">
  <span class="dropdown-text">Bayesian GAMLSS</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/specials.html">
- <span class="dropdown-text">Specials</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/topmodels.html">
- <span class="dropdown-text">Evaluation</span></a>
   </li>  
     </ul>
   </li>
@@ -374,7 +378,7 @@ sigma.s(yday)  5.9588
 *--------
 n = 1057 df =  21.52 res.df =  1035.48
 Deviance = 10112.7247 Null Dev. Red. = 12.95%
-AIC = 10155.7706 elapsed =  0.12sec</code></pre>
+AIC = 10155.7706 elapsed =  0.11sec</code></pre>
 </div>
 </div>
 <p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>
@@ -409,7 +413,7 @@ AIC = 10155.7706 elapsed =  0.12sec</code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">364</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>By default, <code>predict()</code> returns one <code>distributions3</code> object for each row of <code>newdata</code>.</p>
+<p>By default, <code>predict()</code> returns a vector of fitted distributions using the <code>distributions3</code> interface, with one distribution per row of <code>newdata</code>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pf <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newdata =</span> nd)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -464,7 +468,7 @@ AIC = 10155.7706 elapsed =  0.12sec</code></pre>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> yday, <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bikes <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Motorcycles"</span>)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">matlines</span>(nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span>, pq,</span>
@@ -479,7 +483,7 @@ AIC = 10155.7706 elapsed =  0.12sec</code></pre>
 </div>
 </div>
 </div>
-<p>These fitted distributions describe response variation conditional on the estimated model.</p>
+<p>These fitted distributions describe response variation conditional on the estimated model. The 5% and 95% quantiles bound a central 90% response interval; they do not quantify uncertainty in the estimated mean or median. The <a href="prediction.html">Prediction and Uncertainty</a> vignette develops this distinction.</p>
 </section>
 <section id="relation-to-gamlss" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="relation-to-gamlss"><span class="header-section-number">5</span> Relation to <code>gamlss</code></h2>
@@ -487,7 +491,7 @@ AIC = 10155.7706 elapsed =  0.12sec</code></pre>
 </section>
 <section id="next-steps" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="next-steps"><span class="header-section-number">6</span> Next steps</h2>
-<p>The <a href="https://gamlss-dev.github.io/gamlss2/vignettes/families.html">Family Objects</a> vignette explains available and custom response distributions. The <a href="https://gamlss-dev.github.io/gamlss2/vignettes/specials.html">Special Model Terms</a> vignette covers terms beyond standard <code>mgcv</code> smooths.</p>
+<p>Continue with <a href="prediction.html">Prediction and Uncertainty</a> to construct and assess intervals, or <a href="topmodels.html">Forecasting and Assessment</a> for calibration plots and scoring rules. <a href="families.html">Family Objects</a> explains distribution interfaces and custom families; <a href="family_extensions.html">Family Extensions</a> handles truncation, censoring, rounding, and extra point masses. <a href="specials.html">Special Model Terms</a> covers terms beyond standard <code>mgcv</code> smooths, and <a href="bayesian.html">Bayesian GAMLSS</a> uses the same model specification for MCMC.</p>
 
 
 

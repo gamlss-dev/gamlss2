@@ -17,7 +17,7 @@ softplus(a = 1)
 }
 
 \details{
-The softplus link function with parameter \eqn{a} is given by:
+The softplus inverse link function with parameter \eqn{a} is given by:
 
 \deqn{\displaystyle \frac{\log(1 + \exp(a \cdot x))}{a}}{log(1 + exp(a * x))/a}
   
@@ -79,3 +79,4 @@ legend("topleft", c("exp", "softplus"), col = c(4, 2), lwd = 2, lty = 1, bty = "
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
+

@@ -28,8 +28,8 @@ find_gamlss2(formula, families = NULL, k = 2,
 
 \arguments{
   \item{type}{Character, is the response continuous or discrete?}
-  \item{families}{Character, the names of the family objects of the \pkg{gamlss.dist}
-    package that should be returned.}
+  \item{families}{Character, the names of the family objects
+    that should be returned.}
   \item{y}{The response vector or matrix.}
   \item{k}{Numeric, the penalty factor that should be used for the \code{\link{GAIC}}.}
   \item{verbose}{Logical, should runtime information be printed?}
@@ -63,8 +63,11 @@ find_gamlss2(formula, families = NULL, k = 2,
 
 \value{
   Function \code{find_family()} returns a vector of \code{\link{GAIC}} values for the
-  different fitted families. Function \code{fit_family()} returns the fitted intercept-only
-  model.
+  different fitted families. The best model is the model with the lowest GAIC.
+
+  Function \code{fit_family()} returns the fitted intercept-only model.
+
+  Function \code{find_gamlss2()} returns the final selected model.
 }
 
 \seealso{

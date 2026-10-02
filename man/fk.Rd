@@ -23,7 +23,7 @@ fk(x, k = 10L, nk = NULL, degree = 1L,
   }
   \item{k}{
     Integer, the largest number of free interior knots
-    considered when \code{nk = NULL}. Candidate models from zero through
+    considered when \code{nk = NULL}. Candidate models from one through
     \code{k} interior knots are compared.
   }
   \item{nk}{
@@ -74,7 +74,7 @@ fk(x, k = 10L, nk = NULL, degree = 1L,
   by weighted least squares. Knot optimization therefore only operates on
   the interior locations. The fitted model term is centered.
 
-  When \code{nk = NULL}, models with zero through \code{k} interior knots
+  When \code{nk = NULL}, models with one through \code{k} interior knots
   are compared using \code{criterion}. Effective degrees of freedom include
   both the centered spline coefficients and the estimated interior knot
   locations. Fixed locations supplied through \code{knots} do not add
@@ -96,15 +96,15 @@ data("SpirometryUS")
 ## subset for female
 d <- subset(SpirometryUS, gender == "male")
 
-## Automatically select zero through four free interior knots
-m1 <- gamlss2(fev1 ~ fk(age, nk = 1) | ., data = d, family = NO)
+## Automatically select one free interior knot
+m <- gamlss2(fev1 ~ fk(age, nk = 1) | ., data = d, family = NO)
 
 ## estimated effects
-plot(m1)
+plot(m)
 
 ## predict quantiles
 qu <- c(0.025, seq(0.1, 0.9, by = 0.1), 0.975)
-fit <- quantile(m1, probs = qu)
+fit <- quantile(m, probs = qu)
 
 ## plot
 plot(fev1 ~ age, data = d)

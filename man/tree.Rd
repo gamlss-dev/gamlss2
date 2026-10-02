@@ -10,8 +10,12 @@
   \code{gamlss2}.
 }
 
+\usage{
+tree(formula, ...)
+}
+
 \arguments{
-  \item{formula}{A one-sided formula specifying the predictors in the tree.}
+  \item{formula}{Vector or one-sided formula specifying the predictors in the tree.}
   \item{...}{Arguments passed to \code{\link[rpart]{rpart.control}}.}
 }
 
@@ -47,3 +51,4 @@ matlines(mcycle$times, pq, lty = 1, lwd = 2, col = 4)
 }}
 
 \keyword{models}
+

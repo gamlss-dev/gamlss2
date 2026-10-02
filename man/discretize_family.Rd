@@ -30,8 +30,8 @@ discretize_family(family = NO, breaks,
   For each interval defined by adjacent elements of \code{breaks},
   \code{discretize_family()} assigns the interval probability under the base
   distribution to the corresponding element of \code{values}. Thus, with
-  \code{right = TRUE}, response value \eqn{v_j} has probability
-  \deqn{P(X \in (b_j, b_{j+1}])}
+  \code{right = TRUE}, response value \eqn{y_j} has probability
+  \deqn{P(Y \in (b_j, b_{j+1}])}
   under the base distribution. With \code{right = FALSE}, the intervals are
   left-closed instead.
 
@@ -65,16 +65,16 @@ x <- sort(runif(n, -3, 3))
 par <- data.frame(mu = sin(x), sigma = exp(-0.5 + cos(x)))
 y <- fam$random(par, n)
 head(y)
-d <- data.frame(y = y, x = x)
+df <- data.frame(y = y, x = x)
 
 ## plot count data
-plot(y ~ x, data = d)
+plot(y ~ x, data = df)
 
 ## fitted pdf
-fit_family(d$y, family = fam)
+fit_family(df$y, family = fam)
 
 ## fit a regression model using the discretized family
-m <- gamlss2(y ~ s(x) | ., data = d, family = fam)
+m <- gamlss2(y ~ s(x) | ., data = df, family = fam)
 
 ## inspect the estimated effect and fitted probabilities
 plot(m)
@@ -83,7 +83,7 @@ head(pdf(d, y))
 
 ## predict median
 p <- quantile(d, probs = 0.5)
-plot(y ~ x, data = d)
+plot(y ~ x, data = df)
 lines(p ~ x, lwd = 2, col = 4)
 }}
 

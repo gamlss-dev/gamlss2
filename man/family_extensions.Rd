@@ -91,10 +91,8 @@ round_family(family = NO, digits = 0L)
   For a fixed monotone transformation \eqn{Y = g(X)},
   \code{transform_family} uses
   \deqn{\log f_Y(y) = \log f_X(g^{-1}(y)) + \log |d g^{-1}(y) / dy|.}
-  Base-family parameter scores, Hessians, and optimized updates can therefore
-  be evaluated directly at the inverse-transformed response. Increasing and
-  decreasing transformations are supported. The convenience function
-  \code{logit_family} constructs the logistic push-forward,
+  Increasing and decreasing transformations are supported. The convenience
+  function \code{logit_family} constructs the logistic push-forward,
   which has strict support \eqn{0 < Y < 1}.
   Exact zeros and ones are not valid observations for this
   continuous transformation.
@@ -110,22 +108,22 @@ round_family(family = NO, digits = 0L)
   \code{survival::Surv(time, status)} response. An observed event contributes
   the base density or mass at \code{time}; a censored observation contributes
   the base survival probability beyond \code{time}.
-  Truncation and censoring reuse base-family derivatives where possible and
-  differentiate only the additional probability terms.
 
   For inflation points \eqn{c_j}, \code{inflate_family} constructs
   \deqn{F(y) = \pi_0 F_0(y) + \sum_j \pi_j I(c_j \le y).}
   Natural base-distribution mass at an inflation point is retained. The
   appended parameters \code{pi1}, \code{pi2}, and so on have log links and
-  represent positive odds \eqn{w_j} relative to the base component. Thus,
+  represent positive odds \eqn{w_j} relative to the base component, not
+  probabilities. Thus,
   \deqn{\pi_0 = \frac{1}{1 + \sum_j w_j}, \qquad \pi_j = \frac{w_j}{1 + \sum_\ell w_\ell}.}
   This is the baseline-odds parameterization also used by
   \code{\link{mixture_family}}. Quantiles account for every probability jump.
 
   The function \code{hurdle_family} instead constructs
   \deqn{F(y) = \pi_1 I(c \le y) + \pi_0 F_0(y \mid X \ne c).}
-  Hence, the hurdle probability is the complete mass at \eqn{c}, including
-  when the base distribution already assigns positive mass to that point.
+  Here \code{pi1} is also the odds \eqn{w_1}, so the hurdle probability is
+  \eqn{w_1/(1 + w_1)}. This is the complete mass at \eqn{c}, including when
+  the base distribution already assigns positive mass to that point.
 
   The function \code{round_family} uses intervals centered on a decimal grid
   and is restricted to continuous base distributions. Its quantile and
@@ -133,21 +131,13 @@ round_family(family = NO, digits = 0L)
   user-defined intervals, see \code{\link{discretize_family}}.
 
   Inflated, hurdle, and fixed-bin families provide exact means and variances
-  when the required base-family moments are available. Generic censored and
-  rounded moments require partial moments, which are not part of the family
-  interface, and therefore report an informative error rather than applying
-  an incorrect numerical approximation.
+  when the required base-family moments are available. Censored and rounded moments
+  requiring unavailable partial moments report an error.
 
-  Modified continuous distributions containing explicit point masses are
-  treated as mixed distributions and provide randomized quantile residuals.
-  Bounds, atom locations, breaks, and transformations are fixed when the
-  family is constructed; they are not modeled distributional parameters.
-
-  Arbitrary weighted distributions, splices, non-monotone transformations,
-  order-statistic distributions, convolutions, and compound distributions
-  are not provided. Generic implementations would require numerical
-  normalization or derivatives inside fitting iterations and could not be
-  supplied reliably by the existing family interface.
+  Continuous distributions with added point masses provide randomized
+  quantile residuals. Bounds, atom locations, breaks, and transformations
+  are fixed when the family is constructed. Other extensions requiring
+  numerical normalization or derivatives during fitting are not provided.
 }
 
 \value{
@@ -184,7 +174,7 @@ plot(x, y)
 fq <- function(model) {
   matlines(x,
     quantile(model, probs = c(0.05, 0.5, 0.95)),
-    lty = 1, lwd = 2, col = 4
+      lty = 1, lwd = 2, col = 4
   )
 }
 
@@ -201,7 +191,8 @@ fq(m)
 
 ## zero-inflated Poisson distribution
 fam <- inflate_family(PO, at = 0)
-y <- fam$random(list(mu = exp(1/2 + sin(x)), pi1 = plogis(cos(x))), n)
+## pi1 is the added-mass odds; its mixture probability is plogis(cos(x))
+y <- fam$random(list(mu = exp(1/2 + sin(x)), pi1 = exp(-1 + cos(x))), n)
 barplot(table(y))
 m <- gamlss2(y ~ s(x) | s(x), family = fam)
 plot(m)
@@ -210,7 +201,8 @@ fq(m)
 
 ## zero-hurdle Poisson distribution
 fam <- hurdle_family(PO, at = 0)
-y <- fam$random(list(mu = exp(1/2 + sin(x)), pi1 = plogis(cos(x))), n)
+## pi1 is the hurdle odds; the probability of zero is plogis(cos(x))
+y <- fam$random(list(mu = exp(1/2 + sin(x)), pi1 = exp(cos(x))), n)
 barplot(table(y))
 m <- gamlss2(y ~ s(x) | s(x), family = fam)
 plot(m)
@@ -228,3 +220,4 @@ plot(m, which = "resid")
 \keyword{distribution}
 \keyword{models}
 \keyword{regression}
+

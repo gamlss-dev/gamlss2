@@ -10,8 +10,7 @@
 \usage{
 \method{vcov}{gamlss2}(object,
   type = c("vcov", "cor", "se", "coef"), full = FALSE,
-  method = c("joint", "working", "numeric"), unconditional = FALSE,
-  sandwich = FALSE, .details = FALSE, \dots)
+  method = c("joint", "working", "numeric"), unconditional = FALSE, \dots)
 }
 
 \arguments{
@@ -29,11 +28,6 @@
     uncertainty in selected smoothness parameters. For \code{JR} fits this
     uses the fitted joint REML curvature. Other fits use a post-fit local
     approximation. This requires \code{method = "joint"}.}
-  \item{sandwich}{Logical. If \code{TRUE}, use the post-fit estimating-equation
-    sandwich covariance for an ordinary RS fit with local REML smooths.
-    This requires \code{method = "joint"} and \code{unconditional = FALSE}.}
-  \item{.details}{Internal diagnostic for the sandwich calculation. Ordinary
-    calls should leave this at \code{FALSE}.}
   \item{\dots}{Control arguments passed to the numerical Hessian when
     \code{method = "numeric"}.}
 }
@@ -46,53 +40,24 @@ parameters. Thus it retains covariance among linear and smooth terms and among
 distributional parameters. Prior observation weights and offsets in the final
 linear predictors are included.
 
-With \code{sandwich = TRUE}, the coefficient score and the actual local REML
-fixed-point equations form a joint estimating system for coefficients and log
-smoothing parameters. Its bread uses the same joint penalized coefficient
-information as the default method. Its meat is the outer product of
-observation-wise derivatives with respect to case multipliers. Prior weights
-are treated as fixed multipliers on independent rows; this is not a
-frequency-replication interpretation. The quadratic penalty is deterministic
-and is not included in the stochastic meat. The full joint coefficient and
-smoothing-parameter covariance is assembled internally, while \code{vcov()}
-returns only the coefficient block. No coefficient or smooth refit is performed.
-This method requires a converged ordinary RS fit and local REML smoothing
-estimates. An estimated smoothing parameter clipped at an RS limit is held
-fixed when its local update before clipping points beyond that limit. A
-single-penalty smooth whose local REML variance floor is active uses the
-corresponding floored update equation. A user-fixed nonnegative smoothing
-parameter is held fixed regardless of its
-size, including values above the RS estimation cap. A stored estimated
-parameter whose local update points inward is inconsistent with the final
-fit. Indeterminate transition cases, non-REML smoothing selection, selected
-ridge or adaptive penalties, and non-estimable coefficients are rejected.
-It uses the final working equations and is a local fixed-point approximation
-when RS has stopped at a finite convergence tolerance.
+The default covariance conditions on fitted smoothing parameters. Use
+\code{unconditional = TRUE} to include their approximate estimation uncertainty.
+Fixed smoothing parameters receive no correction, and model-selection
+uncertainty is excluded. Adaptive smooth penalties, selected ridge penalties,
+and non-estimable coefficients are unsupported.
 
-By default, the result is conditional on the fitted smoothing parameters.
-For fits estimated with \code{optimizer = JR},
-\code{unconditional = TRUE} uses the Hessian of the profiled joint REML
-criterion stored by \code{\link{JR}}. The outer optimization includes
-coefficient optimization at fixed smoothing parameters; no refits are required
-when \code{vcov()} is called. A successful \code{JR} fit also stores the
-conditional coefficient covariance from its direct likelihood mode. If the
-joint REML optimum or its curvature cannot be
-verified, unconditional covariance is unavailable. Curvature directions too
-flat to distinguish from numerical error are excluded from the inverse for
-variation of the coefficient mean. Their contribution to variation of the
-coefficient covariance factor is bounded, as in \pkg{mgcv}.
+For \code{\link{JR}} fits, the correction uses the stored Hessian of the
+profiled joint REML criterion and conditional coefficient covariance from the
+direct likelihood mode; no refits are required. It is available only when the
+joint REML optimum and its curvature can be verified. For other optimizers,
+the correction uses a local quadratic post-fit approximation, rather than a
+global REML Hessian. It is therefore not a validated covariance of the complete
+RS/CG estimator.
 
-For other optimizers, \code{unconditional = TRUE} uses a local quadratic
-post-fit approximation to joint marginal smoothness curvature. The current
-term-wise RS/CG smoothness selection does not provide the global REML Hessian
-used by \pkg{mgcv}, so this post-fit correction is not a validated covariance
-of the complete RS/CG estimator. Following \pkg{mgcv}, nonpositive directions
-of the local curvature do not contribute to variation in the coefficient
-mean. A small regularization bounds their contribution to variation in the
-coefficient covariance factor. Adaptive smooth penalties, selected ridge
-penalties, and non-estimable coefficients cause an explicit error. Fixed
-smoothing parameters receive no correction. Model-selection uncertainty is
-not included.
+Following \pkg{mgcv}, numerically flat directions for \code{JR}, or nonpositive
+local curvature directions for other optimizers, are excluded from variation
+in the coefficient mean. Their contribution to variation in the coefficient
+covariance factor is bounded.
 
 Special terms that have no verifiable coefficient-linear design are rejected
 explicitly. Objects fitted with \code{light = TRUE} do not retain the final
@@ -104,10 +69,8 @@ The ordinary \code{summary()} and effect-result paths use the covariance stored
 with each fitted model term by default, which is substantially faster for large
 models. Use \code{summary(object, method = "joint")} or
 \code{results(object, method = "joint")} to request the complete joint
-information. Use \code{summary(object, sandwich = TRUE)} to report standard
-errors and coefficient tests from the RS sandwich covariance, or
-\code{summary(object, unconditional = TRUE)} for the existing smoothness
-correction. These options select the joint method unless another method is
+information. Use \code{summary(object, unconditional = TRUE)} for the smoothness
+correction. This option selects the joint method unless another method is
 specified explicitly. Simulation-based \code{predict()} calls always use the
 complete joint covariance. No consumer silently substitutes \code{method = "working"}
 when observed joint information is indefinite.
@@ -136,9 +99,6 @@ head(diag(V))
 
 ## include estimated smoothness uncertainty
 Vc <- vcov(m, full = TRUE, unconditional = TRUE)
-
-## frequentist covariance for a regular RS/local-REML fit
-Vs <- vcov(m, full = TRUE, sandwich = TRUE)
 }}
 
 \keyword{models}

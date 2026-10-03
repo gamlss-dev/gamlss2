@@ -22,11 +22,15 @@
 
 vcov.gamlss2 <- function(object,
   type = c("vcov", "cor", "se", "coef"), full = FALSE,
-  method = c("joint", "working", "numeric"), unconditional = FALSE,
-  sandwich = FALSE, .details = FALSE, ...)
+  method = c("joint", "working", "numeric"), unconditional = FALSE, ...)
 {
   type <- match.arg(type)
   method <- match.arg(method)
+  ## Consume internal controls before forwarding dots to optimHess.
+  dots <- list(...)
+  sandwich <- if("sandwich" %in% names(dots)) dots[["sandwich"]] else FALSE
+  .details <- if(".details" %in% names(dots)) dots[[".details"]] else FALSE
+  dots[c("sandwich", ".details")] <- NULL
   if(!is.logical(unconditional) || length(unconditional) != 1L ||
       is.na(unconditional))
     stop("'unconditional' must be TRUE or FALSE.", call. = FALSE)
@@ -1279,7 +1283,6 @@ vcov.gamlss2 <- function(object,
       return(-sum(prior * ld))
     }
 
-    dots <- list(...)
     if(length(dots) && (is.null(names(dots)) || any(!nzchar(names(dots)))))
       .stop("all control arguments in '...' must be named.")
 

@@ -63,6 +63,13 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
 
       sj <- eval(sjp, envir = if(binj) dj else data)
 
+      ## Center linear blocks only when their predictors have intercepts.
+      if(inherits(sj, "lin.smooth.spec") && !sj$scale &&
+          !is.null(dots$intercept)) {
+        used <- vapply(x, function(x) j %in% x, logical(1L))
+        sj$center <- all(dots$intercept[used])
+      }
+
       ## For class "smooth", binning is not possible.
       if(inherits(sj, "smooth") & binning) {
         warning(paste0("binning is not possible for 'smooth' term ", j, "!"))

@@ -367,12 +367,14 @@ smooth.construct.lin.smooth.spec <- function(object, data, knots)
   if(any(grepl("(Intercept)", colnames(object$X), fixed = TRUE))) {
     object$X <- object$X[, -1L, drop = FALSE]
   }
-  if(object$scale) {
+  if(object$scale || isTRUE(object$center)) {
     sx <- list()
     for(j in seq_len(ncol(object$X))) {
       xj <- object$X[, j]
       sdj <- sd(xj)
       if(is.finite(sdj) && sdj > 0) {
+        if(!object$scale)
+          sdj <- 1
         nm <- colnames(object$X)[j]
         muj <- mean(xj)
         sx[[as.character(j)]] <- list("mean" = muj, "sd" = sdj)

@@ -73,6 +73,13 @@ ridge(...)
   as penalized terms. Ordinary linear effects can still be specified directly
   in the surrounding \code{gamlss2} formula.
 
+  When every distributional predictor using the block has an intercept,
+  nonconstant columns are centered before fitting, without changing their
+  scale. This avoids competition between the block and the separate intercept
+  during backfitting. The intercept then refers to the centered block, and
+  the stored column means are reused for prediction. If a predictor using
+  the block has no intercept, the unscaled design is retained.
+
   \strong{Ridge-penalized blocks.}
   For \code{ridge()}, coefficients are estimated from the current weighted
   working response using an identity penalty. Ignoring the small numerical

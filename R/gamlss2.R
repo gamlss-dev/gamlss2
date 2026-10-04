@@ -236,7 +236,8 @@ gamlss2.formula <- function(formula, data, family = NO,
 
   ## Process special terms.
   Specials <- special_terms(Sterms, mf, binning = control$binning,
-    digits = control$digits, select = control$select, knots = knots)
+    digits = control$digits, select = control$select, knots = knots,
+    intercept = vapply(mt, function(x) attr(x, "intercept") > 0L, logical(1L)))
 
   ## Process by variables using mgcv::smoothCon().
   olab <- sapply(Specials, function(x) if(is.list(x)) x$orig.label else "")

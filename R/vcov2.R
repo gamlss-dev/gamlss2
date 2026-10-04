@@ -92,8 +92,12 @@ vcov.gamlss2 <- function(object,
   {
     if(is.null(x))
       return(NULL)
-    if(!is.null(names(x)) && name %in% names(x))
-      return(x[[name]])
+    ## Named lists can omit predictors without ordinary linear terms.
+    if(!is.null(names(x))) {
+      if(name %in% names(x))
+        return(x[[name]])
+      return(NULL)
+    }
     if(!is.null(pos) && length(x) >= pos)
       return(x[[pos]])
     return(NULL)

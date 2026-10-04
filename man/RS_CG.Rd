@@ -99,6 +99,10 @@ CG(x, y, specials, family, offsets,
       be set in \code{\link{gamlss2_control}}.
   }
 
+  For smoothing parameter selection methods, numerical solver details, and
+  examples, see
+  \code{\link{gamlss2_smoothing}}.
+
   To facilitate the development of new algorithms for \pkg{gamlss2}, users can exchange
   them using the \code{optimizer} argument in \code{\link{gamlss2_control}}. Users
   developing new model fitting functions are advised to use these functions as templates
@@ -133,7 +137,8 @@ CG(x, y, specials, family, offsets,
 }
 
 \seealso{
-  \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{gamlss2.family}}
+  \code{\link{gamlss2}}, \code{\link{gamlss2_control}},
+  \code{\link{gamlss2.family}}, \code{\link{gamlss2_smoothing}}
 }
 
 \examples{\dontrun{## count response example using HarzTraffic data
@@ -154,3 +159,4 @@ m3 <- gamlss2(f, data = HarzTraffic, family = NBI, CG = 3)
 
 \keyword{models}
 \keyword{regression}
+

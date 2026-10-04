@@ -39,7 +39,11 @@ m <- gamlss2(dist ~ s(speed), data = cars, family = GA)
 ## extract results
 r <- results(m)
 names(r$effects)
+
+## plot estimated effects
+plot(r)
 }}
 
 \keyword{models}
 \keyword{regression}
+

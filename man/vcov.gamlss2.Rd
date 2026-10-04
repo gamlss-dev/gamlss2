@@ -24,8 +24,8 @@
     observed information, \code{"working"} uses the final family working
     curvature with zero cross-parameter blocks, and \code{"numeric"} uses a
     slow coefficient-dimensional numerical Hessian for validation.}
-  \item{unconditional}{Logical. If \code{TRUE}, add a correction for
-    uncertainty in selected smoothness parameters. For \code{JR} fits this
+  \item{unconditional}{Logical. If \code{TRUE}, a correction for
+    uncertainty in selected smoothness parameters is added. For \code{JR} fits this
     uses the fitted joint REML curvature. Other fits use a post-fit local
     approximation. This requires \code{method = "joint"}.}
   \item{\dots}{Control arguments passed to the numerical Hessian when
@@ -46,24 +46,10 @@ Fixed smoothing parameters receive no correction, and model-selection
 uncertainty is excluded. Adaptive smooth penalties, selected ridge penalties,
 and non-estimable coefficients are unsupported.
 
-For \code{\link{JR}} fits, the correction uses the stored Hessian of the
-profiled joint REML criterion and conditional coefficient covariance from the
-direct likelihood mode; no refits are required. It is available only when the
-joint REML optimum and its curvature can be verified. For other optimizers,
-the correction uses a local quadratic post-fit approximation, rather than a
-global REML Hessian. It is therefore not a validated covariance of the complete
-RS/CG estimator.
-
-Following \pkg{mgcv}, numerically flat directions for \code{JR}, or nonpositive
-local curvature directions for other optimizers, are excluded from variation
-in the coefficient mean. Their contribution to variation in the coefficient
-covariance factor is bounded.
-
 Special terms that have no verifiable coefficient-linear design are rejected
 explicitly. Objects fitted with \code{light = TRUE} do not retain the final
 predictors and must be refitted for joint covariance. Aliased or numerically
-unidentified coefficient variances are returned as \code{NA}; no arbitrary
-inferential ridge is added.
+unidentified coefficient variances are returned as \code{NA}.
 
 The ordinary \code{summary()} and effect-result paths use the covariance stored
 with each fitted model term by default, which is substantially faster for large
@@ -103,3 +89,4 @@ Vc <- vcov(m, full = TRUE, unconditional = TRUE)
 
 \keyword{models}
 \keyword{regression}
+

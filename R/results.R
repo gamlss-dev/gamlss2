@@ -334,6 +334,19 @@ results.gamlss2 <- function(x, data = NULL, ...)
   return(res)
 }
 
+## Plot estimated effects.
+plot.results <- function(x, ...)
+{
+  if(length(x$effects) < 1L)
+    return(invisible(NULL))
+
+  np <- unique(sub("\\..*$", "", names(x$effects)))
+  x <- list("results" = x, "family" = list("names" = np))
+  class(x) <- "results"
+
+  plot.gamlss2(x, which = "effects", ...)
+}
+
 '%||%' <- function(a, b) if (!is.null(a)) a else b
 
 ## Helper to remove any offsets.

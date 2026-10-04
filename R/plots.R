@@ -32,7 +32,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
   ## Check for any effect plots.
   if(length(which) < 2L) {
     if(which == "effects" && (is.null(x$results) ||
-        (!inherits(x, "bamlss2") &&
+        (!inherits(x, c("bamlss2", "results")) &&
           !identical(attr(x$results, "interval"), "wald"))))
       x$results <- results(x, ...)
     if(which == "effects" & length(x$results$effects) < 1L)
@@ -55,7 +55,7 @@ plot.gamlss2 <- function(x, parameter = NULL,
 
   ## Effect plots.
   if("effects" %in% which) {
-    if(is.null(x$results) || (!inherits(x, "bamlss2") &&
+    if(is.null(x$results) || (!inherits(x, c("bamlss2", "results")) &&
         !identical(attr(x$results, "interval"), "wald")))
       x$results <- results(x, ...)
 

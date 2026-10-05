@@ -666,7 +666,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
 <p>Random effects can be included in <code>gamlss2</code> models in two ways.<br>
-The first uses <code>s()</code> with <code>bs = “re”</code> for simple random effects, i.e., when a single factor is entered into the model as a smoother. This approach relies on the <code>s()</code> function from the <span class="pkg">mgcv</span> package. For example, if <code>area</code> is a factor with several levels, then <code>s(area, bs = “re”)</code> shrinks the level-specific effects of <code>area</code> towards their overall mean.</p>
+The first uses <code>s()</code> with <code>bs = “re”</code> for simple random effects, i.e., when a single factor is entered into the model as a smoother. This approach relies on the <code>s()</code> function from the <span class="pkg">mgcv</span> package. For example, if <code>x</code> is a factor with several levels, then <code>s(x, bs = “re”)</code> shrinks the level-specific effects of <code>x</code> towards their overall mean.</p>
 <p>The second, more general approach uses the model term constructor <code>re()</code>, which provides an interface to the specialised random-effects functionality in the <span class="pkg">nlme</span> package. This allows fitting more complex random-effects structures.</p>
 <p>This documentation focuses on the <code>re()</code> function, but we also provide examples using <code>s(…, bs = “re”)</code>.</p>
 </section>

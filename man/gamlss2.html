@@ -691,7 +691,7 @@ gamlss2(formula, ...)
 <code id="formula">formula</code>
 </td>
 <td>
-A GAM-type <code>formula</code> or <code>Formula</code> describing the additive predictors for the distribution parameters. All smooth terms from <span class="pkg">mgcv</span> are supported, see also <code>formula.gam</code>. For <code>gamlss.list()</code>, <code>formula</code> is a list of <code>formula</code>s.
+A GAM-type <code>formula</code> or <code>Formula</code> describing the additive predictors for the distribution parameters. All smooth terms from <span class="pkg">mgcv</span> are supported, see also <code>formula.gam</code>. For <code>gamlss2.list()</code>, <code>formula</code> is a list of <code>formula</code>s.
 </td>
 </tr>
 <tr>
@@ -859,7 +859,7 @@ sigma.s(Temp) 3.9513
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.15sec</code></pre>
+AIC = 952.263 elapsed =  0.14sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot parameter-specific effects</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

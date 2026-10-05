@@ -719,7 +719,7 @@ Numeric, the penalty for the <code>GAIC</code>.
 <code id="strategy">strategy</code>
 </td>
 <td>
-Character, the strategy to be used by the stepwise algorithm. Possible options are <code>“forward.linear”</code>, <code>“forward”</code>, <code>“backward”</code>, <code>“backward.linear”</code>, <code>“replace”</code>, <code>“replace.linear”</code>, <code>“both”</code>, <code>“both.linear”</code>, <code>“all”</code> and <code>“all.linear”</code>. See the details.
+Character vector of selection strategies; see the details.
 </td>
 </tr>
 <tr>
@@ -727,7 +727,7 @@ Character, the strategy to be used by the stepwise algorithm. Possible options a
 <code id="keeporder">keeporder</code>
 </td>
 <td>
-Logical. For the different stepwise strategies, should the updates be performed sequentially according to the order of the parameters of the response distribution as specified in the family (see <code>gamlss2.family</code>), or should the selection search be performed across all parameters?
+Logical. Update distributional parameters sequentially rather than search across all parameters? See the details for the order.
 </td>
 </tr>
 <tr>
@@ -740,74 +740,10 @@ Integer. If <code>cores &gt; 1L</code>, <code>mclapply</code> is used to speed u
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="x">x</code>
+<code id="x">x</code>, <code id="y">y</code>, <code id="specials">specials</code>, <code id="family">family</code>, <code id="offsets">offsets</code>, <code id="weights">weights</code>, <code id="start">start</code>, <code id="xterms">xterms</code>, <code id="sterms">sterms</code>
 </td>
 <td>
-The full model matrix to be used for fitting.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="y">y</code>
-</td>
-<td>
-The response vector or matrix.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="specials">specials</code>
-</td>
-<td>
-A named list of special model terms, e.g., including design and penalty matrices for fitting smooth terms using <code>smooth.construct</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="family">family</code>
-</td>
-<td>
-A family object, see <code>gamlss2.family</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="offsets">offsets</code>
-</td>
-<td>
-If supplied, a list or data frame of model offsets.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="weights">weights</code>
-</td>
-<td>
-If supplied, a numeric vector of weights.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="start">start</code>
-</td>
-<td>
-Starting values, either for the parameters of the response distribution or, if specified as a named list in which each element of length one is named with <code>“(Intercept)”</code>, the respective intercepts are initialized. If starting values are specified as a named list, data frame or matrix, where each element/column is a vector with the same length as the number of observations in the data, the respective predictors are initialized with these. See the examples for <code>gamlss2</code>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="xterms">xterms</code>
-</td>
-<td>
-A named list specifying the linear model terms. Each named list element represents one parameter as specified in the family object.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="sterms">sterms</code>
-</td>
-<td>
-A named list specifying the special model terms. Each named list element represents one parameter as specified in the family object.
+Model components and starting values passed to the optimizer, as documented for <code>RS</code>.
 </td>
 </tr>
 <tr>
@@ -823,34 +759,43 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The wrapper function <code>step_gamlss2()</code> calls <code>gamlss2</code> using the <code>stepwise()</code> optimizer function.</p>
-<p>The stepwise algorithm can apply the following strategies:</p>
-<ol>
-<li>
-<p>Each predictor must include an intercept.</p>
-</li>
-<li>
-<p>In a forward selection step, model terms with the highest improvement on the GAIC are selected.</p>
-</li>
-<li>
-<p>In a replacement step, each model term is tested to see if an exchange with a term not yet selected improves the GAIC.</p>
-</li>
-<li>
-<p>In a backward step, model terms are removed if this further improves the GAIC.</p>
-</li>
-<li>
-<p>In a bidirectional step, model terms can be either added or removed.</p>
-</li>
-<li>
-<p>In addition, the forward, backward and replace selection step can be combined.</p>
-</li>
-</ol>
-<p>The selected strategies are iterated until no further improvement is achieved.</p>
+<p>Argument <code>strategy</code> selects one or more strategies:</p>
+<dl>
+<dt>
+<code>“forward”</code>
+</dt>
+<dd>
+Add the term that most improves the GAIC.
+</dd>
+<dt>
+<code>“backward”</code>
+</dt>
+<dd>
+Remove the term that most improves the GAIC.
+</dd>
+<dt>
+<code>“replace”</code>
+</dt>
+<dd>
+Exchange a selected term for an unselected term if this improves the GAIC.
+</dd>
+<dt>
+<code>“both”</code>
+</dt>
+<dd>
+Consider both additions and removals.
+</dd>
+<dt>
+<code>“all”</code>
+</dt>
+<dd>
+Combine forward, backward, and replacement steps.
+</dd>
+</dl>
+<p>Append <code>“.linear”</code> to any strategy to restrict it to linear terms. These strategies run before those applied to all model terms. The default is <code>strategy = c(“both.linear”, “both”)</code> and <code>keeporder = FALSE</code>. Selected strategies are iterated until the GAIC no longer improves.</p>
+<p>With <code>keeporder = TRUE</code>, parameters are updated in the order specified by <code>gamlss2.family</code>, or in reverse order for backward elimination. Otherwise, selection searches across all parameters.</p>
 <p>Terms supplied in <code>fixed</code> are included in the initial model and are never eligible for removal or replacement. The intercept is always retained and need not be included in <code>fixed</code>. Fixing a linear interaction also fixes all of its available lower-order marginal terms.</p>
 <p>Linear selection is performed on formula terms, not individual columns of the model matrix. Thus, all columns representing a factor or an interaction with a factor are added, removed, or replaced together. Linear interactions obey strong hierarchy: an interaction can enter only after its available lower-order terms have entered, and a lower-order term cannot be removed while an included interaction depends on it.</p>
-<p>The different strategies can be selected using argument <code>strategy</code>; see the examples. Possible values are <code>“both”</code>, <code>“forward”</code>, <code>“backward”</code>, <code>“replace”</code>, and <code>“all”</code>. Here, <code>strategy = “all”</code> combines the forward, backward, and replace selection steps.</p>
-<p>In addition, each of the steps 2-4 can be applied to linear model terms only, prior to performing the steps for all model terms. This can be done by additionally setting <code>strategy</code> to <code>“both.linear”</code>, <code>“forward.linear”</code>, <code>“backward.linear”</code>, <code>“replace.linear”</code>, or <code>“all.linear”</code>.</p>
-<p>The default is <code>strategy = c(“both.linear”, “both”)</code> and <code>keeporder = FALSE</code>.</p>
-<p>Note that each of the steps 2–4 can be performed while maintaining the order of the parameters of the response distribution, i.e., if the <code>keeporder = TRUE</code> argument is set, then the parameters will be updated in the order specified in the <code>gamlss2.family</code>. Using backward elimination, the model terms are deselected in reverse order.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

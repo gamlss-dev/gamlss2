@@ -31,35 +31,14 @@ stepwise(x, y, specials, family, offsets,
     multi-parameter families, right-hand sides or list elements correspond to
     the distributional parameters in their usual order.}
   \item{K}{Numeric, the penalty for the \code{\link{GAIC}}.}
-  \item{strategy}{Character, the strategy to be used by the stepwise algorithm.
-    Possible options are \code{"forward.linear"}, \code{"forward"}, \code{"backward"},
-    \code{"backward.linear"}, \code{"replace"}, \code{"replace.linear"},
-    \code{"both"}, \code{"both.linear"}, \code{"all"} and
-    \code{"all.linear"}. See the details.}
-  \item{keeporder}{Logical. For the different stepwise strategies,
-    should the updates be performed sequentially according to the order of the parameters
-    of the response distribution as specified in the family (see \code{\link{gamlss2.family}}),
-    or should the selection search be performed across all parameters?}
+  \item{strategy}{Character vector of selection strategies; see the details.}
+  \item{keeporder}{Logical. Update distributional parameters sequentially
+    rather than search across all parameters? See the details for the order.}
   \item{cores}{Integer. If \code{cores > 1L}, \code{\link[parallel]{mclapply}} is used
     to speed up computations within the selection steps.}
-  \item{x}{The full model matrix to be used for fitting.}
-  \item{y}{The response vector or matrix.}
-  \item{specials}{A named list of special model terms, e.g., including design and
-    penalty matrices for fitting smooth terms using \code{\link[mgcv]{smooth.construct}}.}
-  \item{family}{A family object, see \code{\link{gamlss2.family}}.}
-  \item{offsets}{If supplied, a list or data frame of model offsets.}
-  \item{weights}{If supplied, a numeric vector of weights.}
-  \item{start}{Starting values, either for the parameters of the response distribution or,
-    if specified as a named list in which each element of length one is named with
-    \code{"(Intercept)"}, the respective intercepts are initialized. If starting values are
-    specified as a named list, data frame or matrix, where each element/column is a
-    vector with the same length as the number of observations in the data,
-    the respective predictors are initialized with these. See the examples for
-    \code{\link{gamlss2}}.}
-  \item{xterms}{A named list specifying the linear model terms. Each named list
-    element represents one parameter as specified in the family object.}
-  \item{sterms}{A named list specifying the special model terms. Each named list
-    element represents one parameter as specified in the family object.}
+  \item{x, y, specials, family, offsets, weights, start, xterms, sterms}{
+    Model components and starting values passed to the optimizer, as documented
+    for \code{\link{RS}}.}
   \item{control}{Further control arguments as specified within the call
     of \code{\link{gamlss2}}.}
 }
@@ -68,19 +47,24 @@ stepwise(x, y, specials, family, offsets,
   The wrapper function \code{step_gamlss2()} calls \code{\link{gamlss2}}
   using the \code{stepwise()} optimizer function.
 
-  The stepwise algorithm can apply the following strategies:
-  \enumerate{
-    \item Each predictor must include an intercept.
-    \item In a forward selection step, model terms with the highest improvement
-      on the GAIC are selected.
-    \item In a replacement step, each model term is tested to see if an exchange with
-      a term not yet selected improves the GAIC.
-    \item In a backward step, model terms are removed if this further improves the GAIC.
-    \item In a bidirectional step, model terms can be either added or removed.
-    \item In addition, the forward, backward and replace selection step can be combined.
+  Argument \code{strategy} selects one or more strategies:
+  \describe{
+    \item{\code{"forward"}}{Add the term that most improves the GAIC.}
+    \item{\code{"backward"}}{Remove the term that most improves the GAIC.}
+    \item{\code{"replace"}}{Exchange a selected term for an unselected term
+      if this improves the GAIC.}
+    \item{\code{"both"}}{Consider both additions and removals.}
+    \item{\code{"all"}}{Combine forward, backward, and replacement steps.}
   }
 
-  The selected strategies are iterated until no further improvement is achieved.
+  Append \code{".linear"} to any strategy to restrict it to linear terms.
+  These strategies run before those applied to all model terms. The default is
+  \code{strategy = c("both.linear", "both")} and \code{keeporder = FALSE}.
+  Selected strategies are iterated until the GAIC no longer improves.
+
+  With \code{keeporder = TRUE}, parameters are updated in the order specified
+  by \code{\link{gamlss2.family}}, or in reverse order for backward elimination.
+  Otherwise, selection searches across all parameters.
 
   Terms supplied in \code{fixed} are included in the initial model and are never
   eligible for removal or replacement. The intercept is always retained and
@@ -93,24 +77,6 @@ stepwise(x, y, specials, family, offsets,
   strong hierarchy: an interaction can enter only after its available
   lower-order terms have entered, and a lower-order term cannot be removed while
   an included interaction depends on it.
-
-  The different strategies can be selected using argument \code{strategy}; see
-  the examples. Possible values are \code{"both"}, \code{"forward"},
-  \code{"backward"}, \code{"replace"}, and \code{"all"}.
-  Here, \code{strategy = "all"} combines the forward, backward, and replace selection steps.
-
-  In addition, each of the steps 2-4 can be applied to linear model terms only,
-  prior to performing the steps for all model terms. This can be done by additionally
-  setting \code{strategy} to \code{"both.linear"}, \code{"forward.linear"},
-  \code{"backward.linear"}, \code{"replace.linear"}, or \code{"all.linear"}.
-
-  The default is \code{strategy = c("both.linear", "both")} and \code{keeporder = FALSE}.
-
-  Note that each of the steps 2--4 can be performed while maintaining the order of the
-  parameters of the response distribution, i.e., if the \code{keeporder = TRUE}
-  argument is set, then the parameters will be updated in the order specified in the
-  \code{\link{gamlss2.family}}. Using backward elimination, the model terms are
-  deselected in reverse order.
 }
 
 \value{

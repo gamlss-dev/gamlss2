@@ -8,9 +8,9 @@
   The first uses \code{s()} with \code{bs = "re"} for simple random effects,
   i.e., when a single factor is entered into the model as a smoother.
   This approach relies on the \code{s()} function from the \pkg{mgcv} package.
-  For example, if \code{area} is a factor with several levels,
-  then \code{s(area, bs = "re")} shrinks the level-specific effects of
-  \code{area} towards their overall mean.  
+  For example, if \code{x} is a factor with several levels,
+  then \code{s(x, bs = "re")} shrinks the level-specific effects of
+  \code{x} towards their overall mean.  
 
   The second, more general approach uses the model term constructor \code{re()},
   which provides an interface to the specialised random-effects functionality

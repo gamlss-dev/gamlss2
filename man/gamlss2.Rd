@@ -31,7 +31,7 @@ gamlss2(formula, \dots)
   \item{formula}{A GAM-type \code{\link[stats]{formula}} or
     \code{\link[Formula]{Formula}} describing the additive predictors for the
     distribution parameters. All smooth terms from \pkg{mgcv} are supported,
-    see also \code{\link[mgcv]{formula.gam}}. For \code{gamlss.list()},
+    see also \code{\link[mgcv]{formula.gam}}. For \code{gamlss2.list()},
     \code{formula} is a list of \code{\link[stats]{formula}}s.}
   \item{data}{A data frame, list, or environment containing the variables in the model.
     If not found in \code{data}, the variables are taken from \code{environment(formula)},

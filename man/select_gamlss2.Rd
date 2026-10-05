@@ -28,7 +28,7 @@ sRS(x, y, specials, family, offsets,
   \item{formula}{A GAM-type \code{\link[stats]{formula}} or
     \code{\link[Formula]{Formula}}. All smooth terms of the \pkg{mgcv} package
     are supported, see also \code{\link[mgcv]{formula.gam}}.
-    For \code{gamlss.list()} \code{formula} is a list of
+    For \code{gamlss2.list()}, \code{formula} is a list of
     \code{\link[stats]{formula}}s.}
   \item{\dots}{Arguments passed to \code{\link{gamlss2}} and to argument
     \code{control} in function \code{sRS()}. For \code{criterion = "GAIC"},

@@ -783,7 +783,7 @@ window.Quarto = {
 <p>whereas for a decreasing smooth the inequalities are reversed. Because B-spline basis functions are non-negative and form a partition of unity, ordering the spline coefficients in this way produces a monotonic fitted effect.</p>
 <p>Estimation is based on penalized weighted least squares. For a given smoothing parameter <span class="math inline">\(\lambda\)</span>, the coefficient vector minimizes</p>
 <p style="text-align: center;">
-</p><p><code class="reqn"> (z - X)^W (z - X) + ^S </code></p>
+</p><p><span class="math inline">\((z - X\beta)^\top W (z - X\beta) + \lambda \beta^\top S \beta\)</span></p>
 <p>subject to the monotonicity constraints. The constrained problem is solved with an active-set algorithm. Weighted cross-products are computed once per backfitting update, so smoothing parameter selection only requires operations on matrices having dimension determined by <code>k</code>.</p>
 <p>If <code>lambda = NULL</code>, the smoothing parameter is selected by a one-dimensional search on <code>log(lambda)</code> using the criterion specified by <code>criterion</code>.</p>
 <p>The fitted term is centered before it is returned to the additive backfitting algorithm.</p>

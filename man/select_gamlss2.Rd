@@ -7,17 +7,12 @@
 \description{
   The function \code{select_gamlss2()} applies an additional shrinkage penalty to
   all \pkg{mgcv} model terms. This can shrink some terms to zero and thereby
-  remove them from the model. In addition to this penalty,
-  model terms are selected based on two criteria: the estimated degrees of freedom
-  of the term and the percentage of the predictor range covered by the model term.
-  These two thresholds aim to mimic a natural selection process, similar to what
-  one might do by inspecting summaries and effect plots, so that only
-  relevant terms are retained in the final model.
+  remove them from the model.
 }
 
 \usage{
 ## wrapper function
-select_gamlss2(formula, ..., criterion = "BIC", thres = c(0.9, 0.2))
+select_gamlss2(formula, ..., criterion = "BIC", thres = c(0.9, 0.1))
 
 ## modified RS optimizer function
 sRS(x, y, specials, family, offsets,
@@ -67,11 +62,10 @@ sRS(x, y, specials, family, offsets,
 }
 
 \details{
-  The function \code{select_gamlss2()} selects model terms by identifying those
-  with estimated degrees of freedom greater than a pre-specified threshold
-  (e.g., \code{thres = 0.9}). In addition, model term selection can also be based
-  on the percentage of the total predictor range covered by the model term to
-  ensure that the term represents a substantial portion of the total effect.
+  Model terms are retained if their estimated degrees of freedom exceed
+  \code{thres[1]} and the proportion of the total predictor range they cover
+  exceeds \code{thres[2]}. These thresholds mimic selection based on summaries
+  and effect plots.
   After the selection step, the model is refitted using only the selected terms,
   excluding the additional penalty applied during the initial fitting process.
   The additional penalty for automatic term selection is described in
@@ -149,8 +143,7 @@ plot(m1, pages = 1)
 
 ## same with gamlss2
 m2 <- select_gamlss2(f, data = dat, family = PO)
-
-## plot selected effects
+summary(m2)
 plot(m2)
 
 ## final model

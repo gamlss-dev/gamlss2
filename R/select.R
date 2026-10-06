@@ -1,5 +1,5 @@
 ## Model term selection based on null space penalties.
-select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = c(0.9, 0.2))
+select_gamlss2 <- function(formula, ..., criterion = "BIC", thres = c(0.9, 0.1))
 {
   criterion <- rep(criterion, length.out = 2L)
 
@@ -47,9 +47,10 @@ sRS <- function(x, y, specials, family, offsets, weights,
       if(length(m$fitted.specials[[j]])) {
         for(i in names(m$fitted.specials[[j]])) {
           fr[[j]] <- c(fr[[j]], range(m$fitted.specials[[j]][[i]]$fitted.values))
-          if(m$fitted.specials[[j]][[i]]$edf <= thres[1L])
+          if(m$fitted.specials[[j]][[i]]$edf <= thres[1L]) {
             if(inherits(specials[[i]], "mgcv.smooth"))
               drop[[j]] <- unique(c(drop[[j]], i))
+          }
         }
       }
     }

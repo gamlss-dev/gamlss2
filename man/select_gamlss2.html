@@ -665,12 +665,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="smooth-model-term-selection-with-additional-penalties">Smooth Model Term Selection with Additional Penalties</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The function <code>select_gamlss2()</code> applies an additional shrinkage penalty to all <span class="pkg">mgcv</span> model terms. This can shrink some terms to zero and thereby remove them from the model. In addition to this penalty, model terms are selected based on two criteria: the estimated degrees of freedom of the term and the percentage of the predictor range covered by the model term. These two thresholds aim to mimic a natural selection process, similar to what one might do by inspecting summaries and effect plots, so that only relevant terms are retained in the final model.</p>
+<p>The function <code>select_gamlss2()</code> applies an additional shrinkage penalty to all <span class="pkg">mgcv</span> model terms. This can shrink some terms to zero and thereby remove them from the model.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## wrapper function
-select_gamlss2(formula, ..., criterion = "BIC", thres = c(0.9, 0.2))
+select_gamlss2(formula, ..., criterion = "BIC", thres = c(0.9, 0.1))
 
 ## modified RS optimizer function
 sRS(x, y, specials, family, offsets,
@@ -796,7 +796,7 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The function <code>select_gamlss2()</code> selects model terms by identifying those with estimated degrees of freedom greater than a pre-specified threshold (e.g., <code>thres = 0.9</code>). In addition, model term selection can also be based on the percentage of the total predictor range covered by the model term to ensure that the term represents a substantial portion of the total effect. After the selection step, the model is refitted using only the selected terms, excluding the additional penalty applied during the initial fitting process. The additional penalty for automatic term selection is described in <code>gam.selection</code>. This approach is experimental, so model selection should still be assessed carefully.</p>
+<p>Model terms are retained if their estimated degrees of freedom exceed <code>thres[1]</code> and the proportion of the total predictor range they cover exceeds <code>thres[2]</code>. These thresholds mimic selection based on summaries and effect plots. After the selection step, the model is refitted using only the selected terms, excluding the additional penalty applied during the initial fitting process. The additional penalty for automatic term selection is described in <code>gam.selection</code>. This approach is experimental, so model selection should still be assessed carefully.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -872,12 +872,11 @@ Further control arguments as specified within the call of <code>gamlss2</code>.
 <span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="do">## same with gamlss2</span></span>
 <span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">select_gamlss2</span>(f, <span class="at">data =</span> dat, <span class="at">family =</span> PO)</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="do">## plot selected effects</span></span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="do">## final model</span></span>
-<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="do">## final model</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">new_formula</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

@@ -25,7 +25,8 @@ calibration(..., newdata = NULL,
     to be assessed.}
   \item{newdata}{Optional data frame for out-of-sample calibration.}
   \item{y}{Optional numeric or factor vector with the binary response.}
-  \item{parameter}{Character, which parameter should be used for prediction.}
+  \item{parameter}{Character, parameter name(s) to predict. The default
+    \code{NULL} selects all parameters in the family's \code{names} order.}
   \item{breaks}{Numeric vector of break points used to construct bins
     for the predicted probabilities.}
   \item{minn}{Integer, the minimum number of observations required in
@@ -48,11 +49,14 @@ calibration(..., newdata = NULL,
 
 \details{
   For each fitted model, predicted probabilities are obtained via
-  \code{\link{predict}} using \code{type = "parameter"} and the selected
-  \code{parameter}. If the corresponding \code{\link{gamlss2.family}} object
-  provides a \code{probabilities()} method, this is used to transform the
-  parameter vector into probabilities. For multi-column outputs, the first
-  column is used.
+  \code{\link{predict.gamlss2}} using \code{type = "parameter"} and the selected
+  \code{parameter} (all family parameters when \code{NULL}). If the family
+  provides a \code{probabilities()} function, it converts these predictions
+  to probabilities; otherwise, the predicted parameters are used directly.
+  If the result is a matrix or data frame, only its first column is used,
+  after any conversion. Thus, without \code{probabilities()}, multiple
+  predicted parameters are reduced to the first parameter column. The values
+  used for calibration must represent the probability of \code{y = 1}.
 
   Predicted probabilities are grouped into bins defined by \code{breaks}.
   Within each bin, the mean predicted probability, the observed proportion

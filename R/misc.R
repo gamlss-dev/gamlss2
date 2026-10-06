@@ -447,6 +447,9 @@ calibration <- function(..., newdata = NULL,
     graphics::points(ri$probs, ri$y, pch = 1, col = 1, cex = cex)
 
     if(isTRUE(add_loess) && nrow(ri) >= 3L) {
+      warn <- getOption("warn")
+      options("warn" = -1)
+      on.exit(options("warn" = warn))
       lo <- stats::loess(y ~ probs, data = ri)
       gx <- seq(min(ri$probs), max(ri$probs), length.out = smooth_n)
       gy <- stats::predict(lo, newdata = data.frame(probs = gx))

@@ -51,7 +51,8 @@ GAMLSS2(family, parameters)
 
 \details{
 The S3 class \code{GAMLSS2} is a slightly more general implementation of the S3 class
-\code{\link[gamlss.dist]{GAMLSS}} tailored for \pkg{gamlss2}. For details please see the documentation of \code{\link[gamlss.dist]{GAMLSS}}
+\code{\link[gamlss.dist]{GAMLSS}} tailored for \pkg{gamlss2}.
+For details please see the documentation of \code{\link[gamlss.dist]{GAMLSS}}
 }
 
 \value{
@@ -93,3 +94,4 @@ X
 
 ## see ?gamlss.dist::GAMLSS for the remainder of this example
 }
+

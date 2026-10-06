@@ -671,7 +671,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">## k-fold cross-validation
 cv_gamlss2(..., data, folds = 5,
-  metric = log_pdf_metric, parallel = FALSE, simplify = TRUE)
+  metric = log_pdf_metric, simplify = TRUE, cores = 1L)
 
 ## log-pdf for each observation
 log_pdf_metric(model, data)
@@ -720,18 +720,18 @@ a function of the form <code>metric(model, data)</code> returning a score for th
 </tr>
 <tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="parallel">parallel</code>
-</td>
-<td>
-logical. If <code>TRUE</code>, computation is carried out in parallel using <span class="pkg">future.apply</span>.
-</td>
-</tr>
-<tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
 <code id="simplify">simplify</code>
 </td>
 <td>
 logical. If <code>TRUE</code>, results are returned in a simplified vector or data frame depending on the metric output.
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="cores">cores</code>
+</td>
+<td>
+Positive integer, number of workers for evaluating folds. The default <code>cores = 1L</code> runs sequentially; larger values use <code>future_lapply</code> with a temporary <code>multisession</code> plan. The caller’s full future plan is restored on exit, including on errors. Parallel evaluation requires the suggested packages <span class="pkg">future</span> and <span class="pkg">future.apply</span>.
 </td>
 </tr>
 <tr>
@@ -748,6 +748,7 @@ a fitted <code>gamlss2</code> model.
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p><code>cv_gamlss2()</code> splits the data into training and test folds. For each fold the model is fitted on the training data, and the chosen <code>metric</code> is evaluated on the held-out test data. By default, the scoring rule is the log predictive density (<code>log_pdf_metric</code>), but other metrics can be used, such as randomized quantile residuals (<code>rqres_metric</code>) or mean squared error of the conditional mean (<code>mse_metric</code>).</p>
 <p>The function returns either a list of fold-wise results or, if <code>simplify = TRUE</code>, a named vector or data frame aligned with the original observations.</p>
+<p>Set the random seed before calling <code>cv_gamlss2()</code> to reproduce randomly generated folds. Parallel evaluation also uses reproducible random-number streams for stochastic fits or metrics.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -786,7 +787,14 @@ The convenience metrics return a numeric vector of scores or residuals.</p>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="do">## evaluate log-likelihood</span></span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cv1<span class="sc">$</span>score)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cv2<span class="sc">$</span>score)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cv2<span class="sc">$</span>score)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## evaluate folds with two workers, reusing the same fold assignments</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>cv_parallel <span class="ot">&lt;-</span> <span class="fu">cv_gamlss2</span>(</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">s</span>(Temp), <span class="at">data =</span> air, <span class="at">family =</span> GA,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">folds =</span> cv1<span class="sc">$</span>fold, <span class="at">maxit =</span> <span class="dv">100</span>, <span class="at">cores =</span> <span class="dv">2</span>L</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cv_parallel<span class="sc">$</span>score)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

@@ -735,7 +735,7 @@ Logical. Update distributional parameters sequentially rather than search across
 <code id="cores">cores</code>
 </td>
 <td>
-Integer. If <code>cores &gt; 1L</code>, <code>mclapply</code> is used to speed up computations within the selection steps.
+Integer, number of workers for candidate fits. The default <code>cores = 1L</code> runs sequentially. Larger values use <code>future_lapply</code> with a temporary <code>multisession</code> plan, including on Windows. The caller’s future plan is restored on exit. This requires the suggested packages <span class="pkg">future</span> and <span class="pkg">future.apply</span>.
 </td>
 </tr>
 <tr>

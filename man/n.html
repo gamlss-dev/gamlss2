@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-5e2e99434c0e7b777765b56d93c8cf14.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -729,7 +729,7 @@ window.Quarto = {
 <p>The formula supplied to <code>n()</code> defines the inputs to the network. For example, <code>n(~ Temp + Wind)</code> fits a neural network using <code>Temp</code> and <code>Wind</code> as inputs.</p>
 <p>By default, each numeric predictor is scaled to the interval <span class="math inline">\([0,1]\)</span> using its observed range before the network is fitted. Factor predictors are left unchanged. The same scaling information is stored with the fitted term and is applied automatically when predicting from new data. Scaling can be disabled with <code>scale = FALSE</code>.</p>
 <p>The fitted effect is centered by subtracting its mean before it is returned to the additive predictor.</p>
-<p>The effective degrees of freedom (<code>edf</code>) are approximated by the number of fitted neural network coefficients returned by <code>nnet</code>.</p>
+<p>The effective degrees of freedom (<code>edf</code>) use a Gauss–Newton approximation with the current working weights and <code>decay</code> penalty. The calculation accounts for shrinkage and centering of the fitted effect.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

@@ -14,30 +14,32 @@
   n = 100L, ...)
 }
 
-\details{
-  The function applies the predict method to determine the parameters of the response distribution.
-  It then computes the quantiles as specified in the argument \code{probs}.
-
-  With \code{plot = TRUE} and \code{variable = NULL}, observations are
-  ordered once by their fitted median. The same ordering is applied to the
-  observed responses and all fitted quantiles, so values at each position
-  refer to the same observation. If \code{newdata} does not contain the
-  response, only the fitted quantile curves are shown.
+\value{
+  A data frame with one row per prediction and one column per probability.
+  With \code{variable = NULL}, a single probability returns a numeric vector.
+  When a covariate is selected, it is included as the first column.
+  With \code{plot = TRUE}, the result is returned invisibly.
 }
 
-\value{
-  The estimated quantiles. For multiple probabilities, a data frame is returned.
-  For a single probability and \code{variable = NULL}, the result is simplified
-  to a numeric vector.
+\details{
+  Quantiles are computed from the predicted response distributions.
+
+  With \code{plot = TRUE} and no selected \code{variable}, the x-axis shows
+  observation ranks as percentages, ordered by fitted median; the y-axis is
+  on the response scale. Lines show the fitted conditional quantiles at
+  \code{probs}, and points show observed responses when \code{data = TRUE}.
+  The same ordering is used for the responses and all quantiles, so each
+  position refers to one observation. If \code{newdata} does not contain the
+  response, only the fitted quantile curves are shown.
 }
 
 \arguments{
   \item{x}{An object of class \code{"gamlss2"}.}
   \item{probs}{Numeric vector of probabilities with values in [0,1].}
-  \item{variable}{Logical, integer, or character. Should quantiles be plotted
-    against a covariate? If \code{TRUE}, the single model covariate is used.
-    Alternatively, a covariate can be selected by position or name. This option
-    is only available for single-covariate models.}
+  \item{variable}{Covariate selector for single-covariate models: \code{TRUE}
+    uses the sole covariate; an integer or character selects by column position
+    or name. \code{NULL} (default) or \code{FALSE} computes quantiles at the
+    supplied or fitted observations without a covariate grid.}
   \item{newdata}{Data frame that should be used for computing the quantiles.}
   \item{plot}{Logical, should an ordered quantile plot or a covariate plot be shown?}
   \item{data}{Logical, should observed responses be added to the plot when available?}

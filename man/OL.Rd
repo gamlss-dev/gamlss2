@@ -5,9 +5,8 @@
 \title{Ordered Logistic Family for Ordinal Regression}
 
 \description{
-  Defines the ordered logistic (cumulative logit) family for modeling ordinal
-  response variables using \code{gamlss2}. The location and
-  ordered cutpoints can be modeled as functions of covariates.
+  Defines the ordered logistic (cumulative logit) family for ordinal
+  responses in \code{gamlss2}.
 }
 
 \usage{
@@ -22,45 +21,32 @@ ologit(k)
 }
 
 \details{
-  This family implements a cumulative logit model for an ordinal response with
-  \code{k} categories. The response must be coded as the integers
+  The response must be coded as the integers
   \code{1, ..., k}, or as a factor with exactly these levels.
 
-  The linear predictor models a latent \code{location} parameter. Let
-  \eqn{\gamma_j} denote the cutpoint between categories \eqn{j} and
+  Let \eqn{\gamma_j} denote the cutpoint between categories \eqn{j} and
   \eqn{j + 1}. The cutpoints are parameterized as
   \deqn{\gamma_1 = \theta_1}
   and, recursively,
-  \deqn{\gamma_j = \gamma_{j-1} + \exp(\delta_j),
-    \quad j = 2, \ldots, k - 1.}
+  \deqn{\gamma_j = \gamma_{j-1} + \exp(\delta_j), \quad j = 2, \ldots, k - 1.}
   Equivalently,
   \deqn{\gamma_j = \gamma_1 + \sum_{\ell=2}^j \exp(\delta_\ell),}
-  which ensures strictly ordered cutpoints. In the family object,
-  \eqn{\theta_1} is named \code{theta1} and \eqn{\delta_j} is named
-  \code{delta}\eqn{j}. For \code{k = 2}, only \code{location} and
-  \code{theta1} are required; there are no \code{delta} parameters.
+  which ensures strictly ordered cutpoints.
 
   The cumulative probabilities are
-  \deqn{\Pr(Y > j) = \mathrm{logit}^{-1}(\mathrm{location} - \gamma_j),
-    \quad j = 1, \ldots, k - 1.}
+  \deqn{\Pr(Y > j) = \mathrm{logit}^{-1}(\mathrm{location} - \gamma_j), \quad j = 1, \ldots, k - 1.}
 
-  The \code{OL()} family supports modeling the location, first cutpoint, and
-  cutpoint differences as functions of covariates using additive predictors
-  in \code{\link{gamlss2}} via the \code{"|"} formula interface.
-
-  The returned family object provides functions for evaluating probability
-  masses and log-likelihoods, cumulative probabilities and quantiles,
-  category and transition probabilities, and the mean and variance of the
-  numeric category labels.
+  Each parameter can use an additive predictor through the \code{"|"}
+  formula interface. The family also provides category and transition
+  probabilities, and the mean and variance of numeric category labels.
 
   \code{ologit()} is retained as a compatibility alias for \code{OL()}.
 }
 
 \value{
-  A \code{"gamlss2.family"} object to be used with \code{\link{gamlss2}}.
-  Its distribution parameters are \code{location}, \code{theta1}, and, when
-  \code{k > 2}, one cutpoint-difference parameter \code{delta}\eqn{j} for
-  each \eqn{j = 2, \ldots, k - 1}.
+  A \code{"gamlss2.family"} object with parameters \code{location},
+  \code{theta1} (\eqn{\theta_1}), and, for \code{k > 2},
+  \code{delta}\eqn{j} (\eqn{\delta_j}) for \eqn{j = 2, \ldots, k - 1}.
 }
 
 \seealso{

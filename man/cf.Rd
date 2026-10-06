@@ -12,7 +12,7 @@
 \usage{cf(formula, ...)}
 
 \arguments{
-  \item{formula}{A vector or formula specifiyng the covariates that should
+  \item{formula}{A vector or formula specifying the covariates that should
     be used for modeling.}
   \item{\dots}{Control arguments passed to \code{\link[partykit]{cforest}}.}
 }

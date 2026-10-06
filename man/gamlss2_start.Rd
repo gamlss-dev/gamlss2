@@ -17,7 +17,7 @@
       \code{tau};
     \item a data frame or matrix with one column per distribution parameter and
       one row per observation, providing starting values for the full additive
-      predictors;
+      predictors on the link scale;
     \item a fitted \code{"gamlss2"} object, in which case \code{fitted()}
       values are used as starting values for all distribution parameters;
     \item a \code{coef.gamlss2} object, allowing coefficient-wise
@@ -27,39 +27,63 @@
   Parameters can be fixed during estimation using the \code{fixed} control
   argument. This is useful, for example, when shape parameters should remain
   constant while the remaining parameters are estimated.
+
+  Starting values from a previous fit can reduce optimizer iterations.
+  For coefficient-wise initialization, \code{coef(object, full = TRUE)} includes
+  smooth coefficients; \code{lambdas = TRUE} also includes smoothing parameters.
+  Compare iteration counts using the same model, observations, and controls.
 }
 
 \seealso{
   \code{\link{gamlss2}}, \code{\link{gamlss2_control}}, \code{\link{RS}}
 }
 
-\examples{\dontrun{## distributional model
-f <- Ozone ~ s(Wind) | s(Wind) | 1 | 1
+\examples{\dontrun{air <- subset(airquality, !is.na(Ozone))
+
+## hold the smoothing parameter fixed for comparable refits
+f <- Ozone ~ s(Wind, sp = 1) | 1
+ctrl <- gamlss2_control(maxit = 100, eps = 1e-7)
 
 ## scalar starting values for the distribution parameters
-m1 <- gamlss2(f, data = airquality, family = BCT,
-  start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10))
+m1 <- gamlss2(f, data = air, family = GA,
+  start = c(mu = 200, sigma = 0.1), control = ctrl)
 
-## fix shape parameters during estimation
-m2 <- gamlss2(f, data = airquality, family = BCT,
-  start = c(mu = 200, sigma = 0.1, nu = 0, tau = 10),
-  fixed = c(nu = TRUE, tau = TRUE))
+## reuse fitted additive predictors on the link scale
+m2 <- gamlss2(f, data = air, family = GA,
+  start = fitted(m1, type = "link"), control = ctrl)
 
-## coefficient estimates of the fitted model
-coef(m2)
+## coef() without full = TRUE initializes only the linear coefficients
+m3 <- gamlss2(f, data = air, family = GA,
+  start = coef(m1), control = ctrl)
 
-## use fitted additive predictors as starting values
-m3 <- gamlss2(f, data = airquality, family = BCT,
-  start = fitted(m2))
+## reuse all linear and smooth coefficients from the previous fit
+m4 <- gamlss2(f, data = air, family = GA,
+  start = coef(m1, full = TRUE, lambdas = TRUE, dropall = FALSE),
+  control = ctrl)
 
-## same using the fitted model object directly
-m4 <- gamlss2(f, data = airquality, family = BCT,
-  start = m2)
+## full coefficient starts reduce iterations in this example
+## check convergence and compare the final log-likelihoods as well
+fits <- list(scalar = m1, predictors = m2, linear = m3, full = m4)
+data.frame(
+  iterations = sapply(fits, function(m) m$iterations),
+  converged = sapply(fits, function(m) m$converged),
+  logLik = sapply(fits, function(m) as.numeric(logLik(m)))
+)
 
-## coefficient-wise initialization
-m5 <- gamlss2(f, data = airquality, family = BCT,
-  start = coef(m2))
+## fix BCT shape parameters at their supplied starting values
+m5 <- gamlss2(Ozone ~ s(Wind, sp = 1) | 1 | 1 | 1,
+  data = air, family = BCT,
+  start = c(mu = 200, sigma = 0.1, nu = 1, tau = 10),
+  fixed = c(nu = TRUE, tau = TRUE), maxit = 100)
+
+## fixed flags must also be supplied when reusing coefficients
+m6 <- gamlss2(Ozone ~ s(Wind, sp = 1) | 1 | 1 | 1,
+  data = air, family = BCT,
+  start = coef(m5, full = TRUE, dropall = FALSE),
+  fixed = c(nu = TRUE, tau = TRUE), maxit = 100)
+unique(fitted(m6, parameter = c("nu", "tau")))
 }}
 
 \keyword{models}
 \keyword{regression}
+

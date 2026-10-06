@@ -101,14 +101,14 @@ plot(m)
 plot(m, which = "resid")
 
 ## predict quantiles
-p <- quantile(m, probs = c(0.05, 0.1, 0.5))
+p <- quantile(m, probs = seq(0.05, 0.95, by = 0.05))
 
 ## plot
 plot(d, pch = 19, col = adjustcolor(1, 0.3))
 matlines(d$x, p, lty = 1, col = 4, lwd = 2)
-axis(4, at = p[1, ], labels = names(p))
 }
 
 \keyword{regression}
 \keyword{models}
 \keyword{distribution}
+

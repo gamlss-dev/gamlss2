@@ -263,6 +263,10 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   if(!is.null(control$fixed)) {
     for(j in np) {
+      ## A logical fixed flag freezes matching coefficient starts; explicit
+      ## numeric fixed values and missing starts retain the existing fallback.
+      if(isTRUE(control$fixed[[j]]) && !is.null(cstart) && nes[[j]])
+        next
       if(control$fixed[[j]] &&
           (inherits(start, "coef.gamlss2") || is.null(start[[j]]))) {
         link <- make.link2(family$links[[j]])

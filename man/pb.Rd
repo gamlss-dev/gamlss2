@@ -69,8 +69,9 @@ pq <- quantile(m, probs = c(0.05, 0.5, 0.95))
 plot(Ozone ~ Temp, data = air, pch = 19,
   col = rgb(0.1, 0.1, 0.1, alpha = 0.3))
 matlines(air$Temp, pq,
-  lty = 1, col = 4)
+  lty = 1, col = 4, lwd = 2)
 }}
 
 \keyword{utilities}
 \keyword{regression}
+

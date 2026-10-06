@@ -7,7 +7,7 @@
 \description{Fit a GAMLSS model by joint Laplace approximate REML.}
 
 \usage{
-## optimzer function
+## optimizer function
 JR(x, y, specials, family, offsets,
   weights, start, xterms, sterms, control)
 

@@ -81,18 +81,21 @@ m <- gamlss2(
   family = GA
 )
 
-## Conditional mean profiles for temperature and wind.
+## Conditional distributions for temperature and wind.
 mp <- marginal_predict(
   m,
   variables = c("Temp", "Wind"),
   n = 50,
-  type = "response"
+  type = "distribution"
 )
 head(mp$Temp)
 attr(mp, "fixed")
 
-plot(.fit ~ Temp, data = mp$Temp, type = "l",
-  xlab = "Temperature (degrees F)", ylab = "Fitted mean ozone")
+## plot quantiles
+mp$Temp$qfit <- quantile(mp$Temp$fit, probs =  seq(0.01, 0.99, by = 0.01))
+
+matplot(mp$Temp$Temp, mp$Temp$qfit, type = "l", lty = 1, col = 1,
+  xlab = "Temperature (degrees F)", ylab = "Fitted ozone quantiles")
 
 ## Supply a custom grid and condition on a particular wind speed.
 mp2 <- marginal_predict(
@@ -107,3 +110,4 @@ mp2$Temp
 
 \keyword{regression}
 \keyword{models}
+

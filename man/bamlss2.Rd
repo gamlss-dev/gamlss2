@@ -4,10 +4,11 @@
 \title{Bayesian GAMLSS Wrapper}
 
 \description{
-  The function \code{bamlss2()} is a convenience wrapper around
-  \code{\link{gamlss2}} to fit Bayesian GAMLSS models via MCMC sampling. It
-  sets the optimizer to an MCMC routine and allows \code{n.iter},
-  \code{burnin}, and \code{thin} to be specified directly.
+  A wrapper around \code{\link{gamlss2}} for fitting Bayesian GAMLSS models
+  by MCMC sampling. Starting values are computed using \code{maxit}
+  backfitting iterations before sampling. The controls \code{n.iter},
+  \code{burnin}, and \code{thin} can be specified directly; \code{weights}
+  and \code{offset} are passed through to \code{gamlss2}.
 }
 
 \usage{
@@ -25,16 +26,6 @@ bamlss2(formula, n.iter = 1200, burnin = 200, thin = 1, maxit = 2, \dots)
     starting values before running MCMC.}
   \item{\dots}{Further arguments passed to \code{\link{gamlss2}} and/or
     \code{\link{gamlss2_control}}.}
-}
-
-\details{
-  Function \code{bamlss2()} calls \code{\link{gamlss2}} and sets the optimizer
-  to a Bayesian sampler. By default, a small number of backfitting iterations
-  is performed first to obtain reasonable starting values for the MCMC sampler.
-
-  The wrapper is designed to behave in line with the \code{gamlss()}-style
-  interfaces, i.e., it supports \code{weights} and \code{offset} arguments
-  through \code{\link{gamlss2}}.
 }
 
 \value{

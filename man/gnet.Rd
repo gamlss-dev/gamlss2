@@ -13,17 +13,21 @@ gnet(formula, ...)
 }
 
 \arguments{
-  \item{formula}{A formula specifying the covariates that should be estimated using
-    the \pkg{glmnet} implementation.}
-  \item{\dots}{Control arguments passed to \code{\link[glmnet]{glmnet}} and the
-    information-criterion-based shrinkage selection.}
+  \item{formula}{A formula specifying the covariates for the penalized term.}
+  \item{\dots}{\code{criterion} selects the information criterion:
+    \code{"bic"} (default), \code{"aic"}, \code{"aicc"}, \code{"gaic"}, or
+    \code{"gcv"}. Other arguments are passed to \code{\link[glmnet]{glmnet}},
+    including \code{alpha} (elastic-net mixing parameter), \code{lambda}
+    (penalty sequence), \code{nlambda} (number of penalties), and
+    \code{standardize} (whether to standardize covariates).}
 }
 
 \details{
-  \code{gnet()} constructs a \code{\link[stats]{model.matrix}} representation
-  of the supplied formula and delegates estimation to \code{\link[glmnet]{glmnet}}
-  inside the backfitting algorithm. The optimal penalty parameter is selected
-  using an information criterion, with \code{criterion = "bic"} used by default.
+  \code{gnet()} constructs a \code{\link[stats]{model.matrix}} from the formula,
+  removes its intercept column, and fits the term using
+  \code{\link[glmnet]{glmnet}} within backfitting. The penalty \code{lambda}
+  minimizes the selected criterion. For \code{criterion = "gaic"}, the
+  multiplier \code{K} is set in \code{\link{gamlss2_control}} (default: 2).
 }
 
 \value{
@@ -53,7 +57,8 @@ m <- gamlss2(f, data = air, family = NO)
 summary(m)
 
 ## plot coefficient paths
-sp <- specials(m, parameter = "mu", term = "gnet(", element = "model")
+sp <- specials(m, parameter = "mu", terms = "gnet(~Tc+Wc)", elements = "model")
 print(class(sp))
 plot(sp)
 }}
+

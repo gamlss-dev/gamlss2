@@ -31,17 +31,10 @@ lo(formula, ...)
 }
 
 \details{
-  Function \code{lo()} defines a special model term for \code{gamlss2}. It acts 
-  as a wrapper wrapper around the standard \code{\link[stats]{loess}} function.
-  Estimation is based on local weighted least squares. 
-
-  The effective degrees of freedom (\code{edf}, needed for information criteria)
-  for the smooth term are extracted 
-  analytically using the \code{trace.hat} value returned by the local regression 
-  engine.
-
-  To ensure identifiability, the estimated smooth is centered by subtracting 
-  its mean.
+  The term is fitted using \code{\link[stats]{loess}} within backfitting.
+  Effective degrees of freedom (\code{edf}) for information criteria are taken
+  from the fitted object's \code{trace.hat}. The fitted smooth is centered by
+  subtracting its mean to ensure identifiability.
 }
 
 \value{

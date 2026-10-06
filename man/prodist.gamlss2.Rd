@@ -5,9 +5,9 @@
 \title{Extracting Fitted or Predicted Probability Distributions from gamlss2 Models}
 
 \description{
-Methods for \pkg{gamlss2} model objects for extracting fitted (in-sample) or
-predicted (out-of-sample) probability distributions as \pkg{distributions3}
-objects.
+  Methods for \pkg{gamlss2} model objects for extracting fitted (in-sample) or
+  predicted (out-of-sample) probability distributions as \pkg{distributions3}
+  objects.
 }
 
 \usage{
@@ -19,23 +19,23 @@ objects.
 }
 
 \details{
-To facilitate making probabilistic forecasts based on \code{\link{gamlss2}}
-model objects, the \code{\link[distributions3]{prodist}} method extracts fitted
-or predicted probability \code{distribution} objects. Internally, the
-\code{\link{predict.gamlss2}} method is used first to obtain the distribution
-parameters (\code{mu}, \code{sigma}, \code{tau}, \code{nu}, or a subset thereof).
-Subsequently, the corresponding \code{distribution} object is set up as a
-\code{\link{GAMLSS2}} object, a unified \pkg{gamlss2} distribution interface for
-the workflow provided by the \pkg{distributions3} package (see Zeileis et al. 2022).
+  For ordinary predictions, \code{prodist(object, newdata = ...)} returns the
+  same distributions as the default \code{predict(object, newdata = ...)}.
+  Use \code{\link[distributions3]{prodist}} when code needs a common interface
+  for extracting probability distributions from different supported model
+  classes. Omit \code{newdata} to obtain fitted distributions.
 
-Note that these probability distributions only reflect the random variation in
-the dependent variable based on the model employed (and its associated
-distributional assumption for the dependent variable). This does not capture the
-uncertainty in the parameter estimates.
+  The returned objects support \pkg{distributions3} methods such as
+  \code{pdf()}, \code{cdf()}, \code{quantile()}, and \code{random()}.
+  They describe response variation conditional on the fitted parameters;
+  they do not include parameter-estimation uncertainty.
 }
 
 \value{
-An object of class \code{GAMLSS2} inheriting from \code{distribution}.
+  A \pkg{distributions3} object inheriting from \code{distribution}.
+  Its concrete class depends on the family: a \pkg{distributions3} family
+  retains its distribution class (e.g., \code{Normal}); families without a
+  distribution constructor use \code{\link{GAMLSS2}}.
 }
 
 \references{
@@ -46,55 +46,33 @@ Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
 }
 
 \seealso{
-\code{\link{GAMLSS2}}, \code{\link{predict.gamlss2}}
+\code{\link{GAMLSS2}}, \code{\link{family.distribution}},
+\code{\link{predict.gamlss2}}
 }
 
-\examples{\dontrun{## packages, code, and data
+\examples{\dontrun{## fit a Gamma model for stopping distance given speed
 library("distributions3")
 data("cars", package = "datasets")
-
-## fit heteroscedastic normal GAMLSS model
-## stopping distance (ft) explained by speed (mph)
 m <- gamlss2(dist ~ s(speed) | s(speed),
   data = cars, family = GA)
 
-## obtain predicted distributions for three levels of speed
-d <- prodist(m, newdata = data.frame(speed = c(10, 20, 30)))
+## prodist() and default predict() return the same distributions
+nd <- data.frame(speed = c(10, 20, 30))
+d <- prodist(m, newdata = nd)
+all.equal(d, predict(m, newdata = nd))
 print(d)
 
-## obtain quantiles (works the same for any distribution object 'd' !)
-quantile(d, 0.5)
+## evaluate the predicted distributions
 quantile(d, c(0.05, 0.5, 0.95), elementwise = FALSE)
-quantile(d, c(0.05, 0.5, 0.95), elementwise = TRUE)
-
-## visualization
-plot(dist ~ speed, data = cars)
-nd <- data.frame(speed = 0:240/4)
-nd$dist <- prodist(m, newdata = nd)
-nd$fit <- quantile(nd$dist, c(0.05, 0.5, 0.95))
-matlines(nd$speed, nd$fit, lty = 1, col = 4)
-
-## moments
 mean(d)
 variance(d)
-
-## simulate random numbers
-random(d, 5)
-
-## density and distribution
 pdf(d, c(10, 50, 100))
 cdf(d, c(10, 50, 100))
+random(d, 5)
 
-## Poisson example
-data("FIFA2018", package = "distributions3")
-m2 <- gamlss2(goals ~ s(difference), data = FIFA2018, family = PO)
-d2 <- prodist(m2, newdata = data.frame(difference = 0))
-print(d2)
-quantile(d2, c(0.05, 0.5, 0.95))
-
-## note that log_pdf() can replicate logLik() value
-sum(log_pdf(prodist(m2), FIFA2018$goals))
-logLik(m2)
+## fitted distributions reproduce the model log-likelihood
+sum(log_pdf(prodist(m), cars$dist))
+logLik(m)
 }}
 
 \keyword{distribution}

@@ -465,8 +465,6 @@ gamlss2_control <- function(optimizer = RS,
     ctr$initialize <- FALSE
   if(is.null(ctr$nullmodel))
     ctr$nullmodel <- TRUE
-  if(is.null(ctr$sigma.tol))
-    ctr$sigma.tol <- 0.001
 
   return(ctr)
 }

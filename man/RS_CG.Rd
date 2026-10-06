@@ -73,11 +73,6 @@ CG(x, y, specials, family, offsets,
       when smoothing parameters are fixed. Smoothing-parameter changes use the
       specified smoothing criterion, the default local REML update, or the
       term-specific local ML update.
-    \item \code{sigma.tol}: Numeric between zero and one. If a model contains
-      a smooth for \code{sigma}, warn when its smallest fitted value divided by
-      its median is less than \code{sigma.tol}. The default is \code{0.001};
-      use zero or \code{FALSE} to disable the diagnostic. This diagnostic does
-      not constrain the fitted values.
     \item \code{CG}: Integer, the outer iteration in which to start the CG
       correction. Thus, \code{CG = 5} uses RS for the first four outer
       iterations and CG in the fifth. \code{CG = 0} starts with CG immediately;

@@ -138,15 +138,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   else
     control$autostep <- isTRUE(control$autostep)
 
-  if(is.null(control$sigma.tol))
-    control$sigma.tol <- FALSE
-  if(identical(control$sigma.tol, FALSE))
-    control$sigma.tol <- 0
-  if(!is.numeric(control$sigma.tol) || length(control$sigma.tol) != 1L ||
-      !is.finite(control$sigma.tol) || control$sigma.tol < 0 ||
-      control$sigma.tol >= 1)
-    stop("argument sigma.tol must be one number between zero and one!")
-
   ## Maximum number of backfitting iterations.
   maxit <- control$maxit
   if(is.null(maxit))
@@ -990,26 +981,6 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
   if(any(!is.finite(d))) {
     warning("non-finite log-density values in the last iteration of the RS algorithm!")
-  }
-
-  ## A scale smooth can expose an unbounded likelihood by approaching zero at
-  ## one or a few observations. Warn about the fitted function without imposing
-  ## a distribution-independent lower bound on sigma.
-  if(control$sigma.tol > 0 && "sigma" %in% names(par) &&
-      length(sterms[["sigma"]])) {
-    sigma <- par[["sigma"]]
-    sigma <- sigma[is.finite(sigma) & sigma > 0]
-    if(length(sigma)) {
-      reference <- median(sigma)
-      ratio <- min(sigma) / reference
-      if(is.finite(ratio) && ratio < control$sigma.tol) {
-        warning(sprintf(paste0(
-          "fitted sigma approaches zero relative to its median ",
-          "(minimum/median = %.3g); the likelihood may be near-singular ",
-          "and smooth estimates unstable. Consider a stronger smoothing ",
-          "criterion or a smaller basis dimension."), ratio))
-      }
-    }
   }
 
   converged <- is.finite(eps[1L]) && eps[1L] <= stop.eps[1L] &&

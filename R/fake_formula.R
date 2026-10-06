@@ -62,7 +62,12 @@ fake_formula <- function(formula, specials = NULL, nospecials = FALSE, onlyspeci
       ff <- NULL
       for(j in tls) {
         p <- parse(text = j)
-        if(as.character(p[[1]][[1]]) %in% c("la", "gnet", "elm", "im", "si")) {
+        if(as.character(p[[1]][[1]]) == "n") {
+          ## Only the predictor formula defines inputs; selection controls
+          ## may refer to objects outside the model data.
+          i <- match("formula", names(p[[1]]), nomatch = 2L)
+          p <- p[[1]][c(1L, i)]
+        } else if(as.character(p[[1]][[1]]) %in% c("la", "gnet", "elm", "im", "si")) {
           p <- p[[1]][1:2]
         }
         v <- all.vars(p)

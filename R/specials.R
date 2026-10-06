@@ -61,7 +61,11 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
         changed <- TRUE
       }
 
-      sj <- eval(sjp, envir = if(binj) dj else data)
+      sj <- if(sjpc == "n" && !is.null(dots$formula.env)) {
+        eval(sjp, envir = if(binj) dj else data, enclos = dots$formula.env)
+      } else {
+        eval(sjp, envir = if(binj) dj else data)
+      }
 
       ## Center linear blocks only when their predictors have intercepts.
       if(inherits(sj, "lin.smooth.spec") && !sj$scale &&

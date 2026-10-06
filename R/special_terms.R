@@ -197,7 +197,7 @@ n <- function(formula, ...)
     ctr$size <- 50
   if(is.null(ctr$maxit))
     ctr$maxit <- 1000
-  if(is.null(ctr$decay))
+  if(is.null(ctr[["decay"]]))
     ctr$decay <- 0.1
   if(is.null(ctr$trace))
     ctr$trace <- FALSE
@@ -242,7 +242,19 @@ special_fit.n <- function(x, z, w, control, ...)
   x$data$weights_w <- w
 
   ## Possible weights from last iteration.
-  Wts <- list(...)$transfer$Wts
+  transfer <- list(...)$transfer
+  Wts <- transfer$Wts
+
+  ## Term controls override an explicitly supplied global selection criterion.
+  criteria <- c("aic", "aicc", "bic", "gaic", "gcv")
+  criterion <- x$control$criterion
+  if(is.null(criterion)) {
+    criterion <- control$criterion
+    if(is.null(criterion) || length(x$control$decay) != 1L ||
+      !tolower(criterion) %in% criteria)
+      criterion <- "fixed"
+  }
+  criterion <- match.arg(tolower(criterion), c("fixed", criteria))
 
   ## Estimate model.
   nnc <- parse(text = paste0('nnet::nnet(formula = .fnns, data = x$data, weights = weights_w,',
@@ -250,7 +262,106 @@ special_fit.n <- function(x, z, w, control, ...)
       'trace = x$control$trace, MaxNWts = x$control$MaxNWts, linout = TRUE',
       if(!is.null(Wts)) ', Wts = Wts)' else ')'))
 
-  rval <- list("model" = eval(nnc))
+  if(criterion == "fixed") {
+    rval <- list("model" = eval(nnc))
+  } else {
+    decay <- x$control$decay
+    if(!is.numeric(decay) || length(decay) != 1L ||
+      !is.finite(decay) || decay < 0)
+      stop("decay selection in n() requires a nonnegative scalar decay")
+    if(!is.null(transfer$decay))
+      decay <- transfer$decay
+    stopifnot(length(decay) == 1L, is.finite(decay), decay >= 0)
+
+    grid <- x$control$decay.grid
+    if(is.null(grid)) {
+      center <- if(decay > 0) decay else 0.1
+      grid <- pmin(1e8, pmax(1e-8, center * c(0.1, 1, 10)))
+    }
+    if(!is.numeric(grid) || !length(grid) || any(!is.finite(grid)) ||
+      any(grid < 0))
+      stop("decay.grid in n() must contain finite nonnegative values")
+    ## Retain the current decay and evaluate it first, also as the reference
+    ## for the RS safeguard. No candidate requires a final refit.
+    grid <- unique(c(decay, grid))
+    if(!any(w > 0))
+      grid <- decay
+    K <- x$control$K
+    if(is.null(K))
+      K <- if(is.null(control$K)) 2 else control$K
+    stopifnot(is.numeric(K), length(K) == 1L, is.finite(K), K >= 0)
+
+    ## Prepare the formula design once. Candidate fits and EDF calculations
+    ## use the matrix interface; restore formula metadata on the selected fit.
+    mf <- model.frame(.fnns, data = x$data, weights = weights_w)
+    Terms <- attr(mf, "terms")
+    X <- model.matrix(Terms, mf)
+    contrasts <- attr(X, "contrasts")
+    X <- X[, colnames(X) != "(Intercept)", drop = FALSE]
+    response <- model.response(mf)
+    weights <- model.weights(mf)
+    stopifnot(nrow(X) == length(z), length(weights) == length(w))
+    if(is.null(Wts)) {
+      nw <- (ncol(X) + 1L) * x$control$size + x$control$size + 1L
+      ## One common random initialization, matching nnet's default range.
+      Wts <- runif(nw, -0.7, 0.7)
+    }
+
+    best <- NULL
+    scores <- rep(Inf, length(grid))
+    for(i in seq_along(grid)) {
+      model <- nnet::nnet(x = X, y = response, weights = weights,
+        size = x$control$size, Wts = Wts, decay = grid[i],
+        maxit = x$control$maxit, trace = x$control$trace,
+        MaxNWts = x$control$MaxNWts, linout = TRUE)
+      fitted <- drop(model$fitted.values)
+      shift <- mean(fitted)
+      fitted <- fitted - shift
+      edf <- get_nnet_edf(model, X, w)
+      rss <- sum(w * (z - fitted)^2)
+      ## nnet's model$value includes the decay penalty; selection uses only
+      ## the unpenalized, centered working loss and the EDF penalty.
+      if(is.finite(rss) && is.finite(edf) &&
+        !(criterion == "aicc" && length(z) <= edf + 1) &&
+        !(criterion == "gcv" && length(z) <= edf)) {
+        score <- smooth.construct_score(rss, edf, length(z), K,
+          criterion)$value
+        if(is.finite(score))
+          scores[i] <- score
+      }
+      if(is.null(best) || scores[i] < best$ic$value) {
+        best <- list("model" = model, "fitted.values" = fitted,
+          "shift" = shift, "edf" = edf, "decay" = grid[i],
+          "ic" = list("criterion" = criterion, "value" = scores[i],
+            "rss" = rss, "edf" = edf, "K" = K))
+      }
+    }
+    rval <- best
+    rval$model$terms <- Terms
+    rval$model$coefnames <- colnames(X)
+    rval$model$call <- nnc[[1L]]
+    rval$model$call$decay <- rval$decay
+    rval$model$na.action <- attr(mf, "na.action")
+    rval$model$contrasts <- contrasts
+    rval$model$xlevels <- .getXlevels(Terms, mf)
+    class(rval$model) <- c("nnet.formula", "nnet")
+
+    ## A nonlinear network cannot be reconstructed from an interpolation of
+    ## fitted effects. Accept its selected weights and decay as one state,
+    ## including coefficient updates that retain the same decay.
+    changed <- is.null(transfer$Wts) ||
+      !identical(rval$model$wts, transfer$Wts) ||
+      (!is.null(transfer$decay) && rval$decay != transfer$decay)
+    scored <- is.finite(scores[1L]) && is.finite(rval$ic$value)
+    rval$.rs_smoothing <- list("changed" = changed, "scored" = scored,
+      "improved" = scored && rval$ic$value <= scores[1L],
+      "old" = scores[1L], "new" = rval$ic$value, "criterion" = criterion)
+    rval$transfer <- list("Wts" = rval$model$wts, "decay" = rval$decay,
+      "criterion.evaluations" = length(grid))
+    rval$scalex <- x$scalex
+    class(rval) <- "n.fitted"
+    return(rval)
+  }
 
   ## Get the fitted.values.
   ## nnet returns a one-column matrix for a scalar response.  A special term

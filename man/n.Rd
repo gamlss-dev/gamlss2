@@ -29,7 +29,10 @@ n(formula, ...)
     weight-decay parameter; \code{trace}, indicating whether optimization
     progress should be printed; \code{MaxNWts}, the maximum allowable
     number of weights; and \code{scale}, indicating whether numeric
-    predictors should be scaled before fitting.
+    predictors should be scaled before fitting. Local decay selection uses
+    \code{criterion} (\code{"aic"}, \code{"aicc"}, \code{"bic"},
+    \code{"gaic"}, or \code{"gcv"}), an optional \code{decay.grid}, and
+    \code{K}, the EDF penalty for \code{"gaic"} (default 2).
 
     Defaults are \code{size = 50}, \code{maxit = 1000},
     \code{decay = 0.1}, \code{trace = FALSE},
@@ -61,6 +64,23 @@ n(formula, ...)
   The effective degrees of freedom (\code{edf}) use a Gauss--Newton
   approximation with the current working weights and \code{decay} penalty.
   The calculation accounts for shrinkage and centering of the fitted effect.
+
+  To select \code{decay} during backfitting, supply a supported
+  \code{criterion} in \code{n()} or \code{gamlss2()}. Selection minimizes
+  the local criterion based on the centered working residual sum of squares
+  and EDF, using the same criterion formulas as other smooth terms.
+  This is a working-model criterion rather than the full model likelihood.
+  Without a supported criterion, \code{decay} remains fixed;
+  \code{criterion = "fixed"} in \code{n()} also overrides a global criterion.
+  A vector of per-weight decay penalties remains fixed under global criteria.
+
+  Selection requires a scalar \code{decay}, which supplies the starting value.
+  By default, each update compares the current decay with values ten times
+  smaller and larger, bounded by \eqn{10^{-8}} and \eqn{10^8}; zero decay
+  starts the positive grid at 0.1. Alternatively, \code{decay.grid} supplies
+  finite nonnegative candidates. The current decay is always included.
+  All candidates start from the same network weights, and the selected
+  decay and fitted weights are carried to the next update.
 }
 
 \value{

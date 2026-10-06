@@ -237,6 +237,7 @@ gamlss2.formula <- function(formula, data, family = NO,
   ## Process special terms.
   Specials <- special_terms(Sterms, mf, binning = control$binning,
     digits = control$digits, select = control$select, knots = knots,
+    formula.env = environment(formula),
     intercept = vapply(mt, function(x) attr(x, "intercept") > 0L, logical(1L)))
 
   ## Process by variables using mgcv::smoothCon().

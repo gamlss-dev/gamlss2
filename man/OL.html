@@ -694,7 +694,7 @@ window.Quarto = {
 <h2 class="unnumbered anchored" data-anchor-id="ordered-logistic-family-for-ordinal-regression">Ordered Logistic Family for Ordinal Regression</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Defines the ordered logistic (cumulative logit) family for modeling ordinal response variables using <code>gamlss2</code>. The location and ordered cutpoints can be modeled as functions of covariates.</p>
+<p>Defines the ordered logistic (cumulative logit) family for ordinal responses in <code>gamlss2</code>.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -718,27 +718,26 @@ A single integer specifying the number of response categories. Must be <code>k &
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>This family implements a cumulative logit model for an ordinal response with <code>k</code> categories. The response must be coded as the integers <code>1, …, k</code>, or as a factor with exactly these levels.</p>
-<p>The linear predictor models a latent <code>location</code> parameter. Let <span class="math inline">\(\gamma_j\)</span> denote the cutpoint between categories <span class="math inline">\(j\)</span> and <span class="math inline">\(j + 1\)</span>. The cutpoints are parameterized as</p>
+<p>The response must be coded as the integers <code>1, …, k</code>, or as a factor with exactly these levels.</p>
+<p>Let <span class="math inline">\(\gamma_j\)</span> denote the cutpoint between categories <span class="math inline">\(j\)</span> and <span class="math inline">\(j + 1\)</span>. The cutpoints are parameterized as</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(\gamma_1 = \theta_1\)</span></p>
 <p>and, recursively,</p>
 <p style="text-align: center;">
-</p><p><code class="reqn"><em>j = </em>{j-1} + (_j), j = 2, , k - 1.</code></p>
+</p><p><span class="math inline">\(\gamma_j = \gamma_{j-1} + \exp(\delta_j), \quad j = 2, \ldots, k - 1.\)</span></p>
 <p>Equivalently,</p>
 <p style="text-align: center;">
 </p><p><span class="math inline">\(\gamma_j = \gamma_1 + \sum_{\ell=2}^j \exp(\delta_\ell),\)</span></p>
-<p>which ensures strictly ordered cutpoints. In the family object, <span class="math inline">\(\theta_1\)</span> is named <code>theta1</code> and <span class="math inline">\(\delta_j\)</span> is named <code>delta</code><span class="math inline">\(j\)</span>. For <code>k = 2</code>, only <code>location</code> and <code>theta1</code> are required; there are no <code>delta</code> parameters.</p>
+<p>which ensures strictly ordered cutpoints.</p>
 <p>The cumulative probabilities are</p>
 <p style="text-align: center;">
-</p><p><code class="reqn">(Y &gt; j) = ^{-1}( - _j), j = 1, , k - 1.</code></p>
-<p>The <code>OL()</code> family supports modeling the location, first cutpoint, and cutpoint differences as functions of covariates using additive predictors in <code>gamlss2</code> via the <code>“|”</code> formula interface.</p>
-<p>The returned family object provides functions for evaluating probability masses and log-likelihoods, cumulative probabilities and quantiles, category and transition probabilities, and the mean and variance of the numeric category labels.</p>
+</p><p><span class="math inline">\(\Pr(Y &gt; j) = \mathrm{logit}^{-1}(\mathrm{location} - \gamma_j), \quad j = 1, \ldots, k - 1.\)</span></p>
+<p>Each parameter can use an additive predictor through the <code>“|”</code> formula interface. The family also provides category and transition probabilities, and the mean and variance of numeric category labels.</p>
 <p><code>ologit()</code> is retained as a compatibility alias for <code>OL()</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A <code>“gamlss2.family”</code> object to be used with <code>gamlss2</code>. Its distribution parameters are <code>location</code>, <code>theta1</code>, and, when <code>k &gt; 2</code>, one cutpoint-difference parameter <code>delta</code><span class="math inline">\(j\)</span> for each <span class="math inline">\(j = 2, \ldots, k - 1\)</span>.</p>
+<p>A <code>“gamlss2.family”</code> object with parameters <code>location</code>, <code>theta1</code> (<span class="math inline">\(\theta_1\)</span>), and, for <code>k &gt; 2</code>, <code>delta</code><span class="math inline">\(j\)</span> (<span class="math inline">\(\delta_j\)</span>) for <span class="math inline">\(j = 2, \ldots, k - 1\)</span>.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -814,7 +813,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 72 df =  9 res.df =  63
 Deviance = 3479.1514 Null Dev. Red. = -2099.21%
-AIC = 3497.1514 elapsed =  0.02sec</code></pre>
+AIC = 3497.1514 elapsed =  0.03sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## compare coefficients</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

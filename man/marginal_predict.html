@@ -785,22 +785,22 @@ GAMLSS-RS iteration 11: Global Deviance = 929.2443 eps = 0.000035
 GAMLSS-RS iteration 12: Global Deviance = 929.2588 eps = 0.000015     
 GAMLSS-RS iteration 13: Global Deviance = 929.2643 eps = 0.000005     </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Conditional mean profiles for temperature and wind.</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Conditional distributions for temperature and wind.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mp <span class="ot">&lt;-</span> <span class="fu">marginal_predict</span>(</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  m,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"Temp"</span>, <span class="st">"Wind"</span>),</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">50</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"distribution"</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mp<span class="sc">$</span>Temp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      Temp     .fit
-1 57.00000 14.77474
-2 57.81633 15.28238
-3 58.63265 15.80438
-4 59.44898 16.33702
-5 60.26531 16.87571
-6 61.08163 17.41530</code></pre>
+<pre><code>      Temp                                          fit
+1 57.00000 GAMLSS2 GA(mu = 14.77474, sigma = 0.8891614)
+2 57.81633 GAMLSS2 GA(mu = 15.28238, sigma = 0.8341983)
+3 58.63265 GAMLSS2 GA(mu = 15.80438, sigma = 0.7823575)
+4 59.44898 GAMLSS2 GA(mu = 16.33702, sigma = 0.7334152)
+5 60.26531 GAMLSS2 GA(mu = 16.87571, sigma = 0.6875675)
+6 61.08163 GAMLSS2 GA(mu = 17.41530, sigma = 0.6451946)</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(mp, <span class="st">"fixed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -810,8 +810,11 @@ GAMLSS-RS iteration 13: Global Deviance = 929.2643 eps = 0.000005     </code></p
 $Wind
 [1] 9.7</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(.fit <span class="sc">~</span> Temp, <span class="at">data =</span> mp<span class="sc">$</span>Temp, <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (degrees F)"</span>, <span class="at">ylab =</span> <span class="st">"Fitted mean ozone"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot quantiles</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mp<span class="sc">$</span>Temp<span class="sc">$</span>qfit <span class="ot">&lt;-</span> <span class="fu">quantile</span>(mp<span class="sc">$</span>Temp<span class="sc">$</span>fit, <span class="at">probs =</span>  <span class="fu">seq</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>, <span class="at">by =</span> <span class="fl">0.01</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(mp<span class="sc">$</span>Temp<span class="sc">$</span>Temp, mp<span class="sc">$</span>Temp<span class="sc">$</span>qfit, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="dv">1</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (degrees F)"</span>, <span class="at">ylab =</span> <span class="st">"Fitted ozone quantiles"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

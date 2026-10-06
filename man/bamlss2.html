@@ -647,7 +647,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
   <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
   <li><a href="#arguments" id="toc-arguments" class="nav-link" data-scroll-target="#arguments">Arguments</a></li>
-  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
   <li><a href="#value" id="toc-value" class="nav-link" data-scroll-target="#value">Value</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
@@ -666,7 +665,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="unnumbered anchored" data-anchor-id="bayesian-gamlss-wrapper">Bayesian GAMLSS Wrapper</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>The function <code>bamlss2()</code> is a convenience wrapper around <code>gamlss2</code> to fit Bayesian GAMLSS models via MCMC sampling. It sets the optimizer to an MCMC routine and allows <code>n.iter</code>, <code>burnin</code>, and <code>thin</code> to be specified directly.</p>
+<p>A wrapper around <code>gamlss2</code> for fitting Bayesian GAMLSS models by MCMC sampling. Starting values are computed using <code>maxit</code> backfitting iterations before sampling. The controls <code>n.iter</code>, <code>burnin</code>, and <code>thin</code> can be specified directly; <code>weights</code> and <code>offset</code> are passed through to <code>gamlss2</code>.</p>
 </section>
 <section id="usage" class="level3">
 <h3 class="anchored" data-anchor-id="usage">Usage</h3>
@@ -725,11 +724,6 @@ Further arguments passed to <code>gamlss2</code> and/or <code>gamlss2_control</c
 </td>
 </tr>
 </tbody></table>
-</section>
-<section id="details" class="level3">
-<h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Function <code>bamlss2()</code> calls <code>gamlss2</code> and sets the optimizer to a Bayesian sampler. By default, a small number of backfitting iterations is performed first to obtain reasonable starting values for the MCMC sampler.</p>
-<p>The wrapper is designed to behave in line with the <code>gamlss()</code>-style interfaces, i.e., it supports <code>weights</code> and <code>offset</code> arguments through <code>gamlss2</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

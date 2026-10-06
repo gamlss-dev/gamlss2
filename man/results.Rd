@@ -24,9 +24,10 @@ results(x, data = NULL, ...)
 }
 
 \value{
-  A list containing the partial effects. Each effect is stored as a data frame
-  with the corresponding covariate values and the columns \code{fit},
-  \code{lower}, and \code{upper}.
+  A list of class \code{"results"} whose \code{effects} component is a named
+  list of partial-effect data frames. Each data frame contains covariate values
+  and fitted effects (\code{fit}), with interval bounds (\code{lower} and
+  \code{upper}) when available.
 }
 
 \seealso{

@@ -50,7 +50,7 @@
 \examples{\dontrun{## specify a distributional model:
 ## location and scale vary with x,
 ## shape parameters remain constant
-f <- dist ~ s(speed) | 1 | 1
+f <- dist ~ s(speed) | 1
 
 ## estimate model
 m1 <- gamlss2(f, data = cars, family = GA)

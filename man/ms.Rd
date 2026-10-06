@@ -70,10 +70,7 @@ ms(x, mono = c("up", "down"), k = 10,
 
   Estimation is based on penalized weighted least squares. For a given
   smoothing parameter \eqn{\lambda}, the coefficient vector minimizes
-  \deqn{
-    (z - X\beta)^\top W (z - X\beta)
-    + \lambda \beta^\top S \beta
-  }
+  \deqn{(z - X\beta)^\top W (z - X\beta) + \lambda \beta^\top S \beta}
   subject to the monotonicity constraints. The constrained problem is solved
   with an active-set algorithm. Weighted cross-products are computed once
   per backfitting update, so smoothing parameter selection only requires

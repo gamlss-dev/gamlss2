@@ -40,6 +40,12 @@ parameters. Thus it retains covariance among linear and smooth terms and among
 distributional parameters. Prior observation weights and offsets in the final
 linear predictors are included.
 
+For monotonic \code{\link{ms}} terms, inversion is restricted to coefficient
+directions that preserve the fitted active constraints and term centering.
+This local approximation conditions on the active constraint set and does not
+include uncertainty about which constraints are active. Unconditional and
+sandwich corrections are currently unavailable for these terms.
+
 The default covariance conditions on fitted smoothing parameters. Use
 \code{unconditional = TRUE} to include their approximate estimation uncertainty.
 Fixed smoothing parameters receive no correction, and model-selection

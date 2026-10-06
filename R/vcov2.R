@@ -407,6 +407,16 @@ vcov.gamlss2 <- function(object,
         any(!is.finite(X)))
         return(NULL)
 
+      if(inherits(fit, "ms.fitted")) {
+        center <- colMeans(X)
+        X <- sweep(X, 2L, center, "-")
+        if(!is.null(fv) && (length(fv) != n ||
+            !.same(drop(X %*% b0), fv, tol = 1e-6)))
+          return(NULL)
+        attr(X, "ms.center") <- center
+        return(X)
+      }
+
       if(is.null(fv) || length(fv) != n)
         return(X)
 
@@ -542,13 +552,12 @@ vcov.gamlss2 <- function(object,
 
   .special_penalty <- function(name, term, fit, source, q)
   {
-    ## Active inequality constraints change the local coefficient geometry.
-    ## A plain inverse of H + P is not the covariance conditional on an
-    ## active constraint set. Do not silently treat such terms as ordinary
-    ## quadratic smooths.
+    ## ms() supplies the active-set geometry separately. Other constrained
+    ## specials still need a verified representation before they can be used.
     cl <- class(fit)
-    if(any(grepl("^ms[.]|^ms$", cl)) ||
-      !is.null(fit$active) || !is.null(fit$active.set))
+    if(!inherits(fit, "ms.fitted") &&
+        (any(grepl("^ms[.]|^ms$", cl)) ||
+          !is.null(fit$active) || !is.null(fit$active.set)))
       .stop(paste0(
         "special term '", term, "' in parameter '", name,
         "' uses active constraints. A plain H + P covariance is not ",
@@ -676,6 +685,34 @@ vcov.gamlss2 <- function(object,
     return(P)
   }
 
+  .special_constraints <- function(name, term, fit, X, b)
+  {
+    q <- length(b)
+    if(!inherits(fit, "ms.fitted"))
+      return(matrix(0, 0L, q))
+
+    center <- attr(X, "ms.center", exact = TRUE)
+    active <- fit$active
+    if(length(center) != q || any(!is.finite(center)) ||
+        !is.numeric(active) || any(!is.finite(active)) ||
+        any(active != floor(active)) || any(active < 1L | active >= q))
+      .stop(paste0("invalid active constraints for special term '", term,
+        "' in parameter '", name, "'."))
+
+    ## Damped updates can retain an active-set warm start before those
+    ## equalities bind at the accepted coefficients. Use only binding rows.
+    tol <- sqrt(.Machine$double.eps) * (1 + max(abs(b)))
+    active <- unique(as.integer(active[abs(diff(b)[active]) <= tol]))
+    C <- matrix(0, length(active), q)
+    if(length(active)) {
+      C[cbind(seq_along(active), active)] <- -1
+      C[cbind(seq_along(active), active + 1L)] <- 1
+    }
+    ## Centering removes the otherwise unidentified constant B-spline
+    ## direction. All equalities concern perturbations around the fitted b.
+    rbind(center, C)
+  }
+
   .parameter_block <- function(name, pos, n)
   {
     b <- .get_named(object$coefficients, name, pos)
@@ -714,6 +751,7 @@ vcov.gamlss2 <- function(object,
     }
     linear <- seq_len(p0)
     term <- rep("linear", p0)
+    constraints <- matrix(0, 0L, p0)
 
     fs <- .get_named(object$fitted.specials, name, pos)
 
@@ -743,10 +781,18 @@ vcov.gamlss2 <- function(object,
         source <- .special_source(name, tt)
         Xs <- .special_matrix(name, tt, fit, source, bs, n)
         Ps <- .special_penalty(name, tt, fit, source, length(bs))
+        Cs <- .special_constraints(name, tt, fit, Xs, bs)
 
         old <- ncol(X)
         X <- cbind(X, Xs)
         b <- c(b, bs)
+        constraints <- cbind(constraints,
+          matrix(0, nrow(constraints), length(bs)))
+        if(nrow(Cs)) {
+          C <- matrix(0, nrow(Cs), ncol(X))
+          C[, old + seq_along(bs)] <- Cs
+          constraints <- rbind(constraints, C)
+        }
 
         sn <- names(bs)
         if(is.null(sn) || any(!nzchar(sn)))
@@ -782,6 +828,7 @@ vcov.gamlss2 <- function(object,
       linear = linear,
       term = term,
       names = cn,
+      constraints = constraints,
       fixed = rep(.fixed(name, pos), length(b))
     ))
   }
@@ -971,7 +1018,7 @@ vcov.gamlss2 <- function(object,
   }
 
   .invert <- function(K, names, forced.na, fixed, noise = 0,
-    return.factor = FALSE)
+    return.factor = FALSE, constraints = NULL)
   {
     K <- .matrix(K)
 
@@ -1007,6 +1054,48 @@ vcov.gamlss2 <- function(object,
     }
 
     Ka <- K[active, active, drop = FALSE]
+    if(!is.null(constraints) && nrow(constraints)) {
+      C <- constraints[, active, drop = FALSE]
+      norm <- sqrt(rowSums(C^2))
+      C <- C[norm > 0, , drop = FALSE]
+      if(nrow(C)) {
+        C <- C / norm[norm > 0]
+        decomposition <- qr(t(C), tol = 1e-10)
+        rank <- decomposition$rank
+        Z <- qr.Q(decomposition, complete = TRUE)
+        Z <- Z[, seq_len(ncol(Z)) > rank, drop = FALSE]
+        if(ncol(Z)) {
+          Kr <- crossprod(Z, Ka %*% Z)
+          ee <- eigen(0.5 * (Kr + t(Kr)), symmetric = TRUE)
+          cut <- max(ncol(Z), 1L) * .Machine$double.eps *
+            max(1, max(abs(ee$values)))
+          cut <- max(cut, noise)
+          if(any(ee$values < -cut))
+            .stop(paste0(
+              "joint penalized information is indefinite on the ",
+              "constraint tangent space; minimum eigenvalue = ",
+              format(min(ee$values), scientific = TRUE),
+              ". Use method = \"working\" only if that approximation is intended."
+            ))
+          directions <- Z %*% ee$vectors
+          positive <- ee$values > cut
+          if(any(positive)) {
+            root <- sweep(directions[, positive, drop = FALSE], 2L,
+              sqrt(ee$values[positive]), "/")
+            V[active, active] <- tcrossprod(root)
+          }
+          if(any(!positive)) {
+            bad <- active[rowSums(directions[, !positive, drop = FALSE]^2) >
+              sqrt(.Machine$double.eps)]
+            V[bad, ] <- V[, bad] <- NA_real_
+          }
+        }
+        dimnames(V) <- list(names, names)
+        if(return.factor)
+          .stop("covariance corrections do not support active constraints.")
+        return(V)
+      }
+    }
     ee <- eigen(Ka, symmetric = TRUE)
     ev <- ee$values
     cut <- max(length(ev), 1L) * .Machine$double.eps *
@@ -1197,6 +1286,16 @@ vcov.gamlss2 <- function(object,
   X <- lapply(blocks, `[[`, "X")
   P <- .block_diag(blocks, "P")
   dimnames(P) <- list(coefficient.names, coefficient.names)
+  constraints <- matrix(0, sum(vapply(blocks,
+    function(z) nrow(z$constraints), integer(1L))), length(beta))
+  row <- 0L
+  for(a in seq_along(blocks)) {
+    C <- blocks[[a]]$constraints
+    if(!nrow(C)) next
+    ii <- row + seq_len(nrow(C))
+    constraints[ii, index[[a]]] <- C
+    row <- row + nrow(C)
+  }
   direct <- if(method == "joint" && !sandwich &&
       isTRUE(object$jr$converged))
     object$jr$coefficient.covariance else NULL
@@ -1333,6 +1432,8 @@ vcov.gamlss2 <- function(object,
   ## not erase a smaller but valid likelihood direction.
   noise <- 100 * .Machine$double.eps^(2 / 3) * max(1, max(abs(H)))
   need.correction <- (unconditional || sandwich) && type != "coef"
+  if(need.correction && nrow(constraints))
+    .stop("unconditional and sandwich covariance do not support monotonic terms.")
   if(!is.null(direct)) {
     if(length(object$jr$rho)) {
       current <- unclass(coef(object, full = TRUE, lambdas = TRUE,
@@ -1355,7 +1456,7 @@ vcov.gamlss2 <- function(object,
       list(covariance = direct, factor = chol(solve(direct))) else direct
   } else {
     inverse <- .invert(K, coefficient.names, forced.na, fixed, noise,
-      return.factor = need.correction)
+      return.factor = need.correction, constraints = constraints)
   }
   V <- if(need.correction) inverse$covariance else inverse
   if(need.correction) {
@@ -1676,7 +1777,8 @@ vcov_state_signature <- function(object)
         covariance = object$jr$covariance),
     linear.penalties = lapply(object$fitted.linear, function(x) x$penalty),
     special.penalties = lapply(object$fitted.specials, function(x)
-      lapply(x, function(z) list(lambdas = z$lambdas, penalty = z$penalty)))
+      lapply(x, function(z) list(lambdas = z$lambdas, penalty = z$penalty,
+        active = z$active)))
   )
 }
 
@@ -1755,17 +1857,27 @@ vcov_draws <- function(information, R, antithetic = FALSE, center = FALSE)
   if(length(active)) {
     C <- tryCatch(chol(V[active, active, drop = FALSE]),
       error = function(e) NULL)
-    if(is.null(C))
-      stop("Gaussian coefficient draws require positive definite covariance",
-        call. = FALSE)
+    root <- if(!is.null(C)) t(C) else {
+      ## Active constraints can produce a valid singular covariance. Draw
+      ## only in its positive eigenspace instead of adding a ridge.
+      ee <- eigen(V[active, active, drop = FALSE], symmetric = TRUE)
+      cut <- length(active) * .Machine$double.eps *
+        max(1, max(abs(ee$values)))
+      if(any(ee$values < -cut))
+        stop("Gaussian coefficient draws require positive semidefinite covariance",
+          call. = FALSE)
+      keep <- ee$values > cut
+      sweep(ee$vectors[, keep, drop = FALSE], 2L,
+        sqrt(ee$values[keep]), "*")
+    }
     if(isTRUE(antithetic)) {
       R0 <- ceiling(R / 2)
-      Z <- matrix(rnorm(length(active) * R0), length(active), R0)
+      Z <- matrix(rnorm(ncol(root) * R0), ncol(root), R0)
       Z <- cbind(Z, -Z)[, seq_len(R), drop = FALSE]
     } else {
-      Z <- matrix(rnorm(length(active) * R), length(active), R)
+      Z <- matrix(rnorm(ncol(root) * R), ncol(root), R)
     }
-    D[active, ] <- t(C) %*% Z
+    D[active, ] <- root %*% Z
     if(isTRUE(center))
       D[active, ] <- sweep(D[active, , drop = FALSE], 1L,
         rowMeans(D[active, , drop = FALSE]), "-")

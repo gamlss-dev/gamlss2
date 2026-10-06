@@ -57,33 +57,25 @@ CG(x, y, specials, family, offsets,
       parameter sweeps and per-parameter IRLS/backfitting iterations. Default is
       \code{maxit = c(20, 50)}. For the CG algorithm, an optional third element
       limits the internal correction sweeps and defaults to the second element.
-      Plain RS always performs
-      one parameter sweep before checking global convergence; a third element is
-      therefore ignored by RS.
+      RS checks global convergence after each parameter sweep and ignores the
+      third element.
     \item \code{step}: Numeric, the step length control parameter. Default is
-      \code{step = 1}. After the first update and with fixed smoothing
-      parameters, the step is applied to a complete parameter update in RS and
-      to a complete correction sweep in CG. A smoothing-parameter change and
-      its coefficients are instead accepted or rejected as one state. If
-      \code{step} is set smaller than 1, it might be appropriate to lower the
-      stopping criterion \code{eps}, too.
+      \code{step = 1}. With fixed smoothing parameters, it scales complete RS
+      parameter updates or CG correction sweeps after the first update.
+      Smoothing-parameter changes and their coefficients are accepted or
+      rejected together. Smaller steps may require a smaller \code{eps}.
     \item \code{autostep}: Logical, should an update that decreases its
-      objective be halved automatically? Default is \code{TRUE}. The objective
-      is the likelihood for unpenalized updates and the penalized likelihood
-      when smoothing parameters are fixed. Smoothing-parameter changes use the
-      specified smoothing criterion, the default local REML update, or the
-      term-specific local ML update.
+      objective be halved automatically? Default is \code{TRUE}. Updates use
+      the likelihood, penalized likelihood, or smoothing-selection criterion
+      as appropriate; see \code{\link{gamlss2_smoothing}}.
     \item \code{CG}: Integer, the outer iteration in which to start the CG
       correction. Thus, \code{CG = 5} uses RS for the first four outer
       iterations and CG in the fifth. \code{CG = 0} starts with CG immediately;
       the default is \code{CG = Inf}.
     \item \code{trace}: Logical, should information be printed while the algorithm is running?
-    \item \code{rs.cache}: Logical, reuse unchanged generated family evaluations
-      and weighted matrix calculations within a fit? Default is \code{TRUE}.
-      Reuse requires identical inputs and preserves the original arithmetic.
-      User replacements of family callbacks are not memoized. Linear QR reuse
-      is restricted to full-rank fits with strictly positive weights.
-      Set \code{FALSE} to disable these caches, for example for comparisons.
+    \item \code{rs.cache}: Logical, reuse generated family evaluations and weighted
+      matrix calculations with identical inputs within a fit? Default is
+      \code{TRUE}; set \code{FALSE} to disable caching for comparisons.
     \item \code{flush}: Logical, use \code{\link[utils]{flush.console}} for displaying the
       current output in the console.
     \item \code{ridge}: Logical, should automatic ridge penalization be applied
@@ -94,16 +86,12 @@ CG(x, y, specials, family, offsets,
       be set in \code{\link{gamlss2_control}}.
   }
 
-  For smoothing parameter selection methods, numerical solver details, and
-  examples, see
+  For smoothing parameter selection, numerical solvers, and examples, see
   \code{\link{gamlss2_smoothing}}.
 
-  To facilitate the development of new algorithms for \pkg{gamlss2}, users can exchange
-  them using the \code{optimizer} argument in \code{\link{gamlss2_control}}. Users
-  developing new model fitting functions are advised to use these functions as templates
-  and pass them to \code{\link{gamlss2_control}}. Alternatively, users can replace the
-  optimizer function by adding a named list element, \code{"optimizer"}, to the family object.
-  For instructions on setting up new families in \pkg{gamlss2}, see \code{\link{gamlss2.family}}.
+  Use these functions as templates for custom fitting algorithms, supplied via
+  \code{optimizer} in \code{\link{gamlss2_control}} or the family object's
+  \code{"optimizer"} element. For new families, see \code{\link{gamlss2.family}}.
 } 
 
 \value{

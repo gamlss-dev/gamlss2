@@ -47,7 +47,6 @@ ridge(...)
 }
 
 \details{
-  \strong{Model-matrix construction.}
   The supplied predictors are converted to a design matrix using
   \code{\link[stats]{model.matrix}}. Any column named \code{"(Intercept)"}
   is removed because the distributional predictor has its own intercept.
@@ -64,7 +63,6 @@ ridge(...)
   \code{:}, \code{*}, \code{-}, or \code{0 +} need to be interpreted
   explicitly.
 
-  \strong{Unpenalized linear blocks.}
   Function \code{lin()} fixes the identity-penalty multiplier at a negligible
   value. It therefore behaves like weighted linear regression for the current
   working response, while entering all columns as one model term rather than
@@ -80,7 +78,6 @@ ridge(...)
   the stored column means are reused for prediction. If a predictor using
   the block has no intercept, the unscaled design is retained.
 
-  \strong{Ridge-penalized blocks.}
   For \code{ridge()}, coefficients are estimated from the current weighted
   working response using an identity penalty. Ignoring the small numerical
   stabilization used by the fitting algorithm, the update minimizes
@@ -163,7 +160,7 @@ m3 <- gamlss2(
     ridge(~ GNP.deflator + GNP + Unemployed +
       Armed.Forces + Population),
   data = longley,
-  family = NO
+  family = NO, maxit = 100
 )
 
 summary(m3)
@@ -181,3 +178,4 @@ specials(m4, parameter = "mu", elements = "coefficients")
 \keyword{models}
 \keyword{regression}
 \keyword{smooth}
+

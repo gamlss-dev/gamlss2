@@ -696,9 +696,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Function <code>lo()</code> defines a special model term for <code>gamlss2</code>. It acts as a wrapper wrapper around the standard <code>loess</code> function. Estimation is based on local weighted least squares.</p>
-<p>The effective degrees of freedom (<code>edf</code>, needed for information criteria) for the smooth term are extracted analytically using the <code>trace.hat</code> value returned by the local regression engine.</p>
-<p>To ensure identifiability, the estimated smooth is centered by subtracting its mean.</p>
+<p>The term is fitted using <code>loess</code> within backfitting. Effective degrees of freedom (<code>edf</code>) for information criteria are taken from the fitted object’s <code>trace.hat</code>. The fitted smooth is centered by subtracting its mean to ensure identifiability.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

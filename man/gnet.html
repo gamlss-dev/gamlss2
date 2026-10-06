@@ -680,7 +680,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="formula">formula</code>
 </td>
 <td>
-A formula specifying the covariates that should be estimated using the <span class="pkg">glmnet</span> implementation.
+A formula specifying the covariates for the penalized term.
 </td>
 </tr>
 <tr>
@@ -688,14 +688,14 @@ A formula specifying the covariates that should be estimated using the <span cla
 <code id="...">…</code>
 </td>
 <td>
-Control arguments passed to <code>glmnet</code> and the information-criterion-based shrinkage selection.
+<code>criterion</code> selects the information criterion: <code>“bic”</code> (default), <code>“aic”</code>, <code>“aicc”</code>, <code>“gaic”</code>, or <code>“gcv”</code>. Other arguments are passed to <code>glmnet</code>, including <code>alpha</code> (elastic-net mixing parameter), <code>lambda</code> (penalty sequence), <code>nlambda</code> (number of penalties), and <code>standardize</code> (whether to standardize covariates).
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p><code>gnet()</code> constructs a <code>model.matrix</code> representation of the supplied formula and delegates estimation to <code>glmnet</code> inside the backfitting algorithm. The optimal penalty parameter is selected using an information criterion, with <code>criterion = “bic”</code> used by default.</p>
+<p><code>gnet()</code> constructs a <code>model.matrix</code> from the formula, removes its intercept column, and fits the term using <code>glmnet</code> within backfitting. The penalty <code>lambda</code> minimizes the selected criterion. For <code>criterion = “gaic”</code>, the multiplier <code>K</code> is set in <code>gamlss2_control</code> (default: 2).</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -728,7 +728,7 @@ Control arguments passed to <code>glmnet</code> and the information-criterion-ba
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="do">## plot coefficient paths</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">specials</span>(m, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">term =</span> <span class="st">"gnet("</span>, <span class="at">element =</span> <span class="st">"model"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">specials</span>(m, <span class="at">parameter =</span> <span class="st">"mu"</span>, <span class="at">terms =</span> <span class="st">"gnet(~Tc+Wc)"</span>, <span class="at">elements =</span> <span class="st">"model"</span>)</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">class</span>(sp))</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>

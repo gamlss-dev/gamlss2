@@ -712,7 +712,7 @@ Optional numeric or factor vector with the binary response.
 <code id="parameter">parameter</code>
 </td>
 <td>
-Character, which parameter should be used for prediction.
+Character, parameter name(s) to predict. The default <code>NULL</code> selects all parameters in the family’s <code>names</code> order.
 </td>
 </tr>
 <tr>
@@ -831,7 +831,7 @@ The y limits of the plot.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>For each fitted model, predicted probabilities are obtained via <code>predict</code> using <code>type = “parameter”</code> and the selected <code>parameter</code>. If the corresponding <code>gamlss2.family</code> object provides a <code>probabilities()</code> method, this is used to transform the parameter vector into probabilities. For multi-column outputs, the first column is used.</p>
+<p>For each fitted model, predicted probabilities are obtained via <code>predict.gamlss2</code> using <code>type = “parameter”</code> and the selected <code>parameter</code> (all family parameters when <code>NULL</code>). If the family provides a <code>probabilities()</code> function, it converts these predictions to probabilities; otherwise, the predicted parameters are used directly. If the result is a matrix or data frame, only its first column is used, after any conversion. Thus, without <code>probabilities()</code>, multiple predicted parameters are reduced to the first parameter column. The values used for calibration must represent the probability of <code>y = 1</code>.</p>
 <p>Predicted probabilities are grouped into bins defined by <code>breaks</code>. Within each bin, the mean predicted probability, the observed proportion of 1s, and the number of observations are computed. Bins with fewer than <code>minn</code> observations are dropped.</p>
 </section>
 <section id="value" class="level3">

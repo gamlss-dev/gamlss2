@@ -717,7 +717,7 @@ window.Quarto = {
 <code id="...">…</code>
 </td>
 <td>
-<p>Control arguments for the neural network fit. The currently supported arguments are <code>size</code>, the number of units in the hidden layer; <code>maxit</code>, the maximum number of iterations; <code>decay</code>, the weight-decay parameter; <code>trace</code>, indicating whether optimization progress should be printed; <code>MaxNWts</code>, the maximum allowable number of weights; and <code>scale</code>, indicating whether numeric predictors should be scaled before fitting.</p>
+<p>Control arguments for the neural network fit. The currently supported arguments are <code>size</code>, the number of units in the hidden layer; <code>maxit</code>, the maximum number of iterations; <code>decay</code>, the weight-decay parameter; <code>trace</code>, indicating whether optimization progress should be printed; <code>MaxNWts</code>, the maximum allowable number of weights; and <code>scale</code>, indicating whether numeric predictors should be scaled before fitting. Local decay selection uses <code>criterion</code> (<code>“aic”</code>, <code>“aicc”</code>, <code>“bic”</code>, <code>“gaic”</code>, or <code>“gcv”</code>), an optional <code>decay.grid</code>, and <code>K</code>, the EDF penalty for <code>“gaic”</code> (default 2).</p>
 <p>Defaults are <code>size = 50</code>, <code>maxit = 1000</code>, <code>decay = 0.1</code>, <code>trace = FALSE</code>, <code>MaxNWts = 10000</code>, and <code>scale = TRUE</code>.</p>
 </td>
 </tr>
@@ -730,6 +730,8 @@ window.Quarto = {
 <p>By default, each numeric predictor is scaled to the interval <span class="math inline">\([0,1]\)</span> using its observed range before the network is fitted. Factor predictors are left unchanged. The same scaling information is stored with the fitted term and is applied automatically when predicting from new data. Scaling can be disabled with <code>scale = FALSE</code>.</p>
 <p>The fitted effect is centered by subtracting its mean before it is returned to the additive predictor.</p>
 <p>The effective degrees of freedom (<code>edf</code>) use a Gauss–Newton approximation with the current working weights and <code>decay</code> penalty. The calculation accounts for shrinkage and centering of the fitted effect.</p>
+<p>To select <code>decay</code> during backfitting, supply a supported <code>criterion</code> in <code>n()</code> or <code>gamlss2()</code>. Selection minimizes the local criterion based on the centered working residual sum of squares and EDF, using the same criterion formulas as other smooth terms. This is a working-model criterion rather than the full model likelihood. Without a supported criterion, <code>decay</code> remains fixed; <code>criterion = “fixed”</code> in <code>n()</code> also overrides a global criterion. A vector of per-weight decay penalties remains fixed under global criteria.</p>
+<p>Selection requires a scalar <code>decay</code>, which supplies the starting value. By default, each update compares the current decay with values ten times smaller and larger, bounded by <span class="math inline">\(10^{-8}\)</span> and <span class="math inline">\(10^8\)</span>; zero decay starts the positive grid at 0.1. Alternatively, <code>decay.grid</code> supplies finite nonnegative candidates. The current decay is always included. All candidates start from the same network weights, and the selected decay and fitted weights are carried to the next update.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

@@ -341,7 +341,7 @@ forward_backward_step <- function(selected, notselected, xterms, sterms, strateg
       evaluated <- if(cores < 2L) {
         lapply(modelterms, fitfun)
       } else {
-        parallel::mclapply(modelterms, fitfun, mc.cores = cores)
+        future.apply::future_lapply(modelterms, fitfun, future.seed = TRUE)
       }
       remember(evaluated)
 
@@ -450,7 +450,7 @@ replace_step <- function(selected, notselected, xterms, sterms, stats_save,
       evaluated <- if(cores < 2L) {
         lapply(seq_len(nrow(pairs)), fitfun)
       } else {
-        parallel::mclapply(seq_len(nrow(pairs)), fitfun, mc.cores = cores)
+        future.apply::future_lapply(seq_len(nrow(pairs)), fitfun, future.seed = TRUE)
       }
       remember(evaluated)
 
@@ -642,6 +642,15 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
   K <- if(is.null(control$K)) 2 else control$K
   if(is.null(control$cores))
     control$cores <- 1L
+  if(control$cores > 1L) {
+    if(!requireNamespace("future", quietly = TRUE) ||
+        !requireNamespace("future.apply", quietly = TRUE))
+      stop("cores > 1 requires the future and future.apply packages.")
+    ## Preserve the cores interface without changing the caller's future plan.
+    old_plan <- future::plan("list")
+    on.exit(future::plan(old_plan), add = TRUE)
+    future::plan(future::multisession, workers = control$cores)
+  }
 
   ## A term can comprise multiple design-matrix columns, e.g., a factor or
   ## an interaction involving a factor.
@@ -692,7 +701,7 @@ stepwise <- function(x, y, specials, family, offsets, weights, start, xterms, st
     value
   }
 
-  ## Forked workers update private copies of the cache, so merge their compact
+  ## Parallel workers update private copies of the cache, so merge their compact
   ## results into the parent cache after every candidate batch.
   remember_candidates <- function(values) {
     for(value in values) {

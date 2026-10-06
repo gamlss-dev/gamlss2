@@ -16,7 +16,7 @@
 \usage{
 ## k-fold cross-validation
 cv_gamlss2(..., data, folds = 5,
-  metric = log_pdf_metric, parallel = FALSE, simplify = TRUE)
+  metric = log_pdf_metric, simplify = TRUE, cores = 1L)
 
 ## log-pdf for each observation
 log_pdf_metric(model, data)
@@ -39,10 +39,14 @@ mse_metric(model, data)
     Defaults to 5.}
   \item{metric}{a function of the form \code{metric(model, data)} returning
     a score for the given fitted model and test data. Defaults to \code{log_pdf_metric}.}
-  \item{parallel}{logical. If \code{TRUE}, computation is carried
-    out in parallel using \pkg{future.apply}.}
   \item{simplify}{logical. If \code{TRUE}, results are returned in
     a simplified vector or data frame depending on the metric output.}
+  \item{cores}{Positive integer, number of workers for evaluating folds.
+    The default \code{cores = 1L} runs sequentially; larger values use
+    \code{\link[future.apply]{future_lapply}}
+    with a temporary \code{\link[future]{multisession}} plan. The caller's full
+    future plan is restored on exit, including on errors. Parallel evaluation
+    requires the suggested packages \pkg{future} and \pkg{future.apply}.}
   \item{model}{a fitted \code{gamlss2} model.}
 }
 
@@ -58,6 +62,10 @@ but other metrics can be used, such as randomized quantile residuals
 The function returns either a list of fold-wise results or, if
 \code{simplify = TRUE}, a named vector or data frame aligned with the original
 observations.
+
+Set the random seed before calling \code{cv_gamlss2()} to reproduce randomly
+generated folds. Parallel evaluation also uses reproducible random-number
+streams for stochastic fits or metrics.
 }
 
 \value{
@@ -97,5 +105,12 @@ cv2 <- cv_gamlss2(
 ## evaluate log-likelihood
 sum(cv1$score)
 sum(cv2$score)
+
+## evaluate folds with two workers, reusing the same fold assignments
+cv_parallel <- cv_gamlss2(
+  Ozone ~ s(Temp), data = air, family = GA,
+  folds = cv1$fold, maxit = 100, cores = 2L
+)
+sum(cv_parallel$score)
 }}
 

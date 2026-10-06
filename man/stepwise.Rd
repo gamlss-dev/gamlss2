@@ -34,8 +34,12 @@ stepwise(x, y, specials, family, offsets,
   \item{strategy}{Character vector of selection strategies; see the details.}
   \item{keeporder}{Logical. Update distributional parameters sequentially
     rather than search across all parameters? See the details for the order.}
-  \item{cores}{Integer. If \code{cores > 1L}, \code{\link[parallel]{mclapply}} is used
-    to speed up computations within the selection steps.}
+  \item{cores}{Integer, number of workers for candidate fits. The default
+    \code{cores = 1L} runs sequentially. Larger values use
+    \code{\link[future.apply]{future_lapply}} with a temporary
+    \code{\link[future]{multisession}} plan, including on Windows. The caller's
+    future plan is restored on exit. This requires the suggested packages
+    \pkg{future} and \pkg{future.apply}.}
   \item{x, y, specials, family, offsets, weights, start, xterms, sterms}{
     Model components and starting values passed to the optimizer, as documented
     for \code{\link{RS}}.}

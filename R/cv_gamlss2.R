@@ -1,7 +1,10 @@
 cv_gamlss2 <- function(..., data, folds = 5,
-  metric = log_pdf_metric, parallel = FALSE,
-  simplify = TRUE)
+  metric = log_pdf_metric, simplify = TRUE, cores = 1L)
 {
+  if(!is.numeric(cores) || length(cores) != 1L || !is.finite(cores) ||
+      cores < 1 || cores != floor(cores))
+    stop("argument cores must be a positive integer!")
+
   n <- nrow(data)
 
   if(is.vector(folds)) {
@@ -25,15 +28,17 @@ cv_gamlss2 <- function(..., data, folds = 5,
     list("score" = metric(model = m, data = nd), "id" = folds[[i]])
   }
 
-  applier <- if(isTRUE(parallel)) {
-    if(!requireNamespace("future.apply", quietly = TRUE))
-      stop("parallel = TRUE requires the future.apply package.")
-    future.apply::future_lapply
+  res <- if(cores > 1L) {
+    if(!requireNamespace("future", quietly = TRUE) ||
+        !requireNamespace("future.apply", quietly = TRUE))
+      stop("cores > 1 requires the future and future.apply packages.")
+    old_plan <- future::plan("list")
+    on.exit(future::plan(old_plan), add = TRUE)
+    future::plan(future::multisession, workers = cores)
+    future.apply::future_lapply(seq_along(folds), runner, future.seed = TRUE)
   } else {
-    lapply
+    lapply(seq_along(folds), runner)
   }
-
-  res <- applier(seq_along(folds), runner)
 
   if(simplify) {
     if(is.numeric(res[[1L]]$score) || is.vector(res[[1L]]$score)) {

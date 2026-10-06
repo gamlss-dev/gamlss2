@@ -22,8 +22,6 @@ importFrom("graphics", "abline", "axis", "barplot", "box", "grid", "hist",
   "lines", "par", "polygon", "rect", "image", "text", "rug", "matplot",
   "points", "legend", "mtext", "strheight")
 
-importFrom("parallel", "mclapply")
-
 importFrom("mvtnorm", "dmvnorm", "rmvnorm")
 
 importFrom("distributions3", "variance", "pdf", "cdf", "skewness",

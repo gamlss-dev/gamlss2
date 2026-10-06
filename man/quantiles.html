@@ -700,7 +700,7 @@ Numeric vector of probabilities with values in [0,1].
 <code id="variable">variable</code>
 </td>
 <td>
-Logical, integer, or character. Should quantiles be plotted against a covariate? If <code>TRUE</code>, the single model covariate is used. Alternatively, a covariate can be selected by position or name. This option is only available for single-covariate models.
+Covariate selector for single-covariate models: <code>TRUE</code> uses the sole covariate; an integer or character selects by column position or name. <code>NULL</code> (default) or <code>FALSE</code> computes quantiles at the supplied or fitted observations without a covariate grid.
 </td>
 </tr>
 <tr>
@@ -747,12 +747,12 @@ Arguments such as <code>col</code>, <code>legend = TRUE/FALSE</code>. See the ex
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>The function applies the predict method to determine the parameters of the response distribution. It then computes the quantiles as specified in the argument <code>probs</code>.</p>
-<p>With <code>plot = TRUE</code> and <code>variable = NULL</code>, observations are ordered once by their fitted median. The same ordering is applied to the observed responses and all fitted quantiles, so values at each position refer to the same observation. If <code>newdata</code> does not contain the response, only the fitted quantile curves are shown.</p>
+<p>Quantiles are computed from the predicted response distributions.</p>
+<p>With <code>plot = TRUE</code> and no selected <code>variable</code>, the x-axis shows observation ranks as percentages, ordered by fitted median; the y-axis is on the response scale. Lines show the fitted conditional quantiles at <code>probs</code>, and points show observed responses when <code>data = TRUE</code>. The same ordering is used for the responses and all quantiles, so each position refers to one observation. If <code>newdata</code> does not contain the response, only the fitted quantile curves are shown.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>The estimated quantiles. For multiple probabilities, a data frame is returned. For a single probability and <code>variable = NULL</code>, the result is simplified to a numeric vector.</p>
+<p>A data frame with one row per prediction and one column per probability. With <code>variable = NULL</code>, a single probability returns a numeric vector. When a covariate is selected, it is included as the first column. With <code>plot = TRUE</code>, the result is returned invisibly.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

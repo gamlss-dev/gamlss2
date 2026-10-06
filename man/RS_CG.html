@@ -782,9 +782,6 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>autostep</code>: Logical, should an update that decreases its objective be halved automatically? Default is <code>TRUE</code>. The objective is the likelihood for unpenalized updates and the penalized likelihood when smoothing parameters are fixed. Smoothing-parameter changes use the specified smoothing criterion, the default local REML update, or the term-specific local ML update.</p>
 </li>
 <li>
-<p><code>sigma.tol</code>: Numeric between zero and one. If a model contains a smooth for <code>sigma</code>, warn when its smallest fitted value divided by its median is less than <code>sigma.tol</code>. The default is <code>0.001</code>; use zero or <code>FALSE</code> to disable the diagnostic. This diagnostic does not constrain the fitted values.</p>
-</li>
-<li>
 <p><code>CG</code>: Integer, the outer iteration in which to start the CG correction. Thus, <code>CG = 5</code> uses RS for the first four outer iterations and CG in the fifth. <code>CG = 0</code> starts with CG immediately; the default is <code>CG = Inf</code>.</p>
 </li>
 <li>

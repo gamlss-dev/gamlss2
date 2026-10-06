@@ -90,8 +90,6 @@ d <- subset(SpirometryUS, gender == "female")
 
 ## the default sampler is deterministic; set
 ## a seed only for sampler = "random"
-set.seed(1328)
-
 ## formula for all 4 parameters
 f <- fev1 ~ elm(age,k=100,a="tanh") | . | . | .
 

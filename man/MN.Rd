@@ -39,7 +39,8 @@ MN(k)
 \examples{\dontrun{data("marital.nz", package = "VGAM")
 
 ## multinomial model
-m <- gamlss2(mstatus ~ s(age) | . | ., data = marital.nz, family = MN(4))
+m <- gamlss2(mstatus ~ s(age) | . | ., data = marital.nz,
+  family = MN(4), maxit = 100)
 
 ## plot effects
 plot(m)

@@ -14,19 +14,15 @@
 }
 
 \details{
-  The primary purpose of this package is to facilitate the creation of advanced infrastructures
-  designed to enhance the Generalized Additive Models for Location Scale and Shape (GAMLSS,
-  Rigby and Stasinopoulos 2005) modeling framework. Notably, the \pkg{gamlss2} package represents a
-  significant overhaul of its predecessor, \pkg{gamlss}, with a key emphasis on improving estimation
-  speed and incorporating more adaptable infrastructures. These enhancements enable the seamless
-  integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
-  regression trees, and forests, fostering a more versatile and powerful modeling environment.
-
-  Moreover, the package expands its compatibility by supporting all model terms from the base
-  R \pkg{mgcv} package. Additionally, the \pkg{gamlss2} package introduces the capability to
-  accommodate more than four parameter families. Essentially, this means that users can now
-  specify any type of model using these new infrastructures, making the package highly
-  flexible and accommodating to a wide range of modeling requirements.
+  \pkg{gamlss2} fits an additive predictor for each parameter of a response
+  distribution, using linear terms, smooth terms from \pkg{mgcv}, and
+  user-defined model terms (see \code{\link{specials}}). Response distributions
+  are specified through \code{\link{gamlss2.family}} objects,
+  including families with more than four parameters. Fitting algorithms can
+  be selected through \code{\link{gamlss2_control}}. Fitted models provide
+  methods for summaries, prediction, plotting, and diagnostics. Predictions
+  can be returned as \pkg{distributions3} objects for evaluating fitted
+  distributions (see \code{\link{predict.gamlss2}}).
 
   \packageIndices{gamlss2}
 }

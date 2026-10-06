@@ -773,13 +773,13 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>eps</code>: Numeric vector of length 1 to 3, the stopping criterion for the global, per-parameter, and CG correction loops. The CG tolerance defaults to the per-parameter tolerance.</p>
 </li>
 <li>
-<p><code>maxit</code>: Integer vector of length 1 to 3, the maximum number of global parameter sweeps and per-parameter IRLS/backfitting iterations. Default is <code>maxit = c(20, 50)</code>. For the CG algorithm, an optional third element limits the internal correction sweeps and defaults to the second element. Plain RS always performs one parameter sweep before checking global convergence; a third element is therefore ignored by RS.</p>
+<p><code>maxit</code>: Integer vector of length 1 to 3, the maximum number of global parameter sweeps and per-parameter IRLS/backfitting iterations. Default is <code>maxit = c(20, 50)</code>. For the CG algorithm, an optional third element limits the internal correction sweeps and defaults to the second element. RS checks global convergence after each parameter sweep and ignores the third element.</p>
 </li>
 <li>
-<p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. After the first update and with fixed smoothing parameters, the step is applied to a complete parameter update in RS and to a complete correction sweep in CG. A smoothing-parameter change and its coefficients are instead accepted or rejected as one state. If <code>step</code> is set smaller than 1, it might be appropriate to lower the stopping criterion <code>eps</code>, too.</p>
+<p><code>step</code>: Numeric, the step length control parameter. Default is <code>step = 1</code>. With fixed smoothing parameters, it scales complete RS parameter updates or CG correction sweeps after the first update. Smoothing-parameter changes and their coefficients are accepted or rejected together. Smaller steps may require a smaller <code>eps</code>.</p>
 </li>
 <li>
-<p><code>autostep</code>: Logical, should an update that decreases its objective be halved automatically? Default is <code>TRUE</code>. The objective is the likelihood for unpenalized updates and the penalized likelihood when smoothing parameters are fixed. Smoothing-parameter changes use the specified smoothing criterion, the default local REML update, or the term-specific local ML update.</p>
+<p><code>autostep</code>: Logical, should an update that decreases its objective be halved automatically? Default is <code>TRUE</code>. Updates use the likelihood, penalized likelihood, or smoothing-selection criterion as appropriate; see <code>gamlss2_smoothing</code>.</p>
 </li>
 <li>
 <p><code>CG</code>: Integer, the outer iteration in which to start the CG correction. Thus, <code>CG = 5</code> uses RS for the first four outer iterations and CG in the fifth. <code>CG = 0</code> starts with CG immediately; the default is <code>CG = Inf</code>.</p>
@@ -788,7 +788,7 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>trace</code>: Logical, should information be printed while the algorithm is running?</p>
 </li>
 <li>
-<p><code>rs.cache</code>: Logical, reuse unchanged generated family evaluations and weighted matrix calculations within a fit? Default is <code>TRUE</code>. Reuse requires identical inputs and preserves the original arithmetic. User replacements of family callbacks are not memoized. Linear QR reuse is restricted to full-rank fits with strictly positive weights. Set <code>FALSE</code> to disable these caches, for example for comparisons.</p>
+<p><code>rs.cache</code>: Logical, reuse generated family evaluations and weighted matrix calculations with identical inputs within a fit? Default is <code>TRUE</code>; set <code>FALSE</code> to disable caching for comparisons.</p>
 </li>
 <li>
 <p><code>flush</code>: Logical, use <code>flush.console</code> for displaying the current output in the console.</p>
@@ -797,8 +797,8 @@ Further control arguments as specified within the call of <code>gamlss2</code>. 
 <p><code>ridge</code>: Logical, should automatic ridge penalization be applied only to linear effects, without penalizing the intercept? For each parameter of the distribution the optimum ridge penalty is estimated using an information criterion. Possible options are <code>criterion = c(“aic”, “aicc”, “bic”, “gaic”, “gcv”)</code>. The default is <code>criterion = “gaic”</code> and argument <code>K = 2</code>, which can be set in <code>gamlss2_control</code>.</p>
 </li>
 </ul>
-<p>For smoothing parameter selection methods, numerical solver details, and examples, see <code>gamlss2_smoothing</code>.</p>
-<p>To facilitate the development of new algorithms for <span class="pkg">gamlss2</span>, users can exchange them using the <code>optimizer</code> argument in <code>gamlss2_control</code>. Users developing new model fitting functions are advised to use these functions as templates and pass them to <code>gamlss2_control</code>. Alternatively, users can replace the optimizer function by adding a named list element, <code>“optimizer”</code>, to the family object. For instructions on setting up new families in <span class="pkg">gamlss2</span>, see <code>gamlss2.family</code>.</p>
+<p>For smoothing parameter selection, numerical solvers, and examples, see <code>gamlss2_smoothing</code>.</p>
+<p>Use these functions as templates for custom fitting algorithms, supplied via <code>optimizer</code> in <code>gamlss2_control</code> or the family object’s <code>“optimizer”</code> element. For new families, see <code>gamlss2.family</code>.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>

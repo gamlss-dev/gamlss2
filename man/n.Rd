@@ -58,9 +58,9 @@ n(formula, ...)
   The fitted effect is centered by subtracting
   its mean before it is returned to the additive predictor.
 
-  The effective degrees of freedom (\code{edf}) are approximated by the
-  number of fitted neural network coefficients returned by
-  \code{\link[nnet]{nnet}}.
+  The effective degrees of freedom (\code{edf}) use a Gauss--Newton
+  approximation with the current working weights and \code{decay} penalty.
+  The calculation accounts for shrinkage and centering of the fitted effect.
 }
 
 \value{

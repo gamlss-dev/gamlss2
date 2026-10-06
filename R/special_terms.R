@@ -269,7 +269,8 @@ special_fit.n <- function(x, z, w, control, ...)
   rval$fitted.values <- rval$fitted.values - rval$shift
 
   ## Degrees of freedom.
-  rval$edf <- length(coef(rval$model))
+  ## rval$edf <- length(coef(rval$model))
+  rval$edf <- get_nnet_edf(rval$model, x$data, w)
 
   ## Possible scaling.
   rval$scalex <- x$scalex
@@ -278,6 +279,120 @@ special_fit.n <- function(x, z, w, control, ...)
   class(rval) <- "n.fitted"
 
   return(rval)
+}
+
+## Centered Gauss-Newton EDF for the scalar, linear-output network fitted by
+## special_fit.n(). data must contain the inputs as used in fitting (scaled
+## when n(scale = TRUE)); w contains the current working weights.
+get_nnet_edf <- function(object, data, w = rep(1, nrow(data)))
+{
+  stopifnot(inherits(object, "nnet"), object$n[3L] == 1L,
+    object$n[2L] > 0L, object$nsunits == 1L + sum(object$n[1:2]),
+    !isTRUE(object$entropy), !isTRUE(object$softmax))
+
+  ## Build the design only once, with the fitted factor contrasts. As in
+  ## predict.nnet(), the network itself supplies its bias weights.
+  if(inherits(object, "nnet.formula")) {
+    Terms <- delete.response(object$terms)
+    mf <- model.frame(Terms, data, na.action = na.pass, xlev = object$xlevels)
+    X <- model.matrix(Terms, mf, contrasts.arg = object$contrasts)
+    X <- X[, colnames(X) != "(Intercept)", drop = FALSE]
+  } else {
+    X <- as.matrix(data)
+  }
+  nobs <- nrow(X)
+  p <- ncol(X)
+  size <- object$n[2L]
+  nw <- length(object$wts)
+  nh <- (p + 1L) * size
+  decay <- rep_len(object$decay, nw)
+  stopifnot(nobs > 0L, p == object$n[1L], nw == nh + size + 1L,
+    identical(as.numeric(object$conn),
+      as.numeric(c(rep(c(0L, seq_len(p)), size), 0L, p + seq_len(size)))),
+    length(w) == nobs, all(is.finite(w)), all(w >= 0),
+    all(is.finite(X)), all(is.finite(object$wts)),
+    length(object$decay) %in% c(1L, nw),
+    all(is.finite(decay)), all(decay >= 0))
+  active <- w > 0
+  if(!any(active))
+    return(0)
+
+  ## Analytic Jacobian, in nnet's destination-unit weight order. Match its
+  ## sigmoid saturation at +/-15, including zero derivatives outside it.
+  X <- cbind(1, X)
+  hidden <- X %*% matrix(object$wts[seq_len(nh)], nrow = p + 1L)
+  H <- plogis(hidden)
+  H[hidden < -15] <- 0
+  H[hidden > 15] <- 1
+  slopes <- sweep(H * (1 - H), 2L,
+    object$wts[nh + 1L + seq_len(size)], "*")
+  J <- matrix(0, nrow = nobs, ncol = nw)
+  for(k in seq_len(size)) {
+    ii <- (k - 1L) * (p + 1L) + seq_len(p + 1L)
+    J[, ii] <- X * slopes[, k]
+  }
+  J[, nh + 1L] <- 1
+  J[, nh + 1L + seq_len(size)] <- H
+
+  ## Centering is unweighted, including observations with zero working
+  ## weight. trace(C S) = trace(S) - colMeans(J)' A+ J' w, with
+  ## A = J' W J + diag(decay); the SSE's common factor 2 cancels.
+  u <- colMeans(J)
+  sw <- sqrt(w[active])
+  B <- J[active, , drop = FALSE] * sw
+  m <- nrow(B)
+
+  if(m < nw && all(decay > 0)) {
+    ## Woodbury: factor an m x m system rather than an nw x nw system.
+    sd <- sqrt(decay)
+    B <- sweep(B, 2L, sd, "/")
+    G <- tcrossprod(B)
+    A <- G
+    diag(A) <- diag(A) + 1
+    R <- tryCatch(chol(A), error = function(e) NULL)
+    if(!is.null(R)) {
+      Ai <- chol2inv(R)
+      correction <- sum(drop(B %*% (u / sd)) * drop(Ai %*% sw))
+      return(as.numeric(sum(G * Ai) - correction))
+    }
+    ## If the scaled system is numerically singular, use the unscaled
+    ## penalized system below with a pseudoinverse.
+    B <- J[active, , drop = FALSE] * sw
+  } else if(m < nw && all(decay == 0)) {
+    ## The unpenalized pseudoinverse also admits a smaller system.
+    eig <- eigen(tcrossprod(B), symmetric = TRUE)
+    keep <- eig$values > nw * .Machine$double.eps * max(abs(eig$values))
+    if(!any(keep))
+      return(0)
+    V <- eig$vectors[, keep, drop = FALSE]
+    correction <- sum(drop(crossprod(V, B %*% u)) *
+      drop(crossprod(V, sw)) / eig$values[keep])
+    return(as.numeric(sum(keep) - correction))
+  }
+
+  G <- crossprod(B)
+  A <- G
+  diag(A) <- diag(A) + decay
+  v <- drop(crossprod(B, sw))
+  if(all(decay > 0)) {
+    R <- tryCatch(chol(A), error = function(e) NULL)
+    if(!is.null(R)) {
+      Ai <- chol2inv(R)
+      return(as.numeric(sum(G * Ai) - sum(u * drop(Ai %*% v))))
+    }
+  }
+
+  ## Zero decay, redundant weights or a failed Cholesky factorization.
+  eig <- eigen(A, symmetric = TRUE)
+  keep <- eig$values > nw * .Machine$double.eps * max(abs(eig$values))
+  if(!any(keep))
+    return(0)
+  V <- eig$vectors[, keep, drop = FALSE]
+  JV <- B %*% V
+  raw <- sum(colSums(JV^2) / eig$values[keep])
+  correction <- sum(drop(crossprod(V, u)) *
+    drop(crossprod(V, v)) / eig$values[keep])
+  return(as.numeric(raw - correction))
 }
 
 ## Finally, the predict method.

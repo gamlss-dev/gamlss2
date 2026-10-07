@@ -178,6 +178,7 @@ results.gamlss2 <- function(x, data = NULL, ...)
               }
               lab <- paste0(j, ".", lab)
               attr(nd, "label") <- lab
+              attr(nd, "variables") <- x$specials[[i]]$term
               res$effects[[lab]] <- nd
             }
           }

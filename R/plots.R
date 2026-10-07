@@ -114,7 +114,8 @@ plot.gamlss2 <- function(x, parameter = NULL,
       for(j in en) {
         p <- strsplit(j, ".", fixed = TRUE)[[1L]][1L]
         if(!is.factor(x$results$effects[[j]][[1L]])) {
-          xn <- colnames(x$results$effects[[j]])
+          xn <- attr(x$results$effects[[j]], "variables")
+          if(is.null(xn)) xn <- colnames(x$results$effects[[j]])
           xn <- xn[!(xn %in% c("lower", "upper", "fit"))]
           args <- list(...)
           if(is.null(args$ylim))

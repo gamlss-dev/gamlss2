@@ -95,6 +95,14 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
           null.space.penalty = select)
 
         for(i in seq_along(sj)) {
+          ## Some smooths (notably t2) use different constraints for fitting
+          ## and prediction. Store the prediction parameterization throughout
+          ## so PredictMat(), coefficients, and penalties share one basis.
+          if(!is.null(sj[[i]]$Xp)) {
+            sj[[i]]$X <- sj[[i]]$Xp
+            sj[[i]]$S <- sj[[i]]$Sp
+            sj[[i]]$Xp <- sj[[i]]$Sp <- NULL
+          }
           sj[[i]]$orig.label <- j
           if(binj) {
             sj[[i]]$binning <- bn
@@ -648,6 +656,14 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   }
   lambdas <- rep(lambdas, length.out = length(x$S))
 
+  fixed.sp <- rep(FALSE, length(x$S))
+  if(!is.null(x$sp) && length(x$S)) {
+    if(length(x$sp) != length(x$S) || any(!is.finite(x$sp)))
+      stop("invalid fixed smoothing parameter specification")
+    fixed.sp <- x$sp >= 0
+    lambdas[fixed.sp] <- x$sp[fixed.sp]
+  }
+
   ## Penalty for AIC.
   K <- if(is.null(control$K)) 2 else control$K
 
@@ -656,7 +672,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
     !isTRUE(x$fixed) && is.null(x$sp) && any(x$S[[1L]] != 0) &&
     !(length(x$rank) == 1L && x$rank == 0)
   localREML <- control$criterion == "reml" && length(x$S) > 0L &&
-    !isTRUE(x$fixed) && is.null(x$sp) &&
+    !isTRUE(x$fixed) && !all(fixed.sp) &&
     any(vapply(x$S, function(S) any(S != 0), logical(1L)))
   if(!localML) {
     if(control$criterion == "ml")
@@ -864,7 +880,12 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
   } else if(localREML) {
     ## The range of the total penalty is unchanged for positive lambdas.
     ## Cache its basis and update all smoothing parameters together.
-    reml.rank <- if(isTRUE(control$termselect)) {
+    reml.S <- x$S
+    inactive <- which(fixed.sp & x$sp == 0)
+    for(k in inactive) reml.S[[k]][] <- 0
+    reml.rank <- if(length(inactive)) {
+      NULL
+    } else if(isTRUE(control$termselect)) {
       ncol(x$X)
     } else if(length(x$null.space.dim) == 1L) {
       ncol(x$X) - x$null.space.dim
@@ -872,14 +893,14 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       NULL
     }
     cached <- if(is.environment(cache)) cache$reml.penalty else NULL
-    if(!is.null(cached) && identical(cached$S, x$S,
+    if(!is.null(cached) && identical(cached$S, reml.S,
         num.eq = FALSE, single.NA = FALSE) &&
         identical(cached$rank, reml.rank)) {
       penalty.basis <- cached$decomposition
     } else {
-      penalty.basis <- smooth.construct_reml(x$S, reml.rank)
+      penalty.basis <- smooth.construct_reml(reml.S, reml.rank)
       if(is.environment(cache))
-        cache$reml.penalty <- list(S = x$S, rank = reml.rank,
+        cache$reml.penalty <- list(S = reml.S, rank = reml.rank,
           decomposition = penalty.basis)
     }
     if(is.null(penalty.basis))
@@ -910,7 +931,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
 
     native.penalties <- all(vapply(c(x$S, penalty.basis$penalties),
       function(S) is.matrix(S) && is.double(S), logical(1L)))
-    if(!identical(control$native.wfit, FALSE) && is.double(x$X) &&
+    if(!any(fixed.sp) && !identical(control$native.wfit, FALSE) && is.double(x$X) &&
         is.double(XWX) && native.penalties) {
       rval <- try(.Call(C_calc_smooth_reml, x$X, as.numeric(z), as.numeric(w),
         XWX, as.numeric(XWz), x$S, as.numeric(lambdas),
@@ -943,7 +964,7 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       quadratic <- vapply(x$S, function(S)
         drop(crossprod(b, S %*% b)), numeric(1L))
       lambdas.old <- lambdas
-      for(k in seq_along(lambdas)) {
+      for(k in which(!fixed.sp)) {
         q <- quadratic[k]
         a <- numerator[k]
         if(q < 0 && q > -sqrt(.Machine$double.eps)) q <- 0
@@ -958,7 +979,9 @@ smooth.construct_wfit <- function(x, z, w, y, eta, j, family, control, transfer,
       }
       lambdas[!is.finite(lambdas)] <- 1e+07
       lambdas <- pmin(1e+07, pmax(1e-07, lambdas))
-      if(max(abs(log(lambdas) - log(lambdas.old))) < 1e-07)
+      if(any(fixed.sp)) lambdas[fixed.sp] <- x$sp[fixed.sp]
+      if(max(abs(log(lambdas[!fixed.sp]) -
+          log(lambdas.old[!fixed.sp]))) < 1e-07)
         break
     }
 

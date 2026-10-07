@@ -625,10 +625,10 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     stop("jr.inner must be RS or CG.")
   for(j in names(sterms)) for(k in sterms[[j]]) {
     sk <- specials[[k]]
-    if(!inherits(sk, "mgcv.smooth") || is.null(sk$X) ||
-        is.null(sk$S))
+    if(!inherits(sk, "mgcv.smooth") || is.null(sk$X))
       stop("JR requires coefficient-linear mgcv smooths with quadratic penalties.")
-    if(isTRUE(sk$fixed) || !is.null(sk$sp)) next
+    if(isTRUE(sk$fixed) || !length(sk$S) ||
+        (!is.null(sk$sp) && all(sk$sp >= 0))) next
     criterion <- sk$control$criterion
     if(is.null(criterion)) criterion <- sk$control$method
     if(is.null(criterion)) criterion <- control$criterion
@@ -655,13 +655,17 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     nsp <- nfound <- 0L
     for(j in names(sterms)) for(k in sterms[[j]]) {
       sk <- specials[[k]]
-      if(isTRUE(sk$fixed) || !is.null(sk$sp)) next
-      tags <- paste0(j, ".s.", k, ".lambda", seq_along(sk$S))
+      if(isTRUE(sk$fixed) || !length(sk$S) ||
+        (!is.null(sk$sp) && all(sk$sp >= 0))) next
+      selected <- if(is.null(sk$sp)) seq_along(sk$S) else which(sk$sp < 0)
+      tags <- paste0(j, ".s.", k, ".lambda", selected)
       nsp <- nsp + length(tags)
       if(all(tags %in% names(supplied)) &&
           all(is.finite(supplied[tags])) &&
           all(supplied[tags] > 0)) {
-        sp0[[j]][[k]] <- as.numeric(supplied[tags])
+        lambda <- if(is.null(sk$sp)) numeric(length(sk$S)) else sk$sp
+        lambda[selected] <- as.numeric(supplied[tags])
+        sp0[[j]][[k]] <- lambda
         nfound <- nfound + length(tags)
       }
     }
@@ -726,6 +730,8 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
   w <- if(is.null(weights)) rep(1, n) else as.numeric(weights)
   if(length(w) != n || any(!is.finite(w)) || any(w < 0))
     stop("invalid observation weights.")
+  if(!is.null(offsets))
+    offsets <- if(NROW(offsets)) as.data.frame(offsets) else NULL
   index <- X <- off <- setNames(vector("list", length(np)), np)
   for(j in np) {
     index[[j]] <- which(startsWith(names(co), paste0(j, ".")))
@@ -752,7 +758,12 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     Z <- sk$X
     if(nrow(Z) != n && !is.null(sk$binning))
       Z <- Z[sk$binning$match.index, , drop = FALSE]
-    tags <- paste0(j, ".s.", k, ".", seq_len(ncol(Z)))
+    suffix <- names(sf$coefficients)
+    if(is.null(suffix)) suffix <- as.character(seq_len(ncol(Z)))
+    prefix <- paste0(j, ".s.", k, ".")
+    while(any(qualified <- startsWith(suffix, prefix)))
+      suffix[qualified] <- substring(suffix[qualified], nchar(prefix) + 1L)
+    tags <- paste0(prefix, suffix)
     ii <- match(tags, colnames(X[[j]]))
     bi <- match(tags, names(co))
     if(nrow(Z) != n || anyNA(ii) || anyNA(bi) ||
@@ -763,26 +774,34 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
       z <- as.matrix(z)
       0.5 * (z + t(z))
     })
-    lambda <- as.numeric(sf$lambdas)
+    lambda <- if(length(S)) as.numeric(sf$lambdas) else numeric(0L)
+    selected <- if(isTRUE(sk$fixed)) integer(0L) else
+      if(is.null(sk$sp)) seq_along(S) else which(sk$sp < 0)
     if(length(lambda) != length(S) || any(!is.finite(lambda)) ||
-        any(lambda <= 0))
-      stop("JR requires positive fitted smoothing parameters.")
-    rank <- if(length(sk$null.space.dim) == 1L)
+        any(lambda < 0) || any(lambda[selected] <= 0))
+      stop("JR requires positive estimated and nonnegative fixed smoothing parameters.")
+    inactive <- which(lambda == 0)
+    for(i in inactive) S[[i]][] <- 0
+    rank <- if(length(sk$null.space.dim) == 1L && !length(inactive))
       ncol(Z) - sk$null.space.dim else NULL
     basis <- if(length(S)) smooth.construct_reml(S, rank) else NULL
     base.logdet <- if(!is.null(basis) && length(S) == 1L)
       2 * sum(log(diag(chol(basis$penalties[[1L]])))) else NULL
-    fixed <- isTRUE(sk$fixed) || !is.null(sk$sp)
-    ids <- if(fixed) integer(0L) else
-      seq.int(length(rho0) + 1L, length(rho0) + length(S))
+    ids <- if(!length(selected)) integer(0L) else
+      seq.int(length(rho0) + 1L, length(rho0) + length(selected))
     if(length(ids)) {
-      rho0 <- c(rho0, log(lambda))
+      rho0 <- c(rho0, log(lambda[selected]))
       names(rho0)[ids] <- paste0(j, ".s.", k, ".lambda",
-        seq_along(S))
+        selected)
     }
     blocks[[length(blocks) + 1L]] <- list(parameter = j, term = k,
       index = bi, S = S, basis = basis, base.logdet = base.logdet,
-      ids = ids, lambda = lambda)
+      ids = ids, selected = selected, lambda = lambda)
+  }
+  block_lambda <- function(z, rho) {
+    lambda <- z$lambda
+    if(length(z$ids)) lambda[z$selected] <- exp(rho[z$ids])
+    lambda
   }
   if(!length(rho0)) {
     fit0$jr <- list(converged = TRUE, initial = initial, rho = rho0,
@@ -792,24 +811,183 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     return(fit0)
   }
 
+  ## Overlapping smooths can share unpenalized directions. Remove only
+  ## directions invisible to both the likelihood and every penalty, using
+  ## the minimum-norm coefficient representation. Keep the penalized range
+  ## separate so large lambdas do not amplify round-off in the null space.
+  null <- penalized.range <- matrix(0, p, 0L)
+  linear <- unlist(lapply(np, function(j) {
+    b <- fit0$coefficients[[j]]
+    if(!length(b)) return(integer(0L))
+    match(paste0(j, ".p.", names(b)), names(co))
+  }))
+  if(length(linear)) null <- diag(p)[, linear, drop = FALSE]
+  for(k in seq_along(blocks)) {
+    z <- blocks[[k]]
+    S <- matrix(0, length(z$index), length(z$index))
+    for(Si in z$S) if(max(abs(Si)) > 0)
+      S <- S + Si / max(abs(Si))
+    ev <- eigen(S, symmetric = TRUE)
+    rank <- if(is.null(z$basis)) 0L else z$basis$rank
+    keep <- seq_along(ev$values) <= rank
+    U <- matrix(0, p, nrow(S))
+    U[z$index, ] <- ev$vectors
+    blocks[[k]]$range.index <- ncol(penalized.range) + seq_len(rank)
+    penalized.range <- cbind(penalized.range, U[, keep, drop = FALSE])
+    null <- cbind(null, U[, !keep, drop = FALSE])
+  }
+  coefficient.basis <- cbind(penalized.range, null)
+  if(ncol(null)) {
+    Z <- do.call(rbind, lapply(np, function(j) {
+      Zj <- (X[[j]] %*% null[index[[j]], , drop = FALSE]) * sqrt(w)
+      Zj / max(1, norm(Zj, "F"))
+    }))
+    decomposition <- svd(Z, nu = 0L, nv = ncol(null))
+    keep <- rep(FALSE, ncol(null))
+    keep[seq_along(decomposition$d)] <- decomposition$d >
+      sqrt(.Machine$double.eps) * max(decomposition$d)
+    if(!all(keep)) coefficient.basis <- cbind(penalized.range,
+      null %*% decomposition$v[, keep, drop = FALSE])
+  }
+  reduce <- function(K) crossprod(coefficient.basis, K %*% coefficient.basis)
+  expand <- function(b) drop(coefficient.basis %*% b)
+  coordinates <- function(beta) drop(crossprod(coefficient.basis, beta))
+  beta0 <- expand(coordinates(beta0))
+  penalized <- seq_len(ncol(penalized.range))
+  for(k in seq_along(blocks)) {
+    z <- blocks[[k]]
+    U <- coefficient.basis[z$index, penalized, drop = FALSE]
+    blocks[[k]]$reduced.root <- lapply(seq_along(z$S), function(i) {
+      S <- z$S[[i]]
+      ev <- eigen(S, symmetric = TRUE)
+      ranks <- specials[[z$term]]$rank
+      rank <- if(length(ranks) == length(z$S) && any(S != 0)) ranks[i] else
+        sum(ev$values > nrow(S) * .Machine$double.eps * max(1, ev$values))
+      keep <- seq_len(rank)
+      root <- matrix(0, rank, ncol(coefficient.basis))
+      if(rank) root[, penalized] <-
+        sweep(t(ev$vectors[, keep, drop = FALSE]), 1L,
+          sqrt(pmax(0, ev$values[keep])), "*") %*% U
+      root
+    })
+    blocks[[k]]$reduced.S <- lapply(blocks[[k]]$reduced.root, crossprod)
+  }
+  penalty_factor <- function(z, lambda) {
+    roots <- do.call(rbind, lapply(seq_along(z$S), function(i)
+      sqrt(lambda[i]) * z$reduced.root[[i]][, z$range.index, drop = FALSE]))
+    decomposition <- qr(roots, LAPACK = TRUE)
+    list(R = qr.R(decomposition), pivot = decomposition$pivot)
+  }
+  ## Equilibrate information before factoring: location, scale and shape
+  ## coefficients may have very different units and curvature.
+  information_factor <- function(K, stabilize = FALSE, H = NULL, roots = NULL) {
+    scale <- sqrt(pmax(abs(diag(K)), .Machine$double.eps))
+    A <- K / outer(scale, scale)
+    R <- NULL
+    if(!is.null(H) && !is.null(roots)) {
+      Rh <- tryCatch(chol(H / outer(scale, scale)), error = function(e) NULL)
+      negative <- NULL
+      if(is.null(Rh)) {
+        hs <- sqrt(pmax(abs(diag(H)), .Machine$double.eps))
+        ev <- eigen(H / outer(hs, hs), symmetric = TRUE)
+        positive <- ev$values > 0
+        Rh <- sweep(t(ev$vectors[, positive, drop = FALSE]), 1L,
+          sqrt(ev$values[positive]), "*")
+        Rh <- sweep(Rh, 2L, hs / scale, "*")
+        negative <- sweep(t(ev$vectors[, !positive, drop = FALSE]), 1L,
+          sqrt(pmax(0, -ev$values[!positive])), "*")
+        negative <- sweep(negative, 2L, hs / scale, "*")
+      }
+      if(!is.null(Rh)) {
+        augmented <- rbind(Rh, sweep(roots, 2L, scale, "/"))
+        decomposition <- qr(augmented, tol = 0)
+        if(identical(decomposition$pivot, seq_len(ncol(K)))) {
+          R <- qr.R(decomposition)
+          R <- R * ifelse(diag(R) < 0, -1, 1)
+          ## Observed information can be indefinite before adding penalties.
+          ## Downdate its negative part after the stable augmented QR solve.
+          if(!is.null(negative)) for(i in seq_len(nrow(negative))) {
+            u <- negative[i, ]
+            for(k in seq_len(ncol(R))) {
+              square <- R[k, k]^2 - u[k]^2
+              if(!is.finite(square) || square <= 0) { R <- NULL; break }
+              r <- sqrt(square)
+              c <- r / R[k, k]
+              s <- u[k] / R[k, k]
+              R[k, k] <- r
+              if(k < ncol(R)) {
+                ii <- (k + 1L):ncol(R)
+                R[k, ii] <- (R[k, ii] - s * u[ii]) / c
+                u[ii] <- c * u[ii] - s * R[k, ii]
+              }
+            }
+            if(is.null(R)) break
+          }
+        }
+      }
+    }
+    if(is.null(R)) R <- tryCatch(chol(A), error = function(e) NULL)
+    if(is.null(R) && stabilize && all(is.finite(A))) {
+      shift <- max(1e-06, -min(eigen(A, symmetric = TRUE,
+        only.values = TRUE)$values) * 1.1)
+      R <- tryCatch(chol(A + diag(shift, nrow(A))), error = function(e) NULL)
+    }
+    if(is.null(R)) NULL else sweep(R, 2L, scale, "*")
+  }
+  coefficient.tol <- if(is.null(control$jr.eps)) 1e-08 else control$jr.eps
+  coefficient.maxit <- if(is.null(control$jr.maxit)) 100L else control$jr.maxit
+  if(length(coefficient.tol) != 1L || !is.finite(coefficient.tol) ||
+      coefficient.tol <= 0 || length(coefficient.maxit) != 1L ||
+      !is.finite(coefficient.maxit) || coefficient.maxit < 1 ||
+      coefficient.maxit != as.integer(coefficient.maxit))
+    stop("jr.eps must be positive and jr.maxit must be a positive integer.")
+
   numerical.score <- setNames(!vapply(np, function(j)
     is.function(family$score[[j]]), logical(1L)), np)
+  density <- family$pdf
+  density.source <- "family"
+  standard.power <- kind %in% c("BCPE", "SEP3") && tryCatch(
+    identical(body(family$pdf), body(tF(get(kind,
+      envir = asNamespace("gamlss.dist"))())$pdf)) &&
+      identical(get(".fun", envir = environment(family$pdf), inherits = TRUE),
+        get(paste0("d", kind), envir = asNamespace("gamlss.dist"))),
+    error = function(e) FALSE)
+  local_step <- function(step, eta, j, par = NULL) {
+    ## Power-exponential differences must stay on one side of y = mu:
+    ## crossing its cusp biases the score check and observed curvature.
+    if(kind %in% c("BCPE", "SEP3") && j == "mu") {
+      if(is.null(par)) par <- family$map2par(eta)
+      distance <- if(identical(unname(family$links["mu"]), "log"))
+        abs(log(y / par$mu)) else
+        if(identical(unname(family$links["mu"]), "identity"))
+          abs(y - par$mu) else NULL
+      if(!is.null(distance)) step <- pmin(step,
+        pmax(1e-10 * pmax(1, abs(eta[[j]])), 0.05 * distance))
+    }
+    step
+  }
   linked_score <- function(eta, j, par = NULL) {
     if(!numerical.score[j]) {
       if(is.null(par)) par <- family$map2par(eta)
       return(as.numeric(family$score[[j]](par = par, y = y)))
     }
     step <- 1e-04 * pmax(1, abs(eta[[j]]))
+    step <- local_step(step, eta, j, par)
     upper <- lower <- eta
     upper[[j]] <- eta[[j]] + step
     lower[[j]] <- eta[[j]] - step
-    fu <- family$pdf(par = family$map2par(upper), y = y, log = TRUE)
-    fl <- family$pdf(par = family$map2par(lower), y = y, log = TRUE)
-    as.numeric((fu - fl) / (2 * step))
+    fu <- density(par = family$map2par(upper), y = y, log = TRUE)
+    fl <- density(par = family$map2par(lower), y = y, log = TRUE)
+    coarse <- (fu - fl) / (2 * step)
+    upper[[j]] <- eta[[j]] + step / 2
+    lower[[j]] <- eta[[j]] - step / 2
+    fu <- density(par = family$map2par(upper), y = y, log = TRUE)
+    fl <- density(par = family$map2par(lower), y = y, log = TRUE)
+    as.numeric((4 * (fu - fl) / step - coarse) / 3)
   }
 
   ## Negative log likelihood, linked-scale score and observed information.
-  likelihood <- function(beta, information = TRUE) {
+  likelihood <- function(beta, information = TRUE, local.curvature = TRUE) {
     eta <- lapply(np, function(j)
       drop(X[[j]] %*% beta[index[[j]]]) + off[[j]])
     names(eta) <- np
@@ -841,9 +1019,10 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     } else {
       par <- tryCatch(family$map2par(eta), error = function(e) NULL)
       f <- if(is.null(par)) rep(Inf, n) else tryCatch(
-        -as.numeric(family$pdf(par = par, y = y, log = TRUE)),
+        -as.numeric(density(par = par, y = y, log = TRUE)),
         error = function(e) rep(Inf, n))
       if(length(f) != n) f <- rep(Inf, n)
+      f[w == 0] <- 0
       if(!identical(information, FALSE) && all(is.finite(f))) {
         g <- lapply(np, function(j) tryCatch(
           -linked_score(eta, j, par = par),
@@ -854,13 +1033,22 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
         if(identical(information, TRUE)) {
           h <- lapply(np, function(j) vector("list", length(np)))
           for(b in seq_along(np)) {
-            step <- 1e-03 * pmax(1, abs(eta[[b]]))
+            step <- (if(any(numerical.score) || !local.curvature) 1e-03 else 1e-05) *
+              pmax(1, abs(eta[[b]]))
+            if(local.curvature) step <- local_step(step, eta, np[b], par)
             upper <- lower <- eta
             upper[[b]] <- eta[[b]] + step
             lower[[b]] <- eta[[b]] - step
             pu <- tryCatch(family$map2par(upper),
               error = function(e) NULL)
             pl <- tryCatch(family$map2par(lower),
+              error = function(e) NULL)
+            half.upper <- half.lower <- eta
+            half.upper[[b]] <- eta[[b]] + step / 2
+            half.lower[[b]] <- eta[[b]] - step / 2
+            phu <- tryCatch(family$map2par(half.upper),
+              error = function(e) NULL)
+            phl <- tryCatch(family$map2par(half.lower),
               error = function(e) NULL)
             for(a in seq_len(b)) {
               su <- if(is.null(pu)) rep(NA_real_, n) else tryCatch(
@@ -869,11 +1057,57 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
               sl <- if(is.null(pl)) rep(NA_real_, n) else tryCatch(
                 linked_score(lower, np[a], par = pl),
                 error = function(e) rep(NA_real_, n))
-              h[[a]][[b]] <- if(length(su) == n && length(sl) == n)
-                -(su - sl) / (2 * step) else rep(NA_real_, n)
+              shu <- if(is.null(phu)) rep(NA_real_, n) else tryCatch(
+                linked_score(half.upper, np[a], par = phu),
+                error = function(e) rep(NA_real_, n))
+              shl <- if(is.null(phl)) rep(NA_real_, n) else tryCatch(
+                linked_score(half.lower, np[a], par = phl),
+                error = function(e) rep(NA_real_, n))
+              h[[a]][[b]] <- if(all(lengths(list(su, sl, shu, shl)) == n))
+                -(4 * (shu - shl) / step - (su - sl) / (2 * step)) / 3 else
+                  rep(NA_real_, n)
+            }
+            ## Finite differences lose accuracy close to the location cusp.
+            ## Evaluate this diagonal exactly for the standard densities.
+            if(local.curvature && standard.power && np[b] == "mu" &&
+                unname(family$links["mu"]) %in% c("identity", "log")) {
+              if(kind == "SEP3") {
+                z <- (y - par$mu) / par$sigma
+                a <- ifelse(z < 0, par$nu, 1 / par$nu)
+                hm <- 0.5 * par$tau * (par$tau - 1) * a^par$tau *
+                  abs(z)^(par$tau - 2) / par$sigma^2
+                if(unname(family$links["mu"]) == "log")
+                  hm <- par$mu^2 * hm + g[[b]]
+              } else {
+                v <- log(y / par$mu)
+                z <- v / par$sigma
+                nz <- par$nu != 0
+                z[nz] <- expm1(par$nu[nz] * v[nz]) /
+                  (par$nu[nz] * par$sigma[nz])
+                c <- exp(0.5 * (-2 * log(2) / par$tau +
+                  lgamma(1 / par$tau) - lgamma(3 / par$tau)))
+                dz <- -exp(par$nu * v) / (par$sigma * c)
+                d2z <- -par$nu * dz
+                t <- z / c
+                hm <- 0.5 * par$tau * ((par$tau - 1) *
+                  abs(t)^(par$tau - 2) * dz^2 +
+                  sign(t) * abs(t)^(par$tau - 1) * d2z)
+                if(unname(family$links["mu"]) == "identity")
+                  hm <- hm / par$mu^2 - g[[b]] / par$mu
+              }
+              h[[b]][[b]] <- hm
             }
           }
         }
+      }
+    }
+    zero <- which(w == 0)
+    if(length(zero)) {
+      f[zero] <- 0
+      if(!identical(information, FALSE) && all(is.finite(f))) {
+        g <- lapply(g, function(z) { z[zero] <- 0; z })
+        if(identical(information, TRUE)) h <- lapply(h, function(ha)
+          lapply(ha, function(z) { if(length(z)) z[zero] <- 0; z }))
       }
     }
     value <- sum(w * f)
@@ -910,6 +1144,53 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
   }, error = function(e) NA_real_)
   if(!is.finite(check))
     stop("JR requires a finite family log likelihood at the initial fit.")
+  ## dBCT subtracts large log-gamma values for large tau. Their round-off
+  ## contaminates second differences even well below its BCCG switch.
+  ## Use the equivalent stable Student-t density for the standard wrapper,
+  ## after checking equality also at perturbed predictors. Preserve the
+  ## documented large-tau switch and never replace a custom PDF callback.
+  standard.bct <- identical(kind, "BCT") && tryCatch(
+    identical(body(family$pdf), body(tF(gamlss.dist::BCT())$pdf)) &&
+      identical(get(".fun", envir = environment(family$pdf), inherits = TRUE),
+        gamlss.dist::dBCT), error = function(e) FALSE)
+  if(standard.bct && all(y > 0)) {
+    stable.bct <- function(par, y, log = FALSE) {
+      par <- lapply(par, rep_len, length.out = length(y))
+      if(any(par$mu <= 0 | par$sigma <= 0 | par$tau <= 0))
+        return(rep(if(log) -Inf else 0, length(y)))
+      v <- log(y / par$mu)
+      z <- v / par$sigma
+      nonzero <- par$nu != 0
+      z[nonzero] <- expm1(par$nu[nonzero] * v[nonzero]) /
+        (par$nu[nonzero] * par$sigma[nonzero])
+      value <- par$nu * v - log(y) - log(par$sigma) +
+        dt(z, df = par$tau, log = TRUE) -
+        pt(1 / (par$sigma * abs(par$nu)), df = par$tau, log.p = TRUE)
+      tail <- par$tau > 1e6
+      if(any(tail)) value[tail] <- gamlss.dist::dBCCG(y[tail],
+        mu = par$mu[tail], sigma = par$sigma[tail], nu = par$nu[tail], log = TRUE)
+      if(log) value else exp(value)
+    }
+    compatible <- tryCatch({
+      probes <- list(as.list(eta0))
+      for(j in np) for(shift in c(-0.01, 0.01)) {
+        trial <- as.list(eta0)
+        trial[[j]] <- trial[[j]] + shift
+        probes[[length(probes) + 1L]] <- trial
+      }
+      all(vapply(probes, function(eta) {
+        par <- family$map2par(eta)
+        a <- family$pdf(par = par, y = y, log = TRUE)
+        b <- stable.bct(par = par, y = y, log = TRUE)
+        length(a) == n && all(is.finite(a)) && all(is.finite(b)) &&
+          max(abs(a - b)) < 1e-8
+      }, logical(1L)))
+    }, error = function(e) FALSE)
+    if(compatible) {
+      density <- stable.bct
+      density.source <- "stable BCT"
+    }
+  }
   if(analytic && (!is.finite(likelihood(beta0, FALSE)) ||
       abs(check - likelihood(beta0, FALSE)) >
         1e-07 * max(1, abs(check))))
@@ -943,6 +1224,8 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
   state$last.value <- Inf
   state$last.beta <- NULL
   state$last.V <- NULL
+  state$last.reduced.V <- NULL
+  state$last.C <- NULL
   state$evaluations <- 0L
   lower <- rep(log(1e-10), length(rho0))
   upper <- rep(log(1e+10), length(rho0))
@@ -951,71 +1234,90 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     if(!is.null(state$last.rho) && identical(rho, state$last.rho))
       return(state$last.value)
     state$evaluations <- state$evaluations + 1L
-    P <- matrix(0, p, p)
     logdetP <- 0
     for(z in blocks) {
-      lambda <- if(length(z$ids)) exp(rho[z$ids]) else z$lambda
-      for(i in seq_along(z$S))
-        P[z$index, z$index] <- P[z$index, z$index] +
-          lambda[i] * z$S[[i]]
+      lambda <- block_lambda(z, rho)
       if(!is.null(z$basis)) {
         if(length(z$S) == 1L) {
           logdetP <- logdetP + z$base.logdet +
             z$basis$rank * log(lambda[1L])
         } else {
-          Pr <- matrix(0, z$basis$rank, z$basis$rank)
-          for(i in seq_along(z$S))
-            Pr <- Pr + lambda[i] * z$basis$penalties[[i]]
-          logdetP <- logdetP + 2 * sum(log(diag(chol(Pr))))
+          R <- penalty_factor(z, lambda)$R
+          logdetP <- logdetP + 2 * sum(log(abs(diag(R))))
         }
       }
     }
     beta <- state$beta
+    roots <- do.call(rbind, lapply(blocks, function(z) {
+      lambda <- block_lambda(z, rho)
+      do.call(rbind, lapply(seq_along(z$S), function(i)
+        sqrt(lambda[i]) * z$reduced.root[[i]]))
+    }))
+    Pr <- crossprod(roots)
+    quadratic <- function(beta) sum((roots %*% coordinates(beta))^2)
     good <- FALSE
-    for(iter in seq_len(30L)) {
-      lk <- likelihood(beta)
+    for(iter in seq_len(coefficient.maxit)) {
+      ## Average power-exponential curvature for Newton directions only:
+      ## its singularity at a data point can otherwise yield tiny steps
+      ## before the score vanishes. The final REML uses local curvature.
+      lk <- likelihood(beta,
+        local.curvature = !kind %in% c("BCPE", "SEP3"))
       if(!is.finite(lk$value) || any(!is.finite(lk$score))) break
-      score <- lk$score + drop(P %*% beta)
-      K <- lk$K + P
-      R <- tryCatch(chol(K), error = function(e) NULL)
-      if(is.null(R)) {
-        shift <- max(1e-06, abs(min(eigen(K, symmetric = TRUE,
-          only.values = TRUE)$values)) * 1.1)
-        R <- tryCatch(chol(K + diag(shift, p)), error = function(e) NULL)
-        if(is.null(R)) break
-      }
-      step <- drop(backsolve(R, forwardsolve(t(R), score)))
-      if(max(abs(step)) < 1e-09 * max(1, abs(beta))) {
+      score <- drop(crossprod(coefficient.basis, lk$score)) +
+        drop(crossprod(roots, roots %*% coordinates(beta)))
+      Hk <- reduce(lk$K)
+      K <- Hk + Pr
+      R <- information_factor(K, stabilize = TRUE, H = Hk, roots = roots)
+      if(is.null(R)) break
+      step <- expand(drop(backsolve(R, forwardsolve(t(R), score))))
+      relative.step <- max(abs(step) / pmax(1, abs(beta)))
+      mode.tol <- if(kind %in% c("BCPE", "SEP3") && !any(numerical.score))
+        min(coefficient.tol, 1e-11) else coefficient.tol
+      ## Density differences have a finite numerical resolution. Require a
+      ## small full Newton step and a negligible Newton decrement, rather
+      ## than iterating on score noise once the likelihood cannot improve.
+      score.roundoff <- any(numerical.score) &&
+        relative.step < 100 * coefficient.tol &&
+        abs(sum(score * coordinates(step))) <
+          100 * .Machine$double.eps * max(1, abs(lk$value))
+      if(relative.step < mode.tol || score.roundoff) {
         good <- TRUE
         break
       }
-      f0 <- lk$value + 0.5 * drop(crossprod(beta, P %*% beta))
+      f0 <- lk$value + 0.5 * quadratic(beta)
+      roundoff <- 100 * .Machine$double.eps * max(1, abs(f0))
       alpha <- 1
       for(i in seq_len(25L)) {
         trial <- beta - alpha * step
         f1 <- likelihood(trial, FALSE) +
-          0.5 * drop(crossprod(trial, P %*% trial))
-        if(is.finite(f1) && f1 <= f0 + 1e-10) break
+          0.5 * quadratic(trial)
+        if(is.finite(f1) && f1 <= f0 + roundoff) break
         alpha <- alpha / 2
       }
-      if(!is.finite(f1) || f1 > f0 + 1e-10) break
+      if(!is.finite(f1) || f1 > f0 + roundoff) break
       beta <- trial
-      if(max(abs(alpha * step)) < 1e-09 * max(1, abs(beta))) {
-        good <- TRUE
-        break
-      }
     }
     value <- Inf
-    V <- NULL
+    V <- Vr <- C <- NULL
     if(good) {
       lk <- likelihood(beta)
-      K <- lk$K + P
+      Hk <- reduce(lk$K)
+      K <- Hk + Pr
       R <- if(all(is.finite(K)))
-        tryCatch(chol(K), error = function(e) NULL) else NULL
+        information_factor(K, H = Hk, roots = roots) else NULL
       if(!is.null(R)) {
-        V <- chol2inv(R)
+        Vr <- chol2inv(R)
+        V <- coefficient.basis %*% Vr %*% t(coefficient.basis)
+        if(ncol(coefficient.basis) == p) {
+          ## Retain the covariance-factor convention in the original
+          ## coefficient ordering without inverting a large dense penalty.
+          Rc <- qr.R(qr(R %*% t(coefficient.basis), tol = 0))
+          Rc <- Rc * ifelse(diag(Rc) < 0, -1, 1)
+          C <- backsolve(Rc, diag(p))
+        } else C <- coefficient.basis %*% backsolve(R, diag(nrow(R))) %*%
+          t(coefficient.basis)
         value <- unname(lk$value + 0.5 *
-          (drop(crossprod(beta, P %*% beta)) +
+          (quadratic(beta) +
             2 * sum(log(diag(R))) - logdetP))
       }
     }
@@ -1024,6 +1326,8 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     state$last.value <- value
     state$last.beta <- if(is.finite(value)) beta else NULL
     state$last.V <- V
+    state$last.reduced.V <- Vr
+    state$last.C <- C
     value
   }
 
@@ -1050,6 +1354,36 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     }
     return(unavailable(reason))
   }
+  ## A fully penalized smooth can start almost completely removed. Its
+  ## profile is then flat even when a less penalized fit has lower REML.
+  ## Check nearby unsaturated starts before trusting an outer convergence
+  ## test in that flat tail (in particular for shrinkage bases).
+  starting.rho <- rho0
+  starting.value <- state$last.value
+  start.retries <- 0L
+  initial.Vr <- state$last.reduced.V
+  for(z in blocks) {
+    if(!length(z$ids) || is.null(z$basis) ||
+        z$basis$rank != length(z$index)) next
+    lambda <- block_lambda(z, rho0)
+    edf <- z$basis$rank - sum(vapply(seq_along(z$S), function(i)
+      lambda[i] * sum(initial.Vr * z$reduced.S[[i]]), numeric(1L)))
+    if(!is.finite(edf) || edf >= 0.5) next
+    base.rho <- starting.rho
+    for(shift in c(4, 8, 12)) {
+      trial <- base.rho
+      trial[z$ids] <- pmax(lower[z$ids], trial[z$ids] - shift)
+      candidate <- profile(trial)
+      start.retries <- start.retries + 1L
+      if(is.finite(candidate) && candidate < starting.value) {
+        starting.rho <- trial
+        starting.value <- candidate
+      }
+    }
+  }
+  if(!is.finite(profile(starting.rho)))
+    return(unavailable("joint REML starting point could not be recovered"))
+  initial.value <- state$last.value - 1
   finite_gradient <- function(rho) {
     h <- 0.01
     g <- numeric(length(rho))
@@ -1089,32 +1423,43 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     g <- numeric(length(rho))
     for(z in blocks) {
       if(!length(z$ids)) next
-      lambda <- exp(rho[z$ids])
+      lambda <- block_lambda(z, rho)
       Pr <- NULL
       if(!is.null(z$basis) && length(z$S) > 1L) {
+        factor <- penalty_factor(z, lambda)
         Pr <- matrix(0, z$basis$rank, z$basis$rank)
-        for(i in seq_along(z$S))
-          Pr <- Pr + lambda[i] * z$basis$penalties[[i]]
-        Pr <- chol2inv(chol(Pr))
+        Pr[factor$pivot, ] <- backsolve(factor$R, diag(z$basis$rank))
       }
-      for(i in seq_along(z$ids)) {
-        Pi <- lambda[i] * z$S[[i]]
-        u <- numeric(p)
-        u[z$index] <- drop(Pi %*% beta[z$index])
-        db <- -drop(V %*% u)
+      for(a in seq_along(z$ids)) {
+        i <- z$selected[a]
+        Pi <- lambda[i] * z$reduced.S[[i]]
+        b <- coordinates(beta)
+        root <- z$reduced.root[[i]]
+        u <- lambda[i] * drop(crossprod(root, root %*% b))
+        db <- -expand(drop(state$last.reduced.V %*% u))
         deta <- lapply(np, function(j)
           drop(X[[j]] %*% db[index[[j]]]))
+        names(deta) <- np
         scale <- max(abs(unlist(deta, use.names = FALSE)))
         h <- if(scale > 0) min(0.05, 0.01 / scale) else 0.05
+        if(kind %in% c("BCPE", "SEP3")) {
+          eta <- lapply(np, function(j)
+            drop(X[[j]] %*% beta[index[[j]]]) + off[[j]])
+          names(eta) <- np
+          distance <- local_step(rep(Inf, n), eta, "mu")
+          moving <- abs(deta$mu) > 0
+          if(any(moving)) h <- min(h,
+            min(distance[moving] / abs(deta$mu[moving])))
+        }
         Hp <- likelihood(beta + h * db)$K
         Hm <- likelihood(beta - h * db)$K
         if(any(!is.finite(Hp)) || any(!is.finite(Hm)))
           stop("direct likelihood curvature is unavailable")
         penalty.trace <- if(is.null(z$basis)) 0 else
           if(length(z$S) == 1L) z$basis$rank else
-            sum(Pr * (lambda[i] * z$basis$penalties[[i]]))
-        g[z$ids[i]] <- 0.5 * (sum(beta[z$index] * u[z$index]) +
-          sum(V[z$index, z$index, drop = FALSE] * Pi) -
+            lambda[i] * sum((root[, z$range.index, drop = FALSE] %*% Pr)^2)
+        g[z$ids[a]] <- 0.5 * (sum(b * u) +
+          sum(state$last.reduced.V * Pi) -
           penalty.trace + sum(V * (Hp - Hm)) / (2 * h))
       }
     }
@@ -1128,31 +1473,52 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
       gradient.fallbacks <<- gradient.fallbacks + 1L
       finite_gradient(rho)
     }
-  opt <- tryCatch(nlminb(rho0, profile, gradient = outer_gradient,
+  ## Center the objective: a large log likelihood must not make the
+  ## relative convergence test ignore changes in smoothing parameters.
+  opt <- tryCatch(nlminb(starting.rho, function(rho) profile(rho) - initial.value,
+    gradient = outer_gradient,
     lower = lower, upper = upper,
-    control = list(iter.max = if(is.null(control$jr.outer.maxit)) 30L else
+    control = list(iter.max = if(is.null(control$jr.outer.maxit)) 60L else
       control$jr.outer.maxit, eval.max = if(is.null(control$jr.outer.maxeval))
       150L else control$jr.outer.maxeval, rel.tol = 1e-08)),
     error = function(e) e)
   if(inherits(opt, "error"))
     return(unavailable(conditionMessage(opt)))
+  ## Approximate family curvature can make the implicit gradient stall.
+  ## Retry the profile derivative itself before retaining the initial fit.
+  outer.retries <- 0L
+  if(opt$convergence != 0L && gradient.mode != "finite" &&
+      identical(opt$message, "false convergence (8)")) {
+    retry <- tryCatch(nlminb(opt$par,
+      function(rho) profile(rho) - initial.value, gradient = finite_gradient,
+      lower = lower, upper = upper,
+      control = list(iter.max = if(is.null(control$jr.outer.maxit)) 60L else
+        control$jr.outer.maxit, eval.max = if(is.null(control$jr.outer.maxeval))
+        150L else control$jr.outer.maxeval, rel.tol = 1e-08)),
+      error = function(e) NULL)
+    outer.retries <- 1L
+    if(!is.null(retry) && is.finite(retry$objective) &&
+        retry$objective <= opt$objective +
+          100 * .Machine$double.eps * max(1, abs(initial.value))) opt <- retry
+  }
+  opt$objective <- opt$objective + initial.value
   rho <- opt$par
   value <- profile(rho)
   if(!is.finite(value))
     return(unavailable("optimized joint REML evaluation failed"))
   beta <- state$last.beta
   Vmode <- state$last.V
+  Vrmode <- state$last.reduced.V
   dimnames(Vmode) <- list(names(co), names(co))
-  Pmode <- matrix(0, p, p)
-  for(z in blocks) {
-    lambda <- if(length(z$ids)) exp(rho[z$ids]) else z$lambda
-    for(i in seq_along(z$S))
-      Pmode[z$index, z$index] <- Pmode[z$index, z$index] +
-        lambda[i] * z$S[[i]]
-  }
   lk <- likelihood(beta)
-  mode.residual <- max(abs(drop(Vmode %*%
-    (lk$score + drop(Pmode %*% beta))))) / max(1, abs(beta))
+  mode.roots <- do.call(rbind, lapply(blocks, function(z) {
+    lambda <- block_lambda(z, rho)
+    do.call(rbind, lapply(seq_along(z$S), function(i)
+      sqrt(lambda[i]) * z$reduced.root[[i]]))
+  }))
+  mode.step <- expand(drop(Vrmode %*% (crossprod(coefficient.basis, lk$score) +
+    crossprod(mode.roots, mode.roots %*% coordinates(beta)))))
+  mode.residual <- max(abs(mode.step) / pmax(1, abs(beta)))
   residual <- mode.residual
   if(!is.finite(mode.residual) || mode.residual > 1e-04)
     return(unavailable("direct coefficient mode could not be verified"))
@@ -1161,6 +1527,13 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
   ## solve different family working equations for some distributions.
   fit <- fit0
   fit$family <- family
+  if(!is.null(coefficient.basis))
+    attr(fit$fitted.linear, "edf") <- vapply(np, function(j) {
+      b <- fit$coefficients[[j]]
+      if(!length(b)) return(0)
+      ii <- match(paste0(j, ".p.", names(b)), names(co))
+      sum(coefficient.basis[ii, , drop = FALSE]^2)
+    }, numeric(1L))
   for(j in np) {
     linear <- fit$coefficients[[j]]
     if(length(linear)) {
@@ -1178,14 +1551,19 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     j <- z$parameter
     k <- z$term
     ii <- z$index
-    lambda <- if(length(z$ids)) exp(rho[z$ids]) else z$lambda
+    lambda <- block_lambda(z, rho)
     term <- fit$fitted.specials[[j]][[k]]
     term$coefficients[] <- beta[ii]
-    term$lambdas <- lambda
+    if(length(z$S)) term$lambdas <- lambda
     term$fitted.values <-
       drop(X[[j]][, match(ii, index[[j]]), drop = FALSE] %*% beta[ii])
     term$vcov <- Vmode[ii, ii, drop = FALSE]
-    edf <- length(ii) - sum(term$vcov * Pmode[ii, ii, drop = FALSE])
+    dimension <- if(is.null(coefficient.basis)) length(ii) else
+      sum(coefficient.basis[ii, , drop = FALSE]^2)
+    edf <- dimension - sum(vapply(seq_along(z$S), function(i) {
+      root <- z$reduced.root[[i]]
+      lambda[i] * sum((root %*% Vrmode) * root)
+    }, numeric(1L)))
     term$edf <- edf
     term$df <- n - edf
     fit$fitted.specials[[j]][[k]] <- term
@@ -1200,33 +1578,45 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     fit$null.deviance
   fit$df <- get_df(fit)
 
+  if(standard.power) {
+    par <- family$map2par(eta)
+    distance <- abs(y - par$mu) / pmax(1, abs(y), abs(par$mu))
+    nonsmooth <- par$tau < 4
+    if(kind == "BCPE") nonsmooth <- nonsmooth & abs(par$tau - 2) > 1e-8 else
+      nonsmooth <- nonsmooth &
+        (abs(par$tau - 2) > 1e-8 | abs(par$nu - 1) > 1e-8)
+    near <- which(w > 0 & distance < 1e-8 & nonsmooth)
+    if(length(near))
+      return(unavailable(sprintf(paste0(
+        "%s REML profile is non-smooth near fitted mu = y (tau = %.4f); ",
+        "smoothing-parameter curvature could not be verified"),
+        kind, par$tau[near[which.min(distance[near])]])))
+  }
+
   ## Profile curvature and covariance-factor derivatives use the same solver.
   m <- length(rho)
   h <- rep(0.01, m)
+  ## Tiny stencils amplify mode/curvature round-off in almost flat tails.
+  ## A wider log-lambda stencil resolves these extreme penalties reliably.
+  h[rho > log(1e5)] <- 0.1
   gradient <- rep(NA_real_, m)
   H <- matrix(NA_real_, m, m)
   dC <- vector("list", m)
-  covariance_factor <- function(V) {
-    R <- chol(chol2inv(chol(V)))
-    backsolve(R, diag(nrow(V)))
-  }
-  if(all(rho - h > lower & rho + h < upper)) {
+  ## The criterion remains defined beyond the optimizer bounds, so central
+  ## differences also verify curvature when a lambda reaches its upper bound.
+  {
     for(i in seq_len(m)) {
       r <- rho
       r[i] <- rho[i] + h[i]
       fp <- profile(r)
-      Vp <- state$last.V
+      Cp <- state$last.C
       r[i] <- rho[i] - h[i]
       fm <- profile(r)
-      Vm <- state$last.V
+      Cm <- state$last.C
       gradient[i] <- (fp - fm) / (2 * h[i])
       H[i, i] <- (fp - 2 * value + fm) / h[i]^2
-      if(!is.null(Vp) && !is.null(Vm)) {
-        Cp <- tryCatch(covariance_factor(Vp), error = function(e) NULL)
-        Cm <- tryCatch(covariance_factor(Vm), error = function(e) NULL)
-        if(!is.null(Cp) && !is.null(Cm))
-          dC[[i]] <- (Cp - Cm) / (2 * h[i])
-      }
+      if(!is.null(Cp) && !is.null(Cm))
+        dC[[i]] <- (Cp - Cm) / (2 * h[i])
     }
     if(m > 1L) for(i in seq_len(m - 1L)) for(j in (i + 1L):m) {
       v <- numeric(4L)
@@ -1263,7 +1653,8 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
           crossprod(ev$vectors[, positive, drop = FALSE], gradient))
       stationary <- max(abs(step)) < 0.05 &&
         sum(gradient * step) < 0.04 &&
-        max(abs(flat.gradient)) < 1e-05 &&
+        ## Use the same resolution for flat curvature and its gradient.
+        max(abs(flat.gradient)) < max(1e-05, curvature.cutoff) &&
         all(vapply(dC, function(z) !is.null(z) && all(is.finite(z)),
           logical(1L)))
       factor.variance <- rep(if(length(np) > 1L) 50 else 10, m)
@@ -1283,9 +1674,18 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
   dimnames(H) <- list(names(rho0), names(rho0))
   if(!is.null(covariance)) dimnames(covariance) <- dimnames(H)
   if(!is.null(factor.root)) colnames(factor.root) <- names(rho0)
-  fit$jr <- list(initial = initial, rho = rho, criterion = value,
+  ## PORT may report false convergence at the numerical resolution of
+  ## profile curvature. Independently certify a small profile Newton step,
+  ## retaining its raw status. Never accept an iteration/evaluation limit.
+  outer.verified <- opt$convergence != 0L &&
+    identical(opt$message, "false convergence (8)") && stationary &&
+    max(abs(step)) < 0.01 && sum(gradient * step) < 1e-4
+  outer.converged <- opt$convergence == 0L || outer.verified
+  fit$jr <- list(initial = initial, starting.rho = starting.rho,
+    start.retries = start.retries, rho = rho, criterion = value,
     gradient = gradient, hessian = H, covariance = covariance,
     coefficient.covariance = Vmode,
+    coefficient.basis = if(ncol(coefficient.basis) < p) coefficient.basis else NULL,
     mode.coefficients = setNames(beta, names(co)),
     factor.root = factor.root, curvature.rank = curvature.rank,
     curvature.cutoff = curvature.cutoff, curvature.values = curvature.values,
@@ -1293,11 +1693,13 @@ JR <- function(x, y, specials, family, offsets, weights, start, xterms,
     joint.mode.residual = mode.residual,
     score.source = if(analytic) setNames(rep("closed-form", length(np)), np)
       else ifelse(numerical.score, "density", "family"),
-    converged = opt$convergence == 0L && stationary &&
+    density.source = density.source,
+    converged = outer.converged && stationary &&
       is.finite(residual) && residual < 1e-05 &&
       is.finite(mode.residual) && mode.residual < 1e-04,
     evaluations = state$evaluations, gradient.mode = gradient.mode,
-    gradient.fallbacks = gradient.fallbacks, outer = opt)
+    gradient.fallbacks = gradient.fallbacks, outer.retries = outer.retries,
+    outer.verified = outer.verified, outer = opt)
   fit$control <- control
   fit$control$.jr.initial.fit <- NULL
   fit$converged <- isTRUE(fit$converged) && fit$jr$converged

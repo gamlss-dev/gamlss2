@@ -12,6 +12,8 @@ predict.gamlss2 <- function(object,
   if(is.null(parameter)) parameter <- dots[["model"]]
   if(is.null(parameter)) parameter <- dots[["what"]]
   dots[c("interval.cache", "sandwich", "model", "what")] <- NULL
+  if(!is.null(newdata) && is.null(dots$no_weights))
+    dots$no_weights <- TRUE
   if(!is.logical(unconditional) || length(unconditional) != 1L ||
       is.na(unconditional))
     stop("'unconditional' must be TRUE or FALSE.")
@@ -311,6 +313,31 @@ predict.gamlss2 <- function(object,
             }
           }
         }
+      }
+    }
+  }
+
+  ## Offsets enter complete predictors, including simulated coefficients.
+  ## Formula offsets are already evaluated in the prediction model frame.
+  if(!tt && is.null(terms) && !is.null(object$offsets)) {
+    mt <- attr(object$xterms, "terms")
+    supplied <- NULL
+    if(!is.null(object$call$offset)) {
+      supplied <- if(is.null(newdata)) object$offsets else stats::model.offset(mf)
+      if(!is.null(supplied)) {
+        supplied <- as.data.frame(supplied)
+        names(supplied) <- colnames(object$offsets)
+      }
+    }
+    for(j in parameter) {
+      oi <- attr(mt[[j]], "offset")
+      if(length(oi)) {
+        variables <- as.list(attr(mt[[j]], "variables"))[-1L]
+        labels <- vapply(variables[oi], deparse, character(1L), width.cutoff = 500L)
+        off <- Reduce("+", mf[labels])
+        p[[j]] <- p[[j]] + as.numeric(off)
+      } else if(!is.null(supplied) && j %in% names(supplied)) {
+        p[[j]] <- p[[j]] + as.numeric(supplied[[j]])
       }
     }
   }

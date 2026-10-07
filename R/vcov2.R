@@ -1452,8 +1452,11 @@ vcov.gamlss2 <- function(object,
         max(abs(beta - object$jr$mode.coefficients)) >
           1e-08 * max(1, abs(beta)))
       .stop("stored JR coefficient covariance does not match the fitted model.")
+    ## Direct JR fits supply covariance-factor derivatives themselves.
+    ## Their full covariance can be singular when redundant unpenalized
+    ## smooth directions have been constrained during fitting.
     inverse <- if(need.correction)
-      list(covariance = direct, factor = chol(solve(direct))) else direct
+      list(covariance = direct, factor = NULL) else direct
   } else {
     inverse <- .invert(K, coefficient.names, forced.na, fixed, noise,
       return.factor = need.correction, constraints = constraints)

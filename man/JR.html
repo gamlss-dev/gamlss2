@@ -282,20 +282,26 @@ Named joint REML control overrides.
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Use <code>optimizer = JR</code> to fit a model or <code>jr(fit)</code> to continue from an existing fit. The direct solver jointly estimates coefficients and smoothing parameters from cached designs and quadratic penalties. It requires a family density, a predictor-to-parameter map, and an identifiable finite joint mode. Selected penalties and fixed distributional parameters are unsupported. If joint REML fails, the input fit is retained and <code>reml.failure</code> records the reason. Check <code>isTRUE(fit$jr$converged)</code> before using joint uncertainty estimates.</p>
+<p>Use <code>optimizer = JR</code> to fit a model or <code>jr(fit)</code> to continue from an existing fit. The direct solver jointly estimates coefficients and smoothing parameters from cached designs and quadratic penalties. It requires a family density, a predictor-to-parameter map, and an identifiable finite joint mode. Selected penalties and fixed distributional parameters are unsupported. Duplicate unpenalized directions in overlapping smooths are removed from the joint solve. The stored coefficients and covariance use the minimum-norm representation in the original coefficient space, and effective degrees of freedom exclude these redundant directions. If joint REML fails, the input fit is retained and <code>reml.failure</code> records the reason. Check <code>isTRUE(fit$jr$converged)</code> before using joint uncertainty estimates. Power-exponential families may have a non-smooth REML profile when a fitted location coincides with an observation. Such fits retain RS/CG and report that smoothing-parameter curvature could not be verified. Fully penalized smooths that start nearly suppressed are also checked at less penalized starting values, to avoid stopping in a flat profile tail. If the outer optimizer reports false convergence, a stricter independent profile Newton check may verify the fit. In that case <code>fit$jr$outer.verified</code> is true; the original optimizer status is retained in <code>fit$jr$outer</code>. Iteration and evaluation limits still retain the initial fit.</p>
 <p>The following controls can be supplied through <code>gamlss2_control</code> or as named arguments to <code>jr()</code>:</p>
 <ul>
 <li>
 <p><code>jr.inner</code>: Function, <code>RS</code> or <code>CG</code>, used to obtain the initial fit. Default is <code>RS</code>.</p>
 </li>
 <li>
-<p><code>jr.outer.maxit</code>: Integer, the maximum number of outer smoothing parameter iterations. Default is <code>30</code>.</p>
+<p><code>jr.outer.maxit</code>: Integer, the maximum number of outer smoothing parameter iterations. Default is <code>60</code>.</p>
 </li>
 <li>
 <p><code>jr.outer.maxeval</code>: Integer, the maximum number of outer objective evaluations. Default is <code>150</code>.</p>
 </li>
+<li>
+<p><code>jr.eps</code>: Positive number, the relative coefficient step tolerance in the joint mode solve. Default is <code>1e-8</code>. The solver may refine further to stabilize power-exponential curvature.</p>
+</li>
+<li>
+<p><code>jr.maxit</code>: Positive integer, the maximum number of coefficient iterations per objective evaluation. Default is <code>100</code>.</p>
+</li>
 </ul>
-<p>The initial RS/CG fit uses <code>eps</code> and <code>maxit</code>, as documented in <code>RS</code>. The current direct coefficient solver does not use <code>jr.eps</code> or <code>jr.maxit</code>.</p>
+<p>The initial RS/CG fit uses <code>eps</code> and <code>maxit</code>, as documented in <code>RS</code>. Fully and partially fixed smoothing parameters and unpenalized <code>fx = TRUE</code> smooths are supported. At extreme smoothing parameters, penalty roots and an equilibrated solve preserve accuracy in the unpenalized coefficient directions.</p>
 <p>For local REML updates with RS/CG and other smoothing parameter selection methods, see <code>gamlss2_smoothing</code>.</p>
 </section>
 <section id="value" class="level3">

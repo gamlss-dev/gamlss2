@@ -72,7 +72,7 @@ calibration(..., newdata = NULL,
 
 \references{
   Van Calster B, McLernon DJ, van Smeden M, Wynants L, Steyerberg EW (2019).
-  Calibration: the Achilles heel of predictive analytics.
+  \dQuote{Calibration: The Achilles Heel of Predictive Analytics}.
   \emph{BMC Medicine}, \bold{17}, 230.
   \doi{10.1186/s12916-019-1466-7}
 }

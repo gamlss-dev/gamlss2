@@ -81,7 +81,7 @@ A data frame containing 16596 observations on 13 variables.
 
 \references{
   Zavorsky GS (2024). \dQuote{A Refined Spirometry Dataset for Comparing
-    Segmented (Piecewise) Linear Models to that of GAMLSS}.
+    Segmented (Piecewise) Linear Models to That of GAMLSS}.
     \emph{Data in Brief}, \bold{57}, 111062.
     \doi{10.1016/j.dib.2024.111062}
 

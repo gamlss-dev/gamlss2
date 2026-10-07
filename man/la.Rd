@@ -51,7 +51,7 @@ plot_lasso(x, terms = NULL,
 
 \details{
   To implement the Lasso penalty, an approximation of the absolute value function is
-  used, following the approach by Oelker and Tutz (2015). This enables the use of
+  used, following the approach by Oelker and Tutz (2017). This enables the use of
   standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has
   its own shrinkage parameter, allowing a mix of different penalty types within the
   model. The framework builds on the methodology of Groll et al. (2019),
@@ -79,13 +79,15 @@ plot_lasso(x, terms = NULL,
 }
 
 \references{
-  Andreas Groll, Julien Hambuckers, Thomas Kneib, and Nikolaus Umlauf (2019). Lasso-type penalization in
-  the framework of generalized additive models for location, scale and shape.
-  \emph{Computational Statistics & Data Analysis}.
+  Groll A, Hambuckers J, Kneib T, Umlauf N (2019).
+  \dQuote{LASSO-Type Penalization in the Framework of Generalized Additive
+  Models for Location, Scale and Shape}.
+  \emph{Computational Statistics & Data Analysis}, \bold{140}, 59--73.
   \doi{10.1016/j.csda.2019.06.005}
 
-  Oelker Margreth-Ruth and Tutz Gerhard (2015). A uniform framework for combination of
-  penalties in generalized structured models. \emph{Adv Data Anal Classif}.
+  Oelker MR, Tutz G (2017). \dQuote{A Uniform Framework for the Combination
+  of Penalties in Generalized Structured Models}.
+  \emph{Advances in Data Analysis and Classification}, \bold{11}(1), 97--120.
   \doi{10.1007/s11634-015-0205-y}
 }
 

@@ -72,12 +72,12 @@
 }
 
 \references{
-  Demmler, A. and Reinsch, C. (1975). Oscillation Matrices with Spline
-  Smoothing. \emph{Numerische Mathematik}, 24(5), 375--382.
+  Demmler A, Reinsch C (1975). \dQuote{Oscillation Matrices with Spline
+  Smoothing}. \emph{Numerische Mathematik}, \bold{24}(5), 375--382.
   \doi{10.1007/BF01437406}
 
-  Wood, S. N. (2026). On Neighbourhood Cross Validation. \emph{Statistical
-  Science}, in press. \doi{10.48550/arXiv.2404.16490}
+  Wood SN (in press). \dQuote{On Neighbourhood Cross Validation}.
+  \emph{Statistical Science}. Preprint: \doi{10.48550/arXiv.2404.16490}
 }
 
 \seealso{

@@ -60,10 +60,10 @@ A \code{GAMLSS2} object, inheriting from \code{distribution}.
 }
 
 \references{
-Zeileis A, Lang MN, Hayes A (2022).
-\dQuote{distributions3: From Basic Probability to Probabilistic Regression.}
-Presented at \emph{useR! 2022 - The R User Conference}.
-Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
+  Zeileis A, Lang MN, Hayes A (2022).
+  \dQuote{distributions3: From Basic Probability to Probabilistic Regression}.
+  Presented at \emph{useR! 2022 - The R User Conference}.
+  Slides, video, vignette, code at \url{https://www.zeileis.org/news/user2022/}.
 }
 
 \seealso{

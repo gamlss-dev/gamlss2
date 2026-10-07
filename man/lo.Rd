@@ -55,10 +55,11 @@ lo(formula, ...)
 }
 
 \references{
-  Cleveland, W. S., Grosse, E. and Shyu, W. M. (1992).
-  \dQuote{Local regression models.}
-  Chapter 8 of \emph{Statistical Models in S}, 
-  eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+  Cleveland WS, Grosse E, Shyu WM (1992).
+  \dQuote{Local Regression Models}.
+  In Chambers JM, Hastie TJ (eds.), \emph{Statistical Models in S},
+  chapter 8, 309--376. Wadsworth & Brooks/Cole, Pacific Grove, CA.
+  \doi{10.1201/9780203738535-8}
 }
 
 \seealso{

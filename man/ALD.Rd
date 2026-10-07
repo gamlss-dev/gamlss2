@@ -62,12 +62,12 @@ fit_ALD(formula, data, tau, anchor = 0.5, max_step = 0.05,
 }
 
 \references{
-  Yu K, Moyeed RA (2001). \dQuote{Bayesian Quantile Regression.}
+  Yu K, Moyeed RA (2001). \dQuote{Bayesian Quantile Regression}.
   \emph{Statistics & Probability Letters}, \bold{54}(4), 437--447.
   \doi{10.1016/S0167-7152(01)00124-9}
 
   Chernozhukov V, Fernandez-Val I, Galichon A (2010).
-  \dQuote{Quantile and Probability Curves Without Crossing.}
+  \dQuote{Quantile and Probability Curves Without Crossing}.
   \emph{Econometrica}, \bold{78}(3), 1093--1125.
   \doi{10.3982/ECTA7880}
 }

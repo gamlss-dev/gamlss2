@@ -25,7 +25,7 @@ This is an approximation of the linear spline \eqn{\max\{0, x\}}
 where the discrepancy between the two functions decreases with
 increasing \eqn{a}.
 
-Wiemann et al. (2023) propose to employ the softplus function as the
+Wiemann et al. (2024) propose to employ the softplus function as the
 inverse link function where positivity of a parameter needs to be
 assured, e.g., in count data regressions. This is in
 particular of interest as an alternative to the exponential inverse
@@ -38,10 +38,10 @@ effects of the regressors while the softplus function does not.
 }
 
 \references{
-Wiemann PFV, Kneib T, Hambuckers J (2023). \dQuote{Using the Softplus Function to
-  Construct Alternative Link Functions in Generalized Linear Models and Beyond.}
-  \emph{Statistical Papers}, forthcoming.
-  \doi{https://doi.org/10.1007/s00362-023-01509-x}
+  Wiemann PFV, Kneib T, Hambuckers J (2024). \dQuote{Using the Softplus Function to
+  Construct Alternative Link Functions in Generalized Linear Models and Beyond}.
+  \emph{Statistical Papers}, \bold{65}(5), 3155--3180.
+  \doi{10.1007/s00362-023-01509-x}
 }
 
 \seealso{
@@ -49,7 +49,7 @@ Wiemann PFV, Kneib T, Hambuckers J (2023). \dQuote{Using the Softplus Function t
 }
 
 \examples{\dontshow{ if(!requireNamespace("distributions3")) { if(interactive() || is.na(Sys.getenv("_R_CHECK_PACKAGE_NAME_", NA))) { stop("not all packages required for the example are installed") } else q() }}
-## visualization of the softplus function from Wiemann et al. (2023, Figure 1)
+## visualization of the softplus function from Wiemann et al. (2024, Figure 1)
 x <- -200:200/50
 plot(x, softplus(1)$linkinv(x), ylab = expression(softplus[a](x)),
   type = "l", col = 2, lwd = 2)

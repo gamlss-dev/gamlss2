@@ -80,7 +80,7 @@
 }
 
 \references{
-  Dunn PK, Smyth GK (1996). \dQuote{Randomized Quantile Residuals.}
+  Dunn PK, Smyth GK (1996). \dQuote{Randomized Quantile Residuals}.
   \emph{Journal of Computational and Graphical Statistics}, \bold{5}(3),
   236--244. \doi{10.1080/10618600.1996.10474708}
 }

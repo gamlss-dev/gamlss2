@@ -71,7 +71,7 @@ BS(x, y, specials, family, offsets,
 
 \references{
   Umlauf N, Klein N, Zeileis A (2018).
-  \emph{BAMLSS: Bayesian Additive Models for Location, Scale and Shape (and Beyond)}.
+  \dQuote{BAMLSS: Bayesian Additive Models for Location, Scale, and Shape (and Beyond)}.
   \emph{Journal of Computational and Graphical Statistics}, \bold{27}(3),
   612--627. \doi{10.1080/10618600.2017.1407325}
 }
@@ -87,4 +87,3 @@ BS(x, y, specials, family, offsets,
 
 \keyword{models}
 \keyword{regression}
-

@@ -128,7 +128,12 @@ special_terms <- function(x, data, binning = FALSE, digits = Inf, ...)
           sj <- list("X" = sj, "S" = list(diag(1, ncol(sj))),
             "label" = j, "term" = all.vars(expr), "dim" = 1L)
         }
-        sterms[[j]] <- sj
+        if(inherits(sj, c("n", "ct", "cf"))) {
+          sj$orig.label <- j
+          sterms <- c(sterms, setNames(list(sj), sj$label))
+        } else {
+          sterms[[j]] <- sj
+        }
       }
     }
   }

@@ -69,7 +69,7 @@ cf <- function(formula, ...)
   st$control <- do.call(partykit::ctree_control, ctr)
   st$formula <- formula
   st$term <- all.vars(formula)
-  st$label <- paste0("cf(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$label <- special_term_label(st$term, "cf")
   st$data <- model.frame(formula)
   st$ntree <- ntree
   class(st) <- c("special", "cf")
@@ -132,7 +132,7 @@ ct <- function(formula, ...)
   st$control <- do.call(partykit::ctree_control, ctr)
   st$formula <- formula
   st$term <- all.vars(formula)
-  st$label <- paste0("ct(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$label <- special_term_label(st$term, "ct")
   st$data <- model.frame(formula)
   class(st) <- c("special", "ct")
   return(st)
@@ -210,7 +210,7 @@ n <- function(formula, ...)
   st$control <- ctr
   st$formula <- formula
   st$term <- all.vars(formula)
-  st$label <- paste0("n(", paste0(gsub(" ", "", as.character(formula)), collapse = ""), ")")
+  st$label <- special_term_label(st$term, "n")
   st$data <- model.frame(formula)
 
   ## Scale per default!
@@ -521,6 +521,21 @@ special_predict.n.fitted <- function(x, data, se.fit = FALSE, ...)
   return(p)
 }
 
+## Compact labels shared by special model terms.
+special_term_label <- function(v, prefix = "lin", max_terms = 3)
+{
+  n <- length(v)
+  if(n <= max_terms) {
+    inside <- paste(v, collapse = "+")
+  } else {
+    inside <- paste0(
+      paste0(v[1:(max_terms - 1)], collapse = "+"),
+      "+... [", n, "]"
+    )
+  }
+  paste0(prefix, "(", inside, ")")
+}
+
 ## Linear model terms wrapper.
 lin <- function(x, ..., ridge = FALSE, scale = FALSE)
 {
@@ -545,23 +560,10 @@ lin <- function(x, ..., ridge = FALSE, scale = FALSE)
       label_terms <- tl
   }
 
-  make_label <- function(v, prefix = "lin", max_terms = 3) {
-    n <- length(v)
-    if(n <= max_terms) {
-      inside <- paste(v, collapse = "+")
-    } else {
-      inside <- paste0(
-        paste0(v[1:(max_terms - 1)], collapse = "+"),
-        "+... [", n, "]"
-      )
-    }
-    paste0(prefix, "(", inside, ")")
-  }
-
   sx <- list(
     formula = f,
     term    = v,
-    label   = make_label(label_terms, if(ridge) "ridge" else "lin"),
+    label   = special_term_label(label_terms, if(ridge) "ridge" else "lin"),
     by      = "NA",
     dim     = length(v),
     scale   = scale

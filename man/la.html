@@ -750,7 +750,7 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>To implement the Lasso penalty, an approximation of the absolute value function is used, following the approach by Oelker and Tutz (2015). This enables the use of standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has its own shrinkage parameter, allowing a mix of different penalty types within the model. The framework builds on the methodology of Groll et al.&nbsp;(2019), where coefficients are updated through iteratively reweighted least squares (IWLS). This is feasible due to the absolute function approximation, which results in a quadratic penalty matrix similar to that used in penalized splines. By default, the shrinkage parameters are selected using the Bayesian Information Criterion (BIC).</p>
+<p>To implement the Lasso penalty, an approximation of the absolute value function is used, following the approach by Oelker and Tutz (2017). This enables the use of standard Newton-Raphson-type algorithms for estimation. Each Lasso model term has its own shrinkage parameter, allowing a mix of different penalty types within the model. The framework builds on the methodology of Groll et al.&nbsp;(2019), where coefficients are updated through iteratively reweighted least squares (IWLS). This is feasible due to the absolute function approximation, which results in a quadratic penalty matrix similar to that used in penalized splines. By default, the shrinkage parameters are selected using the Bayesian Information Criterion (BIC).</p>
 <p>The choice of <code>type</code> determines the structure that is penalized:</p>
 <ul>
 <li>
@@ -775,8 +775,8 @@ For function <code>la()</code> further control arguments can be passed: The <cod
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Andreas Groll, Julien Hambuckers, Thomas Kneib, and Nikolaus Umlauf (2019). Lasso-type penalization in the framework of generalized additive models for location, scale and shape. <em>Computational Statistics &amp; Data Analysis</em>. <a href="https://doi.org/10.1016/j.csda.2019.06.005">doi:10.1016/j.csda.2019.06.005</a></p>
-<p>Oelker Margreth-Ruth and Tutz Gerhard (2015). A uniform framework for combination of penalties in generalized structured models. <em>Adv Data Anal Classif</em>. <a href="https://doi.org/10.1007/s11634-015-0205-y">doi:10.1007/s11634-015-0205-y</a></p>
+<p>Groll A, Hambuckers J, Kneib T, Umlauf N (2019). “LASSO-Type Penalization in the Framework of Generalized Additive Models for Location, Scale and Shape”. <em>Computational Statistics &amp; Data Analysis</em>, <b>140</b>, 59–73. <a href="https://doi.org/10.1016/j.csda.2019.06.005">doi:10.1016/j.csda.2019.06.005</a></p>
+<p>Oelker MR, Tutz G (2017). “A Uniform Framework for the Combination of Penalties in Generalized Structured Models”. <em>Advances in Data Analysis and Classification</em>, <b>11</b>(1), 97–120. <a href="https://doi.org/10.1007/s11634-015-0205-y">doi:10.1007/s11634-015-0205-y</a></p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

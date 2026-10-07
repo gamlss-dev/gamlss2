@@ -723,7 +723,7 @@ Extra parameter of the generalized softplus function
 <p style="text-align: center;">
 </p><p><span class="math inline">\(\displaystyle \frac{\log(1 + \exp(a \cdot x))}{a}\)</span></p>
 <p>This is an approximation of the linear spline <span class="math inline">\(\max\{0, x\}\)</span> where the discrepancy between the two functions decreases with increasing <span class="math inline">\(a\)</span>.</p>
-<p>Wiemann et al.&nbsp;(2023) propose to employ the softplus function as the inverse link function where positivity of a parameter needs to be assured, e.g., in count data regressions. This is in particular of interest as an alternative to the exponential inverse link function because the exponential implies multiplicative effects of the regressors while the softplus function does not.</p>
+<p>Wiemann et al.&nbsp;(2024) propose to employ the softplus function as the inverse link function where positivity of a parameter needs to be assured, e.g., in count data regressions. This is in particular of interest as an alternative to the exponential inverse link function because the exponential implies multiplicative effects of the regressors while the softplus function does not.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -731,7 +731,7 @@ Extra parameter of the generalized softplus function
 </section>
 <section id="references" class="level3">
 <h3 class="anchored" data-anchor-id="references">References</h3>
-<p>Wiemann PFV, Kneib T, Hambuckers J (2023). “Using the Softplus Function to Construct Alternative Link Functions in Generalized Linear Models and Beyond.” <em>Statistical Papers</em>, forthcoming. <a href="https://doi.org/https://doi.org/10.1007/s00362-023-01509-x">doi:https://doi.org/10.1007/s00362-023-01509-x</a></p>
+<p>Wiemann PFV, Kneib T, Hambuckers J (2024). “Using the Softplus Function to Construct Alternative Link Functions in Generalized Linear Models and Beyond”. <em>Statistical Papers</em>, <b>65</b>(5), 3155–3180. <a href="https://doi.org/10.1007/s00362-023-01509-x">doi:10.1007/s00362-023-01509-x</a></p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -743,7 +743,7 @@ Extra parameter of the generalized softplus function
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## visualization of the softplus function from Wiemann et al. (2023, Figure 1)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## visualization of the softplus function from Wiemann et al. (2024, Figure 1)</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">200</span><span class="sc">:</span><span class="dv">200</span><span class="sc">/</span><span class="dv">50</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="fu">softplus</span>(<span class="dv">1</span>)<span class="sc">$</span><span class="fu">linkinv</span>(x), <span class="at">ylab =</span> <span class="fu">expression</span>(softplus[a](x)),</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>

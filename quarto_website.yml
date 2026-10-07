@@ -21,7 +21,7 @@ website:
         file: man/gamlss2-package.qmd
       - text: Vignettes
         menu:
-        - text: "Overview and reading guide"
+        - text: "Overview"
           file: vignettes/gamlss2.qmd
         - text: "First steps"
           file: vignettes/firststeps.qmd

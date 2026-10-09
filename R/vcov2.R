@@ -927,6 +927,20 @@ vcov.gamlss2 <- function(object,
 
       step <- .Machine$double.eps^(1 / 3) *
         pmax(1, abs(eta[[predictor.name]]))
+      ## Power-exponential densities have a location cusp. Keep the
+      ## difference on the fitted side of y = mu, as in the JR optimizer;
+      ## crossing it can make valid mixed score derivatives disagree.
+      if(predictor.name == "mu" &&
+          isTRUE(family$family[1L] %in% "BCPE")) {
+        par <- family$map2par(eta)
+        link <- unname(family$links["mu"])
+        distance <- if(identical(link, "log")) abs(log(y / par$mu)) else
+          if(identical(link, "identity")) abs(y - par$mu) else NULL
+        if(!is.null(distance)) {
+          step <- pmin(step, pmax(1e-10 * pmax(1, abs(eta[[predictor.name]])),
+            0.01 * distance))
+        }
+      }
       upper <- lower <- eta
       upper[[predictor.name]] <- eta[[predictor.name]] + step
       lower[[predictor.name]] <- eta[[predictor.name]] - step

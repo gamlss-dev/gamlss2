@@ -39,17 +39,30 @@ response means from a \pkg{gamlss2} model.
     \code{"wald"} returns analytic pointwise confidence intervals, at the 95\%
     confidence level by default.}
   \item{unconditional}{If \code{TRUE}, include approximate smoothing-parameter
-    uncertainty in Wald intervals and coefficient draws.}
-  \item{...}{Further controls, including \code{FUN}, \code{R}, \code{seed},
-    and \code{burnin} for simulation.}
+    uncertainty in Wald intervals and coefficient draws. This requires a
+    likelihood fit without stored posterior samples.}
+  \item{...}{Further controls, including \code{FUN} (a function summarizing
+    predictions across coefficient draws), \code{R} (number of Gaussian draws,
+    default 200), \code{seed} (default 123; \code{FALSE} continues the current
+    random-number stream), and \code{burnin} for simulation. For likelihood
+    fits, \code{FUN} or \code{se.fit = TRUE} requests simulation;
+    \code{R} alone does not.}
 }
 
 \details{
-Coefficient draws stored in the fit are used when available; otherwise, draws
-use the full joint coefficient covariance. They approximate the coefficient
-sampling distribution and may give unreliable tails after nonlinear
-transformations. Simulation stops if a marginal 95\% Gaussian interval for a
-log smoothing parameter spans a factor of 100 on the smoothing-parameter scale.
+Coefficient draws stored in the fit are used when available; \code{R} does not
+replace stored posterior samples. Otherwise, Gaussian draws use the full
+joint coefficient covariance, retaining dependence among terms and
+distributional parameters. For penalized likelihood fits, this approximation
+is motivated by the Bayesian interpretation of smoothing penalties. Nonlinear
+transformations can produce asymmetric uncertainty distributions.
+
+To propagate uncertainty to a quantile or event probability, retain the joint
+distribution draws with \code{FUN = identity}, evaluate the quantity within
+each draw, and then summarize across draws at each prediction location.
+These intervals describe estimation uncertainty in the chosen quantity.
+Quantiles of the fitted response distribution instead give plug-in prediction
+intervals for a future observation.
 
 Wald intervals are approximate pointwise \emph{confidence} intervals for fitted
 values, not \emph{prediction} intervals for future observations. They are
@@ -67,9 +80,13 @@ error rather than a working-information approximation.
 \value{
 Ordinary predictions return a distribution object or values in the selected
 form. Term predictions are data frames or, for multiple parameters, lists of
-matrices. With \code{se.fit = TRUE}, fitted values and standard errors are
-returned. With \code{FUN = identity}, simulated distribution predictions form
-a list of distribution objects.
+matrices. With \code{se.fit = TRUE}, simulation summaries use names
+\code{fit} (simulation mean) and \code{se} (simulation standard deviation),
+prefixed by parameter or term names when needed.
+A supplied \code{FUN} determines the simulation summary;
+its center can differ from the prediction at the estimated coefficients.
+With \code{FUN = identity}, simulated distribution predictions form a list of
+distribution objects, one per joint coefficient draw.
 
 Wald predictions return \code{fit}, \code{se.fit}, \code{lower}, and \code{upper}.
 For multiple levels, \code{lower} and \code{upper} are lists named by confidence

@@ -40,6 +40,11 @@ parameters. Thus it retains covariance among linear and smooth terms and among
 distributional parameters. Prior observation weights and offsets in the final
 linear predictors are included.
 
+Joint information is computed by differentiating the linked family scores.
+Mixed derivatives are checked in both orientations. If finite differences
+disagree, additional step sizes and Richardson extrapolation are used to
+check numerical convergence; persistent inconsistencies raise an error.
+
 For monotonic \code{\link{ms}} terms, inversion is restricted to coefficient
 directions that preserve the fitted active constraints and term centering.
 This local approximation conditions on the active constraint set and does not
@@ -95,4 +100,3 @@ Vc <- vcov(m, full = TRUE, unconditional = TRUE)
 
 \keyword{models}
 \keyword{regression}
-

@@ -35,4 +35,6 @@ README.qmd
 ^vignettes/bayesian\.qmd$
 ^vignettes/prediction\.qmd$
 ^vignettes/simulation\.R$
+^vignettes/simulation-checkpoints($|/)
+^vignettes/simulation-partial\.rda$
 LICENSE

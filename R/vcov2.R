@@ -917,7 +917,8 @@ vcov.gamlss2 <- function(object,
     if(!is.function(family$map2par))
       .stop("the fitted family has no predictor-to-parameter map.")
 
-    .differentiate <- function(score.name, predictor.name)
+    .differentiate <- function(score.name, predictor.name, factor = 1,
+      refine = FALSE)
     {
       score <- family$score[[score.name]]
       if(!is.function(score))
@@ -925,7 +926,7 @@ vcov.gamlss2 <- function(object,
           "family score component '", score.name, "' is not available."
         ))
 
-      step <- .Machine$double.eps^(1 / 3) *
+      step <- factor * .Machine$double.eps^(1 / 3) *
         pmax(1, abs(eta[[predictor.name]]))
       ## Power-exponential densities have a location cusp. Keep the
       ## difference on the fitted side of y = mu, as in the JR optimizer;
@@ -938,16 +939,18 @@ vcov.gamlss2 <- function(object,
           if(identical(link, "identity")) abs(y - par$mu) else NULL
         if(!is.null(distance)) {
           step <- pmin(step, pmax(1e-10 * pmax(1, abs(eta[[predictor.name]])),
-            0.01 * distance))
+            min(0.2, 0.01 * factor) * distance))
         }
       }
-      upper <- lower <- eta
-      upper[[predictor.name]] <- eta[[predictor.name]] + step
-      lower[[predictor.name]] <- eta[[predictor.name]] - step
-
-      su <- score(par = family$map2par(upper), y = y)
-      sl <- score(par = family$map2par(lower), y = y)
-      z <- -(as.numeric(su) - as.numeric(sl)) / (2 * step)
+      .central <- function(step) {
+        upper <- lower <- eta
+        upper[[predictor.name]] <- eta[[predictor.name]] + step
+        lower[[predictor.name]] <- eta[[predictor.name]] - step
+        su <- score(par = family$map2par(upper), y = y)
+        sl <- score(par = family$map2par(lower), y = y)
+        -(as.numeric(su) - as.numeric(sl)) / (2 * step)
+      }
+      z <- .central(step)
 
       if(length(z) != n || any(!is.finite(z)))
         .stop(paste0(
@@ -955,7 +958,13 @@ vcov.gamlss2 <- function(object,
           score.name, "' and '", predictor.name, "'."
         ))
 
-      z
+      if(!refine) return(z)
+      half <- .central(step / 2)
+      if(length(half) != n || any(!is.finite(half)))
+        .stop("cannot verify finite observed curvature at a smaller step.")
+      value <- (4 * half - z) / 3
+      list(value = value,
+        change = abs(half - z) / pmax(1, abs(half), abs(z)))
     }
 
     z1 <- .differentiate(a, b)
@@ -968,6 +977,30 @@ vcov.gamlss2 <- function(object,
     z2 <- .differentiate(b, a)
     sc <- pmax(1, abs(z1), abs(z2))
     err <- max(abs(z1 - z2) / sc)
+    if(err > 1e-3) {
+      ## Retry numerically difficult observations at smaller and larger
+      ## steps. Richardson extrapolation reduces truncation error; requiring
+      ## convergence of both orientations preserves the score check.
+      bad <- abs(z1 - z2) / sc > 1e-3
+      for(factor in c(0.25, 4, 16)) {
+        r1 <- tryCatch(.differentiate(a, b, factor, refine = TRUE),
+          error = function(e) NULL)
+        r2 <- tryCatch(.differentiate(b, a, factor, refine = TRUE),
+          error = function(e) NULL)
+        if(is.null(r1) || is.null(r2)) next
+        scale <- pmax(1, abs(r1$value), abs(r2$value))
+        ok <- bad & is.finite(r1$value) & is.finite(r2$value) &
+          is.finite(r1$change) & is.finite(r2$change) &
+          r1$change <= 1e-3 & r2$change <= 1e-3 &
+          abs(r1$value - r2$value) / scale <= 1e-3
+        z1[ok] <- r1$value[ok]
+        z2[ok] <- r2$value[ok]
+        bad[ok] <- FALSE
+        if(!any(bad)) break
+      }
+      sc <- pmax(1, abs(z1), abs(z2))
+      err <- max(abs(z1 - z2) / sc)
+    }
     if(err > 1e-3)
       .stop(paste0(
         "linked family scores give inconsistent mixed curvature for '",

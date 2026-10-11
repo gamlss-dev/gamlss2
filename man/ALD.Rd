@@ -51,6 +51,15 @@ fit_ALD(formula, data, tau, anchor = 0.5, max_step = 0.05,
   Monotone rearrangement affects only the values returned by
   \code{fitted()} and \code{predict()}; the individual fitted models are
   retained unchanged.
+
+  The ALD can be used as a working likelihood when the response distribution
+  is not asymmetric Laplace. With constant scale, its data likelihood targets
+  pinball loss for the requested quantile. The location score is nonsmooth,
+  and working-likelihood intervals are not automatically calibrated under
+  misspecification. Ordinary observed-information Gaussian inference for
+  smooth likelihoods should not be interpreted as calibrated quantile
+  confidence intervals here; a suitable calibration or resampling procedure
+  requires separate justification.
 }
 
 \value{
@@ -70,6 +79,11 @@ fit_ALD(formula, data, tau, anchor = 0.5, max_step = 0.05,
   \dQuote{Quantile and Probability Curves Without Crossing}.
   \emph{Econometrica}, \bold{78}(3), 1093--1125.
   \doi{10.3982/ECTA7880}
+
+  Sriram K (2015). \dQuote{A Sandwich Likelihood Correction for Bayesian
+  Quantile Regression Based on the Misspecified Asymmetric Laplace Density}.
+  \emph{Statistics & Probability Letters}, \bold{107}, 18--26.
+  \doi{10.1016/j.spl.2015.07.035}
 }
 
 \seealso{
@@ -116,4 +130,3 @@ matlines(nd$age, nd$p, lty = c(2, 1, 2), lwd = 2, col = 2)
 
 \keyword{models}
 \keyword{regression}
-

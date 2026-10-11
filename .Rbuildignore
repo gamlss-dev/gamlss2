@@ -36,5 +36,7 @@ README.qmd
 ^vignettes/prediction\.qmd$
 ^vignettes/simulation\.R$
 ^vignettes/simulation-checkpoints($|/)
+^vignettes/simulation-checkpoints-ald($|/)
+^vignettes/simulation-checkpoints-qgam($|/)
 ^vignettes/simulation-partial\.rda$
 LICENSE

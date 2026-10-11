@@ -796,6 +796,7 @@ Further arguments passed to <code>gamlss2</code>.
 <p>The asymmetric Laplace density is proportional to <span class="math inline">\(\exp\{-\rho_\tau((y-\mu)/\sigma)\}\)</span>, where <span class="math inline">\(\rho_\tau(u) = u\{\tau-I(u&lt;0)\}\)</span>. Thus, <span class="math inline">\(\mu\)</span> is the conditional <span class="math inline">\(\tau\)</span>-quantile and <span class="math inline">\(\sigma&gt;0\)</span> is a scale parameter.</p>
 <p><code>fit_ALD</code> first estimates the anchor quantile and then proceeds toward the lower and upper requested quantiles. Coefficients and smoothing parameters are transferred between successive fits. Candidate fits are compared using their asymmetric Laplace log-likelihood.</p>
 <p>Monotone rearrangement affects only the values returned by <code>fitted()</code> and <code>predict()</code>; the individual fitted models are retained unchanged.</p>
+<p>The ALD can be used as a working likelihood when the response distribution is not asymmetric Laplace. With constant scale, its data likelihood targets pinball loss for the requested quantile. The location score is nonsmooth, and working-likelihood intervals are not automatically calibrated under misspecification. Ordinary observed-information Gaussian inference for smooth likelihoods should not be interpreted as calibrated quantile confidence intervals here; a suitable calibration or resampling procedure requires separate justification.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -806,6 +807,7 @@ Further arguments passed to <code>gamlss2</code>.
 <h3 class="anchored" data-anchor-id="references">References</h3>
 <p>Yu K, Moyeed RA (2001). “Bayesian Quantile Regression”. <em>Statistics &amp; Probability Letters</em>, <b>54</b>(4), 437–447. <a href="https://doi.org/10.1016/S0167-7152(01)00124-9">doi:10.1016/S0167-7152(01)00124-9</a></p>
 <p>Chernozhukov V, Fernandez-Val I, Galichon A (2010). “Quantile and Probability Curves Without Crossing”. <em>Econometrica</em>, <b>78</b>(3), 1093–1125. <a href="https://doi.org/10.3982/ECTA7880">doi:10.3982/ECTA7880</a></p>
+<p>Sriram K (2015). “A Sandwich Likelihood Correction for Bayesian Quantile Regression Based on the Misspecified Asymmetric Laplace Density”. <em>Statistics &amp; Probability Letters</em>, <b>107</b>, 18–26. <a href="https://doi.org/10.1016/j.spl.2015.07.035">doi:10.1016/j.spl.2015.07.035</a></p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>

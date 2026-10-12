@@ -754,7 +754,7 @@ Maximum distance between successive quantiles along the fitting path. Intermedia
 <code id="restarts">restarts</code>
 </td>
 <td>
-Character. With <code>“always”</code>, each warm-started fit is compared with a cold fit; <code>“on_failure”</code> uses a cold fit only when the warm fit fails; and <code>“never”</code> uses continuation only.
+Character. With <code>“always”</code>, each warm-started fit is compared with a cold fit; <code>“on_failure”</code> uses a cold fit only when the warm fit fails or does not converge; and <code>“never”</code> uses continuation only.
 </td>
 </tr>
 <tr>
@@ -794,7 +794,7 @@ Further arguments passed to <code>gamlss2</code>.
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>The asymmetric Laplace density is proportional to <span class="math inline">\(\exp\{-\rho_\tau((y-\mu)/\sigma)\}\)</span>, where <span class="math inline">\(\rho_\tau(u) = u\{\tau-I(u&lt;0)\}\)</span>. Thus, <span class="math inline">\(\mu\)</span> is the conditional <span class="math inline">\(\tau\)</span>-quantile and <span class="math inline">\(\sigma&gt;0\)</span> is a scale parameter.</p>
-<p><code>fit_ALD</code> first estimates the anchor quantile and then proceeds toward the lower and upper requested quantiles. Coefficients and smoothing parameters are transferred between successive fits. Candidate fits are compared using their asymmetric Laplace log-likelihood.</p>
+<p><code>fit_ALD</code> first estimates the anchor quantile and then proceeds toward the lower and upper requested quantiles. Coefficients and smoothing parameters are transferred between successive fits. Converged candidate fits are preferred and compared using their asymmetric Laplace log-likelihood. If no candidate converges, up to two retries halve and quarter the step length, retaining the smoothing criterion, iteration limits, and convergence tolerances. These retries use cold starts unless <code>restarts = “never”</code>. If no candidate converges after these retries, a finite candidate is returned with its convergence flag unchanged; callers should check the individual models or the diagnostics.</p>
 <p>Monotone rearrangement affects only the values returned by <code>fitted()</code> and <code>predict()</code>; the individual fitted models are retained unchanged.</p>
 <p>The ALD can be used as a working likelihood when the response distribution is not asymmetric Laplace. With constant scale, its data likelihood targets pinball loss for the requested quantile. The location score is nonsmooth, and working-likelihood intervals are not automatically calibrated under misspecification. Ordinary observed-information Gaussian inference for smooth likelihoods should not be interpreted as calibrated quantile confidence intervals here; a suitable calibration or resampling procedure requires separate justification.</p>
 </section>

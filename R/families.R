@@ -655,8 +655,9 @@ tF <- function(x, ...)
   rval$log_likelihood <- mkfun(paste0(
     "function(par, y) {\n",
     "d__ <- ", dll, "\n",
-    "ii__ <- !is.finite(d__); if(any(ii__)) d__[ii__] <- -100\n",
-    "sum(d__, na.rm=TRUE)\n}"
+    ## Invalid trial densities must be rejected by the step length control.
+    "if(any(!is.finite(d__))) return(-Inf)\n",
+    "sum(d__)\n}"
   ), list(.dfun = dfun))
 
   ## Randomized quantile residuals.

@@ -988,7 +988,7 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
   }
 
   converged <- is.finite(eps[1L]) && eps[1L] <= stop.eps[1L] &&
-    !safeguard.failed
+    !safeguard.failed && all(is.finite(d))
 
   rval <- list(
     "fitted.values" = if(stepwise_candidate) NULL else as.data.frame(eta),

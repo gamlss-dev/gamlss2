@@ -301,7 +301,7 @@ fit_ALD <- function(formula, data, tau,
     format(x, digits = 15L, trim = TRUE, scientific = FALSE)
   }
 
-  fit_candidate <- function(q, candidate_start) {
+  fit_candidate <- function(q, candidate_start, candidate_dots = dots) {
     warns <- character()
     args <- c(
       list(
@@ -310,7 +310,7 @@ fit_ALD <- function(formula, data, tau,
         family = ALD(tau = q),
         start = candidate_start
       ),
-      dots
+      candidate_dots
     )
 
     model <- withCallingHandlers(
@@ -351,6 +351,10 @@ fit_ALD <- function(formula, data, tau,
     )
   }
 
+  converged <- function(z) {
+    isTRUE(z$valid) && isTRUE(z$model$converged)
+  }
+
   fit_node <- function(q, previous = NULL, supplied_start = NULL,
     requested = FALSE)
   {
@@ -372,10 +376,34 @@ fit_ALD <- function(formula, data, tau,
     need_cold <- is.null(candidate_start) ||
       identical(restarts, "always") ||
       (identical(restarts, "on_failure") &&
-        !isTRUE(candidates[[start_name]]$valid))
+        !converged(candidates[[start_name]]))
 
     if(need_cold)
       candidates$cold <- fit_candidate(q, NULL)
+
+    ## Retry a nonconverged node with smaller steps on the same sample.
+    ## Keep the smoothing criterion, iteration limits, and tolerances.
+    ok <- vapply(candidates, function(z) isTRUE(z$valid), logical(1L))
+    if(any(ok) && !any(vapply(candidates, converged, logical(1L))) &&
+        (!identical(restarts, "never") || !is.null(candidate_start))) {
+      retry_dots <- dots
+      step <- if(is.null(dots$control)) dots$step else dots$control$step
+      if(is.null(step)) step <- 1
+      if(is.numeric(step) && length(step) == 1L &&
+          is.finite(step) && step > 0 && step <= 1) {
+        retry_start <- if(identical(restarts, "never")) candidate_start else NULL
+        for(i in 1:2) {
+          if(is.null(retry_dots$control)) {
+            retry_dots$step <- step / 2^i
+          } else {
+            retry_dots$control$step <- step / 2^i
+          }
+          nm <- paste0("retry", i)
+          candidates[[nm]] <- fit_candidate(q, retry_start, retry_dots)
+          if(converged(candidates[[nm]])) break
+        }
+      }
+    }
 
     ok <- vapply(candidates, function(z) isTRUE(z$valid), logical(1L))
     if(!any(ok)) {
@@ -390,7 +418,9 @@ fit_ALD <- function(formula, data, tau,
       )
     }
 
-    valid_names <- names(candidates)[ok]
+    ## A finite likelihood alone does not establish convergence.
+    done <- vapply(candidates, converged, logical(1L))
+    valid_names <- names(candidates)[if(any(done)) done else ok]
     chosen <- valid_names[
       which.max(vapply(candidates[valid_names], function(z) z$logLik, numeric(1L)))
     ]
@@ -407,6 +437,7 @@ fit_ALD <- function(formula, data, tau,
       tau = q,
       requested = requested,
       chosen = chosen,
+      converged = isTRUE(ans$model$converged),
       logLik = ans$logLik,
       warm.logLik = get_ll("warm"),
       start.logLik = get_ll("start"),

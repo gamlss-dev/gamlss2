@@ -28,7 +28,8 @@ fit_ALD(formula, data, tau, anchor = 0.5, max_step = 0.05,
     Use \code{Inf} to disable bridge models.}
   \item{restarts}{Character. With \code{"always"}, each warm-started fit is
     compared with a cold fit; \code{"on_failure"} uses a cold fit only when
-    the warm fit fails; and \code{"never"} uses continuation only.}
+    the warm fit fails or does not converge; and \code{"never"} uses
+    continuation only.}
   \item{start}{Optional starting values for the anchor model, as accepted by
     \code{\link{gamlss2}}.}
   \item{monotone}{Logical. If \code{TRUE}, returned fitted values and
@@ -45,8 +46,14 @@ fit_ALD(formula, data, tau, anchor = 0.5, max_step = 0.05,
 
   \code{fit_ALD} first estimates the anchor quantile and then proceeds toward
   the lower and upper requested quantiles. Coefficients and smoothing
-  parameters are transferred between successive fits. Candidate fits are
-  compared using their asymmetric Laplace log-likelihood.
+  parameters are transferred between successive fits. Converged candidate
+  fits are preferred and compared using their asymmetric Laplace
+  log-likelihood. If no candidate converges, up to two retries halve and
+  quarter the step length, retaining the smoothing criterion, iteration
+  limits, and convergence tolerances. These retries use cold starts unless
+  \code{restarts = "never"}. If no candidate converges after these retries,
+  a finite candidate is returned with its convergence flag unchanged;
+  callers should check the individual models or the diagnostics.
 
   Monotone rearrangement affects only the values returned by
   \code{fitted()} and \code{predict()}; the individual fitted models are

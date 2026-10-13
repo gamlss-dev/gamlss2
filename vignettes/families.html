@@ -174,10 +174,6 @@ window.Quarto = {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
-    <a class="dropdown-item" href="../vignettes/gamlss2.html">
- <span class="dropdown-text">Overview</span></a>
-  </li>  
-        <li>
     <a class="dropdown-item" href="../vignettes/firststeps.html">
  <span class="dropdown-text">First steps</span></a>
   </li>  
@@ -370,7 +366,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.92%
-AIC = 414.0972 elapsed =  0.04sec</code></pre>
+AIC = 414.0972 elapsed =  0.03sec</code></pre>
 </div>
 </div>
 <p>By default, <code>predict()</code> performs the reverse operation: it extracts the fitted parameters and returns a vector of <code>distributions3</code> objects. The explicit <code>prodist()</code> interface is equivalent.</p>
@@ -416,10 +412,10 @@ AIC = 414.0972 elapsed =  0.04sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1       r_2
-1 26.81276  15.46315
-2 41.65429  40.09024
-3 75.45136 155.12686</code></pre>
+<pre><code>        r_1      r_2
+1  19.54011 45.62968
+2  51.74680 59.77373
+3 146.95111 85.33519</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -628,7 +624,7 @@ sigma.s(Temp) 3.9513
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.21sec</code></pre>
+AIC = 952.263 elapsed =  0.16sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. <a href="prediction.html">Prediction and Uncertainty</a> uses this same Gamma family to construct intervals for means, quantiles, and future observations. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -695,7 +691,7 @@ sigma.s(speed) 1.0000
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.92%
-AIC = 414.0972 elapsed =  0.03sec</code></pre>
+AIC = 414.0972 elapsed =  0.02sec</code></pre>
 </div>
 </div>
 <p>For a manually defined family, the minimum required interface is <code>family</code>, <code>names</code>, <code>links</code>, and <code>pdf()</code>. Derivative callbacks have the following shape:</p>

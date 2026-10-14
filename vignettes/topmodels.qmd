@@ -1,10 +1,13 @@
 ---
 title: "Forecasting and Assessment with topmodels"
-format: 
+format:
   html:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    fig-width: 6
+    fig-height: 4.5
+    fig-align: center
 bibliography: gamlss2.bib
 vignette: >
   %\VignetteIndexEntry{Forecasting and Assessment with topmodels}
@@ -65,13 +68,12 @@ the middle curve is its median. These bands describe response variation;
 they are not confidence intervals for the fitted median.
 
 ```{r procast}
-#| fig-height: 5
-#| fig-width: 6
 #| fig-cap: "Fitted medians and central 95% response intervals for log car counts."
 nd <- data.frame(yday = 0:364)
 q1 <- procast(m1, newdata = nd, type = "quantile", at = c(0.025, 0.5, 0.975))
 q2 <- procast(m2, newdata = nd, type = "quantile", at = c(0.025, 0.5, 0.975))
 day <- nd$yday + 1
+par(mar = c(4, 4, 1, 1))
 plot(log(cars) ~ I(yday + 1), data = HarzTraffic, type = "n",
   xlab = "Day of year", ylab = "Log car count",
   ylim = range(log(HarzTraffic$cars), q1, q2))
@@ -108,25 +110,27 @@ These are in-sample diagnostics; satisfactory plots do not establish predictive
 performance on new data or calibration within every covariate subgroup.
 
 ```{r lm}
-#| fig-height: 10
-#| fig-width: 10
-#| echo: true
-par(mfrow = c(2, 2))
+#| fig-cap: "In-sample calibration diagnostics for the Gaussian regression."
+#| fig-width: 9
+#| fig-height: 7
+op <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1), cex = 1)
 rootogram(m1)
 pithist(m1)
 qqrplot(m1)
 wormplot(m1)
+par(op)
 ```
 
 ```{r gamlss2}
-#| fig-height: 10
-#| fig-width: 10
-#| echo: true
-par(mfrow = c(2, 2))
+#| fig-cap: "In-sample calibration diagnostics for the skew-normal GAMLSS model."
+#| fig-width: 9
+#| fig-height: 7
+op <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1), cex = 1)
 rootogram(m2)
 pithist(m2)
 qqrplot(m2)
 wormplot(m2)
+par(op)
 ```
 
 ### Comparing diagnostics
@@ -136,16 +140,17 @@ to identify. Keep the colors from the prediction plot: red for the Gaussian
 regression and blue for the skew-normal model.
 
 ```{r comparison}
-#| fig-height: 5
-#| fig-width: 10
-#| echo: true
-par(mfrow = c(1, 2))
+#| fig-cap: "Overlaid PIT histograms and worm plots for the Gaussian and skew-normal models."
+#| fig-width: 9
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
 p1 <- pithist(m1, plot = FALSE)
 p2 <- pithist(m2, plot = FALSE)
 plot(c(p1, p2), col = c(2, 4), single_graph = TRUE, style = "line")
 w1 <- wormplot(m1, plot = FALSE)
 w2 <- wormplot(m2, plot = FALSE)
 plot(c(w1, w2), col = c(2, 4), single_graph = TRUE)
+par(op)
 ```
 
 ## Scoring rules
@@ -158,7 +163,7 @@ mean and variance. In `topmodels` these are losses: smaller values are better.
 Compare models within a score, since the scores have different scales; see the
 [`proscore()` reference](https://topmodels.r-forge.r-project.org/reference/proscore.html).
 
-```{r, proscore}
+```{r proscore}
 #| message: false
 m <- list(lm = m1, gamlss2 = m2)
 sapply(m, proscore, type = c("logs", "crps", "mae", "mse", "dss"))

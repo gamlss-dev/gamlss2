@@ -5,6 +5,9 @@ format:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    fig-width: 6
+    fig-height: 4.5
+    fig-align: center
 bibliography: gamlss2.bib
 vignette: >
   %\VignetteIndexEntry{Bayesian GAMLSS with gamlss2}
@@ -20,7 +23,7 @@ uses the same distributional formulas, family objects, and smooth terms as the
 usual fitting functions. The sampler follows the Bayesian additive model
 framework described by @bamlss2018.
 
-There are two convenient ways to run the sampler. Function `bamlss2()` fits a
+There are two ways to run the sampler. The function `bamlss2()` fits a
 model directly by MCMC, whereas `mcmc()` starts from an already fitted
 `gamlss2` model. This vignette illustrates both workflows and shows how to
 inspect posterior effects, samples, and predictions.
@@ -46,13 +49,11 @@ air <- subset(airquality, !is.na(Ozone))
 ```
 
 ```{r}
-#| fig-height: 4.5
-#| fig-width: 6
-#| fig-align: center
+#| fig-cap: "Daily ozone concentration and temperature in the airquality data."
 par(mar = c(4, 4, 1, 1))
 plot(Ozone ~ Temp, data = air,
   pch = 16, col = adjustcolor(1, 0.3),
-  xlab = "Temperature (F)", ylab = "Ozone")
+  xlab = "Temperature (°F)", ylab = "Ozone (ppb)")
 ```
 
 The distributional formula is
@@ -103,11 +104,12 @@ Calling `plot()` displays the fitted additive effects. For a Bayesian fit these
 are obtained from the posterior samples stored in the fitted object.
 
 ```{r}
-#| fig-height: 4
-#| fig-width: 9
-#| fig-align: center
-par(mar = c(4, 4, 1, 1))
-plot(m)
+#| fig-cap: "Posterior smooth effects for the Gamma mean and relative scale."
+#| fig-width: 12
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 3), mar = c(4, 4, 1, 1), cex = 1)
+plot(m, spar = FALSE)
+par(op)
 ```
 
 The MCMC draws are available in the `samples` component. For example, the
@@ -127,14 +129,16 @@ can be obtained with `which = "samples"`. Here we inspect the intercept in the
 `mu` model.
 
 ```{r}
-#| fig-height: 4
-#| fig-width: 8
-#| fig-align: center
+#| fig-cap: "Trace and autocorrelation of the intercept draws for the Gamma mean."
+#| fig-width: 9
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
 plot(m, which = "samples", parameter = "mu",
-  terms = "(Intercept)", lag.max = 60)
+  terms = "(Intercept)", lag.max = 60, spar = FALSE)
+par(op)
 ```
 
-The `model` and `terms` arguments can be used to select other coefficients.
+The `parameter` and `terms` arguments can be used to select other coefficients.
 Smooth terms contain several basis coefficients, so inspecting a smooth can
 produce several trace and autocorrelation plots.
 
@@ -190,14 +194,14 @@ curve. Wind speed is held fixed, while the displayed observations include all
 wind speeds.
 
 ```{r}
-#| fig-height: 4
+#| fig-cap: "Posterior medians and 95% pointwise credible intervals for the Gamma mean and relative scale, at median wind speed."
 #| fig-width: 9
-#| fig-align: center
-op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1))
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
 
 plot(Ozone ~ Temp, data = air,
   pch = 16, col = adjustcolor(1, 0.2),
-  xlab = "Temperature (F)", ylab = expression(mu))
+  xlab = "Temperature (°F)", ylab = "Mean ozone (ppb)")
 polygon(c(nd$Temp, rev(nd$Temp)),
   c(pmu$lower, rev(pmu$upper)),
   border = NA, col = adjustcolor(4, 0.15))
@@ -205,7 +209,7 @@ lines(nd$Temp, pmu$fit, col = 4, lwd = 2)
 
 plot(nd$Temp, psigma$fit, type = "n",
   ylim = range(psigma[, c("lower", "upper")]),
-  xlab = "Temperature (F)", ylab = expression(sigma))
+  xlab = "Temperature (°F)", ylab = expression("Relative scale " * sigma))
 polygon(c(nd$Temp, rev(nd$Temp)),
   c(psigma$lower, rev(psigma$upper)),
   border = NA, col = adjustcolor(4, 0.15))
@@ -232,7 +236,7 @@ posterior draws in that construction gives posterior predictive intervals.
 
 Bayesian sampling can also be started from an existing likelihood-based fit.
 This is useful when a model has already been developed with `gamlss2()` and the
-same specification should subsequently be sampled. Function `mcmc()` uses the
+same specification should subsequently be sampled. The function `mcmc()` uses the
 fitted coefficients and smoothing parameters as starting values and merges the
 posterior output back into the model object.
 
@@ -260,7 +264,7 @@ The fitted model supplied to `mcmc()` must retain the design information needed
 by the sampler. In particular, reduced model objects that discard this
 information cannot be used to restart sampling.
 
-## Practical remarks
+## Practical guidance
 
 The Bayesian and likelihood-based interfaces deliberately share the same model
 specification. This makes it possible to develop a distributional model with

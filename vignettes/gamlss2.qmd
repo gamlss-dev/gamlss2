@@ -1,10 +1,13 @@
 ---
 title: "Overview"
-format: 
+format:
   html:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    fig-width: 6
+    fig-height: 4.5
+    fig-align: center
 bibliography: gamlss2.bib
 nocite: |
   @Rigby+Stasinopoulos:2005
@@ -24,27 +27,27 @@ vignette: >
 
 ## Overview
 
-The primary purpose of this package is to facilitate the creation of advanced infrastructures
-designed to enhance the GAMLSS modeling framework. Notably, the `gamlss2` package represents a
-significant overhaul of its predecessor, [`gamlss`](https://cran.r-project.org/package=gamlss),
-with a key emphasis on improving estimation
-speed and incorporating more flexible infrastructures. These enhancements enable the seamless
-integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation,
-regression trees, and forests, fostering a more versatile and powerful modeling environment.
+The `gamlss2` package provides infrastructure for generalized additive models
+for location, scale, and shape (GAMLSS) and distributional regression more
+generally. It reimplements the classic
+[`gamlss`](https://cran.r-project.org/package=gamlss) framework with an emphasis
+on estimation speed and flexible model components. Its modular design supports
+alternative estimation algorithms, Bayesian sampling, and model terms such as
+regression trees and forests.
 
-Moreover, the package expands its compatibility by supporting all model terms from the base
-R [`mgcv`](https://cran.r-project.org/package=mgcv) package. Additionally, the `gamlss2` package
-introduces the capability to accommodate more than four parameter families. Essentially, this
-means that users can now specify any type of model using these new infrastructures, making the
-package highly flexible and accommodating to a wide range of modeling requirements.
+Models can use smooth terms from
+[`mgcv`](https://cran.r-project.org/package=mgcv), custom special terms, and
+response families with more than four parameters. Separate predictors for
+the distribution parameters are specified in a single formula.
 
 * The main model function is [`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html).
-* The default optimizer functions is [`RS()`](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html). Optimizer functions can be exchanged.
-* Most important methods: `summary()`, [`plot()`](https://gamlss-dev.github.io/gamlss2/man/plots.html), [`predict()`](https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html).
-* Easy development of new family objects, see [`?gamlss2,family`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.family.html).
-* User-specific "special" terms are possible, see [`?special_terms`](https://gamlss-dev.github.io/gamlss2/man/special_terms.html).
+* The default optimizer is [`RS()`](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html); alternative optimizers can be supplied.
+* The main methods are `summary()`, [`plot()`](https://gamlss-dev.github.io/gamlss2/man/plots.html), and [`predict()`](https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html).
+* Custom family objects are described in [Family Objects](families.html).
+* Custom predictor components are described in [Special Model Terms](specials.html).
 
-For examples, please visit the manual pages.
+Start with [First Steps](firststeps.html) for a worked example, or browse the
+manual pages.
 
 ```{r}
 #| eval: false
@@ -55,13 +58,14 @@ help(package = "gamlss2")
 
 The development version of `gamlss2` can be installed via
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 install.packages("gamlss2",
   repos = c("https://gamlss-dev.R-universe.dev",
             "https://cloud.R-project.org"))
 ```
 
-## Licence
+## License
 
 The package is available under the
 [General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html)

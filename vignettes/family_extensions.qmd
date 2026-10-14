@@ -5,6 +5,9 @@ format:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    fig-width: 6
+    fig-height: 4.5
+    fig-align: center
 vignette: >
   %\VignetteIndexEntry{Family Extensions}
   %\VignetteEngine{quarto::html}
@@ -85,13 +88,13 @@ suggests that magnitude also varies with depth. We first investigate the
 boundary; later we return to the one-decimal reporting precision.
 
 ```{r quakes-plot}
-#| fig-height: 4.2
-#| fig-width: 8
-#| fig-align: center
-op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1))
+#| fig-cap: "Recorded earthquake magnitudes and their relationship with depth."
+#| fig-width: 9
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
 hist(quakes$mag,
   breaks = seq(3.95, max(quakes$mag) + 0.05, by = 0.1),
-  right = FALSE, border = "white", col = "grey65",
+  right = FALSE, border = "white", col = "gray65",
   xlab = "Magnitude", main = "")
 plot(mag ~ depth, data = quakes,
   pch = 16, col = adjustcolor(1, 0.2),
@@ -122,9 +125,10 @@ marginal distribution. `fit_family()` fits an intercept-only `gamlss2()` model
 and overlays its density on a histogram.
 
 ```{r quakes-marginal}
-#| fig-width: 8
-#| fig-height: 4
-op <- par(mfrow = c(1, 2))
+#| fig-cap: "Normal and truncated normal marginal fits to recorded earthquake magnitudes."
+#| fig-width: 9
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
 mf_norm <- fit_family(quakes$mag, family = NO,
   control = ctrl, main = "Normal", xlab = "Magnitude")
 mf_trunc <- fit_family(quakes$mag,
@@ -137,9 +141,8 @@ AIC(mf_norm, mf_trunc)
 The truncated normal has substantially lower AIC. Compare the lower boundary
 and the right tail in the two plots to see where the distributions differ.
 The AIC improvement supports this choice, but does not establish the sampling
-mechanism: the
-known selection threshold motivates truncation. Both fits use continuous
-densities for the same response, so their AIC values are comparable. Treating
+mechanism: the known selection threshold motivates truncation. Both fits use
+continuous densities for the same response, so their AIC values are comparable. Treating
 the recorded decimals as continuous is a working approximation.
 
 The marginal comparison also ignores depth and geographic location. We next
@@ -207,8 +210,8 @@ AIC(m_round, m_both)
 ```
 
 This second AIC comparison is valid because both models assign probability
-mass to the same one-decimal values. In contrast, neither rounded model should be compared by log-likelihood or
-AIC with `m_norm` or `m_trunc`:
+mass to the same one-decimal values. Neither rounded model should be compared
+by log-likelihood or AIC with `m_norm` or `m_trunc`:
 probability densities and probability masses are defined with respect to
 different measures and have different units.
 
@@ -235,9 +238,7 @@ include all locations, so they show the overall data cloud rather than a
 sample drawn at that fixed location.
 
 ```{r quakes-quantiles}
-#| fig-height: 5
-#| fig-width: 7
-#| fig-align: center
+#| fig-cap: "Fitted 10th, 50th, and 90th percentiles of recorded magnitude, at median longitude and latitude."
 par(mar = c(4, 4, 1, 1))
 plot(mag ~ depth, data = quakes,
   pch = 16, col = adjustcolor(1, 0.15),
@@ -310,9 +311,8 @@ use randomized quantile residuals when fitted.
 ## Censoring: measurements at a recording limit
 
 Truncation excludes events from the sample; rounding and grouping record
-intervals. A recording limit
-has a different consequence: the observation remains in the data, but we
-know only that its true value reached or crossed the limit. This is censoring.
+intervals. A recording limit has a different consequence: the observation
+remains in the data, but we know only that its true value reached or crossed the limit. This is censoring.
 For upper censoring at $u$, every $X \geq u$ is observed as $u$;
 the resulting distribution has a point mass of size $\Pr(X \geq u)$ at the
 boundary.
@@ -329,9 +329,7 @@ table(cars$dist80 == 80)
 ```
 
 ```{r censoring-plot}
-#| fig-height: 5
-#| fig-width: 7
-#| fig-align: center
+#| fig-cap: "Stopping distances capped at 80 feet, with the recording limit marked."
 par(mar = c(4, 4, 1, 1))
 plot(dist80 ~ speed, data = cars,
   pch = 16, col = adjustcolor(1, 0.55),
@@ -369,8 +367,7 @@ speed. Because the recorded response cannot exceed 80, upper quantiles flatten
 at the censoring limit when enough fitted probability lies above it.
 
 ```{r censoring-quantiles}
-#| fig-height: 5
-#| fig-width: 7
+#| fig-cap: "Fitted 10th, 50th, and 90th percentiles of capped stopping distance."
 nd <- data.frame(speed = seq(min(cars$speed), max(cars$speed), length.out = 150))
 q <- quantile(m_cens, newdata = nd, probs = c(0.1, 0.5, 0.9))
 par(mar = c(4, 4, 1, 1))
@@ -470,9 +467,10 @@ surv <- sapply(seq_len(nrow(nd)), function(j) {
 ```
 
 ```{r survival-plot}
-#| fig-width: 8
+#| fig-cap: "Fitted Weibull survival curves by age and sex."
+#| fig-width: 9
 #| fig-height: 4.5
-op <- par(mfrow = c(1, 2), mar = c(4, 4, 4, 1))
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
 for(i in c("Male", "Female")) {
   j <- which(nd$sex == i)
   matplot(time, surv[, j], type = "l", lty = 1:3,
@@ -536,9 +534,10 @@ Fit all three distributions to each sample. The plots compare empirical
 frequencies with fitted probabilities over the same count range.
 
 ```{r count-marginal}
-#| fig-width: 9
-#| fig-height: 6
-op <- par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+#| fig-cap: "Poisson, inflated Poisson, and hurdle Poisson marginal fits for samples with excess or few zeros."
+#| fig-width: 12
+#| fig-height: 7
+op <- par(mfrow = c(2, 3), mar = c(4, 4, 3, 1), cex = 1)
 fits <- lapply(names(ys), function(label) {
   y <- ys[[label]]
   fits <- list(
@@ -593,9 +592,10 @@ Conditioning on positivity gives $E(Y \mid Y>0,x)=\mu/(1-e^{-\mu})$.
 The plots compare these fitted quantities with the known simulation curves.
 
 ```{r count-regression-plot}
-#| fig-width: 8
-#| fig-height: 4
-op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1))
+#| fig-cap: "Fitted zero probabilities and positive-count means compared with the generating model."
+#| fig-width: 9
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
 plot(nd$x, p0, type = "l", col = 4, lwd = 2,
   ylim = c(0, 1), xlab = "x", ylab = "Probability of zero")
 lines(nd$x, plogis(-1.5 + 0.8 * nd$x), lty = 2, lwd = 2)
@@ -655,8 +655,7 @@ complete distribution, they include the endpoint masses as well as the
 continuous interior.
 
 ```{r endpoint-plot}
-#| fig-width: 7
-#| fig-height: 5
+#| fig-cap: "Fitted 10th, 50th, and 90th percentiles of a proportion with point masses at zero and one."
 nd <- data.frame(x = seq(-2, 2, length.out = 150))
 q <- quantile(m_01, newdata = nd,
   probs = c(0.1, 0.5, 0.9))
@@ -714,9 +713,10 @@ volume scale, so their AIC values are comparable. A model fitted to
 `log(Volume)` without the Jacobian would use a different response scale.
 
 ```{r transformed-marginal}
-#| fig-width: 8
-#| fig-height: 4
-op <- par(mfrow = c(1, 2))
+#| fig-cap: "Normal and lognormal marginal fits to tree volume."
+#| fig-width: 9
+#| fig-height: 4.5
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
 mf_norm <- fit_family(trees$Volume, family = NO,
   control = ctrl, main = "Normal", xlab = "Volume")
 mf_lnorm <- fit_family(trees$Volume, family = f_lnorm,
@@ -748,9 +748,7 @@ q <- quantile(m_lnorm, newdata = nd,
 ```
 
 ```{r transformed-plot}
-#| fig-height: 5
-#| fig-width: 7
-#| fig-align: center
+#| fig-cap: "Fitted 10th, 50th, and 90th percentiles of tree volume by girth."
 par(mar = c(4, 4, 1, 1))
 plot(Volume ~ Girth, data = trees,
   pch = 16, col = adjustcolor(1, 0.55),

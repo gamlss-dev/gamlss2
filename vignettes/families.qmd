@@ -5,6 +5,9 @@ format:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    fig-width: 6
+    fig-height: 4.5
+    fig-align: center
 bibliography: gamlss2.bib
 vignette: >
   %\VignetteIndexEntry{Family Objects}
@@ -32,7 +35,10 @@ For the fitting workflow, start with [First Steps](firststeps.html).
 To modify an existing distribution for an observation mechanism such as
 truncation or censoring, see [Family Extensions](family_extensions.html).
 
-```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+```{r preliminaries}
+#| echo: false
+#| message: false
+#| results: hide
 library("gamlss2")
 library("distributions3")
 ```
@@ -243,7 +249,7 @@ are used by residual diagnostics, numerical completion, and the
 Suppose we want a Gamma distribution with the GAMLSS parameterization
 `(mu, sigma)`, where `mu` is the mean and `sigma` controls dispersion. The
 ordinary `distributions3::Gamma()` uses shape and rate instead. We can define a
-small distributions3 class that translates between the two parameterizations:
+small `distributions3` class that translates between the two parameterizations:
 
 $$
 \text{shape}=1/\sigma^2, \qquad
@@ -422,7 +428,7 @@ Newton/Fisher-scoring update returning `list(eta, weights)`.
 
 ## Optional scoring rules
 
-The distributions3 bridge also exposes a `crps()` callback when the optional
+The `distributions3` bridge also exposes a `crps()` callback when the optional
 `scoringRules` package is available. This is useful for probabilistic forecast
 evaluation, but it is not needed for fitting, prediction, or the basic family
 interface. [Forecasting and Assessment](topmodels.html) demonstrates scoring

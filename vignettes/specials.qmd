@@ -5,6 +5,9 @@ format:
     html-math-method: mathjax
     toc: true
     number-sections: true
+    fig-width: 6
+    fig-height: 4.5
+    fig-align: center
 vignette: >
   %\VignetteIndexEntry{Special Model Terms}
   %\VignetteEngine{quarto::html}
@@ -22,7 +25,10 @@ The standard fitting workflow is described in [First Steps](firststeps.html).
 This vignette focuses on extending the predictor; [Family Objects](families.html)
 instead extends the response distribution.
 
-```{r preliminaries, echo=FALSE, message=FALSE, results="hide"}
+```{r preliminaries}
+#| echo: false
+#| message: false
+#| results: hide
 library("gamlss2")
 ```
 
@@ -154,7 +160,7 @@ predict(m, newdata = air[1:5, , drop = FALSE])
 
 Use an existing special when it already provides the required estimator and
 prediction behavior. Write a custom special when the term has a distinct
-fitting algorithm, needs custom state, or wraps an external modelling method.
+fitting algorithm, needs custom state, or wraps an external modeling method.
 Keep the constructor lightweight, store all information needed for prediction,
 return centered fitted contributions, and test both fitting and `newdata`
 predictions. Prediction support alone does not imply support for joint

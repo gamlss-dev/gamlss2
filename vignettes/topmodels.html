@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta property="og:description" content="">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/topmodels_files/figure-html/procast-1.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="960">
+<meta property="og:image:height" content="864">
 <meta property="og:image:width" content="1152">
 </head>
 
@@ -262,19 +262,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">&lt;-</span> <span class="fu">procast</span>(m1, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"quantile"</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>q2 <span class="ot">&lt;-</span> <span class="fu">procast</span>(m2, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"quantile"</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>day <span class="ot">&lt;-</span> nd<span class="sc">$</span>yday <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic, <span class="at">type =</span> <span class="st">"n"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Log car count"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">log</span>(HarzTraffic<span class="sc">$</span>cars), q1, q2))</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(day, <span class="fu">rev</span>(day)), <span class="fu">c</span>(q1[, <span class="dv">1</span>], <span class="fu">rev</span>(q1[, <span class="dv">3</span>])),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">2</span>, <span class="at">alpha.f =</span> <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"transparent"</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(day, <span class="fu">rev</span>(day)), <span class="fu">c</span>(q2[, <span class="dv">1</span>], <span class="fu">rev</span>(q2[, <span class="dv">3</span>])),</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="at">alpha.f =</span> <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"transparent"</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.3</span>))</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(day, q1[, <span class="dv">2</span>], <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(day, q2[, <span class="dv">2</span>], <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"Gaussian regression"</span>, <span class="st">"Skew-normal GAMLSS"</span>),</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Day of year"</span>, <span class="at">ylab =</span> <span class="st">"Log car count"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">log</span>(HarzTraffic<span class="sc">$</span>cars), q1, q2))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(day, <span class="fu">rev</span>(day)), <span class="fu">c</span>(q1[, <span class="dv">1</span>], <span class="fu">rev</span>(q1[, <span class="dv">3</span>])),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">2</span>, <span class="at">alpha.f =</span> <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"transparent"</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(day, <span class="fu">rev</span>(day)), <span class="fu">c</span>(q2[, <span class="dv">1</span>], <span class="fu">rev</span>(q2[, <span class="dv">3</span>])),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="at">alpha.f =</span> <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"transparent"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">log</span>(cars) <span class="sc">~</span> <span class="fu">I</span>(yday <span class="sc">+</span> <span class="dv">1</span>), <span class="at">data =</span> HarzTraffic,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.3</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(day, q1[, <span class="dv">2</span>], <span class="at">col =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(day, q2[, <span class="dv">2</span>], <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"Gaussian regression"</span>, <span class="st">"Skew-normal GAMLSS"</span>),</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -299,52 +300,58 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>We first inspect the Gaussian regression, then the distributional model. These are in-sample diagnostics; satisfactory plots do not establish predictive performance on new data or calibration within every covariate subgroup.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m1)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m1)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m1)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/lm-1.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="topmodels_files/figure-html/lm-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>In-sample calibration diagnostics for the Gaussian regression.</figcaption>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m2)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m2)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m2)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rootogram</span>(m2)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pithist</span>(m2)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">qqrplot</span>(m2)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">wormplot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/gamlss2-1.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="topmodels_files/figure-html/gamlss2-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>In-sample calibration diagnostics for the skew-normal GAMLSS model.</figcaption>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="comparing-diagnostics" class="level3" data-number="4.2">
 <h3 data-number="4.2" class="anchored" data-anchor-id="comparing-diagnostics"><span class="header-section-number">4.2</span> Comparing diagnostics</h3>
 <p>Overlaying the same diagnostic for both models makes their differences easier to identify. Keep the colors from the prediction plot: red for the Gaussian regression and blue for the skew-normal model.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(p1, p2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>, <span class="at">style =</span> <span class="st">"line"</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>w1 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>w2 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(w1, w2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(p1, p2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>, <span class="at">style =</span> <span class="st">"line"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>w1 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>w2 <span class="ot">&lt;-</span> <span class="fu">wormplot</span>(m2, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(w1, w2), <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">single_graph =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/comparison-1.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="topmodels_files/figure-html/comparison-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Overlaid PIT histograms and worm plots for the Gaussian and skew-normal models.</figcaption>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 </section>
@@ -352,8 +359,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="5" class="anchored" data-anchor-id="scoring-rules"><span class="header-section-number">5</span> Scoring rules</h2>
 <p>Scoring rules reduce predictive performance to numerical summaries. The log score and continuous ranked probability score (CRPS) assess the predictive distribution, whereas mean absolute error (MAE) and mean squared error (MSE) assess point predictions. The Dawid–Sebastiani score (DSS) uses the predicted mean and variance. In <code>topmodels</code> these are losses: smaller values are better. Compare models within a score, since the scores have different scales; see the <a href="https://topmodels.r-forge.r-project.org/reference/proscore.html"><code>proscore()</code> reference</a>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lm =</span> m1, <span class="at">gamlss2 =</span> m2)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(m, proscore, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"logs"</span>, <span class="st">"crps"</span>, <span class="st">"mae"</span>, <span class="st">"mse"</span>, <span class="st">"dss"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lm =</span> m1, <span class="at">gamlss2 =</span> m2)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(m, proscore, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"logs"</span>, <span class="st">"crps"</span>, <span class="st">"mae"</span>, <span class="st">"mse"</span>, <span class="st">"dss"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     lm         gamlss2   
 logs 0.1806799  0.03795853

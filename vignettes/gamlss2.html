@@ -227,7 +227,7 @@ div.csl-indent {
   <ul class="collapse">
   <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">1.1</span> Overview</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation"><span class="header-section-number">1.2</span> Installation</a></li>
-  <li><a href="#licence" id="toc-licence" class="nav-link" data-scroll-target="#licence"><span class="header-section-number">1.3</span> Licence</a></li>
+  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license"><span class="header-section-number">1.3</span> License</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -247,16 +247,16 @@ div.csl-indent {
 <h1 data-number="1"><span class="header-section-number">1</span> gamlss2: Infrastructure for Flexible Distributional Regression</h1>
 <section id="overview" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">1.1</span> Overview</h2>
-<p>The primary purpose of this package is to facilitate the creation of advanced infrastructures designed to enhance the GAMLSS modeling framework. Notably, the <code>gamlss2</code> package represents a significant overhaul of its predecessor, <a href="https://cran.r-project.org/package=gamlss"><code>gamlss</code></a>, with a key emphasis on improving estimation speed and incorporating more flexible infrastructures. These enhancements enable the seamless integration of various algorithms into GAMLSS, including gradient boosting, Bayesian estimation, regression trees, and forests, fostering a more versatile and powerful modeling environment.</p>
-<p>Moreover, the package expands its compatibility by supporting all model terms from the base R <a href="https://cran.r-project.org/package=mgcv"><code>mgcv</code></a> package. Additionally, the <code>gamlss2</code> package introduces the capability to accommodate more than four parameter families. Essentially, this means that users can now specify any type of model using these new infrastructures, making the package highly flexible and accommodating to a wide range of modeling requirements.</p>
+<p>The <code>gamlss2</code> package provides infrastructure for generalized additive models for location, scale, and shape (GAMLSS) and distributional regression more generally. It reimplements the classic <a href="https://cran.r-project.org/package=gamlss"><code>gamlss</code></a> framework with an emphasis on estimation speed and flexible model components. Its modular design supports alternative estimation algorithms, Bayesian sampling, and model terms such as regression trees and forests.</p>
+<p>Models can use smooth terms from <a href="https://cran.r-project.org/package=mgcv"><code>mgcv</code></a>, custom special terms, and response families with more than four parameters. Separate predictors for the distribution parameters are specified in a single formula.</p>
 <ul>
 <li>The main model function is <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.html"><code>gamlss2()</code></a>.</li>
-<li>The default optimizer functions is <a href="https://gamlss-dev.github.io/gamlss2/man/RS_CG.html"><code>RS()</code></a>. Optimizer functions can be exchanged.</li>
-<li>Most important methods: <code>summary()</code>, <a href="https://gamlss-dev.github.io/gamlss2/man/plots.html"><code>plot()</code></a>, <a href="https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html"><code>predict()</code></a>.</li>
-<li>Easy development of new family objects, see <a href="https://gamlss-dev.github.io/gamlss2/man/gamlss2.family.html"><code>?gamlss2,family</code></a>.</li>
-<li>User-specific “special” terms are possible, see <a href="https://gamlss-dev.github.io/gamlss2/man/special_terms.html"><code>?special_terms</code></a>.</li>
+<li>The default optimizer is <a href="https://gamlss-dev.github.io/gamlss2/man/RS_CG.html"><code>RS()</code></a>; alternative optimizers can be supplied.</li>
+<li>The main methods are <code>summary()</code>, <a href="https://gamlss-dev.github.io/gamlss2/man/plots.html"><code>plot()</code></a>, and <a href="https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html"><code>predict()</code></a>.</li>
+<li>Custom family objects are described in <a href="families.html">Family Objects</a>.</li>
+<li>Custom predictor components are described in <a href="specials.html">Special Model Terms</a>.</li>
 </ul>
-<p>For examples, please visit the manual pages.</p>
+<p>Start with <a href="firststeps.html">First Steps</a> for a worked example, or browse the manual pages.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">help</span>(<span class="at">package =</span> <span class="st">"gamlss2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -270,8 +270,8 @@ div.csl-indent {
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"https://cloud.R-project.org"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="licence" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="licence"><span class="header-section-number">1.3</span> Licence</h2>
+<section id="license" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="license"><span class="header-section-number">1.3</span> License</h2>
 <p>The package is available under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">General Public License version 3</a> or <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">version 2</a></p>
 
 

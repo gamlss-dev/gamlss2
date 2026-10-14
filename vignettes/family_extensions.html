@@ -144,8 +144,8 @@ window.Quarto = {
 <meta property="og:description" content="">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/family_extensions_files/figure-html/quakes-plot-1.png">
 <meta property="og:site_name" content="gamlss2">
-<meta property="og:image:height" content="806">
-<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="864">
+<meta property="og:image:width" content="1728">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -348,11 +348,11 @@ window.Quarto = {
 </div>
 </div>
 <p>The histogram shows the lower boundary and a long right tail. The scatterplot suggests that magnitude also varies with depth. We first investigate the boundary; later we return to the one-decimal reporting precision.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(quakes<span class="sc">$</span>mag,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fl">3.95</span>, <span class="fu">max</span>(quakes<span class="sc">$</span>mag) <span class="sc">+</span> <span class="fl">0.05</span>, <span class="at">by =</span> <span class="fl">0.1</span>),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">right =</span> <span class="cn">FALSE</span>, <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">col =</span> <span class="st">"grey65"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">right =</span> <span class="cn">FALSE</span>, <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">col =</span> <span class="st">"gray65"</span>,</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Magnitude"</span>, <span class="at">main =</span> <span class="st">""</span>)</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mag <span class="sc">~</span> depth, <span class="at">data =</span> quakes,</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
@@ -360,7 +360,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/quakes-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="family_extensions_files/figure-html/quakes-plot-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Recorded earthquake magnitudes and their relationship with depth.</figcaption>
 </figure>
 </div>
 </div>
@@ -376,16 +377,17 @@ window.Quarto = {
 <p>Truncation divides the original density by the probability of falling in the retained interval. For a continuous distribution with a lower boundary at 4, this gives <span class="math inline">\(f(y \mid Y \geq 4) = f(y)/\{1-F(4)\}\)</span>. The parent normal location may lie below 4; it is not the mean of the observed magnitudes. This is how a symmetric parent distribution can produce an asymmetric observed response.</p>
 <p>Before adding covariates, we check whether this change helps describe the marginal distribution. <code>fit_family()</code> fits an intercept-only <code>gamlss2()</code> model and overlays its density on a histogram.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mf_norm <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(quakes<span class="sc">$</span>mag, <span class="at">family =</span> NO,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Normal"</span>, <span class="at">xlab =</span> <span class="st">"Magnitude"</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>mf_trunc <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(quakes<span class="sc">$</span>mag,</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> f_trunc,</span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Truncated normal"</span>, <span class="at">xlab =</span> <span class="st">"Magnitude"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/quakes-marginal-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="family_extensions_files/figure-html/quakes-marginal-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Normal and truncated normal marginal fits to recorded earthquake magnitudes.</figcaption>
 </figure>
 </div>
 </div>
@@ -454,7 +456,7 @@ m_both  5368.313  7.294337
 m_round 5509.784 13.136685</code></pre>
 </div>
 </div>
-<p>This second AIC comparison is valid because both models assign probability mass to the same one-decimal values. In contrast, neither rounded model should be compared by log-likelihood or AIC with <code>m_norm</code> or <code>m_trunc</code>: probability densities and probability masses are defined with respect to different measures and have different units.</p>
+<p>This second AIC comparison is valid because both models assign probability mass to the same one-decimal values. Neither rounded model should be compared by log-likelihood or AIC with <code>m_norm</code> or <code>m_trunc</code>: probability densities and probability masses are defined with respect to different measures and have different units.</p>
 <p>Parameters returned by <code>predict(..., type = "parameter")</code> still describe the parent normal family, before selection and rounding. In particular, <code>mu</code> is not the mean of the observed, truncated distribution. Distributional methods operate on the final recorded scale. Thus, the following curves are rounded predictive quantiles from the truncated-and-rounded model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -477,7 +479,7 @@ m_round 5509.784 13.136685</code></pre>
 </div>
 </div>
 <p>These curves hold longitude and latitude at their sample medians. The points include all locations, so they show the overall data cloud rather than a sample drawn at that fixed location.</p>
-<div class="cell" data-layout-align="center">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mag <span class="sc">~</span> depth, <span class="at">data =</span> quakes,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.15</span>),</span>
@@ -489,7 +491,8 @@ m_round 5509.784 13.136685</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/quakes-quantiles-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+<p><img src="family_extensions_files/figure-html/quakes-quantiles-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Fitted 10th, 50th, and 90th percentiles of recorded magnitude, at median longitude and latitude.</figcaption>
 </figure>
 </div>
 </div>
@@ -568,7 +571,7 @@ FALSE  TRUE
    44     6 </code></pre>
 </div>
 </div>
-<div class="cell" data-layout-align="center">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist80 <span class="sc">~</span> speed, <span class="at">data =</span> cars,</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.55</span>),</span>
@@ -577,7 +580,8 @@ FALSE  TRUE
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/censoring-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+<p><img src="family_extensions_files/figure-html/censoring-plot-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Stopping distances capped at 80 feet, with the recording limit marked.</figcaption>
 </figure>
 </div>
 </div>
@@ -628,9 +632,10 @@ FALSE  TRUE
 <span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>),</span>
 <span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/censoring-quantiles-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="family_extensions_files/figure-html/censoring-quantiles-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Fitted 10th, 50th, and 90th percentiles of capped stopping distance.</figcaption>
 </figure>
 </div>
 </div>
@@ -707,7 +712,7 @@ FALSE  TRUE
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"Male"</span>, <span class="st">"Female"</span>)) {</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  j <span class="ot">&lt;-</span> <span class="fu">which</span>(nd<span class="sc">$</span>sex <span class="sc">==</span> i)</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matplot</span>(time, surv[, j], <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
@@ -718,9 +723,10 @@ FALSE  TRUE
 <span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span>, <span class="st">"#009E73"</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span>
 <span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/survival-plot-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="family_extensions_files/figure-html/survival-plot-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Fitted Weibull survival curves by age and sex.</figcaption>
 </figure>
 </div>
 </div>
@@ -758,7 +764,7 @@ FALSE  TRUE
 </div>
 <p>Fit all three distributions to each sample. The plots compare empirical frequencies with fitted probabilities over the same count range.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>fits <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">names</span>(ys), <span class="cf">function</span>(label) {</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> ys[[label]]</span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  fits <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -775,9 +781,10 @@ FALSE  TRUE
 <span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>  fits</span>
 <span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/count-marginal-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="family_extensions_files/figure-html/count-marginal-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>Poisson, inflated Poisson, and hurdle Poisson marginal fits for samples with excess or few zeros.</figcaption>
 </figure>
 </div>
 </div>
@@ -820,7 +827,7 @@ fits$Inflated 2452.863  2</code></pre>
 </div>
 <p>Here <code>mu</code> is the parent Poisson mean, not the mean of the positive counts. Conditioning on positivity gives <span class="math inline">\(E(Y \mid Y&gt;0,x)=\mu/(1-e^{-\mu})\)</span>. The plots compare these fitted quantities with the known simulation curves.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nd<span class="sc">$</span>x, p0, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"Probability of zero"</span>)</span>
 <span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd<span class="sc">$</span>x, <span class="fu">plogis</span>(<span class="sc">-</span><span class="fl">1.5</span> <span class="sc">+</span> <span class="fl">0.8</span> <span class="sc">*</span> nd<span class="sc">$</span>x), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
@@ -833,9 +840,10 @@ fits$Inflated 2452.863  2</code></pre>
 <span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"Mean among positive counts"</span>)</span>
 <span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd<span class="sc">$</span>x, mpos0, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/count-regression-plot-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="family_extensions_files/figure-html/count-regression-plot-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Fitted zero probabilities and positive-count means compared with the generating model.</figcaption>
 </figure>
 </div>
 </div>
@@ -893,9 +901,10 @@ fits$Inflated 2452.863  2</code></pre>
 <span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"10%"</span>, <span class="st">"50%"</span>, <span class="st">"90%"</span>),</span>
 <span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/endpoint-plot-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="family_extensions_files/figure-html/endpoint-plot-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Fitted 10th, 50th, and 90th percentiles of a proportion with point masses at zero and one.</figcaption>
 </figure>
 </div>
 </div>
@@ -928,15 +937,16 @@ fits$Inflated 2452.863  2</code></pre>
 </div>
 <p>First compare normal and lognormal marginal fits. Both are densities on the volume scale, so their AIC values are comparable. A model fitted to <code>log(Volume)</code> without the Jacobian would use a different response scale.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>mf_norm <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(trees<span class="sc">$</span>Volume, <span class="at">family =</span> NO,</span>
 <span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Normal"</span>, <span class="at">xlab =</span> <span class="st">"Volume"</span>)</span>
 <span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>mf_lnorm <span class="ot">&lt;-</span> <span class="fu">fit_family</span>(trees<span class="sc">$</span>Volume, <span class="at">family =</span> f_lnorm,</span>
 <span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> ctrl, <span class="at">main =</span> <span class="st">"Lognormal"</span>, <span class="at">xlab =</span> <span class="st">"Volume"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/transformed-marginal-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="family_extensions_files/figure-html/transformed-marginal-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Normal and lognormal marginal fits to tree volume.</figcaption>
 </figure>
 </div>
 </div>
@@ -963,7 +973,7 @@ mf_norm  264.5321  2</code></pre>
 <span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">quantile</span>(m_lnorm, <span class="at">newdata =</span> nd,</span>
 <span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell" data-layout-align="center">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Volume <span class="sc">~</span> Girth, <span class="at">data =</span> trees,</span>
 <span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.55</span>),</span>
@@ -976,7 +986,8 @@ mf_norm  264.5321  2</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="family_extensions_files/figure-html/transformed-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+<p><img src="family_extensions_files/figure-html/transformed-plot-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Fitted 10th, 50th, and 90th percentiles of tree volume by girth.</figcaption>
 </figure>
 </div>
 </div>

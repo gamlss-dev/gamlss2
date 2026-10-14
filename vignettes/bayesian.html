@@ -232,7 +232,7 @@ div.csl-indent {
   <li><a href="#mcmc-diagnostics" id="toc-mcmc-diagnostics" class="nav-link" data-scroll-target="#mcmc-diagnostics"><span class="header-section-number">4</span> MCMC diagnostics</a></li>
   <li><a href="#posterior-predictions" id="toc-posterior-predictions" class="nav-link" data-scroll-target="#posterior-predictions"><span class="header-section-number">5</span> Posterior predictions</a></li>
   <li><a href="#starting-from-a-fitted-gamlss2-model" id="toc-starting-from-a-fitted-gamlss2-model" class="nav-link" data-scroll-target="#starting-from-a-fitted-gamlss2-model"><span class="header-section-number">6</span> Starting from a fitted <code>gamlss2</code> model</a></li>
-  <li><a href="#practical-remarks" id="toc-practical-remarks" class="nav-link" data-scroll-target="#practical-remarks"><span class="header-section-number">7</span> Practical remarks</a></li>
+  <li><a href="#practical-guidance" id="toc-practical-guidance" class="nav-link" data-scroll-target="#practical-guidance"><span class="header-section-number">7</span> Practical guidance</a></li>
   </ul>
 </nav>
     </div>
@@ -246,7 +246,7 @@ div.csl-indent {
 
 
 <p>Generalized additive models for location, scale, and shape can be estimated by penalized likelihood or by Bayesian sampling. In <code>gamlss2</code>, Bayesian estimation uses the same distributional formulas, family objects, and smooth terms as the usual fitting functions. The sampler follows the Bayesian additive model framework described by <span class="citation" data-cites="bamlss2018">Umlauf et al. (<a href="#ref-bamlss2018" role="doc-biblioref">2018</a>)</span>.</p>
-<p>There are two convenient ways to run the sampler. Function <code>bamlss2()</code> fits a model directly by MCMC, whereas <code>mcmc()</code> starts from an already fitted <code>gamlss2</code> model. This vignette illustrates both workflows and shows how to inspect posterior effects, samples, and predictions.</p>
+<p>There are two ways to run the sampler. The function <code>bamlss2()</code> fits a model directly by MCMC, whereas <code>mcmc()</code> starts from an already fitted <code>gamlss2</code> model. This vignette illustrates both workflows and shows how to inspect posterior effects, samples, and predictions.</p>
 <p>The fitting notation is introduced in <a href="firststeps.html">First Steps</a>. <a href="prediction.html">Prediction and Uncertainty</a> uses the same ozone formula and Gamma parameterization for likelihood-based inference, with a training/test split. Here we use all complete observations to illustrate posterior inference.</p>
 <section id="data-and-model" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="data-and-model"><span class="header-section-number">1</span> Data and model</h2>
@@ -256,15 +256,16 @@ div.csl-indent {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">subset</span>(airquality, <span class="sc">!</span><span class="fu">is.na</span>(Ozone))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell" data-layout-align="center">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Ozone <span class="sc">~</span> Temp, <span class="at">data =</span> air,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.3</span>),</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (F)"</span>, <span class="at">ylab =</span> <span class="st">"Ozone"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (°F)"</span>, <span class="at">ylab =</span> <span class="st">"Ozone (ppb)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Daily ozone concentration and temperature in the airquality data.</figcaption>
 </figure>
 </div>
 </div>
@@ -315,7 +316,7 @@ sigma.s(Temp) 3.2250 0.7990
 *--------
 n = 116 df =  14.06 res.df =  101.94
 Deviance = 932.216 DIC = 960.341 Null Dev. Red. = 0.53%
-AIC = 960.341 elapsed =  1.29sec</code></pre>
+AIC = 960.341 elapsed =  2.48sec</code></pre>
 </div>
 </div>
 <p>The sampler uses block Metropolis-Hastings updates for linear and smooth coefficients. Smooth terms are updated using penalized weighted least squares proposals, while smoothing variances are sampled by inverse Gamma or slice sampling. See <code>?BS</code> for details of the sampler.</p>
@@ -323,22 +324,24 @@ AIC = 960.341 elapsed =  1.29sec</code></pre>
 <section id="posterior-effects" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="posterior-effects"><span class="header-section-number">3</span> Posterior effects</h2>
 <p>Calling <code>plot()</code> displays the fitted additive effects. For a Bayesian fit these are obtained from the posterior samples stored in the fitted object.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">spar =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="864"></p>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>Posterior smooth effects for the Gamma mean and relative scale.</figcaption>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The MCMC draws are available in the <code>samples</code> component. For example, the intercept draws for the distribution parameters can be inspected directly.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cn <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"(Intercept)"</span>, <span class="fu">colnames</span>(m<span class="sc">$</span>samples),</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed =</span> <span class="cn">TRUE</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(m<span class="sc">$</span>samples[, cn, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cn <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"(Intercept)"</span>, <span class="fu">colnames</span>(m<span class="sc">$</span>samples),</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed =</span> <span class="cn">TRUE</span>, <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(m<span class="sc">$</span>samples[, cn, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     mu.p.(Intercept) sigma.p.(Intercept)
 [1,]         3.610403          -0.8919850
@@ -353,49 +356,52 @@ AIC = 960.341 elapsed =  1.29sec</code></pre>
 <section id="mcmc-diagnostics" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="mcmc-diagnostics"><span class="header-section-number">4</span> MCMC diagnostics</h2>
 <p>Posterior summaries are only useful if the sampler has explored the relevant part of the parameter space adequately. Trace plots and autocorrelation plots can be obtained with <code>which = "samples"</code>. Here we inspect the intercept in the <code>mu</code> model.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"samples"</span>, <span class="at">parameter =</span> <span class="st">"mu"</span>,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">terms =</span> <span class="st">"(Intercept)"</span>, <span class="at">lag.max =</span> <span class="dv">60</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m, <span class="at">which =</span> <span class="st">"samples"</span>, <span class="at">parameter =</span> <span class="st">"mu"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">terms =</span> <span class="st">"(Intercept)"</span>, <span class="at">lag.max =</span> <span class="dv">60</span>, <span class="at">spar =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Trace and autocorrelation of the intercept draws for the Gamma mean.</figcaption>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The <code>model</code> and <code>terms</code> arguments can be used to select other coefficients. Smooth terms contain several basis coefficients, so inspecting a smooth can produce several trace and autocorrelation plots.</p>
+<p>The <code>parameter</code> and <code>terms</code> arguments can be used to select other coefficients. Smooth terms contain several basis coefficients, so inspecting a smooth can produce several trace and autocorrelation plots.</p>
 <p>The values of <code>n.iter</code>, <code>burnin</code>, and <code>thin</code> used above are suitable for a compact example, but they are not a general convergence rule. For an applied analysis the chains should be inspected and the number of iterations increased when necessary.</p>
 <p>Sampling can be extended by calling <code>mcmc()</code> again on the fitted object. The existing draws are retained and the newly retained draws are appended to <code>samples</code>, so the call can be repeated as necessary. The <code>burnin</code> argument applies to each additional run.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.iter =</span> <span class="dv">1200</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">burnin =</span> <span class="dv">200</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">1</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.iter =</span> <span class="dv">1200</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">burnin =</span> <span class="dv">200</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">1</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="posterior-predictions" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="posterior-predictions"><span class="header-section-number">5</span> Posterior predictions</h2>
 <p>For an object returned by <code>bamlss2()</code>, <code>predict()</code> uses the stored posterior samples. Supplying <code>FUN</code> selects how they are summarized. We evaluate the model over the observed temperature range and keep wind speed fixed at its median.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Temp =</span> <span class="fu">seq</span>(<span class="fu">min</span>(air<span class="sc">$</span>Temp), <span class="fu">max</span>(air<span class="sc">$</span>Temp), <span class="at">length.out =</span> <span class="dv">100</span>),</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Wind =</span> <span class="fu">median</span>(air<span class="sc">$</span>Wind)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>post_interval <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(q, <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"fit"</span>, <span class="st">"upper"</span>))</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>pmu <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"mu"</span>,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> post_interval)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>psigma <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>,</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> post_interval)</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pmu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Temp =</span> <span class="fu">seq</span>(<span class="fu">min</span>(air<span class="sc">$</span>Temp), <span class="fu">max</span>(air<span class="sc">$</span>Temp), <span class="at">length.out =</span> <span class="dv">100</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Wind =</span> <span class="fu">median</span>(air<span class="sc">$</span>Wind)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>post_interval <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">quantile</span>(x, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(q, <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"fit"</span>, <span class="st">"upper"</span>))</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>pmu <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"mu"</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> post_interval)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>psigma <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">parameter =</span> <span class="st">"sigma"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> post_interval)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pmu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     lower      fit    upper
 1 6.669732 13.69218 30.56273
@@ -407,36 +413,37 @@ AIC = 960.341 elapsed =  1.29sec</code></pre>
 </div>
 </div>
 <p>The resulting intervals are 95% pointwise credible intervals for the distribution parameters; <code>fit</code> is the posterior median. They are not prediction intervals for a future ozone observation or simultaneous bands for a whole curve. Wind speed is held fixed, while the displayed observations include all wind speeds.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Ozone <span class="sc">~</span> Temp, <span class="at">data =</span> air,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (F)"</span>, <span class="at">ylab =</span> <span class="fu">expression</span>(mu))</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd<span class="sc">$</span>Temp, <span class="fu">rev</span>(nd<span class="sc">$</span>Temp)),</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(pmu<span class="sc">$</span>lower, <span class="fu">rev</span>(pmu<span class="sc">$</span>upper)),</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="fl">0.15</span>))</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd<span class="sc">$</span>Temp, pmu<span class="sc">$</span>fit, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nd<span class="sc">$</span>Temp, psigma<span class="sc">$</span>fit, <span class="at">type =</span> <span class="st">"n"</span>,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(psigma[, <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"upper"</span>)]),</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (F)"</span>, <span class="at">ylab =</span> <span class="fu">expression</span>(sigma))</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd<span class="sc">$</span>Temp, <span class="fu">rev</span>(nd<span class="sc">$</span>Temp)),</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(psigma<span class="sc">$</span>lower, <span class="fu">rev</span>(psigma<span class="sc">$</span>upper)),</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="fl">0.15</span>))</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd<span class="sc">$</span>Temp, psigma<span class="sc">$</span>fit, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Ozone <span class="sc">~</span> Temp, <span class="at">data =</span> air,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">1</span>, <span class="fl">0.2</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (°F)"</span>, <span class="at">ylab =</span> <span class="st">"Mean ozone (ppb)"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd<span class="sc">$</span>Temp, <span class="fu">rev</span>(nd<span class="sc">$</span>Temp)),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(pmu<span class="sc">$</span>lower, <span class="fu">rev</span>(pmu<span class="sc">$</span>upper)),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="fl">0.15</span>))</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd<span class="sc">$</span>Temp, pmu<span class="sc">$</span>fit, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nd<span class="sc">$</span>Temp, psigma<span class="sc">$</span>fit, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(psigma[, <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"upper"</span>)]),</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (°F)"</span>, <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="st">"Relative scale "</span> <span class="sc">*</span> sigma))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd<span class="sc">$</span>Temp, <span class="fu">rev</span>(nd<span class="sc">$</span>Temp)),</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(psigma<span class="sc">$</span>lower, <span class="fu">rev</span>(psigma<span class="sc">$</span>upper)),</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="fl">0.15</span>))</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(nd<span class="sc">$</span>Temp, psigma<span class="sc">$</span>fit, <span class="at">col =</span> <span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="864"></p>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Posterior medians and 95% pointwise credible intervals for the Gamma mean and relative scale, at median wind speed.</figcaption>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Other posterior summaries can be obtained by changing <code>FUN</code>. For example, posterior means and standard deviations are returned with</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">FUN =</span> mean))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">FUN =</span> mean))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
 1 15.18102 1.0008783
@@ -446,7 +453,7 @@ AIC = 960.341 elapsed =  1.29sec</code></pre>
 5 15.91674 0.8780521
 6 16.13956 0.8516485</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">FUN =</span> sd))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"parameter"</span>, <span class="at">FUN =</span> sd))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        mu     sigma
 1 6.820654 0.3747662
@@ -461,25 +468,25 @@ AIC = 960.341 elapsed =  1.29sec</code></pre>
 </section>
 <section id="starting-from-a-fitted-gamlss2-model" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="starting-from-a-fitted-gamlss2-model"><span class="header-section-number">6</span> Starting from a fitted <code>gamlss2</code> model</h2>
-<p>Bayesian sampling can also be started from an existing likelihood-based fit. This is useful when a model has already been developed with <code>gamlss2()</code> and the same specification should subsequently be sampled. Function <code>mcmc()</code> uses the fitted coefficients and smoothing parameters as starting values and merges the posterior output back into the model object.</p>
+<p>Bayesian sampling can also be started from an existing likelihood-based fit. This is useful when a model has already been developed with <code>gamlss2()</code> and the same specification should subsequently be sampled. The function <code>mcmc()</code> uses the fitted coefficients and smoothing parameters as starting values and merges the posterior output back into the model object.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> air, <span class="at">family =</span> GA, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(f, <span class="at">data =</span> air, <span class="at">family =</span> GA, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The corresponding MCMC fit is obtained with</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.iter =</span> <span class="dv">1200</span>,</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">burnin =</span> <span class="dv">200</span>,</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">1</span>,</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1328</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.iter =</span> <span class="dv">1200</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">burnin =</span> <span class="dv">200</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">thin =</span> <span class="dv">1</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Once fitted, <code>m2</code> supports the same posterior summaries and plots as the object returned by <code>bamlss2()</code>.</p>
 <p>The fitted model supplied to <code>mcmc()</code> must retain the design information needed by the sampler. In particular, reduced model objects that discard this information cannot be used to restart sampling.</p>
 </section>
-<section id="practical-remarks" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="practical-remarks"><span class="header-section-number">7</span> Practical remarks</h2>
+<section id="practical-guidance" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="practical-guidance"><span class="header-section-number">7</span> Practical guidance</h2>
 <p>The Bayesian and likelihood-based interfaces deliberately share the same model specification. This makes it possible to develop a distributional model with <code>gamlss2()</code> and switch to MCMC without rewriting its formula or family. For Bayesian fits, a few points are especially useful:</p>
 <ol type="1">
 <li>set a seed when reproducible posterior draws are required;</li>

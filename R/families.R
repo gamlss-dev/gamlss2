@@ -2408,15 +2408,6 @@ complete_family <- function(family, .links = NULL)
   }
 
   if(inherits(family, "distribution")) {
-    fn <- class(family)[1L]
-    ff <- get(fn)
-    np <- names(formals(ff))
-    if(is.null(.links)) {
-      stop(paste0("no links for parameters (",
-        paste0(np, collapse = ", "),
-        ") supplied!"))
-    }
-    names(.links) <- np
     family <- family(family, links = .links)
   }
 

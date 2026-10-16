@@ -463,7 +463,7 @@ as_distribution <- function(d, family = NULL, ...)
     }
   }
 
-  attr(d, "family") <- family
+  ## attr(d, "family") <- family
 
   return(d)
 }

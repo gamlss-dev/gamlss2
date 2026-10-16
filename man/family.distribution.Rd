@@ -3,6 +3,8 @@
 \alias{family.GAMLSS}
 \alias{family.gamlss.family}
 \alias{distributions3_family}
+\alias{family.Normal}
+\alias{family.Poisson}
 
 \title{Generate a 'gamlss2' Family from a 'distributions3' Object}
 
@@ -23,9 +25,13 @@ package).
   ...
 )
 
+\method{family}{gamlss.family}(object, score = TRUE, hessian = FALSE, update = FALSE, ...)
+
 \method{family}{GAMLSS}(object, ...)
 
-\method{family}{gamlss.family}(object, score = TRUE, hessian = FALSE, update = FALSE, ...)
+\method{family}{Normal}(object, links = NULL, initialize = NULL, ...)
+
+\method{family}{Poisson}(object, links = NULL, initialize = NULL, ...)
 
 distributions3_family(
   distribution,
@@ -91,14 +97,19 @@ vs. \code{"discrete"}).}
 \code{x} is a valid response for the distribution.}
 
 \item{initialize}{list of functions. A named list with one \code{function(y, ...)}
-per parameter to be modeled, returning an initialization for this parameter.}
+per parameter to be modeled, returning an initialization for this parameter with the
+same length as \code{y}.}
 }
 
 \details{
-\code{distributions3_family} maps fitted parameter lists to
-\pkg{distributions3} objects and uses their methods for fitting and
-assessing the model. The \code{family} methods call this function and
-infer some family settings automatically.
+Using \code{family} methods, it is possible to set up \code{\link{gamlss2.family}}
+objects based on \code{distribution} objects leveraging the \pkg{distributions3}
+infrastructure. The workhorse function is \code{distributions3_family} that defines
+all family elements using the standard \pkg{distributions3} generics. Additionally,
+dedicated methods for specific classes such as \code{GAMLSS} or \code{Normal} etc.
+define further family elements for which no standard generic functions are available
+(e.g., the \code{links} or \code{initialize} functions) and then call the 
+\code{distributions3_family} workhorse function.
 }
 
 \value{

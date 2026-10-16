@@ -202,3 +202,22 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   class(rval) <- "gamlss2.family"
   return(rval)
 }
+
+##-----------------------------------------------------------------------------
+
+family.Normal <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(mu = "identity", sigma = "log")
+  if (is.null(initialize)) initialize <- list(
+    mu = function(y, ...) (y + mean(y))/2,
+    sigma = function(y, ...) 0 * y + sd(y))
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, ...)
+}
+
+family.Poisson <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(lambda = "log")
+  if (is.null(initialize)) initialize <- list(lambda = function(y, ...) (y + mean(y))/2)
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, ...)
+}
+

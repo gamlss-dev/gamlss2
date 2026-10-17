@@ -456,6 +456,11 @@ as_distribution <- function(d, family = NULL, ...)
       return(di)
     })
     class(d) <- c("GAMLSS2.list", "list")
+    attr(d, "create_distribution") <- if(is.null(family$create_distribution)) {
+      list(class = c("GAMLSS2", "distribution"), family = family)
+    } else {
+      family$create_distribution
+    }
   } else {
     if(is.null(family$create_distribution)) {
       class(d) <- c("GAMLSS2", "distribution")
@@ -472,17 +477,22 @@ as_distribution <- function(d, family = NULL, ...)
 `[[.GAMLSS2.list` <- function(x, ...)
 {
   d <- NextMethod("[[")
-  attr(d, "family") <- attr(x, "family")
+  cd <- attr(x, "create_distribution")
+  if(is.function(cd)) {
+    d <- cd(d)
+  } else {
+    class(d) <- cd$class
+    attr(d, "family") <- cd$family
+  }
   return(d)
 }
 
 ## Subset list of distributions.
 `[.GAMLSS2.list` <- function(x, ...)
 {
-  family <- attr(x, "family")
   d <- NextMethod("[")
   class(d) <- class(x)
-  attr(d, "family") <- family
+  attr(d, "create_distribution") <- attr(x, "create_distribution")
   return(d)
 }
 

@@ -104,7 +104,7 @@ each bound retain the structure selected by \code{parameter}, \code{terms}, and
 ## fit heteroscedastic normal GAMLSS model
 ## stopping distance (ft) explained by speed (mph)
 data("cars", package = "datasets")
-m <- gamlss2(dist ~ s(speed) | s(speed), data = cars, family = NO)
+m <- gamlss2(dist ~ s(speed) | s(speed), data = cars, family = Normal)
 
 ## new data for predictions
 nd <- data.frame(speed = c(10, 20, 30))

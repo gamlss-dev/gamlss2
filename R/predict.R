@@ -449,6 +449,7 @@ as_distribution <- function(d, family = NULL, ...)
       names(di) <- family$names
       if(is.null(family$create_distribution)) {
         class(di) <- c("GAMLSS2", "distribution")
+        attr(di, "family") <- family
       } else {
         di <- family$create_distribution(di)
       }
@@ -458,12 +459,11 @@ as_distribution <- function(d, family = NULL, ...)
   } else {
     if(is.null(family$create_distribution)) {
       class(d) <- c("GAMLSS2", "distribution")
+      attr(d, "family") <- family
     } else {
       d <- family$create_distribution(d)
     }
   }
-
-  ## attr(d, "family") <- family
 
   return(d)
 }

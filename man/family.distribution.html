@@ -675,11 +675,17 @@ family(
   ...
 )
 
+## S3 method for class 'gamlss.family'
+family(object, score = TRUE, hessian = FALSE, update = FALSE, ...)
+
 ## S3 method for class 'GAMLSS'
 family(object, ...)
 
-## S3 method for class 'gamlss.family'
-family(object, score = TRUE, hessian = FALSE, update = FALSE, ...)
+## S3 method for class 'Normal'
+family(object, links = NULL, initialize = NULL, ...)
+
+## S3 method for class 'Poisson'
+family(object, links = NULL, initialize = NULL, ...)
 
 distributions3_family(
   distribution,
@@ -792,14 +798,14 @@ function. A <code>function(x)</code> returning a logical indicating whether <cod
 <code id="initialize">initialize</code>
 </td>
 <td>
-list of functions. A named list with one <code>function(y, …)</code> per parameter to be modeled, returning an initialization for this parameter.
+list of functions. A named list with one <code>function(y, …)</code> per parameter to be modeled, returning an initialization for this parameter with the same length as <code>y</code>.
 </td>
 </tr>
 </tbody></table>
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p><code>distributions3_family</code> maps fitted parameter lists to <span class="pkg">distributions3</span> objects and uses their methods for fitting and assessing the model. The <code>family</code> methods call this function and infer some family settings automatically.</p>
+<p>Using <code>family</code> methods, it is possible to set up <code>gamlss2.family</code> objects based on <code>distribution</code> objects leveraging the <span class="pkg">distributions3</span> infrastructure. The workhorse function is <code>distributions3_family</code> that defines all family elements using the standard <span class="pkg">distributions3</span> generics. Additionally, dedicated methods for specific classes such as <code>GAMLSS</code> or <code>Normal</code> etc. define further family elements for which no standard generic functions are available (e.g., the <code>links</code> or <code>initialize</code> functions) and then call the <code>distributions3_family</code> workhorse function.</p>
 </section>
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
@@ -814,7 +820,7 @@ list of functions. A named list with one <code>function(y, …)</code> per param
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">family</span>(<span class="fu">Poisson</span>(), <span class="at">links =</span> <span class="fu">c</span>(<span class="at">lambda =</span> <span class="st">"log"</span>))</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(f)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>List of 18
+<pre><code>List of 19
  $ family             : chr "Poisson"
  $ names              : chr "lambda"
  $ links              :List of 1
@@ -842,6 +848,8 @@ list of functions. A named list with one <code>function(y, …)</code> per param
  $ score              :List of 1
   ..$ lambda:function (par, y, ...)  
  $ valid.response     :function (x)  
+ $ initialize         :List of 1
+  ..$ lambda:function (y, ...)  
  - attr(*, "class")= chr "gamlss2.family"</code></pre>
 </div>
 </div>

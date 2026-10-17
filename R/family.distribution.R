@@ -221,3 +221,209 @@ family.Poisson <- function(object, links = NULL, initialize = NULL, ...) {
   NextMethod(object, links = links, initialize = initialize, ...)
 }
 
+family.Bernoulli <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(p = "logit")
+  if (is.null(initialize)) initialize <- list(p = function(y, ...) (y + 0.5)/2)
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "discrete",
+    valid.response = function(x) all(is.finite(x) & x %in% c(0, 1)), ...)
+}
+
+family.NegativeBinomial <- function(object, links = NULL, initialize = NULL, ...) {
+  nams <- names(as.list(object))
+  if (!is.null(names(links))) nams <- names(links)
+  nams <- if ("mu" %in% nams) c("mu", "size") else c("p", "size")
+  if (is.null(links)) links <- if (nams[1L] == "mu") c(mu = "log", size = "log") else c(p = "logit", size = "log")
+  if (is.null(initialize)) {
+    ## Estimate the marginal size with a finite near-Poisson bound.
+    initial <- function(y) {
+      if (!any(y > 0)) return(100)
+      mu <- max(mean(y), 1e-8)
+      exp(optimize(function(eta) {
+        -sum(stats::dnbinom(y, size = exp(eta), mu = mu, log = TRUE))
+      }, interval = log(c(0.01, 100)), tol = 1e-6)$minimum)
+    }
+    initialize <- list(
+      mu = function(y, ...) 0 * y + max(mean(y), 1e-8),
+      p = function(y, ...) {
+        size <- initial(y)
+        0 * y + size/(size + max(mean(y), 1e-8))
+      },
+      size = function(y, ...) 0 * y + initial(y))
+    initialize <- initialize[nams]
+  }
+  if (isFALSE(initialize)) initialize <- NULL
+  rval <- NextMethod(object, links = links, initialize = initialize, type = "discrete",
+    valid.response = function(x) all(is.finite(x) & x >= 0 & x == floor(x)), ...)
+  ## Model the mean or probability before the size parameter.
+  rval$names <- intersect(nams, rval$names)
+  rval$links <- rval$links[rval$names]
+  return(rval)
+}
+
+family.Gamma <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(shape = "log", rate = "log")
+  if (is.null(initialize)) {
+    ## Log-moment shape estimate followed by two Newton corrections.
+    initial <- function(y) {
+      if (all(y == y[1L])) return(1)
+      z <- log(y)
+      d <- max(log(mean(exp(z - max(z)))) + max(z) - mean(z), 1e-8)
+      shape <- (3 - d + sqrt((d - 3)^2 + 24 * d))/(12 * d)
+      for (i in 1:2) {
+        candidate <- shape - (log(shape) - digamma(shape) - d)/(1/shape - trigamma(shape))
+        if (is.finite(candidate) && candidate > 0) shape <- candidate
+      }
+      return(shape)
+    }
+    initialize <- list(
+      shape = function(y, ...) 0 * y + initial(y),
+      rate = function(y, ...) 0 * y + initial(y)/mean(y))
+  }
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x > 0), ...)
+}
+
+family.LogNormal <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(log_mu = "identity", log_sigma = "log")
+  if (is.null(initialize)) initialize <- list(
+    log_mu = function(y, ...) 0 * y + mean(log(y)),
+    log_sigma = function(y, ...) 0 * y + max(sqrt(mean((log(y) - mean(log(y)))^2)), .Machine$double.eps^0.5))
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x > 0), ...)
+}
+
+family.Beta <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(alpha = "log", beta = "log")
+  if (is.null(initialize)) {
+    ## Moment estimates followed by five joint, damped Newton updates.
+    initial <- function(y) {
+      mu <- mean(y)
+      v <- var(y)
+      if (!is.finite(v) || v <= 0) v <- mu * (1 - mu)/3
+      phi <- min(1e6, max(0.01, mu * (1 - mu)/v - 1))
+      par <- c(mu, 1 - mu) * phi
+      logs <- c(mean(log(y)), mean(log1p(-y)))
+      ll <- function(par) lgamma(sum(par)) - sum(lgamma(par)) + sum((par - 1) * logs)
+      value <- ll(par)
+      for (i in 1:5) {
+        s <- digamma(sum(par)) - digamma(par) + logs
+        h <- diag(trigamma(par)) - trigamma(sum(par))
+        delta <- tryCatch(drop(solve(h, s)), error = function(e) c(NA_real_, NA_real_))
+        if (any(!is.finite(delta))) break
+        accepted <- FALSE
+        for (j in 0:19) {
+          candidate <- par + delta/2^j
+          if (all(is.finite(candidate)) && all(candidate > 0)) {
+            next.value <- ll(candidate)
+            if (is.finite(next.value) && next.value >= value - 1e-12) {
+              par <- candidate
+              value <- next.value
+              accepted <- TRUE
+              break
+            }
+          }
+        }
+        if (!accepted) break
+      }
+      return(par)
+    }
+    initialize <- list(
+      alpha = function(y, ...) 0 * y + initial(y)[[1L]],
+      beta = function(y, ...) 0 * y + initial(y)[[2L]])
+  }
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x > 0 & x < 1), ...)
+}
+
+family.Weibull <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(shape = "log", scale = "log")
+  if (is.null(initialize)) {
+    ## Refine the log-moment shape and obtain its profile-likelihood scale.
+    initial <- function(y) {
+      z <- log(y)
+      mu <- mean(z)
+      v <- var(z)
+      if (!is.finite(v) || v <= 0) v <- pi^2/6
+      shape <- min(1e4, max(1e-4, pi/sqrt(6 * v)))
+      z <- z - mu
+      for (i in 1:3) {
+        w <- shape * z
+        w <- exp(w - max(w))
+        w <- w/sum(w)
+        m <- sum(w * z)
+        s <- 1/shape - m
+        h <- -1/shape^2 - sum(w * (z - m)^2)
+        candidate <- shape - s/h
+        if (is.finite(candidate) && candidate > 0) shape <- candidate
+      }
+      w <- shape * z
+      scale <- exp(mu + (max(w) + log(mean(exp(w - max(w)))))/shape)
+      return(c(shape, scale))
+    }
+    initialize <- list(
+      shape = function(y, ...) 0 * y + initial(y)[[1L]],
+      scale = function(y, ...) 0 * y + initial(y)[[2L]])
+  }
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x > 0), ...)
+}
+
+family.Binomial <- function(object, links = NULL, initialize = NULL, ...) {
+  size <- object$size
+  stopifnot(length(size) > 0L, all(is.finite(size) & size >= 0 & size == floor(size)))
+  if (all(size == size[1L])) size <- size[1L]
+  if (is.null(links)) links <- c(p = "logit")
+  stopifnot(length(links) == 1L, is.null(names(links)) || identical(names(links), "p"))
+  names(links) <- "p"
+  if (is.null(initialize)) initialize <- list(p = function(y, ...) (y + 0.5)/(size + 1))
+  if (isFALSE(initialize)) initialize <- NULL
+  ## The number of trials is known and is not modeled.
+  create_distribution <- function(par) distributions3::Binomial(size = size, p = par$p)
+  rval <- distributions3_family("Binomial", links = links, initialize = initialize, type = "discrete",
+    valid.response = function(x) {
+      (length(size) == 1L || length(size) == length(x)) &&
+        all(is.finite(x) & x >= 0 & x <= size & x == floor(x))
+    }, create_distribution = create_distribution, ...)
+  ## Avoid the legacy binomial response conversion in gamlss2().
+  rval$family <- "distributions3::Binomial"
+  return(rval)
+}
+
+family.Exponential <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(rate = "log")
+  if (is.null(initialize)) initialize <- list(
+    rate = function(y, ...) {
+      mu <- mean(y)
+      if (mu == 0) mu <- 1e-8
+      0 * y + 1/max(mu, .Machine$double.xmin)
+    })
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x >= 0), ...)
+}
+
+family.Logistic <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(location = "identity", scale = "log")
+  if (is.null(initialize)) initialize <- list(
+    location = function(y, ...) (y + mean(y))/2,
+    scale = function(y, ...) 0 * y + max(sd(y) * sqrt(3)/pi, .Machine$double.eps^0.5, na.rm = TRUE))
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x)), ...)
+}
+
+family.Cauchy <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(location = "identity", scale = "log")
+  if (is.null(initialize)) initialize <- list(
+    location = function(y, ...) 0 * y + median(y),
+    scale = function(y, ...) 0 * y + max(diff(quantile(y, c(0.25, 0.75)))/2, .Machine$double.eps^0.5))
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x)), ...)
+}
+

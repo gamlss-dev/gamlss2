@@ -201,18 +201,31 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
 
 ##-----------------------------------------------------------------------------
 
+## Compute location-scale starts in standardized units to avoid overflow and
+## preserve small, nonzero scales. Only degenerate samples need a fallback.
+initial_scale <- function(y, robust = FALSE) {
+  magnitude <- max(abs(y))
+  if (magnitude == 0) return(1)
+  z <- y/magnitude
+  scale <- if (robust) diff(quantile(z, c(0.25, 0.75)))/2 else sd(z)
+  if (robust && scale == 0) scale <- mean(abs(z - median(z)))
+  if (!is.finite(scale) || scale <= 0) scale <- sqrt(.Machine$double.eps)
+  max(.Machine$double.xmin, min(scale * magnitude, .Machine$double.xmax))
+}
+
 family.Normal <- function(object, links = NULL, initialize = NULL, ...) {
   if (is.null(links)) links <- c(mu = "identity", sigma = "log")
   if (is.null(initialize)) initialize <- list(
-    mu = function(y, ...) (y + mean(y))/2,
-    sigma = function(y, ...) 0 * y + sd(y))
+    mu = function(y, ...) y/2 + mean(y)/2,
+    sigma = function(y, ...) 0 * y + initial_scale(y))
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, ...)
 }
 
 family.Poisson <- function(object, links = NULL, initialize = NULL, ...) {
   if (is.null(links)) links <- c(lambda = "log")
-  if (is.null(initialize)) initialize <- list(lambda = function(y, ...) (y + mean(y))/2)
+  if (is.null(initialize)) initialize <- list(
+    lambda = function(y, ...) pmax(y/2 + mean(y)/2, 1e-8))
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, ...)
 }
@@ -231,19 +244,26 @@ family.NegativeBinomial <- function(object, links = NULL, initialize = NULL, ...
   nams <- if ("mu" %in% nams) c("mu", "size") else c("p", "size")
   if (is.null(links)) links <- if (nams[1L] == "mu") c(mu = "log", size = "log") else c(p = "logit", size = "log")
   if (is.null(initialize)) {
-    ## Estimate the marginal size with a finite near-Poisson bound.
+    ## Use a mean-dependent upper size bound targeting 1% excess variance.
     initial <- function(y) {
       if (!any(y > 0)) return(100)
       mu <- max(mean(y), 1e-8)
-      exp(optimize(function(eta) {
+      upper <- max(100, 100 * min(mu, .Machine$double.xmax/100))
+      if (mean((y - mu)^2) <= mu) return(upper)
+      objective <- function(eta) {
         -sum(stats::dnbinom(y, size = exp(eta), mu = mu, log = TRUE))
-      }, interval = log(c(0.01, 100)), tol = 1e-6)$minimum)
+      }
+      interval <- log(c(1e-8, upper))
+      eta <- optimize(objective, interval = interval, tol = 1e-6)$minimum
+      candidates <- c(eta, interval)
+      exp(candidates[which.min(vapply(candidates, objective, numeric(1L)))])
     }
     initialize <- list(
       mu = function(y, ...) 0 * y + max(mean(y), 1e-8),
       p = function(y, ...) {
         size <- initial(y)
-        0 * y + size/(size + max(mean(y), 1e-8))
+        p <- plogis(log(size) - log(max(mean(y), 1e-8)))
+        0 * y + min(1 - .Machine$double.eps, max(.Machine$double.eps, p))
       },
       size = function(y, ...) 0 * y + initial(y))
     initialize <- initialize[nams]
@@ -262,19 +282,20 @@ family.Gamma <- function(object, links = NULL, initialize = NULL, ...) {
   if (is.null(initialize)) {
     ## Log-moment shape estimate followed by two Newton corrections.
     initial <- function(y) {
-      if (all(y == y[1L])) return(1)
       z <- log(y)
-      d <- max(log(mean(exp(z - max(z)))) + max(z) - mean(z), 1e-8)
-      shape <- (3 - d + sqrt((d - 3)^2 + 24 * d))/(12 * d)
+      z <- z - max(z)
+      ## Bound concentration also for constant and nearly constant responses.
+      d <- max(log(mean(exp(z))) - mean(z), 1e-8)
+      shape <- min(5e7, (3 - d + sqrt((d - 3)^2 + 24 * d))/(12 * d))
       for (i in 1:2) {
         candidate <- shape - (log(shape) - digamma(shape) - d)/(1/shape - trigamma(shape))
-        if (is.finite(candidate) && candidate > 0) shape <- candidate
+        if (is.finite(candidate) && candidate > 0) shape <- min(candidate, 5e7)
       }
       return(shape)
     }
     initialize <- list(
       shape = function(y, ...) 0 * y + initial(y),
-      rate = function(y, ...) 0 * y + initial(y)/mean(y))
+      rate = function(y, ...) 0 * y + min(initial(y)/mean(y), .Machine$double.xmax))
   }
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, type = "continuous",
@@ -297,9 +318,8 @@ family.Beta <- function(object, links = NULL, initialize = NULL, ...) {
     ## Moment estimates followed by five joint, damped Newton updates.
     initial <- function(y) {
       mu <- mean(y)
-      v <- var(y)
-      if (!is.finite(v) || v <= 0) v <- mu * (1 - mu)/3
-      phi <- min(1e6, max(0.01, mu * (1 - mu)/v - 1))
+      v <- mean((y - mu)^2)
+      phi <- if (v > 0) min(1e6, max(0.01, mu * (1 - mu)/v - 1)) else 1e6
       par <- c(mu, 1 - mu) * phi
       logs <- c(mean(log(y)), mean(log1p(-y)))
       ll <- function(par) lgamma(sum(par)) - sum(lgamma(par)) + sum((par - 1) * logs)
@@ -313,6 +333,8 @@ family.Beta <- function(object, links = NULL, initialize = NULL, ...) {
         for (j in 0:19) {
           candidate <- par + delta/2^j
           if (all(is.finite(candidate)) && all(candidate > 0)) {
+            ## Apply the precision bound to refinements as well as the seed.
+            if (sum(candidate) > 1e6) candidate <- candidate * (1e6/sum(candidate))
             next.value <- ll(candidate)
             if (is.finite(next.value) && next.value >= value - 1e-12) {
               par <- candidate
@@ -342,8 +364,7 @@ family.Weibull <- function(object, links = NULL, initialize = NULL, ...) {
     initial <- function(y) {
       z <- log(y)
       mu <- mean(z)
-      v <- var(z)
-      if (!is.finite(v) || v <= 0) v <- pi^2/6
+      v <- mean((z - mu)^2)
       shape <- min(1e4, max(1e-4, pi/sqrt(6 * v)))
       z <- z - mu
       for (i in 1:3) {
@@ -354,7 +375,7 @@ family.Weibull <- function(object, links = NULL, initialize = NULL, ...) {
         s <- 1/shape - m
         h <- -1/shape^2 - sum(w * (z - m)^2)
         candidate <- shape - s/h
-        if (is.finite(candidate) && candidate > 0) shape <- candidate
+        if (is.finite(candidate) && candidate > 0) shape <- min(1e4, max(1e-4, candidate))
       }
       w <- shape * z
       scale <- exp(mu + (max(w) + log(mean(exp(w - max(w)))))/shape)
@@ -406,8 +427,8 @@ family.Exponential <- function(object, links = NULL, initialize = NULL, ...) {
 family.Logistic <- function(object, links = NULL, initialize = NULL, ...) {
   if (is.null(links)) links <- c(location = "identity", scale = "log")
   if (is.null(initialize)) initialize <- list(
-    location = function(y, ...) (y + mean(y))/2,
-    scale = function(y, ...) 0 * y + max(sd(y) * sqrt(3)/pi, .Machine$double.eps^0.5, na.rm = TRUE))
+    location = function(y, ...) y/2 + mean(y)/2,
+    scale = function(y, ...) 0 * y + max(initial_scale(y) * sqrt(3)/pi, .Machine$double.xmin))
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, type = "continuous",
     valid.response = function(x) all(is.finite(x)), ...)
@@ -417,7 +438,7 @@ family.Cauchy <- function(object, links = NULL, initialize = NULL, ...) {
   if (is.null(links)) links <- c(location = "identity", scale = "log")
   if (is.null(initialize)) initialize <- list(
     location = function(y, ...) 0 * y + median(y),
-    scale = function(y, ...) 0 * y + max(diff(quantile(y, c(0.25, 0.75)))/2, .Machine$double.eps^0.5))
+    scale = function(y, ...) 0 * y + initial_scale(y, robust = TRUE))
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, type = "continuous",
     valid.response = function(x) all(is.finite(x)), ...)

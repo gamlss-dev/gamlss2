@@ -64,14 +64,10 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   ## distribution must be a character,
   ## corresponding to a distribution generator
   stopifnot(is.character(distribution))
-  args <- argsAnywhere(distribution)
-
-  ## If args is a list (found the same function in multiple packages) but
-  ## one is a function from the distributions3 package, pick the distributions3
-  ## version.
-  if (is.list(args) && length(grep("^package:distributions3$", names(args), value = TRUE)) == 1L) {
-      args <- args[[grep("^package:distributions3$", names(args), value = TRUE)[[1]]]]
-  }
+  ## Prefer the distributions3 generator, also when only its namespace is loaded.
+  args <- get0(distribution, envir = asNamespace("distributions3"),
+    mode = "function", inherits = FALSE)
+  args <- if(is.null(args)) argsAnywhere(distribution) else base::args(args)
   stopifnot(is.function(args))
   nams <- names(formals(args))
 

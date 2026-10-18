@@ -41,6 +41,7 @@ export(
   "JR",
   "jr",
   "calibration",
+  "reparameterize",
   "transform_family",
   "logit_family",
   "truncate_family",

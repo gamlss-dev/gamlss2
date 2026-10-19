@@ -743,7 +743,7 @@ Arguments such as <code>col</code>, <code>legend = TRUE/FALSE</code>. See the ex
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Quantiles are computed from the predicted response distributions.</p>
+<p>Quantiles are computed from the predicted response distributions. Probabilities are passed to the family’s quantile function without clipping. Endpoint probabilities can return infinite quantiles, and invalid probabilities are handled by the family.</p>
 <p>With <code>plot = TRUE</code> and no selected <code>variable</code>, the x-axis shows observation ranks as percentages, ordered by fitted median; the y-axis is on the response scale. Lines show the fitted conditional quantiles at <code>probs</code>, and points show observed responses when <code>data = TRUE</code>. The same ordering is used for the responses and all quantiles, so each position refers to one observation. If <code>newdata</code> does not contain the response, only the fitted quantile curves are shown.</p>
 </section>
 <section id="value" class="level3">

@@ -23,6 +23,9 @@
 
 \details{
   Quantiles are computed from the predicted response distributions.
+  Probabilities are passed to the family's quantile function without clipping.
+  Endpoint probabilities can return infinite quantiles, and invalid
+  probabilities are handled by the family.
 
   With \code{plot = TRUE} and no selected \code{variable}, the x-axis shows
   observation ranks as percentages, ordered by fitted median; the y-axis is

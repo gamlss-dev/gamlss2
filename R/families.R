@@ -535,20 +535,17 @@ tF <- function(x, ...)
   quantile_fun <- NULL
   support_fun <- x[["support"]]
   if(!is.null(qfun)) {
+    ## Let the distribution function handle endpoints and invalid probabilities.
     qcall <- dist_call(qfun, "p", with_log = TRUE, with_dots = TRUE)
     quantile_fun <- mkfun(paste0(
       "function(par, p, log=FALSE, ...) {\n",
-      "ii__ <- p <= 1e-10; if(any(ii__)) p[ii__] <- 1e-10\n",
-      "ii__ <- p >= (1 - 1e-10); if(any(ii__)) p[ii__] <- 1 - 1e-10\n",
       "q__ <- ", qcall, "\n",
       "n__ <- length(par[[1L]])\n",
       "if(length(q__) < n__) { p <- rep(p, length.out=n__); q__ <- ", qcall, " }\n",
       "q__\n}"
     ), list(.fun = qfun))
 
-    ## The prediction quantile wrapper clips probabilities away from zero and
-    ## one. Use the original distribution function for support endpoints so
-    ## that unbounded supports remain infinite.
+    ## Infer support endpoints from the original distribution function.
     if(is.null(support_fun)) {
       qcall_support <- dist_call(qfun, "p", with_log = FALSE,
         with_dots = TRUE)

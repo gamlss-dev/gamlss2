@@ -3112,6 +3112,63 @@ OL <- function(k) {
     qlogis(cumulative_probs)
   }
 
+  ## Derivatives of the observed category probability on the predictor scale.
+  compute_derivatives <- function(par, y, which, which2 = which) {
+    comps <- compute_components(par, n = length(y))
+    n <- nrow(comps$probs)
+    if(length(y) == 1L && n > 1L)
+      y <- rep(y, n)
+    if(length(y) != n)
+      stop("y must have length 1 or match the distribution parameters.")
+    y_int <- as_categories(y)
+
+    lower <- comps$cum_probs[cbind(seq_len(n), pmax(y_int - 1L, 1L))]
+    upper <- comps$cum_probs[cbind(seq_len(n), pmin(y_int, k - 1L))]
+    lower[y_int == 1L] <- 1
+    upper[y_int == k] <- 0
+    f_lower <- lower * (1 - lower)
+    f_upper <- upper * (1 - upper)
+
+    ## Derivatives of location - gamma_j at the two category boundaries.
+    slopes <- function(parameter) {
+      if(parameter == "location")
+        return(list(lower = 1, upper = 1))
+      if(parameter == "theta1")
+        return(list(lower = -1, upper = -1))
+      j <- match(parameter, threshold_names)
+      if(is.na(j))
+        stop("unknown OL parameter: ", parameter)
+      spacing <- exp(rep_len(par[[parameter]], n))
+      dl <- du <- -spacing
+      dl[y_int <= j | f_lower == 0] <- 0
+      du[y_int < j | f_upper == 0] <- 0
+      list(lower = dl, upper = du)
+    }
+
+    p <- comps$probs[cbind(seq_len(n), y_int)]
+    active <- !is.na(p) & p >= 1e-8
+    p <- pmax(p, 1e-8)
+    d1 <- slopes(which)
+    score <- (f_lower * d1$lower - f_upper * d1$upper) / p
+
+    diagonal <- identical(which, which2)
+    d2 <- if(diagonal) d1 else slopes(which2)
+    score2 <- if(diagonal) score else
+      (f_lower * d2$lower - f_upper * d2$upper) / p
+    second <- (f_lower * (1 - 2 * lower) * d1$lower * d2$lower -
+      f_upper * (1 - 2 * upper) * d1$upper * d2$upper) / p
+
+    ## The second derivative of an exponential spacing equals its first.
+    if(diagonal && which %in% threshold_names[-1L])
+      second <- second + score
+    hessian <- score * score2 - second
+
+    ## The density is constant where its probability floor is active.
+    score[!active] <- 0
+    hessian[!active] <- 0
+    list(score = score, hessian = hessian)
+  }
+
   fam <- list(
     family = paste0("Ordered Logit (", k, " categories)"),
     names = par_names,
@@ -3168,6 +3225,45 @@ OL <- function(k) {
       init_list
     }
   )
+
+  ## Analytic scores and negative Hessians, including cross derivatives.
+  fam$score <- fam$hessian <- list()
+  for(i in seq_along(par_names)) {
+    parameter <- par_names[i]
+    fam$score[[parameter]] <- local({
+      parameter <- par_names[i]
+      function(par, y, ...) {
+        compute_derivatives(par, y, parameter)$score
+      }
+    })
+    fam$hessian[[parameter]] <- local({
+      parameter <- par_names[i]
+      function(par, y, ...) {
+        compute_derivatives(par, y, parameter)$hessian
+      }
+    })
+    if(i < length(par_names)) {
+      for(j in seq.int(i + 1L, length(par_names))) {
+        cross <- paste0(parameter, ":", par_names[j])
+        fam$hessian[[cross]] <- local({
+          parameter1 <- par_names[i]
+          parameter2 <- par_names[j]
+          function(par, y, ...) {
+            compute_derivatives(par, y, parameter1, parameter2)$hessian
+          }
+        })
+        fam$hessian[[paste0(par_names[j], ":", parameter)]] <- fam$hessian[[cross]]
+      }
+    }
+  }
+
+  ## Compute working response and weights with one probability calculation.
+  fam$update <- function(par, y, eta, which, ...) {
+    derivatives <- compute_derivatives(par, y, which)
+    score <- deriv_checks(derivatives$score, is.weight = FALSE)
+    hessian <- deriv_checks(derivatives$hessian, is.weight = TRUE)
+    list(eta = eta + 1 / hessian * score, weights = hessian)
+  }
 
   ## Probabilities on response scale.
   fam$probabilities <- function(par, ...) {

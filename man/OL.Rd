@@ -40,6 +40,9 @@ ologit(k)
   formula interface. The family also provides category and transition
   probabilities, and the mean and variance of numeric category labels.
 
+  Analytic scores, negative Hessians (including cross derivatives), and
+  a joint working response and weight update are provided for estimation.
+
   \code{ologit()} is retained as a compatibility alias for \code{OL()}.
 }
 

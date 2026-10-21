@@ -53,6 +53,8 @@ export(
   "MN",
   "OL",
   "ologit",
+  "OP",
+  "oprobit",
   "elm",
   "lin",
   "ridge",

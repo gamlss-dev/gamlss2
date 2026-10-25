@@ -496,10 +496,27 @@ results_linear <- function(x, parameter = NULL, data,
     mt <- terms(fj, data = data)
     labels <- attr(mt, "term.labels")
     model_variables <- intersect(all.vars(fj), names(data))
+    evaluated <- !all(all.vars(fj) %in% names(data))
+    if(evaluated) {
+      ## Model frames can contain transformed columns without their raw inputs.
+      ## Refer to these columns directly so transformations are not reapplied.
+      expressions <- as.list(attr(mt, "variables"))[-1L]
+      model_variables <- vapply(expressions, deparse1, character(1L))
+      for(v in seq_along(expressions)) {
+        if(!model_variables[v] %in% names(data))
+          data[[model_variables[v]]] <- eval(expressions[[v]], data, env)
+      }
+      attr(mt, "variables") <- as.call(c(list(as.name("list")),
+        lapply(model_variables, as.name)))
+    }
 
     for(i in seq_along(labels)) {
       term_formula <- as.formula(paste("~", labels[i]), env = env)
-      variables <- intersect(all.vars(term_formula), names(data))
+      variables <- if(evaluated) {
+        model_variables[attr(mt, "factors")[, i] > 0L]
+      } else {
+        intersect(all.vars(term_formula), names(data))
+      }
       grid <- make_grid(variables)
       if(is.null(grid))
         next

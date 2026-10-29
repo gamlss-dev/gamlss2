@@ -413,10 +413,10 @@ AIC = 414.0972 elapsed =  0.02sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       r_1      r_2
-1 27.89481 15.65104
-2 30.32057 83.66720
-3 71.41616 48.24474</code></pre>
+<pre><code>         r_1      r_2
+1   4.750126 19.85823
+2  85.029771 42.68387
+3 109.932977 87.71966</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -625,7 +625,7 @@ sigma.s(Temp) 3.9513
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.17sec</code></pre>
+AIC = 952.263 elapsed =  0.18sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. <a href="prediction.html">Prediction and Uncertainty</a> uses this same Gamma family to construct intervals for means, quantiles, and future observations. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>

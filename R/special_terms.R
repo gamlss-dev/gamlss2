@@ -1248,8 +1248,11 @@ la <- function(x, type = 1, const = 1e-05, ...)
 
 special_fit.lasso <- function(x, z, w, control, transfer, ...)
 {
-  if(is.null(control$lasso.criterion))
-    control$criterion <- x$control$lasso.criterion
+  control$criterion <- if(is.null(control$lasso.criterion)) {
+    x$control$criterion
+  } else {
+    control$lasso.criterion
+  }
 
   ridge <- isTRUE(control$add_ridge) || isTRUE(x$control$ridge)
 

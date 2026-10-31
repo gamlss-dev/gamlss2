@@ -110,35 +110,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <meta property="og:title" content="gamlss2">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/man/gamlss2_files/figure-html/unnamed-chunk-1-1.png">
@@ -819,7 +790,6 @@ Arguments passed to <code>gamlss2_control</code>.
 <section id="value" class="level3">
 <h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The object returned by the selected optimizer. By default, this is an object of class <code>“gamlss2”</code> produced by <code>RS</code>. Standard methods and extractor functions are available for this class.</p>
-<p>For likelihood fits, entries of <code>fitted.specials</code> for <span class="pkg">mgcv</span> smooths and special terms of class <code>“X %*% b”</code> contain a <code>test</code> list with components <code>stat</code>, <code>rank</code>, and <code>pval</code>, computed after optimization using <code>mgcv:::testStat()</code> and the stored local covariance matrix. With covariance <span class="math inline">\(V\)</span> and fitted penalty <span class="math inline">\(P\)</span>, the local reference degrees of freedom are based on <span class="math inline">\(\mathrm{tr}(2F - F^2)\)</span>, where <span class="math inline">\(F = I - VP\)</span>. Ordinary effective degrees of freedom are retained as an approximation for custom terms without usable penalty information. The summary reports the rank returned by the test as <code>Ref.df</code>; the fitted term’s <code>edf</code> is unchanged. These are local approximate tests conditional on the other fitted contributions and smoothing parameters. They do not include the boundary correction used by <span class="pkg">mgcv</span> for fully penalized random effects.</p>
 </section>
 <section id="see-also" class="level3">
 <h3 class="anchored" data-anchor-id="see-also">See Also</h3>
@@ -887,7 +857,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.12sec</code></pre>
+AIC = 952.263 elapsed =  0.16sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## plot parameter-specific effects</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m1, <span class="at">which =</span> <span class="st">"effects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1013,7 +983,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 1057 df =  15.12 res.df =  1041.88
 Deviance = 10150.7454 Null Dev. Red. = 12.62%
-AIC = 10180.9933 elapsed =  0.08sec</code></pre>
+AIC = 10180.9933 elapsed =  0.11sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## effect plots</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

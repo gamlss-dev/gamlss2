@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-185d500df19a4666b0583bc8f2eb2c82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -231,6 +231,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="details">Details</h3>
 <p>For <span class="pkg">mgcv</span>-based smooth terms, smoothing parameters are selected by local REML updates by default (<code>criterion = “reml”</code>). These updates use the current working response and weights. With one penalty matrix this is the usual Schall update; with multiple penalty matrices all smoothing parameters are updated together using the extended Fellner–Schall trace equations. This is a local working-model REML update. Explicit choices such as <code>“gcv”</code>, <code>“aic”</code>, <code>“aicc”</code>, <code>“bic”</code>, and <code>“ncv”</code> retain their respective selection methods.</p>
 <p>These local updates are used by the <code>RS</code> and <code>CG</code> optimizers. With <code>optimizer = JR</code>, coefficients and smoothing parameters are estimated jointly by Laplace approximate REML; see <code>JR</code>.</p>
+<p>Local REML updates are safeguarded using the penalized family likelihood. With automatic step control, the coefficient step is halved if a full working-model update does not improve this objective. Fitted contributions and coefficient warm starts are updated together.</p>
+<p>Step control does not prevent a flexible scale predictor from overfitting. Shrinkage smooths, such as <code>s(x, bs = “ts”)</code> or <code>s(x, bs = “cs”)</code>, also penalize the otherwise unpenalized null space and can shrink an entire effect towards zero. Alternatively, <code>select = TRUE</code> adds selection penalties to eligible smooths. These are explicit changes to the term penalties, not changes to the selection criterion; see <code>gam.selection</code>. Local P-values remain approximate and do not provide a guarantee against false positives.</p>
 <p>Neighbourhood cross-validation can be selected with <code>criterion = “ncv”</code>. If <code>ncv</code> is omitted, singleton neighbourhoods are used, corresponding to leave-one-observation-out cross-validation. For ordered data, a numeric <code>ncv = k</code> uses the observation together with up to <code>k</code> neighbours on either side. Larger neighbourhoods generally provide more smoothing and can account for short-range dependence, at increased computational cost. For ordered data, small values such as <code>ncv = 1</code> or <code>ncv = 2</code> are often preferable to the singleton default. Custom neighbourhoods can also be supplied as a list through a smooth term’s <code>xt</code> argument, for example <code>s(x, xt = list(ncv = neighbourhoods))</code>, where <code>neighbourhoods</code> has one integer index vector per observation and each vector contains its target observation.</p>
 <p>All methods return coefficients and covariance at the reported smoothing parameters.</p>
 <p>For the <code>RS</code> and <code>CG</code> optimizers, argument <code>demmler.reinsch</code> controls the use of a weighted Demmler–Reinsch reparameterization when selecting the smoothing parameter of an eligible single-penalty smooth, including multivariate smooths. The default, <code>“auto”</code>, uses the native reparameterization for local REML updates, and for quadratic criteria after the initial outer iteration. Set <code>demmler.reinsch = TRUE</code> to force it for eligible updates, or <code>FALSE</code> to disable it. For quadratic criteria, the initial outer iteration continues to use the direct solver; with numerical gradients or <code>native.wfit = FALSE</code>, automatic reparameterization is delayed until the current search reaches the edge of its one-decade search window.</p>

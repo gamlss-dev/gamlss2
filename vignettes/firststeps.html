@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -97,7 +97,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-185d500df19a4666b0583bc8f2eb2c82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -368,13 +368,15 @@ sigma.(Intercept)  0.40371    0.04992   8.086 1.71e-15 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                  edf
-mu.s(yday)    13.5642
-sigma.s(yday)  5.9588
+                  edf  Ref.df  Chi.sq   p-value    
+mu.s(yday)    13.5642 13.5642 4612.17 &lt; 2.2e-16 ***
+sigma.s(yday)  5.9588  5.9588  343.96 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 1057 df =  21.52 res.df =  1035.48
 Deviance = 10112.7247 Null Dev. Red. = 12.95%
-AIC = 10155.7706 elapsed =  0.07sec</code></pre>
+AIC = 10155.7706 elapsed =  0.13sec</code></pre>
 </div>
 </div>
 <p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>

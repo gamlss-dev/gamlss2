@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-185d500df19a4666b0583bc8f2eb2c82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -252,14 +252,16 @@ sigma.(Intercept) -0.90192    0.06343  -14.22   &lt;2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                         edf
-mu.s(Wind)            3.3464
-mu.lo(~Temp,span=0.7) 5.7708
-sigma.s(Temp)         4.3414
+                         edf Ref.df Chi.sq   p-value    
+mu.s(Wind)            3.3464 3.3464 33.165 7.429e-05 ***
+mu.lo(~Temp,span=0.7) 5.7708     NA     NA        NA    
+sigma.s(Temp)         4.3414 4.3414 51.990 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  15.46 res.df =  100.54
 Deviance = 921.4427 Null Dev. Red. = 14.92%
-AIC = 952.3597 elapsed =  0.59sec</code></pre>
+AIC = 952.3597 elapsed =  0.58sec</code></pre>
 </div>
 </div>
 <p>Specials can occur in any distributional parameter formula. They are refitted from the current working response and weights at each backfitting iteration, then centered before being added to the additive predictor. Centering keeps the intercept and the special term identifiable.</p>
@@ -355,13 +357,15 @@ sigma.(Intercept) -0.82894    0.06315  -13.13   &lt;2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                           edf
-mu.user(~Temp,span=0.7) 5.8084
-sigma.s(Temp)           4.3942
+                           edf Ref.df Chi.sq   p-value    
+mu.user(~Temp,span=0.7) 5.8084     NA     NA        NA    
+sigma.s(Temp)           4.3942 4.3942 51.835 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  12.2 res.df =  103.8
 Deviance = 939.5092 Null Dev. Red. = 13.26%
-AIC = 963.9144 elapsed =  0.04sec</code></pre>
+AIC = 963.9144 elapsed =  0.03sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted distributions</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

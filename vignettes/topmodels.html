@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-185d500df19a4666b0583bc8f2eb2c82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -363,11 +363,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(m, proscore, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"logs"</span>, <span class="st">"crps"</span>, <span class="st">"mae"</span>, <span class="st">"mse"</span>, <span class="st">"dss"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     lm         gamlss2   
-logs 0.1806799  0.03795853
-crps 0.1580683  0.1471419 
-mae  0.2191784  0.2081132 
-mse  0.08403538 0.07786656
-dss  -1.476517  -1.739153 </code></pre>
+logs 0.1806799  0.03795867
+crps 0.1580683  0.147142  
+mae  0.2191784  0.2081134 
+mse  0.08403538 0.07786658
+dss  -1.476517  -1.739154 </code></pre>
 </div>
 </div>
 <p>Both models are scored on the same observations and the same log-response scale. These training scores describe fit and can favor flexible models. For a predictive comparison, refit on training data and score held-out responses, using a time-ordered split when the aim is forecasting later days. <a href="prediction.html#observations-held-out-from-fitting">Prediction and Uncertainty</a> shows a simple held-out interval check and explains how response variation differs from uncertainty in estimated distribution parameters.</p>

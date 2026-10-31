@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -78,7 +78,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-185d500df19a4666b0583bc8f2eb2c82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -361,9 +361,11 @@ sigma.(Intercept)    2.638      0.100   26.38   &lt;2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                  edf
-mu.s(speed)    1.2175
-sigma.s(speed) 1.0000
+                  edf Ref.df   Chi.sq   p-value    
+mu.s(speed)    1.2175 1.2175 161.5503 &lt; 2.2e-16 ***
+sigma.s(speed) 1.0000 1.0000   7.7925  0.005247 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.91%
@@ -413,10 +415,10 @@ AIC = 414.0972 elapsed =  0.02sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">random</span>(d, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>         r_1      r_2
-1   4.750126 19.85823
-2  85.029771 42.68387
-3 109.932977 87.71966</code></pre>
+<pre><code>       r_1      r_2
+1 13.92527 30.24074
+2 70.82621 53.08088
+3 64.06067 57.21408</code></pre>
 </div>
 </div>
 <p>This gives the complete workflow:</p>
@@ -618,14 +620,16 @@ sigma.(Intercept) -0.87025    0.06331  -13.75   &lt;2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                 edf
-mu.s(Temp)    4.4762
-mu.s(Wind)    1.0718
-sigma.s(Temp) 3.9513
+                 edf Ref.df  Chi.sq   p-value    
+mu.s(Temp)    4.4762 4.4762 279.075 &lt; 2.2e-16 ***
+mu.s(Wind)    1.0718 1.0718  34.155 &lt; 2.2e-16 ***
+sigma.s(Temp) 3.9513 3.9513  54.811 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  11.5 res.df =  104.5
 Deviance = 929.2643 Null Dev. Red. = 14.2%
-AIC = 952.263 elapsed =  0.18sec</code></pre>
+AIC = 952.263 elapsed =  0.17sec</code></pre>
 </div>
 </div>
 <p>This pattern is useful when an existing distribution has the right likelihood but the wrong parameterization. <a href="prediction.html">Prediction and Uncertainty</a> uses this same Gamma family to construct intervals for means, quantiles, and future observations. A user-defined family can also be assembled directly as a <code>gamlss2.family</code>, as shown next.</p>
@@ -686,9 +690,11 @@ sigma.(Intercept)    2.638      0.100   26.38   &lt;2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
-                  edf
-mu.s(speed)    1.2175
-sigma.s(speed) 1.0000
+                  edf Ref.df   Chi.sq   p-value    
+mu.s(speed)    1.2175 1.2175 161.5500 &lt; 2.2e-16 ***
+sigma.s(speed) 1.0000 1.0000   7.7925  0.005247 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 50 df =  4.22 res.df =  45.78
 Deviance = 405.6622 Null Dev. Red. = 12.92%

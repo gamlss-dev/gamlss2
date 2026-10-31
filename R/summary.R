@@ -546,6 +546,7 @@ special_pvalues <- function(object)
       if("(Intercept)" %in% names(b) &&
           !"(Intercept)" %in% colnames(X))
         X <- cbind("(Intercept)" = 1, X)
+      cn <- colnames(X)
       if(!is.null(names(b)) && !is.null(colnames(X)) &&
           all(names(b) %in% colnames(X)))
         X <- X[, names(b), drop = FALSE]
@@ -558,13 +559,59 @@ special_pvalues <- function(object)
           any(!is.finite(X)) || any(!is.finite(V)) || !any(diag(V) > 0))
         next
 
+      ## Recover the local influence matrix from its covariance and penalty.
+      ## Custom terms without penalty information retain the EDF approximation.
+      edf1 <- edf
+      P <- fs[["penalty", exact = TRUE]]
+      if(is.null(P)) {
+        S <- x[["S", exact = TRUE]]
+        if(is.matrix(S) || inherits(S, "Matrix")) S <- list(S)
+        if(!length(S) && (is.list(S) || inherits(x, "mgcv.smooth"))) {
+          P <- matrix(0, length(b), length(b))
+        } else if(is.list(S) && length(S) &&
+            is.numeric(fs$lambdas) && length(fs$lambdas)) {
+          P <- try({
+            lambda <- rep(fs$lambdas, length.out = length(S))
+            penalty <- lambda[1L] * as.matrix(S[[1L]])
+            if(length(S) > 1L) {
+              for(k in 2:length(S))
+                penalty <- penalty + lambda[k] * as.matrix(S[[k]])
+            }
+            penalty
+          }, silent = TRUE)
+        }
+      }
+      if(inherits(P, "Matrix")) P <- as.matrix(P)
+      if(is.matrix(P) && is.numeric(P) && nrow(P) == ncol(P) &&
+          all(is.finite(P))) {
+        if(!is.null(cn) && "(Intercept)" %in% cn &&
+            nrow(P) == length(cn) - 1L) {
+          penalty <- matrix(0, length(cn), length(cn),
+            dimnames = list(cn, cn))
+          penalty[cn != "(Intercept)", cn != "(Intercept)"] <- P
+          P <- penalty
+        } else if(is.null(rownames(P)) && length(cn) == nrow(P)) {
+          dimnames(P) <- list(cn, cn)
+        }
+        if(!is.null(names(b)) && !is.null(rownames(P)) &&
+            !is.null(colnames(P)) && all(names(b) %in% rownames(P)) &&
+            all(names(b) %in% colnames(P)))
+          P <- P[names(b), names(b), drop = FALSE]
+        if(identical(dim(P), dim(V))) {
+          F <- diag(length(b)) - V %*% P
+          rdf <- 2 * sum(diag(F)) - sum(F * t(F))
+          if(is.finite(rdf) && rdf > 0)
+            edf1 <- min(ncol(X), max(edf, rdf))
+        }
+      }
+
       ## Restore observation multiplicities for binned designs.
       if(!is.null(x$binning))
         X <- X[x$binning$match.index, , drop = FALSE]
 
       ## Conditional local test: no joint covariance or estimated dispersion.
       test <- try(mgcv:::testStat(p = b, X = X, V = V,
-        rank = min(ncol(X), edf), type = 0, res.df = -1), silent = TRUE)
+        rank = min(ncol(X), edf1), type = 0, res.df = -1), silent = TRUE)
       if(!inherits(test, "try-error"))
         object$fitted.specials[[i]][[j]]$test <- test
     }

@@ -74,6 +74,20 @@ gamlss2(formula, \dots)
   The object returned by the selected optimizer. By default, this is an object
   of class \code{"gamlss2"} produced by \code{\link{RS}}. Standard methods and
   extractor functions are available for this class.
+
+  For likelihood fits, entries of \code{fitted.specials} for \pkg{mgcv}
+  smooths and special terms of class \code{"X \%*\% b"} contain a \code{test}
+  list with components \code{stat}, \code{rank}, and \code{pval}, computed
+  after optimization using \code{mgcv:::testStat()} and the stored local
+  covariance matrix. With covariance \eqn{V} and fitted penalty \eqn{P}, the
+  local reference degrees of freedom are based on
+  \eqn{\mathrm{tr}(2F - F^2)}, where \eqn{F = I - VP}. Ordinary effective
+  degrees of freedom are retained as an approximation for custom terms
+  without usable penalty information. The summary reports the rank returned
+  by the test as \code{Ref.df}; the fitted term's \code{edf} is unchanged.
+  These are local approximate tests conditional on the other fitted
+  contributions and smoothing parameters. They do not include the boundary
+  correction used by \pkg{mgcv} for fully penalized random effects.
 }
 
 \seealso{

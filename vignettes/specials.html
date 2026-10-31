@@ -253,15 +253,15 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ---
 Smooth terms:
                          edf Ref.df Chi.sq   p-value    
-mu.s(Wind)            3.3464 3.3464 33.165 7.429e-05 ***
+mu.s(Wind)            3.3464 4.1623 33.061 7.545e-07 ***
 mu.lo(~Temp,span=0.7) 5.7708     NA     NA        NA    
-sigma.s(Temp)         4.3414 4.3414 51.990 &lt; 2.2e-16 ***
+sigma.s(Temp)         4.3414 5.3584 52.556 &lt; 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  15.46 res.df =  100.54
 Deviance = 921.4427 Null Dev. Red. = 14.92%
-AIC = 952.3597 elapsed =  0.58sec</code></pre>
+AIC = 952.3597 elapsed =  0.87sec</code></pre>
 </div>
 </div>
 <p>Specials can occur in any distributional parameter formula. They are refitted from the current working response and weights at each backfitting iteration, then centered before being added to the additive predictor. Centering keeps the intercept and the special term identifiable.</p>
@@ -359,13 +359,13 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Smooth terms:
                            edf Ref.df Chi.sq   p-value    
 mu.user(~Temp,span=0.7) 5.8084     NA     NA        NA    
-sigma.s(Temp)           4.3942 4.3942 51.835 &lt; 2.2e-16 ***
+sigma.s(Temp)           4.3942 5.4200 52.625 &lt; 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  12.2 res.df =  103.8
 Deviance = 939.5092 Null Dev. Red. = 13.26%
-AIC = 963.9144 elapsed =  0.03sec</code></pre>
+AIC = 963.9144 elapsed =  0.05sec</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted distributions</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

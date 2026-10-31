@@ -592,6 +592,7 @@
   object$reml.failure <- NULL
   for(k in names(fit)) object[[k]] <- fit[[k]]
   object$df <- get_df(object)
+  object <- special_pvalues(object)
   object$elapsed <- object$elapsed + elapsed
   object$jr$elapsed <- elapsed
   object$jr.call <- match.call()
@@ -1754,6 +1755,7 @@ jr <- function(object, trace = TRUE, ...)
   object$reml.failure <- NULL
   for(k in names(fit)) object[[k]] <- fit[[k]]
   object$df <- get_df(object)
+  object <- special_pvalues(object)
   object$elapsed <- object$elapsed + elapsed
   object$jr$elapsed <- elapsed
   object$jr.call <- match.call()

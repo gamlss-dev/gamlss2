@@ -392,6 +392,9 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$offsets <- if(!is.null(offsets) && NROW(offsets)) offsets else NULL
   rval$elapsed <- elapsed
 
+  ## Test special terms before light fits discard their design matrices.
+  rval <- special_pvalues(rval)
+
   ## Return model.frame, X and y.
   if(!control$light) {
     if(control$model) {

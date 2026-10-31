@@ -430,9 +430,8 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
     rval
   }
 
-  ## Smoothing parameters and coefficients form one state. If a criterion
-  ## selects a new smoothing parameter, accept or reject that state as a
-  ## whole; interpolating only its coefficients leaves an invalid warm start.
+  ## Scored smoothing updates compare complete coefficient and smoothing
+  ## parameter states at the same working response and weights.
   smoothing_update <- function(sfit) {
     if(length(intersect(names(sfit), np)))
       sfit <- unlist(sfit, recursive = FALSE)
@@ -513,12 +512,13 @@ RS <- function(x, y, specials, family, offsets, weights, start, xterms, sterms, 
 
   safeguard <- function(eta0, eta1, ll0, initial, old.sfit, new.sfit) {
     smoothing <- smoothing_update(new.sfit)
-    if(!smoothing$changed)
+    ## Local REML updates have no criterion score for accepting a full step.
+    ## Their working-model update still needs the family likelihood safeguard.
+    if(!smoothing$changed || !smoothing$scored)
       return(find_step(eta0, eta1, ll0, initial, old.sfit, new.sfit))
 
     ll1 <- candidate_log_likelihood(eta1)
-    accept <- is.finite(ll1) && if(smoothing$scored)
-      smoothing$improved else TRUE
+    accept <- is.finite(ll1) && smoothing$improved
     if(accept) {
       return(list("eta" = eta1, "logLik" = ll1, "step" = 1,
         "accepted" = TRUE, "objective" = TRUE))

@@ -496,16 +496,83 @@ summary.gamlss2 <- function(object, ..., unconditional = FALSE,
     sg$specials <- list()
     for(i in names(object$fitted.specials)) {
       for(j in names(object$fitted.specials[[i]])) {
-        sg$specials[[i]] <- rbind(sg$specials[[i]], object$fitted.specials[[i]][[j]]$edf)
+        fs <- object$fitted.specials[[i]][[j]]
+        test <- fs$test
+        if(is.null(test))
+          test <- list("stat" = NA_real_, "pval" = NA_real_, "rank" = NA_real_)
+        sg$specials[[i]] <- rbind(sg$specials[[i]],
+          c(fs$edf, test$rank, test$stat, test$pval))
       }
       rownames(sg$specials[[i]]) <- names(object$fitted.specials[[i]])
-      colnames(sg$specials[[i]]) <- "edf"
+      colnames(sg$specials[[i]]) <- c("edf", "Ref.df", "Chi.sq", "p-value")
     }
   }
   sg$elapsed <- object$elapsed
   class(sg) <- "summary.gamlss2"
   return(sg)
 }
+
+## P-values for smooth terms.
+special_pvalues <- function(object)
+{
+  if(inherits(object, c("bamlss2", "gamlss2.mcmc")))
+    return(object)
+
+  for(i in names(object$fitted.specials)) {
+    for(j in names(object$fitted.specials[[i]])) {
+      x <- object$specials[[j]]
+      if(!inherits(x, c("mgcv.smooth", "X %*% b")))
+        next
+
+      fs <- object$fitted.specials[[i]][[j]]
+      object$fitted.specials[[i]][[j]]$test <-
+        list("stat" = NA_real_, "pval" = NA_real_, "rank" = NA_real_)
+      b <- fs$coefficients
+      X <- x[["X", exact = TRUE]]
+      V <- fs$vcov
+      edf <- fs$edf
+      if(is.null(X) || is.null(V) || !is.numeric(b) ||
+          !length(b) || !is.null(dim(b)) || any(!is.finite(b)) ||
+          length(edf) != 1L || !is.finite(edf) || edf <= 0)
+        next
+
+      if(inherits(X, "Matrix")) X <- as.matrix(X)
+      if(inherits(V, "Matrix")) V <- as.matrix(V)
+      if(!is.matrix(X) || !is.numeric(X) ||
+          !is.matrix(V) || !is.numeric(V))
+        next
+
+      ## Match the fitted coefficient basis, including special intercepts.
+      if("(Intercept)" %in% names(b) &&
+          !"(Intercept)" %in% colnames(X))
+        X <- cbind("(Intercept)" = 1, X)
+      if(!is.null(names(b)) && !is.null(colnames(X)) &&
+          all(names(b) %in% colnames(X)))
+        X <- X[, names(b), drop = FALSE]
+      if(!is.null(names(b)) && !is.null(rownames(V)) &&
+          !is.null(colnames(V)) && all(names(b) %in% rownames(V)) &&
+          all(names(b) %in% colnames(V)))
+        V <- V[names(b), names(b), drop = FALSE]
+      if(ncol(X) != length(b) || nrow(X) < 1L ||
+          !identical(dim(V), c(length(b), length(b))) ||
+          any(!is.finite(X)) || any(!is.finite(V)) || !any(diag(V) > 0))
+        next
+
+      ## Restore observation multiplicities for binned designs.
+      if(!is.null(x$binning))
+        X <- X[x$binning$match.index, , drop = FALSE]
+
+      ## Conditional local test: no joint covariance or estimated dispersion.
+      test <- try(mgcv:::testStat(p = b, X = X, V = V,
+        rank = min(ncol(X), edf), type = 0, res.df = -1), silent = TRUE)
+      if(!inherits(test, "try-error"))
+        object$fitted.specials[[i]][[j]]$test <- test
+    }
+  }
+
+  return(object)
+}
+
 
 summary.bamlss2 <- function(object, thres = 0.01, ...)
 {

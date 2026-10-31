@@ -23,6 +23,20 @@
   and smoothing parameters are estimated jointly by Laplace approximate
   REML; see \code{\link{JR}}.
 
+  Local REML updates are safeguarded using the penalized family likelihood.
+  With automatic step control, the coefficient step is halved if a full
+  working-model update does not improve this objective. Fitted contributions
+  and coefficient warm starts are updated together.
+
+  Step control does not prevent a flexible scale predictor from overfitting.
+  Shrinkage smooths, such as \code{s(x, bs = "ts")} or
+  \code{s(x, bs = "cs")}, also penalize the otherwise unpenalized null space
+  and can shrink an entire effect towards zero. Alternatively,
+  \code{select = TRUE} adds selection penalties to eligible smooths.
+  These are explicit changes to the term penalties, not changes to the
+  selection criterion; see \code{\link[mgcv]{gam.selection}}. Local P-values
+  remain approximate and do not provide a guarantee against false positives.
+
   Neighbourhood cross-validation can be selected with \code{criterion = "ncv"}.
   If \code{ncv} is omitted, singleton neighbourhoods are used, corresponding to
   leave-one-observation-out cross-validation. For ordered data, a numeric

@@ -70,7 +70,10 @@ round_family(family = NO, digits = 0L)
     Optional character string used as the extended family label.
   }
   \item{lower, upper}{
-    Fixed scalar lower and upper truncation or censoring boundaries. For
+    Fixed lower and upper boundaries. For \code{truncate_family()}, each
+    can be a scalar or an observation-specific numeric vector. Two vectors
+    must have the same length; a scalar is recycled to match the other bound.
+    \code{censor_family()} requires scalar boundaries. For
     \code{censor_family()}, leaving both at their infinite defaults constructs
     an observation-specific right-censored family for a \code{Surv} response.
   }
@@ -100,7 +103,25 @@ round_family(family = NO, digits = 0L)
   The function \code{truncate_family} conditions the base distribution on
   the interval selected by \code{lower}, \code{upper}, and \code{include}.
   Its density or probability mass is divided by the probability of the
-  retained interval. With at least one finite boundary,
+  retained interval. Fitting uses the truncated score with the base family's
+  working weights, avoiding unstable smoothing updates based on
+  observation-dependent curvature. These weights are an optimization
+  approximation, not the Fisher information of the truncated distribution.
+  The \code{score} and \code{hessian} functions retain the derivatives of
+  the truncated log-density on the link scale.
+
+  With vector truncation boundaries, each interval corresponds to one row.
+  Non-scalar parameters and evaluation points must have the same length as
+  the boundaries; scalar parameters, responses, and probabilities are
+  broadcast over the intervals. The \code{random(par, n)} function requires
+  \code{n} to equal the number of intervals and draws one value per interval.
+  For fitting, bounds must match the final response length and order.
+  Perform subsetting and missing-value removal before constructing the
+  family. Bound vectors are not automatically subset, reordered, or replaced
+  by \code{newdata}. To evaluate other rows, construct a family with the
+  corresponding bounds and use its methods with the predicted parameters.
+
+  With at least one finite boundary,
   \code{censor_family} observes
   \deqn{Y = \min(\max(X, lower), upper)}
   and consequently creates point masses at finite censoring boundaries.
@@ -170,6 +191,15 @@ y <- fam$random(list(mu = exp(1/2 + sin(x))), n)
 m <- gamlss2(y ~ s(x), family = fam)
 plot(x, y)
 
+## observation-specific truncation intervals
+lower <- 10 + 2 * sin(x)
+upper <- 30 + cos(x)
+fam <- truncate_family(TF, lower = lower, upper = upper)
+y <- fam$random(list(mu = 20 + 2 * sin(x), sigma = 3, nu = 8), n)
+m <- gamlss2(y ~ s(x) | 1 | 1, family = fam,
+  start = list(nu = 8), fixed = c(nu = TRUE))
+quantile(m, probs = c(0.1, 0.5, 0.9))
+
 ## small helper for plotting fitted quantiles
 fq <- function(model) {
   matlines(x,
@@ -178,6 +208,7 @@ fq <- function(model) {
   )
 }
 
+plot(x, y)
 fq(m)
 
 ## normal distribution censored at both boundaries

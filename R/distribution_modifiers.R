@@ -418,69 +418,95 @@ logit_family <- function(family = NO)
   )
 }
 
-## Construct a family conditioned to a fixed interval.
+## Construct a family conditioned to fixed, possibly observation-specific intervals.
 truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
   include = c(FALSE, TRUE))
 {
   family <- complete_family(family)
-  if(length(lower) != 1L || length(upper) != 1L || is.na(lower) ||
-      is.na(upper) || lower >= upper)
-    stop("'lower' and 'upper' must define a nonempty fixed interval",
+  if(!is.numeric(lower) || !is.numeric(upper) ||
+      !is.null(dim(lower)) || !is.null(dim(upper)) ||
+      !length(lower) || !length(upper) || anyNA(lower) || anyNA(upper))
+    stop("'lower' and 'upper' must be nonempty numeric vectors without missing values",
+      call. = FALSE)
+  nb <- max(length(lower), length(upper))
+  if(!length(lower) %in% c(1L, nb) || !length(upper) %in% c(1L, nb))
+    stop("'lower' and 'upper' must have length one or the same length",
+      call. = FALSE)
+  if(any(lower >= upper))
+    stop("'lower' and 'upper' must define nonempty intervals",
       call. = FALSE)
   if(!is.logical(include) || length(include) != 2L || anyNA(include))
     stop("'include' must contain two logical values", call. = FALSE)
 
   lower.left <- isTRUE(include[1L])
   upper.left <- !isTRUE(include[2L])
+  rows <- function(par, y = NULL) {
+    sizes <- c(lengths(as.list(par)), if(!is.null(y)) length(y), nb)
+    n <- max(sizes)
+    if(nb > 1L && any(!sizes %in% c(1L, n)))
+      stop("vector bounds, parameters, and evaluation points must have length one or the same length",
+        call. = FALSE)
+    n
+  }
   inside <- function(y) {
     lo <- if(include[1L]) y >= lower else y > lower
     hi <- if(include[2L]) y <= upper else y < upper
     lo & hi
   }
-  log.normalizer <- function(par, n) {
+  log.normalizer <- function(par, n,
+    lo = .modifier_recycle(lower, n), hi = .modifier_recycle(upper, n)) {
     .modifier_log_interval(
-      family, par, rep.int(lower, n), rep.int(upper, n),
+      family, par, lo, hi,
       lower.left = lower.left, upper.left = upper.left
     )
   }
   adjustment <- function(par, y)
-    -log.normalizer(par, max(length(y), .modifier_rows(par)))
+    -log.normalizer(par, rows(par, y))
 
   fam <- .modifier_family(
     family,
     paste0("Truncated(", family$family[1L], ")")
   )
   fam$pdf <- function(par, y, log = FALSE, ...) {
-    n <- max(length(y), .modifier_rows(par))
+    n <- rows(par, y)
     yy <- .modifier_recycle(y, n)
     value <- family$pdf(par = par, y = yy, log = TRUE, ...) -
       log.normalizer(par, n)
     value[!inside(yy)] <- -Inf
     if(log) value else exp(value)
   }
-  fam$cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
+  cdf <- function(par, y, lo, hi, lower.tail = TRUE, log.p = FALSE, ...) {
     n <- max(length(y), .modifier_rows(par))
     yy <- .modifier_recycle(y, n)
     numerator <- .modifier_log_interval(
-      family, par, rep.int(lower, n), yy,
+      family, par, lo, yy,
       lower.left = lower.left, upper.left = FALSE, ...
     )
-    value <- exp(numerator - log.normalizer(par, n))
-    value[yy < lower | (yy == lower & !include[1L])] <- 0
-    value[yy >= upper] <- 1
+    value <- exp(numerator - log.normalizer(par, n, lo, hi))
+    value[yy < lo | (yy == lo & !include[1L])] <- 0
+    value[yy >= hi] <- 1
+    value[is.na(yy)] <- NA_real_
     value <- pmin(pmax(value, 0), 1)
     if(!lower.tail) value <- 1 - value
     if(log.p) log(value) else value
   }
+  fam$cdf <- function(par, y, lower.tail = TRUE, log.p = FALSE, ...) {
+    n <- rows(par, y)
+    cdf(par, .modifier_recycle(y, n),
+      .modifier_recycle(lower, n), .modifier_recycle(upper, n),
+      lower.tail = lower.tail, log.p = log.p, ...)
+  }
   fam$quantile <- function(par, p, lower.tail = TRUE, log.p = FALSE, ...) {
     probability <- if(log.p) exp(p) else p
     if(!lower.tail) probability <- 1 - probability
-    n <- max(length(probability), .modifier_rows(par))
+    n <- rows(par, probability)
     probability <- .modifier_recycle(probability, n)
+    lo <- .modifier_recycle(lower, n)
+    hi <- .modifier_recycle(upper, n)
     a <- if(lower.left) {
-      .modifier_cdf_left(family, par, rep.int(lower, n))
+      .modifier_cdf_left(family, par, lo)
     } else {
-      .modifier_call_cdf(family, par, rep.int(lower, n))
+      .modifier_call_cdf(family, par, lo)
     }
     log.z <- log.normalizer(par, n)
     value <- rep.int(NA_real_, n)
@@ -499,12 +525,12 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
       log.survival <- if(lower.left &&
           identical(tolower(family$type[1L]), "discrete")) {
         left <- .modifier_cdf_left(
-          family, pp, rep.int(lower, sum(i)), log.p = TRUE
+          family, pp, lo[i], log.p = TRUE
         )
         log1p(-exp(left))
       } else {
         .modifier_call_cdf(
-          family, pp, rep.int(lower, sum(i)),
+          family, pp, lo[i],
           lower.tail = FALSE, log.p = TRUE
         )
       }
@@ -518,31 +544,31 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
     ## Some legacy quantile wrappers clip tail probabilities.  Fall back to
     ## vectorized inversion only for candidates that fail their CDF check.
     if(identical(tolower(family$type[1L]), "continuous")) {
-      fitted.probability <- fam$cdf(par, value)
+      fitted.probability <- cdf(par, value, lo, hi)
       bad <- !is.na(probability) & probability > 0 & probability < 1 &
         (!is.finite(value) | abs(fitted.probability - probability) > 1e-7)
       if(any(bad)) {
         pp <- .modifier_subset(par, bad, n)
+        lo <- lo[bad]
+        hi <- hi[bad]
         target <- probability[bad]
         candidate <- value[bad]
         candidate[!is.finite(candidate)] <- 0
-        left <- if(is.finite(lower)) rep.int(lower, sum(bad)) else
-          candidate - 1
-        right <- if(is.finite(upper)) rep.int(upper, sum(bad)) else
-          candidate + 1
+        left <- ifelse(is.finite(lo), lo, candidate - 1)
+        right <- ifelse(is.finite(hi), hi, candidate + 1)
         width <- rep.int(1, sum(bad))
-        if(!is.finite(lower)) {
+        if(any(!is.finite(lo))) {
           for(iteration in seq_len(60L)) {
-            active <- fam$cdf(pp, left) >= target
+            active <- !is.finite(lo) & cdf(pp, left, lo, hi) >= target
             if(!any(active)) break
             left[active] <- left[active] - width[active]
             width[active] <- 2 * width[active]
           }
         }
         width[] <- 1
-        if(!is.finite(upper)) {
+        if(any(!is.finite(hi))) {
           for(iteration in seq_len(60L)) {
-            active <- fam$cdf(pp, right) < target
+            active <- !is.finite(hi) & cdf(pp, right, lo, hi) < target
             if(!any(active)) break
             right[active] <- right[active] + width[active]
             width[active] <- 2 * width[active]
@@ -550,7 +576,7 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
         }
         for(iteration in seq_len(80L)) {
           midpoint <- (left + right) / 2
-          move <- fam$cdf(pp, midpoint) < target
+          move <- cdf(pp, midpoint, lo, hi) < target
           left[move] <- midpoint[move]
           right[!move] <- midpoint[!move]
         }
@@ -559,12 +585,16 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
     }
     value
   }
-  fam$random <- function(par, n, ...)
+  fam$random <- function(par, n, ...) {
+    if(nb > 1L && (length(n) != 1L || is.na(n) || n != nb))
+      stop("'n' must equal the number of truncation intervals",
+        call. = FALSE)
     fam$quantile(par = par, p = stats::runif(n), ...)
+  }
   fam$mass <- function(par, y, log = FALSE, ...) {
     value <- .modifier_mass(family, par, y, log = TRUE, ...) -
-      log.normalizer(par, max(length(y), .modifier_rows(par)))
-    value[!inside(y)] <- -Inf
+      log.normalizer(par, rows(par, y))
+    value[!inside(.modifier_recycle(y, length(value)))] <- -Inf
     if(log) value else exp(value)
   }
   fam$cdf_left <- function(par, y, log.p = FALSE, ...) {
@@ -576,14 +606,46 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
   derivatives <- .modifier_add_derivatives(family, adjustment)
   fam$score <- derivatives$score
   fam$hessian <- derivatives$hessian
-  fam$update <- NULL
+  ## Keep the observed derivatives, but use the base working curvature for
+  ## fitting. Observation-dependent curvature can destabilize smooth updates.
+  fam$update <- function(par, y, eta, which) {
+    weights <- .update(par = par, y = y, eta = eta,
+      family = family, which = which)$weights
+    score <- deriv_checks(
+      fam$score[[which]](par = par, y = y, id = which), is.weight = FALSE
+    )
+    list(eta = eta + score / weights, weights = weights)
+  }
   fam$log_likelihood <- function(par, y, ...)
     sum(fam$pdf(par = par, y = y, log = TRUE, ...), na.rm = TRUE)
-  fam$valid.response <- function(y) all(is.na(y) | inside(y))
+  fam$valid.response <- function(y) {
+    if(nb > 1L && length(y) != nb)
+      stop("the response must have one observation per truncation interval",
+        call. = FALSE)
+    all(is.na(y) | inside(y))
+  }
   fam$initialize <- family$initialize
   fam$rqres <- NULL
   fam$support <- NULL
   fam$mean <- fam$variance <- NULL
+  if(nb > 1L) {
+    ## Numerical moment integration evaluates one distribution at a time.
+    ## Give each such evaluation its corresponding scalar boundaries.
+    moment <- function(par, which, ...) {
+      n <- rows(par)
+      lo <- .modifier_recycle(lower, n)
+      hi <- .modifier_recycle(upper, n)
+      vapply(seq_len(n), function(i) {
+        f <- complete_family(truncate_family(family, lo[i], hi[i], include))
+        f[[which]](.modifier_subset(par, i, n), ...)
+      }, numeric(1L))
+    }
+    fam$mean <- function(par, ...) moment(par, "mean", ...)
+    fam$variance <- function(par, ...) moment(par, "variance", ...)
+    fam$support <- function(par, ...)
+      cbind(min = fam$quantile(par, 0), max = fam$quantile(par, 1))
+    attr(fam$support, "gamlss2.normalized") <- TRUE
+  }
   class(fam) <- "gamlss2.family"
   fam
 }

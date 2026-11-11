@@ -420,7 +420,7 @@ logit_family <- function(family = NO)
 
 ## Construct a family conditioned to fixed, possibly observation-specific intervals.
 truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
-  include = c(FALSE, TRUE))
+  include = c(FALSE, TRUE), numhessian = FALSE)
 {
   family <- complete_family(family)
   if(!is.numeric(lower) || !is.numeric(upper) ||
@@ -605,7 +605,11 @@ truncate_family <- function(family = NO, lower = -Inf, upper = Inf,
   }
   derivatives <- .modifier_add_derivatives(family, adjustment)
   fam$score <- derivatives$score
-  fam$hessian <- derivatives$hessian
+  if(numhessian) {
+    fam$hessian <- derivatives$hessian
+  } else {
+    fam$hessian <- family$hessian
+  }
   ## Keep the observed derivatives, but use the base working curvature for
   ## fitting. Observation-dependent curvature can destabilize smooth updates.
   fam$update <- function(par, y, eta, which) {

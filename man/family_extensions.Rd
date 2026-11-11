@@ -27,7 +27,7 @@ transform_family(family = NO, transform, inverse, log_jacobian,
 logit_family(family = NO)
 
 truncate_family(family = NO, lower = -Inf, upper = Inf,
-  include = c(FALSE, TRUE))
+  include = c(FALSE, TRUE), numhessian = FALSE)
 
 censor_family(family = NO, lower = -Inf, upper = Inf)
 
@@ -81,6 +81,9 @@ round_family(family = NO, digits = 0L)
     Logical vector of length two indicating whether the lower and upper
     truncation boundaries are retained. The default interval is
     \eqn{(lower, upper]}.
+  }
+  \item{numhessian}{
+    Logical. Should the hessian be numerically approximated?
   }
   \item{at}{
     One or more fixed inflation points, or one fixed hurdle point.

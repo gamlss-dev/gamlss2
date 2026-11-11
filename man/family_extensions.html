@@ -677,7 +677,7 @@ window.Quarto = {
 logit_family(family = NO)
 
 truncate_family(family = NO, lower = -Inf, upper = Inf,
-  include = c(FALSE, TRUE))
+  include = c(FALSE, TRUE), numhessian = FALSE)
 
 censor_family(family = NO, lower = -Inf, upper = Inf)
 
@@ -769,6 +769,14 @@ round_family(family = NO, digits = 0L)
 </td>
 <td>
 <p>Logical vector of length two indicating whether the lower and upper truncation boundaries are retained. The default interval is <span class="math inline">\((lower, upper]\)</span>.</p>
+</td>
+</tr>
+<tr>
+<td style="white-space: collapse; font-family: monospace; vertical-align: top">
+<code id="numhessian">numhessian</code>
+</td>
+<td>
+<p>Logical. Should the hessian be numerically approximated?</p>
 </td>
 </tr>
 <tr>

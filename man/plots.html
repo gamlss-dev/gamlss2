@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-962582a37fd08a7f01a2241ca1d9be2c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-41d81f29c3eb600407fa41ecd004b5e9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -721,7 +721,7 @@ Additional graphical arguments such as <code>lwd</code>, <code>lty</code>, <code
 </section>
 <section id="details" class="level3">
 <h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>For objects of class <code>“gamlss2”</code>, <code>which = “effects”</code> is the default and plots the partial effects stored in <code>results(object)</code>. If no effect information is available, residual diagnostics are shown instead. Effect uncertainty uses fast term-local covariance by default. Pass <code>method = “joint”</code> through <code>…</code> to rebuild effects from the full joint covariance.</p>
+<p>For objects of class <code>“gamlss2”</code>, <code>which = “effects”</code> is the default and plots the partial effects stored in <code>results(object)</code>. If no effect information is available, residual diagnostics are shown instead. Effect uncertainty uses stored covariance by default. Linear effects use the corrected linear blocks computed after fitting, while smooth effects use term-local covariance. Pass <code>method = “joint”</code> through <code>…</code> to rebuild effects from the full joint covariance.</p>
 <p>Linear effects are constructed separately for each formula term, so a main effect does not include columns belonging to an interaction. A linear interaction between two numeric covariates is displayed as an image and contour plot, in the same way as a bivariate smooth effect. Linear terms involving more than two covariates are not plotted automatically.</p>
 <p>For objects of class <code>“gamlss2.list”</code>, plots compare effect estimates across several fitted models. Residual diagnostics are only available for single-model objects.</p>
 </section>

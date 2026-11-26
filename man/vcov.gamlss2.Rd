@@ -51,20 +51,47 @@ This local approximation conditions on the active constraint set and does not
 include uncertainty about which constraints are active. Unconditional and
 sandwich corrections are currently unavailable for these terms.
 
+For \code{\link{fk}} terms, the identifying coefficient fixed to zero during
+fitting is kept fixed in the covariance calculation. Inference conditions on
+the selected knot locations and number of knots. Smoothness and sandwich
+corrections are currently unavailable for these constrained representations.
+
 The default covariance conditions on fitted smoothing parameters. Use
 \code{unconditional = TRUE} to include their approximate estimation uncertainty.
 Fixed smoothing parameters receive no correction, and model-selection
-uncertainty is excluded. Adaptive smooth penalties, selected ridge penalties,
-and non-estimable coefficients are unsupported.
+uncertainty is excluded. The smoothness correction does not support adaptive
+smooth penalties, selected ridge penalties, or non-estimable coefficients.
 
 Special terms that have no verifiable coefficient-linear design are rejected
-explicitly. Objects fitted with \code{light = TRUE} do not retain the final
+explicitly. A stored term covariance alone is insufficient for adjusting
+linear-coefficient covariance: the coefficient design, fitted quadratic
+penalty (possibly zero), and identifying constraints must also be available.
+Standard \pkg{mgcv} terms provide their design and penalty matrices; other
+specials must supply an equivalent verifiable representation.
+Objects fitted with \code{light = TRUE} do not retain the final
 predictors and must be refitted for joint covariance. Aliased or numerically
 unidentified coefficient variances are returned as \code{NA}.
 
-The ordinary \code{summary()} and effect-result paths use the covariance stored
-with each fitted model term by default, which is substantially faster for large
-models. Use \code{summary(object, method = "joint")} or
+The default \code{summary(object, method = "local")} and
+\code{confint(object, method = "local")} extract the linear covariance
+stored with the fitted model terms. For RS and CG fits this is computed once
+after fitting using predictor-local working information, equivalent to
+\code{vcov(object, method = "working")} for the linear coefficients.
+All linear and smooth coefficients within each
+distributional predictor enter the penalized inverse before extracting its
+linear block. Thus random effects and smooths are not treated as known
+offsets. This approximation omits cross-parameter curvature and conditions
+on fitted smoothing parameters; it need not agree with the observed joint
+covariance. Direct JR fits already supply marginal linear blocks from their
+joint covariance, which are retained. Summaries and confidence intervals do
+not reconstruct or refactor these systems. Light fits retain the same
+corrected linear blocks. Models fitted before this correction must be refitted
+to obtain corrected local inference in predictors containing smooth terms.
+If a predictor contains unsupported specials, its local linear covariance is
+unavailable and its standard errors are reported as \code{NA} with a warning.
+
+Effect-result paths use the covariance stored with each fitted model term by
+default. Use \code{summary(object, method = "joint")} or
 \code{results(object, method = "joint")} to request the complete joint
 information. Use \code{summary(object, unconditional = TRUE)} for the smoothness
 correction. This option selects the joint method unless another method is

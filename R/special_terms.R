@@ -293,7 +293,11 @@ special_fit.n <- function(x, z, w, control, ...)
 
     ## Prepare the formula design once. Candidate fits and EDF calculations
     ## use the matrix interface; restore formula metadata on the selected fit.
-    mf <- model.frame(.fnns, data = x$data, weights = weights_w)
+    mf <- do.call(stats::model.frame, list(
+      formula = .fnns,
+      data = x$data,
+      weights = x$data[["weights_w"]]
+    ))
     Terms <- attr(mf, "terms")
     X <- model.matrix(Terms, mf)
     contrasts <- attr(X, "contrasts")

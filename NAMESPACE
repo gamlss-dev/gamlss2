@@ -10,7 +10,7 @@ importFrom("stats", "terms", "delete.response", ".getXlevels", "coef", "dnorm", 
   "as.formula", "optimHess", "printCoefmat", "pt", "vcov", "AIC", "BIC",
   "formula", "logLik", "na.omit", "var", "optim", "optimize", "median", "pchisq",
   "na.pass", "reformulate", "cov", "rexp", "rgamma", "loess", "update",
-  "deviance", "drop1", "plogis", "qlogis", "setNames")
+  "deviance", "drop1", "plogis", "qlogis", "setNames", "dt")
 
 importFrom("utils", "flush.console", "tail", "getFromNamespace",
   "capture.output", "combn", "head", "argsAnywhere", "getS3method")

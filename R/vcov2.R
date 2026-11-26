@@ -30,7 +30,11 @@ vcov.gamlss2 <- function(object,
   dots <- list(...)
   sandwich <- if("sandwich" %in% names(dots)) dots[["sandwich"]] else FALSE
   .details <- if(".details" %in% names(dots)) dots[[".details"]] else FALSE
-  dots[c("sandwich", ".details")] <- NULL
+  .linear.only <- isTRUE(dots[[".linear.only"]])
+  dots[c("sandwich", ".details", ".linear.only")] <- NULL
+  if(.linear.only && (method != "working" || full || unconditional || sandwich))
+    stop("internal linear covariance requires working information without corrections.",
+      call. = FALSE)
   if(!is.logical(unconditional) || length(unconditional) != 1L ||
       is.na(unconditional))
     stop("'unconditional' must be TRUE or FALSE.", call. = FALSE)
@@ -52,6 +56,8 @@ vcov.gamlss2 <- function(object,
 
   .matrix <- function(x)
   {
+    if(.linear.only && inherits(x, "Matrix"))
+      return(x)
     if(inherits(x, "Matrix"))
       x <- as.matrix(x)
     if(!is.matrix(x) || !is.numeric(x))
@@ -249,12 +255,13 @@ vcov.gamlss2 <- function(object,
         X <- X[, i, drop = FALSE]
       }
 
-      if(ncol(X) != p || any(!is.finite(X)))
+      if(ncol(X) != p ||
+          (if(.linear.only) !vcov_local_finite(X) else any(!is.finite(X))))
         return(NULL)
 
       ## protect against changed contrasts or an incorrectly selected matrix
       if(!is.null(fv) && length(fv) == n) {
-        z <- drop(X %*% b0)
+        z <- as.numeric(X %*% b0)
         sc <- max(1, abs(z), abs(fv))
         if(max(abs(z - fv)) > 1e-6 * sc)
           return(NULL)
@@ -359,8 +366,18 @@ vcov.gamlss2 <- function(object,
     return(NULL)
   }
 
-  .special_matrix <- function(name, term, fit, source, b, n)
+  .special_matrix <- function(name, term, fit, source, b, n, compact = FALSE)
   {
+    if(compact) {
+      design <- vcov_local_design(fit, source, b, n)
+      if(!is.null(design)) return(design)
+      if(!inherits(fit, "ms.fitted")) {
+        design <- vcov_local_predict_design(fit, b, object$model, n)
+        if(!is.null(design)) return(design)
+      }
+      .stop(paste0("cannot obtain a verified coefficient-linear design for ",
+        "special term '", term, "' in parameter '", name, "'."))
+    }
     q <- length(b)
     if(!q)
       .stop(paste0(
@@ -438,7 +455,7 @@ vcov.gamlss2 <- function(object,
     for(X in candidates) {
       X <- .ok(X)
       if(!is.null(X))
-        return(X)
+        return(if(compact) vcov_local_design_matrix(X, n) else X)
     }
 
     ## Some coefficient-linear specials store a compact representation
@@ -537,7 +554,7 @@ vcov.gamlss2 <- function(object,
           if(ok) {
             X <- .ok(X)
             if(!is.null(X))
-              return(X)
+              return(if(compact) vcov_local_design_matrix(X, n) else X)
           }
         }
       }
@@ -571,11 +588,14 @@ vcov.gamlss2 <- function(object,
       z <- .matrix(z)
 
       if(!is.null(z)) {
-        if(any(dim(z) != q) || any(!is.finite(z)))
+        if(any(dim(z) != q) ||
+            (if(.linear.only) !vcov_local_finite(z) else any(!is.finite(z))))
           .stop(paste0(
             "invalid fitted penalty matrix for special term '", term, "'."
           ))
 
+        if(.linear.only)
+          return(vcov_local_penalty(z, term))
         z <- 0.5 * (z + t(z))
         ev <- eigen(z, symmetric = TRUE, only.values = TRUE)$values
         cut <- 1e-9 * max(1, max(abs(ev)))
@@ -599,7 +619,7 @@ vcov.gamlss2 <- function(object,
       S <- fit$S
 
     if(is.null(S) && is.list(source) && isTRUE(source$fixed))
-      return(matrix(0, q, q))
+      return(if(.linear.only) vcov_local_zero(q) else matrix(0, q, q))
 
     if(is.null(S)) {
       lambda0 <- fit$lambdas
@@ -608,7 +628,7 @@ vcov.gamlss2 <- function(object,
       if(!is.null(lambda0)) {
         lambda0 <- as.numeric(lambda0)
         if(length(lambda0) && all(is.finite(lambda0)) && all(lambda0 == 0))
-          return(matrix(0, q, q))
+          return(if(.linear.only) vcov_local_zero(q) else matrix(0, q, q))
       }
       .stop(paste0(
         "special term '", term, "' in parameter '", name,
@@ -619,7 +639,7 @@ vcov.gamlss2 <- function(object,
 
     ## Fixed-basis smooths legitimately have no penalty matrices.
     if(!length(S))
-      return(matrix(0, q, q))
+      return(if(.linear.only) vcov_local_zero(q) else matrix(0, q, q))
 
     if(is.matrix(S) || inherits(S, "Matrix"))
       S <- list(S)
@@ -633,11 +653,15 @@ vcov.gamlss2 <- function(object,
       S[[j]] <- .matrix(S[[j]])
 
       if(is.null(S[[j]]) || any(dim(S[[j]]) != q) ||
-        any(!is.finite(S[[j]])))
+        (if(.linear.only) !vcov_local_finite(S[[j]]) else any(!is.finite(S[[j]]))))
         .stop(paste0(
           "invalid penalty matrix for special term '", term, "'."
         ))
 
+      if(.linear.only) {
+        S[[j]] <- vcov_local_penalty(S[[j]], term)
+        next
+      }
       S[[j]] <- 0.5 * (S[[j]] + t(S[[j]]))
       ev <- eigen(S[[j]], symmetric = TRUE, only.values = TRUE)$values
       cut <- 1e-9 * max(1, max(abs(ev)))
@@ -678,9 +702,44 @@ vcov.gamlss2 <- function(object,
         "special term '", term, "'."
       ))
 
-    P <- matrix(0, q, q)
-    for(j in seq_along(S))
+    P <- if(.linear.only) lambda[1L] * S[[1L]] else matrix(0, q, q)
+    for(j in if(.linear.only) seq_along(S)[-1L] else seq_along(S))
       P <- P + lambda[j] * S[[j]]
+    if(.linear.only && q <= 128L) {
+      ## Preserve the common penalty null space before very different
+      ## smoothing parameters can obscure it through cancellation.
+      reference <- matrix(0, q, q)
+      ranks <- if(is.list(source)) source$rank else NULL
+      if(is.null(ranks) && is.list(fit)) ranks <- fit$rank
+      for(j in which(lambda > 0)) {
+        Sj <- as.matrix(S[[j]])
+        rank <- if(length(ranks) >= j) ranks[[j]] else NA_real_
+        if(is.numeric(rank) && length(rank) == 1L && is.finite(rank) &&
+            rank >= 0 && rank <= q && rank == floor(rank)) {
+          decomposition <- eigen(Sj, symmetric = TRUE)
+          cutoff <- 8 * q * .Machine$double.eps *
+            max(.Machine$double.xmin, abs(decomposition$values))
+          if(rank < q && any(abs(decomposition$values[seq_len(q) > rank]) > cutoff)) {
+            ## A custom term's rank field need not describe its penalty.
+            ## Inconsistent metadata must never remove a real penalty.
+            reference <- NULL
+            break
+          }
+          if(rank) {
+            U <- decomposition$vectors[, seq_len(rank), drop = FALSE]
+            reference <- reference + tcrossprod(U)
+          }
+        } else if(requireNamespace("Matrix", quietly = TRUE) && Matrix::isDiagonal(Sj)) {
+          diag(reference) <- diag(reference) + as.numeric(diag(Sj) > 0)
+        } else {
+          ## Without a declared rank, a tiny positive eigenvalue cannot
+          ## safely be distinguished from a structural zero.
+          reference <- NULL
+          break
+        }
+      }
+      attr(P, "local.reference") <- reference
+    }
 
     return(P)
   }
@@ -688,6 +747,17 @@ vcov.gamlss2 <- function(object,
   .special_constraints <- function(name, term, fit, X, b)
   {
     q <- length(b)
+    if(inherits(fit, "fk.fitted")) {
+      ## fk_wfit() fits the centered basis with its last column removed,
+      ## then pads the coefficient vector with a deterministic zero.
+      tol <- sqrt(.Machine$double.eps) * (1 + max(abs(b)))
+      if(length(fit$basis.center) != q || abs(b[q]) > tol)
+        .stop(paste0("invalid identifying constraint for free-knot term '",
+          term, "' in parameter '", name, "'."))
+      C <- matrix(0, 1L, q)
+      C[1L, q] <- 1
+      return(C)
+    }
     if(!inherits(fit, "ms.fitted"))
       return(matrix(0, 0L, q))
 
@@ -1259,11 +1329,25 @@ vcov.gamlss2 <- function(object,
     par[[pn[j]]] <- z
   }
 
+  ## Local linear inference keeps term designs separate and solves only for
+  ## the requested linear block. No complete design or inverse is assembled.
+  if(.linear.only) {
+    parameter <- names(object$coefficients)[lengths(object$coefficients) > 0L]
+    if(length(parameter) != 1L)
+      .stop("internal local covariance requires one linear predictor.")
+    parameter <- parameter[1L]
+    w <- prior * .working_weights(family, par, y, eta[[parameter]], parameter, n)
+    return(vcov_working_linear(object, parameter, n, w,
+      linear.matrix = .linear_matrix, special.source = .special_source,
+      special.matrix = .special_matrix, special.penalty = .special_penalty,
+      special.constraints = .special_constraints))
+  }
+
   ## construct complete coefficient-linear predictor blocks
   blocks <- vector("list", length(pn))
   names(blocks) <- pn
   for(j in seq_along(pn))
-    blocks[[j]] <- .parameter_block(pn[j], j, n)
+    blocks[j] <- list(.parameter_block(pn[j], j, n))
   blocks <- blocks[!vapply(blocks, is.null, logical(1L))]
 
   if(!length(blocks))
@@ -1480,7 +1564,7 @@ vcov.gamlss2 <- function(object,
   noise <- 100 * .Machine$double.eps^(2 / 3) * max(1, max(abs(H)))
   need.correction <- (unconditional || sandwich) && type != "coef"
   if(need.correction && nrow(constraints))
-    .stop("unconditional and sandwich covariance do not support monotonic terms.")
+    .stop("unconditional and sandwich covariance do not support constrained special terms.")
   if(!is.null(direct)) {
     if(length(object$jr$rho)) {
       current <- unclass(coef(object, full = TRUE, lambdas = TRUE,
@@ -1935,53 +2019,138 @@ vcov_draws <- function(information, R, antithetic = FALSE, center = FALSE)
   sweep(D, 1L, beta, "+")
 }
 
-## Block-diagonal covariance stored by the individual fitting steps. This is
-## the fast default for summaries and effect plots and deliberately contains
-## no cross-term or cross-parameter covariance.
+## Optimizers can retain either named flags or the original scalar control.
+vcov_parameter_fixed <- function(object, name)
+{
+  fixed <- object$control$fixed
+  if(!is.null(names(fixed))) {
+    fixed <- as.list(fixed)[[name]]
+  } else {
+    position <- match(name, object$family$names)
+    fixed <- if(length(fixed) >= position) fixed[[position]] else FALSE
+  }
+  length(fixed) == 1L && !is.na(fixed) && isTRUE(as.logical(fixed))
+}
+
+## Compute linear inference once after the optimizer has finished. Within a
+## predictor, all smooth coefficients participate in the penalized inverse;
+## only the ordinary linear block is retained. Separate predictor systems
+## avoid factoring a larger block-diagonal working-information matrix.
+vcov_store_local <- function(object, x = object$x, y = object$y,
+  model = object$model)
+{
+  if(inherits(object, "bamlss2") ||
+      isTRUE(object$control$.stepwise_candidate) ||
+      is.null(object$fitted.values))
+    return(object)
+
+  temporary <- object
+  temporary$x <- x
+  temporary$y <- y
+  temporary$model <- model
+  class(temporary) <- unique(c(class(temporary), "gamlss2"))
+  direct <- if(isTRUE(object$jr$converged))
+    object$jr$coefficient.covariance else NULL
+
+  for(j in object$family$names) {
+    b <- object$coefficients[[j]]
+    if(!length(b)) next
+    fixed <- vcov_parameter_fixed(object, j)
+    method <- "working"
+    if(fixed) {
+      V <- matrix(0, length(b), length(b))
+    } else if(!is.null(direct)) {
+      ## Direct JR already stores the marginal blocks of its joint inverse.
+      ii <- match(paste0(j, ".p.", names(b)), rownames(direct))
+      if(anyNA(ii))
+        stop("cannot match stored JR linear covariance.", call. = FALSE)
+      V <- direct[ii, ii, drop = FALSE]
+      method <- "joint"
+    } else {
+      parameter <- temporary
+      parameter$coefficients <- temporary$coefficients[j]
+      parameter$fitted.linear <- temporary$fitted.linear[j]
+      parameter$fitted.specials <- temporary$fitted.specials[j]
+      V <- tryCatch(vcov.gamlss2(parameter, full = FALSE, method = "working",
+        .linear.only = TRUE),
+        error = identity)
+    }
+
+    ## Unsupported nonlinear specials must not invalidate a successful fit
+    ## or silently leave the old conditional linear standard errors behind.
+    object$fitted.linear[[j]]$vcov.error <- NULL
+    object$fitted.linear[[j]]$vcov.solver <- NULL
+    if(inherits(V, "error")) {
+      object$fitted.linear[[j]]$vcov.error <- conditionMessage(V)
+      V <- matrix(NA_real_, length(b), length(b))
+      method <- "unavailable"
+    } else {
+      object$fitted.linear[[j]]$vcov.solver <- attr(V, "local.solver", exact = TRUE)
+      attr(V, "local.solver") <- NULL
+    }
+    dimnames(V) <- list(names(b), names(b))
+    object$fitted.linear[[j]]$vcov <- V
+    object$fitted.linear[[j]]$vcov.method <- method
+  }
+  object
+}
+
+## Fast extraction of covariance stored with fitted terms. Linear blocks
+## have been marginalized over smooth coefficients at fitting time; smooth
+## blocks retain their term-local covariance. No matrix is refactored here.
 vcov_local <- function(object,
   type = c("vcov", "cor", "se", "coef"), full = FALSE)
 {
   type <- match.arg(type)
-  beta <- unclass(coef(object, full = TRUE, dropall = FALSE))
   if(type == "coef")
     return(coef(object, full = full, dropall = FALSE))
+
+  beta <- unclass(coef(object, full = full, dropall = FALSE))
   map <- vcov_coefficient_blocks(object, names(beta))$blocks
   V <- matrix(0, length(beta), length(beta),
     dimnames = list(names(beta), names(beta)))
-
   for(j in object$family$names) {
-    fixed <- object$control$fixed[[j]]
-    fixed <- length(fixed) == 1L && !is.na(fixed) && isTRUE(as.logical(fixed))
+    fixed <- vcov_parameter_fixed(object, j)
     for(block in map[[j]]) {
-      if(fixed || !length(block$index))
-        next
+      if(fixed || !length(block$index)) next
       source <- if(is.null(block$label)) object$fitted.linear[[j]] else
         object$fitted.specials[[j]][[block$label]]
       B <- source$vcov
+      if(is.null(block$label) && !inherits(object, "bamlss2")) {
+        if(!is.null(source$vcov.error)) {
+          warning("local linear covariance is unavailable for parameter '", j,
+            "': ", source$vcov.error, call. = FALSE)
+        } else if(length(object$fitted.specials[[j]]) &&
+            is.null(source$vcov.method)) {
+          warning("stored linear covariance for parameter '", j,
+            "' does not account for smooth uncertainty; refit the model.",
+            call. = FALSE)
+          B <- NULL
+        }
+      }
       if(is.null(B) || !identical(dim(as.matrix(B)), c(block$size, block$size))) {
         V[block$index, ] <- V[, block$index] <- NA_real_
       } else {
-        V[block$index, block$index] <- as.matrix(B)
+        B <- as.matrix(B)
+        if(all(block$names %in% rownames(B)) &&
+            all(block$names %in% colnames(B)))
+          B <- B[block$names, block$names, drop = FALSE]
+        V[block$index, block$index] <- B
       }
     }
   }
-
-  linear <- unlist(lapply(map, function(z) {
-    k <- which(vapply(z, function(x) identical(x$type, "linear"), logical(1L)))
-    if(!length(k)) integer() else z[[k[1L]]]$index
-  }), use.names = FALSE)
-  keep <- if(isTRUE(full)) seq_along(beta) else linear
-  V <- V[keep, keep, drop = FALSE]
+  unavailable <- is.na(diag(V))
+  if(any(unavailable))
+    V[unavailable, ] <- V[, unavailable] <- NA_real_
   if(type == "se") {
-    answer <- sqrt(pmax(diag(V), 0))
-    answer[is.na(diag(V)) | diag(V) < 0] <- NA_real_
+    answer <- sqrt(diag(V))
     names(answer) <- rownames(V)
     return(answer)
   }
   if(type == "cor") {
     s <- sqrt(diag(V))
     V <- V / outer(s, s)
-    diag(V)[is.finite(s) & s > 0] <- 1
+    diag(V) <- ifelse(is.finite(s) & s > 0, 1, NA_real_)
   }
   V
 }

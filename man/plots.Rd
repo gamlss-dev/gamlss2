@@ -53,7 +53,9 @@
   For objects of class \code{"gamlss2"}, \code{which = "effects"} is the default
   and plots the partial effects stored in \code{results(object)}. If no effect
   information is available, residual diagnostics are shown instead. Effect
-  uncertainty uses fast term-local covariance by default. Pass
+  uncertainty uses stored covariance by default. Linear effects use the
+  corrected linear blocks computed after fitting, while smooth effects use
+  term-local covariance. Pass
   \code{method = "joint"} through \code{...} to rebuild effects from the full
   joint covariance.
 

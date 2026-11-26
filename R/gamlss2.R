@@ -392,6 +392,14 @@ gamlss2.formula <- function(formula, data, family = NO,
   rval$offsets <- if(!is.null(offsets) && NROW(offsets)) offsets else NULL
   rval$elapsed <- elapsed
 
+  ## Store corrected linear covariance once, before effects are constructed
+  ## or light fits discard their designs. Inner optimizer iterations do not
+  ## need this post-fit calculation.
+  covariance.start <- proc.time()
+  rval <- vcov_store_local(rval, x = X, y = Y, model = mf)
+  rval$elapsed <- rval$elapsed +
+    as.numeric((proc.time() - covariance.start)["elapsed"])
+
   ## Test special terms before light fits discard their design matrices.
   rval <- special_pvalues(rval)
 

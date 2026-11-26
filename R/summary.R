@@ -610,7 +610,7 @@ special_pvalues <- function(object)
         X <- X[x$binning$match.index, , drop = FALSE]
 
       ## Conditional local test: no joint covariance or estimated dispersion.
-      test <- try(mgcv:::testStat(p = b, X = X, V = V,
+      test <- try(testStat2(p = b, X = X, V = V,
         rank = min(ncol(X), edf1), type = 0, res.df = -1), silent = TRUE)
       if(!inherits(test, "try-error"))
         object$fitted.specials[[i]][[j]]$test <- test

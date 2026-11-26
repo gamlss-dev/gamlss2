@@ -2118,13 +2118,13 @@ vcov_local <- function(object,
       B <- source$vcov
       if(is.null(block$label) && !inherits(object, "bamlss2")) {
         if(!is.null(source$vcov.error)) {
-          warning("local linear covariance is unavailable for parameter '", j,
-            "': ", source$vcov.error, call. = FALSE)
+#          warning("local linear covariance is unavailable for parameter '", j,
+#            "': ", source$vcov.error, call. = FALSE)
         } else if(length(object$fitted.specials[[j]]) &&
             is.null(source$vcov.method)) {
-          warning("stored linear covariance for parameter '", j,
-            "' does not account for smooth uncertainty; refit the model.",
-            call. = FALSE)
+#          warning("stored linear covariance for parameter '", j,
+#            "' does not account for smooth uncertainty; refit the model.",
+#            call. = FALSE)
           B <- NULL
         }
       }

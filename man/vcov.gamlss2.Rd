@@ -88,7 +88,7 @@ not reconstruct or refactor these systems. Light fits retain the same
 corrected linear blocks. Models fitted before this correction must be refitted
 to obtain corrected local inference in predictors containing smooth terms.
 If a predictor contains unsupported specials, its local linear covariance is
-unavailable and its standard errors are reported as \code{NA} with a warning.
+unavailable and its standard errors are reported as \code{NA}.
 
 Effect-result paths use the covariance stored with each fitted model term by
 default. Use \code{summary(object, method = "joint")} or

@@ -76,22 +76,19 @@ A \code{GAMLSS2} object, inheriting from \code{distribution}.
     stop("not all packages required for the example are installed")
   } else q() }
 }
-## package and random seed
-library("distributions3")
-set.seed(6020)
+if(requireNamespace("gamlss.dist", quietly = TRUE)) {
+  ## one normal distribution
+  X <- GAMLSS2("NO", c(mu = 1, sigma = 2))
+  X
 
-## one normal distribution
-X <- GAMLSS2("NO", c(mu = 1, sigma = 2))
-X
+  ## two normal distributions
+  X <- GAMLSS2("NO", cbind(c(1, 1.5), c(0.6, 1.2)))
+  X
 
-## two normal distributions
-X <- GAMLSS2("NO", cbind(c(1, 1.5), c(0.6, 1.2)))
-X
+  ## three Weibull distributions
+  X <- GAMLSS2("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
+  X
 
-## three Weibull distributions
-X <- GAMLSS2("WEI", list(mu = c(1, 1, 2), sigma = c(1, 2, 2)))
-X
-
-## see ?gamlss.dist::GAMLSS for the remainder of this example
-}
+  ## see ?gamlss.dist::GAMLSS for the remainder of this example
+}}
 

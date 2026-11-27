@@ -72,9 +72,12 @@ plot(bikes ~ yday, data = HarzTraffic)
 ## count distribution
 barplot(table(HarzTraffic$bikes))
 
+## generate family from distribution object
+fam <- family(NegativeBinomial(mu = 1, size = 1))
+
 ## negative binomial seasonal model using cyclic splines
 m <- gamlss2(bikes ~ s(yday, bs = "cc") | s(yday, bs = "cc"),
-  data = HarzTraffic, family = NBI)
+  data = HarzTraffic, family = fam)
 
 ## visualize effects
 plot(m)

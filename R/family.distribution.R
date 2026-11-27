@@ -277,7 +277,11 @@ family.NegativeBinomial <- function(object, links = NULL, initialize = NULL, ...
   return(rval)
 }
 
-family.Gamma <- function(object, links = NULL, initialize = NULL, ...) {
+family.Gamma <- function(object, links = NULL, initialize = NULL, ..., regression = TRUE) {
+  if (regression && length(object) == 0L && is.null(links) && is.null(initialize)) {
+    object <- structure(list(mu = numeric(), sigma = numeric()), class = c("GammaR", "distribution"))
+    return(family(object, links = NULL, initialize = NULL, ...))
+  }
   if (is.null(links)) links <- c(shape = "log", rate = "log")
   if (is.null(initialize)) {
     ## Log-moment shape estimate followed by two Newton corrections.
@@ -296,6 +300,19 @@ family.Gamma <- function(object, links = NULL, initialize = NULL, ...) {
     initialize <- list(
       shape = function(y, ...) 0 * y + initial(y),
       rate = function(y, ...) 0 * y + min(initial(y)/mean(y), .Machine$double.xmax))
+  }
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x > 0), ...)
+}
+
+family.GammaR <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(mu = "log", sigma = "log")
+  if (is.null(initialize)) {
+    initialize <- list(
+      mu = function(y, ...) { (y + mean(y)) / 2 },
+      sigma = function(y, ...) { rep(1, length(y)) }
+    )
   }
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, type = "continuous",
@@ -411,13 +428,28 @@ family.Binomial <- function(object, links = NULL, initialize = NULL, ...) {
   return(rval)
 }
 
-family.Exponential <- function(object, links = NULL, initialize = NULL, ...) {
+family.Exponential <- function(object, links = NULL, initialize = NULL, ..., regression = TRUE) {
+  if (regression && length(object) == 1L && object$rate == 1L && is.null(links) && is.null(initialize)) {
+    object <- structure(list(mu = numeric()), class = c("ExponentialR", "distribution"))
+    return(family(object, links = NULL, initialize = NULL, ...))
+  }
   if (is.null(links)) links <- c(rate = "log")
   if (is.null(initialize)) initialize <- list(
     rate = function(y, ...) {
       mu <- mean(y)
       if (mu == 0) mu <- 1e-8
       0 * y + 1/max(mu, .Machine$double.xmin)
+    })
+  if (isFALSE(initialize)) initialize <- NULL
+  NextMethod(object, links = links, initialize = initialize, type = "continuous",
+    valid.response = function(x) all(is.finite(x) & x >= 0), ...)
+}
+
+family.ExponentialR <- function(object, links = NULL, initialize = NULL, ...) {
+  if (is.null(links)) links <- c(mu = "log")
+  if (is.null(initialize)) initialize <- list(
+    mu = function(y, ...) {
+      (y + mean(y)) / 2
     })
   if (isFALSE(initialize)) initialize <- NULL
   NextMethod(object, links = links, initialize = initialize, type = "continuous",

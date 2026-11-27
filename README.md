@@ -58,8 +58,8 @@ install.packages("gamlss2",
 ## Licence
 
 The package is available under the [General Public License version
-3](https://www.gnu.org/licenses/gpl-3.0.html) or [version
-2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+3](https://www.r-project.org/Licenses/GPL-3) or [version
+2](https://www.r-project.org/Licenses/GPL-2)
 
 ## Vignettes
 

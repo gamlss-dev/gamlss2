@@ -2348,7 +2348,7 @@ complete_family_random <- function(family)
 ## will be approximated numerically.
 complete_family <- function(family, .links = NULL)
 {
-  if(!is.null(attr(family, "family"))) {
+  if(!is.null(attr(family, "family"))) { ## FIXME: only do this for specific classes?
     family <- attr(family, "family")
   }
 
@@ -2360,6 +2360,10 @@ complete_family <- function(family, .links = NULL)
   if(is.function(family)) {
     family_constructor <- family
     family <- family()
+  }
+
+  if(inherits(family, "distribution")) {
+    family <- family(family, links = .links)
   }
 
   if(inherits(family, "gamlss.family")) {
@@ -2402,10 +2406,6 @@ complete_family <- function(family, .links = NULL)
 
   if(is.null(family$family)) {
     family$family <- "NA"
-  }
-
-  if(inherits(family, "distribution")) {
-    family <- family(family, links = .links)
   }
 
   if(!is.null(family[["d"]])) {

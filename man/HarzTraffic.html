@@ -179,7 +179,7 @@ window.Quarto = {
  <span class="dropdown-text">First steps</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+    <a class="dropdown-item" href="../vignettes/prediction.html">
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
@@ -858,14 +858,16 @@ URL:
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## negative binomial seasonal model using cyclic splines</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> NBI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## generate family from distribution object</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">family</span>(<span class="fu">NegativeBinomial</span>(<span class="at">mu =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## negative binomial seasonal model using cyclic splines</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(bikes <span class="sc">~</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>) <span class="sc">|</span> <span class="fu">s</span>(yday, <span class="at">bs =</span> <span class="st">"cc"</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> fam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration  1: Global Deviance = 10163.0634 eps = 0.148403     
-GAMLSS-RS iteration  2: Global Deviance = 10151.0415 eps = 0.001182     
-GAMLSS-RS iteration  3: Global Deviance = 10150.8407 eps = 0.000019     
-GAMLSS-RS iteration  4: Global Deviance = 10150.7454 eps = 0.000009     </code></pre>
+<pre><code>GAMLSS-RS iteration  1: Global Deviance = 10159.0354 eps = 0.125501     
+GAMLSS-RS iteration  2: Global Deviance = 10152.6851 eps = 0.000625     
+GAMLSS-RS iteration  3: Global Deviance = 10152.671 eps = 0.000001     </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## visualize effects</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

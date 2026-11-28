@@ -151,7 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">First steps</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+    <a class="dropdown-item" href="../vignettes/prediction.html">
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
@@ -225,21 +225,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Special model terms extend a <code>gamlss2</code> formula with a model component that is fitted inside the backfitting algorithm. Ordinary linear terms and <code>mgcv</code> smooths cover many models; specials are useful when the fitting method needs its own estimator, prediction method, state, or tuning parameters.</p>
-<p>The standard fitting workflow is described in <a href="firststeps.html">First Steps</a>. This vignette focuses on extending the predictor; <a href="families.html">Family Objects</a> instead extends the response distribution.</p>
+<p>For an introduction to fitting a model, see <a href="firststeps.html">First Steps</a>. Here we use a built-in local smoother and then write one ourselves. To extend the response distribution, see <a href="families.html">Family Objects</a>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <section id="built-in-special-terms" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="built-in-special-terms"><span class="header-section-number">1</span> Built-in special terms</h2>
 <p>The package already provides several specials. For example, <code>lo()</code> fits a weighted local-polynomial smoother, <code>tree()</code>, <code>ct()</code>, and <code>cf()</code> fit tree-based terms, <code>n()</code> fits a neural-network term, and <code>lin()</code>, <code>re()</code>, <code>random()</code>, and <code>gnet()</code> provide structured linear or grouped effects. The <code>mgcv</code> terms <code>s()</code>, <code>te()</code>, <code>ti()</code>, and <code>t2()</code> are also supported.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">subset</span>(airquality, <span class="sc">!</span><span class="fu">is.na</span>(Ozone))</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span> Temp, <span class="at">span =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="fu">s</span>(Wind) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">subset</span>(airquality, <span class="sc">!</span><span class="fu">is.na</span>(Ozone))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">lo</span>(<span class="sc">~</span> Temp, <span class="at">span =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="fu">s</span>(Wind) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = Ozone ~ lo(~Temp, span = 0.7) + s(Wind) | s(Temp), 
@@ -264,7 +267,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  15.46 res.df =  100.54
 Deviance = 921.4427 Null Dev. Red. = 14.92%
-AIC = 952.3597 elapsed =  0.84sec</code></pre>
+AIC = 952.3597 elapsed =  1.04sec</code></pre>
 </div>
 </div>
 <p>Specials can occur in any distributional parameter formula. They are refitted from the current working response and weights at each backfitting iteration, then centered before being added to the additive predictor. Centering keeps the intercept and the special term identifiable.</p>
@@ -278,7 +281,7 @@ AIC = 952.3597 elapsed =  0.84sec</code></pre>
 <li>a <code>special_predict()</code> method for fitted values on new data.</li>
 </ol>
 <p>The constructor should return a list of class <code>c("special", "user")</code> containing the formula, variables, data, controls, and anything else needed by fitting and prediction. The reserved <code>user</code> name is recognized by <code>fake_formula()</code>, so it can be used without changing package internals. For a package-level special, register its name in <code>fake_formula()</code> and use a dedicated class instead.</p>
-<p>A fitting method receives at least <code>x</code>, <code>z</code>, and <code>w</code>. The framework can also supply <code>y</code>, <code>eta</code>, <code>j</code>, <code>family</code>, and <code>control</code>; accepting <code>...</code> keeps a method compatible with these additional arguments. The returned list must contain numeric <code>fitted.values</code>. It should usually also contain:</p>
+<p>A fitting method receives the constructed term <code>x</code>, the current working response <code>z</code>, and the working weights <code>w</code>. The framework can also supply <code>y</code>, <code>eta</code>, <code>j</code>, <code>family</code>, and <code>control</code>; accepting <code>...</code> keeps a method compatible with these additional arguments. The returned list must contain numeric <code>fitted.values</code>. It should usually also contain:</p>
 <ul>
 <li><code>edf</code>, the effective degrees of freedom;</li>
 <li><code>model</code>, the fitted underlying model;</li>
@@ -291,60 +294,60 @@ AIC = 952.3597 elapsed =  0.84sec</code></pre>
 <h2 data-number="3" class="anchored" data-anchor-id="a-custom-weighted-local-smoother"><span class="header-section-number">3</span> A custom weighted local smoother</h2>
 <p>The following example implements a small <code>user()</code> term around <code>stats::loess()</code>. It is deliberately compact: a production term should validate its controls and handle missing values and extrapolation explicitly.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>user <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, <span class="at">span =</span> <span class="fl">0.75</span>, <span class="at">degree =</span> <span class="dv">2</span>) {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">inherits</span>(formula, <span class="st">"formula"</span>))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"~"</span>, <span class="fu">deparse1</span>(<span class="fu">substitute</span>(formula))))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  st <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> formula,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">model.frame</span>(formula),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">list</span>(<span class="at">span =</span> span, <span class="at">degree =</span> degree),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">term =</span> <span class="fu">all.vars</span>(formula),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"user("</span>, <span class="fu">paste</span>(<span class="fu">all.vars</span>(formula), <span class="at">collapse =</span> <span class="st">"+"</span>), <span class="st">")"</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(st) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"special"</span>, <span class="st">"user"</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  st</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>special_fit.user <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...) {</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  fit_formula <span class="ot">&lt;-</span> <span class="fu">update</span>(x<span class="sc">$</span>formula, response_z <span class="sc">~</span> .)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> x<span class="sc">$</span>data</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>response_z <span class="ot">&lt;-</span> z</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>weights_w <span class="ot">&lt;-</span> w</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">loess</span>(</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    fit_formula,</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">weights =</span> weights_w,</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">span =</span> x<span class="sc">$</span>control<span class="sc">$</span>span,</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">degree =</span> x<span class="sc">$</span>control<span class="sc">$</span>degree</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  fitted <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(fit, <span class="at">newdata =</span> dat))</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(fitted)</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">model =</span> fit,</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">fitted.values =</span> fitted <span class="sc">-</span> shift,</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">shift =</span> shift,</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">edf =</span> fit<span class="sc">$</span>trace.hat</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(out) <span class="ot">&lt;-</span> <span class="st">"user.fitted"</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  out</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>special_predict.user.fitted <span class="ot">&lt;-</span> <span class="cf">function</span>(x, data, <span class="at">se.fit =</span> <span class="cn">FALSE</span>, ...) {</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(x<span class="sc">$</span>model, <span class="at">newdata =</span> data)) <span class="sc">-</span> x<span class="sc">$</span>shift</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(se.fit) <span class="fu">return</span>(<span class="fu">data.frame</span>(<span class="at">fit =</span> fit))</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  fit</span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>user <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, <span class="at">span =</span> <span class="fl">0.75</span>, <span class="at">degree =</span> <span class="dv">2</span>) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">inherits</span>(formula, <span class="st">"formula"</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"~"</span>, <span class="fu">deparse1</span>(<span class="fu">substitute</span>(formula))))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  st <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> formula,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">model.frame</span>(formula),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">list</span>(<span class="at">span =</span> span, <span class="at">degree =</span> degree),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">term =</span> <span class="fu">all.vars</span>(formula),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"user("</span>, <span class="fu">paste</span>(<span class="fu">all.vars</span>(formula), <span class="at">collapse =</span> <span class="st">"+"</span>), <span class="st">")"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(st) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"special"</span>, <span class="st">"user"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  st</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>special_fit.user <span class="ot">&lt;-</span> <span class="cf">function</span>(x, z, w, control, ...) {</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  fit_formula <span class="ot">&lt;-</span> <span class="fu">update</span>(x<span class="sc">$</span>formula, response_z <span class="sc">~</span> .)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> x<span class="sc">$</span>data</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>response_z <span class="ot">&lt;-</span> z</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>weights_w <span class="ot">&lt;-</span> w</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">loess</span>(</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    fit_formula,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">weights =</span> weights_w,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">span =</span> x<span class="sc">$</span>control<span class="sc">$</span>span,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">degree =</span> x<span class="sc">$</span>control<span class="sc">$</span>degree</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  fitted <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(fit, <span class="at">newdata =</span> dat))</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  shift <span class="ot">&lt;-</span> <span class="fu">mean</span>(fitted)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">model =</span> fit,</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">fitted.values =</span> fitted <span class="sc">-</span> shift,</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">shift =</span> shift,</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">edf =</span> fit<span class="sc">$</span>trace.hat</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(out) <span class="ot">&lt;-</span> <span class="st">"user.fitted"</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  out</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>special_predict.user.fitted <span class="ot">&lt;-</span> <span class="cf">function</span>(x, data, <span class="at">se.fit =</span> <span class="cn">FALSE</span>, ...) {</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(x<span class="sc">$</span>model, <span class="at">newdata =</span> data)) <span class="sc">-</span> x<span class="sc">$</span>shift</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(se.fit) <span class="fu">return</span>(<span class="fu">data.frame</span>(<span class="at">fit =</span> fit))</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  fit</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>user</code> constructor is available while the formula is parsed because it is one of the reserved special names. The corresponding methods are found by S3 dispatch during fitting and prediction.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">user</span>(<span class="sc">~</span> Temp, <span class="at">span =</span> <span class="fl">0.7</span>) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">gamlss2</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  Ozone <span class="sc">~</span> <span class="fu">user</span>(<span class="sc">~</span> Temp, <span class="at">span =</span> <span class="fl">0.7</span>) <span class="sc">|</span> <span class="fu">s</span>(Temp),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> air,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> GA,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 gamlss2(formula = Ozone ~ user(~Temp, span = 0.7) | s(Temp), 
@@ -368,10 +371,10 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 116 df =  12.2 res.df =  103.8
 Deviance = 939.5092 Null Dev. Red. = 13.26%
-AIC = 963.9144 elapsed =  0.05sec</code></pre>
+AIC = 963.9144 elapsed =  0.06sec</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## predicted distributions</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict ozone distributions for the first five days in the data.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> air[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                       1 
 "GAMLSS2 GA(mu = 18.91, sigma = 0.4630)" 
@@ -388,7 +391,8 @@ AIC = 963.9144 elapsed =  0.05sec</code></pre>
 </section>
 <section id="practical-guidance" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="practical-guidance"><span class="header-section-number">4</span> Practical guidance</h2>
-<p>Use an existing special when it already provides the required estimator and prediction behavior. Write a custom special when the term has a distinct fitting algorithm, needs custom state, or wraps an external modeling method. Keep the constructor lightweight, store all information needed for prediction, return centered fitted contributions, and test both fitting and <code>newdata</code> predictions. Prediction support alone does not imply support for joint coefficient uncertainty: the Gaussian intervals in <a href="prediction.html">Prediction and Uncertainty</a> require a coefficient-linear design and a verifiable quadratic penalty. A custom fitting method may need its own uncertainty procedure. The help topic <code>?special_terms</code> documents the method arguments and return-value contract; <code>?fake_formula</code> documents special-name registration.</p>
+<p>Use an existing special when it already provides the required estimator and prediction behavior. Write a custom special when the term has a distinct fitting algorithm, needs custom state, or wraps an external modeling method. Keep the constructor lightweight, store all information needed for prediction, return centered fitted contributions, and test both fitting and <code>newdata</code> predictions. For the confidence intervals in <a href="prediction.html">Prediction and Uncertainty</a>, the term must be linear in its coefficients and have a quadratic penalty that the fitting code can recover. A custom fitting method may need its own uncertainty calculation.</p>
+<p>See <code>?special_terms</code> for the method arguments and return values, and <code>?fake_formula</code> for special-name registration.</p>
 
 
 </section>

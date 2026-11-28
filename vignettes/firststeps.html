@@ -164,6 +164,7 @@ window.Quarto = {
 <meta property="og:description" content="">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/firststeps_files/figure-html/unnamed-chunk-2-1.png">
 <meta property="og:site_name" content="gamlss2">
+<meta property="og:image:alt" content="Daily counts plotted against day of year, with higher motorcycle traffic in the middle of the year.">
 <meta property="og:image:height" content="864">
 <meta property="og:image:width" content="1152">
 </head>
@@ -199,7 +200,7 @@ window.Quarto = {
  <span class="dropdown-text">First steps</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+    <a class="dropdown-item" href="../vignettes/prediction.html">
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
@@ -274,16 +275,11 @@ window.Quarto = {
 </header>
 
 
-<p>Generalized additive models for location, scale, and shape (GAMLSS) model all parameters of a response distribution rather than only its mean <span class="citation" data-cites="Rigby+Stasinopoulos:2005">(<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">Rigby and Stasinopoulos 2005</a>)</span>. The <code>gamlss2</code> package provides a workflow similar to <code>lm()</code> and <code>glm()</code>, while allowing a separate additive predictor for every distribution parameter.</p>
-<p>This vignette illustrates the basic workflow:</p>
-<ol type="1">
-<li>specify and fit a distributional regression model,</li>
-<li>inspect its estimated effects and residuals, and</li>
-<li>obtain distribution parameters, probabilities, and quantiles.</li>
-</ol>
+<p>Generalized additive models for location, scale, and shape (GAMLSS) let each parameter of a response distribution depend on covariates <span class="citation" data-cites="Rigby+Stasinopoulos:2005">(<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">Rigby and Stasinopoulos 2005</a>)</span>. The <code>gamlss2</code> package provides a workflow similar to <code>lm()</code> and <code>glm()</code>, while allowing a separate additive predictor for every distribution parameter.</p>
+<p>We fit a seasonal model for motorcycle counts, inspect its effects and residuals, and use the fitted distribution to estimate how often daily traffic exceeds 500 motorcycles.</p>
 <section id="data" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="data"><span class="header-section-number">1</span> Data</h2>
-<p>We use the <code>HarzTraffic</code> data included in the package. They contain daily traffic counts and weather measurements near Sonnenberg in the Harz region of Germany. Motorcycle traffic has a pronounced annual cycle, so we model the number of motorcycles (<code>bikes</code>) as a smooth function of the day of the year (<code>yday</code>).</p>
+<p>We use the <code>HarzTraffic</code> data included in the package. They contain daily traffic counts and weather measurements near Sonnenberg in the Harz region of Germany. Motorcycle traffic has a pronounced annual cycle, so we model the number of motorcycles (<code>bikes</code>) as a smooth function of the day of the year (<code>yday</code>, where January 1 is day 0).</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"HarzTraffic"</span>, <span class="at">package =</span> <span class="st">"gamlss2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -296,7 +292,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" alt="Daily counts plotted against day of year, with higher motorcycle traffic in the middle of the year." width="576"></p>
 <figcaption>Daily motorcycle counts in the Harz region.</figcaption>
 </figure>
 </div>
@@ -326,7 +322,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><code>bikes ~ x</code></td>
-<td>model <code>mu</code> with <code>x</code>; keep <code>sigma</code> constant</td>
+<td>model <code>mu</code> with <code>x</code> and keep <code>sigma</code> constant</td>
 </tr>
 <tr class="even">
 <td><code>bikes ~ x | z</code></td>
@@ -377,17 +373,17 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 *--------
 n = 1057 df =  21.52 res.df =  1035.48
 Deviance = 10112.7247 Null Dev. Red. = 12.95%
-AIC = 10155.7706 elapsed =  0.11sec</code></pre>
+AIC = 10155.7706 elapsed =  0.13sec</code></pre>
 </div>
 </div>
-<p>Calling <code>plot()</code> without further arguments displays the estimated effects for all modeled distribution parameters.</p>
+<p>Use <code>plot()</code> to inspect the seasonal effect on each parameter’s log scale.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m2, <span class="at">spar =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" alt="Smooth effects of day of year on the log mean and log dispersion in separate panels." width="864"></p>
 <figcaption>Estimated seasonal effects for the negative binomial mean and dispersion.</figcaption>
 </figure>
 </div>
@@ -402,7 +398,7 @@ AIC = 10155.7706 elapsed =  0.11sec</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" alt="Four residual diagnostic plots for the seasonal negative binomial model." width="864"></p>
 <figcaption>In-sample diagnostics based on randomized quantile residuals.</figcaption>
 </figure>
 </div>
@@ -461,7 +457,7 @@ AIC = 10155.7706 elapsed =  0.11sec</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" alt="Curve showing how the fitted chance of exceeding 500 motorcycles varies over the year." width="576"></p>
 <figcaption>Fitted probability of more than 500 motorcycles by day of year.</figcaption>
 </figure>
 </div>
@@ -483,13 +479,13 @@ AIC = 10155.7706 elapsed =  0.11sec</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="firststeps_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="firststeps_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" alt="Observed daily counts with three seasonal percentile curves. The solid line is the median." width="576"></p>
 <figcaption>Fitted 5th, 50th, and 95th percentiles of daily motorcycle counts.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>These fitted distributions describe response variation conditional on the estimated model. The 5% and 95% quantiles bound a central 90% response interval; they do not quantify uncertainty in the estimated mean or median. The <a href="prediction.html">Prediction and Uncertainty</a> vignette develops this distinction.</p>
+<p>The two outer curves bound a central 90% interval for daily counts under the fitted model. The middle curve gives the fitted median on each day.</p>
 </section>
 <section id="relation-to-gamlss" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="relation-to-gamlss"><span class="header-section-number">5</span> Relation to <code>gamlss</code></h2>
@@ -497,7 +493,7 @@ AIC = 10155.7706 elapsed =  0.11sec</code></pre>
 </section>
 <section id="next-steps" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="next-steps"><span class="header-section-number">6</span> Next steps</h2>
-<p>Continue with <a href="prediction.html">Prediction and Uncertainty</a> to construct and assess intervals, or <a href="topmodels.html">Forecasting and Assessment</a> for calibration plots and scoring rules. <a href="families.html">Family Objects</a> explains distribution interfaces and custom families; <a href="family_extensions.html">Family Extensions</a> handles truncation, censoring, rounding, and extra point masses. <a href="specials.html">Special Model Terms</a> covers terms beyond standard <code>mgcv</code> smooths, and <a href="bayesian.html">Bayesian GAMLSS</a> uses the same model specification for MCMC.</p>
+<p>To add uncertainty intervals to a prediction, continue with <a href="prediction.html">Prediction and Uncertainty</a>. To compare two traffic models using calibration plots and scoring rules, see <a href="topmodels.html">Forecasting and Assessment</a>. The <a href="gamlss2.html">Overview</a> links to the articles on Bayesian fitting, families, and special model terms.</p>
 
 
 

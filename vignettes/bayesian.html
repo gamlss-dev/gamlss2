@@ -135,6 +135,7 @@ div.csl-indent {
 <meta property="og:description" content="">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/bayesian_files/figure-html/unnamed-chunk-2-1.png">
 <meta property="og:site_name" content="gamlss2">
+<meta property="og:image:alt" content="Scatterplot of daily ozone against temperature, with higher ozone concentrations on hotter days.">
 <meta property="og:image:height" content="864">
 <meta property="og:image:width" content="1152">
 </head>
@@ -170,7 +171,7 @@ div.csl-indent {
  <span class="dropdown-text">First steps</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+    <a class="dropdown-item" href="../vignettes/prediction.html">
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
@@ -233,7 +234,6 @@ div.csl-indent {
   <li><a href="#mcmc-diagnostics" id="toc-mcmc-diagnostics" class="nav-link" data-scroll-target="#mcmc-diagnostics"><span class="header-section-number">4</span> MCMC diagnostics</a></li>
   <li><a href="#posterior-predictions" id="toc-posterior-predictions" class="nav-link" data-scroll-target="#posterior-predictions"><span class="header-section-number">5</span> Posterior predictions</a></li>
   <li><a href="#starting-from-a-fitted-gamlss2-model" id="toc-starting-from-a-fitted-gamlss2-model" class="nav-link" data-scroll-target="#starting-from-a-fitted-gamlss2-model"><span class="header-section-number">6</span> Starting from a fitted <code>gamlss2</code> model</a></li>
-  <li><a href="#practical-guidance" id="toc-practical-guidance" class="nav-link" data-scroll-target="#practical-guidance"><span class="header-section-number">7</span> Practical guidance</a></li>
   </ul>
 </nav>
     </div>
@@ -247,11 +247,11 @@ div.csl-indent {
 
 
 <p>Generalized additive models for location, scale, and shape can be estimated by penalized likelihood or by Bayesian sampling. In <code>gamlss2</code>, Bayesian estimation uses the same distributional formulas, family objects, and smooth terms as the usual fitting functions. The sampler follows the Bayesian additive model framework described by <span class="citation" data-cites="bamlss2018">Umlauf et al. (<a href="#ref-bamlss2018" role="doc-biblioref">2018</a>)</span>.</p>
-<p>There are two ways to run the sampler. The function <code>bamlss2()</code> fits a model directly by MCMC, whereas <code>mcmc()</code> starts from an already fitted <code>gamlss2</code> model. This vignette illustrates both workflows and shows how to inspect posterior effects, samples, and predictions.</p>
+<p>There are two ways to run the sampler. The function <code>bamlss2()</code> fits a model directly by Markov chain Monte Carlo (MCMC), whereas <code>mcmc()</code> starts from an already fitted <code>gamlss2</code> model. This vignette illustrates both workflows and shows how to inspect posterior effects, samples, and predictions.</p>
 <p>The fitting notation is introduced in <a href="firststeps.html">First Steps</a>. <a href="prediction.html">Prediction and Uncertainty</a> uses the same ozone formula and Gamma parameterization for likelihood-based inference, with a training/test split. Here we use all complete observations to illustrate posterior inference.</p>
 <section id="data-and-model" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="data-and-model"><span class="header-section-number">1</span> Data and model</h2>
-<p>We use the <code>airquality</code> data and model daily ozone concentration. Ozone is positive and right-skewed, so a Gamma distribution is a useful starting point. The location parameter <code>mu</code> is modeled as a smooth function of temperature and wind speed, while the scale parameter <code>sigma</code> varies smoothly with temperature.</p>
+<p>We use the <code>airquality</code> data and model daily ozone concentration. Ozone is positive and right-skewed, so a Gamma distribution is a useful starting point. We model the conditional mean (<code>mu</code>) with smooth effects of temperature and wind speed. The conditional coefficient of variation (<code>sigma</code>) varies smoothly with temperature.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -265,7 +265,7 @@ div.csl-indent {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" alt="Scatterplot of daily ozone against temperature, with higher ozone concentrations on hotter days." width="576"></p>
 <figcaption>Daily ozone concentration and temperature in the airquality data.</figcaption>
 </figure>
 </div>
@@ -317,7 +317,7 @@ sigma.s(Temp) 3.2250 0.7990
 *--------
 n = 116 df =  14.06 res.df =  101.94
 Deviance = 932.216 DIC = 960.341 Null Dev. Red. = 0.53%
-AIC = 960.341 elapsed =  1.80sec</code></pre>
+AIC = 960.341 elapsed =  2.44sec</code></pre>
 </div>
 </div>
 <p>The sampler uses block Metropolis-Hastings updates for linear and smooth coefficients. Smooth terms are updated using penalized weighted least squares proposals, while smoothing variances are sampled by inverse Gamma or slice sampling. See <code>?BS</code> for details of the sampler.</p>
@@ -331,8 +331,8 @@ AIC = 960.341 elapsed =  1.80sec</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1152"></p>
-<figcaption>Posterior smooth effects for the Gamma mean and relative scale.</figcaption>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" alt="Three panels showing temperature and wind effects on the mean and a temperature effect on the coefficient of variation." width="1152"></p>
+<figcaption>Posterior smooth effects for the Gamma mean and coefficient of variation.</figcaption>
 </figure>
 </div>
 </div>
@@ -364,7 +364,7 @@ AIC = 960.341 elapsed =  1.80sec</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" alt="Intercept draws in sampling order alongside their autocorrelation at lags up to 60." width="864"></p>
 <figcaption>Trace and autocorrelation of the intercept draws for the Gamma mean.</figcaption>
 </figure>
 </div>
@@ -372,7 +372,7 @@ AIC = 960.341 elapsed =  1.80sec</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>parameter</code> and <code>terms</code> arguments can be used to select other coefficients. Smooth terms contain several basis coefficients, so inspecting a smooth can produce several trace and autocorrelation plots.</p>
-<p>The values of <code>n.iter</code>, <code>burnin</code>, and <code>thin</code> used above are suitable for a compact example, but they are not a general convergence rule. For an applied analysis the chains should be inspected and the number of iterations increased when necessary.</p>
+<p>This short run illustrates the workflow. In an analysis, inspect draws for several coefficients and compare chains started from different values. Slow decay in the autocorrelation plot means successive draws carry similar information, so a longer run may be needed for precise posterior summaries.</p>
 <p>Sampling can be extended by calling <code>mcmc()</code> again on the fitted object. The existing draws are retained and the newly retained draws are appended to <code>samples</code>, so the call can be repeated as necessary. The <code>burnin</code> argument applies to each additional run.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">mcmc</span>(m,</span>
@@ -427,7 +427,7 @@ AIC = 960.341 elapsed =  1.80sec</code></pre>
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(nd<span class="sc">$</span>Temp, psigma<span class="sc">$</span>fit, <span class="at">type =</span> <span class="st">"n"</span>,</span>
 <span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">range</span>(psigma[, <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"upper"</span>)]),</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (°F)"</span>, <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="st">"Relative scale "</span> <span class="sc">*</span> sigma))</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature (°F)"</span>, <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="st">"Coefficient of variation "</span> <span class="sc">*</span> sigma))</span>
 <span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(nd<span class="sc">$</span>Temp, <span class="fu">rev</span>(nd<span class="sc">$</span>Temp)),</span>
 <span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(psigma<span class="sc">$</span>lower, <span class="fu">rev</span>(psigma<span class="sc">$</span>upper)),</span>
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="dv">4</span>, <span class="fl">0.15</span>))</span>
@@ -435,8 +435,8 @@ AIC = 960.341 elapsed =  1.80sec</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="bayesian_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="864"></p>
-<figcaption>Posterior medians and 95% pointwise credible intervals for the Gamma mean and relative scale, at median wind speed.</figcaption>
+<p><img src="bayesian_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" alt="Median curves with shaded credible intervals across temperature. Observed ozone values are overlaid in the mean panel." width="864"></p>
+<figcaption>Posterior medians and 95% pointwise credible intervals for the Gamma mean and coefficient of variation, at median wind speed.</figcaption>
 </figure>
 </div>
 </div>
@@ -485,17 +485,6 @@ AIC = 960.341 elapsed =  1.80sec</code></pre>
 </div>
 <p>Once fitted, <code>m2</code> supports the same posterior summaries and plots as the object returned by <code>bamlss2()</code>.</p>
 <p>The fitted model supplied to <code>mcmc()</code> must retain the design information needed by the sampler. In particular, reduced model objects that discard this information cannot be used to restart sampling.</p>
-</section>
-<section id="practical-guidance" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="practical-guidance"><span class="header-section-number">7</span> Practical guidance</h2>
-<p>The Bayesian and likelihood-based interfaces deliberately share the same model specification. This makes it possible to develop a distributional model with <code>gamlss2()</code> and switch to MCMC without rewriting its formula or family. For Bayesian fits, a few points are especially useful:</p>
-<ol type="1">
-<li>set a seed when reproducible posterior draws are required;</li>
-<li>inspect trace and autocorrelation plots rather than relying only on posterior summaries;</li>
-<li>increase <code>n.iter</code> when the retained draws do not provide adequate mixing;</li>
-<li>use <code>predict(..., type = "parameter", FUN = ...)</code> to summarize uncertainty from the stored posterior samples; and</li>
-<li>distinguish posterior uncertainty in distribution parameters from predictive variation in the response.</li>
-</ol>
 <p>The general GAMLSS formulation is described in <span class="citation" data-cites="Rigby+Stasinopoulos:2005">Rigby and Stasinopoulos (<a href="#ref-Rigby+Stasinopoulos:2005" role="doc-biblioref">2005</a>)</span>. For the Bayesian additive distributional framework and the MCMC methodology, see <span class="citation" data-cites="bamlss2018">Umlauf et al. (<a href="#ref-bamlss2018" role="doc-biblioref">2018</a>)</span>.</p>
 
 

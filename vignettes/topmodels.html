@@ -116,6 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta property="og:description" content="">
 <meta property="og:image" content="https://gamlss-dev.github.io/gamlss2/vignettes/topmodels_files/figure-html/procast-1.png">
 <meta property="og:site_name" content="gamlss2">
+<meta property="og:image:alt" content="Observed log car counts by day of year, with median curves and shaded intervals for both models.">
 <meta property="og:image:height" content="864">
 <meta property="og:image:width" content="1152">
 </head>
@@ -151,7 +152,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">First steps</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../vignettes/prediction.qmd">
+    <a class="dropdown-item" href="../vignettes/prediction.html">
  <span class="dropdown-text">Prediction and uncertainty</span></a>
   </li>  
         <li>
@@ -208,15 +209,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#probabilistic-model-infrastructure" id="toc-probabilistic-model-infrastructure" class="nav-link active" data-scroll-target="#probabilistic-model-infrastructure"><span class="header-section-number">1</span> Probabilistic model infrastructure</a></li>
-  <li><a href="#data-and-models" id="toc-data-and-models" class="nav-link" data-scroll-target="#data-and-models"><span class="header-section-number">2</span> Data and models</a></li>
-  <li><a href="#probabilistic-forecasting" id="toc-probabilistic-forecasting" class="nav-link" data-scroll-target="#probabilistic-forecasting"><span class="header-section-number">3</span> Probabilistic forecasting</a></li>
-  <li><a href="#graphical-model-assessment" id="toc-graphical-model-assessment" class="nav-link" data-scroll-target="#graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</a>
+  <li><a href="#data-and-models" id="toc-data-and-models" class="nav-link active" data-scroll-target="#data-and-models"><span class="header-section-number">1</span> Data and models</a></li>
+  <li><a href="#probabilistic-forecasting" id="toc-probabilistic-forecasting" class="nav-link" data-scroll-target="#probabilistic-forecasting"><span class="header-section-number">2</span> Probabilistic forecasting</a></li>
+  <li><a href="#graphical-model-assessment" id="toc-graphical-model-assessment" class="nav-link" data-scroll-target="#graphical-model-assessment"><span class="header-section-number">3</span> Graphical model assessment</a>
   <ul class="collapse">
-  <li><a href="#diagnostics-for-each-model" id="toc-diagnostics-for-each-model" class="nav-link" data-scroll-target="#diagnostics-for-each-model"><span class="header-section-number">4.1</span> Diagnostics for each model</a></li>
-  <li><a href="#comparing-diagnostics" id="toc-comparing-diagnostics" class="nav-link" data-scroll-target="#comparing-diagnostics"><span class="header-section-number">4.2</span> Comparing diagnostics</a></li>
+  <li><a href="#diagnostics-for-each-model" id="toc-diagnostics-for-each-model" class="nav-link" data-scroll-target="#diagnostics-for-each-model"><span class="header-section-number">3.1</span> Diagnostics for each model</a></li>
+  <li><a href="#comparing-diagnostics" id="toc-comparing-diagnostics" class="nav-link" data-scroll-target="#comparing-diagnostics"><span class="header-section-number">3.2</span> Comparing diagnostics</a></li>
   </ul></li>
-  <li><a href="#scoring-rules" id="toc-scoring-rules" class="nav-link" data-scroll-target="#scoring-rules"><span class="header-section-number">5</span> Scoring rules</a></li>
+  <li><a href="#scoring-rules" id="toc-scoring-rules" class="nav-link" data-scroll-target="#scoring-rules"><span class="header-section-number">4</span> Scoring rules</a></li>
   </ul>
 </nav>
     </div>
@@ -230,8 +230,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p><img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="120"></p>
-<section id="probabilistic-model-infrastructure" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="probabilistic-model-infrastructure"><span class="header-section-number">1</span> Probabilistic model infrastructure</h2>
 <p>The <a href="https://topmodels.R-Forge.R-project.org/topmodels/">topmodels</a> package provides a common interface for probabilistic predictions, calibration plots, and scoring rules across model classes. Here we compare an ordinary Gaussian regression with a distributional regression for traffic counts on the log scale. This continues the prediction workflow in <a href="firststeps.html">First Steps</a>.</p>
 <p>Install the additional package from <a href="https://zeileis.R-universe.dev/">R-universe</a> before running this vignette.</p>
 <div class="cell">
@@ -242,9 +240,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">"https://gamlss-dev.R-universe.dev"</span>, <span class="st">"https://cloud.R-project.org"</span>))</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="data-and-models" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="data-and-models"><span class="header-section-number">2</span> Data and models</h2>
+<section id="data-and-models" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="data-and-models"><span class="header-section-number">1</span> Data and models</h2>
 <p>The <code>HarzTraffic</code> data contain daily traffic counts and weather measurements. We use <code>cars</code>, the number of cars, and <code>yday</code>, the zero-based day of the year. The first model uses a cubic polynomial for the mean log count and constant residual variance. The second uses cyclic smooths for the location and scale of a skew-normal distribution (<code>SN2</code>), with constant shape. This comparison changes both predictors and family, so it does not isolate either change.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"gamlss2"</span>)</span>
@@ -255,9 +252,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> HarzTraffic, <span class="at">family =</span> SN2, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="probabilistic-forecasting" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="probabilistic-forecasting"><span class="header-section-number">3</span> Probabilistic forecasting</h2>
-<p><code>procast()</code> evaluates fitted distributions through the same interface for both models. The outer quantiles below enclose 95% of each fitted distribution and the middle curve is its median. These bands describe response variation; they are not confidence intervals for the fitted median.</p>
+<section id="probabilistic-forecasting" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="probabilistic-forecasting"><span class="header-section-number">2</span> Probabilistic forecasting</h2>
+<p><code>procast()</code> evaluates fitted distributions through the same interface for both models. For each day, the line shows the fitted median and the shaded interval covers the central 95% of daily log car counts under each model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">yday =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">364</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">&lt;-</span> <span class="fu">procast</span>(m1, <span class="at">newdata =</span> nd, <span class="at">type =</span> <span class="st">"quantile"</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</span>
@@ -280,7 +277,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/procast-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="topmodels_files/figure-html/procast-1.png" class="img-fluid figure-img" alt="Observed log car counts by day of year, with median curves and shaded intervals for both models." width="576"></p>
 <figcaption>Fitted medians and central 95% response intervals for log car counts.</figcaption>
 </figure>
 </div>
@@ -288,10 +285,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Exponentiating these quantiles gives quantiles on the car-count scale because the transformation is increasing. Exponentiating a fitted mean log count would not, in general, give the mean count.</p>
 </section>
-<section id="graphical-model-assessment" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="graphical-model-assessment"><span class="header-section-number">4</span> Graphical model assessment</h2>
-<section id="diagnostics-for-each-model" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="diagnostics-for-each-model"><span class="header-section-number">4.1</span> Diagnostics for each model</h3>
+<section id="graphical-model-assessment" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="graphical-model-assessment"><span class="header-section-number">3</span> Graphical model assessment</h2>
+<section id="diagnostics-for-each-model" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="diagnostics-for-each-model"><span class="header-section-number">3.1</span> Diagnostics for each model</h3>
 <p>The four plots examine different aspects of fit:</p>
 <ul>
 <li>The rootogram compares observed and expected frequencies on a square-root scale.</li>
@@ -309,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/lm-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="topmodels_files/figure-html/lm-1.png" class="img-fluid figure-img" alt="Rootogram, PIT histogram, quantile-residual Q-Q plot, and worm plot for the Gaussian fit." width="864"></p>
 <figcaption>In-sample calibration diagnostics for the Gaussian regression.</figcaption>
 </figure>
 </div>
@@ -325,7 +322,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/gamlss2-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="topmodels_files/figure-html/gamlss2-1.png" class="img-fluid figure-img" alt="Rootogram, PIT histogram, quantile-residual Q-Q plot, and worm plot for the skew-normal fit." width="864"></p>
 <figcaption>In-sample calibration diagnostics for the skew-normal GAMLSS model.</figcaption>
 </figure>
 </div>
@@ -333,9 +330,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="comparing-diagnostics" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="comparing-diagnostics"><span class="header-section-number">4.2</span> Comparing diagnostics</h3>
-<p>Overlaying the same diagnostic for both models makes their differences easier to identify. Keep the colors from the prediction plot: red for the Gaussian regression and blue for the skew-normal model.</p>
+<section id="comparing-diagnostics" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="comparing-diagnostics"><span class="header-section-number">3.2</span> Comparing diagnostics</h3>
+<p>Overlaying the same diagnostic for both models makes their differences easier to identify. As in the prediction plot, red denotes the Gaussian regression and blue denotes the skew-normal model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="dv">1</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">pithist</span>(m1, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
@@ -347,7 +344,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="topmodels_files/figure-html/comparison-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="topmodels_files/figure-html/comparison-1.png" class="img-fluid figure-img" alt="Gaussian and skew-normal fits overlaid in a PIT histogram on the left and a worm plot on the right." width="864"></p>
 <figcaption>Overlaid PIT histograms and worm plots for the Gaussian and skew-normal models.</figcaption>
 </figure>
 </div>
@@ -356,8 +353,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="scoring-rules" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="scoring-rules"><span class="header-section-number">5</span> Scoring rules</h2>
+<section id="scoring-rules" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="scoring-rules"><span class="header-section-number">4</span> Scoring rules</h2>
 <p>Scoring rules reduce predictive performance to numerical summaries. The log score and continuous ranked probability score (CRPS) assess the predictive distribution, whereas mean absolute error (MAE) and mean squared error (MSE) assess point predictions. The Dawid–Sebastiani score (DSS) uses the predicted mean and variance. In <code>topmodels</code> these are losses: smaller values are better. Compare models within a score, since the scores have different scales; see the <a href="https://topmodels.r-forge.r-project.org/reference/proscore.html"><code>proscore()</code> reference</a>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lm =</span> m1, <span class="at">gamlss2 =</span> m2)</span>

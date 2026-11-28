@@ -8,20 +8,37 @@ hasS3method <- function (method, classes) {
 ## S3 method for generating a gamlss2.family from a distribution object (from distributions3)
 family.distribution <- function(object, links, score = TRUE, hessian = FALSE, update = FALSE, expected = FALSE, ...) {
   ## distributions3 class
-  d <- setdiff(class(object), "distribution")
-  create_distribution <- function(par) structure(par, class = class(object))
+  cl <- class(object)
+  d <- setdiff(cl, "distribution")
+
+  ## parameter names
+  n0 <- length(object) == 0L
+  if (length(object) > 1L) object <- object[1L]
+  object <- unclass(object)
+  nams <- names(object)
+
+  ## create distribution object, possibly with fixed parameters
+  if (!n0 && any(na <- sapply(object, is.na))) {
+    fix <- object[!na]
+    nams <- nams[na]
+    create_distribution <- function(par) {
+      n <- length(par[[1L]])
+      structure(c(par, lapply(fix, rep.int, times = n)), class = cl)
+    }
+  } else {
+    create_distribution <- function(par) structure(par, class = cl)
+  }
+
+  ## process links
+  if (is.null(names(links)) || !all(nams %in% names(links))) {
+    stop("'links' must be a named vector or list providing links for ", paste(nams, collapse = ", "))
+  }
+  links <- links[nams]
 
   ## score and hessian methods available?
   has_score <- hasS3method("score", d)
   has_hessian <- hasS3method("hessian", d)
 
-  ## process links
-  if(!is.list(links))
-    links <- as.list(links)
-  if(is.null(names(links))) {
-    names(links) <- names(as.list(object))
-  }
-  
   distributions3_family(d[1L],
     links = links,
     score = score && has_score,
@@ -61,15 +78,18 @@ family.gamlss.family <- function(object, score = TRUE, hessian = FALSE, update =
 ## workhorse function
 distributions3_family <- function(distribution, links, score = TRUE, hessian = FALSE, update = FALSE, expected = FALSE, create_distribution = "structure",
   type = NULL, valid.response = NULL, initialize = NULL, ...) {
-  ## distribution must be a character,
-  ## corresponding to a distribution generator
-  stopifnot(is.character(distribution))
-  ## Prefer the distributions3 generator, also when only its namespace is loaded.
-  args <- get0(distribution, envir = asNamespace("distributions3"),
-    mode = "function", inherits = FALSE)
-  args <- if(is.null(args)) argsAnywhere(distribution) else base::args(args)
-  stopifnot(is.function(args))
-  nams <- names(formals(args))
+
+  ## distribution class/generator ## FIXME: apply any sanity checking?
+  if (!is.character(distribution)) stop("'distribution' must be a character corresponding to a distribution class and generator function")
+
+  ## links must be provided as named vector or list (with matching names)
+  links <- as.list(links)
+  if (!is.list(links) || is.null(names(links))) stop("'links' must be a named vector or list providing the link for each distribution parameter")
+  nams <- names(links)
+  for (n in nams) {
+    if (is.character(links[[n]])) links[[n]] <- make.link2(links[[n]])
+    stopifnot(inherits(links[[n]], "link-glm"))
+  }
 
   ## default strategies for creating distributions3 objects
   if (is.character(create_distribution)) create_distribution <- match.arg(create_distribution, c("structure", "do.call"))
@@ -82,17 +102,6 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
       warning("'create_distribution' must be a function or set to 'do.call' for distributions with extra arguments")
       create_distribution <- "do.call"
     }
-  }
-
-  ## links must be provided as named vector or list (with matching names)
-  links <- as.list(links)
-  stopifnot(is.list(links), !is.null(names(links)))
-  nams <- intersect(nams, names(links))
-  if (length(nams) < 1L) warning("'distribution' and 'links' do not seem to have any parameter names in common")
-  links <- links[nams]
-  for (n in nams) {
-    if (is.character(links[[n]])) links[[n]] <- make.link2(links[[n]])
-    stopifnot(inherits(links[[n]], "link-glm"))
   }
 
   ## create distributions3 object from parameter list
@@ -111,15 +120,15 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     "family"   = distribution,
     "names"    = nams,
     "links"    = links,
-    "log_likelihood"   = function(par, y, ...) sum(log_pdf(d3(par), y, ...)),
+    "log_likelihood"   = function(par, y, ...) sum(log_pdf(d3(par), y, ...)), ## FIXME: elementwise = TRUE?
     "mu"       = function(par, ...) mean(d3(par), ...),
     "pdf"      = function(par, y, log = FALSE) {
-      if(log) log_pdf(d3(par), y) else pdf(d3(par), y)
+      if(log) log_pdf(d3(par), y) else pdf(d3(par), y) ## FIXME: elementwise = TRUE?
     },
-    "cdf"      = function(par, y, ...) cdf(d3(par), y, ...),
+    "cdf"      = function(par, y, ...) cdf(d3(par), y, ...), ## FIXME: elementwise = TRUE?
     "random"   = function(par, n) random(d3(par), n),
-    "quantile" = function(par, p) quantile(d3(par), p),
-    "crps"     = function(par, y, ...) sum(scoringRules::crps(d3(par), y, ...)),
+    "quantile" = function(par, p) quantile(d3(par), p), ## FIXME: elementwise = TRUE?
+    "crps"     = function(par, y, ...) sum(scoringRules::crps(d3(par), y, ...)), ## FIXME: elementwise = TRUE?
     "mean"     = function(par) mean(d3(par)),
     "variance" = function(par) variance(d3(par)),
     "skewness" = function(par) skewness(d3(par)),
@@ -127,7 +136,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
     "create_distribution" = d3
   )
 
-  ## Prefer the native distribution support when its class provides one.
+  ## prefer the native distribution support when its class provides one.
   if(hasS3method("support", distribution))
     rval$support <- function(par, ...) support(d3(par), drop = FALSE, ...)
 
@@ -144,7 +153,7 @@ distributions3_family <- function(distribution, links, score = TRUE, hessian = F
   ## add hessian function if desired and available
   has_hessian <- hasS3method("hessian", distribution)
   if (hessian && has_hessian) rval$hessian <- structure(lapply(nams, function(n) {
-    if (expected) function(par, y, ...) {
+    if (expected) function(par, y, ...) { ## FIXME: Why duplicate the code here?
       lnk <- links[[n]]
       eta <- lnk$linkfun(par[[n]])
       h <- hessian(d3(par), y, which = n, expected = TRUE, ...)
@@ -241,7 +250,7 @@ family.Bernoulli <- function(object, links = NULL, initialize = NULL, ...) {
 family.NegativeBinomial <- function(object, links = NULL, initialize = NULL, ...) {
   nams <- names(as.list(object))
   if (!is.null(names(links))) nams <- names(links)
-  nams <- if ("mu" %in% nams) c("mu", "size") else c("p", "size")
+  nams <- if ("mu" %in% nams) c("mu", "size") else c("p", "size") ## FIXME: find way to use mu/size parameters by default
   if (is.null(links)) links <- if (nams[1L] == "mu") c(mu = "log", size = "log") else c(p = "logit", size = "log")
   if (is.null(initialize)) {
     ## Use a mean-dependent upper size bound targeting 1% excess variance.
@@ -251,7 +260,7 @@ family.NegativeBinomial <- function(object, links = NULL, initialize = NULL, ...
       upper <- max(100, 100 * min(mu, .Machine$double.xmax/100))
       if (mean((y - mu)^2) <= mu) return(upper)
       objective <- function(eta) {
-        -sum(stats::dnbinom(y, size = exp(eta), mu = mu, log = TRUE))
+        -sum(stats::dnbinom(y, size = exp(eta), mu = mu, log = TRUE)) ## FIXME: Why is stats:: needed here? Why not import it in the NAMESPACE?
       }
       interval <- log(c(1e-8, upper))
       eta <- optimize(objective, interval = interval, tol = 1e-6)$minimum
@@ -417,13 +426,13 @@ family.Binomial <- function(object, links = NULL, initialize = NULL, ...) {
   if (is.null(initialize)) initialize <- list(p = function(y, ...) (y + 0.5)/(size + 1))
   if (isFALSE(initialize)) initialize <- NULL
   ## The number of trials is known and is not modeled.
-  create_distribution <- function(par) distributions3::Binomial(size = size, p = par$p)
-  rval <- distributions3_family("Binomial", links = links, initialize = initialize, type = "discrete",
+  create_distribution <- function(par) distributions3::Binomial(size = size, p = par$p) ## FIXME: Why not use structure() here?
+  rval <- distributions3_family("Binomial", links = links, initialize = initialize, type = "discrete", ## FIXME: Can this be avoided using Binomial(size = size, p = NA)?
     valid.response = function(x) {
       (length(size) == 1L || length(size) == length(x)) &&
         all(is.finite(x) & x >= 0 & x <= size & x == floor(x))
     }, create_distribution = create_distribution, ...)
-  ## Avoid the legacy binomial response conversion in gamlss2().
+  ## Avoid the legacy binomial response conversion in gamlss2(). ## FIXME: Is this still needed?
   rval$family <- "distributions3::Binomial"
   return(rval)
 }

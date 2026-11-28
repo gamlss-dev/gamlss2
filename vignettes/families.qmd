@@ -26,17 +26,15 @@ to define a family:
 2. construct a `gamlss2.family` list directly for a distribution that needs
    custom behavior.
 
-The first route should usually be preferred. It gives the fitted model the
-same distribution interface used by
-`distributions3` for densities,
-probabilities, quantiles, moments, and simulation.
+If the distribution is already available in `distributions3`, start with the
+bridge. You can then use the same methods to evaluate densities, calculate
+probabilities and quantiles, obtain moments, and simulate responses from a fit.
 
 For the fitting workflow, start with [First Steps](firststeps.html).
 To modify an existing distribution for an observation mechanism such as
 truncation or censoring, see [Family Extensions](family_extensions.html).
 
 ```{r preliminaries}
-#| echo: false
 #| message: false
 #| results: hide
 library("gamlss2")
@@ -214,8 +212,6 @@ normal_family <- family(
   score = FALSE, hessian = FALSE
 )
 
-## The softplus link does not provide all second-link derivatives needed by
-## the analytic update path, so the bridge uses numerical derivatives here.
 m_softplus <- gamlss2(
   dist ~ s(speed) | s(speed),
   data = cars,
@@ -247,7 +243,7 @@ are used by residual diagnostics, numerical completion, and the
 ## A reparameterized distribution from scratch
 
 Suppose we want a Gamma distribution with the GAMLSS parameterization
-`(mu, sigma)`, where `mu` is the mean and `sigma` controls dispersion. The
+`(mu, sigma)`, where `mu` is the mean and `sigma` is the coefficient of variation. The
 ordinary `distributions3::Gamma()` uses shape and rate instead. We can define a
 small `distributions3` class that translates between the two parameterizations:
 
@@ -350,7 +346,7 @@ summary(m)
 
 This pattern is useful when an existing distribution has the right likelihood
 but the wrong parameterization. [Prediction and Uncertainty](prediction.html)
-uses this same Gamma family to construct intervals for means, quantiles, and
+uses the built-in `GA` family with the same parameterization to construct intervals for means, quantiles, and
 future observations. A user-defined family can also be assembled
 directly as a `gamlss2.family`, as shown next.
 

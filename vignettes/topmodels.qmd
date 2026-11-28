@@ -19,8 +19,6 @@ vignette: >
 
 <img src="https://topmodels.R-Forge.R-project.org/topmodels/topmodels.png" align="right" alt="" width="120"/>
 
-## Probabilistic model infrastructure
-
 The [topmodels](https://topmodels.R-Forge.R-project.org/topmodels/) package
 provides a common interface for probabilistic predictions, calibration plots,
 and scoring rules across model classes. Here we compare an ordinary Gaussian
@@ -63,12 +61,12 @@ m2 <- gamlss2(log(cars) ~ s(yday, bs = "cc") | s(yday, bs = "cc"),
 ## Probabilistic forecasting
 
 `procast()` evaluates fitted distributions through the same interface for both
-models. The outer quantiles below enclose 95% of each fitted distribution and
-the middle curve is its median. These bands describe response variation;
-they are not confidence intervals for the fitted median.
+models. For each day, the line shows the fitted median and the shaded interval
+covers the central 95% of daily log car counts under each model.
 
 ```{r procast}
 #| fig-cap: "Fitted medians and central 95% response intervals for log car counts."
+#| fig-alt: "Observed log car counts by day of year, with median curves and shaded intervals for both models."
 nd <- data.frame(yday = 0:364)
 q1 <- procast(m1, newdata = nd, type = "quantile", at = c(0.025, 0.5, 0.975))
 q2 <- procast(m2, newdata = nd, type = "quantile", at = c(0.025, 0.5, 0.975))
@@ -111,6 +109,7 @@ performance on new data or calibration within every covariate subgroup.
 
 ```{r lm}
 #| fig-cap: "In-sample calibration diagnostics for the Gaussian regression."
+#| fig-alt: "Rootogram, PIT histogram, quantile-residual Q-Q plot, and worm plot for the Gaussian fit."
 #| fig-width: 9
 #| fig-height: 7
 op <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1), cex = 1)
@@ -123,6 +122,7 @@ par(op)
 
 ```{r gamlss2}
 #| fig-cap: "In-sample calibration diagnostics for the skew-normal GAMLSS model."
+#| fig-alt: "Rootogram, PIT histogram, quantile-residual Q-Q plot, and worm plot for the skew-normal fit."
 #| fig-width: 9
 #| fig-height: 7
 op <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1), cex = 1)
@@ -136,11 +136,12 @@ par(op)
 ### Comparing diagnostics
 
 Overlaying the same diagnostic for both models makes their differences easier
-to identify. Keep the colors from the prediction plot: red for the Gaussian
-regression and blue for the skew-normal model.
+to identify. As in the prediction plot, red denotes the Gaussian regression and
+blue denotes the skew-normal model.
 
 ```{r comparison}
 #| fig-cap: "Overlaid PIT histograms and worm plots for the Gaussian and skew-normal models."
+#| fig-alt: "Gaussian and skew-normal fits overlaid in a PIT histogram on the left and a worm plot on the right."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)

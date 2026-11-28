@@ -24,7 +24,7 @@ usual fitting functions. The sampler follows the Bayesian additive model
 framework described by @bamlss2018.
 
 There are two ways to run the sampler. The function `bamlss2()` fits a
-model directly by MCMC, whereas `mcmc()` starts from an already fitted
+model directly by Markov chain Monte Carlo (MCMC), whereas `mcmc()` starts from an already fitted
 `gamlss2` model. This vignette illustrates both workflows and shows how to
 inspect posterior effects, samples, and predictions.
 
@@ -37,9 +37,9 @@ split. Here we use all complete observations to illustrate posterior inference.
 
 We use the `airquality` data and model daily ozone concentration. Ozone is
 positive and right-skewed, so a Gamma distribution is a useful starting point.
-The location parameter `mu` is modeled as a smooth function of temperature and
-wind speed, while the scale parameter `sigma` varies smoothly with
-temperature.
+We model the conditional mean (`mu`) with smooth effects of temperature
+and wind speed. The conditional coefficient of variation (`sigma`) varies
+smoothly with temperature.
 
 ```{r}
 #| message: false
@@ -50,6 +50,7 @@ air <- subset(airquality, !is.na(Ozone))
 
 ```{r}
 #| fig-cap: "Daily ozone concentration and temperature in the airquality data."
+#| fig-alt: "Scatterplot of daily ozone against temperature, with higher ozone concentrations on hotter days."
 par(mar = c(4, 4, 1, 1))
 plot(Ozone ~ Temp, data = air,
   pch = 16, col = adjustcolor(1, 0.3),
@@ -104,7 +105,8 @@ Calling `plot()` displays the fitted additive effects. For a Bayesian fit these
 are obtained from the posterior samples stored in the fitted object.
 
 ```{r}
-#| fig-cap: "Posterior smooth effects for the Gamma mean and relative scale."
+#| fig-cap: "Posterior smooth effects for the Gamma mean and coefficient of variation."
+#| fig-alt: "Three panels showing temperature and wind effects on the mean and a temperature effect on the coefficient of variation."
 #| fig-width: 12
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 3), mar = c(4, 4, 1, 1), cex = 1)
@@ -130,6 +132,7 @@ can be obtained with `which = "samples"`. Here we inspect the intercept in the
 
 ```{r}
 #| fig-cap: "Trace and autocorrelation of the intercept draws for the Gamma mean."
+#| fig-alt: "Intercept draws in sampling order alongside their autocorrelation at lags up to 60."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
@@ -142,10 +145,10 @@ The `parameter` and `terms` arguments can be used to select other coefficients.
 Smooth terms contain several basis coefficients, so inspecting a smooth can
 produce several trace and autocorrelation plots.
 
-The values of `n.iter`, `burnin`, and `thin` used above are suitable for a
-compact example, but they are not a general convergence rule. For an applied
-analysis the chains should be inspected and the number of iterations increased
-when necessary.
+This short run illustrates the workflow. In an analysis, inspect draws for
+several coefficients and compare chains started from different values. Slow
+decay in the autocorrelation plot means successive draws carry similar
+information, so a longer run may be needed for precise posterior summaries.
 
 Sampling can be extended by calling `mcmc()` again on the fitted object. The
 existing draws are retained and the newly retained draws are appended to
@@ -194,7 +197,8 @@ curve. Wind speed is held fixed, while the displayed observations include all
 wind speeds.
 
 ```{r}
-#| fig-cap: "Posterior medians and 95% pointwise credible intervals for the Gamma mean and relative scale, at median wind speed."
+#| fig-cap: "Posterior medians and 95% pointwise credible intervals for the Gamma mean and coefficient of variation, at median wind speed."
+#| fig-alt: "Median curves with shaded credible intervals across temperature. Observed ozone values are overlaid in the mean panel."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
@@ -209,7 +213,7 @@ lines(nd$Temp, pmu$fit, col = 4, lwd = 2)
 
 plot(nd$Temp, psigma$fit, type = "n",
   ylim = range(psigma[, c("lower", "upper")]),
-  xlab = "Temperature (°F)", ylab = expression("Relative scale " * sigma))
+  xlab = "Temperature (°F)", ylab = expression("Coefficient of variation " * sigma))
 polygon(c(nd$Temp, rev(nd$Temp)),
   c(psigma$lower, rev(psigma$upper)),
   border = NA, col = adjustcolor(4, 0.15))
@@ -263,22 +267,6 @@ returned by `bamlss2()`.
 The fitted model supplied to `mcmc()` must retain the design information needed
 by the sampler. In particular, reduced model objects that discard this
 information cannot be used to restart sampling.
-
-## Practical guidance
-
-The Bayesian and likelihood-based interfaces deliberately share the same model
-specification. This makes it possible to develop a distributional model with
-`gamlss2()` and switch to MCMC without rewriting its formula or family.
-For Bayesian fits, a few points are especially useful:
-
-1. set a seed when reproducible posterior draws are required;
-2. inspect trace and autocorrelation plots rather than relying only on posterior
-   summaries;
-3. increase `n.iter` when the retained draws do not provide adequate mixing;
-4. use `predict(..., type = "parameter", FUN = ...)` to summarize uncertainty
-   from the stored posterior samples; and
-5. distinguish posterior uncertainty in distribution parameters from
-   predictive variation in the response.
 
 The general GAMLSS formulation is described in @Rigby+Stasinopoulos:2005. For
 the Bayesian additive distributional framework and the MCMC methodology, see

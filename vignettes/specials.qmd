@@ -21,12 +21,11 @@ fitted inside the backfitting algorithm. Ordinary linear terms and `mgcv`
 smooths cover many models; specials are useful when the fitting method needs its
 own estimator, prediction method, state, or tuning parameters.
 
-The standard fitting workflow is described in [First Steps](firststeps.html).
-This vignette focuses on extending the predictor; [Family Objects](families.html)
-instead extends the response distribution.
+For an introduction to fitting a model, see [First Steps](firststeps.html).
+Here we use a built-in local smoother and then write one ourselves. To extend
+the response distribution, see [Family Objects](families.html).
 
 ```{r preliminaries}
-#| echo: false
 #| message: false
 #| results: hide
 library("gamlss2")
@@ -73,7 +72,8 @@ prediction. The reserved `user` name is recognized by `fake_formula()`, so it
 can be used without changing package internals. For a package-level special,
 register its name in `fake_formula()` and use a dedicated class instead.
 
-A fitting method receives at least `x`, `z`, and `w`. The framework can also
+A fitting method receives the constructed term `x`, the current working
+response `z`, and the working weights `w`. The framework can also
 supply `y`, `eta`, `j`, `family`, and `control`; accepting `...` keeps a method
 compatible with these additional arguments. The returned list must contain
 numeric `fitted.values`. It should usually also contain:
@@ -152,7 +152,8 @@ m <- gamlss2(
 )
 
 summary(m)
-## predicted distributions
+
+# Predict ozone distributions for the first five days in the data.
 predict(m, newdata = air[1:5, , drop = FALSE])
 ```
 
@@ -163,9 +164,10 @@ prediction behavior. Write a custom special when the term has a distinct
 fitting algorithm, needs custom state, or wraps an external modeling method.
 Keep the constructor lightweight, store all information needed for prediction,
 return centered fitted contributions, and test both fitting and `newdata`
-predictions. Prediction support alone does not imply support for joint
-coefficient uncertainty: the Gaussian intervals in
-[Prediction and Uncertainty](prediction.html) require a coefficient-linear
-design and a verifiable quadratic penalty. A custom fitting method may need
-its own uncertainty procedure. The help topic `?special_terms` documents the method arguments and
-return-value contract; `?fake_formula` documents special-name registration.
+predictions. For the confidence intervals in
+[Prediction and Uncertainty](prediction.html), the term must be linear in its
+coefficients and have a quadratic penalty that the fitting code can recover.
+A custom fitting method may need its own uncertainty calculation.
+
+See `?special_terms` for the method arguments and return values, and
+`?fake_formula` for special-name registration.

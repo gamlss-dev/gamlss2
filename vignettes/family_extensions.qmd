@@ -72,23 +72,21 @@ the parameter names, order, and links of the base family are retained.
 
 The base R `quakes` data contain 1,000 seismic events near Fiji. According to
 the data description, only events with body-wave magnitude greater than 4.0
-were retained. Before choosing a model, it is useful to inspect the response.
-Its observed minimum is exactly 4.0, and its strongly asymmetric shape at that
-boundary is immediately visible in a histogram.
+were retained. The smallest recorded magnitude is exactly 4.0.
 
 ```{r quakes-data}
 data("quakes", package = "datasets")
 
 range(quakes$mag)
-min(quakes$mag)
 ```
 
 The histogram shows the lower boundary and a long right tail. The scatterplot
-suggests that magnitude also varies with depth. We first investigate the
-boundary; later we return to the one-decimal reporting precision.
+suggests that magnitude also varies with depth. We start by modeling the lower boundary, then account for the precision
+of the recorded magnitudes.
 
 ```{r quakes-plot}
 #| fig-cap: "Recorded earthquake magnitudes and their relationship with depth."
+#| fig-alt: "Histogram with a lower boundary at magnitude 4 and a right tail, alongside a scatterplot of magnitude against depth."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
@@ -126,6 +124,7 @@ and overlays its density on a histogram.
 
 ```{r quakes-marginal}
 #| fig-cap: "Normal and truncated normal marginal fits to recorded earthquake magnitudes."
+#| fig-alt: "Two histograms of the same magnitudes with an ordinary normal density and a density truncated at magnitude 4."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
@@ -234,11 +233,11 @@ head(predict(m_both, newdata = nd, type = "parameter"))
 ```
 
 These curves hold longitude and latitude at their sample medians. The points
-include all locations, so they show the overall data cloud rather than a
-sample drawn at that fixed location.
+include all locations, so they show the full range of recorded magnitudes across sites.
 
 ```{r quakes-quantiles}
 #| fig-cap: "Fitted 10th, 50th, and 90th percentiles of recorded magnitude, at median longitude and latitude."
+#| fig-alt: "Three percentile curves on the one-decimal magnitude grid overlaid on observations from all locations."
 par(mar = c(4, 4, 1, 1))
 plot(mag ~ depth, data = quakes,
   pch = 16, col = adjustcolor(1, 0.15),
@@ -330,6 +329,7 @@ table(cars$dist80 == 80)
 
 ```{r censoring-plot}
 #| fig-cap: "Stopping distances capped at 80 feet, with the recording limit marked."
+#| fig-alt: "Stopping distance versus speed, with observations accumulating at the horizontal recording limit."
 par(mar = c(4, 4, 1, 1))
 plot(dist80 ~ speed, data = cars,
   pch = 16, col = adjustcolor(1, 0.55),
@@ -368,6 +368,7 @@ at the censoring limit when enough fitted probability lies above it.
 
 ```{r censoring-quantiles}
 #| fig-cap: "Fitted 10th, 50th, and 90th percentiles of capped stopping distance."
+#| fig-alt: "Three percentile curves over observed stopping distances, with the upper curve leveling off at 80 feet."
 nd <- data.frame(speed = seq(min(cars$speed), max(cars$speed), length.out = 150))
 q <- quantile(m_cens, newdata = nd, probs = c(0.1, 0.5, 0.9))
 par(mar = c(4, 4, 1, 1))
@@ -446,11 +447,6 @@ logLik(m_surv)
 head(predict(m_surv, type = "parameter"))
 ```
 
-The likelihood contribution is a density when `event` is true and a survival
-probability when it is false. Thus the censoring information remains attached
-to every observation instead of being encoded by replacing time with one
-fixed boundary value.
-
 To see the covariate effects on the response scale, predict survival curves
 for ages 50, 65, and 80, separately for men and women. Predictions use the
 underlying event-time distribution: $S(t \mid x) = 1-F(t \mid x)$.
@@ -468,6 +464,7 @@ surv <- sapply(seq_len(nrow(nd)), function(j) {
 
 ```{r survival-plot}
 #| fig-cap: "Fitted Weibull survival curves by age and sex."
+#| fig-alt: "Survival probability versus time for ages 50, 65, and 80, with separate panels for men and women."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
@@ -535,6 +532,7 @@ frequencies with fitted probabilities over the same count range.
 
 ```{r count-marginal}
 #| fig-cap: "Poisson, inflated Poisson, and hurdle Poisson marginal fits for samples with excess or few zeros."
+#| fig-alt: "Observed and fitted count frequencies for three models in each of two samples. The top row has excess zeros and the bottom row has few zeros."
 #| fig-width: 12
 #| fig-height: 7
 op <- par(mfrow = c(2, 3), mar = c(4, 4, 3, 1), cex = 1)
@@ -593,6 +591,7 @@ The plots compare these fitted quantities with the known simulation curves.
 
 ```{r count-regression-plot}
 #| fig-cap: "Fitted zero probabilities and positive-count means compared with the generating model."
+#| fig-alt: "Fitted curves overlaid on generating curves for the probability of zero and the mean among positive counts as x varies."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
@@ -656,6 +655,7 @@ continuous interior.
 
 ```{r endpoint-plot}
 #| fig-cap: "Fitted 10th, 50th, and 90th percentiles of a proportion with point masses at zero and one."
+#| fig-alt: "Three percentile curves over observations in the unit interval, including observations at both endpoints."
 nd <- data.frame(x = seq(-2, 2, length.out = 150))
 q <- quantile(m_01, newdata = nd,
   probs = c(0.1, 0.5, 0.9))
@@ -714,13 +714,14 @@ volume scale, so their AIC values are comparable. A model fitted to
 
 ```{r transformed-marginal}
 #| fig-cap: "Normal and lognormal marginal fits to tree volume."
+#| fig-alt: "Histograms of tree volume with fitted normal and lognormal densities in separate panels."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1), cex = 1)
 mf_norm <- fit_family(trees$Volume, family = NO,
-  control = ctrl, main = "Normal", xlab = "Volume")
+  control = ctrl, main = "Normal", xlab = "Volume (ft³)")
 mf_lnorm <- fit_family(trees$Volume, family = f_lnorm,
-  control = ctrl, main = "Lognormal", xlab = "Volume")
+  control = ctrl, main = "Lognormal", xlab = "Volume (ft³)")
 par(op)
 AIC(mf_norm, mf_lnorm)
 ```
@@ -728,8 +729,8 @@ AIC(mf_norm, mf_lnorm)
 The lognormal has lower marginal AIC in this comparison. This is a useful
 starting point, but the marginal distribution combines trees of different
 sizes and does not determine the best conditional family. We now model the
-location of log volume as a smooth function of girth and inspect conditional
-quantiles on the original volume scale.
+location of log volume as a smooth function of trunk diameter (the variable
+`Girth`, measured in inches) and inspect quantiles on the original volume scale.
 
 ```{r transformed-fit}
 m_lnorm <- gamlss2(
@@ -748,11 +749,12 @@ q <- quantile(m_lnorm, newdata = nd,
 ```
 
 ```{r transformed-plot}
-#| fig-cap: "Fitted 10th, 50th, and 90th percentiles of tree volume by girth."
+#| fig-cap: "Fitted 10th, 50th, and 90th percentiles of tree volume by trunk diameter."
+#| fig-alt: "Tree volumes plotted against trunk diameter, with three fitted percentile curves on the original volume scale."
 par(mar = c(4, 4, 1, 1))
 plot(Volume ~ Girth, data = trees,
   pch = 16, col = adjustcolor(1, 0.55),
-  xlab = "Girth (in)", ylab = "Volume (ft^3)",
+  xlab = "Trunk diameter (in)", ylab = "Volume (ft³)",
   ylim = range(trees$Volume, q))
 matlines(nd$Girth, q,
   lty = c(2, 1, 2), lwd = 2, col = 4)
@@ -776,9 +778,9 @@ response. In practice:
    fitted to the same response with compatible likelihoods.
 4. Add covariates with `gamlss2()`, using `s()` for nonlinear effects, and
    check whether the extended family remains useful conditionally.
-5. Interpret `predict(..., type = "parameter")` on the base-family scale, but
-   interpret probabilities, quantiles, simulations, and residuals under the
-   fully extended family.
+5. Use `type = "parameter"` to inspect the parent parameters and any added
+   point-mass weights. Use the fitted distribution to calculate probabilities
+   and quantiles on the recorded response scale.
 
 A few boundaries of the infrastructure are intentional. Constants passed to
 the extension constructors are fixed. `censor_family()` also accepts
@@ -790,12 +792,6 @@ variances are not reported because exact calculation would require
 partial moments that are not part of the family interface. Arbitrary weighted
 distributions, splices, non-monotone transformations, convolutions, and
 compound distributions are likewise outside this infrastructure.
-
-Finally, match the family to the actual observation process. A pile-up at a
-detection limit suggests censoring; missing out-of-range cases imply
-truncation; extra and natural zeros together imply inflation; and a separate
-zero-generating process suggests a hurdle. These choices are scientifically
-different even when the observed histograms look similar.
 
 See `?family_extensions` for the complete argument and return-value
 reference for all constructors.

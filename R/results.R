@@ -184,7 +184,6 @@ results.gamlss2 <- function(x, data = NULL, ...)
           }
           ## gamlss smooth terms.
           if("smooth" %in% class(x$specials[[i]])) {
-            ## FIXME: vcov?
             if(inherits(x$fitted.specials[[j]][[i]]$coefficients, "pb")) {
               xn <- attr(x$specials[[i]], "Name")
               xr <- range(data[[xn]])

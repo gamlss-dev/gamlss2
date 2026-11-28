@@ -19,13 +19,7 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-<!-- README.md is generated from README.qmd via: quarto render README.qmd --to gfm -->
-
 <img src="https://gamlss-dev.github.io/gamlss2/gamlss2.png" align="right" alt="gamlss2 logo" width="120" />
-
-# gamlss2: Infrastructure for Flexible Distributional Regression
-
-## Overview
 
 The `gamlss2` package provides infrastructure for generalized additive models
 for location, scale, and shape (GAMLSS) and distributional regression more
@@ -40,14 +34,28 @@ Models can use smooth terms from
 response families with more than four parameters. Separate predictors for
 the distribution parameters are specified in a single formula.
 
-* The main model function is [`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html).
-* The default optimizer is [`RS()`](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html); alternative optimizers can be supplied.
-* The main methods are `summary()`, [`plot()`](https://gamlss-dev.github.io/gamlss2/man/plots.html), and [`predict()`](https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html).
-* Custom family objects are described in [Family Objects](families.html).
-* Custom predictor components are described in [Special Model Terms](specials.html).
+## Choosing a vignette
 
-Start with [First Steps](firststeps.html) for a worked example, or browse the
-manual pages.
+Start with [First Steps](firststeps.html) to fit a seasonal model for daily
+motorcycle counts, inspect its residuals, and predict the probability of a
+busy day.
+
+| If you want to… | Read |
+|---|---|
+| Estimate a mean or quantile, or construct an interval for a future observation | [Prediction and Uncertainty](prediction.html) |
+| Compare predictive distributions using calibration plots and scoring rules | [Forecasting and Assessment](topmodels.html) |
+| Fit a model by Bayesian sampling and interpret posterior draws | [Bayesian GAMLSS](bayesian.html) |
+| Adapt a distribution for truncation, censoring, rounding, or extra point masses | [Family Extensions](family_extensions.html) |
+| Implement a response distribution or connect one from `distributions3` | [Family Objects](families.html) |
+| Add a predictor term with its own fitting and prediction methods | [Special Model Terms](specials.html) |
+
+## Function reference
+
+[`gamlss2()`](https://gamlss-dev.github.io/gamlss2/man/gamlss2.html) fits the model
+using the [`RS()` optimizer](https://gamlss-dev.github.io/gamlss2/man/RS_CG.html) by default.
+Use `summary()` and [`plot()`](https://gamlss-dev.github.io/gamlss2/man/plots.html)
+to inspect a fit and [`predict()`](https://gamlss-dev.github.io/gamlss2/man/predict.gamlss2.html)
+to obtain fitted distributions. To browse all manual pages in R, use
 
 ```{r}
 #| eval: false
@@ -69,4 +77,4 @@ install.packages("gamlss2",
 
 The package is available under the
 [General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html)
-or [version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+or [version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).

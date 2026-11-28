@@ -17,17 +17,15 @@ vignette: >
   %\VignettePackage{gamlss2}
 ---
 
-Generalized additive models for location, scale, and shape (GAMLSS) model
-all parameters of a response distribution rather than only its mean
+Generalized additive models for location, scale, and shape (GAMLSS) let each
+parameter of a response distribution depend on covariates
 [@Rigby+Stasinopoulos:2005]. The `gamlss2` package provides a workflow similar
 to `lm()` and `glm()`, while allowing a separate additive predictor for every
 distribution parameter.
 
-This vignette illustrates the basic workflow:
-
-1. specify and fit a distributional regression model,
-2. inspect its estimated effects and residuals, and
-3. obtain distribution parameters, probabilities, and quantiles.
+We fit a seasonal model for motorcycle counts, inspect its effects and
+residuals, and use the fitted distribution to estimate how often daily
+traffic exceeds 500 motorcycles.
 
 ## Data
 
@@ -35,7 +33,7 @@ We use the `HarzTraffic` data included in the package. They contain daily
 traffic counts and weather measurements near Sonnenberg in the Harz region of
 Germany. Motorcycle traffic has a pronounced annual cycle, so we model the
 number of motorcycles (`bikes`) as a smooth function of the day of the year
-(`yday`).
+(`yday`, where January 1 is day 0).
 
 ```{r}
 #| message: false
@@ -45,6 +43,7 @@ data("HarzTraffic", package = "gamlss2")
 
 ```{r}
 #| fig-cap: "Daily motorcycle counts in the Harz region."
+#| fig-alt: "Daily counts plotted against day of year, with higher motorcycle traffic in the middle of the year."
 par(mar = c(4, 4, 1, 1))
 plot(bikes ~ I(yday + 1), data = HarzTraffic,
   pch = 16, col = adjustcolor(1, 0.25),
@@ -78,7 +77,7 @@ the family parameters in their displayed order:
 
 | Formula | Interpretation for `NBI` |
 |---|---|
-| `bikes ~ x` | model `mu` with `x`; keep `sigma` constant |
+| `bikes ~ x` | model `mu` with `x` and keep `sigma` constant |
 | `bikes ~ x | z` | model `mu` with `x` and `sigma` with `z` |
 | `bikes ~ x | .` | use the predictor `x` for both parameters |
 
@@ -108,11 +107,11 @@ degrees of freedom of the smooth terms, and model-fit information.
 summary(m2)
 ```
 
-Calling `plot()` without further arguments displays the estimated effects for
-all modeled distribution parameters.
+Use `plot()` to inspect the seasonal effect on each parameter's log scale.
 
 ```{r}
 #| fig-cap: "Estimated seasonal effects for the negative binomial mean and dispersion."
+#| fig-alt: "Smooth effects of day of year on the log mean and log dispersion in separate panels."
 #| fig-width: 9
 #| fig-height: 4.5
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1), cex = 1)
@@ -127,6 +126,7 @@ reproducible.
 
 ```{r}
 #| fig-cap: "In-sample diagnostics based on randomized quantile residuals."
+#| fig-alt: "Four residual diagnostic plots for the seasonal negative binomial model."
 #| fig-width: 9
 #| fig-height: 7
 set.seed(1328)
@@ -166,6 +166,7 @@ $1 - F(500)$.
 
 ```{r}
 #| fig-cap: "Fitted probability of more than 500 motorcycles by day of year."
+#| fig-alt: "Curve showing how the fitted chance of exceeding 500 motorcycles varies over the year."
 prob_high <- 1 - cdf(pf, 500)
 
 par(mar = c(4, 4, 1, 1))
@@ -183,6 +184,7 @@ pq <- quantile(pf, probs = c(0.05, 0.5, 0.95), elementwise = FALSE)
 
 ```{r}
 #| fig-cap: "Fitted 5th, 50th, and 95th percentiles of daily motorcycle counts."
+#| fig-alt: "Observed daily counts with three seasonal percentile curves. The solid line is the median."
 par(mar = c(4, 4, 1, 1))
 plot(bikes ~ I(yday + 1), data = HarzTraffic,
   pch = 16, col = adjustcolor(1, 0.2),
@@ -193,10 +195,8 @@ legend("topright", c("5%", "50%", "95%"),
   lwd = 2, lty = c(3, 1, 2), col = 4, bty = "n")
 ```
 
-These fitted distributions describe response variation conditional on the
-estimated model. The 5% and 95% quantiles bound a central 90% response interval;
-they do not quantify uncertainty in the estimated mean or median. The
-[Prediction and Uncertainty](prediction.html) vignette develops this distinction.
+The two outer curves bound a central 90% interval for daily counts under the
+fitted model. The middle curve gives the fitted median on each day.
 
 ## Relation to `gamlss`
 
@@ -210,10 +210,8 @@ place the predictors for all distribution parameters in a single formula.
 
 ## Next steps
 
-Continue with [Prediction and Uncertainty](prediction.html) to construct and
-assess intervals, or [Forecasting and Assessment](topmodels.html) for calibration
-plots and scoring rules. [Family Objects](families.html) explains distribution
-interfaces and custom families; [Family Extensions](family_extensions.html)
-handles truncation, censoring, rounding, and extra point masses.
-[Special Model Terms](specials.html) covers terms beyond standard `mgcv` smooths,
-and [Bayesian GAMLSS](bayesian.html) uses the same model specification for MCMC.
+To add uncertainty intervals to a prediction, continue with
+[Prediction and Uncertainty](prediction.html). To compare two traffic models
+using calibration plots and scoring rules, see
+[Forecasting and Assessment](topmodels.html). The [Overview](gamlss2.html)
+links to the articles on Bayesian fitting, families, and special model terms.

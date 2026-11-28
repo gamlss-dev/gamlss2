@@ -5,7 +5,7 @@ gamlss2 <- function(formula, ...)
 }
 
 ## Formula method.
-gamlss2.formula <- function(formula, data, family = NO,
+gamlss2.formula <- function(formula, data, family = NO, ## FIXME: switch to Normal?
   subset, na.action, weights, offset, start = NULL, knots = NULL,
   control = gamlss2_control(...), ...)
 {
